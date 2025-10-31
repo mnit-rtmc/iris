@@ -121,7 +121,7 @@ public class Name {
 
 	/** Write/create/delete access exceptions for OPERATE level */
 	static final String[] TYPE_OPERATE = {
-		"incident"
+		"incident", "rpt_conduit"
 	};
 
 	/** Write/create/delete access exceptions for MANAGE level */
