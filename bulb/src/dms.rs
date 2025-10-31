@@ -520,7 +520,11 @@ impl DmsAnc {
             let ln = 1 + i as u16;
             let mc_line = format!("mc_line{ln}");
             let mc_choice = format!("mc_choice{ln}");
-            let input = html.input().id(mc_line).attr("list", &mc_choice);
+            let input = html
+                .input()
+                .id(mc_line)
+                .value(cur_line)
+                .attr("list", &mc_choice);
             if rn != rect_num {
                 input.class("mc_line_gap");
                 rect_num = rn;
@@ -529,7 +533,7 @@ impl DmsAnc {
             if let Some(font) = dms.font_definition().font(font_num) {
                 for ml in self.pat_lines(pat) {
                     if ml.line == ln {
-                        self.line_html(&ml.multi, width, font, cur_line, html)
+                        self.line_html(&ml.multi, width, font, html)
                     }
                 }
             }
@@ -566,14 +570,7 @@ impl DmsAnc {
     }
 
     /// Build line HTML
-    fn line_html(
-        &self,
-        multi: &str,
-        width: u16,
-        font: &Font,
-        cur_line: &str,
-        html: &mut Html,
-    ) {
+    fn line_html(&self, multi: &str, width: u16, font: &Font, html: &mut Html) {
         // FIXME: handle line-allowed MULTI tags
         let mut ms = multi;
         let mut line;
@@ -582,11 +579,7 @@ impl DmsAnc {
                 return;
             };
             if w <= width {
-                let option = html.option().value(ms);
-                if ms == cur_line {
-                    option.attr_bool("selected");
-                }
-                html.text(join_text(ms, " ")).end();
+                html.option().value(ms).text(join_text(ms, " ")).end();
                 break;
             } else if let Some(abbrev) = self.abbreviate_text(ms) {
                 line = abbrev;
