@@ -57,12 +57,8 @@ public interface RptConduit extends SonarObject {
 
 	void setRequest(String sReq);
 
-	String getRequest();
-
 	//-------------------------------------------
 	// send report-results to client
-
-	void setresults(String sResp);
 
 	String getResults();
 }
