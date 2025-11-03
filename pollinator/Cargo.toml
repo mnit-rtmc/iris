@@ -1,0 +1,18 @@
+[package]
+name = "pollinator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio-tungstenite = "0.28"
+tungstenite = "0.28"
+
+[dependencies.futures-util]
+version = "0.3.28"
+default-features = false
+features = ["sink", "std"]
+
+[dependencies.tokio]
+version = "1.48.0"
+default-features = false
+features = ["io-util", "io-std", "macros", "net", "rt-multi-thread"]
