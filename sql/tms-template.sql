@@ -4050,7 +4050,7 @@ CREATE TABLE iris.lcs_indication (
     symbol VARCHAR NOT NULL
 );
 
-INSERT INTO iris.lcs_indication (id, description)
+INSERT INTO iris.lcs_indication (id, description, symbol)
 VALUES
     (0, 'Unknown', '?'),
     (1, 'Dark', '⍽'),
