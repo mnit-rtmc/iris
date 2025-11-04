@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2019  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -139,7 +139,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	public void setScreenPane(ScreenPane sp) {
 		s_pane = sp;
 	}
-	
+
 	/** Get the screen pane */
 	public ScreenPane getScreenPane() {
 		return s_pane;
@@ -311,13 +311,13 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Keep a handle to this layer state. */
 	private LayerState layerState;
-	
+
 	/** Create layer state for a map bean */
 	public LayerState createState(MapBean mb) {
 		layerState = layer.createState(mb);
 		return layerState;
 	}
-	
+
 	/** Return the layer state used by this manager */
 	public LayerState getLayerState() {
 		return layerState;
@@ -334,7 +334,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	public StyleSummary<T> createStyleSummary(boolean size_btns) {
 		return new StyleSummary<T>(this, def_style, size_btns);
 	}
-	
+
 	/** Create a new style summary.
 	 * @param size_btns Enable buttons to change cell size.
 	 * @param sr Number of rows of style buttons.
@@ -382,7 +382,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 			return ItemStyle.lookupStyle(style.toString());
 		return null;
 	}
-	
+
 	/** Get the style of a proxy */
 	public Style getStyle(T proxy) {
 		return theme.getStyle(proxy);

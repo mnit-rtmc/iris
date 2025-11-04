@@ -434,10 +434,7 @@ public class LcsImpl extends DeviceImpl implements Lcs {
 	/** Test if LCS array is available */
 	@Override
 	protected boolean isAvailable() {
-		return (lock == null) &&
-		        isOnline() &&
-		       !isDeployed() &&
-		       !hasFaults();
+		return (lock == null) && isOnline() && !isDeployed();
 	}
 
 	/** Calculate the item styles */

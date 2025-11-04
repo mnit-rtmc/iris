@@ -125,7 +125,7 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 		}
 		return getDefaultStyle();
 	}
-	
+
 	/** Get the Style for the the given ItemStyle */
 	public Style getStyle(ItemStyle is) {
 		if (is != null) {

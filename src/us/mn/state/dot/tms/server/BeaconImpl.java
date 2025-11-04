@@ -137,7 +137,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	/** Test if beacon is available */
 	@Override
 	protected boolean isAvailable() {
-		return super.isAvailable() && 
+		return super.isAvailable() &&
 			state == BeaconState.DARK.ordinal();
 	}
 

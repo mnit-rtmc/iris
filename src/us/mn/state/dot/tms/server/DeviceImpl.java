@@ -207,7 +207,7 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 
 	/** Test if device is available */
 	protected boolean isAvailable() {
-		return isOnline() && !hasFaults();
+		return isOnline();
 	}
 
 	/** Test if a device has faults */

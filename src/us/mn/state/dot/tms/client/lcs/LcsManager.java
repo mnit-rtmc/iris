@@ -87,9 +87,9 @@ public class LcsManager extends DeviceManager<Lcs> {
 	protected ProxyTheme<Lcs> createTheme() {
 		ProxyTheme<Lcs> theme = new ProxyTheme<Lcs>(this,
 			new LcsMarker());
-		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
 		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
 		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
