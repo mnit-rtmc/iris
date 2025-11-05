@@ -12,6 +12,10 @@ struct Args {
     #[argh(option, short = 'h', default = "String::from(\"127.0.0.1\")")]
     host: String,
 
+    /// percentile of intervals sorted by speed
+    #[argh(option, short = 'p', default = "75")]
+    percentile: usize,
+
     /// detector ID
     #[argh(positional)]
     det: String,
@@ -32,9 +36,6 @@ const ASSUMED_FIELD_FT: f32 = 20.0;
 
 /// Assumed avg. field length (mi)
 const ASSUMED_FIELD_MI: f32 = ASSUMED_FIELD_FT / FEET_PER_MILE;
-
-/// Percentile of intervals sorted by speed
-const PERCENTILE: usize = 75;
 
 /// Speed limit
 const SPEED_LIMIT_MPH: f32 = 60.0;
@@ -124,13 +125,13 @@ impl Args {
         let mut intervals = self.fetch_intervals(date)?;
         intervals.sort_by(|a, b| a.speed.partial_cmp(&b.speed).unwrap());
         let len = intervals.len();
-        let typical = len * PERCENTILE / 100;
+        let typical = len * self.percentile / 100;
         let interval = &intervals[typical];
         if self.verbose {
             println!("Date: {date}, detector: {}", &self.det);
             println!("Free-flowing intervals: {len} of 2880");
             println!();
-            println!("Interval {typical} of {len} ({PERCENTILE}%)");
+            println!("Interval {typical} of {len} ({}%)", self.percentile);
             println!();
             interval.display();
         } else {
