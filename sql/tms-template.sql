@@ -2802,28 +2802,28 @@ CREATE TABLE iris.dms_type (
     description VARCHAR(32) NOT NULL
 );
 
-COPY iris.dms_type (id, description) FROM stdin;
-0	Unknown
-1	Other
-2	BOS (blank-out sign)
-3	CMS (changeable message sign)
-4	VMS Character-matrix
-5	VMS Line-matrix
-6	VMS Full-matrix
-\.
+INSERT INTO iris.dms_type (id, description)
+VALUES
+    (0, 'Unknown'),
+    (1, 'Other'),
+    (2, 'BOS (blank-out sign)'),
+    (3, 'CMS (changeable message sign)'),
+    (4, 'VMS Character-matrix'),
+    (5, 'VMS Line-matrix'),
+    (6, 'VMS Full-matrix');
 
 CREATE TABLE iris.color_scheme (
     id INTEGER PRIMARY KEY,
     description VARCHAR(16) NOT NULL
 );
 
-COPY iris.color_scheme (id, description) FROM stdin;
-0	unknown
-1	monochrome1Bit
-2	monochrome8Bit
-3	colorClassic
-4	color24Bit
-\.
+INSERT INTO iris.color_scheme (id, description)
+VALUES
+    (0, 'unknown'),
+    (1, 'monochrome1Bit'),
+    (2, 'monochrome8Bit'),
+    (3, 'colorClassic'),
+    (4, 'color24Bit');
 
 -- Bit flags for sign_detail.supported_tags
 CREATE TABLE iris.multi_tag (
@@ -2833,38 +2833,38 @@ CREATE TABLE iris.multi_tag (
 ALTER TABLE iris.multi_tag ADD CONSTRAINT multi_tag_bit_ck
     CHECK (bit >= 0 AND bit < 32);
 
-COPY iris.multi_tag (bit, tag) FROM stdin;
-0	cb
-1	cf
-2	fl
-3	fo
-4	g
-5	hc
-6	jl
-7	jp
-8	ms
-9	mv
-10	nl
-11	np
-12	pt
-13	sc
-14	f1
-15	f2
-16	f3
-17	f4
-18	f5
-19	f6
-20	f7
-21	f8
-22	f9
-23	f10
-24	f11
-25	f12
-26	f13
-27	tr
-28	cr
-29	pb
-\.
+INSERT INTO iris.multi_tag (bit, tag)
+VALUES
+    (0, 'cb'),
+    (1, 'cf'),
+    (2, 'fl'),
+    (3, 'fo'),
+    (4, 'g'),
+    (5, 'hc'),
+    (6, 'jl'),
+    (7, 'jp'),
+    (8, 'ms'),
+    (9, 'mv'),
+    (10, 'nl'),
+    (11, 'np'),
+    (12, 'pt'),
+    (13, 'sc'),
+    (14, 'f1'),
+    (15, 'f2'),
+    (16, 'f3'),
+    (17, 'f4'),
+    (18, 'f5'),
+    (19, 'f6'),
+    (20, 'f7'),
+    (21, 'f8'),
+    (22, 'f9'),
+    (23, 'f10'),
+    (24, 'f11'),
+    (25, 'f12'),
+    (26, 'f13'),
+    (27, 'tr'),
+    (28, 'cr'),
+    (29, 'pb');
 
 CREATE FUNCTION iris.multi_tags(INTEGER)
     RETURNS SETOF iris.multi_tag AS $multi_tags$
@@ -3006,83 +3006,83 @@ CREATE VIEW word_view AS
     FROM iris.word;
 GRANT SELECT ON word_view TO PUBLIC;
 
-COPY iris.word (name, abbr, allowed) FROM stdin;
-ACCESS	ACCS	t
-AHEAD	AHD	t
-ALL	ALL	t
-ALTERNATE	OTHER	t
-ANIMAL	ANML	t
-AT		t
-BLCKING	BLKNG	t
-BLOCKED	BLKD	t
-BLOCKING	BLCKING	t
-BOTH	BTH	t
-BRIDGE	BRDG	t
-CANNOT	CANT	t
-CENTER	CNTR	t
-CLEARED	CLRD	t
-CLOSED	CLSD	t
-CONGESTED	CONG	t
-CONGESTION	CONG	t
-CONSTRUCTION	CONST	t
-CRASH	CRSH	t
-CROSSING	X-ING	t
-DEBRIS	DEBRIS	t
-DELAYS	DELAY	t
-DOWNTOWN	DWNTN	t
-EAST	E	t
-EMERGENCY	EMRGNCY	t
-ENTRANCE	ENT	t
-EVENT	EVNT	t
-EXIT	EXIT	t
-FAILURE	FAIL	t
-FLASH	FLSH	t
-FLOODING	FLOOD	t
-FRONTAGE	FRNTG	t
-GRASS	GRSS	t
-ICE	ICE	t
-IN		t
-INCIDENT	INCDNT	t
-LANE	LN	t
-LANES	LNS	t
-LEFT	LFT	t
-MAXIMUM	MAX	t
-MILE	MI	t
-MILES	MI	t
-MINIMUM	MIN	t
-NORTH	N	t
-ON	ON	t
-OTHER	ALT	t
-OVERSIZED	OVRSZ	t
-PARKING	PKNG	t
-PAVEMENT	PVMT	t
-PEDESTRIAN	PED	t
-PREPARE	PREP	t
-QUALITY	QLTY	t
-RAMP	RMP	t
-REMOVAL	RMVL	t
-RIGHT	RT	t
-ROAD	RD	t
-ROUTE	RTE	t
-ROUTES	ROUTE	t
-SERVICE	SERV	t
-SHOULDER	SHLDR	t
-SINGLE	SNGL	t
-SLIPPERY	SLIP	t
-SNOW	SNW	t
-SOUTH	S	t
-SPEED	SPD	t
-STALL	STLL	t
-STALLED	STALL	t
-TEMPORARY	TEMP	t
-TEST	TST	t
-TRAFFIC	TRAF	t
-VEHICLE	VEH	t
-VEHICLES	VEHS	t
-WARNING	WARN	t
-WEST	W	t
-WORK	WRK	t
-\.
+INSERT INTO iris.word (name, abbr, allowed)
+VALUES
+    ('ACCESS', 'ACCS', true),
+    ('AHEAD', 'AHD', true),
+    ('ALL', 'ALL', true),
+    ('ALTERNATE', 'OTHER', true),
+    ('ANIMAL', 'ANML', true),
+    ('AT', '', true),
+    ('BLCKING', 'BLKNG', true),
+    ('BLOCKED', 'BLKD', true),
+    ('BLOCKING', 'BLCKING', true),
+    ('BOTH', 'BTH', true),
+    ('BRIDGE', 'BRDG', true),
+    ('CANNOT', 'CANT', true),
+    ('CENTER', 'CNTR', true),
+    ('CLEARED', 'CLRD', true),
+    ('CLOSED', 'CLSD', true),
+    ('CONGESTED', 'CONG', true),
+    ('CONGESTION', 'CONG', true),
+    ('CONSTRUCTION', 'CONST', true),
+    ('CRASH', 'CRSH', true),
+    ('CROSSING', 'X-ING', true),
+    ('DEBRIS', 'DEBRIS', true),
+    ('DELAYS', 'DELAY', true),
+    ('DOWNTOWN', 'DWNTN', true),
+    ('EAST', 'E', true),
+    ('EMERGENCY', 'EMRGNCY', true),
+    ('ENTRANCE', 'ENT', true),
+    ('EVENT', 'EVNT', true),
+    ('EXIT', 'EXIT', true),
+    ('FAILURE', 'FAIL', true),
+    ('FLASH', 'FLSH', true),
+    ('FLOODING', 'FLOOD', true),
+    ('FRONTAGE', 'FRNTG', true),
+    ('GRASS', 'GRSS', true),
+    ('ICE', 'ICE', true),
+    ('IN', '', true),
+    ('INCIDENT', 'INCDNT', true),
+    ('LANE', 'LN', true),
+    ('LANES', 'LNS', true),
+    ('LEFT', 'LFT', true),
+    ('MAXIMUM', 'MAX', true),
+    ('MILE', 'MI', true),
+    ('MILES', 'MI', true),
+    ('MINIMUM', 'MIN', true),
+    ('NORTH', 'N', true),
+    ('ON', 'ON', true),
+    ('OTHER', 'ALT', true),
+    ('OVERSIZED', 'OVRSZ', true),
+    ('PARKING', 'PKNG', true),
+    ('PAVEMENT', 'PVMT', true),
+    ('PEDESTRIAN', 'PED', true),
+    ('PREPARE', 'PREP', true),
+    ('QUALITY', 'QLTY', true),
+    ('RAMP', 'RMP', true),
+    ('REMOVAL', 'RMVL', true),
+    ('RIGHT', 'RT', true),
+    ('ROAD', 'RD', true),
+    ('ROUTE', 'RTE', true),
+    ('ROUTES', 'ROUTE', true),
+    ('SERVICE', 'SERV', true),
+    ('SHOULDER', 'SHLDR', true),
+    ('SINGLE', 'SNGL', true),
+    ('SLIPPERY', 'SLIP', true),
+    ('SNOW', 'SNW', true),
+    ('SOUTH', 'S', true),
+    ('SPEED', 'SPD', true),
+    ('STALL', 'STLL', true),
+    ('STALLED', 'STALL', true),
+    ('TEMPORARY', 'TEMP', true),
+    ('TEST', 'TST', true),
+    ('TRAFFIC', 'TRAF', true),
+    ('VEHICLE', 'VEH', true),
+    ('VEHICLES', 'VEHS', true),
+    ('WARNING', 'WARN', true),
+    ('WEST', 'W', true),
+    ('WORK', 'WRK', true);
 
 CREATE TABLE iris.graphic (
     name VARCHAR(20) PRIMARY KEY,
