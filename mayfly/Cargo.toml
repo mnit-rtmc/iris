@@ -19,3 +19,7 @@ tokio = { workspace = true }
 version = "0.6"
 default-features = false
 features = ["deflate", "time"]
+
+[dev-dependencies]
+serde_json = "1"
+ureq = "3.1"
