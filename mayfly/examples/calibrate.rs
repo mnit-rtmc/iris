@@ -1,4 +1,25 @@
+use argh::FromArgs;
 use std::error::Error;
+
+/// Command-line arguments
+#[derive(FromArgs)]
+struct Args {
+    /// verbose output
+    #[argh(switch, short = 'v')]
+    verbose: bool,
+
+    /// host name or IP
+    #[argh(option, short = 'h', default = "String::from(\"127.0.0.1\")")]
+    host: String,
+
+    /// detector ID
+    #[argh(positional)]
+    det: String,
+
+    /// dates to process
+    #[argh(positional)]
+    dates: Vec<String>,
+}
 
 /// Intervals per hour (30-second)
 const INTERVALS_PER_HOUR: u16 = 2 * 60;
@@ -89,77 +110,97 @@ impl Interval {
     }
 }
 
+impl Args {
+    /// Run the calibration process
+    fn run(&self) -> Result<(), Box<dyn Error>> {
+        for date in &self.dates {
+            self.calibrate_date(date)?;
+        }
+        Ok(())
+    }
+
+    /// Calibrate one date
+    fn calibrate_date(&self, date: &str) -> Result<(), Box<dyn Error>> {
+        let mut intervals = self.fetch_intervals(date)?;
+        intervals.sort_by(|a, b| a.speed.partial_cmp(&b.speed).unwrap());
+        let len = intervals.len();
+        let typical = len * PERCENTILE / 100;
+        let interval = &intervals[typical];
+        if self.verbose {
+            println!("Date: {date}, detector: {}", &self.det);
+            println!("Free-flowing intervals: {len} of 2880");
+            println!();
+            println!("Interval {typical} of {len} ({PERCENTILE}%)");
+            println!();
+            interval.display();
+        } else {
+            println!("{date},{}", interval.field_len_adj());
+        }
+        Ok(())
+    }
+
+    /// Fetch all free-flowing intervals for one date/detector
+    fn fetch_intervals(
+        &self,
+        date: &str,
+    ) -> Result<Vec<Interval>, Box<dyn Error>> {
+        let url = self.make_counts_url(date);
+        let counts = fetch_json_u16(&url)?;
+        let url = free_flowing_filter(url);
+        let counts_filtered = fetch_json_u16(&url)?;
+        let url = self.make_occ_url(date);
+        let occupancy = fetch_json_f32(&url)?;
+        let mut intervals = Vec::new();
+        for (i, ((c0, c1), occ)) in counts
+            .into_iter()
+            .zip(counts_filtered)
+            .zip(occupancy)
+            .enumerate()
+        {
+            match (c0, c1, occ) {
+                (Some(c0), Some(c1), Some(occ)) if c0 == c1 && c0 > 0 => {
+                    intervals.push(Interval::new(i, c0, occ));
+                }
+                _ => (),
+            }
+        }
+        Ok(intervals)
+    }
+
+    /// Make URL to request vehicle counts
+    fn make_counts_url(&self, date: &str) -> String {
+        let mut url = String::from("http://");
+        url.push_str(&self.host);
+        url.push_str("/mayfly/counts");
+        url.push_str("?date=");
+        url.push_str(date);
+        url.push_str("&detector=");
+        url.push_str(&self.det);
+        url
+    }
+
+    /// Make URL to request occupancies
+    fn make_occ_url(&self, date: &str) -> String {
+        let mut url = String::from("http://");
+        url.push_str(&self.host);
+        url.push_str("/mayfly/occupancy");
+        url.push_str("?date=");
+        url.push_str(date);
+        url.push_str("&detector=");
+        url.push_str(&self.det);
+        url
+    }
+}
+
 /// Main entry point
 fn main() -> Result<(), Box<dyn Error>> {
-    let date = "20251015";
-    let det = "1188";
-    let mut intervals = fetch_intervals(date, det)?;
-    intervals.sort_by(|a, b| a.speed.partial_cmp(&b.speed).unwrap());
-    let len = intervals.len();
-    println!("Date: {date}, detector: {det}");
-    println!("Free-flowing intervals: {len} of 2880");
-    println!();
-    let typical = len * PERCENTILE / 100;
-    let interval = &intervals[typical];
-    println!("Interval {typical} of {len} ({PERCENTILE}%)");
-    println!();
-    interval.display();
-    Ok(())
-}
-
-/// Fetch all free-flowing intervals for one date/detector
-fn fetch_intervals(
-    date: &str,
-    det: &str,
-) -> Result<Vec<Interval>, Box<dyn Error>> {
-    let url = make_counts_url(date, det);
-    let counts = fetch_json_u16(&url)?;
-    let url = free_flowing_filter(url);
-    let counts_filtered = fetch_json_u16(&url)?;
-    let url = make_occ_url(date, det);
-    let occupancy = fetch_json_f32(&url)?;
-    let mut intervals = Vec::new();
-    for (i, ((c0, c1), occ)) in counts
-        .into_iter()
-        .zip(counts_filtered)
-        .zip(occupancy)
-        .enumerate()
-    {
-        match (c0, c1, occ) {
-            (Some(c0), Some(c1), Some(occ)) if c0 == c1 && c0 > 0 => {
-                intervals.push(Interval::new(i, c0, occ));
-            }
-            _ => (),
-        }
-    }
-    Ok(intervals)
-}
-
-/// Make URL to request vehicle counts
-fn make_counts_url(date: &str, det: &str) -> String {
-    let mut url = String::from("http://127.0.0.1");
-    url.push_str("/mayfly/counts");
-    url.push_str("?date=");
-    url.push_str(date);
-    url.push_str("&detector=");
-    url.push_str(det);
-    url
+    let args: Args = argh::from_env();
+    args.run()
 }
 
 /// Add free-flowing headway filter to URL
 fn free_flowing_filter(mut url: String) -> String {
     url.push_str("&headway_sec_min=4");
-    url
-}
-
-/// Make URL to request occupancies
-fn make_occ_url(date: &str, det: &str) -> String {
-    let mut url = String::from("http://127.0.0.1");
-    url.push_str("/mayfly/occupancy");
-    url.push_str("?date=");
-    url.push_str(date);
-    url.push_str("&detector=");
-    url.push_str(det);
     url
 }
 
