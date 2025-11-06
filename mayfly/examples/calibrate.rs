@@ -12,7 +12,7 @@ struct Args {
     #[argh(option, short = 'h', default = "String::from(\"127.0.0.1\")")]
     host: String,
 
-    /// percentile of intervals by speed; default 75%
+    /// percentile of intervals by conjectured speed; default 75%
     #[argh(option, short = 'p', default = "75")]
     percentile: usize,
 
@@ -49,6 +49,8 @@ struct Interval {
     flow: u16,
     /// Percent of time occupied
     occupancy: f32,
+    /// Speed (mi/h) measured
+    speed: Option<u16>,
     /// Density (veh/mi) with conjectured avg field
     density_cnj: f32,
     /// Speed (mi/h) with conjectured avg field
@@ -57,7 +59,7 @@ struct Interval {
 
 impl Interval {
     /// Create new interval data
-    fn new(number: usize, count: u16, occ: f32) -> Self {
+    fn new(number: usize, count: u16, occ: f32, speed: Option<u16>) -> Self {
         let flow = count * INTERVALS_PER_HOUR;
         let occupancy = occ / 100.0;
         let density_cnj = occupancy / FIELD_MI_CNJ;
@@ -66,6 +68,7 @@ impl Interval {
             number,
             flow,
             occupancy,
+            speed,
             density_cnj,
             speed_cnj,
         }
@@ -94,8 +97,11 @@ impl Interval {
     /// Display interval data to stdout
     fn display(&self, limit: u16) {
         println!("        time: {}", self.time());
-        println!("  flow (vph): {:3}", self.flow);
+        println!("  flow (vph): {}", self.flow);
         println!("   occupancy: {:.04}%", self.occupancy);
+        if let Some(speed) = &self.speed {
+            println!(" speed (mph): {speed}");
+        }
         println!();
         println!("           Conjectured    Adjusted");
         println!(
@@ -153,16 +159,22 @@ impl Args {
         let counts_filtered = fetch_json_u16(&url)?;
         let url = self.make_occ_url(date);
         let occupancy = fetch_json_f32(&url)?;
+        let url = self.make_speed_url(date);
+        let speeds = match fetch_json_u16(&url) {
+            Ok(speeds) => speeds,
+            _ => vec![None; 2880],
+        };
         let mut intervals = Vec::new();
-        for (i, ((c0, c1), occ)) in counts
+        for (i, (((c0, c1), occ), speed)) in counts
             .into_iter()
             .zip(counts_filtered)
             .zip(occupancy)
+            .zip(speeds)
             .enumerate()
         {
             match (c0, c1, occ) {
                 (Some(c0), Some(c1), Some(occ)) if c0 == c1 && c0 > 0 => {
-                    intervals.push(Interval::new(i, c0, occ));
+                    intervals.push(Interval::new(i, c0, occ, speed));
                 }
                 _ => (),
             }
@@ -187,6 +199,18 @@ impl Args {
         let mut url = String::from("http://");
         url.push_str(&self.host);
         url.push_str("/mayfly/occupancy");
+        url.push_str("?date=");
+        url.push_str(date);
+        url.push_str("&detector=");
+        url.push_str(&self.det);
+        url
+    }
+
+    /// Make URL to request speeds
+    fn make_speed_url(&self, date: &str) -> String {
+        let mut url = String::from("http://");
+        url.push_str(&self.host);
+        url.push_str("/mayfly/speed");
         url.push_str("?date=");
         url.push_str(date);
         url.push_str("&detector=");
