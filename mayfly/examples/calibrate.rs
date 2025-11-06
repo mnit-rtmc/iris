@@ -42,6 +42,8 @@ const FIELD_MI_CNJ: f32 = FIELD_FT_CNJ / FEET_PER_MILE;
 struct Interval {
     /// Interval number (0-2879)
     number: usize,
+    /// Free-flowing check
+    free_flowing: bool,
     /// Flow rate (veh/hr)
     flow: f32,
     /// Percent of time occupied
@@ -56,13 +58,20 @@ struct Interval {
 
 impl Interval {
     /// Create new interval data
-    fn new(number: usize, count: u16, occ: f32, speed: Option<u16>) -> Self {
+    fn new(
+        number: usize,
+        free_flowing: bool,
+        count: u16,
+        occ: f32,
+        speed: Option<u16>,
+    ) -> Self {
         let flow = f32::from(count * INTERVALS_PER_HOUR);
         let occupancy = occ / 100.0;
         let density_cnj = occupancy / FIELD_MI_CNJ;
         let speed_cnj = flow / density_cnj;
         Interval {
             number,
+            free_flowing,
             flow,
             occupancy,
             speed,
@@ -77,6 +86,7 @@ impl Interval {
         let speed_cnj = flow / density_cnj;
         Interval {
             number: 9999,
+            free_flowing: false,
             flow,
             occupancy,
             speed: None,
@@ -97,6 +107,12 @@ impl Interval {
         } else {
             "--:--:--".into()
         }
+    }
+
+    /// Calculate speed (mph) using a given average field length
+    fn speed_adj(&self, field_len: f32) -> f32 {
+        let dens = self.occupancy / (field_len / FEET_PER_MILE);
+        self.flow / dens
     }
 
     /// Calculate adjusted density (using speed limit)
@@ -143,8 +159,10 @@ impl Args {
     }
 
     /// Calibrate one date
-    fn calibrate_date(&self, date: &str) -> Result<(), Box<dyn Error>> {
-        let mut intervals = self.fetch_intervals(date)?;
+    fn calibrate_date(&self, date: &str) -> Result<f32, Box<dyn Error>> {
+        let intervals_all = self.fetch_intervals(date)?;
+        let mut intervals: Vec<_> =
+            intervals_all.iter().filter(|i| i.free_flowing).collect();
         intervals
             .sort_by(|a, b| a.speed_cnj.partial_cmp(&b.speed_cnj).unwrap());
         let len = intervals.len();
@@ -167,16 +185,46 @@ impl Args {
             occ /= half;
             interval = Interval::new_avg(flow, occ);
         }
+        let field_len_adj = interval.field_len_adj(self.limit);
         if self.verbose {
             println!("Date: {date}, detector: {}", &self.det);
             println!("Free-flowing intervals: {len} of 2880");
             println!("Q1-Q3 intervals: {quar1}-{quar3} of {len}");
             println!();
             interval.display(self.limit);
+            if intervals_all.iter().any(|i| i.speed.is_some()) {
+                self.display_speeds(&intervals_all, field_len_adj);
+            }
         } else {
-            println!("{date},{}", interval.field_len_adj(self.limit));
+            let mean = mean_speed(&intervals_all);
+            let mean_adj = mean_speed_adj(&intervals_all, field_len_adj);
+            println!("{date},{field_len_adj},{mean},{mean_adj}");
         }
-        Ok(())
+        Ok(field_len_adj)
+    }
+
+    /// Display speeds side by side
+    fn display_speeds(&self, intervals: &[Interval], field_len_adj: f32) {
+        for i in (0..2880).step_by(8) {
+            for j in i..i + 8 {
+                let ival = &intervals[j];
+                match ival.speed {
+                    Some(speed) => print!(" {speed:3}"),
+                    None => print!("    "),
+                }
+            }
+            print!("    ");
+            for j in i..i + 8 {
+                let ival = &intervals[j];
+                let speed = ival.speed_adj(field_len_adj);
+                if speed.is_normal() {
+                    print!(" {speed:3.0}");
+                } else {
+                    print!("    ");
+                }
+            }
+            println!("");
+        }
     }
 
     /// Fetch all free-flowing intervals for one date/detector
@@ -204,10 +252,19 @@ impl Args {
             .enumerate()
         {
             match (c0, c1, occ) {
-                (Some(c0), Some(c1), Some(occ)) if c0 == c1 && c0 > 0 => {
-                    intervals.push(Interval::new(i, c0, occ, speed));
+                (Some(c0), Some(c1), Some(occ)) => {
+                    let free_flowing = c0 == c1 && c0 > 0;
+                    intervals.push(Interval::new(
+                        i,
+                        free_flowing,
+                        c0,
+                        occ,
+                        speed,
+                    ));
                 }
-                _ => (),
+                _ => {
+                    intervals.push(Interval::new(i, false, 0, 0.0, speed));
+                }
             }
         }
         Ok(intervals)
@@ -248,6 +305,33 @@ impl Args {
         url.push_str(&self.det);
         url
     }
+}
+
+/// Calculate the mean recorded speed
+fn mean_speed(intervals: &[Interval]) -> f32 {
+    let mut sum = 0.0;
+    let mut values = 0;
+    for i in intervals {
+        if let Some(speed) = i.speed {
+            sum += f32::from(speed);
+            values += 1;
+        }
+    }
+    if values > 0 { sum / values as f32 } else { 0.0 }
+}
+
+/// Calculate the mean adjusted speed
+fn mean_speed_adj(intervals: &[Interval], field_len_adj: f32) -> f32 {
+    let mut sum = 0.0;
+    let mut values = 0;
+    for i in intervals {
+        let speed = i.speed_adj(field_len_adj);
+        if speed.is_normal() {
+            sum += f32::from(speed);
+            values += 1;
+        }
+    }
+    if values > 0 { sum / values as f32 } else { 0.0 }
 }
 
 /// Main entry point
