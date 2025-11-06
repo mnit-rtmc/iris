@@ -12,11 +12,11 @@ struct Args {
     #[argh(option, short = 'h', default = "String::from(\"127.0.0.1\")")]
     host: String,
 
-    /// percentile of intervals by speed (default 75%)
+    /// percentile of intervals by speed; default 75%
     #[argh(option, short = 'p', default = "75")]
     percentile: usize,
 
-    /// speed limit (default 55 mph)
+    /// speed limit; default 55 mph
     #[argh(option, short = 'l', default = "55")]
     limit: u16,
 
@@ -35,11 +35,11 @@ const INTERVALS_PER_HOUR: u16 = 2 * 60;
 /// Number of feet per mil
 const FEET_PER_MILE: f32 = 5280.0;
 
-/// Assumed avg. field length (ft)
-const ASSUMED_FIELD_FT: f32 = 20.0;
+/// Conjectured avg. field length (ft)
+const FIELD_FT_CNJ: f32 = 20.0;
 
-/// Assumed avg. field length (mi)
-const ASSUMED_FIELD_MI: f32 = ASSUMED_FIELD_FT / FEET_PER_MILE;
+/// Conjectured avg. field length (mi)
+const FIELD_MI_CNJ: f32 = FIELD_FT_CNJ / FEET_PER_MILE;
 
 /// Detector data interval (30-second)
 struct Interval {
@@ -49,10 +49,10 @@ struct Interval {
     flow: u16,
     /// Percent of time occupied
     occupancy: f32,
-    /// Density (veh/mi) with assumed avg field
-    density: f32,
-    /// Speed (mi/h) with assumed avg field
-    speed: f32,
+    /// Density (veh/mi) with conjectured avg field
+    density_cnj: f32,
+    /// Speed (mi/h) with conjectured avg field
+    speed_cnj: f32,
 }
 
 impl Interval {
@@ -60,14 +60,14 @@ impl Interval {
     fn new(number: usize, count: u16, occ: f32) -> Self {
         let flow = count * INTERVALS_PER_HOUR;
         let occupancy = occ / 100.0;
-        let density = occupancy / ASSUMED_FIELD_MI;
-        let speed = f32::from(flow) / density;
+        let density_cnj = occupancy / FIELD_MI_CNJ;
+        let speed_cnj = f32::from(flow) / density_cnj;
         Interval {
             number,
             flow,
             occupancy,
-            density,
-            speed,
+            density_cnj,
+            speed_cnj,
         }
     }
 
@@ -97,16 +97,16 @@ impl Interval {
         println!("  flow (vph): {:3}", self.flow);
         println!("   occupancy: {:.04}%", self.occupancy);
         println!();
-        println!("               Assumed    Adjusted");
+        println!("           Conjectured    Adjusted");
         println!(
             " field len (ft): {:5.02} => {:5.02}",
-            ASSUMED_FIELD_FT,
+            FIELD_FT_CNJ,
             self.field_len_adj(limit),
         );
-        println!("    speed (mph): {:5.02} => {limit}", self.speed);
+        println!("    speed (mph): {:5.02} => {limit}", self.speed_cnj);
         println!(
             "  density (vpm): {:5.02} => {:.02}",
-            self.density,
+            self.density_cnj,
             self.density_adj(limit)
         );
     }
@@ -124,7 +124,8 @@ impl Args {
     /// Calibrate one date
     fn calibrate_date(&self, date: &str) -> Result<(), Box<dyn Error>> {
         let mut intervals = self.fetch_intervals(date)?;
-        intervals.sort_by(|a, b| a.speed.partial_cmp(&b.speed).unwrap());
+        intervals
+            .sort_by(|a, b| a.speed_cnj.partial_cmp(&b.speed_cnj).unwrap());
         let len = intervals.len();
         let typical = len * self.percentile / 100;
         let interval = &intervals[typical];
