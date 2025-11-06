@@ -12,10 +12,6 @@ struct Args {
     #[argh(option, short = 'h', default = "String::from(\"127.0.0.1\")")]
     host: String,
 
-    /// percentile of intervals by conjectured speed; default 75%
-    #[argh(option, short = 'p', default = "75")]
-    percentile: usize,
-
     /// speed limit; default 55 mph
     #[argh(option, short = 'l', default = "55")]
     limit: u16,
@@ -42,11 +38,12 @@ const FIELD_FT_CNJ: f32 = 20.0;
 const FIELD_MI_CNJ: f32 = FIELD_FT_CNJ / FEET_PER_MILE;
 
 /// Detector data interval (30-second)
+#[derive(Clone)]
 struct Interval {
     /// Interval number (0-2879)
     number: usize,
     /// Flow rate (veh/hr)
-    flow: u16,
+    flow: f32,
     /// Percent of time occupied
     occupancy: f32,
     /// Speed (mi/h) measured
@@ -60,10 +57,10 @@ struct Interval {
 impl Interval {
     /// Create new interval data
     fn new(number: usize, count: u16, occ: f32, speed: Option<u16>) -> Self {
-        let flow = count * INTERVALS_PER_HOUR;
+        let flow = f32::from(count * INTERVALS_PER_HOUR);
         let occupancy = occ / 100.0;
         let density_cnj = occupancy / FIELD_MI_CNJ;
-        let speed_cnj = f32::from(flow) / density_cnj;
+        let speed_cnj = flow / density_cnj;
         Interval {
             number,
             flow,
@@ -74,19 +71,37 @@ impl Interval {
         }
     }
 
+    /// Create new interval data
+    fn new_avg(flow: f32, occupancy: f32) -> Self {
+        let density_cnj = occupancy / FIELD_MI_CNJ;
+        let speed_cnj = flow / density_cnj;
+        Interval {
+            number: 9999,
+            flow,
+            occupancy,
+            speed: None,
+            density_cnj,
+            speed_cnj,
+        }
+    }
+
     /// Get interval time stamp (`HH:MM:SS`)
     fn time(&self) -> String {
-        format!(
-            "{:02}:{:02}:{:02}",
-            self.number / 120,
-            self.number % 60,
-            self.number % 2 * 30
-        )
+        if self.number < 2880 {
+            format!(
+                "{:02}:{:02}:{:02}",
+                self.number / 120,
+                self.number % 60,
+                self.number % 2 * 30
+            )
+        } else {
+            "--:--:--".into()
+        }
     }
 
     /// Calculate adjusted density (using speed limit)
     fn density_adj(&self, limit: u16) -> f32 {
-        f32::from(self.flow) / f32::from(limit)
+        self.flow / f32::from(limit)
     }
 
     /// Calculate adjusted average field length (ft/veh)
@@ -97,7 +112,7 @@ impl Interval {
     /// Display interval data to stdout
     fn display(&self, limit: u16) {
         println!("        time: {}", self.time());
-        println!("  flow (vph): {}", self.flow);
+        println!("  flow (vph): {:.02}", self.flow);
         println!("   occupancy: {:.04}%", self.occupancy);
         if let Some(speed) = &self.speed {
             println!(" speed (mph): {speed}");
@@ -133,13 +148,29 @@ impl Args {
         intervals
             .sort_by(|a, b| a.speed_cnj.partial_cmp(&b.speed_cnj).unwrap());
         let len = intervals.len();
-        let typical = len * self.percentile / 100;
-        let interval = &intervals[typical];
+        let typical = len / 2;
+        let mut quar1 = typical;
+        let mut quar3 = typical + 1;
+        let mut interval = intervals[typical].clone();
+        if len >= 4 {
+            quar1 = len / 4;
+            quar3 = len - quar1;
+            let mut flow = 0.0;
+            let mut occ = 0.0;
+            // from 1st to 3rd quartile
+            for i in quar1..quar3 {
+                flow += intervals[i].flow;
+                occ += intervals[i].occupancy;
+            }
+            let half = (quar3 - quar1) as f32;
+            flow /= half;
+            occ /= half;
+            interval = Interval::new_avg(flow, occ);
+        }
         if self.verbose {
             println!("Date: {date}, detector: {}", &self.det);
             println!("Free-flowing intervals: {len} of 2880");
-            println!();
-            println!("Interval {typical} of {len} ({}%)", self.percentile);
+            println!("Q1-Q3 intervals: {quar1}-{quar3} of {len}");
             println!();
             interval.display(self.limit);
         } else {
