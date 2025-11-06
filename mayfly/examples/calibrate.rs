@@ -8,13 +8,17 @@ struct Args {
     #[argh(switch, short = 'v')]
     verbose: bool,
 
-    /// host name or IP
+    /// host name or IP address
     #[argh(option, short = 'h', default = "String::from(\"127.0.0.1\")")]
     host: String,
 
-    /// percentile of intervals sorted by speed
+    /// percentile of intervals by speed (default 75%)
     #[argh(option, short = 'p', default = "75")]
     percentile: usize,
+
+    /// speed limit (default 55 mph)
+    #[argh(option, short = 'l', default = "55")]
+    limit: u16,
 
     /// detector ID
     #[argh(positional)]
@@ -36,9 +40,6 @@ const ASSUMED_FIELD_FT: f32 = 20.0;
 
 /// Assumed avg. field length (mi)
 const ASSUMED_FIELD_MI: f32 = ASSUMED_FIELD_FT / FEET_PER_MILE;
-
-/// Speed limit
-const SPEED_LIMIT_MPH: f32 = 60.0;
 
 /// Detector data interval (30-second)
 struct Interval {
@@ -81,17 +82,17 @@ impl Interval {
     }
 
     /// Calculate adjusted density (using speed limit)
-    fn density_adj(&self) -> f32 {
-        f32::from(self.flow) / SPEED_LIMIT_MPH
+    fn density_adj(&self, limit: u16) -> f32 {
+        f32::from(self.flow) / f32::from(limit)
     }
 
     /// Calculate adjusted average field length (ft/veh)
-    fn field_len_adj(&self) -> f32 {
-        self.occupancy * FEET_PER_MILE / self.density_adj()
+    fn field_len_adj(&self, limit: u16) -> f32 {
+        self.occupancy * FEET_PER_MILE / self.density_adj(limit)
     }
 
     /// Display interval data to stdout
-    fn display(&self) {
+    fn display(&self, limit: u16) {
         println!("        time: {}", self.time());
         println!("  flow (vph): {:3}", self.flow);
         println!("   occupancy: {:.04}%", self.occupancy);
@@ -100,13 +101,13 @@ impl Interval {
         println!(
             " field len (ft): {:5.02} => {:5.02}",
             ASSUMED_FIELD_FT,
-            self.field_len_adj(),
+            self.field_len_adj(limit),
         );
-        println!("    speed (mph): {:5.02} => {SPEED_LIMIT_MPH}", self.speed);
+        println!("    speed (mph): {:5.02} => {limit}", self.speed);
         println!(
             "  density (vpm): {:5.02} => {:.02}",
             self.density,
-            self.density_adj()
+            self.density_adj(limit)
         );
     }
 }
@@ -133,9 +134,9 @@ impl Args {
             println!();
             println!("Interval {typical} of {len} ({}%)", self.percentile);
             println!();
-            interval.display();
+            interval.display(self.limit);
         } else {
-            println!("{date},{}", interval.field_len_adj());
+            println!("{date},{}", interval.field_len_adj(self.limit));
         }
         Ok(())
     }
