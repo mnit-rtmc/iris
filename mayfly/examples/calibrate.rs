@@ -136,6 +136,7 @@ impl Interval {
             self.density_cnj,
             self.density_adj(free_flow)
         );
+        println!();
     }
 }
 
@@ -151,6 +152,11 @@ fn time(number: usize) -> String {
     } else {
         "--:--:--".into()
     }
+}
+
+/// Check if an interval is in "daytime" (5 AM to 8 PM)
+fn is_daytime(number: usize) -> bool {
+    number >= 5 * 120 && number < 20 * 120
 }
 
 impl Args {
@@ -200,11 +206,10 @@ impl Args {
             println!("Q1-Q3 intervals: {quar1}-{quar3} of {len}");
             println!();
             interval.display(self.free_flow);
-        } else {
-            let mean = mean_speed(&intervals_all);
-            let mean_adj = mean_speed_adj(&intervals_all, field_len_adj);
-            println!("{date},{field_len_adj},{mean},{mean_adj}");
         }
+        let mean = mean_speed(&intervals_all);
+        let mean_adj = mean_speed_adj(&intervals_all, field_len_adj);
+        println!("{date},{field_len_adj:.2},{mean:.2},{mean_adj:.2}");
         Ok(field_len_adj)
     }
 
@@ -234,7 +239,7 @@ impl Args {
         {
             match (c0, c1, occ) {
                 (Some(c0), Some(c1), Some(occ)) => {
-                    let free_flowing = c0 == c1 && c0 > 0;
+                    let free_flowing = is_daytime(i) && c0 == c1 && c0 > 0;
                     intervals.push(Interval::new(
                         i,
                         free_flowing,
@@ -300,7 +305,7 @@ fn display_intervals(intervals: &[Interval], field_len_adj: f32) {
                 let speed_adj = ival.speed_adj(field_len_adj);
                 match (ival.speed, speed_adj.is_normal()) {
                     (Some(speed), true) => {
-                        let diff = f32::from(speed) - speed_adj;
+                        let diff = speed_adj - f32::from(speed);
                         line += diff;
                         total += diff;
                         print!(" {diff:3.0}");
@@ -308,9 +313,9 @@ fn display_intervals(intervals: &[Interval], field_len_adj: f32) {
                     _ => print!("    "),
                 }
             }
-            println!("  : {line:4.0}");
+            println!(" :{line:4.0}");
         }
-        println!("{:76}={total:5.0}", ' ');
+        println!("{:74}{total:6.0}", ' ');
     } else {
         for i in (0..2880).step_by(16) {
             print!("{}: ", time(i));
@@ -339,7 +344,7 @@ fn display_intervals_compare(intervals: &[Interval], field_len_adj: f32) {
                 None => print!("    "),
             }
         }
-        print!(" / ");
+        print!(" : ");
         for j in i..i + 8 {
             let ival = &intervals[j];
             let speed = ival.speed_adj(field_len_adj);
