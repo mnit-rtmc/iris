@@ -34,19 +34,20 @@ const FEET_PER_MILE: f32 = 5280.0;
 /// Vehicle legnth estimate
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum VehLength {
+    /// Small vehicles, less than 24 ft
     Small,
+    /// Medium vehicles, 24 to 36 ft
     Medium,
+    /// Large vehicles, more than 36 ft
     Large,
-    Huge,
 }
 
 impl From<u16> for VehLength {
     fn from(len_ft: u16) -> Self {
         match len_ft {
-            0..12 => VehLength::Small,
-            12..24 => VehLength::Medium,
-            24..36 => VehLength::Large,
-            _ => VehLength::Huge,
+            0..24 => VehLength::Small,
+            24..36 => VehLength::Medium,
+            _ => VehLength::Large,
         }
     }
 }
@@ -57,7 +58,15 @@ impl VehLength {
             VehLength::Small => 'S',
             VehLength::Medium => 'M',
             VehLength::Large => 'L',
-            VehLength::Huge => 'H',
+        }
+    }
+
+    /// Get length adjustment (ft)
+    fn len_adjust(self) -> f32 {
+        match self {
+            VehLength::Small => 0.0,
+            VehLength::Medium => 3.0,
+            VehLength::Large => 6.0,
         }
     }
 }
@@ -115,8 +124,17 @@ impl Interval {
         None
     }
 
-    /// Calculate speed (mph) using a given average field length
-    fn speed_adj(&self, field_len: f32) -> f32 {
+    /// Get estimated vehicle field length (ft)
+    fn field_len(&self, field_len_med: f32) -> f32 {
+        match self.length_est {
+            Some(est) => field_len_med + est.len_adjust(),
+            _ => field_len_med,
+        }
+    }
+
+    /// Calculate speed (mph) using a given medium vehicle field length
+    fn speed_adj(&self, field_len_med: f32) -> f32 {
+        let field_len = self.field_len(field_len_med);
         let dens = self.occupancy / (field_len / FEET_PER_MILE);
         self.flow() / dens
     }
@@ -127,8 +145,8 @@ impl Interval {
     }
 
     /// Display interval speeds
-    fn display_speed(&self, field_len: f32) {
-        let speed_adj = self.speed_adj(field_len);
+    fn display_speed(&self, field_len_med: f32) {
+        let speed_adj = self.speed_adj(field_len_med);
         match (self.speed, speed_adj.is_normal()) {
             (Some(speed), true) => {
                 let diff = speed_adj - f32::from(speed);
@@ -139,7 +157,7 @@ impl Interval {
     }
 
     /// Display interval vehicle length estimate
-    fn display_length(&self, _field_len: f32) {
+    fn display_length(&self, _field_len_med: f32) {
         if let (Some(est), Some(len)) = (self.length_est, self.length) {
             if VehLength::from(len) != est {
                 print!(" {}--", est.code());
@@ -265,7 +283,7 @@ fn field_len_adj(intervals: &[Interval], free_speed: u16) -> f32 {
     let mut density = 0.0;
     let mut number = 0;
     for interval in intervals {
-        if let Some(VehLength::Medium) = interval.length_est {
+        if let Some(VehLength::Small) = interval.length_est {
             occupancy += interval.occupancy;
             density += interval.density_adj(free_speed);
             number += 1;
