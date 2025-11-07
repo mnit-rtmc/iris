@@ -62,6 +62,9 @@ impl VehLength {
     }
 
     /// Get length adjustment (ft)
+    ///
+    /// NOTE: Since vehicle length estimates are affected by congestion,
+    /// these adjustments are less than expected based on the definitions.
     fn len_adjust(self) -> f32 {
         match self {
             VehLength::Small => 0.0,
@@ -125,16 +128,16 @@ impl Interval {
     }
 
     /// Get estimated vehicle field length (ft)
-    fn field_len(&self, field_len_med: f32) -> f32 {
+    fn field_len(&self, field_len_sml: f32) -> f32 {
         match self.length_est {
-            Some(est) => field_len_med + est.len_adjust(),
-            _ => field_len_med,
+            Some(est) => field_len_sml + est.len_adjust(),
+            _ => field_len_sml,
         }
     }
 
-    /// Calculate speed (mph) using a given medium vehicle field length
-    fn speed_adj(&self, field_len_med: f32) -> f32 {
-        let field_len = self.field_len(field_len_med);
+    /// Calculate speed (mph) using a given small vehicle field length
+    fn speed_adj(&self, field_len_sml: f32) -> f32 {
+        let field_len = self.field_len(field_len_sml);
         let dens = self.occupancy / (field_len / FEET_PER_MILE);
         self.flow() / dens
     }
@@ -145,19 +148,20 @@ impl Interval {
     }
 
     /// Display interval speeds
-    fn display_speed(&self, field_len_med: f32) {
-        let speed_adj = self.speed_adj(field_len_med);
+    fn display_speed(&self, field_len_sml: f32) {
+        let speed_adj = self.speed_adj(field_len_sml);
         match (self.speed, speed_adj.is_normal()) {
             (Some(speed), true) => {
                 let diff = speed_adj - f32::from(speed);
                 print!(" {diff:3.0}");
             }
+            (None, true) => print!(" {speed_adj:3.0}"),
             _ => print!("    "),
         }
     }
 
     /// Display interval vehicle length estimate
-    fn display_length(&self, _field_len_med: f32) {
+    fn display_length(&self, _field_len_sml: f32) {
         if let (Some(est), Some(len)) = (self.length_est, self.length) {
             if VehLength::from(len) != est {
                 print!(" {}--", est.code());
