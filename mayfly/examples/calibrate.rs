@@ -8,6 +8,10 @@ struct Args {
     #[argh(switch, short = 'v')]
     verbose: bool,
 
+    /// display interval data
+    #[argh(switch, short = 'i')]
+    interval: bool,
+
     /// host name or IP address
     #[argh(option, short = 'h', default = "String::from(\"127.0.0.1\")")]
     host: String,
@@ -95,20 +99,6 @@ impl Interval {
         }
     }
 
-    /// Get interval time stamp (`HH:MM:SS`)
-    fn time(&self) -> String {
-        if self.number < 2880 {
-            format!(
-                "{:02}:{:02}:{:02}",
-                self.number / 120,
-                self.number % 60,
-                self.number % 2 * 30
-            )
-        } else {
-            "--:--:--".into()
-        }
-    }
-
     /// Calculate speed (mph) using a given average field length
     fn speed_adj(&self, field_len: f32) -> f32 {
         let dens = self.occupancy / (field_len / FEET_PER_MILE);
@@ -127,7 +117,7 @@ impl Interval {
 
     /// Display interval data to stdout
     fn display(&self, free_flow: u16) {
-        println!("        time: {}", self.time());
+        println!("        time: {}", time(self.number));
         println!("  flow (vph): {:.02}", self.flow);
         println!("   occupancy: {:.04}%", self.occupancy);
         if let Some(speed) = &self.speed {
@@ -146,6 +136,20 @@ impl Interval {
             self.density_cnj,
             self.density_adj(free_flow)
         );
+    }
+}
+
+/// Get interval time stamp (`HH:MM:SS`)
+fn time(number: usize) -> String {
+    if number < 2880 {
+        format!(
+            "{:02}:{:02}:{:02}",
+            number / 120,
+            number % 120 / 2,
+            number % 2 * 30
+        )
+    } else {
+        "--:--:--".into()
     }
 }
 
@@ -186,15 +190,16 @@ impl Args {
             interval = Interval::new_avg(flow, occ);
         }
         let field_len_adj = interval.field_len_adj(self.free_flow);
-        if self.verbose {
+        if self.interval && self.verbose {
+            display_intervals_compare(&intervals_all, field_len_adj);
+        } else if self.interval {
+            display_intervals(&intervals_all, field_len_adj);
+        } else if self.verbose {
             println!("Date: {date}, detector: {}", &self.det);
             println!("Free-flowing intervals: {len} of 2880");
             println!("Q1-Q3 intervals: {quar1}-{quar3} of {len}");
             println!();
             interval.display(self.free_flow);
-            if intervals_all.iter().any(|i| i.speed.is_some()) {
-                display_speeds(&intervals_all, field_len_adj);
-            }
         } else {
             let mean = mean_speed(&intervals_all);
             let mean_adj = mean_speed_adj(&intervals_all, field_len_adj);
@@ -283,9 +288,50 @@ impl Args {
     }
 }
 
-/// Display speeds side by side
-fn display_speeds(intervals: &[Interval], field_len_adj: f32) {
+/// Display interval speeds
+fn display_intervals(intervals: &[Interval], field_len_adj: f32) {
+    if intervals.iter().any(|i| i.speed.is_some()) {
+        let mut total = 0.0;
+        for i in (0..2880).step_by(16) {
+            print!("{}: ", time(i));
+            let mut line = 0.0;
+            for j in i..i + 16 {
+                let ival = &intervals[j];
+                let speed_adj = ival.speed_adj(field_len_adj);
+                match (ival.speed, speed_adj.is_normal()) {
+                    (Some(speed), true) => {
+                        let diff = f32::from(speed) - speed_adj;
+                        line += diff;
+                        total += diff;
+                        print!(" {diff:3.0}");
+                    }
+                    _ => print!("    "),
+                }
+            }
+            println!("  : {line:4.0}");
+        }
+        println!("{:76}={total:5.0}", ' ');
+    } else {
+        for i in (0..2880).step_by(16) {
+            print!("{}: ", time(i));
+            for j in i..i + 16 {
+                let ival = &intervals[j];
+                let speed = ival.speed_adj(field_len_adj);
+                if speed.is_normal() {
+                    print!(" {speed:3.0}");
+                } else {
+                    print!("    ");
+                }
+            }
+            println!("");
+        }
+    }
+}
+
+/// Display interval speeds side by side
+fn display_intervals_compare(intervals: &[Interval], field_len_adj: f32) {
     for i in (0..2880).step_by(8) {
+        print!("{}: ", time(i));
         for j in i..i + 8 {
             let ival = &intervals[j];
             match ival.speed {
@@ -293,7 +339,7 @@ fn display_speeds(intervals: &[Interval], field_len_adj: f32) {
                 None => print!("    "),
             }
         }
-        print!("    ");
+        print!(" / ");
         for j in i..i + 8 {
             let ival = &intervals[j];
             let speed = ival.speed_adj(field_len_adj);
