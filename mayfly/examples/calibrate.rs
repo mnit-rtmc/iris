@@ -4,7 +4,7 @@ use std::error::Error;
 /// Command-line arguments
 #[derive(FromArgs)]
 struct Args {
-    /// display mode
+    /// display mode; `l`, `s` or `v` (length, speed, verbose)
     #[argh(option, short = 'd')]
     display: Option<char>,
 
@@ -209,10 +209,10 @@ impl Args {
         for interval in intervals.iter_mut() {
             interval.length_est = interval.length_guess(free_speed);
         }
-        let field_len_adj = field_len_adj(&intervals, self.free_speed);
         if let Some('v') = self.display {
             println!("Date: {date}, detector: {}", &self.det);
         }
+        let field_len_adj = self.field_len_adj(&intervals, self.free_speed);
         if let Some('l') = self.display {
             display_intervals(
                 &intervals,
@@ -279,22 +279,24 @@ impl Args {
         url.push_str(&self.det);
         url
     }
-}
 
-/// Calculate adjusted average field length (ft)
-fn field_len_adj(intervals: &[Interval], free_speed: u16) -> f32 {
-    let mut occupancy = 0.0;
-    let mut density = 0.0;
-    let mut number = 0;
-    for interval in intervals {
-        if let Some(VehLength::Small) = interval.length_est {
-            occupancy += interval.occupancy;
-            density += interval.density_adj(free_speed);
-            number += 1;
+    /// Calculate adjusted average field length (ft)
+    fn field_len_adj(&self, intervals: &[Interval], free_speed: u16) -> f32 {
+        let mut occupancy = 0.0;
+        let mut density = 0.0;
+        let mut number = 0;
+        for interval in intervals {
+            if let Some(VehLength::Small) = interval.length_est {
+                occupancy += interval.occupancy;
+                density += interval.density_adj(free_speed);
+                number += 1;
+            }
         }
+        if let Some('v') = self.display {
+            println!("Free-flowing intervals: {number} of 2880");
+        }
+        occupancy * FEET_PER_MILE / density
     }
-    println!("Free-flowing intervals: {number} of 2880");
-    occupancy * FEET_PER_MILE / density
 }
 
 /// Display interval speeds
