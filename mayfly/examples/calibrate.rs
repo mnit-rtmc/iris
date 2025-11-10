@@ -31,33 +31,37 @@ const INTERVALS_PER_HOUR: u16 = 2 * 60;
 /// Number of feet per mil
 const FEET_PER_MILE: f32 = 5280.0;
 
-/// Vehicle legnth estimate
+/// Traffic conditions
 #[derive(Clone, Copy, Debug, PartialEq)]
-enum VehLength {
-    /// Small vehicles, less than 24 ft
-    Small,
-    /// Medium vehicles, 24 to 36 ft
-    Medium,
-    /// Large vehicles, more than 36 ft
-    Large,
+enum TrafficCondition {
+    /// Light traffic with vehicles less than 24 ft
+    FreeFlow,
+    /// Moderate traffic or large vehicles (24 to 36 ft)
+    Moderate,
+    /// Heavy traffic or very large vehicles (more than 36 ft)
+    Heavy,
+    /// Congested traffic
+    Congested,
 }
 
-impl From<u16> for VehLength {
+impl From<u16> for TrafficCondition {
     fn from(len_ft: u16) -> Self {
         match len_ft {
-            0..24 => VehLength::Small,
-            24..36 => VehLength::Medium,
-            _ => VehLength::Large,
+            0..24 => TrafficCondition::FreeFlow,
+            24..36 => TrafficCondition::Moderate,
+            36..64 => TrafficCondition::Heavy,
+            _ => TrafficCondition::Congested,
         }
     }
 }
 
-impl VehLength {
+impl TrafficCondition {
     fn code(self) -> char {
         match self {
-            VehLength::Small => 'S',
-            VehLength::Medium => 'M',
-            VehLength::Large => 'L',
+            TrafficCondition::FreeFlow => 'F',
+            TrafficCondition::Moderate => 'M',
+            TrafficCondition::Heavy => 'H',
+            TrafficCondition::Congested => 'C',
         }
     }
 
@@ -67,9 +71,10 @@ impl VehLength {
     /// these adjustments are less than expected based on the definitions.
     fn len_adjust(self) -> f32 {
         match self {
-            VehLength::Small => 0.0,
-            VehLength::Medium => 3.0,
-            VehLength::Large => 6.0,
+            TrafficCondition::FreeFlow => 0.0,
+            TrafficCondition::Moderate => 4.0,
+            TrafficCondition::Heavy => 9.0,
+            TrafficCondition::Congested => 14.0,
         }
     }
 }
@@ -85,8 +90,8 @@ struct Interval {
     speed: Option<u16>,
     /// Length (ft) measured
     length: Option<u16>,
-    /// Vehicle length estimate
-    length_est: Option<VehLength>,
+    /// Traffic conditions estimate
+    condition: Option<TrafficCondition>,
 }
 
 impl Interval {
@@ -112,8 +117,8 @@ impl Interval {
         f32::from(self.count * INTERVALS_PER_HOUR)
     }
 
-    /// Guess vehicle length, with assumed free-flow speed
-    fn length_guess(&self, free_speed: u16) -> Option<VehLength> {
+    /// Guess traffic condition, with assumed free-flow speed
+    fn guess_condition(&self, free_speed: u16) -> Option<TrafficCondition> {
         // density = flow / speed
         let dens_free = self.flow() / f32::from(free_speed);
         if dens_free > 0.0 {
@@ -121,7 +126,7 @@ impl Interval {
             let len_mi_free = self.occupancy / dens_free;
             let len_ft_free = (len_mi_free * FEET_PER_MILE).round();
             if len_ft_free > 0.0 && len_ft_free < 65_535.0 {
-                return Some(VehLength::from(len_ft_free as u16));
+                return Some(TrafficCondition::from(len_ft_free as u16));
             }
         }
         None
@@ -129,8 +134,8 @@ impl Interval {
 
     /// Get estimated vehicle field length (ft)
     fn field_len(&self, field_len_sml: f32) -> f32 {
-        match self.length_est {
-            Some(est) => field_len_sml + est.len_adjust(),
+        match self.condition {
+            Some(con) => field_len_sml + con.len_adjust(),
             _ => field_len_sml,
         }
     }
@@ -152,29 +157,26 @@ impl Interval {
         let speed_adj = self.speed_adj(field_len_sml);
         match (self.speed, speed_adj.is_normal()) {
             (Some(speed), true) => {
-                let diff = speed_adj - f32::from(speed);
-                print!(" {diff:3.0}");
+                let diff = (speed_adj - f32::from(speed)).clamp(-99.9, 99.9);
+                print!(" {diff:+3.0}");
             }
             (None, true) => print!(" {speed_adj:3.0}"),
-            _ => print!("    "),
+            _ => print!(" ___"),
         }
     }
 
     /// Display interval vehicle length estimate
     fn display_length(&self, _field_len_sml: f32) {
-        if let (Some(est), Some(len)) = (self.length_est, self.length) {
-            if VehLength::from(len) != est {
-                print!(" {}--", est.code());
+        if let (Some(con), Some(len)) = (self.condition, self.length) {
+            if TrafficCondition::from(len) != con {
+                print!(" {}--", con.code());
                 return;
             }
         }
-        let sz = match self.length_est {
-            Some(est) => est.code(),
-            _ => ' ',
-        };
+        let con = self.condition.map_or(' ', |c| c.code());
         match self.length {
-            Some(len) => print!(" {sz}{len:02}"),
-            None => print!(" {sz}--"),
+            Some(len) => print!(" {con}{len:02}"),
+            None => print!(" {con}--"),
         }
     }
 }
@@ -207,7 +209,7 @@ impl Args {
         let free_speed = self.free_speed;
         let mut intervals = self.fetch_intervals(date)?;
         for interval in intervals.iter_mut() {
-            interval.length_est = interval.length_guess(free_speed);
+            interval.condition = interval.guess_condition(free_speed);
         }
         if let Some('v') = self.display {
             println!("Date: {date}, detector: {}", &self.det);
@@ -286,7 +288,7 @@ impl Args {
         let mut density = 0.0;
         let mut number = 0;
         for interval in intervals {
-            if let Some(VehLength::Small) = interval.length_est {
+            if let Some(TrafficCondition::FreeFlow) = interval.condition {
                 occupancy += interval.occupancy;
                 density += interval.density_adj(free_speed);
                 number += 1;
