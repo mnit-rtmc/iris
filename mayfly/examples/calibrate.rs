@@ -98,11 +98,10 @@ impl Interval {
     /// Create new interval data
     fn new(
         count: u16,
-        occ: f32,
+        occupancy: f32,
         speed: Option<u16>,
         length: Option<u16>,
     ) -> Self {
-        let occupancy = occ / 100.0;
         Interval {
             count,
             occupancy,
@@ -120,7 +119,7 @@ impl Interval {
     /// Guess traffic condition, with assumed free-flow speed
     fn guess_condition(&self, free_speed: u16) -> Option<TrafficCondition> {
         // density = flow / speed
-        let dens_free = self.flow() / f32::from(free_speed);
+        let dens_free = self.density_adj(free_speed);
         if dens_free > 0.0 {
             // length = occupancy / density
             let len_mi_free = self.occupancy / dens_free;
@@ -143,7 +142,7 @@ impl Interval {
     /// Calculate speed (mph) using a given small vehicle field length
     fn speed_adj(&self, field_len_sml: f32) -> f32 {
         let field_len = self.field_len(field_len_sml);
-        let dens = self.occupancy / (field_len / FEET_PER_MILE);
+        let dens = self.occupancy * FEET_PER_MILE / field_len;
         self.flow() / dens
     }
 
@@ -260,7 +259,7 @@ impl Args {
             let length = lengths[i];
             let interval = match (count, occ) {
                 (Some(count), Some(occ)) => {
-                    Interval::new(count, occ, speed, length)
+                    Interval::new(count, occ / 100.0, speed, length)
                 }
                 _ => Interval::new(0, 0.0, speed, length),
             };
