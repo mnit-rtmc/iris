@@ -1,42 +1,20 @@
 body {
-    background: #def;
-}
-hr {
-    border: 1px dashed black;
-}
-table {
-    border-collapse: collapse;
-}
-th {
-    border: 0.05rem dotted black;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    vertical-align: middle;
-    background: #e0e0f0;
-}
-td {
-    border: 0.05rem dotted black;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    vertical-align: middle;
     background: #eee;
 }
-.path {
+summary {
+    background: #e0e0e0;
+}
+details {
+    background: #eee;
+}
+dt {
+    font-weight: bold;
+    text-decoration: underline;
+}
+dt::after {
+    content: ": ";
+}
+.uri {
     white-space: nowrap;
     font-family: monospace;
-}
-.example {
-    white-space: nowrap;
-    font-family: monospace;
-    background: #e0e0f0;
-}
-.upath {
-    white-space: nowrap;
-    font-family: monospace;
-    text-decoration: line-through;
-    background: #e99;
-}
-.unimplemented {
-    text-decoration: line-through;
-    background: #e99;
 }
