@@ -4,7 +4,7 @@ use std::error::Error;
 /// Command-line arguments
 #[derive(FromArgs)]
 struct Args {
-    /// display mode; `l`, `s` or `v` (length, speed, verbose)
+    /// display mode; `c`, `s` or `v` (condition, speed, verbose)
     #[argh(option, short = 'd')]
     display: Option<char>,
 
@@ -165,8 +165,8 @@ impl Interval {
         }
     }
 
-    /// Display interval vehicle length estimate
-    fn display_length(&self, _field_len_sml: f32) {
+    /// Display interval traffic condition guess
+    fn display_condition(&self, _field_len_sml: f32) {
         if let (Some(con), Some(len)) = (self.condition, self.length) {
             if TrafficCondition::from(len) != con {
                 print!(" {}--", con.code());
@@ -215,11 +215,11 @@ impl Args {
             println!("Date: {date}, detector: {}", &self.det);
         }
         let field_len_adj = self.field_len_adj(&intervals, self.free_speed);
-        if let Some('l') = self.display {
+        if let Some('c') = self.display {
             display_intervals(
                 &intervals,
                 field_len_adj,
-                Interval::display_length,
+                Interval::display_condition,
             );
         }
         if let Some('s') = self.display {
