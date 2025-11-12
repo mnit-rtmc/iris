@@ -232,8 +232,11 @@ pub const DETECTOR_ONE: &str = "\
 
 /// SQL query for all detectors (public)
 pub const DETECTOR_PUB: &str = "\
-  SELECT name, r_node, cor_id, lane_number, lane_code, field_length \
-  FROM detector_view";
+  SELECT d.name, r_node, cor_id, lane_number, lane_code, speed_limit \
+  FROM detector_view d
+  JOIN r_node_view r ON d.r_node = r.name
+  ORDER BY regexp_replace(d.name, '[0-9]', '', 'g'), \
+          (regexp_replace(d.name, '[^0-9]', '', 'g') || '0')::INTEGER";
 
 /// SQL query for all device actions (primary)
 pub const DEVICE_ACTION_ALL: &str = "\
