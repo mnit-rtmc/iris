@@ -445,13 +445,13 @@ impl<T> Traf<T>
 where
     T: TrafficData + Sync + Send + 'static,
 {
-    /// Lookup data from a zip archive
-    async fn lookup_zipped(self, traffic: Traffic) -> Result<String> {
+    /// Lookup traffic data from a zip archive
+    async fn lookup_zipped(self, traffic: Traffic) -> Result<Vec<T>> {
         task::spawn_blocking(|| self.lookup_zipped_blocking(traffic)).await?
     }
 
     /// Lookup data from a zip archive (blocking)
-    fn lookup_zipped_blocking(self, mut traffic: Traffic) -> Result<String> {
+    fn lookup_zipped_blocking(self, mut traffic: Traffic) -> Result<Vec<T>> {
         if !self.filter().is_filtered() {
             match self.lookup_zipped_bin(&mut traffic) {
                 Err(Error::Zip(ZipError::FileNotFound)) => (),
@@ -462,28 +462,29 @@ where
     }
 
     /// Lookup archived data from 30-second binned data (blocking)
-    fn lookup_zipped_bin(&self, traffic: &mut Traffic) -> Result<String> {
+    fn lookup_zipped_bin(&self, traffic: &mut Traffic) -> Result<Vec<T>> {
         let name = self.binned_file_name();
         let mut zf = traffic.by_name(&name)?;
         log::info!("opened {name} in {}.{EXT}", self.date);
         let mut buf = Self::make_bin_buffer(zf.size())?;
         zf.read_exact(&mut buf)?;
-        self.make_binned_body(buf)
-            .ok_or(Error::Zip(ZipError::FileNotFound))
+        Ok(buf
+            .chunks_exact(T::bin_bytes())
+            .map(|v| T::unpack(v))
+            .collect())
     }
 
     /// Read vehicle log data from a zip file (blocking)
-    fn lookup_zipped_vlog(&self, traffic: &mut Traffic) -> Result<String> {
+    fn lookup_zipped_vlog(&self, traffic: &mut Traffic) -> Result<Vec<T>> {
         let name = self.vlog_file_name();
         let zf = traffic.by_name(&name)?;
         log::info!("opened {name} in {}.{EXT}", self.date);
         let vlog = VehLog::from_reader_blocking(zf)?;
-        self.make_vlog_body(vlog)
-            .ok_or(Error::Zip(ZipError::FileNotFound))
+        Ok(vlog.binned_iter::<T>(30, self.filter()).collect())
     }
 
     /// Lookup data from file system (unzipped)
-    async fn lookup_unzipped(&self) -> Result<String> {
+    async fn lookup_unzipped(&self) -> Result<Vec<T>> {
         if !self.filter().is_filtered() {
             match self.lookup_unzipped_bin().await {
                 Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => (),
@@ -494,7 +495,7 @@ where
     }
 
     /// Lookup unzipped data from 30-second binned data
-    async fn lookup_unzipped_bin(&self) -> Result<String> {
+    async fn lookup_unzipped_bin(&self) -> Result<Vec<T>> {
         let mut path = self.date_path()?;
         path.push(self.binned_file_name());
         let mut file = File::open(&path).await?;
@@ -502,19 +503,20 @@ where
         log::info!("opened {path:?}");
         let mut buf = Self::make_bin_buffer(metadata.len())?;
         file.read_exact(&mut buf).await?;
-        self.make_binned_body(buf)
-            .ok_or(Error::Io(ErrorKind::NotFound.into()))
+        Ok(buf
+            .chunks_exact(T::bin_bytes())
+            .map(|v| T::unpack(v))
+            .collect())
     }
 
     /// Lookup unzipped data from vehicle log file
-    async fn lookup_unzipped_vlog(&self) -> Result<String> {
+    async fn lookup_unzipped_vlog(&self) -> Result<Vec<T>> {
         let mut path = self.date_path()?;
         path.push(self.vlog_file_name());
         let file = File::open(&path).await?;
         log::info!("opened {path:?}");
         let vlog = VehLog::from_reader_async(file).await?;
-        self.make_vlog_body(vlog)
-            .ok_or(Error::Io(ErrorKind::NotFound.into()))
+        Ok(vlog.binned_iter::<T>(30, self.filter()).collect())
     }
 
     /// Create a vehicle filter
@@ -541,33 +543,6 @@ where
         } else {
             Err(Error::InvalidData("bin"))
         }
-    }
-
-    /// Make body from binned buffer
-    fn make_binned_body(&self, buf: Vec<u8>) -> Option<String> {
-        let mut vec = JsonVec::new();
-        let mut any_valid = false;
-        for val in buf.chunks_exact(T::bin_bytes()) {
-            let val = T::unpack(val);
-            if !any_valid && val.value().is_some() {
-                any_valid = true;
-            }
-            vec.write(val);
-        }
-        any_valid.then(|| String::from(vec))
-    }
-
-    /// Make body from vehicle log
-    fn make_vlog_body(&self, vlog: VehLog) -> Option<String> {
-        let mut vec = JsonVec::new();
-        let mut any_valid = false;
-        for val in vlog.binned_iter::<T>(30, self.filter()) {
-            if !any_valid && val.value().is_some() {
-                any_valid = true;
-            }
-            vec.write(val);
-        }
-        any_valid.then(|| String::from(vec))
     }
 
     /// Get path to (zip) file
@@ -600,11 +575,27 @@ where
 {
     let path = traf.zip_path()?;
     let is_recent = traf.is_recent()?;
-    let body = match Traffic::new(&path) {
+    let data = match Traffic::new(&path) {
         Ok(traffic) => traf.lookup_zipped(traffic).await,
         _ => traf.lookup_unzipped().await,
     }?;
+    let body = make_body(&data)?;
     Result::<_>::Ok(json_resp(body, is_recent))
+}
+
+/// Make body from traffic data
+fn make_body<T: TrafficData>(data: &[T]) -> Result<String> {
+    let mut vec = JsonVec::new();
+    let mut any_valid = false;
+    for val in data {
+        if !any_valid && val.value().is_some() {
+            any_valid = true;
+        }
+        vec.write(val);
+    }
+    any_valid
+        .then(|| String::from(vec))
+        .ok_or(Error::Io(ErrorKind::NotFound.into()))
 }
 
 /// Lookup archived count data.
