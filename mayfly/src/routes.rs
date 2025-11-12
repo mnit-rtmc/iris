@@ -478,6 +478,7 @@ where
         log::info!("opened {name} in {}.{EXT}", self.date);
         let vlog = VehLog::from_reader_blocking(zf)?;
         self.make_vlog_body(vlog)
+            .ok_or(Error::Zip(ZipError::FileNotFound))
     }
 
     /// Lookup data from file system (unzipped)
@@ -511,6 +512,7 @@ where
         log::info!("opened {path:?}");
         let vlog = VehLog::from_reader_async(file).await?;
         self.make_vlog_body(vlog)
+            .ok_or(Error::Io(ErrorKind::NotFound.into()))
     }
 
     /// Create a vehicle filter
@@ -549,23 +551,16 @@ where
     }
 
     /// Make body from vehicle log
-    fn make_vlog_body(&self, vlog: VehLog) -> Result<String> {
+    fn make_vlog_body(&self, vlog: VehLog) -> Option<String> {
         let mut vec = JsonVec::new();
-        let mut valid = false;
+        let mut any_valid = false;
         for val in vlog.binned_iter::<T>(30, self.filter()) {
-            if !valid {
-                if !format!("{}", val).contains("null") {
-                    valid = true;
-                };
-            };
+            if !any_valid && val.value().is_some() {
+                any_valid = true;
+            }
             vec.write(val);
         }
-        if valid {
-            return Ok(String::from(vec));
-        }
-
-        // Return "Not Found" to match pre-vlog behavior
-        Err(Error::Zip(ZipError::FileNotFound))
+        any_valid.then(|| String::from(vec))
     }
 
     /// Get path to (zip) file

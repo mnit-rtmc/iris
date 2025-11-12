@@ -16,7 +16,7 @@ use crate::vehicle::VehicleEvent;
 use std::convert::TryFrom;
 use std::fmt;
 
-/// Traffic data type
+/// Binned traffic data
 pub trait TrafficData: Default + fmt::Display {
     /// Binned file extension
     fn binned_ext() -> &'static str;
@@ -26,11 +26,16 @@ pub trait TrafficData: Default + fmt::Display {
         1
     }
 
+    /// Get data value
+    fn value(&self) -> Option<u16>;
+
     /// Unpack one binned value
     fn unpack(val: &[u8]) -> Self;
 
     /// Pack one binned value
-    fn pack(&self, buf: &mut Vec<u8>);
+    fn pack(&self, buf: &mut Vec<u8>) {
+        buf.push(self.value().map(|v| v as u8).unwrap_or(0xFF))
+    }
 
     /// Set reset for traffic data
     fn reset(&mut self) {}
@@ -81,6 +86,15 @@ impl TrafficData for CountData {
         "v30"
     }
 
+    /// Get data value
+    fn value(&self) -> Option<u16> {
+        if self.reset {
+            None
+        } else {
+            u8::try_from(self.count).ok().map(u16::from)
+        }
+    }
+
     /// Unpack one binned value
     fn unpack(val: &[u8]) -> Self {
         assert_eq!(val.len(), Self::bin_bytes());
@@ -88,15 +102,6 @@ impl TrafficData for CountData {
         let reset = value < 0;
         let count = u32::try_from(value).unwrap_or(0);
         CountData { reset, count }
-    }
-
-    /// Pack one binned value
-    fn pack(&self, buf: &mut Vec<u8>) {
-        if self.reset {
-            buf.push(0xFF);
-        } else {
-            buf.push(self.count as u8);
-        }
     }
 
     /// Set reset for count data
@@ -112,10 +117,9 @@ impl TrafficData for CountData {
 
 impl fmt::Display for CountData {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.reset {
-            write!(f, "null")
-        } else {
-            write!(f, "{}", self.count)
+        match self.value() {
+            Some(val) => write!(f, "{val}"),
+            None => write!(f, "null"),
         }
     }
 }
@@ -126,6 +130,16 @@ impl TrafficData for SpeedData {
         "s30"
     }
 
+    /// Get data value
+    fn value(&self) -> Option<u16> {
+        if self.count > 0 {
+            let speed = (self.total as f32 / self.count as f32).round() as i32;
+            u8::try_from(speed).ok().map(u16::from)
+        } else {
+            None
+        }
+    }
+
     /// Unpack one binned value
     fn unpack(val: &[u8]) -> Self {
         assert_eq!(val.len(), Self::bin_bytes());
@@ -133,17 +147,6 @@ impl TrafficData for SpeedData {
         let total = u32::try_from(value).unwrap_or(0);
         let count = total.min(1);
         SpeedData { total, count }
-    }
-
-    /// Pack one binned value
-    fn pack(&self, buf: &mut Vec<u8>) {
-        if self.count > 0 {
-            let speed = (self.total as f32 / self.count as f32).round() as i32;
-            let speed = u8::try_from(speed).unwrap_or(0xFF);
-            buf.push(speed);
-        } else {
-            buf.push(0xFF);
-        }
     }
 
     /// Bin a vehicle to speed data
@@ -157,11 +160,9 @@ impl TrafficData for SpeedData {
 
 impl fmt::Display for SpeedData {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.count > 0 {
-            let speed = (self.total as f32 / self.count as f32).round();
-            write!(f, "{}", speed as u32)
-        } else {
-            write!(f, "null")
+        match self.value() {
+            Some(val) => write!(f, "{val}"),
+            None => write!(f, "null"),
         }
     }
 }
@@ -172,6 +173,17 @@ impl TrafficData for HeadwayData {
         "h30"
     }
 
+    /// Get data value
+    fn value(&self) -> Option<u16> {
+        if self.count > 0 {
+            let headway =
+                (self.total as f32 / self.count as f32).round() as i32;
+            u8::try_from(headway).ok().map(u16::from)
+        } else {
+            None
+        }
+    }
+
     /// Unpack one binned value
     fn unpack(val: &[u8]) -> Self {
         assert_eq!(val.len(), Self::bin_bytes());
@@ -179,18 +191,6 @@ impl TrafficData for HeadwayData {
         let total = u32::try_from(value).unwrap_or(0);
         let count = total.min(1);
         HeadwayData { total, count }
-    }
-
-    /// Pack one binned value
-    fn pack(&self, buf: &mut Vec<u8>) {
-        if self.count > 0 {
-            let headway =
-                (self.total as f32 / self.count as f32).round() as i32;
-            let headway = u8::try_from(headway).unwrap_or(0xFF);
-            buf.push(headway);
-        } else {
-            buf.push(0xFF);
-        }
     }
 
     /// Bin a vehicle to headway data
@@ -204,11 +204,9 @@ impl TrafficData for HeadwayData {
 
 impl fmt::Display for HeadwayData {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.count > 0 {
-            let headway = (self.total as f32 / self.count as f32).round();
-            write!(f, "{}", headway as u32)
-        } else {
-            write!(f, "null")
+        match self.value() {
+            Some(val) => write!(f, "{val}"),
+            None => write!(f, "null"),
         }
     }
 }
@@ -224,6 +222,17 @@ impl TrafficData for OccupancyData {
         2
     }
 
+    /// Get data value
+    fn value(&self) -> Option<u16> {
+        if self.reset {
+            None
+        } else {
+            let percent = (self.duration as f32) / 30_000.0;
+            let scans = (percent * 1_800.0).round() as u16;
+            Some(scans)
+        }
+    }
+
     /// Unpack one binned value
     fn unpack(val: &[u8]) -> Self {
         assert_eq!(val.len(), Self::bin_bytes());
@@ -237,14 +246,15 @@ impl TrafficData for OccupancyData {
 
     /// Pack one binned value
     fn pack(&self, buf: &mut Vec<u8>) {
-        if self.reset {
-            buf.push(0xFF);
-            buf.push(0xFF);
-        } else {
-            let percent = (self.duration as f32) / 30_000.0;
-            let scans = (percent * 1_800.0).round() as u16;
-            buf.push(((scans >> 8) & 0xFF) as u8);
-            buf.push((scans & 0xFF) as u8);
+        match self.value() {
+            Some(scans) => {
+                buf.push(((scans >> 8) & 0xFF) as u8);
+                buf.push((scans & 0xFF) as u8);
+            }
+            None => {
+                buf.push(0xFF);
+                buf.push(0xFF);
+            }
         }
     }
 
@@ -263,17 +273,18 @@ impl TrafficData for OccupancyData {
 
 impl fmt::Display for OccupancyData {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.reset {
-            write!(f, "null")
-        } else {
-            // Ranges from 0 - 30_000 (100%)
-            let val = self.duration;
-            if val.is_multiple_of(300) {
-                // Whole number; use integer to prevent .0 at end
-                write!(f, "{}", val / 300)
-            } else {
-                write!(f, "{:.2}", val as f32 / 300.0)
+        match self.value() {
+            Some(_val) => {
+                // Ranges from 0 - 30_000 (100%)
+                let val = self.duration;
+                if val.is_multiple_of(300) {
+                    // Whole number; use integer to prevent .0 at end
+                    write!(f, "{}", val / 300)
+                } else {
+                    write!(f, "{:.2}", val as f32 / 300.0)
+                }
             }
+            None => write!(f, "null"),
         }
     }
 }
@@ -284,6 +295,16 @@ impl TrafficData for LengthData {
         "L30"
     }
 
+    /// Get data value
+    fn value(&self) -> Option<u16> {
+        if self.count > 0 {
+            let length = (self.total as f32 / self.count as f32).round() as i32;
+            u8::try_from(length).ok().map(u16::from)
+        } else {
+            None
+        }
+    }
+
     /// Unpack one binned value
     fn unpack(val: &[u8]) -> Self {
         assert_eq!(val.len(), Self::bin_bytes());
@@ -291,17 +312,6 @@ impl TrafficData for LengthData {
         let total = u32::try_from(value).unwrap_or(0);
         let count = total.min(1);
         LengthData { total, count }
-    }
-
-    /// Pack one binned value
-    fn pack(&self, buf: &mut Vec<u8>) {
-        if self.count > 0 {
-            let length = (self.total as f32 / self.count as f32).round() as i32;
-            let length = u8::try_from(length).unwrap_or(0xFF);
-            buf.push(length);
-        } else {
-            buf.push(0xFF);
-        }
     }
 
     /// Bin a vehicle to length data
@@ -315,11 +325,9 @@ impl TrafficData for LengthData {
 
 impl fmt::Display for LengthData {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.count > 0 {
-            let length = (self.total as f32 / self.count as f32).round();
-            write!(f, "{}", length as u32)
-        } else {
-            write!(f, "null")
+        match self.value() {
+            Some(val) => write!(f, "{val}"),
+            None => write!(f, "null"),
         }
     }
 }
