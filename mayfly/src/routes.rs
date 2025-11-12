@@ -625,15 +625,6 @@ pub fn headway_get() -> Router {
     Router::new().route("/headway", get(handler))
 }
 
-/// Lookup archived length data.
-pub fn length_get() -> Router {
-    async fn handler(traf: Query<Traf<LengthData>>) -> impl IntoResponse {
-        log::info!("GET /length");
-        traf_handler(traf.0).await
-    }
-    Router::new().route("/length", get(handler))
-}
-
 /// Lookup archived occupancy data.
 pub fn occupancy_get() -> Router {
     async fn handler(traf: Query<Traf<OccupancyData>>) -> impl IntoResponse {
@@ -641,6 +632,15 @@ pub fn occupancy_get() -> Router {
         traf_handler(traf.0).await
     }
     Router::new().route("/occupancy", get(handler))
+}
+
+/// Lookup archived length data.
+pub fn length_get() -> Router {
+    async fn handler(traf: Query<Traf<LengthData>>) -> impl IntoResponse {
+        log::info!("GET /length");
+        traf_handler(traf.0).await
+    }
+    Router::new().route("/length", get(handler))
 }
 
 /// Lookup archived speed data.

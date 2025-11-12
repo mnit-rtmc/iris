@@ -1,6 +1,6 @@
 // mayfly.rs
 //
-// Copyright (c) 2019-2024  Minnesota Department of Transportation
+// Copyright (c) 2019-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -84,8 +84,8 @@ fn route_mayfly() -> Router {
         .merge(routes::corridors_get())
         .merge(routes::detectors_get())
         .merge(routes::counts_get())
-        .merge(routes::speed_get())
         .merge(routes::headway_get())
         .merge(routes::occupancy_get())
         .merge(routes::length_get())
+        .merge(routes::speed_get())
 }

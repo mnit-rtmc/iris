@@ -51,13 +51,6 @@ pub struct CountData {
     count: u32,
 }
 
-/// Binned speed data
-#[derive(Clone, Copy, Default)]
-pub struct SpeedData {
-    total: u32,
-    count: u32,
-}
-
 /// Binned headway data
 #[derive(Clone, Copy, Default)]
 pub struct HeadwayData {
@@ -76,6 +69,13 @@ pub struct OccupancyData {
 /// Binned length data
 #[derive(Clone, Copy, Default)]
 pub struct LengthData {
+    total: u32,
+    count: u32,
+}
+
+/// Binned speed data
+#[derive(Clone, Copy, Default)]
+pub struct SpeedData {
     total: u32,
     count: u32,
 }
@@ -116,49 +116,6 @@ impl TrafficData for CountData {
 }
 
 impl fmt::Display for CountData {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.value() {
-            Some(val) => write!(f, "{val}"),
-            None => write!(f, "null"),
-        }
-    }
-}
-
-impl TrafficData for SpeedData {
-    /// Binned file extension
-    fn binned_ext() -> &'static str {
-        "s30"
-    }
-
-    /// Get data value
-    fn value(&self) -> Option<u16> {
-        if self.count > 0 {
-            let speed = (self.total as f32 / self.count as f32).round() as i32;
-            u8::try_from(speed).ok().map(u16::from)
-        } else {
-            None
-        }
-    }
-
-    /// Unpack one binned value
-    fn unpack(val: &[u8]) -> Self {
-        assert_eq!(val.len(), Self::bin_bytes());
-        let value = val[0] as i8;
-        let total = u32::try_from(value).unwrap_or(0);
-        let count = total.min(1);
-        SpeedData { total, count }
-    }
-
-    /// Bin a vehicle to speed data
-    fn bin_vehicle(&mut self, veh: &VehicleEvent) {
-        if let Some(speed) = veh.speed() {
-            self.total += speed;
-            self.count += 1;
-        }
-    }
-}
-
-impl fmt::Display for SpeedData {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.value() {
             Some(val) => write!(f, "{val}"),
@@ -324,6 +281,49 @@ impl TrafficData for LengthData {
 }
 
 impl fmt::Display for LengthData {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self.value() {
+            Some(val) => write!(f, "{val}"),
+            None => write!(f, "null"),
+        }
+    }
+}
+
+impl TrafficData for SpeedData {
+    /// Binned file extension
+    fn binned_ext() -> &'static str {
+        "s30"
+    }
+
+    /// Get data value
+    fn value(&self) -> Option<u16> {
+        if self.count > 0 {
+            let speed = (self.total as f32 / self.count as f32).round() as i32;
+            u8::try_from(speed).ok().map(u16::from)
+        } else {
+            None
+        }
+    }
+
+    /// Unpack one binned value
+    fn unpack(val: &[u8]) -> Self {
+        assert_eq!(val.len(), Self::bin_bytes());
+        let value = val[0] as i8;
+        let total = u32::try_from(value).unwrap_or(0);
+        let count = total.min(1);
+        SpeedData { total, count }
+    }
+
+    /// Bin a vehicle to speed data
+    fn bin_vehicle(&mut self, veh: &VehicleEvent) {
+        if let Some(speed) = veh.speed() {
+            self.total += speed;
+            self.count += 1;
+        }
+    }
+}
+
+impl fmt::Display for SpeedData {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.value() {
             Some(val) => write!(f, "{val}"),
