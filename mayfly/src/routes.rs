@@ -468,7 +468,8 @@ where
         log::info!("opened {name} in {}.{EXT}", self.date);
         let mut buf = Self::make_bin_buffer(zf.size())?;
         zf.read_exact(&mut buf)?;
-        Ok(self.make_binned_body(buf))
+        self.make_binned_body(buf)
+            .ok_or(Error::Zip(ZipError::FileNotFound))
     }
 
     /// Read vehicle log data from a zip file (blocking)
@@ -501,7 +502,8 @@ where
         log::info!("opened {path:?}");
         let mut buf = Self::make_bin_buffer(metadata.len())?;
         file.read_exact(&mut buf).await?;
-        Ok(self.make_binned_body(buf))
+        self.make_binned_body(buf)
+            .ok_or(Error::Io(ErrorKind::NotFound.into()))
     }
 
     /// Lookup unzipped data from vehicle log file
@@ -542,12 +544,17 @@ where
     }
 
     /// Make body from binned buffer
-    fn make_binned_body(&self, buf: Vec<u8>) -> String {
+    fn make_binned_body(&self, buf: Vec<u8>) -> Option<String> {
         let mut vec = JsonVec::new();
+        let mut any_valid = false;
         for val in buf.chunks_exact(T::bin_bytes()) {
-            vec.write(T::unpack(val));
+            let val = T::unpack(val);
+            if !any_valid && val.value().is_some() {
+                any_valid = true;
+            }
+            vec.write(val);
         }
-        String::from(vec)
+        any_valid.then(|| String::from(vec))
     }
 
     /// Make body from vehicle log
