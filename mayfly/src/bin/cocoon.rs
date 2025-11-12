@@ -218,14 +218,14 @@ fn make_writer(path: &impl AsRef<Path>) -> Result<ZipWriter<BufWriter<File>>> {
 fn pack_binned<T: TrafficData>(vlog: &VehLog) -> Option<Vec<u8>> {
     let len = 2880 * T::bin_bytes();
     let mut buf = Vec::with_capacity(len);
+    let mut any_valid = false;
     for val in vlog.binned_iter::<T>(30, VehicleFilter::default()) {
+        if !any_valid && val.value().is_some() {
+            any_valid = true;
+        }
         val.pack(&mut buf);
     }
-    if buf.iter().any(|v| v != &0xFF) {
-        Some(buf)
-    } else {
-        None
-    }
+    any_valid.then_some(buf)
 }
 
 /// Main function

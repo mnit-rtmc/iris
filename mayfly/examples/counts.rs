@@ -4,7 +4,7 @@ use std::fs::File;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file = File::open("res/test.vlog")?;
-    let vlog = VehLog::from_blocking_reader(file)?;
+    let vlog = VehLog::from_reader_blocking(file)?;
     print!("[");
     for (i, v) in vlog
         .binned_iter::<CountData>(30, VehicleFilter::default())
