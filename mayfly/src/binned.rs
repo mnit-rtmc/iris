@@ -184,9 +184,7 @@ impl TrafficData for OccupancyData {
         if self.reset {
             None
         } else {
-            let percent = (self.duration as f32) / 30_000.0;
-            let scans = (percent * 1_800.0).round() as u16;
-            Some(scans)
+            u16::try_from(self.duration).ok()
         }
     }
 
@@ -231,9 +229,8 @@ impl TrafficData for OccupancyData {
 impl fmt::Display for OccupancyData {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.value() {
-            Some(_val) => {
+            Some(val) => {
                 // Ranges from 0 - 30_000 (100%)
-                let val = self.duration;
                 if val.is_multiple_of(300) {
                     // Whole number; use integer to prevent .0 at end
                     write!(f, "{}", val / 300)

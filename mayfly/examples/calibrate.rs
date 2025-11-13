@@ -28,7 +28,7 @@ struct Args {
 /// Intervals per hour (30-second)
 const INTERVALS_PER_HOUR: u16 = 2 * 60;
 
-/// Number of feet per mil
+/// Number of feet per mile
 const FEET_PER_MILE: f32 = 5280.0;
 
 /// Traffic conditions
