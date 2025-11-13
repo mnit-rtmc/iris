@@ -202,7 +202,9 @@ impl TrafficData for OccupancyData {
     /// Pack one binned value
     fn pack(&self, buf: &mut Vec<u8>) {
         match self.value() {
-            Some(scans) => {
+            Some(val) => {
+                let percent = (val as f32) / 30_000.0;
+                let scans = (percent * 1_800.0).round() as u16;
                 buf.push(((scans >> 8) & 0xFF) as u8);
                 buf.push((scans & 0xFF) as u8);
             }
