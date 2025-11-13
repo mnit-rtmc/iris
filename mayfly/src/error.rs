@@ -28,6 +28,10 @@ pub enum Error {
     #[error("Invalid {0} data")]
     InvalidData(&'static str),
 
+    /// Serde serialization error
+    #[error("Serde {0}")]
+    Serde(#[from] serde_json::Error),
+
     /// Tokio join error
     #[error("Join {0}")]
     Join(#[from] tokio::task::JoinError),

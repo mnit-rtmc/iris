@@ -88,4 +88,5 @@ fn route_mayfly() -> Router {
         .merge(routes::occupancy_get())
         .merge(routes::length_get())
         .merge(routes::speed_get())
+        .merge(routes::espeed_get())
 }

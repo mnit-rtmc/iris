@@ -288,6 +288,16 @@ impl fmt::Display for LengthData {
     }
 }
 
+impl SpeedData {
+    /// Create new speed data
+    pub fn new(speed: u16) -> Self {
+        SpeedData {
+            total: u32::from(speed),
+            count: 1,
+        }
+    }
+}
+
 impl TrafficData for SpeedData {
     /// Binned file extension
     fn binned_ext() -> &'static str {

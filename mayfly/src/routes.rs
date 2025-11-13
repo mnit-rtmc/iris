@@ -46,6 +46,24 @@ const DEXT: &str = ".traffic";
 /// Traffic file extension without dot
 const EXT: &str = "traffic";
 
+/// Intervals per hour (30-second)
+const INTERVALS_PER_HOUR: u16 = 2 * 60;
+
+/// Number of feet per mile
+const FEET_PER_MILE: f32 = 5280.0;
+
+/// Detector configuration
+#[allow(unused)]
+#[derive(Deserialize)]
+struct DetectorConfig {
+    name: String,
+    r_node: String,
+    cor_id: String,
+    lane_number: u16,
+    lane_code: String,
+    speed_limit: u16,
+}
+
 /// JSON vec of values
 struct JsonVec {
     value: String,
@@ -445,6 +463,26 @@ impl<T> Traf<T>
 where
     T: TrafficData + Sync + Send + 'static,
 {
+    /// Create new traf query from another data type
+    fn new_from<O>(other: &Traf<O>) -> Self
+    where
+        O: TrafficData + Sync + Send + 'static,
+    {
+        Traf {
+            _data: None,
+            district: other.district.clone(),
+            date: other.date.clone(),
+            detector: other.detector.clone(),
+            length_ft_min: other.length_ft_min,
+            length_ft_max: other.length_ft_max,
+            speed_mph_min: other.speed_mph_min,
+            speed_mph_max: other.speed_mph_max,
+            headway_sec_min: other.headway_sec_min,
+            headway_sec_max: other.headway_sec_max,
+            _bin_secs: other._bin_secs,
+        }
+    }
+
     /// Lookup traffic data
     async fn lookup(self) -> Result<Vec<T>> {
         let path = self.zip_path()?;
@@ -575,6 +613,30 @@ where
         let today = Local::now().date_naive();
         Ok(today < date + TimeDelta::try_days(2).unwrap())
     }
+
+    /// Load detector free-flow speed
+    async fn load_free_flow(&self) -> Result<u16> {
+        let configs = load_detector_configs().await?;
+        for det in configs {
+            if det.name == self.detector {
+                let limit = det.speed_limit;
+                return Ok(match det.lane_number {
+                    0 => limit,
+                    1 => limit + 5,
+                    _ => limit + 10,
+                });
+            }
+        }
+        Err(Error::InvalidData("detector_pub"))
+    }
+}
+
+/// Load detector configurations
+async fn load_detector_configs() -> Result<Vec<DetectorConfig>> {
+    let mut path = PathBuf::new();
+    path.push("/var/lib/iris/web/detector_pub");
+    let buf = tokio::fs::read(path).await?;
+    Ok(serde_json::from_slice(&buf)?)
 }
 
 /// Handle a generic request for traffic data
@@ -646,4 +708,161 @@ pub fn speed_get() -> Router {
         traf_handler(traf.0).await
     }
     Router::new().route("/speed", get(handler))
+}
+
+/// Lookup estimated speed data.
+pub fn espeed_get() -> Router {
+    async fn handler(traf: Query<Traf<SpeedData>>) -> impl IntoResponse {
+        log::info!("GET /espeed");
+        let is_recent = traf.is_recent()?;
+        let free_flow = traf.load_free_flow().await?;
+        let traf_count = Traf::<CountData>::new_from(&traf.0);
+        let traf_occ = Traf::<OccupancyData>::new_from(&traf.0);
+        let counts = traf_count.lookup().await?;
+        let occ = traf_occ.lookup().await?;
+        // guess traffic conditions
+        let conditions: Vec<_> = counts
+            .iter()
+            .zip(occ.iter())
+            .map(|(c, o)| TrafficCondition::guess(free_flow, c, o))
+            .collect();
+        // calculate adjusted field length
+        let mut occ_free = 0.0;
+        let mut dens_free = 0.0;
+        let mut intervals: u16 = 0;
+        conditions
+            .iter()
+            .zip(counts.iter())
+            .zip(occ.iter())
+            .for_each(|((con, c), o)| {
+                if let (Some(TrafficCondition::FreeFlow), Some(c), Some(o)) =
+                    (con, c.value(), o.value())
+                {
+                    occ_free += f32::from(o) / 30_000.0;
+                    dens_free += guess_density(free_flow, c);
+                    intervals += 1;
+                }
+            });
+        if intervals > 0 {
+            let intervals = f32::from(intervals);
+            occ_free /= intervals;
+            dens_free /= intervals;
+            // calculate adjusted field length
+            if let Some(field_len) = field_len_ft(occ_free, dens_free) {
+                // estimate speeds
+                let speeds: Vec<_> = conditions
+                    .iter()
+                    .zip(counts.iter())
+                    .zip(occ.iter())
+                    .map(|((con, c), o)| estimate_speed(field_len, con, c, o))
+                    .collect();
+                let body = make_body(&speeds)?;
+                return Result::<_>::Ok(json_resp(body, is_recent));
+            }
+        }
+        Err(Error::Io(ErrorKind::NotFound.into()))
+    }
+    Router::new().route("/espeed", get(handler))
+}
+
+/// Guess density, assuming free-flow speed
+fn guess_density(free_flow_mph: u16, count: u16) -> f32 {
+    let flow = f32::from(count * INTERVALS_PER_HOUR);
+    // density = flow / speed
+    flow / f32::from(free_flow_mph)
+}
+
+/// Calculate adjusted field length, based on "free-flow" density
+fn field_len_ft(occ: f32, dens_free: f32) -> Option<f32> {
+    // length (ft/veh) = occupancy (%) * 5280 (ft/mi) / density (veh/mi)
+    let len_ft_free = (occ * FEET_PER_MILE) / dens_free;
+    if len_ft_free > 0.0 && len_ft_free < 65_535.0 {
+        return Some(len_ft_free);
+    }
+    None
+}
+
+/// Estimate speed for one 30-second interval
+fn estimate_speed(
+    avg_field_len: f32,
+    con: &Option<TrafficCondition>,
+    count: &CountData,
+    occ: &OccupancyData,
+) -> SpeedData {
+    if let (Some(count), Some(occ)) = (count.value(), occ.value()) {
+        let field_len = avg_field_len
+            + con.unwrap_or(TrafficCondition::FreeFlow).len_adjust();
+        // convert occ from ms to percent
+        let occ = f32::from(occ) / 30_000.0;
+        // density (veh/mi) = occupancy (%) * 5280 (ft/mi) / field_len (ft/veh)
+        let density = (occ * FEET_PER_MILE) / field_len;
+        if density > 0.0 {
+            // speed (mi/hr) = flow (veh/hr) / density (veh/mi)
+            let speed = f32::from(count * INTERVALS_PER_HOUR) / density;
+            if speed > 0.0 && speed < 65_535.0 {
+                let speed = speed.round() as u16;
+                return SpeedData::new(speed);
+            }
+        }
+    }
+    SpeedData::default()
+}
+
+/// Traffic conditions
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum TrafficCondition {
+    /// Light traffic with vehicles less than 24 ft
+    FreeFlow,
+    /// Moderate traffic or large vehicles (24 to 36 ft)
+    Moderate,
+    /// Heavy traffic or very large vehicles (more than 36 ft)
+    Heavy,
+    /// Congested traffic
+    Congested,
+}
+
+impl From<u16> for TrafficCondition {
+    fn from(len_ft: u16) -> Self {
+        match len_ft {
+            0..24 => TrafficCondition::FreeFlow,
+            24..36 => TrafficCondition::Moderate,
+            36..64 => TrafficCondition::Heavy,
+            _ => TrafficCondition::Congested,
+        }
+    }
+}
+
+impl TrafficCondition {
+    /// Guess the traffic condition
+    fn guess(
+        free_flow_mph: u16,
+        count: &CountData,
+        occ: &OccupancyData,
+    ) -> Option<Self> {
+        if let (Some(c), Some(o)) = (count.value(), occ.value()) {
+            let dens_free = guess_density(free_flow_mph, c);
+            if dens_free > 0.0 {
+                // convert occ from ms to percent
+                let occ = f32::from(o) / 30_000.0;
+                if let Some(len) = field_len_ft(occ, dens_free) {
+                    let len = len.round() as u16;
+                    return Some(TrafficCondition::from(len));
+                }
+            }
+        }
+        None
+    }
+
+    /// Get length adjustment (ft)
+    ///
+    /// NOTE: Since vehicle length estimates are affected by congestion,
+    /// these adjustments are less than expected based on the definitions.
+    fn len_adjust(self) -> f32 {
+        match self {
+            TrafficCondition::FreeFlow => 0.0,
+            TrafficCondition::Moderate => 4.0,
+            TrafficCondition::Heavy => 9.0,
+            TrafficCondition::Congested => 14.0,
+        }
+    }
 }
