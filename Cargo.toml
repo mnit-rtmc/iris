@@ -15,6 +15,7 @@ env_logger = { version = "0.11", default-features = false }
 http = "1"
 log = "0.4"
 ntcip = "0.14.1"
+serde_json = "1"
 thiserror = "2"
 tokio-postgres = "0.7"
 
