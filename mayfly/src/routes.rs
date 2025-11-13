@@ -445,6 +445,15 @@ impl<T> Traf<T>
 where
     T: TrafficData + Sync + Send + 'static,
 {
+    /// Lookup traffic data
+    async fn lookup(self) -> Result<Vec<T>> {
+        let path = self.zip_path()?;
+        match Traffic::new(&path) {
+            Ok(traffic) => self.lookup_zipped(traffic).await,
+            _ => self.lookup_unzipped().await,
+        }
+    }
+
     /// Lookup traffic data from a zip archive
     async fn lookup_zipped(self, traffic: Traffic) -> Result<Vec<T>> {
         task::spawn_blocking(|| self.lookup_zipped_blocking(traffic)).await?
@@ -573,12 +582,8 @@ async fn traf_handler<T>(traf: Traf<T>) -> impl IntoResponse
 where
     T: TrafficData + Sync + Send + 'static,
 {
-    let path = traf.zip_path()?;
     let is_recent = traf.is_recent()?;
-    let data = match Traffic::new(&path) {
-        Ok(traffic) => traf.lookup_zipped(traffic).await,
-        _ => traf.lookup_unzipped().await,
-    }?;
+    let data = traf.lookup().await?;
     let body = make_body(&data)?;
     Result::<_>::Ok(json_resp(body, is_recent))
 }
