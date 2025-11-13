@@ -111,6 +111,14 @@ impl Interval {
         }
     }
 
+    /// Is the interval condition free-flow?
+    fn is_free_flow(&self) -> bool {
+        if let Some(TrafficCondition::FreeFlow) = self.condition {
+            return self.count > 0 && self.occupancy > 0.0;
+        }
+        false
+    }
+
     /// Get flow rate (veh/hr)
     fn flow(&self) -> f32 {
         f32::from(self.count * INTERVALS_PER_HOUR)
@@ -132,16 +140,16 @@ impl Interval {
     }
 
     /// Get estimated vehicle field length (ft)
-    fn field_len(&self, field_len_sml: f32) -> f32 {
+    fn field_len(&self, field_len_free: f32) -> f32 {
         match self.condition {
-            Some(con) => field_len_sml + con.len_adjust(),
-            _ => field_len_sml,
+            Some(con) => field_len_free + con.len_adjust(),
+            _ => field_len_free,
         }
     }
 
-    /// Calculate speed (mph) using a given small vehicle field length
-    fn speed_adj(&self, field_len_sml: f32) -> f32 {
-        let field_len = self.field_len(field_len_sml);
+    /// Calculate speed (mph) using a given free-flow field length
+    fn speed_adj(&self, field_len_free: f32) -> f32 {
+        let field_len = self.field_len(field_len_free);
         let dens = self.occupancy * FEET_PER_MILE / field_len;
         self.flow() / dens
     }
@@ -152,8 +160,8 @@ impl Interval {
     }
 
     /// Display interval speeds
-    fn display_speed(&self, field_len_sml: f32) {
-        let speed_adj = self.speed_adj(field_len_sml);
+    fn display_speed(&self, field_len_free: f32) {
+        let speed_adj = self.speed_adj(field_len_free);
         match (self.speed, speed_adj.is_normal()) {
             (Some(speed), true) => {
                 let diff = (speed_adj - f32::from(speed)).clamp(-99.9, 99.9);
@@ -165,7 +173,7 @@ impl Interval {
     }
 
     /// Display interval traffic condition guess
-    fn display_condition(&self, _field_len_sml: f32) {
+    fn display_condition(&self, _field_len_free: f32) {
         if let (Some(con), Some(len)) = (self.condition, self.length) {
             if TrafficCondition::from(len) != con {
                 print!(" {}--", con.code());
@@ -287,7 +295,7 @@ impl Args {
         let mut density = 0.0;
         let mut number = 0;
         for interval in intervals {
-            if let Some(TrafficCondition::FreeFlow) = interval.condition {
+            if interval.is_free_flow() {
                 occupancy += interval.occupancy;
                 density += interval.density_adj(free_speed);
                 number += 1;
