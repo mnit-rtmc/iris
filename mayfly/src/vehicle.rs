@@ -606,7 +606,6 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
         }
         // no more events
         self.reset = true;
-        data.reset();
         data
     }
 
