@@ -1,6 +1,6 @@
 // error.rs
 //
-// Copyright (c) 2019-2024  Minnesota Department of Transportation
+// Copyright (c) 2019-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -59,7 +59,10 @@ impl IntoResponse for Error {
                 StatusCode::NOT_FOUND
             }
             Self::Zip(ZipError::FileNotFound) => StatusCode::NOT_FOUND,
-            _ => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => {
+                log::warn!("Error processing request: {self}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
         };
         (status, status.canonical_reason().unwrap_or("WTF")).into_response()
     }
