@@ -58,7 +58,7 @@ const FEET_PER_MILE: f32 = 5280.0;
 struct DetectorConfig {
     name: String,
     r_node: String,
-    cor_id: String,
+    cor_id: Option<String>,
     lane_number: u16,
     lane_code: String,
     speed_limit: u16,
