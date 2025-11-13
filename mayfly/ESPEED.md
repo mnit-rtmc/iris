@@ -8,10 +8,10 @@
   - `density` (veh/mi) = `flow` (veh/hr) / `speed` (mi/hr)
   - Calculate avg. field length, using assumed density
   - `field_len` (ft/veh) = `occupancy` (%) * 5280 (ft/mi) / `density` (veh/mi)
-  - 0-24 ft: Free-flow
-  - 24-36 ft: Moderate
-  - 36-64 ft: Heavy
-  - 64+ ft: Congested
+  - 0-24 ft: Free-flow traffic with vehicles less than 24 ft
+  - 24-36 ft: Moderate traffic or large vehicles (24 to 36 ft)
+  - 36-64 ft: Heavy traffic or very large vehicles (more than 36 ft)
+  - 64+ ft: Congested traffic
 3. Calculate "adjusted field length"
   - Sum `occupancy` and `density` of all free-flow intervals
   - `field_len` (ft/veh) = `occupancy` (%) * 5280 (ft/mi) / `density` (veh/mi)
