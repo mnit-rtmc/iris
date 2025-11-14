@@ -596,6 +596,12 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
             } else {
                 if self.is_future_event(ev) {
                     self.future_ev = Some(ev);
+                    let interval =
+                        self.event_interval(ev).unwrap_or(self.interval);
+                    // reset if there is a gap of 30 minutes or longer
+                    if interval > self.interval + 30 * 2 {
+                        self.reset = true;
+                    }
                     return data;
                 }
                 self.reset = false;
