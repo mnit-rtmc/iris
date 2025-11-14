@@ -122,9 +122,8 @@ public enum CommProtocol {
 	/** DR-500 doppler radar (30) */
 	DR_500("DR-500", false),
 
-	/** ADDCO NodeComm sign control -- removed (31) */
-	@Deprecated
-	ADDCO("ADDCO"),
+	/** RTMS Echo vehicle log (31) */
+	RTMS_ECHO_VLOG("RTMS Echo vlog", false),
 
 	/** TransCore E6 tag reader (32) */
 	TRANSCORE_E6("TransCore E6", false),

@@ -1273,7 +1273,7 @@ VALUES
     (28, 'HySecurity STC'),
     (29, 'Cohu PTZ'),
     (30, 'DR-500'),
-    (31, 'ADDCO'),
+    (31, 'RTMS Echo vlog'),
     (32, 'TransCore E6'),
     (33, 'CBW'),
     (34, 'Incident Feed'),
