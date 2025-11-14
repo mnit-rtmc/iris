@@ -79,7 +79,7 @@ public class RptConduitImpl extends BaseObjectImpl
 	public void setRequest(String sReq) {
 		request = sReq;
 		if ((sReq == null) || sReq.equals("")) {
-			setresults("{}");
+			setResultsNotify("{}");
 			return;
 		}
 
@@ -92,31 +92,16 @@ public class RptConduitImpl extends BaseObjectImpl
 		t.start();
 	}
 
-	@Override
-	public String getRequest() {
-		return request;
-	}
-
 	//-------------------------------------------
-	
-	protected String results = "";
-	
-	@Override
-	public void setresults(String sRes) {
-		results = sRes;
-	}
 
-	/** Set the results */
-	public void doSetresults(String sRes) throws TMSException {
-		if (!results.equals(sRes)) {
-			setresults(sRes);
-		}
-	}
+	private String results = "";
 
 	/** Set the results and notify clients of the change */
-	private void setresultsNotify(String sRes) throws TMSException {
-		doSetresults(sRes);
-		notifyAttribute("results");
+	private void setResultsNotify(String sRes) {
+		if (!results.equals(sRes)) {
+			results = sRes;
+			notifyAttribute("results");
+		}
 	}
 
 	@Override
@@ -143,17 +128,13 @@ public class RptConduitImpl extends BaseObjectImpl
 				}
 			}
 		}
-		
+
 		// return results
-		try {
-			if (!canceled) {
-				String sRes = res.toResultsString();
-				if ((sRes == null) || sRes.isEmpty())
-					sRes = "{empty: }";
-				setresultsNotify(sRes);
-			}
-		} catch (TMSException e) {
-			e.printStackTrace();
+		if (!canceled) {
+			String sRes = res.toResultsString();
+			if ((sRes == null) || sRes.isEmpty())
+				sRes = "{empty: }";
+			setResultsNotify(sRes);
 		}
 	}
 	
