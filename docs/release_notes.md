@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.78.0 (17 Nov 2025)
+ - Improved gate arm UI
+ - Don't show "Fault" device markers as black on map
+ - Tweaked DMS pixel stuck thresholds
+ - mayfly: Add estimated speed endpoint
+ - mayfly: Fixed a couple of minor data problems
+ - Reserve RTMS echo protocol, start on "pollinator"
+
 5.77.0 (20 Oct 2025)
  - Disallow negative controller `drop_id`
  - Add incidents to web UI
