@@ -20,6 +20,11 @@ async fn main() {
 
     loop {
         let data = stream.next().await.unwrap().unwrap().into_data();
+        let msg = format!("\nreceived {} bytes\n", data.len());
+        tokio::io::stdout()
+            .write_all(&msg.as_bytes())
+            .await
+            .unwrap();
         tokio::io::stdout().write_all(&data).await.unwrap();
     }
 }
