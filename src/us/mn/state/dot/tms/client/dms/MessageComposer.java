@@ -28,6 +28,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DmsLock;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MsgPattern;
@@ -54,8 +55,17 @@ public class MessageComposer extends JPanel {
 	/** Maximum allowed number of pages in a message */
 	static private final int MAX_PAGES = 6;
 
+	/** Get MULTI string of user DMS lock */
+	static private String getUserMulti(DmsLock lk) {
+		String ms = (lk != null) ? lk.optMulti() : null;
+		return (ms != null) ? ms : "";
+	}
+
 	/** User session */
 	private final Session session;
+
+	/** Currently logged in user */
+	private final String user;
 
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
@@ -111,6 +121,9 @@ public class MessageComposer extends JPanel {
 	/** Selected sign */
 	private DMS dms;
 
+	/** Current DMS lock */
+	private DmsLock lock = new DmsLock(null);
+
 	/** Number of text rectangles in selected pattern */
 	private int n_rects;
 
@@ -123,7 +136,9 @@ public class MessageComposer extends JPanel {
 	public void updateMessage(boolean unlink_incident) {
 		if (adjusting == 0) {
 			adjusting++;
-			dispatcher.updateMessage(unlink_incident);
+			if (unlink_incident)
+				lock = new DmsLock(null);
+			dispatcher.updateMessage();
 			adjusting--;
 		}
 	}
@@ -133,6 +148,7 @@ public class MessageComposer extends JPanel {
 		DMSManager manager)
 	{
 		session = s;
+		user = s.getUser().getName();
 		dispatcher = ds;
 		pattern_cbx = new MsgPatternCBox();
 		pattern_cbx.addActionListener(pattern_listener);
@@ -217,7 +233,7 @@ public class MessageComposer extends JPanel {
 	private void clearWidgets() {
 		setTabRect(0);
 		dur_cbx.setSelectedIndex(0);
-		setComposedMulti("");
+		setLock(new DmsLock(null));
 	}
 
 	/** Set tab to specified text rect */
@@ -341,8 +357,27 @@ public class MessageComposer extends JPanel {
 			return "";
 	}
 
-	/** Set the composed MULTI string */
-	public void setComposedMulti(String ms) {
+	/** Get DMS lock for selected message */
+	public DmsLock getLock() {
+		String ms = getComposedMulti();
+		if (new MultiString(ms).isBlank())
+			return null;
+		DmsLock lk = lock;
+		if (lk.optReason() == null)
+			lk.setReason(DmsLock.REASON_SITUATION);
+		lk.setMulti(ms);
+		lk.setDuration(getDuration());
+		lk.setFlashBeacon(getFlashBeacon());
+		lk.setPixelService(getPixelService());
+		lk.setUser(user);
+		return lk;
+	}
+
+	/** Set the DMS lock */
+	public void setLock(DmsLock lk) {
+		assert lk != null;
+		lock = lk;
+		String ms = getUserMulti(lk);
 		TextRect tr = fullTextRect();
 		if (tr != null) {
 			MsgPattern pat = pattern_cbx.findBestPattern(ms, tr);

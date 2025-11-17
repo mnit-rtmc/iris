@@ -147,18 +147,6 @@ public class DMSHelper extends BaseHelper {
 		return "";
 	}
 
-	/** Get the user sent MULTI string currently on a DMS.
-	 * @param dms DMS to lookup. */
-	static public String getUserMulti(DMS dms) {
-		if (dms != null) {
-			DmsLock lk = new DmsLock(dms.getLock());
-			String ms = lk.optMulti();
-			if (ms != null)
-				return ms;
-		}
-		return "";
-	}
-
 	/** Get the default font number for a DMS */
 	static public int getDefaultFontNum(DMS dms) {
 		SignConfig sc = (dms != null) ? dms.getSignConfig() : null;

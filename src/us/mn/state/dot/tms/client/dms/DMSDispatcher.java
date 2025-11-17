@@ -65,9 +65,6 @@ public class DMSDispatcher extends JPanel {
 	/** User session */
 	private final Session session;
 
-	/** Currently logged in user */
-	private final String user;
-
 	/** Selection model */
 	private final ProxySelectionModel<DMS> sel_mdl;
 
@@ -111,7 +108,6 @@ public class DMSDispatcher extends JPanel {
 			dms.setLock(null);
 		}
 		selectPreview(false);
-		unlink_incident = false;
 	}
 
 	/** Get action to blank selected signs */
@@ -182,14 +178,10 @@ public class DMSDispatcher extends JPanel {
 		return pixel_test_act;
 	}
 
-	/** Flag to unlink incident */
-	private boolean unlink_incident = false;
-
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(Session s, DMSManager manager) {
 		super(new BorderLayout());
 		session = s;
-		user = session.getUser().getName();
 		DmsCache dms_cache = session.getSonarState().getDmsCache();
 		sel_mdl = manager.getSelectionModel();
 		singleTab = new SingleSignTab(session, this);
@@ -217,14 +209,14 @@ public class DMSDispatcher extends JPanel {
 
 	/** Update the current message on a sign */
 	public void updateMsgCurrent(DMS dms) {
-		String ms = DMSHelper.getUserMulti(dms);
-		composer.setComposedMulti(ms);
-		unlink_incident = false;
+		DmsLock lk = (dms != null)
+			? new DmsLock(dms.getLock())
+			: new DmsLock(null);
+		composer.setLock(lk);
 	}
 
 	/** Update the composed message */
-	public void updateMessage(boolean unlink) {
-		unlink_incident = unlink;
+	public void updateMessage() {
 		selectPreview(true);
 		singleTab.setMessage();
 	}
@@ -266,42 +258,41 @@ public class DMSDispatcher extends JPanel {
 		Iterator<DMS> it = sel.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
-			if (sc != null && dms.getSignConfig() != sc)
-				it.remove();
-			else
+			SignConfig dsc = dms.getSignConfig();
+			if (dsc != null && (dsc == sc || null == sc))
 				sc = dms.getSignConfig();
+			else
+				it.remove();
 		}
 		return sel;
 	}
 
 	/** Send the currently selected message */
 	private void sendSelectedMessage() {
-		String ms = composer.getComposedMulti();
-		if (new MultiString(ms).isBlank())
-			sendBlankMessage();
-		else {
+		DmsLock lk = composer.getLock();
+		if (lk != null) {
 			// Remove all invalid selected DMS
-			sel_mdl.setSelected(getValidSelected());
-			if (shouldSendMessage(ms))
-				sendMessage(ms);
-		}
+			Set<DMS> signs = getValidSelected();
+			sel_mdl.setSelected(signs);
+			if (shouldSendMessage()) {
+				for (DMS dms: signs) {
+					dms.setLock(lk.toString());
+				}
+			}
+			selectPreview(false);
+		} else
+			sendBlankMessage();
 	}
 
-	/** Determine if the message should be sent, which is a function
- 	 * of spell checking options and send confirmation options.
+	/** Determine if the message should be sent, possibly invoking a
+ 	 * send confirmation dialog.
 	 * @return True to send the message else false to cancel. */
-	private boolean shouldSendMessage(String ms) {
-		if (SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
-			return showConfirmDialog();
-		else
+	private boolean shouldSendMessage() {
+		if (SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean()) {
+			String imsg = buildConfirmMsg();
+			return (!imsg.isEmpty()) && confirmSend(imsg);
+		} else
 			return true;
-	}
-
-	/** Show a message confirmation dialog.
-	 * @return True if message should be sent. */
-	private boolean showConfirmDialog() {
-		String imsg = buildConfirmMsg();
-		return (!imsg.isEmpty()) && confirmSend(imsg);
 	}
 
 	/** Build a confirmation message containing all selected DMS.
@@ -324,36 +315,6 @@ public class DMSDispatcher extends JPanel {
 			sb.append(dms.getName());
 		}
 		return sb.toString();
-	}
-
-	/** Send a new (non-blank) message to all selected DMS */
-	private void sendMessage(String ms) {
-		Set<DMS> signs = getValidSelected();
-		for (DMS dms: signs) {
-			DmsLock lk = makeLock(dms, ms);
-			if (lk != null)
-				dms.setLock(lk.toString());
-		}
-		selectPreview(false);
-	}
-
-	/** Make DMS lock for a non-blank message */
-	private DmsLock makeLock(DMS dms, String ms) {
-		SignConfig sc = dms.getSignConfig();
-		if (sc != null) {
-			DmsLock lk = (unlink_incident)
-				? new DmsLock(null)
-				: new DmsLock(dms.getLock());
-			if (lk.optReason() == null)
-				lk.setReason(DmsLock.REASON_SITUATION);
-			lk.setMulti(ms);
-			lk.setDuration(composer.getDuration());
-			lk.setFlashBeacon(composer.getFlashBeacon());
-			lk.setPixelService(composer.getPixelService());
-			lk.setUser(user);
-			return lk;
-		}
-		return null;
 	}
 
 	/** Update the selected sign(s) */
@@ -380,7 +341,7 @@ public class DMSDispatcher extends JPanel {
 	/** Clear the selection */
 	private void clearSelected() {
 		setEnabled(false);
-		unlink_incident = false;
+		composer.setLock(new DmsLock(null));
 		composer.setSelectedSign(null);
 		singleTab.setSelected(null);
 	}
