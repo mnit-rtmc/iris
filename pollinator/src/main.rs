@@ -1,7 +1,17 @@
 use futures_util::StreamExt;
+use serde::Deserialize;
 use tokio::io::AsyncWriteExt;
 use tokio_tungstenite::connect_async;
 use tungstenite::client::IntoClientRequest;
+
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+struct VehicleData {
+    speed: f32,
+    length: f32,
+    direction: String,
+    zone_id: String,
+}
 
 #[tokio::main]
 async fn main() {
@@ -20,11 +30,14 @@ async fn main() {
 
     loop {
         let data = stream.next().await.unwrap().unwrap().into_data();
-        let msg = format!("\nreceived {} bytes\n", data.len());
+        let veh: VehicleData = serde_json::from_slice(&data).unwrap();
+        let msg = format!(
+            "speed {}, length {}, direction: {}, zoneId: {}\n",
+            veh.speed, veh.length, veh.direction, veh.zone_id
+        );
         tokio::io::stdout()
-            .write_all(&msg.as_bytes())
+            .write_all(msg.as_bytes())
             .await
             .unwrap();
-        tokio::io::stdout().write_all(&data).await.unwrap();
     }
 }

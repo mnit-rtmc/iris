@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
 tokio-tungstenite = "0.28"
 tungstenite = "0.28"
 
