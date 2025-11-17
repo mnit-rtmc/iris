@@ -41,6 +41,12 @@ enum Error {
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
+struct ZoneId {
+    id: u32,
+    name: String,
+}
+
+#[derive(Debug, Deserialize, PartialEq)]
 enum Direction {
     LeftToRight,
     RightToLeft,
@@ -91,6 +97,10 @@ async fn collect_vehicle_data(host: &str) -> Result<(), Error> {
         if let Some(chunk) = frame.data_ref() {
             body.extend(chunk);
         }
+    }
+    let zones: Vec<ZoneId> = serde_json::from_slice(&body)?;
+    for zone in zones {
+        println!("  {zone:?}");
     }
 
     let request = format!("ws://{host}/api/v1/live-vehicle-data")
