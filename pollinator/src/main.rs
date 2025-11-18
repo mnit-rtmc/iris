@@ -1,7 +1,7 @@
 use bytes::Bytes;
 use futures_util::StreamExt;
 use http_body_util::{BodyExt, Empty};
-use hyper::{Request, Uri};
+use hyper::{Request, StatusCode, Uri};
 use hyper_util::rt::TokioIo;
 use serde::Deserialize;
 use std::string::FromUtf8Error;
@@ -17,6 +17,9 @@ enum Error {
 
     #[error("HTTP {0}")]
     Http(#[from] hyper::http::Error),
+
+    #[error("HTTP status {0}")]
+    HttpStatus(StatusCode),
 
     #[error("Invalid URI {0}")]
     InvalidUri(#[from] hyper::http::uri::InvalidUri),
@@ -67,37 +70,8 @@ async fn main() {
 }
 
 async fn collect_vehicle_data(host: &str) -> Result<(), Error> {
-    let addr = format!("{}:80", host);
-    let stream = TcpStream::connect(addr).await?;
-    let io = TokioIo::new(stream);
+    let body = http_req(host, "api/v1/zone-identifiers").await?;
 
-    let (mut sender, conn) = hyper::client::conn::http1::handshake(io).await?;
-    tokio::task::spawn(async move {
-        if let Err(err) = conn.await {
-            println!("Connection failed: {:?}", err);
-        }
-    });
-
-    let uri = "http://{host}/api/v1/zone-identifiers".parse::<Uri>()?;
-    let authority = uri.authority().ok_or(Error::MissingAuthority)?;
-    let path = uri.path();
-    let req = Request::builder()
-        .uri(path)
-        .header(hyper::header::HOST, authority.as_str())
-        .body(Empty::<Bytes>::new())?;
-
-    let mut res = sender.send_request(req).await?;
-
-    println!("Response: {}", res.status());
-    println!("Headers: {:#?}\n", res.headers());
-
-    let mut body = Vec::<u8>::new();
-    while let Some(next) = res.frame().await {
-        let frame = next?;
-        if let Some(chunk) = frame.data_ref() {
-            body.extend(chunk);
-        }
-    }
     let zones: Vec<ZoneId> = serde_json::from_slice(&body)?;
     for zone in zones {
         println!("  {zone:?}");
@@ -121,4 +95,39 @@ async fn collect_vehicle_data(host: &str) -> Result<(), Error> {
         );
         tokio::io::stdout().write_all(msg.as_bytes()).await?;
     }
+}
+
+async fn http_req(host: &str, endpoint: &str) -> Result<Vec<u8>, Error> {
+    let addr = format!("{host}:80");
+    let stream = TcpStream::connect(addr).await?;
+    let io = TokioIo::new(stream);
+
+    let (mut sender, conn) = hyper::client::conn::http1::handshake(io).await?;
+    conn.await?;
+
+    let uri = format!("http://{host}/{endpoint}").parse::<Uri>()?;
+    let authority = uri.authority().ok_or(Error::MissingAuthority)?;
+    let path = uri.path();
+    let req = Request::builder()
+        .uri(path)
+        .header(hyper::header::HOST, authority.as_str())
+        .body(Empty::<Bytes>::new())?;
+
+    let mut res = sender.send_request(req).await?;
+    let status = res.status();
+
+    println!("Response: {status}");
+    println!("Headers: {:#?}\n", res.headers());
+    if status.is_success() {
+        return Err(Error::HttpStatus(status));
+    }
+
+    let mut body = Vec::<u8>::new();
+    while let Some(next) = res.frame().await {
+        let frame = next?;
+        if let Some(chunk) = frame.data_ref() {
+            body.extend(chunk);
+        }
+    }
+    Ok(body)
 }
