@@ -1,12 +1,10 @@
 use bytes::Bytes;
 use futures_util::StreamExt;
 use http_body_util::{BodyExt, Empty};
-use hyper::body::Body;
 use hyper::header::{AUTHORIZATION, HeaderValue, InvalidHeaderValue};
 use hyper::{HeaderMap, Request, StatusCode, Uri};
 use hyper_util::rt::TokioIo;
 use serde::Deserialize;
-use serde::ser::StdError;
 use std::string::FromUtf8Error;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
@@ -45,14 +43,12 @@ enum Error {
     #[error("IO {0}")]
     Io(#[from] std::io::Error),
 
-    #[error("Missing Authority")]
-    MissingAuthority,
-
     #[error("Stream Closed")]
     StreamClosed,
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
 struct AuthResp {
     username: String,
     is_authenticated: bool,
@@ -104,7 +100,7 @@ async fn collect_vehicle_data(
             let body = format!(
                 "{{\"username\": \"{user}\", \"password\": \"{pass}\" }}"
             );
-            let resp = http_post(host, "login", body).await?;
+            let resp = http_post(host, "api/v1/login", body).await?;
             let auth: AuthResp = serde_json::from_slice(&resp)?;
             let bearer = HeaderValue::from_str(&format!(
                 "BEARER {}",
@@ -151,10 +147,8 @@ async fn http_get(
     let stream = TcpStream::connect(addr).await?;
     let io = TokioIo::new(stream);
     let (mut sender, conn) = hyper::client::conn::http1::handshake(io).await?;
-    let conn_task = tokio::spawn(async move { conn.await });
+    let conn_task = tokio::spawn(conn);
     let uri = format!("http://{host}/{endpoint}").parse::<Uri>()?;
-    //let authority = uri.authority().ok_or(Error::MissingAuthority)?;
-    //let path = uri.path();
     let mut builder = Request::get(uri);
     for (key, value) in headers {
         if let Some(key) = key {
@@ -181,23 +175,17 @@ async fn http_get(
     Ok(body)
 }
 
-async fn http_post<B>(
+async fn http_post(
     host: &'_ str,
     endpoint: &'_ str,
-    body: B,
-) -> Result<Vec<u8>, Error>
-where
-    B: hyper::body::Body + Send + 'static,
-    <B as Body>::Data: Send + 'static,
-    <B as Body>::Error: StdError + Send + Sync,
-{
+    body: String,
+) -> Result<Vec<u8>, Error> {
     let addr = format!("{host}:80");
     let stream = TcpStream::connect(addr).await?;
     let io = TokioIo::new(stream);
     let (mut sender, conn) = hyper::client::conn::http1::handshake(io).await?;
-    let conn_task = tokio::spawn(async move { conn.await });
+    let conn_task = tokio::spawn(conn);
     let uri = format!("http://{host}/{endpoint}").parse::<Uri>()?;
-    //let path = uri.path();
     let req = Request::post(uri)
         .header("content-type", "application/json")
         .body(body)?;
