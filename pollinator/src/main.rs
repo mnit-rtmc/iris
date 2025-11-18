@@ -21,6 +21,9 @@ enum Error {
     #[error("HTTP status {0}")]
     HttpStatus(StatusCode),
 
+    #[error("Join {0}")]
+    Join(#[from] tokio::task::JoinError),
+
     #[error("Invalid URI {0}")]
     InvalidUri(#[from] hyper::http::uri::InvalidUri),
 
@@ -103,7 +106,7 @@ async fn http_req(host: &str, endpoint: &str) -> Result<Vec<u8>, Error> {
     let io = TokioIo::new(stream);
 
     let (mut sender, conn) = hyper::client::conn::http1::handshake(io).await?;
-    conn.await?;
+    let conn_task = tokio::spawn(async move { conn.await });
 
     let uri = format!("http://{host}/{endpoint}").parse::<Uri>()?;
     let authority = uri.authority().ok_or(Error::MissingAuthority)?;
@@ -118,9 +121,10 @@ async fn http_req(host: &str, endpoint: &str) -> Result<Vec<u8>, Error> {
 
     println!("Response: {status}");
     println!("Headers: {:#?}\n", res.headers());
-    if status.is_success() {
+    if !status.is_success() {
         return Err(Error::HttpStatus(status));
     }
+    conn_task.await??;
 
     let mut body = Vec::<u8>::new();
     while let Some(next) = res.frame().await {
