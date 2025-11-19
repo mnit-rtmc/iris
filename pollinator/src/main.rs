@@ -3,8 +3,7 @@ mod http;
 
 use crate::error::Error;
 use futures_util::StreamExt;
-use hyper::header::{AUTHORIZATION, HeaderValue};
-use hyper::{HeaderMap, StatusCode};
+use hyper::StatusCode;
 use serde::Deserialize;
 use tokio::io::AsyncWriteExt;
 use tokio_tungstenite::connect_async;
@@ -54,8 +53,8 @@ async fn collect_vehicle_data(
     user: &str,
     pass: &str,
 ) -> Result<(), Error> {
-    let headers = HeaderMap::new();
-    let body = match http::get(host, "api/v1/zone-identifiers", headers).await {
+    let mut client = http::Client::new(host);
+    let body = match client.get("api/v1/zone-identifiers").await {
         Ok(body) => body,
         Err(Error::HttpStatus(status))
             if status == StatusCode::UNAUTHORIZED =>
@@ -63,12 +62,11 @@ async fn collect_vehicle_data(
             let body = format!(
                 "{{\"username\": \"{user}\", \"password\": \"{pass}\" }}"
             );
-            let resp = http::post(host, "api/v1/login", &body).await?;
+            let resp = client.post("api/v1/login", &body).await?;
             let auth: AuthResp = serde_json::from_slice(&resp)?;
             let bearer = format!("Bearer {}", auth.bearer_token);
-            let mut headers = HeaderMap::new();
-            headers.insert(AUTHORIZATION, HeaderValue::from_str(&bearer)?);
-            http::get(host, "api/v1/zone-identifiers", headers).await?
+            client.set_bearer_token(bearer);
+            client.get("api/v1/zone-identifiers").await?
         }
         Err(err) => return Err(err),
     };
