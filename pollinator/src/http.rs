@@ -6,9 +6,12 @@ use hyper::{Request, Uri};
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpStream;
 
+/// HTTP client
 #[derive(Debug, Default)]
 pub struct Client {
+    /// Host name / IP address
     host: String,
+    /// Bearer token
     bearer_token: Option<String>,
 }
 
@@ -61,7 +64,7 @@ impl Client {
         Ok(body)
     }
 
-    /// Make an http `POST` request
+    /// Make an http `POST` request (JSON)
     pub async fn post(&self, path: &str, body: &str) -> Result<Vec<u8>, Error> {
         let addr = format!("{}:80", self.host);
         let stream = TcpStream::connect(addr).await?;
