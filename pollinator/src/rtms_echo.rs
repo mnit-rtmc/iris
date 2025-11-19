@@ -109,6 +109,16 @@ impl Sensor {
         Ok(&self.zones)
     }
 
+    /// Lookup a zone index
+    fn zone(&self, zid: u32) -> Option<usize> {
+        for (i, zone) in self.zones.iter().enumerate() {
+            if zid == zone.id {
+                return Some(i);
+            }
+        }
+        None
+    }
+
     /// Poll the sensor for input voltage records
     pub async fn poll_input_voltage(&self) -> Result<Vec<InputVoltage>, Error> {
         let body = self.client.get("api/v1/input-voltage?count=1").await?;
@@ -132,10 +142,14 @@ impl Sensor {
             let data =
                 stream.next().await.ok_or(Error::StreamClosed)??.into_data();
             let veh: VehicleData = serde_json::from_slice(&data)?;
-            let msg = format!(
+            let mut msg = format!(
                 "speed {}, length {}, direction: {:?}, zoneId: {}\n",
                 veh.speed, veh.length, veh.direction, veh.zone_id
             );
+            if let Some(zone) = self.zone(veh.zone_id) {
+                msg.push(' ');
+                msg.push_str(&zone.to_string());
+            }
             tokio::io::stdout().write_all(msg.as_bytes()).await?;
         }
     }
