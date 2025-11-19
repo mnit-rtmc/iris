@@ -1341,7 +1341,7 @@ dependencies = [
 
 [[package]]
 name = "pollinator"
-version = "0.1.0"
+version = "5.78.0"
 dependencies = [
  "bytes",
  "futures-util",

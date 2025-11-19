@@ -1,7 +1,9 @@
 [package]
 name = "pollinator"
-version = "0.1.0"
-edition = "2024"
+description = "Polling server for IRIS"
+license = "GPL-2.0-or-later"
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
 bytes = "1.11"
