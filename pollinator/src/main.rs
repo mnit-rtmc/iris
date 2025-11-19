@@ -1,51 +1,17 @@
+mod error;
+
+use crate::error::Error;
 use bytes::Bytes;
 use futures_util::StreamExt;
 use http_body_util::{BodyExt, Empty};
-use hyper::header::{AUTHORIZATION, HeaderValue, InvalidHeaderValue};
+use hyper::header::{AUTHORIZATION, HeaderValue};
 use hyper::{HeaderMap, Request, StatusCode, Uri};
 use hyper_util::rt::TokioIo;
 use serde::Deserialize;
-use std::string::FromUtf8Error;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 use tokio_tungstenite::connect_async;
 use tungstenite::client::IntoClientRequest;
-
-#[derive(Debug, thiserror::Error)]
-enum Error {
-    #[error("Hyper {0}")]
-    Hyper(#[from] hyper::Error),
-
-    #[error("Header {0}")]
-    Header(#[from] InvalidHeaderValue),
-
-    #[error("HTTP {0}")]
-    Http(#[from] hyper::http::Error),
-
-    #[error("HTTP status {0}")]
-    HttpStatus(StatusCode),
-
-    #[error("Join {0}")]
-    Join(#[from] tokio::task::JoinError),
-
-    #[error("Invalid URI {0}")]
-    InvalidUri(#[from] hyper::http::uri::InvalidUri),
-
-    #[error("Tungstenite {0}")]
-    Tungstenite(#[from] tungstenite::Error),
-
-    #[error("Utf-8 {0}")]
-    FromUtf8(#[from] FromUtf8Error),
-
-    #[error("JSON {0}")]
-    SerdeJson(#[from] serde_json::Error),
-
-    #[error("IO {0}")]
-    Io(#[from] std::io::Error),
-
-    #[error("Stream Closed")]
-    StreamClosed,
-}
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -102,12 +68,9 @@ async fn collect_vehicle_data(
             );
             let resp = http_post(host, "api/v1/login", body).await?;
             let auth: AuthResp = serde_json::from_slice(&resp)?;
-            let bearer = HeaderValue::from_str(&format!(
-                "BEARER {}",
-                auth.bearer_token
-            ))?;
+            let bearer = format!("Bearer {}", auth.bearer_token);
             let mut headers = HeaderMap::new();
-            headers.insert(AUTHORIZATION, bearer);
+            headers.insert(AUTHORIZATION, HeaderValue::from_str(&bearer)?);
             http_get(host, "api/v1/zone-identifiers", headers).await?
         }
         Err(err) => return Err(err),
