@@ -143,13 +143,14 @@ impl Sensor {
                 stream.next().await.ok_or(Error::StreamClosed)??.into_data();
             let veh: VehicleData = serde_json::from_slice(&data)?;
             let mut msg = format!(
-                "speed {}, length {}, direction: {:?}, zoneId: {}\n",
+                "speed {}, length {}, direction: {:?}, zoneId: {}",
                 veh.speed, veh.length, veh.direction, veh.zone_id
             );
             if let Some(zone) = self.zone(veh.zone_id) {
                 msg.push(' ');
                 msg.push_str(&zone.to_string());
             }
+            msg.push('\n');
             tokio::io::stdout().write_all(msg.as_bytes()).await?;
         }
     }
