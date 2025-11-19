@@ -2,7 +2,6 @@ use crate::http;
 
 use crate::error::Error;
 use futures_util::StreamExt;
-use hyper::StatusCode;
 use serde::Deserialize;
 use tokio::io::AsyncWriteExt;
 use tokio_tungstenite::connect_async;
@@ -22,7 +21,7 @@ struct AuthResp {
 
 /// Sensor zone ID
 #[derive(Debug, Deserialize, PartialEq)]
-struct ZoneId {
+pub struct ZoneId {
     /// Identifier
     id: u32,
     /// Zone name
@@ -52,51 +51,61 @@ struct VehicleData {
     zone_id: u32,
 }
 
-/// Collect vehicle data
-pub async fn collect_vehicle_data(
-    host: &str,
-    user: &str,
-    pass: &str,
-) -> Result<(), Error> {
-    let mut client = http::Client::new(host);
-    let body = match client.get("api/v1/zone-identifiers").await {
-        Ok(body) => body,
-        Err(Error::HttpStatus(status))
-            if status == StatusCode::UNAUTHORIZED =>
-        {
-            let body = format!(
-                "{{\"username\": \"{user}\", \"password\": \"{pass}\" }}"
-            );
-            let resp = client.post("api/v1/login", &body).await?;
-            let auth: AuthResp = serde_json::from_slice(&resp)?;
-            let bearer = format!("Bearer {}", auth.bearer_token);
-            client.set_bearer_token(bearer);
-            client.get("api/v1/zone-identifiers").await?
+/// RTMS Echo sensor connection
+pub struct Sensor {
+    /// HTTP client
+    client: http::Client,
+    /// Zone identifiers
+    zones: Vec<ZoneId>,
+}
+
+impl Sensor {
+    /// Create a new RTMS Echo sensor connection
+    pub fn new(host: &str) -> Self {
+        let client = http::Client::new(host);
+        let zones = Vec::new();
+        Sensor { client, zones }
+    }
+
+    /// Login with user credentials
+    pub async fn login(&mut self, user: &str, pass: &str) -> Result<(), Error> {
+        let body =
+            format!("{{\"username\": \"{user}\", \"password\": \"{pass}\" }}");
+        let resp = self.client.post("api/v1/login", &body).await?;
+        let auth: AuthResp = serde_json::from_slice(&resp)?;
+        let bearer = format!("Bearer {}", auth.bearer_token);
+        self.client.set_bearer_token(bearer);
+        Ok(())
+    }
+
+    /// Poll the sensor for Zone Identifiers
+    pub async fn poll_zone_identifiers(&mut self) -> Result<&[ZoneId], Error> {
+        let body = self.client.get("api/v1/zone-identifiers").await?;
+        self.zones = serde_json::from_slice(&body)?;
+        Ok(&self.zones)
+    }
+
+    /// Collect vehicle data
+    pub async fn collect_vehicle_data(&self) -> Result<(), Error> {
+        let host = self.client.host();
+        let request = format!("ws://{host}/api/v1/live-vehicle-data")
+            .into_client_request()?;
+        let (mut stream, response) = connect_async(request).await?;
+        print!("Connected, ");
+        match response.into_body() {
+            Some(body) => println!("{}", String::from_utf8(body)?),
+            None => println!("waiting..."),
         }
-        Err(err) => return Err(err),
-    };
 
-    let zones: Vec<ZoneId> = serde_json::from_slice(&body)?;
-    for zone in zones {
-        println!("  {zone:?}");
-    }
-
-    let request = format!("ws://{host}/api/v1/live-vehicle-data")
-        .into_client_request()?;
-    let (mut stream, response) = connect_async(request).await?;
-    print!("Connected, ");
-    match response.into_body() {
-        Some(body) => println!("{}", String::from_utf8(body)?),
-        None => println!("waiting..."),
-    }
-
-    loop {
-        let data = stream.next().await.ok_or(Error::StreamClosed)??.into_data();
-        let veh: VehicleData = serde_json::from_slice(&data)?;
-        let msg = format!(
-            "speed {}, length {}, direction: {:?}, zoneId: {}\n",
-            veh.speed, veh.length, veh.direction, veh.zone_id
-        );
-        tokio::io::stdout().write_all(msg.as_bytes()).await?;
+        loop {
+            let data =
+                stream.next().await.ok_or(Error::StreamClosed)??.into_data();
+            let veh: VehicleData = serde_json::from_slice(&data)?;
+            let msg = format!(
+                "speed {}, length {}, direction: {:?}, zoneId: {}\n",
+                veh.speed, veh.length, veh.direction, veh.zone_id
+            );
+            tokio::io::stdout().write_all(msg.as_bytes()).await?;
+        }
     }
 }

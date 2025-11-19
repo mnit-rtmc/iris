@@ -25,6 +25,11 @@ impl Client {
         }
     }
 
+    /// Get the hostname / IP address
+    pub fn host(&self) -> &str {
+        &self.host
+    }
+
     /// Set bearer token
     pub fn set_bearer_token(&mut self, bearer_token: String) {
         self.bearer_token = Some(bearer_token);
