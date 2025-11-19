@@ -28,6 +28,15 @@ pub struct ZoneId {
     name: String,
 }
 
+/// Input Voltage record
+#[derive(Debug, Deserialize, PartialEq)]
+pub struct InputVoltage {
+    /// Time stamp
+    time: String,
+    /// Input voltage
+    voltage: f32,
+}
+
 /// Vehicle detection direction
 #[derive(Debug, Deserialize, PartialEq)]
 enum Direction {
@@ -83,6 +92,13 @@ impl Sensor {
         let body = self.client.get("api/v1/zone-identifiers").await?;
         self.zones = serde_json::from_slice(&body)?;
         Ok(&self.zones)
+    }
+
+    /// Poll the sensor for input voltage records
+    pub async fn poll_input_voltage(&self) -> Result<Vec<InputVoltage>, Error> {
+        let body = self.client.get("api/v1/input-voltage").await?;
+        let records = serde_json::from_slice(&body)?;
+        Ok(records)
     }
 
     /// Collect vehicle data

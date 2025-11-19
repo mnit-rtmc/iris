@@ -20,5 +20,10 @@ async fn main() {
         println!("  {zone:?}");
     }
 
+    let records = sensor.poll_input_voltage().await.unwrap();
+    for record in records {
+        println!("  {record:?}");
+    }
+
     sensor.collect_vehicle_data().await.unwrap();
 }
