@@ -1,15 +1,12 @@
 mod error;
+mod http;
 
 use crate::error::Error;
-use bytes::Bytes;
 use futures_util::StreamExt;
-use http_body_util::{BodyExt, Empty};
 use hyper::header::{AUTHORIZATION, HeaderValue};
-use hyper::{HeaderMap, Request, StatusCode, Uri};
-use hyper_util::rt::TokioIo;
+use hyper::{HeaderMap, StatusCode};
 use serde::Deserialize;
 use tokio::io::AsyncWriteExt;
-use tokio::net::TcpStream;
 use tokio_tungstenite::connect_async;
 use tungstenite::client::IntoClientRequest;
 
@@ -58,7 +55,7 @@ async fn collect_vehicle_data(
     pass: &str,
 ) -> Result<(), Error> {
     let headers = HeaderMap::new();
-    let body = match http_get(host, "api/v1/zone-identifiers", headers).await {
+    let body = match http::get(host, "api/v1/zone-identifiers", headers).await {
         Ok(body) => body,
         Err(Error::HttpStatus(status))
             if status == StatusCode::UNAUTHORIZED =>
@@ -66,12 +63,12 @@ async fn collect_vehicle_data(
             let body = format!(
                 "{{\"username\": \"{user}\", \"password\": \"{pass}\" }}"
             );
-            let resp = http_post(host, "api/v1/login", body).await?;
+            let resp = http::post(host, "api/v1/login", &body).await?;
             let auth: AuthResp = serde_json::from_slice(&resp)?;
             let bearer = format!("Bearer {}", auth.bearer_token);
             let mut headers = HeaderMap::new();
             headers.insert(AUTHORIZATION, HeaderValue::from_str(&bearer)?);
-            http_get(host, "api/v1/zone-identifiers", headers).await?
+            http::get(host, "api/v1/zone-identifiers", headers).await?
         }
         Err(err) => return Err(err),
     };
@@ -99,74 +96,4 @@ async fn collect_vehicle_data(
         );
         tokio::io::stdout().write_all(msg.as_bytes()).await?;
     }
-}
-
-async fn http_get(
-    host: &str,
-    endpoint: &str,
-    headers: HeaderMap,
-) -> Result<Vec<u8>, Error> {
-    let addr = format!("{host}:80");
-    let stream = TcpStream::connect(addr).await?;
-    let io = TokioIo::new(stream);
-    let (mut sender, conn) = hyper::client::conn::http1::handshake(io).await?;
-    let conn_task = tokio::spawn(conn);
-    let uri = format!("http://{host}/{endpoint}").parse::<Uri>()?;
-    let mut builder = Request::get(uri);
-    for (key, value) in headers {
-        if let Some(key) = key {
-            builder = builder.header(key, value);
-        }
-    }
-    let req = builder.body(Empty::<Bytes>::new())?;
-
-    let mut res = sender.send_request(req).await?;
-    let status = res.status();
-    if !status.is_success() {
-        eprintln!("Headers: {:#?}\n", res.headers());
-        return Err(Error::HttpStatus(status));
-    }
-    conn_task.await??;
-
-    let mut body = Vec::<u8>::new();
-    while let Some(next) = res.frame().await {
-        let frame = next?;
-        if let Some(chunk) = frame.data_ref() {
-            body.extend(chunk);
-        }
-    }
-    Ok(body)
-}
-
-async fn http_post(
-    host: &'_ str,
-    endpoint: &'_ str,
-    body: String,
-) -> Result<Vec<u8>, Error> {
-    let addr = format!("{host}:80");
-    let stream = TcpStream::connect(addr).await?;
-    let io = TokioIo::new(stream);
-    let (mut sender, conn) = hyper::client::conn::http1::handshake(io).await?;
-    let conn_task = tokio::spawn(conn);
-    let uri = format!("http://{host}/{endpoint}").parse::<Uri>()?;
-    let req = Request::post(uri)
-        .header("content-type", "application/json")
-        .body(body)?;
-
-    let mut res = sender.send_request(req).await?;
-    let status = res.status();
-    if !status.is_success() {
-        eprintln!("Headers: {:#?}\n", res.headers());
-        return Err(Error::HttpStatus(status));
-    }
-    conn_task.await??;
-
-    let mut body = Vec::<u8>::new();
-    while let Some(next) = res.frame().await {
-        let frame = next?;
-        if let Some(chunk) = frame.data_ref() {
-            body.extend(chunk);
-        }
-    }
-    Ok(body)
 }
