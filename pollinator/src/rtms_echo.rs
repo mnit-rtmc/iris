@@ -82,6 +82,9 @@ impl Sensor {
             format!("{{\"username\": \"{user}\", \"password\": \"{pass}\" }}");
         let resp = self.client.post("api/v1/login", &body).await?;
         let auth: AuthResp = serde_json::from_slice(&resp)?;
+        if !auth.is_authenticated {
+            return Err(Error::AuthFailed());
+        }
         let bearer = format!("Bearer {}", auth.bearer_token);
         self.client.set_bearer_token(bearer);
         Ok(())
@@ -96,7 +99,7 @@ impl Sensor {
 
     /// Poll the sensor for input voltage records
     pub async fn poll_input_voltage(&self) -> Result<Vec<InputVoltage>, Error> {
-        let body = self.client.get("api/v1/input-voltage").await?;
+        let body = self.client.get("api/v1/input-voltage?count=1").await?;
         let records = serde_json::from_slice(&body)?;
         Ok(records)
     }

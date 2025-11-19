@@ -14,6 +14,9 @@ pub enum Error {
     #[error("HTTP {0}")]
     Http(#[from] hyper::http::Error),
 
+    #[error("Authentication failed")]
+    AuthFailed(),
+
     #[error("HTTP status {0}")]
     HttpStatus(StatusCode),
 
