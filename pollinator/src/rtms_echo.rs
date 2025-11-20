@@ -140,17 +140,20 @@ impl Sensor {
         loop {
             let data =
                 stream.next().await.ok_or(Error::StreamClosed)??.into_data();
-            let veh: VehicleData = serde_json::from_slice(&data)?;
-            let mut msg = format!(
-                "speed {}, length {}, direction: {:?}, zoneId: {}",
-                veh.speed, veh.length, veh.direction, veh.zone_id
-            );
-            if let Some(zone) = self.zone(veh.zone_id) {
-                msg.push(' ');
-                msg.push_str(&zone.to_string());
+            // split JSON objects on ending brace
+            for ev in data.split_inclusive(|b| *b == b'}') {
+                let veh: VehicleData = serde_json::from_slice(ev)?;
+                match self.zone(veh.zone_id) {
+                    Some(zone) => {
+                        let msg = format!(
+                            "{zone}: speed {}, length {}, direction: {:?}\n",
+                            veh.speed, veh.length, veh.direction,
+                        );
+                        tokio::io::stdout().write_all(msg.as_bytes()).await?;
+                    }
+                    None => log::warn!("Unknown zoneId: {veh:?}"),
+                }
             }
-            msg.push('\n');
-            tokio::io::stdout().write_all(msg.as_bytes()).await?;
         }
     }
 }
