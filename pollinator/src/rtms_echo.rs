@@ -132,10 +132,9 @@ impl Sensor {
         let request = format!("ws://{host}/api/v1/live-vehicle-data")
             .into_client_request()?;
         let (mut stream, response) = connect_async(request).await?;
-        print!("Connected, ");
         match response.into_body() {
-            Some(body) => println!("{}", String::from_utf8(body)?),
-            None => println!("waiting..."),
+            Some(body) => log::warn!("{}", String::from_utf8(body)?),
+            None => log::info!("WebSocket connected, waiting..."),
         }
 
         loop {

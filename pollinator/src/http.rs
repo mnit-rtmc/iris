@@ -13,8 +13,9 @@
 use crate::error::Error;
 use bytes::Bytes;
 use http_body_util::{BodyExt, Empty};
+use hyper::body::Incoming;
 use hyper::header::{AUTHORIZATION, HeaderValue};
-use hyper::{Request, Uri};
+use hyper::{Request, Response, Uri};
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpStream;
 
@@ -62,22 +63,9 @@ impl Client {
                 builder.header(AUTHORIZATION, HeaderValue::from_str(token)?);
         }
         let req = builder.body(Empty::<Bytes>::new())?;
-
-        let mut res = sender.send_request(req).await?;
-        let status = res.status();
-        if !status.is_success() {
-            eprintln!("Headers: {:#?}\n", res.headers());
-            return Err(Error::HttpStatus(status));
-        }
+        let res = sender.send_request(req).await?;
+        let body = parse_response(res).await?;
         conn_task.await??;
-
-        let mut body = Vec::<u8>::new();
-        while let Some(next) = res.frame().await {
-            let frame = next?;
-            if let Some(chunk) = frame.data_ref() {
-                body.extend(chunk);
-            }
-        }
         Ok(body)
     }
 
@@ -93,22 +81,28 @@ impl Client {
         let req = Request::post(uri)
             .header("content-type", "application/json")
             .body(body.to_string())?;
-
-        let mut res = sender.send_request(req).await?;
-        let status = res.status();
-        if !status.is_success() {
-            eprintln!("Headers: {:#?}\n", res.headers());
-            return Err(Error::HttpStatus(status));
-        }
+        let res = sender.send_request(req).await?;
+        let body = parse_response(res).await?;
         conn_task.await??;
-
-        let mut body = Vec::<u8>::new();
-        while let Some(next) = res.frame().await {
-            let frame = next?;
-            if let Some(chunk) = frame.data_ref() {
-                body.extend(chunk);
-            }
-        }
         Ok(body)
     }
+}
+
+/// Parse HTTP response
+async fn parse_response(mut res: Response<Incoming>) -> Result<Vec<u8>, Error> {
+    let status = res.status();
+    if !status.is_success() {
+        log::warn!("Status: {status:?}");
+        log::warn!("Headers: {:#?}", res.headers());
+        return Err(Error::HttpStatus(status));
+    }
+
+    let mut body = Vec::<u8>::new();
+    while let Some(next) = res.frame().await {
+        let frame = next?;
+        if let Some(chunk) = frame.data_ref() {
+            body.extend(chunk);
+        }
+    }
+    Ok(body)
 }

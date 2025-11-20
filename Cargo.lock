@@ -1344,10 +1344,12 @@ name = "pollinator"
 version = "5.78.0"
 dependencies = [
  "bytes",
+ "env_logger",
  "futures-util",
  "http-body-util",
  "hyper",
  "hyper-util",
+ "log",
  "serde",
  "serde_json",
  "thiserror 2.0.17",
