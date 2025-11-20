@@ -129,14 +129,13 @@ impl Sensor {
     /// Collect vehicle data
     pub async fn collect_vehicle_data(&self) -> Result<(), Error> {
         let host = self.client.host();
-        let request = format!("ws://{host}/api/v1/live-vehicle-data")
+        let req = format!("ws://{host}/api/v1/live-vehicle-data")
             .into_client_request()?;
-        let (mut stream, response) = connect_async(request).await?;
-        match response.into_body() {
+        let (mut stream, res) = connect_async(req).await?;
+        match res.into_body() {
             Some(body) => log::warn!("{}", String::from_utf8(body)?),
             None => log::info!("WebSocket connected, waiting..."),
         }
-
         loop {
             let data =
                 stream.next().await.ok_or(Error::StreamClosed)??.into_data();
