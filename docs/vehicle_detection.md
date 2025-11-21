@@ -308,7 +308,7 @@ Log Data            | Duration | Headway | Time     | Speed | Length
 ## Binary Vehicle Logging
 
 The `.vev` format is a binary log, similar to the text vehicle log.  Each
-vehicle event is recorded as a 8 bytes (64 bits):
+vehicle event is recorded as 8 bytes (64 bits):
 
 | Field     | Size    | Description           | Valid Range  |
 |-----------|---------|-----------------------|--------------|
@@ -322,22 +322,21 @@ vehicle event is recorded as a 8 bytes (64 bits):
 after midnight.
 
 **Mode** is the recorded timestamp mode:
-- `0`: Gap in recorded events; unknown number of vehicle events missed
-- `1`: Timestamp recorded by sensor; accurate to millisecond precision
+- `0`: No timestamp recorded for this vehicle event
+- `1`: Timestamp recorded by sensor; accurate to millisecond (ms) precision
 - `2`: Timestamp recorded by IRIS; may be affected by network latency
 - `3`: Timestamp estimated by IRIS; not accurate
-- `4`-`7`: *Reserved*
+- `4`: Gap in recorded events; unknown number of vehicle events missed
+- `5`-`15`: *Reserved*
 
-**Length** is the measured vehicle length, in decimeters.
+**Length** is the measured vehicle length, in decimeters (dm).
 
-**Speed** is the measured vehicle speed, in kilometers per hour.
+**Speed** is the measured vehicle speed, in kilometers per hour (kph).
 
 **Duration** is the time the vehicle occupied the detector area, in
-milliseconds.
+milliseconds (ms).
 
-If any of the vehicle event values is unknown, it is recorded as `0`.  So,
-a record with all zeros indicates that a vehicle was counted, but the
-timestamp, mode, length, speed and duration are not known.
+If any of the values for a vehicle event is unknown, it is recorded as `0`.
 
 ## Binned Data
 
