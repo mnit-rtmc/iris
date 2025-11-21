@@ -308,12 +308,13 @@ Log Data            | Duration | Headway | Time     | Speed | Length
 ## Binary Vehicle Logging
 
 The `.vev` format is a binary log, similar to the text vehicle log.  Each
-vehicle event is recorded as 8 bytes (64 bits):
+vehicle event is recorded as 8 bytes (64 bits, little-endian):
 
 | Field     | Size    | Description           | Valid Range  |
 |-----------|---------|-----------------------|--------------|
-| Timestamp | 27 bits | Time of day (ms)      | 1-86,400,000 |
-| Mode      | 4 bits  | Timestamp mode        | 1-3          |
+| Timestamp | 27 bits | Time of day (ms)      | 0-85,399,999 |
+| Mode      | 3 bits  | Timestamp mode        | 0-4          |
+| Wrong Way | 1 bit   | Travel direction      | 0-1          |
 | Length    | 9 bits  | Vehicle length (dm)   | 1-511        |
 | Speed     | 8 bits  | Vehicle speed (kph)   | 1-255        |
 | Duration  | 16 bits | Vehicle duration (ms) | 1-60,000     |
@@ -327,7 +328,10 @@ after midnight.
 - `2`: Timestamp recorded by IRIS; may be affected by network latency
 - `3`: Timestamp estimated by IRIS; not accurate
 - `4`: Gap in recorded events; unknown number of vehicle events missed
-- `5`-`15`: *Reserved*
+- `5`-`7`: *Reserved*
+
+**Wrong Way** is a flag indicating whether the vehicle was traveling in the
+wrong direction (`1`).
 
 **Length** is the measured vehicle length, in decimeters (dm).
 
