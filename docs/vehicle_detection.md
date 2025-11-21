@@ -40,9 +40,9 @@ Detectors can collect several different types of data:
 - **Count**: The number of vehicles in a period of time
 - **Duration**: Interval of time a vehicle occupied a detector (ms)
 - **Occupancy**: Percentage of time period detector was occupied
-- **Speed**: Vehicle speed (mph)
+- **Speed**: Vehicle speed
 - **Headway**: Interval of time between the start of consecutive vehicles (ms)
-- **Length**: Physical length of vehicle (ft)
+- **Length**: Physical length of vehicle
 
 Some data can be _derived_ from collected data:
 
@@ -121,8 +121,9 @@ Protocol               | Binning         | Traffic Data
 [SmartSensor] 125 HD   | 5 sec to 1 hour | Count, Occupancy, Speed
 [SmartSensor] 125 vlog | N/A             | [vlog]
 [SmartSensor] 105      | 5 sec to 1 hour | Count, Occupancy, Speed
-RTMS [G4]              | 5 sec to 1 hour | Count, Occupancy, Speed
-RTMS [G4] vlog         | N/A             | [vlog]
+[RTMS G4]              | 5 sec to 1 hour | Count, Occupancy, Speed
+[RTMS G4] vlog         | N/A             | [vlog]
+[RTMS Echo] vev        | N/A             | [vev]
 [Natch]                | N/A             | [vlog]
 [MnDOT-170]            | 30 sec          | Count, Occupancy
 [Canoga]               | N/A             | [vlog]
@@ -310,17 +311,25 @@ Log Data            | Duration | Headway | Time     | Speed | Length
 The `.vev` format is a binary log, similar to the text vehicle log.  Each
 vehicle event is recorded as 8 bytes (64 bits, little-endian):
 
-| Field     | Size    | Description           | Valid Range  |
-|-----------|---------|-----------------------|--------------|
-| Timestamp | 27 bits | Time of day (ms)      | 0-85,399,999 |
-| Mode      | 3 bits  | Timestamp mode        | 0-4          |
-| Wrong Way | 1 bit   | Travel direction      | 0-1          |
-| Length    | 9 bits  | Vehicle length (dm)   | 1-511        |
-| Speed     | 8 bits  | Vehicle speed (kph)   | 1-255        |
-| Duration  | 16 bits | Vehicle duration (ms) | 1-60,000     |
+| Field     | Size    | Description           | Valid Range   |
+|-----------|---------|-----------------------|---------------|
+| Timestamp | 27 bits | Time of day (ms)      | *varies* †    |
+| Mode      | 3 bits  | Timestamp mode        | 0..4          |
+| Wrong Way | 1 bit   | Travel direction      | 0..1          |
+| Length    | 9 bits  | Vehicle length (dm)   | 1..511        |
+| Speed     | 8 bits  | Vehicle speed (kph)   | 1..255        |
+| Duration  | 16 bits | Vehicle duration (ms) | 1..60,000     |
 
 **Timestamp** is when the vehicle left the detection area, in milliseconds
-after midnight.
+since midnight local time.
+
+† Valid timestamp ranges:
+
+| Day        | Hours | Valid Range   |
+|------------|-------|---------------|
+| Typical    | 24    | 0..86,400,000 |
+| DST begins | 23    | 0..82,800,000 |
+| DST ends   | 25    | 9..90,000,000 |
 
 **Mode** is the recorded timestamp mode:
 - `0`: No timestamp recorded for this vehicle event
@@ -378,21 +387,21 @@ indicates missing data.  Any data outside the valid ranges should be considered
 _missing_.
 
 
-[ADEC TDC]: protocols.html#adec-tdc
-[Canoga]: protocols.html#canoga
+[ADEC TDC]: protocols.html#vehicle-detection
+[Canoga]: protocols.html#vehicle-detection
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
 [district]: installation.html#server-properties
-[DR-500]: protocols.html#dr-500
-[DXM]: protocols.html#dxm
+[DR-500]: protocols.html#vehicle-detection
+[DXM]: protocols.html#vehicle-detection
 [event]: events.html
-[G4]: protocols.html#g4
+[RTMS G4]: protocols.html#vehicle-detection
 [IO pins]: controllers.html#io-pins
 [Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly
-[MnDOT-170]: protocols.html#mndot-170
-[Natch]: protocols.html#natch
-[NTCIP]: protocols.html#ntcip
+[MnDOT-170]: protocols.html#device-control
+[Natch]: protocols.html#device-control
+[NTCIP]: protocols.html#device-control
 [Parking area]: parking_areas.html
 [poll period]: comm_config.html#setup
 [protocols]: protocols.html
@@ -400,11 +409,12 @@ _missing_.
 [Ramp metering]: ramp_meters.html
 [road topology]: road_topology.html
 [roads]: road_topology.html#roads
-[SmartSensor]: protocols.html#smartsensor
+[SmartSensor]: protocols.html#vehicle-detection
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html
 [Tolling]: tolling.html
 [Travel time]: travel_time.html
 [Variable speed advisories]: vsa.html
+[vev]: #binary-vehicle-logging
 [vlog]: #vehicle-logging
 [XML file]: troubleshooting.html#xml-output
