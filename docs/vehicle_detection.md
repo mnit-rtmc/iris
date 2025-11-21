@@ -305,6 +305,40 @@ Log Data            | Duration | Headway | Time     | Speed | Length
 `111,1542`          | 111      | 1542    | 17:50:35 |       |
 `304,12029`         | 304      | 12029   | 17:50:47 |       |
 
+## Binary Vehicle Logging
+
+The `.vev` format is a binary log, similar to the text vehicle log.  Each
+vehicle event is recorded as a 8 bytes (64 bits):
+
+| Field     | Size    | Description           | Valid Range  |
+|-----------|---------|-----------------------|--------------|
+| Timestamp | 27 bits | Time of day (ms)      | 1-86,400,000 |
+| Mode      | 4 bits  | Timestamp mode        | 1-3          |
+| Length    | 9 bits  | Vehicle length (dm)   | 1-511        |
+| Speed     | 8 bits  | Vehicle speed (kph)   | 1-255        |
+| Duration  | 16 bits | Vehicle duration (ms) | 1-60,000     |
+
+**Timestamp** is when the vehicle left the detection area, in milliseconds
+after midnight.
+
+**Mode** is the recorded timestamp mode:
+- `0`: Gap in recorded events; unknown number of vehicle events missed
+- `1`: Timestamp recorded by sensor; accurate to millisecond precision
+- `2`: Timestamp recorded by IRIS; may be affected by network latency
+- `3`: Timestamp estimated by IRIS; not accurate
+- `4`-`7`: *Reserved*
+
+**Length** is the measured vehicle length, in decimeters.
+
+**Speed** is the measured vehicle speed, in kilometers per hour.
+
+**Duration** is the time the vehicle occupied the detector area, in
+milliseconds.
+
+If any of the vehicle event values is unknown, it is recorded as `0`.  So,
+a record with all zeros indicates that a vehicle was counted, but the
+timestamp, mode, length, speed and duration are not known.
+
 ## Binned Data
 
 IRIS can collect these types of binned traffic data:
