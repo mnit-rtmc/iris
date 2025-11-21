@@ -121,12 +121,13 @@ Protocol               | Binning         | Traffic Data
 [SmartSensor] 125 HD   | 5 sec to 1 hour | Count, Occupancy, Speed
 [SmartSensor] 125 vlog | N/A             | [vlog]
 [SmartSensor] 105      | 5 sec to 1 hour | Count, Occupancy, Speed
-[RTMS G4]              | 5 sec to 1 hour | Count, Occupancy, Speed
-[RTMS G4] vlog         | N/A             | [vlog]
-[RTMS Echo] vev        | N/A             | [vev]
+[RTMS] G4              | 5 sec to 1 hour | Count, Occupancy, Speed
+[RTMS] G4 vlog         | N/A             | [vlog]
+[RTMS] Echo vev        | N/A             | [vev]
 [Natch]                | N/A             | [vlog]
 [MnDOT-170]            | 30 sec          | Count, Occupancy
 [Canoga]               | N/A             | [vlog]
+[Central Park]         | N/A             | Occupancy
 [DR-500]               | 30-300? sec     | Speed
 [DXM]                  | N/A             | Occupancy
 [NTCIP]                | 0-255 sec       | Count, Occupancy
@@ -318,7 +319,7 @@ vehicle event is recorded as 8 bytes (64 bits, little-endian):
 | Wrong Way | 1 bit   | Travel direction      | 0..1          |
 | Length    | 9 bits  | Vehicle length (dm)   | 1..511        |
 | Speed     | 8 bits  | Vehicle speed (kph)   | 1..255        |
-| Duration  | 16 bits | Vehicle duration (ms) | 1..60,000     |
+| Duration  | 16 bits | Vehicle duration (ms) | 1..65,000     |
 
 **Timestamp** is when the vehicle left the detection area, in milliseconds
 since midnight local time.
@@ -329,7 +330,7 @@ since midnight local time.
 |------------|-------|---------------|
 | Typical    | 24    | 0..86,400,000 |
 | DST begins | 23    | 0..82,800,000 |
-| DST ends   | 25    | 9..90,000,000 |
+| DST ends   | 25    | 0..90,000,000 |
 
 **Mode** is the recorded timestamp mode:
 - `0`: No timestamp recorded for this vehicle event
@@ -389,6 +390,7 @@ _missing_.
 
 [ADEC TDC]: protocols.html#vehicle-detection
 [Canoga]: protocols.html#vehicle-detection
+[Central Park]: protocols.html#vehicle-detection
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
@@ -396,7 +398,7 @@ _missing_.
 [DR-500]: protocols.html#vehicle-detection
 [DXM]: protocols.html#vehicle-detection
 [event]: events.html
-[RTMS G4]: protocols.html#vehicle-detection
+[RTMS]: protocols.html#vehicle-detection
 [IO pins]: controllers.html#io-pins
 [Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly
 [MnDOT-170]: protocols.html#device-control
