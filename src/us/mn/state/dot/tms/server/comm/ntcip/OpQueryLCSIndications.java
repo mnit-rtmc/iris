@@ -49,13 +49,12 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Lookup an indication on a DMS */
 	private int lookupIndication(DMSImpl dms) {
-		if (dms.isOffline() || DMSHelper.hasFaults(dms))
-			return LcsIndication.UNKNOWN.ordinal();
-		else {
+		if (dms.isDeployable()) {
 			SignMessage sm = dms.getMsgCurrent();
 			return (sm != null)
 			      ? lookupIndication(sm)
 			      : LcsIndication.UNKNOWN.ordinal();
-		}
+		} else
+			return LcsIndication.UNKNOWN.ordinal();
 	}
 }

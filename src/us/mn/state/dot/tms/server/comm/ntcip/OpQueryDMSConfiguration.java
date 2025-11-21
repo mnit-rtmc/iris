@@ -293,8 +293,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 					s_height.getInteger()
 				);
 			}
-		} else
-			putCtrlFaults("other", "Query Configuration");
+		}
 		super.cleanup();
 	}
 

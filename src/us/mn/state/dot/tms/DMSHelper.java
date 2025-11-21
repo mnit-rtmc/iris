@@ -97,6 +97,23 @@ public class DMSHelper extends BaseHelper {
 		return optFaults(proxy) != null;
 	}
 
+	/** Test if a DMS is deployable */
+	static public boolean isDeployable(DMS proxy) {
+		String faults = optFaults(proxy);
+		if (faults != null) {
+			if (faults.contains("attached_device") ||
+			    faults.contains("communications") ||
+			    faults.contains("controller") ||
+			    faults.contains("critical_temperature") ||
+			    faults.contains("drum_rotor") ||
+			    faults.contains("lamp") ||
+			    faults.contains("other") ||
+			    faults.contains("power"))
+				return false;
+		}
+		return true;
+	}
+
 	/** Test if a DMS is active */
 	static public boolean isActive(DMS proxy) {
 		return ItemStyle.ACTIVE.checkBit(proxy.getStyles());

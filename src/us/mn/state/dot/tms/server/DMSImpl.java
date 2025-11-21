@@ -1170,14 +1170,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check if the sign is deployable */
 	public boolean isDeployable() {
-		return isOnline() && !hasStatusError();
-	}
-
-	/** Check if the controller has a status error */
-	private boolean hasStatusError() {
-		ControllerImpl c = controller; // Avoid race
-		String s = (c != null) ? c.getStatus() : null;
-		return (s != null) ? !s.isEmpty() : false;
+		return isOnline() && DMSHelper.isDeployable(this);
 	}
 
 	/** Calculate the item styles */
