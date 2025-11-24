@@ -272,8 +272,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Set the gate arm state and notify clients */
 	public void setArmStateNotify(GateArmState gas) {
-		if (gas == arm_state)
+		if (gas == arm_state) {
+			updateStyles();
 			return;
+		}
 		logEvent(new GateArmEvent(gas, name, fault));
 		try {
 			store.update(this, "arm_state", gas.ordinal());
