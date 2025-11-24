@@ -264,12 +264,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		}
 	}
 
-	/** Perform a periodic poll */
-	@Override
-	public void periodicPoll(boolean is_long) {
-		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
-	}
-
 	/** Check for comm timeout to UNKNOWN status */
 	public void checkTimeout() {
 		if (getFailMillis() > failTimeoutMS())
