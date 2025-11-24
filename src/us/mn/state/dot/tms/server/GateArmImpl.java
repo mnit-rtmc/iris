@@ -133,7 +133,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		ControllerImpl c = controller;
 		if (c != null)
 			c.setIO(pin, this);
-		updateStyles();
+		if (GateArmInterlock.SYSTEM_DISABLE != interlock) {
+			if (isActive())
+				initDependencyArrays();
+		}
 	}
 
 	/** Destroy an object */
@@ -370,27 +373,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		return interlock;
 	}
 
-	/** Set the interlock enum */
-	private void setInterlockNotify(GateArmInterlock lk) {
-		if (lk != interlock) {
-			try {
-				store.update(this, "interlock", lk.ordinal());
-			}
-			catch (TMSException e) {
-				GateArmSystem.disable(name, "DB interlock");
-				logError("setInterlockNotify: " +
-					e.getMessage());
-				return;
-			}
-			interlock = lk;
-			sendInterlocks();
-			notifyAttribute("interlock");
-			// NOTE: call super here to prevent recursivee calls
-			//       thru checkDependencies
-			super.updateStyles();
-		}
-	}
-
 	/** Send gate arm interlock settings.
 	 *
 	 * Do not test checkEnabled since this is used to shut off interlocks
@@ -412,24 +394,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Upstream gate arm dependencies */
 	private transient ArrayList<GateArmImpl> upstream_arms =
 		new ArrayList<GateArmImpl>();
-
-	/** Update the interlock by checking dependencies */
-	public void updateInterlock(boolean e) {
-		GateArmLockState ls = new GateArmLockState(e && isActive());
-		for (GateArmImpl ga: opposing_arms) {
-			if (ga.isPossiblyOpen())
-				ls.setOpposingOpen();
-		}
-		for (GateArmImpl ga: downstream_arms) {
-			if (ga.isPossiblyClosed())
-				ls.setDownstreamClosed();
-		}
-		for (GateArmImpl ga: upstream_arms) {
-			if (ga.isPossiblyOpen())
-				ls.setUpstreamOpen();
-		}
-		setInterlockNotify(ls.getInterlock());
-	}
 
 	/** Check if gate arm is denied from opening */
 	public boolean isOpenDenied() {
@@ -482,10 +446,58 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Check dependencies */
 	private void checkDependencies() {
-		GateArmSystem.checkEnabled();
-		GateArmSystem.updateInterlocks();
+		GateArmInterlock before = interlock;
+		updateInterlock(GateArmSystem.checkEnabled());
 		setOpenConflict(interlock.isOpenDenied() && isPossiblyOpen());
 		setCloseConflict(interlock.isCloseDenied() && isClosed());
+		GateArmInterlock after = interlock;
+		if (before != after) {
+			if (GateArmInterlock.SYSTEM_DISABLE == after) {
+				opposing_arms.clear();
+				downstream_arms.clear();
+				upstream_arms.clear();
+			}
+			if (GateArmInterlock.SYSTEM_DISABLE == before) {
+				if (isActive())
+					initDependencyArrays();
+			}
+		}
+	}
+
+	/** Update the interlock by checking dependencies */
+	private void updateInterlock(boolean e) {
+		GateArmLockState ls = new GateArmLockState(e && isActive());
+		for (GateArmImpl ga: opposing_arms) {
+			if (ga.isPossiblyOpen())
+				ls.setOpposingOpen();
+		}
+		for (GateArmImpl ga: downstream_arms) {
+			if (ga.isPossiblyClosed())
+				ls.setDownstreamClosed();
+		}
+		for (GateArmImpl ga: upstream_arms) {
+			if (ga.isPossiblyOpen())
+				ls.setUpstreamOpen();
+		}
+		setInterlockNotify(ls.getInterlock());
+	}
+
+	/** Set the interlock enum */
+	private void setInterlockNotify(GateArmInterlock lk) {
+		if (lk != interlock) {
+			try {
+				store.update(this, "interlock", lk.ordinal());
+			}
+			catch (TMSException e) {
+				GateArmSystem.disable(name, "DB interlock");
+				logError("setInterlockNotify: " +
+					e.getMessage());
+				return;
+			}
+			interlock = lk;
+			sendInterlocks();
+			notifyAttribute("interlock");
+		}
 	}
 
 	/** Open conflict detected flag.  This is initially set to true because
@@ -511,16 +523,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			if (c)
 				sendEmailAlert("CLOSE CONFLICT: " + name);
 		}
-	}
-
-	/** Set flag to enable gate arm system */
-	public void setSystemEnable(boolean e) {
-		opposing_arms.clear();
-		downstream_arms.clear();
-		upstream_arms.clear();
-		if (e && isActive())
-			initDependencyArrays();
-		checkDependencies();
 	}
 
 	/** Initialize opposing / downstream / upstream arrays */

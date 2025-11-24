@@ -65,25 +65,11 @@ public class GateArmSystem {
 		       CONFIG_ENABLE_FILE.canWrite();
 	}
 
-	/** Enable or disable gate arm system */
-	static private void setEnabled(boolean e) {
-		ENABLED = e;
-		Iterator<GateArm> it = GateArmHelper.iterator();
-		while (it.hasNext()) {
-			GateArm ga = it.next();
-			if (ga instanceof GateArmImpl) {
-				GateArmImpl gai = (GateArmImpl) ga;
-				gai.setSystemEnable(e);
-			}
-		}
-	}
-
 	/** Disable gate arm configuration */
 	static public void disable(String name, String reason) {
 		if (isEnabledFile())
 			DELETE_FLAG = CONFIG_ENABLE_FILE.delete();
-		if (ENABLED)
-			setEnabled(false);
+		ENABLED = false;
 		String msg = reason + ": " + name;
 		logStderr(CONFIG_ENABLE_FILE.toString() + " " + msg +
 			" " + getAdvice());
@@ -101,7 +87,7 @@ public class GateArmSystem {
 		if (ENABLED)
 			return true;
 		if (isEnabledFile()) {
-			setEnabled(true);
+			ENABLED = true;
 			return true;
 		} else
 			return false;
@@ -128,19 +114,6 @@ public class GateArmSystem {
 	static public void sendEmailAlert(String msg) {
 		EmailHandler.send(EventType.GATE_ARM_SYSTEM, "Gate Arm ALERT",
 			msg);
-	}
-
-	/** Update all gate arm interlocks */
-	static public void updateInterlocks() {
-		boolean e = checkEnabled();
-		Iterator<GateArm> it = GateArmHelper.iterator();
-		while (it.hasNext()) {
-			GateArm ga = it.next();
-			if (ga instanceof GateArmImpl) {
-				GateArmImpl gai = (GateArmImpl) ga;
-				gai.updateInterlock(e);
-			}
-		}
 	}
 
 	/** Check all gate arms for a GeoLoc change.  This needs to be fast,
