@@ -13,6 +13,7 @@
 #![forbid(unsafe_code)]
 
 mod error;
+mod event;
 mod http;
 mod rtms_echo;
 
@@ -28,7 +29,9 @@ async fn main() -> Result<(), Error> {
     let user = args.next().unwrap_or(String::from("user"));
     let pass = args.next().unwrap_or(String::from("pass"));
 
-    let mut sensor = Sensor::new(&host);
+    let detectors =
+        ["X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9", "X10"];
+    let mut sensor = Sensor::new(&host, &detectors);
     sensor.login(&user, &pass).await?;
 
     let zones = sensor.poll_zone_identifiers().await?;

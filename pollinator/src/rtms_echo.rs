@@ -13,9 +13,9 @@
 use crate::http;
 
 use crate::error::Error;
+use crate::event::VehEvent;
 use futures_util::StreamExt;
 use serde::Deserialize;
-use tokio::io::AsyncWriteExt;
 use tokio_tungstenite::connect_async;
 use tungstenite::client::IntoClientRequest;
 
@@ -76,16 +76,45 @@ struct VehicleData {
 pub struct Sensor {
     /// HTTP client
     client: http::Client,
+    /// Detector IDs
+    detectors: Vec<String>,
     /// Zone identifiers
     zones: Vec<ZoneId>,
 }
 
+impl VehicleData {
+    /// Convert to a server recorded vehicle event
+    fn server_recorded(&self) -> VehEvent {
+        let mut veh = VehEvent::default();
+        // FIXME: use chrono Local::now() to build time stamp
+        // FIXME: set wrong-way
+        veh.length_m(self.length);
+        veh.speed_kph(self.speed);
+        veh
+    }
+}
+
 impl Sensor {
     /// Create a new RTMS Echo sensor connection
-    pub fn new(host: &str) -> Self {
+    pub fn new(host: &str, detectors: &[&str]) -> Self {
         let client = http::Client::new(host);
+        let detectors = detectors.iter().map(|d| d.to_string()).collect();
         let zones = Vec::new();
-        Sensor { client, zones }
+        Sensor {
+            client,
+            detectors,
+            zones,
+        }
+    }
+
+    /// Lookup detector ID for a zone index
+    fn detector_id(&self, zone_idx: usize) -> Option<&str> {
+        if zone_idx < self.detectors.len() {
+            Some(&self.detectors[zone_idx])
+        } else {
+            log::warn!("Missing detector ID for zone: {zone_idx}");
+            None
+        }
     }
 
     /// Login with user credentials
@@ -109,13 +138,14 @@ impl Sensor {
         Ok(&self.zones)
     }
 
-    /// Lookup a zone index
-    fn zone(&self, zid: u32) -> Option<usize> {
+    /// Lookup zone index for vehicle data
+    fn zone_idx(&self, veh: &VehicleData) -> Option<usize> {
         for (i, zone) in self.zones.iter().enumerate() {
-            if zid == zone.id {
+            if veh.zone_id == zone.id {
                 return Some(i);
             }
         }
+        log::warn!("Unknown zoneId for vehicle: {veh:?}");
         None
     }
 
@@ -142,17 +172,19 @@ impl Sensor {
             // split JSON objects on ending brace
             for ev in data.split_inclusive(|b| *b == b'}') {
                 let veh: VehicleData = serde_json::from_slice(ev)?;
-                match self.zone(veh.zone_id) {
-                    Some(zone) => {
-                        let msg = format!(
-                            "{zone}: speed {}, length {}, direction: {:?}\n",
-                            veh.speed, veh.length, veh.direction,
-                        );
-                        tokio::io::stdout().write_all(msg.as_bytes()).await?;
-                    }
-                    None => log::warn!("Unknown zoneId: {veh:?}"),
-                }
+                self.log_event(veh).await?;
             }
         }
+    }
+
+    /// Log a vehicle event
+    async fn log_event(&self, veh: VehicleData) -> Result<(), Error> {
+        if let Some(idx) = self.zone_idx(&veh)
+            && let Some(det_id) = self.detector_id(idx)
+        {
+            let veh = veh.server_recorded();
+            veh.log_append(det_id).await?;
+        }
+        Ok(())
     }
 }

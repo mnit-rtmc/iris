@@ -7,6 +7,7 @@ edition.workspace = true
 
 [dependencies]
 bytes = "1.11"
+chrono = { workspace = true }
 env_logger = { workspace = true }
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["tokio"] }
