@@ -27,4 +27,4 @@ features = ["sink", "std"]
 [dependencies.tokio]
 version = "1.48.0"
 default-features = false
-features = ["io-util", "io-std", "macros", "net", "rt-multi-thread"]
+features = ["fs", "io-util", "io-std", "macros", "net", "rt-multi-thread"]

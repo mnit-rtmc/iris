@@ -31,7 +31,7 @@ async fn main() -> Result<(), Error> {
 
     let detectors =
         ["X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9", "X10"];
-    let mut sensor = Sensor::new(&host, &detectors);
+    let mut sensor = Sensor::new(&host, &detectors).await?;
     sensor.login(&user, &pass).await?;
 
     let zones = sensor.poll_zone_identifiers().await?;

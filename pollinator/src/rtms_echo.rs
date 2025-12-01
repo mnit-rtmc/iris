@@ -13,7 +13,7 @@
 use crate::http;
 
 use crate::error::Error;
-use crate::event::VehEvent;
+use crate::event::{Stamp, VehEvent, VehLog};
 use futures_util::StreamExt;
 use serde::Deserialize;
 use tokio_tungstenite::connect_async;
@@ -76,8 +76,8 @@ struct VehicleData {
 pub struct Sensor {
     /// HTTP client
     client: http::Client,
-    /// Detector IDs
-    detectors: Vec<String>,
+    /// Vehicle event logs
+    veh_logs: Vec<VehLog>,
     /// Zone identifiers
     zones: Vec<ZoneId>,
 }
@@ -86,7 +86,7 @@ impl VehicleData {
     /// Convert to a server recorded vehicle event
     fn server_recorded(&self) -> VehEvent {
         let mut veh = VehEvent::default();
-        // FIXME: use chrono Local::now() to build time stamp
+        veh.server_recorded(Stamp::now());
         // FIXME: set wrong-way
         veh.length_m(self.length);
         veh.speed_kph(self.speed);
@@ -96,23 +96,26 @@ impl VehicleData {
 
 impl Sensor {
     /// Create a new RTMS Echo sensor connection
-    pub fn new(host: &str, detectors: &[&str]) -> Self {
+    pub async fn new(host: &str, detectors: &[&str]) -> Result<Self, Error> {
         let client = http::Client::new(host);
-        let detectors = detectors.iter().map(|d| d.to_string()).collect();
-        let zones = Vec::new();
-        Sensor {
-            client,
-            detectors,
-            zones,
+        let mut veh_logs = Vec::with_capacity(detectors.len());
+        for det_id in detectors {
+            veh_logs.push(VehLog::new(det_id).await?);
         }
+        let zones = Vec::new();
+        Ok(Sensor {
+            client,
+            veh_logs,
+            zones,
+        })
     }
 
-    /// Lookup detector ID for a zone index
-    fn detector_id(&self, zone_idx: usize) -> Option<&str> {
-        if zone_idx < self.detectors.len() {
-            Some(&self.detectors[zone_idx])
+    /// Lookup vehicle event log for a zone index
+    fn veh_log(&mut self, zone_idx: usize) -> Option<&mut VehLog> {
+        if zone_idx < self.veh_logs.len() {
+            Some(&mut self.veh_logs[zone_idx])
         } else {
-            log::warn!("Missing detector ID for zone: {zone_idx}");
+            log::warn!("No vehicle log for zone: {zone_idx}");
             None
         }
     }
@@ -157,7 +160,7 @@ impl Sensor {
     }
 
     /// Collect vehicle data
-    pub async fn collect_vehicle_data(&self) -> Result<(), Error> {
+    pub async fn collect_vehicle_data(&mut self) -> Result<(), Error> {
         let host = self.client.host();
         let req = format!("ws://{host}/api/v1/live-vehicle-data")
             .into_client_request()?;
@@ -178,12 +181,12 @@ impl Sensor {
     }
 
     /// Log a vehicle event
-    async fn log_event(&self, veh: VehicleData) -> Result<(), Error> {
+    async fn log_event(&mut self, veh: VehicleData) -> Result<(), Error> {
         if let Some(idx) = self.zone_idx(&veh)
-            && let Some(det_id) = self.detector_id(idx)
+            && let Some(veh_log) = self.veh_log(idx)
         {
             let veh = veh.server_recorded();
-            veh.log_append(det_id).await?;
+            veh_log.append(&veh).await?;
         }
         Ok(())
     }

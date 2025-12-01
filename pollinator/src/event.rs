@@ -11,26 +11,29 @@
 // GNU General Public License for more details.
 //
 use crate::error::Error;
+use chrono::{Local, NaiveTime};
+use std::path::PathBuf;
+use tokio::fs::{File, OpenOptions};
 use tokio::io::AsyncWriteExt;
 
-/// Time stamp
+/// Time stamp (ms since midnight)
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct Stamp(u32);
 
 /// Timestamp mode
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum Mode {
     /// No timestamp recorded
     #[default]
-    NoTimestamp,
+    NoTimestamp = 0,
     /// Timestamp recorded by field sensor
-    SensorRecorded,
+    SensorRecorded = 1,
     /// Timestamp recorded by central server
-    ServerRecorded,
+    ServerRecorded = 2,
     /// Timestamp estimated by central server
-    Estimated,
+    Estimated = 3,
     /// Gap in event collection (missing events)
-    GapEvent,
+    GapEvent = 4,
 }
 
 /// Vehicle event
@@ -48,6 +51,54 @@ pub struct VehEvent {
     speed: u8,
     /// Vehicle duration (ms)
     duration: u16,
+}
+
+/// Vehicle event log
+pub struct VehLog {
+    /// File opened in append mode
+    file: File,
+}
+
+impl From<i64> for Stamp {
+    fn from(val: i64) -> Self {
+        if (0..Self::MAX_MS).contains(&val) {
+            Stamp(val as u32)
+        } else {
+            log::warn!("Invalid timestamp: {val}");
+            Stamp(0)
+        }
+    }
+}
+
+impl Stamp {
+    /// Maximum milliseconds since midnight (with DST)
+    const MAX_MS: i64 = 25 * 60 * 60 * 1000;
+
+    /// Get stamp of the current time
+    pub fn now() -> Self {
+        let now = Local::now();
+        let midnight = now.with_time(NaiveTime::MIN).single().unwrap();
+        let delta = now.signed_duration_since(midnight);
+        Stamp::from(delta.num_milliseconds())
+    }
+}
+
+impl From<&VehEvent> for u64 {
+    fn from(ev: &VehEvent) -> Self {
+        let mut val = ev.stamp.0.into();
+        val |= (ev.mode as u64) << 27;
+        val |= u64::from(ev.wrong_way) << 30;
+        val |= u64::from(ev.length) << 31;
+        val |= u64::from(ev.speed) << 40;
+        val |= u64::from(ev.duration) << 48;
+        val
+    }
+}
+
+impl From<VehEvent> for u64 {
+    fn from(ev: VehEvent) -> Self {
+        u64::from(&ev)
+    }
 }
 
 impl VehEvent {
@@ -104,15 +155,56 @@ impl VehEvent {
     pub fn duration_ms(&mut self, duration: u16) {
         self.duration = duration;
     }
+}
+
+impl VehLog {
+    /// Make a vehicle event log file
+    pub async fn new(det_id: &str) -> Result<Self, Error> {
+        let mut path = PathBuf::from(det_id);
+        path.set_extension("vev");
+        let file = OpenOptions::new().append(true).open(path).await?;
+        Ok(VehLog { file })
+    }
 
     /// Append vehicle data to `.vev` log file
-    pub async fn log_append(&self, det_id: &str) -> Result<(), Error> {
-        // FIXME
-        let msg = format!(
-            "{det_id}: speed {}, length {}\n",
-            self.speed, self.length,
-        );
-        tokio::io::stdout().write_all(msg.as_bytes()).await?;
+    pub async fn append(&mut self, ev: &VehEvent) -> Result<(), Error> {
+        self.file.write_u64_le(u64::from(ev)).await?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn stamp() {
+        assert_eq!(Stamp::default().0, 0);
+        assert_eq!(Stamp::from(60 * 60 * 1000).0, 60 * 60 * 1000);
+        assert_eq!(Stamp::from(-1).0, 0);
+        assert_eq!(Stamp::from(Stamp::MAX_MS).0, 0);
+    }
+
+    #[test]
+    fn veh_event() {
+        const HOUR: i64 = 60 * 60 * 1000;
+        let ev = VehEvent::default();
+        assert_eq!(u64::from(ev), 0);
+        let mut ev = VehEvent::default();
+        ev.sensor_recorded(Stamp::from(HOUR));
+        assert_eq!(u64::from(ev), (1 << 27) + HOUR as u64);
+        let mut ev = VehEvent::default();
+        ev.server_recorded(Stamp::from(2 * HOUR));
+        ev.length_m(3.0);
+        ev.speed_kph(80.0);
+        ev.duration_ms(200);
+        assert_eq!(
+            u64::from(ev),
+            (2 << 27)
+                + (2 * HOUR as u64)
+                + (30 << 31)
+                + (80 << 40)
+                + (200 << 48)
+        );
     }
 }
