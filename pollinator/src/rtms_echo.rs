@@ -32,7 +32,7 @@ struct AuthResp {
 }
 
 /// Sensor zone ID
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq)]
 pub struct ZoneId {
     /// Identifier
     id: u32,
@@ -50,7 +50,7 @@ pub struct InputVoltage {
 }
 
 /// Vehicle detection direction
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
 enum Direction {
     /// Left-to-right from sensor perspective
     LeftToRight,
@@ -78,16 +78,16 @@ pub struct Sensor {
     client: http::Client,
     /// Vehicle event logs
     veh_logs: Vec<VehLog>,
-    /// Zone identifiers
-    zones: Vec<ZoneId>,
+    /// Zone identifiers and directions
+    zones: Vec<(ZoneId, Option<Direction>)>,
 }
 
 impl VehicleData {
     /// Convert to a server recorded vehicle event
-    fn server_recorded(&self) -> VehEvent {
+    fn server_recorded(&self, wrong_way: bool) -> VehEvent {
         let mut veh = VehEvent::default();
         veh.server_recorded(Stamp::now());
-        // FIXME: set wrong-way
+        veh.wrong_way(wrong_way);
         veh.length_m(self.length);
         veh.speed_kph(self.speed);
         veh
@@ -135,15 +135,31 @@ impl Sensor {
     }
 
     /// Poll the sensor for Zone Identifiers
-    pub async fn poll_zone_identifiers(&mut self) -> Result<&[ZoneId], Error> {
+    pub async fn poll_zone_identifiers(
+        &mut self,
+    ) -> Result<Vec<ZoneId>, Error> {
         let body = self.client.get("api/v1/zone-identifiers").await?;
-        self.zones = serde_json::from_slice(&body)?;
-        Ok(&self.zones)
+        let zones: Vec<ZoneId> = serde_json::from_slice(&body)?;
+        self.zones = zones.iter().map(|z| (z.clone(), None)).collect();
+        Ok(zones)
+    }
+
+    /// Check direction for a vehicle
+    fn check_direction(&mut self, veh: &VehicleData) -> Direction {
+        for (zone, dir) in self.zones.iter_mut() {
+            if veh.zone_id == zone.id {
+                match dir {
+                    Some(dir) => return *dir,
+                    None => *dir = Some(veh.direction),
+                }
+            }
+        }
+        veh.direction
     }
 
     /// Lookup zone index for vehicle data
     fn zone_idx(&self, veh: &VehicleData) -> Option<usize> {
-        for (i, zone) in self.zones.iter().enumerate() {
+        for (i, (zone, _dir)) in self.zones.iter().enumerate() {
             if veh.zone_id == zone.id {
                 return Some(i);
             }
@@ -183,10 +199,12 @@ impl Sensor {
     /// Log a vehicle event
     async fn log_event(&mut self, veh: VehicleData) -> Result<(), Error> {
         log::info!("veh data: {veh:?}");
+        let dir = self.check_direction(&veh);
         if let Some(idx) = self.zone_idx(&veh)
             && let Some(veh_log) = self.veh_log(idx)
         {
-            let veh = veh.server_recorded();
+            let wrong_way = dir != veh.direction;
+            let veh = veh.server_recorded(wrong_way);
             veh_log.append(&veh).await?;
         }
         Ok(())
