@@ -13,7 +13,7 @@
 use crate::error::Error;
 use chrono::{Local, NaiveTime};
 use std::path::PathBuf;
-use tokio::fs::{File, OpenOptions};
+use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 
 /// Time stamp (ms since midnight)
@@ -162,13 +162,14 @@ impl VehLog {
     pub async fn new(det_id: &str) -> Result<Self, Error> {
         let mut path = PathBuf::from(det_id);
         path.set_extension("vev");
-        let file = OpenOptions::new().append(true).open(path).await?;
+        let file = File::options().append(true).create(true).open(path).await?;
         Ok(VehLog { file })
     }
 
     /// Append vehicle data to `.vev` log file
     pub async fn append(&mut self, ev: &VehEvent) -> Result<(), Error> {
         self.file.write_u64_le(u64::from(ev)).await?;
+        log::info!("veh ev: {ev:?}");
         Ok(())
     }
 }
