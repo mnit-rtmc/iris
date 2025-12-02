@@ -49,9 +49,9 @@ pub struct InputVoltage {
     voltage: f32,
 }
 
-/// Vehicle detection direction
+/// Vehicle observation direction
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq)]
-enum Direction {
+enum ObsDirection {
     /// Left-to-right from sensor perspective
     LeftToRight,
     /// Right-to-left from sensor perspective
@@ -66,8 +66,8 @@ struct VehicleData {
     speed: f32,
     /// Vehicle length (m)
     length: f32,
-    /// Detection direction
-    direction: Direction,
+    /// Observation direction
+    direction: ObsDirection,
     /// Zone identifier
     zone_id: u32,
 }
@@ -79,7 +79,7 @@ pub struct Sensor {
     /// Vehicle event logs
     veh_logs: Vec<VehLog>,
     /// Zone identifiers and directions
-    zones: Vec<(ZoneId, Option<Direction>)>,
+    zones: Vec<(ZoneId, Option<ObsDirection>)>,
 }
 
 impl VehicleData {
@@ -145,7 +145,7 @@ impl Sensor {
     }
 
     /// Check direction for a vehicle
-    fn check_direction(&mut self, veh: &VehicleData) -> Direction {
+    fn check_direction(&mut self, veh: &VehicleData) -> ObsDirection {
         for (zone, dir) in self.zones.iter_mut() {
             if veh.zone_id == zone.id {
                 match dir {
