@@ -17,6 +17,7 @@ use crate::event::{Stamp, VehEvent, VehLog};
 use futures_util::StreamExt;
 use serde::Deserialize;
 use tokio_tungstenite::connect_async;
+use tungstenite::Message;
 use tungstenite::client::IntoClientRequest;
 
 /// Authentication response
@@ -185,15 +186,30 @@ impl Sensor {
             Some(body) => log::warn!("{}", String::from_utf8(body)?),
             None => log::info!("WebSocket connected, waiting..."),
         }
-        loop {
-            let data =
-                stream.next().await.ok_or(Error::StreamClosed)??.into_data();
-            // split JSON objects on ending brace
-            for ev in data.split_inclusive(|b| *b == b'}') {
-                let veh: VehicleData = serde_json::from_slice(ev)?;
-                self.log_event(veh).await?;
+        while let Some(msg) = stream.next().await {
+            match msg? {
+                Message::Text(bytes) => {
+                    log::debug!("Text message {} bytes", bytes.len());
+                    let data = bytes.as_str();
+                    // split JSON objects on ending brace
+                    for ev in data.split_inclusive('}') {
+                        let veh: VehicleData = serde_json::from_str(ev)?;
+                        self.log_event(veh).await?;
+                    }
+                }
+                Message::Binary(bytes) => {
+                    log::debug!("Binary message {} bytes", bytes.len());
+                }
+                Message::Ping(_bytes) => {
+                    log::debug!("Ping received");
+                }
+                Message::Pong(_bytes) => {
+                    log::debug!("Pong received");
+                }
+                _ => (),
             }
         }
+        Err(Error::StreamClosed)
     }
 
     /// Log a vehicle event
