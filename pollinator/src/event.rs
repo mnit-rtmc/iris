@@ -13,7 +13,7 @@
 use crate::error::Error;
 use jiff::Zoned;
 use std::path::PathBuf;
-use tokio::fs::{File, create_dir_all};
+use tokio::fs::{File, create_dir_all, try_exists};
 use tokio::io::AsyncWriteExt;
 
 /// Time stamp
@@ -105,8 +105,10 @@ impl Stamp {
     /// Make a file
     async fn make_file(&self, det_id: &str) -> Result<File, Error> {
         let mut path = self.build_path();
-        log::info!("creating dir: {path:?}");
-        create_dir_all(&path).await?;
+        if !try_exists(&path).await? {
+            log::info!("creating dir: {path:?}");
+            create_dir_all(&path).await?;
+        }
         path.push(det_id);
         path.set_extension("vev");
         let file = File::options().append(true).create(true).open(path).await?;
