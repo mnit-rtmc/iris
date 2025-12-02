@@ -105,6 +105,7 @@ impl Stamp {
     /// Make a file
     async fn make_file(&self, det_id: &str) -> Result<File, Error> {
         let mut path = self.build_path();
+        log::info!("creating dir: {path:?}");
         create_dir_all(&path).await?;
         path.push(det_id);
         path.set_extension("vev");
