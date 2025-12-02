@@ -204,7 +204,7 @@ impl Sensor {
         while let Some(msg) = stream.next().await {
             match msg? {
                 Message::Text(bytes) => {
-                    log::info!("Text message {} bytes", bytes.len());
+                    log::info!("TEXT: {} bytes", bytes.len());
                     let data = bytes.as_str();
                     // split JSON objects on ending brace
                     for ev in data.split_inclusive('}') {
@@ -213,13 +213,13 @@ impl Sensor {
                     }
                 }
                 Message::Binary(bytes) => {
-                    log::info!("Binary message {} bytes", bytes.len());
+                    log::info!("BINARY: {} bytes", bytes.len());
                 }
-                Message::Ping(_bytes) => {
-                    log::info!("Ping received");
+                Message::Ping(bytes) => {
+                    log::info!("PING: {} bytes", bytes.len());
                 }
-                Message::Pong(_bytes) => {
-                    log::info!("Pong received");
+                Message::Pong(bytes) => {
+                    log::info!("PONG: {} bytes", bytes.len());
                 }
                 _ => (),
             }
@@ -242,7 +242,7 @@ impl Sensor {
     }
 }
 
-/// Regularly send ping messages to websocket
+/// Send ping messages to websocket at a regular interval
 async fn send_pings(
     mut sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
 ) -> Result<(), Error> {
@@ -250,6 +250,7 @@ async fn send_pings(
     ticker.tick().await;
     loop {
         ticker.tick().await;
+        log::info!("Sending PING");
         let msg = Message::Ping(Bytes::new());
         sink.send(msg).await?;
     }
