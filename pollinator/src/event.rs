@@ -13,7 +13,7 @@
 use crate::error::Error;
 use jiff::Zoned;
 use std::path::PathBuf;
-use tokio::fs::File;
+use tokio::fs::{File, create_dir_all};
 use tokio::io::AsyncWriteExt;
 
 /// Time stamp
@@ -55,6 +55,10 @@ pub struct VehEvent {
 
 /// Vehicle event log
 pub struct VehLog {
+    /// Detector ID
+    det_id: String,
+    /// Timestamp
+    stamp: Stamp,
     /// File opened in append mode
     file: File,
 }
@@ -79,6 +83,33 @@ impl Stamp {
             log::warn!("Invalid timestamp: {ms}");
             0
         }
+    }
+
+    /// Build path to traffic archive directory
+    fn build_path(&self) -> PathBuf {
+        let year = self.0.year().to_string();
+        let date = format!(
+            "{:04}{:02}{:02}",
+            self.0.year(),
+            self.0.month(),
+            self.0.day()
+        );
+        let mut path = PathBuf::from("/var/lib/iris/traffic");
+        // FIXME: use IRIS server district property
+        path.push("tms");
+        path.push(&year);
+        path.push(&date);
+        path
+    }
+
+    /// Make a file
+    async fn make_file(&self, det_id: &str) -> Result<File, Error> {
+        let mut path = self.build_path();
+        create_dir_all(&path).await?;
+        path.push(det_id);
+        path.set_extension("vev");
+        let file = File::options().append(true).create(true).open(path).await?;
+        Ok(file)
     }
 }
 
@@ -159,14 +190,22 @@ impl VehEvent {
 impl VehLog {
     /// Make a vehicle event log file
     pub async fn new(det_id: &str) -> Result<Self, Error> {
-        let mut path = PathBuf::from(det_id);
-        path.set_extension("vev");
-        let file = File::options().append(true).create(true).open(path).await?;
-        Ok(VehLog { file })
+        let det_id = det_id.to_string();
+        let stamp = Stamp::now();
+        let file = stamp.make_file(&det_id).await?;
+        Ok(VehLog {
+            det_id,
+            stamp,
+            file,
+        })
     }
 
     /// Append vehicle data to `.vev` log file
     pub async fn append(&mut self, ev: &VehEvent) -> Result<(), Error> {
+        if self.stamp.0.date() != ev.stamp.0.date() {
+            self.stamp = ev.stamp.clone();
+            self.file = self.stamp.make_file(&self.det_id).await?;
+        }
         self.file.write_u64_le(u64::from(ev)).await?;
         log::debug!("veh ev: {ev:?}");
         Ok(())
