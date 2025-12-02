@@ -14,11 +14,15 @@ use crate::http;
 
 use crate::error::Error;
 use crate::event::{Stamp, VehEvent, VehLog};
-use futures_util::StreamExt;
+use futures_util::stream::{SplitSink, SplitStream};
+use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
-use tokio_tungstenite::connect_async;
-use tungstenite::Message;
+use tokio::join;
+use tokio::net::TcpStream;
+use tokio::time::{Duration, interval};
+use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
 use tungstenite::client::IntoClientRequest;
+use tungstenite::{Bytes, Message};
 
 /// Authentication response
 #[derive(Debug, Deserialize, PartialEq)]
@@ -181,15 +185,26 @@ impl Sensor {
         let host = self.client.host();
         let req = format!("ws://{host}/api/v1/live-vehicle-data")
             .into_client_request()?;
-        let (mut stream, res) = connect_async(req).await?;
+        let (stream, res) = connect_async(req).await?;
         match res.into_body() {
             Some(body) => log::warn!("{}", String::from_utf8(body)?),
             None => log::info!("WebSocket connected, waiting..."),
         }
+        let (sink, stream) = stream.split();
+        let (r0, r1) = join![send_pings(sink), self.read_messages(stream),];
+        r0?;
+        r1
+    }
+
+    /// Read messages from websocket stream
+    async fn read_messages(
+        &mut self,
+        mut stream: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
+    ) -> Result<(), Error> {
         while let Some(msg) = stream.next().await {
             match msg? {
                 Message::Text(bytes) => {
-                    log::debug!("Text message {} bytes", bytes.len());
+                    log::info!("Text message {} bytes", bytes.len());
                     let data = bytes.as_str();
                     // split JSON objects on ending brace
                     for ev in data.split_inclusive('}') {
@@ -198,13 +213,13 @@ impl Sensor {
                     }
                 }
                 Message::Binary(bytes) => {
-                    log::debug!("Binary message {} bytes", bytes.len());
+                    log::info!("Binary message {} bytes", bytes.len());
                 }
                 Message::Ping(_bytes) => {
-                    log::debug!("Ping received");
+                    log::info!("Ping received");
                 }
                 Message::Pong(_bytes) => {
-                    log::debug!("Pong received");
+                    log::info!("Pong received");
                 }
                 _ => (),
             }
@@ -224,5 +239,18 @@ impl Sensor {
             veh_log.append(&veh).await?;
         }
         Ok(())
+    }
+}
+
+/// Regularly send ping messages to websocket
+async fn send_pings(
+    mut sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
+) -> Result<(), Error> {
+    let mut ticker = interval(Duration::from_secs(30));
+    ticker.tick().await;
+    loop {
+        ticker.tick().await;
+        let msg = Message::Ping(Bytes::new());
+        sink.send(msg).await?;
     }
 }
