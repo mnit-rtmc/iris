@@ -7,11 +7,11 @@ edition.workspace = true
 
 [dependencies]
 bytes = "1.11"
-chrono = { workspace = true }
 env_logger = { workspace = true }
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["tokio"] }
 hyper = { version = "1.8", features = ["client", "http1"] }
+jiff = "0.2.16"
 log = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

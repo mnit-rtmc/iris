@@ -11,14 +11,14 @@
 // GNU General Public License for more details.
 //
 use crate::error::Error;
-use chrono::{Local, NaiveTime};
+use jiff::Zoned;
 use std::path::PathBuf;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 
-/// Time stamp (ms since midnight)
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub struct Stamp(u32);
+/// Time stamp
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct Stamp(Zoned);
 
 /// Timestamp mode
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -59,33 +59,32 @@ pub struct VehLog {
     file: File,
 }
 
-impl From<i64> for Stamp {
-    fn from(val: i64) -> Self {
-        if (0..Self::MAX_MS).contains(&val) {
-            Stamp(val as u32)
-        } else {
-            log::warn!("Invalid timestamp: {val}");
-            Stamp(0)
-        }
-    }
-}
-
 impl Stamp {
     /// Maximum milliseconds since midnight (with DST)
-    const MAX_MS: i64 = 25 * 60 * 60 * 1000;
+    const MAX_MS: i128 = 25 * 60 * 60 * 1000;
 
     /// Get stamp of the current time
     pub fn now() -> Self {
-        let now = Local::now();
-        let midnight = now.with_time(NaiveTime::MIN).single().unwrap();
-        let delta = now.signed_duration_since(midnight);
-        Stamp::from(delta.num_milliseconds())
+        Stamp(Zoned::now())
+    }
+
+    /// Get the number of milliseconds since midnight
+    pub fn ms_since_midnight(&self) -> u32 {
+        let midnight = self.0.start_of_day().unwrap();
+        let delta = self.0.duration_since(&midnight);
+        let ms = delta.as_millis();
+        if (0..Self::MAX_MS).contains(&ms) {
+            ms as u32
+        } else {
+            log::warn!("Invalid timestamp: {ms}");
+            0
+        }
     }
 }
 
 impl From<&VehEvent> for u64 {
     fn from(ev: &VehEvent) -> Self {
-        let mut val = ev.stamp.0.into();
+        let mut val = u64::from(ev.stamp.ms_since_midnight());
         val |= (ev.mode as u64) << 27;
         val |= u64::from(ev.wrong_way) << 30;
         val |= u64::from(ev.length) << 31;
@@ -103,26 +102,26 @@ impl From<VehEvent> for u64 {
 
 impl VehEvent {
     /// Set sensor-recorded timestamp
-    pub fn sensor_recorded(&mut self, stamp: impl Into<Stamp>) {
-        self.stamp = stamp.into();
+    pub fn sensor_recorded(&mut self, stamp: Stamp) {
+        self.stamp = stamp;
         self.mode = Mode::SensorRecorded;
     }
 
     /// Set server-recorded timestamp
-    pub fn server_recorded(&mut self, stamp: impl Into<Stamp>) {
-        self.stamp = stamp.into();
+    pub fn server_recorded(&mut self, stamp: Stamp) {
+        self.stamp = stamp;
         self.mode = Mode::ServerRecorded;
     }
 
     /// Set estimated timestamp
-    pub fn estimated(&mut self, stamp: impl Into<Stamp>) {
-        self.stamp = stamp.into();
+    pub fn estimated(&mut self, stamp: Stamp) {
+        self.stamp = stamp;
         self.mode = Mode::Estimated;
     }
 
     /// Set gap event
-    pub fn gap_event(&mut self, stamp: Option<impl Into<Stamp>>) {
-        self.stamp = stamp.map(|s| s.into()).unwrap_or_default();
+    pub fn gap_event(&mut self, stamp: Option<Stamp>) {
+        self.stamp = stamp.unwrap_or_default();
         self.mode = Mode::GapEvent;
     }
 
@@ -179,33 +178,17 @@ mod test {
     use super::*;
 
     #[test]
-    fn stamp() {
-        assert_eq!(Stamp::default().0, 0);
-        assert_eq!(Stamp::from(60 * 60 * 1000).0, 60 * 60 * 1000);
-        assert_eq!(Stamp::from(-1).0, 0);
-        assert_eq!(Stamp::from(Stamp::MAX_MS).0, 0);
-    }
-
-    #[test]
     fn veh_event() {
-        const HOUR: i64 = 60 * 60 * 1000;
-        let ev = VehEvent::default();
-        assert_eq!(u64::from(ev), 0);
+        const MS: i64 = (14 * 60 * 60 * 1000) + (53 * 60 * 1000);
+        let stamp: Zoned = "2025-12-02 14:53[America/Chicago]".parse().unwrap();
         let mut ev = VehEvent::default();
-        ev.sensor_recorded(Stamp::from(HOUR));
-        assert_eq!(u64::from(ev), (1 << 27) + HOUR as u64);
-        let mut ev = VehEvent::default();
-        ev.server_recorded(Stamp::from(2 * HOUR));
+        ev.sensor_recorded(Stamp(stamp));
         ev.length_m(3.0);
         ev.speed_kph(80.0);
         ev.duration_ms(200);
         assert_eq!(
             u64::from(ev),
-            (2 << 27)
-                + (2 * HOUR as u64)
-                + (30 << 31)
-                + (80 << 40)
-                + (200 << 48)
+            (1 << 27) + (MS as u64) + (30 << 31) + (80 << 40) + (200 << 48)
         );
     }
 }
