@@ -169,7 +169,7 @@ impl VehLog {
     /// Append vehicle data to `.vev` log file
     pub async fn append(&mut self, ev: &VehEvent) -> Result<(), Error> {
         self.file.write_u64_le(u64::from(ev)).await?;
-        log::info!("veh ev: {ev:?}");
+        log::debug!("veh ev: {ev:?}");
         Ok(())
     }
 }

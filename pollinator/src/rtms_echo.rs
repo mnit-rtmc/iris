@@ -198,7 +198,7 @@ impl Sensor {
 
     /// Log a vehicle event
     async fn log_event(&mut self, veh: VehicleData) -> Result<(), Error> {
-        log::info!("veh data: {veh:?}");
+        log::debug!("veh data: {veh:?}");
         let dir = self.check_direction(&veh);
         if let Some(idx) = self.zone_idx(&veh)
             && let Some(veh_log) = self.veh_log(idx)

@@ -36,12 +36,12 @@ async fn main() -> Result<(), Error> {
 
     let zones = sensor.poll_zone_identifiers().await?;
     for zone in zones {
-        log::info!("{zone:?}");
+        log::debug!("{zone:?}");
     }
 
     let records = sensor.poll_input_voltage().await?;
     for record in records {
-        log::info!("{record:?}");
+        log::debug!("{record:?}");
     }
 
     sensor.collect_vehicle_data().await?;
