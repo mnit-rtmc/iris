@@ -1384,6 +1384,7 @@ dependencies = [
 name = "pollinator"
 version = "5.78.2"
 dependencies = [
+ "argh",
  "bb8",
  "bb8-postgres",
  "bytes",

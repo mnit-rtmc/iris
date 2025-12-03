@@ -6,6 +6,7 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+argh = "0.1"
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
 bytes = "1.11"
