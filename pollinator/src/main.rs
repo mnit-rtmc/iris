@@ -19,6 +19,7 @@ mod rtms_echo;
 
 use crate::error::Error;
 use crate::rtms_echo::Sensor;
+use std::collections::HashMap;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -29,9 +30,19 @@ async fn main() -> Result<(), Error> {
     let user = args.next().unwrap_or(String::from("user"));
     let pass = args.next().unwrap_or(String::from("pass"));
 
-    let detectors =
-        ["X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9", "X10"];
-    let mut sensor = Sensor::new(&host, &detectors).await?;
+    let mut sensor = Sensor::new(&host).await?;
     sensor.login(&user, &pass).await?;
+    let mut detectors = HashMap::new();
+    detectors.insert(1, "X1");
+    detectors.insert(2, "X2");
+    detectors.insert(3, "X3");
+    detectors.insert(4, "X4");
+    detectors.insert(5, "X5");
+    detectors.insert(6, "X6");
+    detectors.insert(7, "X7");
+    detectors.insert(8, "X8");
+    detectors.insert(9, "X9");
+    detectors.insert(10, "X10");
+    sensor.init_detector_zones(&detectors).await?;
     sensor.periodic_poll(30, 300).await
 }

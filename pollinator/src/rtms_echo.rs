@@ -17,6 +17,7 @@ use crate::event::{Stamp, VehEvent, VehLog};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
+use std::collections::HashMap;
 use tokio::join;
 use tokio::net::TcpStream;
 use tokio::time::{Duration, interval};
@@ -77,14 +78,22 @@ struct VehicleData {
     zone_id: u32,
 }
 
+/// Detection zone
+struct Zone {
+    /// Zone identifier
+    id: u32,
+    /// Observation direction
+    direction: Option<ObsDirection>,
+    /// Vehicle event log
+    veh_log: Option<VehLog>,
+}
+
 /// RTMS Echo sensor connection
 pub struct Sensor {
     /// HTTP client
     client: http::Client,
-    /// Vehicle event logs
-    veh_logs: Vec<VehLog>,
-    /// Zone identifiers and directions
-    zones: Vec<(ZoneId, Option<ObsDirection>)>,
+    /// Detection zones
+    zones: Vec<Zone>,
 }
 
 impl VehicleData {
@@ -99,30 +108,46 @@ impl VehicleData {
     }
 }
 
-impl Sensor {
-    /// Create a new RTMS Echo sensor connection
-    pub async fn new(host: &str, detectors: &[&str]) -> Result<Self, Error> {
-        let client = http::Client::new(host);
-        let mut veh_logs = Vec::with_capacity(detectors.len());
-        for det_id in detectors {
-            veh_logs.push(VehLog::new(det_id).await?);
+impl Zone {
+    /// Create a new zone
+    fn new(id: u32) -> Self {
+        Zone {
+            id,
+            direction: None,
+            veh_log: None,
         }
-        let zones = Vec::new();
-        Ok(Sensor {
-            client,
-            veh_logs,
-            zones,
-        })
     }
 
-    /// Lookup vehicle event log for a zone index
-    fn veh_log(&mut self, zone_idx: usize) -> Option<&mut VehLog> {
-        if zone_idx < self.veh_logs.len() {
-            Some(&mut self.veh_logs[zone_idx])
-        } else {
-            log::warn!("No vehicle log for zone: {zone_idx}");
-            None
+    /// Append a vehicle to log
+    async fn log_append(&mut self, veh: &VehicleData) -> Result<(), Error> {
+        let dir = self.check_direction(veh);
+        match &mut self.veh_log {
+            Some(veh_log) => {
+                let wrong_way = dir != veh.direction;
+                let veh = veh.server_recorded(wrong_way);
+                veh_log.append(&veh).await?;
+            }
+            None => log::warn!("No log for zone: {}", self.id),
         }
+        Ok(())
+    }
+
+    /// Check direction for a vehicle
+    fn check_direction(&mut self, veh: &VehicleData) -> ObsDirection {
+        match self.direction {
+            Some(dir) => return dir,
+            None => self.direction = Some(veh.direction),
+        }
+        veh.direction
+    }
+}
+
+impl Sensor {
+    /// Create a new RTMS Echo sensor connection
+    pub async fn new(host: &str) -> Result<Self, Error> {
+        let client = http::Client::new(host);
+        let zones = Vec::new();
+        Ok(Sensor { client, zones })
     }
 
     /// Login with user credentials
@@ -139,16 +164,44 @@ impl Sensor {
         Ok(())
     }
 
+    /// Initialize detector zones
+    pub async fn init_detector_zones(
+        &mut self,
+        dets: &HashMap<usize, &str>,
+    ) -> Result<(), Error> {
+        let zones = self.poll_zone_identifiers().await?;
+        self.zones = Vec::with_capacity(zones.len());
+        for (i, zone) in zones.iter().enumerate() {
+            log::debug!("{zone:?}");
+            let id = zone.id;
+            let mut zone = Zone::new(id);
+            let i1 = i + 1;
+            if let Some(det) = dets.get(&i1) {
+                let veh_log = VehLog::new(det).await?;
+                zone.veh_log = Some(veh_log);
+            }
+        }
+        for (i1, det) in dets {
+            if *i1 < 1 || *i1 > zones.len() {
+                log::warn!("Invalid zone for detector: {det}, #{i1}");
+            }
+        }
+        Ok(())
+    }
+
+    /// Poll the sensor for Zone Identifiers
+    async fn poll_zone_identifiers(&self) -> Result<Vec<ZoneId>, Error> {
+        let body = self.client.get("api/v1/zone-identifiers").await?;
+        let zones: Vec<ZoneId> = serde_json::from_slice(&body)?;
+        Ok(zones)
+    }
+
     /// Poll the sensor for vehicle events
     pub async fn periodic_poll(
         &mut self,
         per: u32,
         _per_long: u32,
     ) -> Result<(), Error> {
-        let zones = self.poll_zone_identifiers().await?;
-        for zone in zones {
-            log::debug!("{zone:?}");
-        }
         // FIXME: use per_long interval to poll for this
         let records = self.poll_input_voltage().await?;
         for record in records {
@@ -157,52 +210,26 @@ impl Sensor {
         self.collect_vehicle_data(per).await
     }
 
-    /// Poll the sensor for Zone Identifiers
-    pub async fn poll_zone_identifiers(
-        &mut self,
-    ) -> Result<Vec<ZoneId>, Error> {
-        let body = self.client.get("api/v1/zone-identifiers").await?;
-        let zones: Vec<ZoneId> = serde_json::from_slice(&body)?;
-        self.zones = zones.iter().map(|z| (z.clone(), None)).collect();
-        Ok(zones)
+    /// Poll the sensor for input voltage records
+    async fn poll_input_voltage(&self) -> Result<Vec<InputVoltage>, Error> {
+        let body = self.client.get("api/v1/input-voltage?count=1").await?;
+        let records = serde_json::from_slice(&body)?;
+        Ok(records)
     }
 
-    /// Check direction for a vehicle
-    fn check_direction(&mut self, veh: &VehicleData) -> ObsDirection {
-        for (zone, dir) in self.zones.iter_mut() {
+    /// Lookup zone for vehicle data
+    fn zone_mut(&mut self, veh: &VehicleData) -> Option<&mut Zone> {
+        for zone in self.zones.iter_mut() {
             if veh.zone_id == zone.id {
-                match dir {
-                    Some(dir) => return *dir,
-                    None => *dir = Some(veh.direction),
-                }
-            }
-        }
-        veh.direction
-    }
-
-    /// Lookup zone index for vehicle data
-    fn zone_idx(&self, veh: &VehicleData) -> Option<usize> {
-        for (i, (zone, _dir)) in self.zones.iter().enumerate() {
-            if veh.zone_id == zone.id {
-                return Some(i);
+                return Some(zone);
             }
         }
         log::warn!("Unknown zoneId for vehicle: {veh:?}");
         None
     }
 
-    /// Poll the sensor for input voltage records
-    pub async fn poll_input_voltage(&self) -> Result<Vec<InputVoltage>, Error> {
-        let body = self.client.get("api/v1/input-voltage?count=1").await?;
-        let records = serde_json::from_slice(&body)?;
-        Ok(records)
-    }
-
     /// Collect vehicle data
-    pub async fn collect_vehicle_data(
-        &mut self,
-        per: u32,
-    ) -> Result<(), Error> {
+    async fn collect_vehicle_data(&mut self, per: u32) -> Result<(), Error> {
         let host = self.client.host();
         let req = format!("ws://{host}/api/v1/live-vehicle-data")
             .into_client_request()?;
@@ -251,13 +278,8 @@ impl Sensor {
     /// Log a vehicle event
     async fn log_event(&mut self, veh: VehicleData) -> Result<(), Error> {
         log::debug!("veh data: {veh:?}");
-        let dir = self.check_direction(&veh);
-        if let Some(idx) = self.zone_idx(&veh)
-            && let Some(veh_log) = self.veh_log(idx)
-        {
-            let wrong_way = dir != veh.direction;
-            let veh = veh.server_recorded(wrong_way);
-            veh_log.append(&veh).await?;
+        if let Some(zone) = self.zone_mut(&veh) {
+            zone.log_append(&veh).await?;
         }
         Ok(())
     }
