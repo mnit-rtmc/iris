@@ -12,7 +12,7 @@
 //
 use crate::http;
 
-use crate::error::Error;
+use crate::error::{Error, Result};
 use crate::event::{Stamp, VehEvent, VehLog};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{SinkExt, StreamExt};
@@ -119,7 +119,7 @@ impl Zone {
     }
 
     /// Append a vehicle to log
-    async fn log_append(&mut self, veh: &VehicleData) -> Result<(), Error> {
+    async fn log_append(&mut self, veh: &VehicleData) -> Result<()> {
         let dir = self.check_direction(veh);
         match &mut self.veh_log {
             Some(veh_log) => {
@@ -144,14 +144,14 @@ impl Zone {
 
 impl Sensor {
     /// Create a new RTMS Echo sensor connection
-    pub async fn new(host: &str) -> Result<Self, Error> {
+    pub async fn new(host: &str) -> Result<Self> {
         let client = http::Client::new(host);
         let zones = Vec::new();
         Ok(Sensor { client, zones })
     }
 
     /// Login with user credentials
-    pub async fn login(&mut self, user: &str, pass: &str) -> Result<(), Error> {
+    pub async fn login(&mut self, user: &str, pass: &str) -> Result<()> {
         let body =
             format!("{{\"username\": \"{user}\", \"password\": \"{pass}\" }}");
         let resp = self.client.post("api/v1/login", &body).await?;
@@ -168,7 +168,7 @@ impl Sensor {
     pub async fn init_detector_zones(
         &mut self,
         dets: &HashMap<usize, &str>,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         let zones = self.poll_zone_identifiers().await?;
         self.zones = Vec::with_capacity(zones.len());
         for (i, zone) in zones.iter().enumerate() {
@@ -195,7 +195,7 @@ impl Sensor {
     }
 
     /// Poll the sensor for Zone Identifiers
-    async fn poll_zone_identifiers(&self) -> Result<Vec<ZoneId>, Error> {
+    async fn poll_zone_identifiers(&self) -> Result<Vec<ZoneId>> {
         let body = self.client.get("api/v1/zone-identifiers").await?;
         let zones: Vec<ZoneId> = serde_json::from_slice(&body)?;
         Ok(zones)
@@ -206,7 +206,7 @@ impl Sensor {
         &mut self,
         per: u32,
         _per_long: u32,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         // FIXME: use per_long interval to poll for this
         let records = self.poll_input_voltage().await?;
         for record in records {
@@ -216,7 +216,7 @@ impl Sensor {
     }
 
     /// Poll the sensor for input voltage records
-    async fn poll_input_voltage(&self) -> Result<Vec<InputVoltage>, Error> {
+    async fn poll_input_voltage(&self) -> Result<Vec<InputVoltage>> {
         let body = self.client.get("api/v1/input-voltage?count=1").await?;
         let records = serde_json::from_slice(&body)?;
         Ok(records)
@@ -234,7 +234,7 @@ impl Sensor {
     }
 
     /// Collect vehicle data
-    async fn collect_vehicle_data(&mut self, per: u32) -> Result<(), Error> {
+    async fn collect_vehicle_data(&mut self, per: u32) -> Result<()> {
         let host = self.client.host();
         let req = format!("ws://{host}/api/v1/live-vehicle-data")
             .into_client_request()?;
@@ -253,7 +253,7 @@ impl Sensor {
     async fn read_messages(
         &mut self,
         mut stream: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         while let Some(msg) = stream.next().await {
             match msg? {
                 Message::Text(bytes) => {
@@ -281,7 +281,7 @@ impl Sensor {
     }
 
     /// Log a vehicle event
-    async fn log_event(&mut self, veh: VehicleData) -> Result<(), Error> {
+    async fn log_event(&mut self, veh: VehicleData) -> Result<()> {
         log::debug!("veh data: {veh:?}");
         if let Some(zone) = self.zone_mut(&veh) {
             zone.log_append(&veh).await?;
@@ -294,7 +294,7 @@ impl Sensor {
 async fn send_pings(
     mut sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
     per: u32,
-) -> Result<(), Error> {
+) -> Result<()> {
     let mut ticker = interval(Duration::from_secs(u64::from(per)));
     ticker.tick().await;
     loop {

@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Error;
+use crate::error::{Error, Result};
 use bytes::Bytes;
 use http_body_util::{BodyExt, Empty};
 use hyper::body::Incoming;
@@ -49,7 +49,7 @@ impl Client {
     }
 
     /// Make a `GET` request
-    pub async fn get(&self, path: &str) -> Result<Vec<u8>, Error> {
+    pub async fn get(&self, path: &str) -> Result<Vec<u8>> {
         let addr = format!("{}:80", self.host);
         let stream = TcpStream::connect(addr).await?;
         let io = TokioIo::new(stream);
@@ -70,7 +70,7 @@ impl Client {
     }
 
     /// Make an http `POST` request (JSON)
-    pub async fn post(&self, path: &str, body: &str) -> Result<Vec<u8>, Error> {
+    pub async fn post(&self, path: &str, body: &str) -> Result<Vec<u8>> {
         let addr = format!("{}:80", self.host);
         let stream = TcpStream::connect(addr).await?;
         let io = TokioIo::new(stream);
@@ -89,7 +89,7 @@ impl Client {
 }
 
 /// Parse HTTP response
-async fn parse_response(mut res: Response<Incoming>) -> Result<Vec<u8>, Error> {
+async fn parse_response(mut res: Response<Incoming>) -> Result<Vec<u8>> {
     let status = res.status();
     if !status.is_success() {
         log::warn!("Status: {status:?}");

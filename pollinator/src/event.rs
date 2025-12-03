@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::Error;
+use crate::error::Result;
 use jiff::Zoned;
 use std::path::PathBuf;
 use tokio::fs::{File, create_dir_all, try_exists};
@@ -103,7 +103,7 @@ impl Stamp {
     }
 
     /// Make a file
-    async fn make_file(&self, det_id: &str) -> Result<File, Error> {
+    async fn make_file(&self, det_id: &str) -> Result<File> {
         let mut path = self.build_path();
         if !try_exists(&path).await? {
             log::info!("creating dir: {path:?}");
@@ -192,7 +192,7 @@ impl VehEvent {
 
 impl VehLog {
     /// Make a vehicle event log file
-    pub async fn new(det_id: &str) -> Result<Self, Error> {
+    pub async fn new(det_id: &str) -> Result<Self> {
         let det_id = det_id.to_string();
         let stamp = Stamp::now();
         let file = stamp.make_file(&det_id).await?;
@@ -204,7 +204,7 @@ impl VehLog {
     }
 
     /// Append vehicle data to `.vev` log file
-    pub async fn append(&mut self, ev: &VehEvent) -> Result<(), Error> {
+    pub async fn append(&mut self, ev: &VehEvent) -> Result<()> {
         if self.stamp.0.date() != ev.stamp.0.date() {
             self.stamp = ev.stamp.clone();
             self.file = self.stamp.make_file(&self.det_id).await?;
