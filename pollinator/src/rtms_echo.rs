@@ -172,18 +172,23 @@ impl Sensor {
         let zones = self.poll_zone_identifiers().await?;
         self.zones = Vec::with_capacity(zones.len());
         for (i, zone) in zones.iter().enumerate() {
-            log::debug!("{zone:?}");
             let mut zone = Zone::new(zone.id);
-            let i1 = i + 1;
-            if let Some(det) = dets.get(&i1) {
-                let veh_log = VehLog::new(det).await?;
-                zone.veh_log = Some(veh_log);
+            let pin = i + 1;
+            match dets.get(&pin) {
+                Some(det) => {
+                    let veh_log = VehLog::new(det).await?;
+                    zone.veh_log = Some(veh_log);
+                    log::info!("pin #{pin}, zone: {}, det: {det}", zone.id);
+                }
+                None => {
+                    log::info!("pin #{pin}, zone: {}, NO detector", zone.id)
+                }
             }
             self.zones.push(zone);
         }
-        for (i1, det) in dets {
-            if *i1 < 1 || *i1 > zones.len() {
-                log::warn!("Invalid zone for detector: {det}, #{i1}");
+        for (pin, det) in dets {
+            if *pin < 1 || *pin > zones.len() {
+                log::warn!("Invalid pin #{pin} for detector: {det}");
             }
         }
         Ok(())
