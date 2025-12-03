@@ -33,17 +33,5 @@ async fn main() -> Result<(), Error> {
         ["X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9", "X10"];
     let mut sensor = Sensor::new(&host, &detectors).await?;
     sensor.login(&user, &pass).await?;
-
-    let zones = sensor.poll_zone_identifiers().await?;
-    for zone in zones {
-        log::debug!("{zone:?}");
-    }
-
-    let records = sensor.poll_input_voltage().await?;
-    for record in records {
-        log::debug!("{record:?}");
-    }
-
-    sensor.collect_vehicle_data().await?;
-    Ok(())
+    sensor.periodic_poll(30, 300).await
 }

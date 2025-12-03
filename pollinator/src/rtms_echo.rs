@@ -139,6 +139,24 @@ impl Sensor {
         Ok(())
     }
 
+    /// Poll the sensor for vehicle events
+    pub async fn periodic_poll(
+        &mut self,
+        per: u32,
+        _per_long: u32,
+    ) -> Result<(), Error> {
+        let zones = self.poll_zone_identifiers().await?;
+        for zone in zones {
+            log::debug!("{zone:?}");
+        }
+        // FIXME: use per_long interval to poll for this
+        let records = self.poll_input_voltage().await?;
+        for record in records {
+            log::debug!("{record:?}");
+        }
+        self.collect_vehicle_data(per).await
+    }
+
     /// Poll the sensor for Zone Identifiers
     pub async fn poll_zone_identifiers(
         &mut self,
@@ -181,7 +199,10 @@ impl Sensor {
     }
 
     /// Collect vehicle data
-    pub async fn collect_vehicle_data(&mut self) -> Result<(), Error> {
+    pub async fn collect_vehicle_data(
+        &mut self,
+        per: u32,
+    ) -> Result<(), Error> {
         let host = self.client.host();
         let req = format!("ws://{host}/api/v1/live-vehicle-data")
             .into_client_request()?;
@@ -191,7 +212,7 @@ impl Sensor {
             None => log::info!("WebSocket connected, waiting..."),
         }
         let (sink, stream) = stream.split();
-        let (r0, r1) = join![send_pings(sink), self.read_messages(stream),];
+        let (r0, r1) = join![send_pings(sink, per), self.read_messages(stream)];
         r0?;
         r1
     }
@@ -245,8 +266,9 @@ impl Sensor {
 /// Send ping messages to websocket at a regular interval
 async fn send_pings(
     mut sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
+    per: u32,
 ) -> Result<(), Error> {
-    let mut ticker = interval(Duration::from_secs(30));
+    let mut ticker = interval(Duration::from_secs(u64::from(per)));
     ticker.tick().await;
     loop {
         ticker.tick().await;
