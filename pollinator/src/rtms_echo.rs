@@ -173,13 +173,13 @@ impl Sensor {
         self.zones = Vec::with_capacity(zones.len());
         for (i, zone) in zones.iter().enumerate() {
             log::debug!("{zone:?}");
-            let id = zone.id;
-            let mut zone = Zone::new(id);
+            let mut zone = Zone::new(zone.id);
             let i1 = i + 1;
             if let Some(det) = dets.get(&i1) {
                 let veh_log = VehLog::new(det).await?;
                 zone.veh_log = Some(veh_log);
             }
+            self.zones.push(zone);
         }
         for (i1, det) in dets {
             if *i1 < 1 || *i1 > zones.len() {

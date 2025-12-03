@@ -42,7 +42,6 @@ async fn main() -> Result<(), Error> {
     detectors.insert(7, "X7");
     detectors.insert(8, "X8");
     detectors.insert(9, "X9");
-    detectors.insert(10, "X10");
     sensor.init_detector_zones(&detectors).await?;
     sensor.periodic_poll(30, 300).await
 }
