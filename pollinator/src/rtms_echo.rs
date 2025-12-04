@@ -144,8 +144,8 @@ impl Zone {
 
 impl Sensor {
     /// Create a new RTMS Echo sensor connection
-    pub async fn new(host: &str) -> Result<Self> {
-        let client = http::Client::new(host);
+    pub async fn new(uri: &str) -> Result<Self> {
+        let client = http::Client::new(uri);
         let zones = Vec::new();
         Ok(Sensor { client, zones })
     }
@@ -235,8 +235,8 @@ impl Sensor {
 
     /// Collect vehicle data
     async fn collect_vehicle_data(&mut self, per: u32) -> Result<()> {
-        let host = self.client.host();
-        let req = format!("ws://{host}/api/v1/live-vehicle-data")
+        let hostport = self.client.hostport()?;
+        let req = format!("ws://{hostport}/api/v1/live-vehicle-data")
             .into_client_request()?;
         let (stream, res) = connect_async(req).await?;
         match res.into_body() {

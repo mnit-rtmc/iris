@@ -40,8 +40,8 @@ SELECT row_to_json(row)::text FROM (
 /// Sensor connector configuration
 #[derive(Debug, Deserialize, PartialEq)]
 struct Connector {
-    /// Host name or IP address
-    host: String,
+    /// uri address or host name
+    uri: String,
     /// User name
     user: Option<String>,
     /// Password
@@ -59,9 +59,9 @@ struct Connector {
 /// Command-line arguments
 #[derive(FromArgs)]
 struct Args {
-    /// host name or IP address
-    #[argh(option, short = 'h')]
-    host: Option<String>,
+    /// uri address or host name
+    #[argh(option, short = 'a')]
+    uri: Option<String>,
     /// user name
     #[argh(option, short = 'u')]
     user: Option<String>,
@@ -72,7 +72,7 @@ struct Args {
 
 impl Connector {
     /// Create a new connector
-    fn new(host: String, user: String, password: String) -> Self {
+    fn new(uri: String, user: String, password: String) -> Self {
         let pins = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
         let detectors = vec![
             "X1".to_string(),
@@ -86,7 +86,7 @@ impl Connector {
             "X9".to_string(),
         ];
         Connector {
-            host,
+            uri,
             user: Some(user),
             password: Some(password),
             per_s: 30,
@@ -107,14 +107,14 @@ impl Connector {
 
     /// Run requested polling
     async fn run(&self) -> Result<()> {
-        log::info!("connecting to {}", &self.host);
-        let mut sensor = Sensor::new(&self.host).await?;
+        log::info!("connecting to {}", &self.uri);
+        let mut sensor = Sensor::new(&self.uri).await?;
         let user = &self.user.as_ref().map_or("", |u| u);
         let password = &self.password.as_ref().map_or("", |p| p);
         sensor.login(user, password).await?;
         sensor.init_detector_zones(&self.make_detectors()).await?;
         sensor.periodic_poll(self.per_s, self.long_per_s).await?;
-        log::warn!("disconnected from {}", &self.host);
+        log::warn!("disconnected from {}", &self.uri);
         Ok(())
     }
 }
@@ -122,13 +122,13 @@ impl Connector {
 impl Args {
     /// Get connector
     async fn connector(self) -> Result<Option<Connector>> {
-        let any = self.host.is_some()
+        let any = self.uri.is_some()
             || self.user.is_some()
             || self.password.is_some();
-        if let (Some(host), Some(user), Some(password)) =
-            (self.host, self.user, self.password)
+        if let (Some(uri), Some(user), Some(password)) =
+            (self.uri, self.user, self.password)
         {
-            return Ok(Some(Connector::new(host, user, password)));
+            return Ok(Some(Connector::new(uri, user, password)));
         }
         if any {
             return Err(Error::InvalidConfiguration);

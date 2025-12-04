@@ -22,25 +22,30 @@ use tokio::net::TcpStream;
 /// HTTP client
 #[derive(Debug, Default)]
 pub struct Client {
-    /// Host name / IP address
-    host: String,
+    /// URI address
+    uri: String,
     /// Bearer token
     bearer_token: Option<String>,
 }
 
 impl Client {
     /// Make a new HTTP client
-    pub fn new(host: &str) -> Self {
-        let host = host.to_string();
+    pub fn new(uri: &str) -> Self {
+        let uri = uri.to_string();
         Client {
-            host,
+            uri,
             bearer_token: None,
         }
     }
 
-    /// Get the hostname / IP address
-    pub fn host(&self) -> &str {
-        &self.host
+    /// Get host and port of URI
+    pub fn hostport(&self) -> Result<String> {
+        let uri = self.uri.parse::<Uri>()?;
+        let mut hostport =
+            uri.host().ok_or(Error::InvalidConfiguration)?.to_string();
+        let port = uri.port_u16().unwrap_or(80);
+        hostport.push_str(&format!(":{port}"));
+        Ok(hostport)
     }
 
     /// Set bearer token
@@ -50,13 +55,13 @@ impl Client {
 
     /// Make a `GET` request
     pub async fn get(&self, path: &str) -> Result<Vec<u8>> {
-        let addr = format!("{}:80", self.host);
-        let stream = TcpStream::connect(addr).await?;
+        let hostport = self.hostport()?;
+        let stream = TcpStream::connect(&hostport).await?;
         let io = TokioIo::new(stream);
         let (mut sender, conn) =
             hyper::client::conn::http1::handshake(io).await?;
         let conn_task = tokio::spawn(conn);
-        let uri = format!("http://{}/{path}", self.host).parse::<Uri>()?;
+        let uri = format!("http://{hostport}/{path}").parse::<Uri>()?;
         let mut builder = Request::get(uri);
         if let Some(token) = &self.bearer_token {
             builder =
@@ -71,13 +76,13 @@ impl Client {
 
     /// Make an http `POST` request (JSON)
     pub async fn post(&self, path: &str, body: &str) -> Result<Vec<u8>> {
-        let addr = format!("{}:80", self.host);
-        let stream = TcpStream::connect(addr).await?;
+        let hostport = self.hostport()?;
+        let stream = TcpStream::connect(&hostport).await?;
         let io = TokioIo::new(stream);
         let (mut sender, conn) =
             hyper::client::conn::http1::handshake(io).await?;
         let conn_task = tokio::spawn(conn);
-        let uri = format!("http://{}/{path}", self.host).parse::<Uri>()?;
+        let uri = format!("http://{hostport}/{path}").parse::<Uri>()?;
         let req = Request::post(uri)
             .header("content-type", "application/json")
             .body(body.to_string())?;
