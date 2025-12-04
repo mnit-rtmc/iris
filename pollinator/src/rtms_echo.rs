@@ -46,6 +46,30 @@ SELECT row_to_json(row)::text FROM (
        WHERE protocol = 31 AND poll_enabled = true AND condition = 1
 ) row"#;
 
+/// SQL to connect comm_link
+const COMM_LINK_CONNECT: &str = "\
+  UPDATE iris.comm_link \
+  SET connected = true \
+  WHERE name = '$1'";
+
+/// SQL to connect controller
+const CONTROLLER_CONNECT: &str = "\
+  UPDATE iris.controller \
+  SET fail_time = NULL \
+  WHERE name = '$1'";
+
+/// SQL to disconnect comm_link
+const COMM_LINK_DISCONNECT: &str = "\
+  UPDATE iris.comm_link \
+  SET connected = false \
+  WHERE name = '$1'";
+
+/// SQL to disconnect controller
+const CONTROLLER_DISCONNECT: &str = "\
+  UPDATE iris.controller \
+  SET fail_time = now() \
+  WHERE name = '$1'";
+
 /// Authentication response
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -216,8 +240,7 @@ impl Default for SensorCfg {
 
 impl SensorCfg {
     /// Lookup all sensor configurations in database
-    pub async fn lookup_all(db_name: &str) -> Result<Vec<Self>> {
-        let db = Database::new(db_name).await?;
+    pub async fn lookup_all(db: Database) -> Result<Vec<Self>> {
         let client = db.client().await?;
         let params: &[&str] = &[];
         let mut cfgs = Vec::new();
@@ -262,12 +285,14 @@ impl SensorCfg {
     }
 
     /// Run requested polling
-    pub async fn run(self) -> Result<()> {
+    pub async fn run(self, db: Option<Database>) -> Result<()> {
         loop {
             log::info!("connecting to {}", &self.comm_link);
-            let res = self.do_run().await;
+            let res = self.do_run(db.clone()).await;
             log::info!("disconnected from {}", &self.comm_link);
-            // FIXME: update controller fail_time
+            if let Some(db) = &db {
+                self.log_disconnect(db.clone()).await?;
+            }
             if let Err(Error::StreamDisconnected) = &res {
                 continue;
             }
@@ -279,14 +304,56 @@ impl SensorCfg {
     }
 
     /// Run requested sensor polling
-    async fn do_run(&self) -> Result<()> {
+    async fn do_run(&self, db: Option<Database>) -> Result<()> {
         let mut sensor = Sensor::new(&self.uri).await?;
         let user = &self.user.as_ref().map_or("", |u| u);
         let password = &self.password.as_ref().map_or("", |p| p);
         sensor.login(user, password).await?;
-        // FIXME: clear controller fail_time
+        if let Some(db) = &db {
+            self.log_connect(db.clone()).await?;
+        }
         sensor.init_detector_zones(&self.make_detectors()).await?;
         sensor.periodic_poll(self.per_s, self.long_per_s).await?;
+        Ok(())
+    }
+
+    /// Log sensor connect in database
+    async fn log_connect(&self, db: Database) -> Result<()> {
+        let mut client = db.client().await?;
+        let transaction = client.transaction().await?;
+        let rows = transaction
+            .execute(COMM_LINK_CONNECT, &[&self.comm_link])
+            .await?;
+        if rows != 1 {
+            return Err(Error::DbUpdate);
+        }
+        let rows = transaction
+            .execute(CONTROLLER_CONNECT, &[&self.controller])
+            .await?;
+        if rows != 1 {
+            return Err(Error::DbUpdate);
+        }
+        transaction.commit().await?;
+        Ok(())
+    }
+
+    /// Log sensor disconnect in database
+    async fn log_disconnect(&self, db: Database) -> Result<()> {
+        let mut client = db.client().await?;
+        let transaction = client.transaction().await?;
+        let rows = transaction
+            .execute(COMM_LINK_DISCONNECT, &[&self.comm_link])
+            .await?;
+        if rows != 1 {
+            return Err(Error::DbUpdate);
+        }
+        let rows = transaction
+            .execute(CONTROLLER_DISCONNECT, &[&self.controller])
+            .await?;
+        if rows != 1 {
+            return Err(Error::DbUpdate);
+        }
+        transaction.commit().await?;
         Ok(())
     }
 }

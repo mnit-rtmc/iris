@@ -12,7 +12,7 @@
 //
 use argh::FromArgs;
 use pollinator::rtms_echo::SensorCfg;
-use pollinator::{Error, Result};
+use pollinator::{Database, Error, Result};
 
 /// Command-line arguments
 #[derive(FromArgs)]
@@ -46,8 +46,23 @@ impl Args {
         if any {
             return Err(Error::InvalidConfiguration);
         }
-        SensorCfg::lookup_all("tms").await
+        Ok(vec![])
     }
+}
+
+/// Poll sensor configurations
+async fn poll_sensors(
+    cfgs: Vec<SensorCfg>,
+    db: Option<Database>,
+) -> Result<()> {
+    let mut handles = Vec::with_capacity(cfgs.len());
+    for cfg in cfgs {
+        handles.push(tokio::spawn(cfg.run(db.clone())));
+    }
+    for handle in handles {
+        handle.await??;
+    }
+    Ok(())
 }
 
 /// Main entry point
@@ -56,12 +71,12 @@ async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let args: Args = argh::from_env();
     let cfgs = args.sensor_configs().await?;
-    let mut handles = Vec::with_capacity(cfgs.len());
-    for cfg in cfgs {
-        handles.push(tokio::spawn(cfg.run()));
-    }
-    for handle in handles {
-        handle.await??;
+    if cfgs.is_empty() {
+        let db = Database::new("tms").await?;
+        let cfgs = SensorCfg::lookup_all(db.clone()).await?;
+        poll_sensors(cfgs, Some(db)).await?;
+    } else {
+        poll_sensors(cfgs, None).await?;
     }
     Ok(())
 }

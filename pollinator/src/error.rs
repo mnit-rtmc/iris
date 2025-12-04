@@ -76,6 +76,10 @@ pub enum Error {
     /// Stream disconnected error
     #[error("Stream disconnected")]
     StreamDisconnected,
+
+    /// Database update error
+    #[error("Database update error")]
+    DbUpdate,
 }
 
 impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
