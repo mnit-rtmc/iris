@@ -138,7 +138,7 @@ struct Zone {
 pub struct SensorCfg {
     /// Comm link name
     comm_link: String,
-    /// uri address or host name
+    /// URI address or host name
     uri: String,
     /// Poll period
     per_s: u32,
@@ -512,6 +512,7 @@ async fn send_pings(
     mut sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
     per: u32,
 ) -> Result<()> {
+    // FIXME: first, wait until start of next interval
     let mut ticker = interval(Duration::from_secs(u64::from(per)));
     ticker.tick().await;
     loop {
