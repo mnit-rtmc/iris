@@ -50,25 +50,25 @@ SELECT row_to_json(row)::text FROM (
 const COMM_LINK_CONNECT: &str = "\
   UPDATE iris.comm_link \
   SET connected = true \
-  WHERE name = '$1'";
+  WHERE name = $1";
 
 /// SQL to connect controller
 const CONTROLLER_CONNECT: &str = "\
   UPDATE iris.controller \
   SET fail_time = NULL \
-  WHERE name = '$1'";
+  WHERE name = $1";
 
 /// SQL to disconnect comm_link
 const COMM_LINK_DISCONNECT: &str = "\
   UPDATE iris.comm_link \
   SET connected = false \
-  WHERE name = '$1'";
+  WHERE name = $1";
 
 /// SQL to disconnect controller
 const CONTROLLER_DISCONNECT: &str = "\
   UPDATE iris.controller \
   SET fail_time = now() \
-  WHERE name = '$1'";
+  WHERE name = $1";
 
 /// Authentication response
 #[derive(Debug, Deserialize, PartialEq)]
