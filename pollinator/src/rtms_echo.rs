@@ -426,6 +426,7 @@ impl Sensor {
         // FIXME: use per_long interval to poll for this
         let records = self.poll_input_voltage().await?;
         for record in records {
+            // FIXME: store in controller status
             log::debug!("{record:?}");
         }
         self.collect_vehicle_data(per).await
