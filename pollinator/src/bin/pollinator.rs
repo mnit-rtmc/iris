@@ -11,50 +11,8 @@
 // GNU General Public License for more details.
 //
 use argh::FromArgs;
-use futures_util::{TryStreamExt, pin_mut};
-use pollinator::rtms_echo::Sensor;
-use pollinator::{Database, Error, Result};
-use serde::Deserialize;
-use std::collections::HashMap;
-
-/// SQL query for RTMS Echo sensors
-const QUERY: &str = r#"
-SELECT row_to_json(row)::text FROM (
-       SELECT l.name AS comm_link, uri, split_part(c.password, ':', 1) AS user,
-              split_part(c.password, ':', 2) AS password,
-              poll_period_sec AS per_s, long_poll_period_sec AS long_per_s,
-              pins, detectors
-       FROM iris.comm_link l
-       JOIN iris.comm_config cc ON cc.name = l.comm_config
-       JOIN iris.controller c ON c.comm_link = l.name
-       INNER JOIN (
-              SELECT controller,
-                     json_agg(pin ORDER BY pin) AS pins,
-                     json_agg(name ORDER BY pin) AS detectors
-              FROM iris.detector
-              GROUP BY controller
-       ) d ON d.controller = c.name
-       WHERE protocol = 31 AND poll_enabled = true AND condition = 1
-) row"#;
-
-/// Sensor connector configuration
-#[derive(Debug, Deserialize, PartialEq)]
-struct Connector {
-    /// uri address or host name
-    uri: String,
-    /// User name
-    user: Option<String>,
-    /// Password
-    password: Option<String>,
-    /// Poll period
-    per_s: u32,
-    /// Long poll period
-    long_per_s: u32,
-    /// Detector pins
-    pins: Vec<usize>,
-    /// Detector pin mapping
-    detectors: Vec<String>,
-}
+use pollinator::rtms_echo::SensorCfg;
+use pollinator::{Error, Result};
 
 /// Command-line arguments
 #[derive(FromArgs)]
@@ -70,81 +28,25 @@ struct Args {
     password: Option<String>,
 }
 
-impl Connector {
-    /// Create a new connector
-    fn new(uri: String, user: String, password: String) -> Self {
-        let pins = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
-        let detectors = vec![
-            "X1".to_string(),
-            "X2".to_string(),
-            "X3".to_string(),
-            "X4".to_string(),
-            "X5".to_string(),
-            "X6".to_string(),
-            "X7".to_string(),
-            "X8".to_string(),
-            "X9".to_string(),
-        ];
-        Connector {
-            uri,
-            user: Some(user),
-            password: Some(password),
-            per_s: 30,
-            long_per_s: 300,
-            pins,
-            detectors,
-        }
-    }
-
-    /// Make sample detectors
-    fn make_detectors(&self) -> HashMap<usize, &str> {
-        let mut detectors = HashMap::new();
-        for (pin, det) in self.pins.iter().zip(&self.detectors) {
-            detectors.insert(*pin, &det[..]);
-        }
-        detectors
-    }
-
-    /// Run requested polling
-    async fn run(&self) -> Result<()> {
-        log::info!("connecting to {}", &self.uri);
-        let mut sensor = Sensor::new(&self.uri).await?;
-        let user = &self.user.as_ref().map_or("", |u| u);
-        let password = &self.password.as_ref().map_or("", |p| p);
-        sensor.login(user, password).await?;
-        sensor.init_detector_zones(&self.make_detectors()).await?;
-        sensor.periodic_poll(self.per_s, self.long_per_s).await?;
-        log::warn!("disconnected from {}", &self.uri);
-        Ok(())
-    }
-}
-
 impl Args {
-    /// Get connector
-    async fn connector(self) -> Result<Option<Connector>> {
+    /// Get sensor configurations
+    async fn sensor_configs(self) -> Result<Vec<SensorCfg>> {
         let any = self.uri.is_some()
             || self.user.is_some()
             || self.password.is_some();
         if let (Some(uri), Some(user), Some(password)) =
             (self.uri, self.user, self.password)
         {
-            return Ok(Some(Connector::new(uri, user, password)));
+            let cfg = SensorCfg::default()
+                .with_uri(&uri)
+                .with_user(&user)
+                .with_password(&password);
+            return Ok(vec![cfg]);
         }
         if any {
             return Err(Error::InvalidConfiguration);
         }
-        let db = Database::new("tms").await?;
-        let client = db.client().await?;
-        let params: &[&str] = &[];
-        let it = client.query_raw(QUERY, params).await?;
-        pin_mut!(it);
-        while let Some(row) = it.try_next().await? {
-            let json = row.get::<usize, String>(0);
-            let conn: Connector = serde_json::from_str(&json)?;
-            return Ok(Some(conn));
-        }
-        log::warn!("no sensors configured");
-        Ok(None)
+        SensorCfg::lookup_all("tms").await
     }
 }
 
@@ -153,8 +55,13 @@ impl Args {
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let args: Args = argh::from_env();
-    if let Some(conn) = args.connector().await? {
-        conn.run().await?;
+    let cfgs = args.sensor_configs().await?;
+    let mut handles = Vec::with_capacity(cfgs.len());
+    for cfg in cfgs {
+        handles.push(tokio::spawn(cfg.run()));
+    }
+    for handle in handles {
+        handle.await??;
     }
     Ok(())
 }
