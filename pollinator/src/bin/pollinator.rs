@@ -34,18 +34,18 @@ SELECT row_to_json(row)::text FROM (
               FROM iris.detector
               GROUP BY controller
        ) d ON d.controller = c.name
-       WHERE protocol = 31 AND poll_enabled = true
+       WHERE protocol = 31 AND poll_enabled = true AND condition = 1
 ) row"#;
 
-/// Sensor connector
+/// Sensor connector configuration
 #[derive(Debug, Deserialize, PartialEq)]
 struct Connector {
     /// Host name or IP address
     host: String,
     /// User name
-    user: String,
+    user: Option<String>,
     /// Password
-    password: String,
+    password: Option<String>,
     /// Poll period
     per_s: u32,
     /// Long poll period
@@ -87,8 +87,8 @@ impl Connector {
         ];
         Connector {
             host,
-            user,
-            password,
+            user: Some(user),
+            password: Some(password),
             per_s: 30,
             long_per_s: 300,
             pins,
@@ -107,10 +107,15 @@ impl Connector {
 
     /// Run requested polling
     async fn run(&self) -> Result<()> {
+        log::info!("connecting to {}", &self.host);
         let mut sensor = Sensor::new(&self.host).await?;
-        sensor.login(&self.user, &self.password).await?;
+        let user = &self.user.as_ref().map_or("", |u| u);
+        let password = &self.password.as_ref().map_or("", |p| p);
+        sensor.login(user, password).await?;
         sensor.init_detector_zones(&self.make_detectors()).await?;
-        sensor.periodic_poll(self.per_s, self.long_per_s).await
+        sensor.periodic_poll(self.per_s, self.long_per_s).await?;
+        log::warn!("disconnected from {}", &self.host);
+        Ok(())
     }
 }
 
