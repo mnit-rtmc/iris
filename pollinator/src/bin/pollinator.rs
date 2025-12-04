@@ -13,7 +13,7 @@
 use argh::FromArgs;
 use futures_util::{TryStreamExt, pin_mut};
 use pollinator::rtms_echo::Sensor;
-use pollinator::{Database, Result};
+use pollinator::{Database, Error, Result};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -131,7 +131,7 @@ impl Args {
             return Ok(Some(Connector::new(host, user, password)));
         }
         if any {
-            panic!("Invalid arguments");
+            return Err(Error::InvalidConfiguration);
         }
         let db = Database::new("tms").await?;
         let client = db.client().await?;
@@ -143,6 +143,7 @@ impl Args {
             let conn: Connector = serde_json::from_str(&json)?;
             return Ok(Some(conn));
         }
+        log::warn!("no sensors configured");
         Ok(None)
     }
 }

@@ -277,7 +277,7 @@ impl Sensor {
                 _ => (),
             }
         }
-        Err(Error::StreamClosed)
+        Err(Error::StreamDisconnected)
     }
 
     /// Log a vehicle event

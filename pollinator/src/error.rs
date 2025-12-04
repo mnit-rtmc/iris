@@ -69,9 +69,13 @@ pub enum Error {
     #[error("IO {0}")]
     Io(#[from] std::io::Error),
 
-    /// Stream closed error
-    #[error("Stream Closed")]
-    StreamClosed,
+    /// Invalid configuration error
+    #[error("Invalid configuration")]
+    InvalidConfiguration,
+
+    /// Stream disconnected error
+    #[error("Stream disconnected")]
+    StreamDisconnected,
 }
 
 impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
