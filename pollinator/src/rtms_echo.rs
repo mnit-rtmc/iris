@@ -29,10 +29,10 @@ use tungstenite::{Bytes, Message};
 /// SQL query for RTMS Echo sensors
 const QUERY: &str = r#"
 SELECT row_to_json(row)::text FROM (
-       SELECT l.name AS comm_link, uri, split_part(c.password, ':', 1) AS user,
-              split_part(c.password, ':', 2) AS password,
-              poll_period_sec AS per_s, long_poll_period_sec AS long_per_s,
-              pins, detectors
+       SELECT l.name AS comm_link, uri, poll_period_sec AS per_s,
+              long_poll_period_sec AS long_per_s, controller,
+              split_part(c.password, ':', 1) AS user,
+              split_part(c.password, ':', 2) AS password, pins, detectors
        FROM iris.comm_link l
        JOIN iris.comm_config cc ON cc.name = l.comm_config
        JOIN iris.controller c ON c.comm_link = l.name
@@ -112,16 +112,20 @@ struct Zone {
 /// Sensor configuration
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct SensorCfg {
+    /// Comm link name
+    comm_link: String,
     /// uri address or host name
     uri: String,
-    /// User name
-    user: Option<String>,
-    /// Password
-    password: Option<String>,
     /// Poll period
     per_s: u32,
     /// Long poll period
     long_per_s: u32,
+    /// Controller name
+    controller: String,
+    /// User name
+    user: Option<String>,
+    /// Password
+    password: Option<String>,
     /// Detector pins
     pins: Vec<usize>,
     /// Detector pin mapping
@@ -197,11 +201,13 @@ impl Default for SensorCfg {
             "X9".to_string(),
         ];
         SensorCfg {
+            comm_link: String::from("default comm link"),
             uri: String::new(),
-            user: None,
-            password: None,
             per_s: 30,
             long_per_s: 300,
+            controller: String::from("default controller"),
+            user: None,
+            password: None,
             pins,
             detectors,
         }
@@ -257,14 +263,30 @@ impl SensorCfg {
 
     /// Run requested polling
     pub async fn run(self) -> Result<()> {
-        log::info!("connecting to {}", &self.uri);
+        loop {
+            log::info!("connecting to {}", &self.comm_link);
+            let res = self.do_run().await;
+            log::info!("disconnected from {}", &self.comm_link);
+            // FIXME: update controller fail_time
+            if let Err(Error::StreamDisconnected) = &res {
+                continue;
+            }
+            if let Err(err) = res {
+                log::warn!("Sensor err: {err:?}");
+                return Err(err);
+            }
+        }
+    }
+
+    /// Run requested sensor polling
+    async fn do_run(&self) -> Result<()> {
         let mut sensor = Sensor::new(&self.uri).await?;
         let user = &self.user.as_ref().map_or("", |u| u);
         let password = &self.password.as_ref().map_or("", |p| p);
         sensor.login(user, password).await?;
+        // FIXME: clear controller fail_time
         sensor.init_detector_zones(&self.make_detectors()).await?;
         sensor.periodic_poll(self.per_s, self.long_per_s).await?;
-        log::warn!("disconnected from {}", &self.uri);
         Ok(())
     }
 }
