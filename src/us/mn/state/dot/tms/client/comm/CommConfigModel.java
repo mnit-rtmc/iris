@@ -101,8 +101,8 @@ public class CommConfigModel extends ProxyTableModel<CommConfig> {
 				cc.setDescription(value.toString().trim());
 			}
 		});
-		cols.add(new ProxyColumn<CommConfig>("comm.link.pollinator", 56,
-			Boolean.class)
+		cols.add(new ProxyColumn<CommConfig>("comm.config.pollinator",
+			56, Boolean.class)
 		{
 			public Object getValueAt(CommConfig cc) {
 				return cc.getPollinator();
