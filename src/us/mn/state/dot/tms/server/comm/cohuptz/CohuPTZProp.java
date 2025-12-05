@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,9 @@ abstract public class CohuPTZProp extends ControllerProp {
 	/** Cohu camera address range constants */
 	static private final int ADDR_MIN = 1;
 	static private final int ADDR_MAX = 223;
+
+	/** Maximum valid preset number */
+	static public final int MAX_PRESET = 64;
 
 	/** Check drop address validity */
 	static private boolean isAddressValid(int drop) {
@@ -146,7 +149,7 @@ abstract public class CohuPTZProp extends ControllerProp {
 	 * @throws ProtocolException if the given preset number is invalid.
 	 */
 	protected byte getPresetByte(int p) throws ProtocolException {
-		if (p < 1 || p > 64)
+		if (p < 1 || p > MAX_PRESET)
 			throw new ProtocolException("Invalid preset: " + p);
 		else {
 			return (p <= 47)

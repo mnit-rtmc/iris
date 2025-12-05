@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016-2020  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 import static us.mn.state.dot.tms.server.comm.PriorityLevel.COMMAND;
+import static us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZProp.MAX_PRESET;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
@@ -60,15 +61,19 @@ public class CohuPTZPoller extends BasePoller implements CameraPoller {
 	/** Send a "store camera preset" command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		createOp("camera.op.store.preset", c,
-			new OpStorePreset(preset));
+		if (preset >= 1 && preset <= MAX_PRESET) {
+			createOp("camera.op.store.preset", c,
+				new OpStorePreset(preset));
+		}
 	}
 
 	/** Send a "recall camera preset" command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		createOp("camera.op.recall.preset", c,
-			new OpRecallPreset(preset));
+		if (preset >= 1 && preset <= MAX_PRESET) {
+			createOp("camera.op.recall.preset", c,
+				new OpRecallPreset(preset));
+		}
 	}
 
 	/** Send a device request.
