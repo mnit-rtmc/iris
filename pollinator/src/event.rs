@@ -154,8 +154,8 @@ impl VehEvent {
     }
 
     /// Set gap event
-    pub fn gap_event(&mut self, stamp: Option<Stamp>) {
-        self.stamp = stamp.unwrap_or_default();
+    pub fn gap_event(&mut self, stamp: Stamp) {
+        self.stamp = stamp;
         self.mode = Mode::GapEvent;
     }
 

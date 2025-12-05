@@ -186,6 +186,19 @@ impl Zone {
         }
     }
 
+    /// Append a gap to log
+    async fn log_gap(&mut self, stamp: &Stamp) -> Result<()> {
+        match &mut self.veh_log {
+            Some(veh_log) => {
+                let mut veh = VehEvent::default();
+                veh.gap_event(stamp.clone());
+                veh_log.append(&veh).await?;
+            }
+            None => log::warn!("No log for zone: {}", self.id),
+        }
+        Ok(())
+    }
+
     /// Append a vehicle to log
     async fn log_append(&mut self, veh: &VehicleData) -> Result<()> {
         let dir = self.check_direction(veh);
@@ -367,7 +380,7 @@ impl Sensor {
     }
 
     /// Login with user credentials
-    pub async fn login(&mut self, user: &str, pass: &str) -> Result<()> {
+    async fn login(&mut self, user: &str, pass: &str) -> Result<()> {
         let body =
             format!("{{\"username\": \"{user}\", \"password\": \"{pass}\" }}");
         let resp = self.client.post("api/v1/login", &body).await?;
@@ -381,7 +394,7 @@ impl Sensor {
     }
 
     /// Initialize detector zones
-    pub async fn init_detector_zones(
+    async fn init_detector_zones(
         &mut self,
         dets: &HashMap<usize, &str>,
     ) -> Result<()> {
@@ -418,11 +431,7 @@ impl Sensor {
     }
 
     /// Poll the sensor for vehicle events
-    pub async fn periodic_poll(
-        &mut self,
-        per: u32,
-        _per_long: u32,
-    ) -> Result<()> {
+    async fn periodic_poll(&mut self, per: u32, _per_long: u32) -> Result<()> {
         // FIXME: use per_long interval to poll for this
         let records = self.poll_input_voltage().await?;
         for record in records {
@@ -471,6 +480,7 @@ impl Sensor {
         &mut self,
         mut stream: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
     ) -> Result<()> {
+        self.log_gap().await?;
         while let Some(msg) = stream.next().await {
             match msg? {
                 Message::Text(bytes) => {
@@ -495,6 +505,16 @@ impl Sensor {
             }
         }
         Err(Error::StreamDisconnected)
+    }
+
+    /// Log a gap event
+    async fn log_gap(&mut self) -> Result<()> {
+        let stamp = Stamp::now();
+        log::debug!("log gap: {stamp:?}");
+        for zone in &mut self.zones {
+            zone.log_gap(&stamp).await?;
+        }
+        Ok(())
     }
 
     /// Log a vehicle event
