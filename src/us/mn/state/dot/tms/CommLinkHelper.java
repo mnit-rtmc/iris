@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,12 @@ public class CommLinkHelper extends BaseHelper {
 	static public CommLink lookup(String name) {
 		return (CommLink) namespace.lookupObject(CommLink.SONAR_TYPE,
 			name);
+	}
+
+	/** Check if a CommLink is handled by pollinator */
+	static public boolean isPollinator(CommLink cl) {
+		return (cl != null)
+		     && CommConfigHelper.isPollinator(cl.getCommConfig());
 	}
 
 	/** Get the protocol for a CommLink */

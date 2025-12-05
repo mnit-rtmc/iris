@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2020-2023  Minnesota Department of Transportation
+ * Copyright (C) 2020-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,9 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 	/** Description label */
 	private final JLabel description_lbl = createValueLabel();
 
+	/** Pollinator label */
+	private final JLabel pollinator_lbl = createValueLabel();
+
 	/** Protocol label */
 	private final JLabel protocol_lbl = createValueLabel();
 
@@ -82,6 +85,8 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 		add(filler_lbl, Stretch.LAST);
 		add("device.description");
 		add(description_lbl, Stretch.LAST);
+		add("comm.config.pollinator");
+		add(pollinator_lbl, Stretch.LAST);
 		add("comm.config.protocol");
 		add(protocol_lbl, Stretch.LAST);
 		add("comm.config.timeout_ms");
@@ -105,6 +110,10 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 	protected void updateAttrib(CommConfig cc, String a) {
 		if (a == null || a.equals("description"))
 			description_lbl.setText(cc.getDescription());
+		if (a == null || a.equals("pollinator")) {
+			pollinator_lbl.setText(cc.getPollinator() ?
+				"Yes" : "No");
+		}
 		if (a == null || a.equals("protocol")) {
 			protocol_lbl.setText(CommProtocol.fromOrdinal(
 				cc.getProtocol()).toString());
@@ -131,6 +140,7 @@ public class CommConfigPanel extends ProxyPanel<CommConfig> {
 	@Override
 	protected void clearView() {
 		description_lbl.setText("");
+		pollinator_lbl.setText("");
 		protocol_lbl.setText("");
 		timeout_lbl.setText("");
 		period_lbl.setText("");

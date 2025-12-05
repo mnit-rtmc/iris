@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2020  Minnesota Department of Transportation
+ * Copyright (C) 2020-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,5 +55,10 @@ public class CommConfigHelper extends BaseHelper {
 		return (cc != null)
 		      ? CommProtocol.fromOrdinal(cc.getProtocol())
 		      : null;
+	}
+
+	/** Check if a comm config is handled by pollinator */
+	static public boolean isPollinator(CommConfig cc) {
+		return (cc != null) && cc.getPollinator();
 	}
 }

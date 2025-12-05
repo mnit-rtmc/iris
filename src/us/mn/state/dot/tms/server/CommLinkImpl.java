@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2025  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -323,20 +323,24 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Get the device poller */
 	public synchronized DevicePoller getPoller() {
-		if (poll_enabled) {
-			updateConnected();
-			return poller;
-		} else
-			return null;
+		if (!comm_config.getPollinator()) {
+			if (poll_enabled) {
+				updateConnected();
+				return poller;
+			}
+		}
+		return null;
 	}
 
 	/** Recreate the device poller */
 	private synchronized void recreatePoller() {
 		destroyPoller();
-		if (poll_enabled)
-			createPoller();
-		offlineControllers();
-		updateConnected();
+		if (!comm_config.getPollinator()) {
+			if (poll_enabled)
+				createPoller();
+			offlineControllers();
+			updateConnected();
+		}
 	}
 
 	/** Destroy the device poller */

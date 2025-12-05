@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2020-2024  Minnesota Department of Transportation
+ * Copyright (C) 2020-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,11 +35,11 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 
 	/** Load all the comm configs */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, description, protocol, " +
-			"timeout_ms, retry_threshold, poll_period_sec, " +
-			"long_poll_period_sec, idle_disconnect_sec, " +
-			"no_response_disconnect_sec FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, description, pollinator, " +
+			"protocol, timeout_ms, retry_threshold, " +
+			"poll_period_sec, long_poll_period_sec, " +
+			"idle_disconnect_sec, no_response_disconnect_sec " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CommConfigImpl(row));
@@ -63,6 +63,7 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("description", description);
+		map.put("pollinator", pollinator);
 		map.put("protocol", (short) protocol.ordinal());
 		map.put("timeout_ms", timeout_ms);
 		map.put("retry_threshold", retry_threshold);
@@ -83,23 +84,25 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 	private CommConfigImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // description
-		     row.getShort(3),   // protocol
-		     row.getInt(4),     // timeout_ms
-		     row.getInt(5),     // retry_threshold
-		     row.getInt(6),     // poll_period_sec
-		     row.getInt(7),     // long_poll_period_sec
-		     row.getInt(8),     // idle_disconnect_sec
-		     row.getInt(9)      // no_response_disconnect_sec
+		     row.getBoolean(3), // pollinator
+		     row.getShort(4),   // protocol
+		     row.getInt(5),     // timeout_ms
+		     row.getInt(6),     // retry_threshold
+		     row.getInt(7),     // poll_period_sec
+		     row.getInt(8),     // long_poll_period_sec
+		     row.getInt(9),     // idle_disconnect_sec
+		     row.getInt(10)     // no_response_disconnect_sec
 		);
 	}
 
 	/** Create a comm config */
-	private CommConfigImpl(String n, String d, short p, int t, int rt,
-		int pp, int lpp, int idsc, int nrdsc)
+	private CommConfigImpl(String n, String d, boolean po, short pr, int t,
+		int rt, int pp, int lpp, int idsc, int nrdsc)
 	{
 		super(n);
 		description = d;
-		CommProtocol cp = CommProtocol.fromOrdinal(p);
+		pollinator = po;
+		CommProtocol cp = CommProtocol.fromOrdinal(pr);
 		protocol = (cp != null) ? cp : CommProtocol.NTCIP_C;
 		timeout_ms = t;
 		retry_threshold = rt;
@@ -138,6 +141,31 @@ public class CommConfigImpl extends BaseObjectImpl implements CommConfig {
 	@Override
 	public String getDescription() {
 		return description;
+	}
+
+	/** Pollinator flag */
+	private boolean pollinator;
+
+	/** Set pollinator flag */
+	@Override
+	public void setPollinator(boolean po) {
+		testGateArmDisable(name, "set pollinator");
+		pollinator = po;
+		CommLinkImpl.recreatePollers(this);
+	}
+
+	/** Set the pollinator flag */
+	public void doSetPollinator(boolean po) throws TMSException {
+		if (po != pollinator) {
+			store.update(this, "pollinator", po);
+			setPollinator(po);
+		}
+	}
+
+	/** Get pollinator flag */
+	@Override
+	public boolean getPollinator() {
+		return pollinator;
 	}
 
 	/** Communication protocol */

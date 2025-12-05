@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2020-2024  Minnesota Department of Transportation
+ * Copyright (C) 2020-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ public class CommConfigModel extends ProxyTableModel<CommConfig> {
 	@Override
 	protected ArrayList<ProxyColumn<CommConfig>> createColumns() {
 		ArrayList<ProxyColumn<CommConfig>> cols =
-			new ArrayList<ProxyColumn<CommConfig>>(9);
+			new ArrayList<ProxyColumn<CommConfig>>(10);
 		cols.add(new ProxyColumn<CommConfig>("comm.config", 60) {
 			public Object getValueAt(CommConfig cc) {
 				return cc.getName();
@@ -99,6 +99,20 @@ public class CommConfigModel extends ProxyTableModel<CommConfig> {
 			}
 			public void setValueAt(CommConfig cc, Object value) {
 				cc.setDescription(value.toString().trim());
+			}
+		});
+		cols.add(new ProxyColumn<CommConfig>("comm.link.pollinator", 56,
+			Boolean.class)
+		{
+			public Object getValueAt(CommConfig cc) {
+				return cc.getPollinator();
+			}
+			public boolean isEditable(CommConfig cc) {
+				return canWrite(cc, "pollinator");
+			}
+			public void setValueAt(CommConfig cc, Object value) {
+				if (value instanceof Boolean)
+					cc.setPollinator((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<CommConfig>("comm.config.protocol",

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -68,6 +68,12 @@ public class ControllerHelper extends BaseHelper {
 		return (ctrl != null)
 		    && (ctrl.getCondition() == CtrlCondition.ACTIVE.ordinal())
 		    && CommLinkHelper.getPollEnabled(ctrl.getCommLink());
+	}
+
+	/** Check if a controller is handled by pollinator */
+	static public boolean isPollinator(Controller ctrl) {
+		return (ctrl != null)
+		    && CommLinkHelper.isPollinator(ctrl.getCommLink());
 	}
 
 	/** Check if a controller is offline */

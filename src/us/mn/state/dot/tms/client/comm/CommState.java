@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2024  Minnesota Department of Transportation
+ * Copyright (C) 2014-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,10 @@ import java.awt.Color;
  * @author Douglas Lau
  */
 public enum CommState {
-	INACTIVE (new Color(0, 0, 0, 32)),
-	OK       (new Color(96, 96, 255)),
-	OFFLINE  (Color.GRAY);
+	INACTIVE   (new Color(0, 0, 0, 32)),
+	OK         (new Color(96, 96, 255)),
+	OFFLINE    (Color.GRAY),
+	POLLINATOR (new Color(255, 32, 128));
 
 	/** Icon for the comm state */
 	public final ControllerIcon icon;
@@ -41,6 +42,7 @@ public enum CommState {
 			INACTIVE,
 			OK,
 			OFFLINE,
+			POLLINATOR,
 		};
 	}
 }

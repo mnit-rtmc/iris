@@ -70,12 +70,14 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 
 	/** Get a controller comm state */
 	static private CommState getCommState(Controller c) {
-		if (ControllerHelper.isOffline(c))
-			return CommState.OFFLINE;
-		else if (ControllerHelper.isActive(c))
-			return CommState.OK;
-		else
+		if (!ControllerHelper.isActive(c))
 			return CommState.INACTIVE;
+		else if (ControllerHelper.isPollinator(c))
+			return CommState.POLLINATOR;
+		else if (ControllerHelper.isOffline(c))
+			return CommState.OFFLINE;
+		else
+			return CommState.OK;
 	}
 
 	/** Special value for unused drop */
