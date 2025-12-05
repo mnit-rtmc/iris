@@ -54,7 +54,7 @@ public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 	private final HashSet<String> extensions = new HashSet<String>();
 
 	/** Add a file extension */
-	private void addExtension(String ext) {
+	public void addExtension(String ext) {
 		synchronized(extensions) {
 			extensions.add(ext);
 		}

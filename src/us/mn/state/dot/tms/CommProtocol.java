@@ -122,8 +122,8 @@ public enum CommProtocol {
 	/** DR-500 doppler radar (30) */
 	DR_500("DR-500", false),
 
-	/** RTMS Echo vehicle log (31) */
-	RTMS_ECHO_VLOG("RTMS Echo vlog", false),
+	/** RTMS Echo (31) */
+	RTMS_ECHO("RTMS Echo", false),
 
 	/** TransCore E6 tag reader (32) */
 	TRANSCORE_E6("TransCore E6", false),
