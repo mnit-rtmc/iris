@@ -135,9 +135,9 @@ pub const COMM_CONFIG_ALL: &str = "\
 
 /// SQL query for one comm config (secondary)
 pub const COMM_CONFIG_ONE: &str = "\
-  SELECT name, description, protocol, poll_period_sec, long_poll_period_sec, \
-         timeout_ms, retry_threshold, idle_disconnect_sec, \
-         no_response_disconnect_sec \
+  SELECT name, description, pollinator, protocol, poll_period_sec, \
+         long_poll_period_sec, timeout_ms, retry_threshold, \
+         idle_disconnect_sec, no_response_disconnect_sec \
   FROM iris.comm_config \
   WHERE name = $1";
 

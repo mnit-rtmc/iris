@@ -113,7 +113,7 @@ There are a few types of [vehicle detection] data:
 
 ‡ Use "Data per stall" endpoint (URI ending in `/integration/spot`)
 
-⸸ Communicates using `pollinator` service
+⸸ Communicates using [pollinator] service
 
 ## GPS Devices
 
@@ -186,6 +186,7 @@ can be associated with each [controller], using [IO pin] 1.
 [ONVIF]: https://en.wikipedia.org/wiki/ONVIF
 [parking area]: parking_areas.html
 [Pelco]: https://www.pelco.com/
+[pollinator]: https://github.com/mnit-rtmc/iris/tree/master/pollinator
 [PTZ]: cameras.html#pan-tilt-and-zoom
 [ramp meter]: ramp_meters.html
 [streambed]: https://github.com/mnit-rtmc/streambed

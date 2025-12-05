@@ -128,6 +128,7 @@ pub struct CommConfig {
     pub name: String,
     pub description: String,
     // secondary attributes
+    pub pollinator: Option<bool>,
     pub protocol: Option<u32>,
     pub timeout_ms: Option<u32>,
     pub retry_threshold: Option<u32>,
@@ -212,6 +213,13 @@ impl CommConfig {
             .maxlength(20)
             .size(20)
             .value(&self.description);
+        html.end(); /* div */
+        html.div().class("row");
+        html.label().r#for("pollinator").text("Pollinator").end();
+        let pollinator = html.input().id("pollinator").r#type("checkbox");
+        if let Some(true) = self.pollinator {
+            pollinator.checked();
+        }
         html.end(); /* div */
         html.div().class("row");
         html.label().r#for("protocol").text("Protocol").end();
@@ -338,6 +346,7 @@ impl Card for CommConfig {
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("description", &self.description);
+        fields.changed_input("pollinator", self.pollinator);
         fields.changed_select("protocol", self.protocol);
         fields.changed_input("timeout_ms", self.timeout_ms);
         fields.changed_input("retry_threshold", self.retry_threshold);

@@ -15,11 +15,14 @@ A comm configuration is a set of properties which is shared among multiple
 |--------------|-------------|-----------|
 | 👁️  View      | name        |           |
 | 💡 Manage    |             | timeout\_ms, retry\_threshold, idle\_disconnect\_sec, no\_response\_disconnect\_sec |
-| 🔧 Configure | description | protocol, poll\_period\_sec, long\_poll\_period\_sec |
+| 🔧 Configure | description | pollinator, protocol, poll\_period\_sec, long\_poll\_period\_sec |
 
 </details>
 
 ## Setup
+
+**Pollinator** determines whether communication is handled by the [pollinator]
+service rather than the legacy Java IRIS server.
 
 [Protocol] determines what type of [device] or system is on the other end of
 a [comm link].
@@ -49,4 +52,5 @@ disables this feature.
 [comm link]: comm_links.html
 [controller]: controllers.html
 [device]: controllers.html#devices
+[pollinator]: https://github.com/mnit-rtmc/iris/tree/master/pollinator
 [protocol]: protocols.html
