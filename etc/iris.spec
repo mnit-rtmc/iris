@@ -54,6 +54,7 @@ ant -Dinstall.dir=%{_installdir} install
 
 # pre-install
 %pre
+# FIXME: not needed after Fedora 43
 if [ $1 == 1 ]; then
 	useradd -r -m tms
 	# exit value 9: username already in use
@@ -106,6 +107,10 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 # /etc/security/limits.d
 %defattr(0644,root,root)
 /etc/security/limits.d/99-tms.conf
+
+# /usr/lib/sysusers.d
+%defattr(0644,root,root)
+/usr/lib/sysusers.d/tms-iris.conf
 
 # /usr/share/java/iris-server
 %defattr(0644,root,root,0755)

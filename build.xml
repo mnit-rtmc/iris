@@ -323,6 +323,11 @@
 	        depends="dist"
 	        description="Install the full iris distribution">
 
+		<copy todir="${install.dir}/usr/lib/sysusers.d">
+			<fileset file="${build.etc}/tms-iris.conf"/>
+		</copy>
+		<chmod file="${install.dir}/usr/lib/sysusers.d/tms-iris.conf" perm="660"/>
+
 		<copy todir="${install.dir}/usr/lib/systemd/system">
 			<fileset file="${build.bin}/iris.service"/>
 		</copy>
