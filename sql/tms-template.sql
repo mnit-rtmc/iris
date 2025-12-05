@@ -1293,6 +1293,7 @@ VALUES
 CREATE TABLE iris.comm_config (
     name VARCHAR(10) PRIMARY KEY,
     description VARCHAR(20) NOT NULL UNIQUE,
+    pollinator BOOLEAN NOT NULL,
     protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
     timeout_ms INTEGER NOT NULL,
     retry_threshold INTEGER NOT NULL,
@@ -1311,10 +1312,11 @@ ALTER TABLE iris.comm_config
     CHECK (poll_period_sec >= 5 AND long_poll_period_sec >= poll_period_sec);
 
 INSERT INTO iris.comm_config (
-    name, description, protocol, timeout_ms, retry_threshold, poll_period_sec,
-    long_poll_period_sec, idle_disconnect_sec, no_response_disconnect_sec
+    name, description, pollinator, protocol, timeout_ms, retry_threshold,
+    poll_period_sec, long_poll_period_sec, idle_disconnect_sec,
+    no_response_disconnect_sec
 ) VALUES (
-     'cfg_0', 'NTCIP udp', 11, 1000, 3, 30, 300, 0, 0
+     'cfg_0', 'NTCIP udp', false, 11, 1000, 3, 30, 300, 0, 0
 );
 
 CREATE TRIGGER comm_config_notify_trig
@@ -1322,7 +1324,7 @@ CREATE TRIGGER comm_config_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW comm_config_view AS
-    SELECT cc.name, cc.description, cp.description AS protocol,
+    SELECT cc.name, cc.description, pollinator, cp.description AS protocol,
            timeout_ms, retry_threshold, poll_period_sec, long_poll_period_sec,
            idle_disconnect_sec, no_response_disconnect_sec
     FROM iris.comm_config cc
