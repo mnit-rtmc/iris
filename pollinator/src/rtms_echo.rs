@@ -46,30 +46,6 @@ SELECT row_to_json(row)::text FROM (
        WHERE protocol = 31 AND poll_enabled = true AND condition = 1
 ) row"#;
 
-/// SQL to connect comm_link
-const COMM_LINK_CONNECT: &str = "\
-  UPDATE iris.comm_link \
-  SET connected = true \
-  WHERE name = $1";
-
-/// SQL to connect controller
-const CONTROLLER_CONNECT: &str = "\
-  UPDATE iris.controller \
-  SET fail_time = NULL \
-  WHERE name = $1";
-
-/// SQL to disconnect comm_link
-const COMM_LINK_DISCONNECT: &str = "\
-  UPDATE iris.comm_link \
-  SET connected = false \
-  WHERE name = $1";
-
-/// SQL to disconnect controller
-const CONTROLLER_DISCONNECT: &str = "\
-  UPDATE iris.controller \
-  SET fail_time = now() \
-  WHERE name = $1";
-
 /// Authentication response
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -305,7 +281,9 @@ impl SensorCfg {
             let res = self.do_run(db.clone()).await;
             log::info!("disconnected from {}", &self.comm_link);
             if let Some(db) = &db {
-                self.log_disconnect(db.clone()).await?;
+                db.clone()
+                    .log_disconnect(&self.comm_link, &self.controller)
+                    .await?;
             }
             if let Err(Error::StreamDisconnected) = &res {
                 continue;
@@ -324,50 +302,12 @@ impl SensorCfg {
         let password = &self.password.as_ref().map_or("", |p| p);
         sensor.login(user, password).await?;
         if let Some(db) = &db {
-            self.log_connect(db.clone()).await?;
+            db.clone()
+                .log_connect(&self.comm_link, &self.controller)
+                .await?;
         }
         sensor.init_detector_zones(&self.make_detectors()).await?;
         sensor.periodic_poll(self.per_s, self.long_per_s).await?;
-        Ok(())
-    }
-
-    /// Log sensor connect in database
-    async fn log_connect(&self, db: Database) -> Result<()> {
-        let mut client = db.client().await?;
-        let transaction = client.transaction().await?;
-        let rows = transaction
-            .execute(COMM_LINK_CONNECT, &[&self.comm_link])
-            .await?;
-        if rows != 1 {
-            return Err(Error::DbUpdate);
-        }
-        let rows = transaction
-            .execute(CONTROLLER_CONNECT, &[&self.controller])
-            .await?;
-        if rows != 1 {
-            return Err(Error::DbUpdate);
-        }
-        transaction.commit().await?;
-        Ok(())
-    }
-
-    /// Log sensor disconnect in database
-    async fn log_disconnect(&self, db: Database) -> Result<()> {
-        let mut client = db.client().await?;
-        let transaction = client.transaction().await?;
-        let rows = transaction
-            .execute(COMM_LINK_DISCONNECT, &[&self.comm_link])
-            .await?;
-        if rows != 1 {
-            return Err(Error::DbUpdate);
-        }
-        let rows = transaction
-            .execute(CONTROLLER_DISCONNECT, &[&self.controller])
-            .await?;
-        if rows != 1 {
-            return Err(Error::DbUpdate);
-        }
-        transaction.commit().await?;
         Ok(())
     }
 }

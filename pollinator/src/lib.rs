@@ -12,6 +12,7 @@
 //
 #![forbid(unsafe_code)]
 
+mod connect;
 mod database;
 mod error;
 mod event;
