@@ -40,7 +40,7 @@ public class Tokens {
 
 	/** Get the ClearGuide customer key, never null */
 	static private String getCustomerKey() {
-		return safe(SystemAttrEnum.CLEARGUIDE_KEY.getString());
+		return safe(SystemAttrEnum.API_KEY_CLEARGUIDE.getString());
 	}
 
 	/** Get DMS API URI */

@@ -23,6 +23,7 @@ System Attribute                 | Description
 `alert_clear_secs`               | Seconds to leave cleared alerts before removing them
 `alert_sign_thresh_auto_meters`  | Threshold around alert area (in meters) for selecting DMS for automatic deployment of alerts
 `alert_sign_thresh_opt_meters`   | Threshold around alert area (in meters) for selecting DMS for optional inclusion in alert deployments
+`api_key_clearguide`             | ClearGuide customer key
 `camera_autoplay`                | Automatically stream video when a [camera] is selected
 `camera_blank_url`               | Location of PNG image to display for blankd [video monitors]
 `camera_construction_url`        | Location of PNG image to display for [camera]s out due to construction
@@ -35,7 +36,6 @@ System Attribute                 | Description
 `camera_ptz_blind`               | Allow [camera] controls to be used even when not currently streaming to the IRIS client
 `camera_stream_controls_enable`  | Enable [camera] stream control panel (stop, play, etc.)
 `cap_save_enable`                | Enable saving CAP file for parsing errors
-`clearguide_key`                 | ClearGuide customer key
 `client_units_si`                | `true` for the client to display units using the International System of Units (SI) or `false` for customary (US) units
 `database_version`               | IRIS database version; developer attribute.  **Do not change**.
 `detector_auto_fail_enable`      | Enable [auto-fail] of traffic detectors with suspicious data

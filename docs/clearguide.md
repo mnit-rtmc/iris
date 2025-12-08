@@ -7,7 +7,7 @@ To use the system, one [comm link] must be configured using the `clearguide`
 protocol.  The `URI` specifies the HTTPS address of a ClearGuide server.
 There must be a single controller associated with the comm link, and its
 password field must contain both the user name and password in the form
-`username:password`.  The `clearguide_key` [system attribute] should also
+`username:password`.  The `api_key_clearguide` [system attribute] should also
 contain the ClearGuide agency name.
 
 ## ClearGuide Action Tag

@@ -25,4 +25,8 @@ CREATE VIEW comm_config_view AS
     JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
 GRANT SELECT ON comm_config_view TO PUBLIC;
 
+-- Rename `clearguide_key` system attribute to `api_key_clearguide`
+UPDATE iris.system_attribute SET name = 'api_key_clearguide'
+   WHERE name = 'clearguide_key';
+
 COMMIT;

@@ -49,7 +49,7 @@ UPDATE iris.vid_src_template SET config = '';
 -- DELETE FROM iris.sign_message;
 DELETE FROM iris.map_extent;
 
-UPDATE iris.system_attribute SET value = '' WHERE name = 'clearguide_key';
+UPDATE iris.system_attribute SET value = '' WHERE name = 'api_key_clearguide';
 UPDATE iris.system_attribute SET value = '' WHERE name = 'email_smtp_host';
 UPDATE iris.system_attribute SET value = '' WHERE name = 'email_sender_server';
 UPDATE iris.system_attribute SET value = '' WHERE name = 'work_request_url';

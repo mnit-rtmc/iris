@@ -55,6 +55,7 @@ action_plan_alert_list
 alert_clear_secs	300
 alert_sign_thresh_auto_meters	1000
 alert_sign_thresh_opt_meters	4000
+api_key_clearguide	
 camera_autoplay	true
 camera_blank_url	
 camera_construction_url	
@@ -67,7 +68,6 @@ camera_playlist_dwell_sec	5
 camera_ptz_blind	true
 camera_stream_controls_enable	false
 cap_save_enable	true
-clearguide_key	
 client_units_si	true
 database_version	5.78.0
 detector_auto_fail_enable	true
