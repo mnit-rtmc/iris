@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Color;
+import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
  * Comm state enumeration.
@@ -22,10 +23,10 @@ import java.awt.Color;
  * @author Douglas Lau
  */
 public enum CommState {
-	INACTIVE   (new Color(0, 0, 0, 32)),
-	OK         (new Color(96, 96, 255)),
-	OFFLINE    (Color.GRAY),
-	POLLINATOR (new Color(255, 32, 128));
+	INACTIVE   (ProxyTheme.COLOR_INACTIVE),
+	OK         (ProxyTheme.COLOR_AVAILABLE),
+	OFFLINE    (ProxyTheme.COLOR_OFFLINE),
+	POLLINATOR (ProxyTheme.COLOR_POLLINATOR);
 
 	/** Icon for the comm state */
 	public final ControllerIcon icon;

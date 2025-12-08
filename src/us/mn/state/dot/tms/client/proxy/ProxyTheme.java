@@ -78,6 +78,9 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Color to display changing gate devices */
 	static public final Color COLOR_CHANGE  = new Color(240, 128, 0);
 
+	/** Color to display pollinator controlled devices */
+	static public final Color COLOR_POLLINATOR = new Color(255, 32, 128);
+
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 

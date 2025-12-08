@@ -36,6 +36,7 @@ public enum ItemStyle {
 	OFFLINE,
 	INACTIVE,
 	NO_CONTROLLER,
+	POLLINATOR,
 	PURPOSE,
 	HIDDEN,
 	/* Incident styles */

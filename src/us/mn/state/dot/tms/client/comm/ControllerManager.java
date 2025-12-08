@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,6 +86,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 			new ControllerMarker());
 		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
 		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
+		theme.addStyle(ItemStyle.POLLINATOR,
+			ProxyTheme.COLOR_POLLINATOR);
 		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
@@ -124,6 +126,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 			return ControllerHelper.hasFaults(proxy);
 		case OFFLINE:
 			return ControllerHelper.isOffline(proxy);
+		case POLLINATOR:
+			return ControllerHelper.isPollinator(proxy);
 		case ALL:
 			return true;
 		default:
