@@ -19,7 +19,7 @@ use log::{debug, info};
 use mayfly::binned::{CountData, OccupancyData, SpeedData, TrafficData};
 use mayfly::error::Result;
 use mayfly::traffic::Traffic;
-use mayfly::vehicle::{VehLog, VehicleFilter};
+use mayfly::vlog::{VehLog, VehicleFilter};
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::{BufWriter, ErrorKind, Write};

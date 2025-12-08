@@ -17,7 +17,7 @@ use crate::binned::{
 };
 use crate::error::{Error, Result};
 use crate::traffic::Traffic;
-use crate::vehicle::{VehLog, VehicleFilter};
+use crate::vlog::{VehLog, VehicleFilter};
 use axum::Router;
 use axum::extract::Query;
 use axum::response::IntoResponse;
