@@ -15,6 +15,7 @@
 use crate::vlog::VehicleEvent;
 use std::convert::TryFrom;
 use std::fmt;
+use std::marker::PhantomData;
 
 /// Binned traffic data
 pub trait TrafficData: Default + fmt::Display {
@@ -78,6 +79,46 @@ pub struct LengthData {
 pub struct SpeedData {
     total: u32,
     count: u32,
+}
+
+/// Vehicle event filter
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct VehicleFilter {
+    /// Minimum vehicle length (ft)
+    length_ft_min: Option<u32>,
+
+    /// Maximum vehicle length (ft)
+    length_ft_max: Option<u32>,
+
+    /// Minimum vehicle speed (mph)
+    speed_mph_min: Option<u32>,
+
+    /// Maximum vehicle speed (mph)
+    speed_mph_max: Option<u32>,
+
+    /// Minimum headway (ms)
+    headway_ms_min: Option<u32>,
+
+    /// Maximum headway (ms)
+    headway_ms_max: Option<u32>,
+}
+
+/// Vehicle event binning iterator
+pub struct BinIter<'a, T: TrafficData> {
+    /// Traffic data type
+    _data: PhantomData<T>,
+    /// Remaining vehicle events
+    event_iter: std::slice::Iter<'a, VehicleEvent>,
+    /// Future event
+    future_ev: Option<&'a VehicleEvent>,
+    /// Vehicle event filter
+    filter: VehicleFilter,
+    /// Binning period (s)
+    period: usize,
+    /// Current binning interval
+    interval: usize,
+    /// Reset on previous event
+    reset: bool,
 }
 
 impl TrafficData for CountData {
@@ -337,6 +378,199 @@ impl fmt::Display for SpeedData {
         match self.value() {
             Some(val) => write!(f, "{val}"),
             None => write!(f, "null"),
+        }
+    }
+}
+
+impl VehicleFilter {
+    /// Check if any filters are in effect
+    pub fn is_filtered(&self) -> bool {
+        self != &Self::default()
+    }
+
+    /// Set minimum vehicle length (ft)
+    pub fn with_length_ft_min(mut self, m: Option<u32>) -> Self {
+        self.length_ft_min = m;
+        self
+    }
+
+    /// Set maximum vehicle length (ft)
+    pub fn with_length_ft_max(mut self, m: Option<u32>) -> Self {
+        self.length_ft_max = m;
+        self
+    }
+
+    /// Set minimum vehicle speed (mph)
+    pub fn with_speed_mph_min(mut self, m: Option<u32>) -> Self {
+        self.speed_mph_min = m;
+        self
+    }
+
+    /// Set maximum vehicle speed (mph)
+    pub fn with_speed_mph_max(mut self, m: Option<u32>) -> Self {
+        self.speed_mph_max = m;
+        self
+    }
+
+    /// Set minimum headway (sec)
+    pub fn with_headway_sec_min(mut self, m: Option<f32>) -> Self {
+        self.headway_ms_min = m.map(sec_to_ms);
+        self
+    }
+
+    /// Set maximum headway (sec)
+    pub fn with_headway_sec_max(mut self, m: Option<f32>) -> Self {
+        self.headway_ms_max = m.map(sec_to_ms);
+        self
+    }
+
+    /// Check if vehicle should be binned
+    fn check(&self, ev: &VehicleEvent) -> bool {
+        if let Some(m) = self.length_ft_min {
+            // use 0 for unknown length
+            if ev.length().unwrap_or(0) < m {
+                return false;
+            }
+        }
+        if let Some(m) = self.length_ft_max {
+            // use MAX value for unknown length
+            if ev.length().unwrap_or(u32::MAX) >= m {
+                return false;
+            }
+        }
+        if let Some(m) = self.speed_mph_min {
+            // use 0 for unknown speed
+            if ev.speed().unwrap_or(0) < m {
+                return false;
+            }
+        }
+        if let Some(m) = self.speed_mph_max {
+            // use MAX value for unknown speed
+            if ev.speed().unwrap_or(u32::MAX) >= m {
+                return false;
+            }
+        }
+        if let Some(m) = self.headway_ms_min {
+            // use 0 for unknown headway
+            if ev.headway().unwrap_or(0) < m {
+                return false;
+            }
+        }
+        if let Some(m) = self.headway_ms_max {
+            // use MAX value for unknown headway
+            if ev.headway().unwrap_or(u32::MAX) >= m {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+/// Convert a value in seconds to milliseconds
+fn sec_to_ms(m: f32) -> u32 {
+    (m * 1000.0).round() as u32
+}
+
+impl<T: TrafficData> Iterator for BinIter<'_, T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.interval < self.max_interval() {
+            let data = self.interval_data();
+            self.interval += 1;
+            Some(data)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a, T: TrafficData> BinIter<'a, T> {
+    /// Create a new binning iterator
+    pub fn new(
+        period: usize,
+        events: &'a [VehicleEvent],
+        filter: VehicleFilter,
+    ) -> Self {
+        BinIter {
+            _data: PhantomData,
+            event_iter: events.iter(),
+            future_ev: None,
+            filter,
+            period,
+            interval: 0,
+            reset: false,
+        }
+    }
+
+    /// Get the maximum interval number
+    fn max_interval(&self) -> usize {
+        (24 * 60 * 60) / self.period
+    }
+
+    /// Get the interval number for an event
+    fn event_interval(&self, ev: &VehicleEvent) -> Option<usize> {
+        if let Some(stamp) = ev.stamp() {
+            let interval = (stamp as usize) / (self.period * 1000);
+            if interval < self.max_interval() {
+                return Some(interval);
+            }
+        }
+        None
+    }
+
+    /// Get the current interval data
+    fn interval_data(&mut self) -> T {
+        let mut data = self.make_data();
+        if let Some(ev) = &self.future_ev {
+            if self.is_future_event(ev) {
+                return data;
+            }
+            if self.filter.check(ev) {
+                data.bin_vehicle(ev);
+            }
+        }
+        self.future_ev = None;
+        while let Some(ev) = self.event_iter.next() {
+            if ev.is_reset() {
+                self.reset = true;
+                data.reset();
+            } else {
+                if self.is_future_event(ev) {
+                    self.future_ev = Some(ev);
+                    let interval =
+                        self.event_interval(ev).unwrap_or(self.interval);
+                    // reset if there is a gap of 30 minutes or longer
+                    if interval > self.interval + 30 * 2 {
+                        self.reset = true;
+                    }
+                    return data;
+                }
+                self.reset = false;
+                if self.filter.check(ev) {
+                    data.bin_vehicle(ev);
+                }
+            }
+        }
+        // no more events
+        self.reset = true;
+        data
+    }
+
+    /// Make binned traffic data
+    fn make_data(&self) -> T {
+        let mut data = T::default();
+        if self.reset {
+            data.reset();
+        }
+        data
+    }
+
+    /// Check if an event is for a future interval
+    fn is_future_event(&self, ev: &VehicleEvent) -> bool {
+        match self.event_interval(ev) {
+            Some(interval) => interval > self.interval,
+            None => false,
         }
     }
 }

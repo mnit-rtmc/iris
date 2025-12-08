@@ -13,11 +13,12 @@
 // GNU General Public License for more details.
 //
 use crate::binned::{
-    CountData, HeadwayData, LengthData, OccupancyData, SpeedData, TrafficData,
+    BinIter, CountData, HeadwayData, LengthData, OccupancyData, SpeedData,
+    TrafficData, VehicleFilter,
 };
 use crate::error::{Error, Result};
 use crate::traffic::Traffic;
-use crate::vlog::{VehLog, VehicleFilter};
+use crate::vlog::VehLogReader;
 use axum::Router;
 use axum::extract::Query;
 use axum::response::IntoResponse;
@@ -526,8 +527,10 @@ where
         let name = self.vlog_file_name();
         let zf = traffic.by_name(&name)?;
         log::info!("opened {name} in {}.{EXT}", self.date);
-        let vlog = VehLog::from_reader_blocking(zf)?;
-        Ok(vlog.binned_iter::<T>(30, self.filter()).collect())
+        let vlog = VehLogReader::from_reader_blocking(zf)?;
+        let events = vlog.events();
+        let bi = BinIter::new(30, &events, self.filter());
+        Ok(bi.collect())
     }
 
     /// Lookup data from file system (unzipped)
@@ -562,8 +565,10 @@ where
         path.push(self.vlog_file_name());
         let file = File::open(&path).await?;
         log::info!("opened {path:?}");
-        let vlog = VehLog::from_reader_async(file).await?;
-        Ok(vlog.binned_iter::<T>(30, self.filter()).collect())
+        let vlog = VehLogReader::from_reader_async(file).await?;
+        let events = vlog.events();
+        let bi = BinIter::new(30, &events, self.filter());
+        Ok(bi.collect())
     }
 
     /// Create a vehicle filter

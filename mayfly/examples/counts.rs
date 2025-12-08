@@ -1,10 +1,10 @@
 use mayfly::binned::CountData;
-use mayfly::vlog::{VehLog, VehicleFilter};
+use mayfly::vlog::{VehLogReader, VehicleFilter};
 use std::fs::File;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file = File::open("res/test.vlog")?;
-    let vlog = VehLog::from_reader_blocking(file)?;
+    let vlog = VehLogReader::from_reader_blocking(file)?;
     print!("[");
     for (i, v) in vlog
         .binned_iter::<CountData>(30, VehicleFilter::default())

@@ -16,10 +16,12 @@
 
 use argh::FromArgs;
 use log::{debug, info};
-use mayfly::binned::{CountData, OccupancyData, SpeedData, TrafficData};
+use mayfly::binned::{
+    BinIter, CountData, OccupancyData, SpeedData, TrafficData, VehicleFilter,
+};
 use mayfly::error::Result;
 use mayfly::traffic::Traffic;
-use mayfly::vlog::{VehLog, VehicleFilter};
+use mayfly::vlog::{VehLogReader, VehicleEvent};
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::{BufWriter, ErrorKind, Write};
@@ -108,20 +110,21 @@ impl Binner {
             match self.vlog_det_id(zf.name()) {
                 Some(det_id) => {
                     let mtime = zf.last_modified();
-                    let vlog = VehLog::from_reader_blocking(zf)?;
+                    let vlog = VehLogReader::from_reader_blocking(zf)?;
+                    let events = vlog.events();
                     n_binned += self.write_binned::<OccupancyData>(
                         det_id.to_string() + ".c30",
-                        &vlog,
+                        &events,
                         &mtime,
                     )?;
                     n_binned += self.write_binned::<SpeedData>(
                         det_id.to_string() + ".s30",
-                        &vlog,
+                        &events,
                         &mtime,
                     )?;
                     n_binned += self.write_binned::<CountData>(
                         det_id.to_string() + ".v30",
-                        &vlog,
+                        &events,
                         &mtime,
                     )?;
                     let zf = traffic.by_index(i)?;
@@ -164,13 +167,13 @@ impl Binner {
     fn write_binned<T: TrafficData>(
         &mut self,
         name: String,
-        vlog: &VehLog,
+        events: &[VehicleEvent],
         mtime: &DateTime,
     ) -> Result<u32> {
         if self.contains(&name) {
             return Ok(0);
         }
-        if let Some(buf) = pack_binned::<T>(vlog) {
+        if let Some(buf) = pack_binned::<T>(events) {
             debug!("Binning {name:?}");
             let options = FileOptions::default().last_modified_time(*mtime);
             self.writer.start_file(name, options)?;
@@ -215,11 +218,11 @@ fn make_writer(path: &impl AsRef<Path>) -> Result<ZipWriter<BufWriter<File>>> {
 }
 
 /// Pack traffic data into 30-second bins
-fn pack_binned<T: TrafficData>(vlog: &VehLog) -> Option<Vec<u8>> {
+fn pack_binned<T: TrafficData>(events: &[VehicleEvent]) -> Option<Vec<u8>> {
     let len = 2880 * T::bin_bytes();
     let mut buf = Vec::with_capacity(len);
     let mut any_valid = false;
-    for val in vlog.binned_iter::<T>(30, VehicleFilter::default()) {
+    for val in BinIter::<T>::new(30, events, VehicleFilter::default()) {
         if !any_valid && val.value().is_some() {
             any_valid = true;
         }
