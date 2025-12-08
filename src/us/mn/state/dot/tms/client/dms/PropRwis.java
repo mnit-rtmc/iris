@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2023  SRF Consulting Group
+ * Copyright (C) 2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -156,14 +157,20 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
 		if (null == a || a.equals("weatherSensors")) {
-			StringBuilder names = new StringBuilder();
-			for (WeatherSensor ws: dms.getWeatherSensors()) {
-				if (names.length() > 0)
-					names.append(' ');
-				names.append(ws.getName());
+			WeatherSensor[] sensors = dms.getWeatherSensors();
+			if (sensors != null) {
+				StringBuilder names = new StringBuilder();
+				for (WeatherSensor ws: sensors) {
+					String nm = ws.getName();
+					if (nm != null) {
+						if (names.length() > 0)
+							names.append(' ');
+						names.append(nm);
+					}
+				}
+				weather_sensor_txt.setText(names.toString());
+				updateGui();
 			}
-			weather_sensor_txt.setText(names.toString());
-			updateGui();
 		}
 	}
 
