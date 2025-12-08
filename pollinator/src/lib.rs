@@ -15,7 +15,7 @@
 mod connect;
 mod database;
 mod error;
-mod event;
+pub mod event;
 mod http;
 pub mod rtms_echo;
 

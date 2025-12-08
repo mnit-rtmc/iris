@@ -143,21 +143,17 @@ pub struct Sensor {
 impl VehicleData {
     /// Convert to a gap vehicle event
     fn gap(&self) -> VehEvent {
-        let mut veh = VehEvent::default();
-        veh.gap_event(Stamp::now());
-        veh.length_m(self.length);
-        veh.speed_kph(self.speed);
-        veh
+        VehEvent::gap_event(Stamp::now())
+            .with_length_m(self.length)
+            .with_speed_kph(self.speed)
     }
 
     /// Convert to a server recorded vehicle event
     fn server_recorded(&self, wrong_way: bool) -> VehEvent {
-        let mut veh = VehEvent::default();
-        veh.server_recorded(Stamp::now());
-        veh.wrong_way(wrong_way);
-        veh.length_m(self.length);
-        veh.speed_kph(self.speed);
-        veh
+        VehEvent::server_recorded(Stamp::now())
+            .with_wrong_way(wrong_way)
+            .with_length_m(self.length)
+            .with_speed_kph(self.speed)
     }
 }
 

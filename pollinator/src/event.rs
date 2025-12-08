@@ -60,7 +60,7 @@ pub struct VehEventWriter {
     /// Timestamp
     stamp: Stamp,
     /// File opened in append mode
-    file: File,
+    file: Option<File>,
 }
 
 impl Stamp {
@@ -101,19 +101,6 @@ impl Stamp {
         path.push(&date);
         path
     }
-
-    /// Make a file
-    async fn make_file(&self, det_id: &str) -> Result<File> {
-        let mut path = self.build_path();
-        if !try_exists(&path).await? {
-            log::info!("creating dir: {path:?}");
-            create_dir_all(&path).await?;
-        }
-        path.push(det_id);
-        path.set_extension("vev");
-        let file = File::options().append(true).create(true).open(path).await?;
-        Ok(file)
-    }
 }
 
 impl From<&VehEvent> for u64 {
@@ -136,57 +123,73 @@ impl From<VehEvent> for u64 {
 
 impl VehEvent {
     /// Set sensor-recorded timestamp
-    pub fn sensor_recorded(&mut self, stamp: Stamp) {
-        self.stamp = stamp;
-        self.mode = Mode::SensorRecorded;
+    pub fn sensor_recorded(stamp: Stamp) -> Self {
+        VehEvent {
+            stamp,
+            mode: Mode::SensorRecorded,
+            ..Default::default()
+        }
     }
 
     /// Set server-recorded timestamp
-    pub fn server_recorded(&mut self, stamp: Stamp) {
-        self.stamp = stamp;
-        self.mode = Mode::ServerRecorded;
+    pub fn server_recorded(stamp: Stamp) -> Self {
+        VehEvent {
+            stamp,
+            mode: Mode::ServerRecorded,
+            ..Default::default()
+        }
     }
 
     /// Set estimated timestamp
-    pub fn estimated(&mut self, stamp: Stamp) {
-        self.stamp = stamp;
-        self.mode = Mode::Estimated;
+    pub fn estimated(stamp: Stamp) -> Self {
+        VehEvent {
+            stamp,
+            mode: Mode::Estimated,
+            ..Default::default()
+        }
     }
 
     /// Set gap event
-    pub fn gap_event(&mut self, stamp: Stamp) {
-        self.stamp = stamp;
-        self.mode = Mode::GapEvent;
+    pub fn gap_event(stamp: Stamp) -> Self {
+        VehEvent {
+            stamp,
+            mode: Mode::GapEvent,
+            ..Default::default()
+        }
     }
 
     /// Set wrong-way vehicle
-    pub fn wrong_way(&mut self, wrong_way: bool) {
+    pub fn with_wrong_way(mut self, wrong_way: bool) -> Self {
         self.wrong_way = wrong_way;
+        self
     }
 
     /// Set vehicle length (m)
-    pub fn length_m(&mut self, length: f32) {
+    pub fn with_length_m(mut self, length: f32) -> Self {
         let dm = (length * 10.0).round();
         self.length = if (1.0..=511.0).contains(&dm) {
             dm as u16
         } else {
             0
         };
+        self
     }
 
     /// Set vehicle speed (kph)
-    pub fn speed_kph(&mut self, speed: f32) {
+    pub fn with_speed_kph(mut self, speed: f32) -> Self {
         let kph = speed.round();
         self.speed = if (1.0..=255.0).contains(&kph) {
             kph as u8
         } else {
             0
         };
+        self
     }
 
     /// Set vehicle duration (ms)
-    pub fn duration_ms(&mut self, duration: u16) {
+    pub fn with_duration(mut self, duration: u16) -> Self {
         self.duration = duration;
+        self
     }
 }
 
@@ -194,22 +197,31 @@ impl VehEventWriter {
     /// Make a vehicle event (`.vev`) log writer
     pub async fn new(det_id: &str) -> Result<Self> {
         let det_id = det_id.to_string();
-        let stamp = Stamp::now();
-        let file = stamp.make_file(&det_id).await?;
         Ok(VehEventWriter {
             det_id,
-            stamp,
-            file,
+            stamp: Stamp::now(),
+            file: None,
         })
     }
 
     /// Append a vehicle event to `.vev` log file
     pub async fn append(&mut self, ev: &VehEvent) -> Result<()> {
-        if self.stamp.0.date() != ev.stamp.0.date() {
+        if self.file.is_none() || self.stamp.0.date() != ev.stamp.0.date() {
             self.stamp = ev.stamp.clone();
-            self.file = self.stamp.make_file(&self.det_id).await?;
+            let mut path = self.stamp.build_path();
+            if !try_exists(&path).await? {
+                log::info!("creating dir: {path:?}");
+                create_dir_all(&path).await?;
+            }
+            path.push(&self.det_id);
+            path.set_extension("vev");
+            let file =
+                File::options().append(true).create(true).open(path).await?;
+            self.file = Some(file);
         }
-        self.file.write_u64_le(u64::from(ev)).await?;
+        if let Some(file) = &mut self.file {
+            file.write_u64_le(u64::from(ev)).await?;
+        }
         log::debug!("veh ev: {ev:?}");
         Ok(())
     }
@@ -223,11 +235,10 @@ mod test {
     fn veh_event() {
         const MS: i64 = (14 * 60 * 60 * 1000) + (53 * 60 * 1000);
         let stamp: Zoned = "2025-12-02 14:53[America/Chicago]".parse().unwrap();
-        let mut ev = VehEvent::default();
-        ev.sensor_recorded(Stamp(stamp));
-        ev.length_m(3.0);
-        ev.speed_kph(80.0);
-        ev.duration_ms(200);
+        let ev = VehEvent::sensor_recorded(Stamp(stamp))
+            .with_length_m(3.0)
+            .with_speed_kph(80.0)
+            .with_duration(200);
         assert_eq!(
             u64::from(ev),
             (1 << 27) + (MS as u64) + (30 << 31) + (80 << 40) + (200 << 48)
