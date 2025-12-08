@@ -12,10 +12,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::database::Database;
 use crate::error::{Error, Result};
 use crate::query;
 use crate::sonar::Name;
+use resin::Database;
 use resources::Res;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

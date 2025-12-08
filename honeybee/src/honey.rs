@@ -12,7 +12,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::Database;
 use crate::access::Access;
 use crate::cred::Credentials;
 use crate::domain;
@@ -32,6 +31,7 @@ use axum::routing::get;
 use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
+use resin::Database;
 use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;

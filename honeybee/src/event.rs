@@ -1,6 +1,6 @@
 // event.rs
 //
-// Copyright (C) 2024  Minnesota Department of Transportation
+// Copyright (C) 2024-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,8 +12,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::database::Database;
 use crate::error::{Error, Result};
+use resin::Database;
 
 /// Event types
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

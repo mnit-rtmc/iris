@@ -15,9 +15,8 @@
 #![forbid(unsafe_code)]
 
 use argh::FromArgs;
-use honeybee::{
-    Database, Honey, Resource, Result, SegmentState, notify_events,
-};
+use honeybee::{Honey, Resource, Result, SegmentState, notify_events};
+use resin::Database;
 use std::collections::HashSet;
 use std::net::SocketAddr;
 use std::time::Duration;

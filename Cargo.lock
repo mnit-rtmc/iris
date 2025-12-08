@@ -270,7 +270,7 @@ dependencies = [
 
 [[package]]
 name = "bulb"
-version = "5.78.2"
+version = "5.79.0"
 dependencies = [
  "base64",
  "chrono",
@@ -835,7 +835,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "5.78.2"
+version = "5.79.0"
 dependencies = [
  "anyhow",
  "argh",
@@ -857,6 +857,7 @@ dependencies = [
  "pointy",
  "postgres-types",
  "rendzina",
+ "resin",
  "resources",
  "rosewood",
  "rustls",
@@ -1144,7 +1145,7 @@ checksum = "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3"
 
 [[package]]
 name = "mayfly"
-version = "5.78.2"
+version = "5.79.0"
 dependencies = [
  "argh",
  "axum",
@@ -1152,6 +1153,7 @@ dependencies = [
  "env_logger",
  "http",
  "log",
+ "resin",
  "serde",
  "serde_json",
  "thiserror 2.0.17",
@@ -1382,7 +1384,7 @@ dependencies = [
 
 [[package]]
 name = "pollinator"
-version = "5.78.2"
+version = "5.79.0"
 dependencies = [
  "argh",
  "bb8",
@@ -1395,6 +1397,7 @@ dependencies = [
  "hyper-util",
  "jiff",
  "log",
+ "resin",
  "serde",
  "serde_json",
  "thiserror 2.0.17",
@@ -1618,7 +1621,7 @@ checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 
 [[package]]
 name = "rendzina"
-version = "5.78.2"
+version = "5.79.0"
 dependencies = [
  "fstr",
  "gift",
@@ -1632,8 +1635,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "resin"
+version = "5.79.0"
+dependencies = [
+ "bb8",
+ "bb8-postgres",
+ "hyper",
+ "jiff",
+ "log",
+ "serde_json",
+ "thiserror 2.0.17",
+ "tokio",
+ "tokio-postgres",
+ "tokio-tungstenite",
+ "tungstenite",
+ "whoami",
+]
+
+[[package]]
 name = "resources"
-version = "5.78.2"
+version = "5.79.0"
 
 [[package]]
 name = "ring"

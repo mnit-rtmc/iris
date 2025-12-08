@@ -19,6 +19,10 @@ use std::time::SystemTimeError;
 /// Honeybee error
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// Resin error
+    #[error("Resin {0}")]
+    Resin(#[from] resin::Error),
+
     /// Unauthenticated request
     #[error("Unauthenticated")]
     Unauthenticated,
@@ -71,10 +75,6 @@ pub enum Error {
     #[error("failed to read/write loam file: {0}")]
     Loam(#[from] loam::Error),
 
-    /// Bb8 run error
-    #[error("Bb8 run error")]
-    Bb8(String),
-
     /// Tower sessions
     #[error("Session {0}")]
     Session(#[from] tower_sessions::session::Error),
@@ -94,12 +94,6 @@ pub enum Error {
     /// Serde JSON
     #[error("Json {0}")]
     Json(#[from] serde_json::Error),
-}
-
-impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
-    fn from(err: bb8::RunError<E>) -> Self {
-        Self::Bb8(format!("{err:?}"))
-    }
 }
 
 impl From<Error> for StatusCode {

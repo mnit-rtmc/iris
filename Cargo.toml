@@ -1,10 +1,10 @@
 [workspace]
-members = ["honeybee", "mayfly", "bulb", "rendzina", "resources", "pollinator"]
+members = ["honeybee", "mayfly", "bulb", "rendzina", "resin", "resources", "pollinator"]
 default-members = ["honeybee", "mayfly"]
 resolver = "2"
 
 [workspace.package]
-version = "5.78.2"
+version = "5.79.0"
 edition = "2024"
 
 [workspace.dependencies]

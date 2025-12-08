@@ -23,6 +23,7 @@ ntcip = { workspace = true }
 percent-encoding = "2"
 pointy = "0.7"
 rendzina = { path = "../rendzina" }
+resin = { path = "../resin" }
 resources = { path = "../resources" }
 rosewood = "0.4"
 rustls = "0.23"

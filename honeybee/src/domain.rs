@@ -1,6 +1,6 @@
 // domain.rs
 //
-// Copyright (C) 2024  Minnesota Department of Transportation
+// Copyright (C) 2024-2025  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,9 +12,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::database::Database;
 use crate::error::Result;
 use cidr::IpCidr;
+use resin::Database;
 use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
 use tokio_postgres::Row;

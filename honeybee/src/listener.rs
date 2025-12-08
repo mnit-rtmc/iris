@@ -12,11 +12,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::database::Database;
 use crate::error::Result;
 use crate::resource::Resource;
 use crate::sonar::Name;
 use futures::Stream;
+use resin::Database;
 use std::collections::HashSet;
 use std::pin::Pin;
 use std::task::{Context, Poll};
