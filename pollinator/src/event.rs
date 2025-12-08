@@ -53,8 +53,8 @@ pub struct VehEvent {
     duration: u16,
 }
 
-/// Vehicle event log
-pub struct VehLog {
+/// Vehicle event (`.vev`) log writer
+pub struct VehEventWriter {
     /// Detector ID
     det_id: String,
     /// Timestamp
@@ -190,20 +190,20 @@ impl VehEvent {
     }
 }
 
-impl VehLog {
-    /// Make a vehicle event log file
+impl VehEventWriter {
+    /// Make a vehicle event (`.vev`) log writer
     pub async fn new(det_id: &str) -> Result<Self> {
         let det_id = det_id.to_string();
         let stamp = Stamp::now();
         let file = stamp.make_file(&det_id).await?;
-        Ok(VehLog {
+        Ok(VehEventWriter {
             det_id,
             stamp,
             file,
         })
     }
 
-    /// Append vehicle data to `.vev` log file
+    /// Append a vehicle event to `.vev` log file
     pub async fn append(&mut self, ev: &VehEvent) -> Result<()> {
         if self.stamp.0.date() != ev.stamp.0.date() {
             self.stamp = ev.stamp.clone();

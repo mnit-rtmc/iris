@@ -14,7 +14,7 @@ use crate::http;
 
 use crate::database::Database;
 use crate::error::{Error, Result};
-use crate::event::{Stamp, VehEvent, VehLog};
+use crate::event::{Stamp, VehEvent, VehEventWriter};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{SinkExt, StreamExt, TryStreamExt, pin_mut};
 use serde::Deserialize;
@@ -105,8 +105,8 @@ struct Zone {
     id: u32,
     /// Observation direction
     direction: Option<ObsDirection>,
-    /// Vehicle event log
-    veh_log: Option<VehLog>,
+    /// Vehicle event log writer
+    vev_writer: Option<VehEventWriter>,
 }
 
 /// Sensor configuration
@@ -167,7 +167,7 @@ impl Zone {
         Zone {
             id,
             direction: None,
-            veh_log: None,
+            vev_writer: None,
         }
     }
 
@@ -175,15 +175,15 @@ impl Zone {
     async fn log_append(&mut self, veh: &VehicleData) -> Result<()> {
         let gap = self.direction.is_none();
         let dir = self.check_direction(veh);
-        match &mut self.veh_log {
-            Some(veh_log) => {
+        match &mut self.vev_writer {
+            Some(vev_writer) => {
                 let vev = if gap {
                     veh.gap()
                 } else {
                     let wrong_way = dir != veh.direction;
                     veh.server_recorded(wrong_way)
                 };
-                veh_log.append(&vev).await?;
+                vev_writer.append(&vev).await?;
             }
             None => log::warn!("No log for zone: {}", self.id),
         }
@@ -346,8 +346,8 @@ impl Sensor {
             let pin = i + 1;
             match dets.get(&pin) {
                 Some(det) => {
-                    let veh_log = VehLog::new(det).await?;
-                    zone.veh_log = Some(veh_log);
+                    let vev_writer = VehEventWriter::new(det).await?;
+                    zone.vev_writer = Some(vev_writer);
                     log::info!("pin #{pin}, zone: {}, det: {det}", zone.id);
                 }
                 None => {
