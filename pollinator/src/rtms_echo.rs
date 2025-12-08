@@ -12,11 +12,10 @@
 //
 use crate::http;
 
-use crate::database::Database;
-use crate::error::{Error, Result};
-use crate::event::{Stamp, VehEvent, VehEventWriter};
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{SinkExt, StreamExt, TryStreamExt, pin_mut};
+use resin::event::{Stamp, VehEvent, VehEventWriter};
+use resin::{Database, Error, Result};
 use serde::Deserialize;
 use std::collections::HashMap;
 use tokio::join;

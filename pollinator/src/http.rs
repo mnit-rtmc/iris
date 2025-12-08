@@ -10,13 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::{Error, Result};
 use bytes::Bytes;
 use http_body_util::{BodyExt, Empty};
 use hyper::body::Incoming;
 use hyper::header::{AUTHORIZATION, HeaderValue};
 use hyper::{Request, Response, Uri};
 use hyper_util::rt::TokioIo;
+use resin::{Error, Result};
 use tokio::net::TcpStream;
 
 /// HTTP client

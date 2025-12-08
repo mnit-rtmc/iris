@@ -12,7 +12,7 @@
 //
 use argh::FromArgs;
 use pollinator::rtms_echo::SensorCfg;
-use pollinator::{Database, Error, Result};
+use resin::{Database, Error, Result};
 
 /// Command-line arguments
 #[derive(FromArgs)]

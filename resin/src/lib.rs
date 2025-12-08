@@ -12,5 +12,10 @@
 //
 #![forbid(unsafe_code)]
 
-mod http;
-pub mod rtms_echo;
+mod connect;
+mod database;
+mod error;
+pub mod event;
+
+pub use database::Database;
+pub use error::{Error, Result};
