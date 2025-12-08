@@ -94,7 +94,7 @@ impl Stamp {
             self.0.month(),
             self.0.day()
         );
-        let mut path = PathBuf::from("/var/lib/iris/traffic");
+        let mut path = PathBuf::new();
         // FIXME: use IRIS server district property
         path.push("tms");
         path.push(&year);

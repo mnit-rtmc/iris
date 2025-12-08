@@ -1,0 +1,15 @@
+[Unit]
+Description=Pollinator service for IRIS
+StartLimitIntervalSec=0
+
+[Service]
+Environment=RUST_LOG=warn
+Environment=PGTZ=US/Central
+WorkingDirectory=/var/lib/iris/traffic/
+ExecStart=/usr/local/bin/pollinator
+Restart=always
+RestartSec=2
+User=tms
+
+[Install]
+WantedBy=multi-user.target
