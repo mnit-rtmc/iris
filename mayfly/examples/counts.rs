@@ -1,5 +1,5 @@
 use mayfly::binned::CountData;
-use mayfly::vehicle::{VehLog, VehicleFilter};
+use mayfly::vlog::{VehLog, VehicleFilter};
 use std::fs::File;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
