@@ -11,6 +11,7 @@ bb8-postgres = { workspace = true }
 hyper = { version = "1.8", features = ["client", "http1"] }
 jiff = "0.2.16"
 log = { workspace = true }
+mag = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio-postgres = { workspace = true }

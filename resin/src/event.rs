@@ -12,6 +12,7 @@
 //
 use crate::error::Result;
 use jiff::Zoned;
+use mag::{Length, Speed, length, time};
 use std::num::{NonZeroU8, NonZeroU16, NonZeroU32};
 use std::path::PathBuf;
 use tokio::fs::{File, create_dir_all, try_exists};
@@ -184,6 +185,13 @@ impl VehEvent {
         self
     }
 
+    /// Set vehicle length (ft)
+    pub fn with_length_ft(self, length: f32) -> Self {
+        let ft = Length::<length::ft>::new(f64::from(length));
+        let m = ft.to::<length::m>();
+        self.with_length_m(m.quantity as f32)
+    }
+
     /// Set vehicle speed (kph)
     pub fn with_speed_kph(mut self, speed: f32) -> Self {
         let kph = speed.round();
@@ -195,8 +203,15 @@ impl VehEvent {
         self
     }
 
+    /// Set vehicle speed (mph)
+    pub fn with_speed_mph(self, speed: f32) -> Self {
+        let mph = Speed::<length::mi, time::h>::new(f64::from(speed));
+        let kph = mph.to::<length::km, time::h>();
+        self.with_speed_kph(kph.quantity as f32)
+    }
+
     /// Set vehicle duration (ms)
-    pub fn with_duration(mut self, duration: u16) -> Self {
+    pub fn with_duration_ms(mut self, duration: u16) -> Self {
         self.duration = NonZeroU16::new(duration);
         self
     }
@@ -205,6 +220,62 @@ impl VehEvent {
     pub fn with_headway_ms(mut self, headway: u32) -> Self {
         self.headway = NonZeroU32::new(headway);
         self
+    }
+
+    /// Get time stamp
+    pub fn stamp(&self) -> Stamp {
+        self.stamp.clone()
+    }
+
+    /// Get time stamp mode
+    pub fn mode(&self) -> Mode {
+        self.mode
+    }
+
+    /// Get vehicle length (dm)
+    pub fn length_dm(&self) -> Option<u16> {
+        self.length.map(NonZeroU16::get)
+    }
+
+    /// Get vehicle length (ft)
+    pub fn length_ft(&self) -> Option<u8> {
+        self.length_dm().and_then(|dm| {
+            let dm = Length::<length::dm>::new(f64::from(dm));
+            let ft = dm.to::<length::ft>().quantity.round();
+            if (1.0..=255.0).contains(&ft) {
+                Some(ft as u8)
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Get vehicle speed (kph)
+    pub fn speed_kph(&self) -> Option<u8> {
+        self.speed.map(NonZeroU8::get)
+    }
+
+    /// Get vehicle speed (mph)
+    pub fn speed_mph(&self) -> Option<u8> {
+        self.speed_kph().and_then(|speed| {
+            let kph = Speed::<length::km, time::h>::new(f64::from(speed));
+            let mph = kph.to::<length::mi, time::h>().quantity.round();
+            if (1.0..=255.0).contains(&mph) {
+                Some(mph as u8)
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Get vehicle duration (ms)
+    pub fn duration_ms(&self) -> Option<u16> {
+        self.duration.map(NonZeroU16::get)
+    }
+
+    /// Get headway from start of previous vehicle to this one (ms)
+    pub fn headway_ms(&self) -> Option<u32> {
+        self.headway.map(NonZeroU32::get)
     }
 }
 
@@ -253,7 +324,7 @@ mod test {
         let ev = VehEvent::sensor_recorded(Stamp(stamp))
             .with_length_m(3.0)
             .with_speed_kph(80.0)
-            .with_duration(200);
+            .with_duration_ms(200);
         assert_eq!(
             u64::from(ev),
             (1 << 27) + (MS as u64) + (30 << 31) + (80 << 40) + (200 << 48)
