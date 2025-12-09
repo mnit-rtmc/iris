@@ -1,5 +1,6 @@
 [package]
 name = "mayfly"
+description = "Traffic data server for IRIS"
 version.workspace = true
 edition.workspace = true
 default-run = "mayfly"

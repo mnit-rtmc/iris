@@ -1,6 +1,6 @@
 [package]
 name = "resources"
-description = "Library for rendering DMS messages"
+description = "Definition of IRIS resource API"
 license = "GPL-2.0-or-later"
 version.workspace = true
 edition.workspace = true

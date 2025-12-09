@@ -1,5 +1,6 @@
 [package]
 name = "bulb"
+description = "Web UI frontend for IRIS"
 version.workspace = true
 edition.workspace = true
 

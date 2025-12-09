@@ -1,6 +1,6 @@
 [package]
 name = "resin"
-description = "Utility crate for IRIS"
+description = "Utility crate for IRIS services"
 license = "GPL-2.0-or-later"
 version.workspace = true
 edition.workspace = true
