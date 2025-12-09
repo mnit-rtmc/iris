@@ -12,6 +12,7 @@
 //
 use crate::error::Result;
 use jiff::Zoned;
+use std::num::{NonZeroU8, NonZeroU16, NonZeroU32};
 use std::path::PathBuf;
 use tokio::fs::{File, create_dir_all, try_exists};
 use tokio::io::AsyncWriteExt;
@@ -46,11 +47,13 @@ pub struct VehEvent {
     /// Wrong way vehicle flag
     wrong_way: bool,
     /// Vehicle length (dm)
-    length: u16,
+    length: Option<NonZeroU16>,
     /// Vehicle speed (kph)
-    speed: u8,
+    speed: Option<NonZeroU8>,
     /// Vehicle duration (ms)
-    duration: u16,
+    duration: Option<NonZeroU16>,
+    /// Headway from start of previous vehicle to this one (ms)
+    headway: Option<NonZeroU32>,
 }
 
 /// Vehicle event (`.vev`) log writer
@@ -108,9 +111,15 @@ impl From<&VehEvent> for u64 {
         let mut val = u64::from(ev.stamp.ms_since_midnight());
         val |= (ev.mode as u64) << 27;
         val |= u64::from(ev.wrong_way) << 30;
-        val |= u64::from(ev.length) << 31;
-        val |= u64::from(ev.speed) << 40;
-        val |= u64::from(ev.duration) << 48;
+        if let Some(dm) = ev.length {
+            val |= u64::from(dm.get()) << 31;
+        }
+        if let Some(kph) = ev.speed {
+            val |= u64::from(kph.get()) << 40;
+        }
+        if let Some(ms) = ev.duration {
+            val |= u64::from(ms.get()) << 48;
+        }
         val
     }
 }
@@ -168,9 +177,9 @@ impl VehEvent {
     pub fn with_length_m(mut self, length: f32) -> Self {
         let dm = (length * 10.0).round();
         self.length = if (1.0..=511.0).contains(&dm) {
-            dm as u16
+            NonZeroU16::new(dm as u16)
         } else {
-            0
+            None
         };
         self
     }
@@ -179,16 +188,22 @@ impl VehEvent {
     pub fn with_speed_kph(mut self, speed: f32) -> Self {
         let kph = speed.round();
         self.speed = if (1.0..=255.0).contains(&kph) {
-            kph as u8
+            NonZeroU8::new(kph as u8)
         } else {
-            0
+            None
         };
         self
     }
 
     /// Set vehicle duration (ms)
     pub fn with_duration(mut self, duration: u16) -> Self {
-        self.duration = duration;
+        self.duration = NonZeroU16::new(duration);
+        self
+    }
+
+    /// Set headway from start of previous vehicle to this one (ms)
+    pub fn with_headway_ms(mut self, headway: u32) -> Self {
+        self.headway = NonZeroU32::new(headway);
         self
     }
 }
