@@ -474,11 +474,7 @@ mod test {
 
     #[test]
     fn log() {
-        let mut log = VehLogReader::default();
-        for line in LOG.split('\n') {
-            log.append(line).unwrap();
-        }
-        log.finish();
+        let log = VehLogReader::from_reader_blocking(LOG.as_bytes()).unwrap();
         assert_eq!(log.events[0], VehicleEvent::new_reset());
         assert_eq!(
             log.events[1],
