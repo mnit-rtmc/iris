@@ -76,19 +76,6 @@ impl Stamp {
         Stamp(Zoned::now())
     }
 
-    /// Get the number of milliseconds since midnight
-    pub fn ms_since_midnight(&self) -> u32 {
-        let midnight = self.0.start_of_day().unwrap();
-        let delta = self.0.duration_since(&midnight);
-        let ms = delta.as_millis();
-        if (0..Self::MAX_MS).contains(&ms) {
-            ms as u32
-        } else {
-            log::warn!("Invalid timestamp: {ms}");
-            0
-        }
-    }
-
     /// Build path to traffic archive directory
     fn build_path(&self) -> PathBuf {
         let year = self.0.year().to_string();
@@ -104,6 +91,25 @@ impl Stamp {
         path.push(&year);
         path.push(&date);
         path
+    }
+
+    /// Get the number of milliseconds since midnight
+    pub fn ms_since_midnight(&self) -> u32 {
+        let midnight = self.0.start_of_day().unwrap();
+        let delta = self.0.duration_since(&midnight);
+        let ms = delta.as_millis();
+        if (0..Self::MAX_MS).contains(&ms) {
+            ms as u32
+        } else {
+            log::warn!("Invalid timestamp: {ms}");
+            0
+        }
+    }
+
+    /// Get interval of day for a given period
+    pub fn interval(&self, period_s: u32) -> u32 {
+        let ms = self.ms_since_midnight();
+        ms / (period_s * 1000)
     }
 }
 
@@ -133,39 +139,31 @@ impl From<VehEvent> for u64 {
 
 impl VehEvent {
     /// Set sensor-recorded timestamp
-    pub fn sensor_recorded(stamp: Stamp) -> Self {
-        VehEvent {
-            stamp,
-            mode: Mode::SensorRecorded,
-            ..Default::default()
-        }
+    pub fn with_sensor_recorded(mut self, stamp: Stamp) -> Self {
+        self.stamp = stamp;
+        self.mode = Mode::SensorRecorded;
+        self
     }
 
     /// Set server-recorded timestamp
-    pub fn server_recorded(stamp: Stamp) -> Self {
-        VehEvent {
-            stamp,
-            mode: Mode::ServerRecorded,
-            ..Default::default()
-        }
+    pub fn with_server_recorded(mut self, stamp: Stamp) -> Self {
+        self.stamp = stamp;
+        self.mode = Mode::ServerRecorded;
+        self
     }
 
     /// Set estimated timestamp
-    pub fn estimated(stamp: Stamp) -> Self {
-        VehEvent {
-            stamp,
-            mode: Mode::Estimated,
-            ..Default::default()
-        }
+    pub fn with_estimated(mut self, stamp: Stamp) -> Self {
+        self.stamp = stamp;
+        self.mode = Mode::Estimated;
+        self
     }
 
     /// Set gap event
-    pub fn gap_event(stamp: Stamp) -> Self {
-        VehEvent {
-            stamp,
-            mode: Mode::GapEvent,
-            ..Default::default()
-        }
+    pub fn with_gap_event(mut self, stamp: Stamp) -> Self {
+        self.stamp = stamp;
+        self.mode = Mode::GapEvent;
+        self
     }
 
     /// Set wrong-way vehicle
@@ -321,7 +319,8 @@ mod test {
     fn veh_event() {
         const MS: i64 = (14 * 60 * 60 * 1000) + (53 * 60 * 1000);
         let stamp: Zoned = "2025-12-02 14:53[America/Chicago]".parse().unwrap();
-        let ev = VehEvent::sensor_recorded(Stamp(stamp))
+        let ev = VehEvent::default()
+            .with_sensor_recorded(Stamp(stamp))
             .with_length_m(3.0)
             .with_speed_kph(80.0)
             .with_duration_ms(200);
