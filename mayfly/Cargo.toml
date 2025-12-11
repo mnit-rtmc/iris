@@ -8,7 +8,6 @@ default-run = "mayfly"
 [dependencies]
 argh = "0.1"
 axum = { workspace = true }
-chrono = { workspace = true }
 env_logger = { workspace = true }
 http = { workspace = true }
 log = { workspace = true }

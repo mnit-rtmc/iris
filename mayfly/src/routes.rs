@@ -18,12 +18,12 @@ use crate::binned::{
 };
 use crate::error::{Error, Result};
 use crate::traffic::Traffic;
-use crate::vlog::VehLogReader;
+use crate::vlog;
 use axum::Router;
 use axum::extract::Query;
 use axum::response::IntoResponse;
 use axum::routing::get;
-use chrono::{Local, NaiveDate, TimeDelta};
+use resin::event::Stamp;
 use serde::Deserialize;
 use std::collections::HashSet;
 use std::fmt::{Display, Write};
@@ -52,6 +52,9 @@ const INTERVALS_PER_HOUR: u16 = 2 * 60;
 
 /// Number of feet per mile
 const FEET_PER_MILE: f32 = 5280.0;
+
+/// Recent age for max-age cache control header (2 days)
+const RECENT_AGE_MS: i128 = 2 * 24 * 60 * 60 * 1000;
 
 /// Detector configuration
 #[allow(unused)]
@@ -297,33 +300,12 @@ fn parse_year(year: &str) -> Result<i32> {
     }
 }
 
-/// Parse month parameter
-fn parse_month(month: &str) -> Result<u32> {
-    match month.parse() {
-        Ok(m) if (1..=12).contains(&m) => Ok(m),
-        _ => Err(Error::InvalidQuery("month")),
-    }
-}
-
-/// Parse day parameter
-fn parse_day(day: &str) -> Result<u32> {
-    match day.parse() {
-        Ok(d) if (1..=31).contains(&d) => Ok(d),
-        _ => Err(Error::InvalidQuery("day")),
-    }
-}
-
 /// Check if a date is valid
-fn parse_date(date: &str) -> Result<NaiveDate> {
-    if date.len() == 8 {
-        let year = parse_year(date.get(..4).unwrap_or(""))?;
-        let month = parse_month(date.get(4..6).unwrap_or(""))?;
-        let day = parse_day(date.get(6..8).unwrap_or(""))?;
-        if let Some(date) = NaiveDate::from_ymd_opt(year, month, day) {
-            return Ok(date);
-        }
+fn parse_date(date: &str) -> Result<Stamp> {
+    match Stamp::try_from_date(date) {
+        Some(stamp) => Ok(stamp),
+        None => Err(Error::InvalidQuery("date")),
     }
-    Err(Error::InvalidQuery("date"))
 }
 
 /// Build route for districts
@@ -527,8 +509,7 @@ where
         let name = self.vlog_file_name();
         let zf = traffic.by_name(&name)?;
         log::info!("opened {name} in {}.{EXT}", self.date);
-        let vlog = VehLogReader::from_reader_blocking(zf)?;
-        let events = vlog.events();
+        let events = vlog::read_blocking(&self.date, zf)?;
         let bi = BinIter::new(30, &events, self.filter());
         Ok(bi.collect())
     }
@@ -565,8 +546,7 @@ where
         path.push(self.vlog_file_name());
         let file = File::open(&path).await?;
         log::info!("opened {path:?}");
-        let vlog = VehLogReader::from_reader_async(file).await?;
-        let events = vlog.events();
+        let events = vlog::read_async(&self.date, file).await?;
         let bi = BinIter::new(30, &events, self.filter());
         Ok(bi.collect())
     }
@@ -615,8 +595,8 @@ where
     /// Check if date is "recent" for max-age cache control heder
     fn is_recent(&self) -> Result<bool> {
         let date = parse_date(&self.date)?;
-        let today = Local::now().date_naive();
-        Ok(today < date + TimeDelta::try_days(2).unwrap())
+        let elapsed = Stamp::now().elapsed(&date);
+        Ok(elapsed < RECENT_AGE_MS)
     }
 
     /// Load detector free-flow speed

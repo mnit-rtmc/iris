@@ -1149,7 +1149,6 @@ version = "5.79.0"
 dependencies = [
  "argh",
  "axum",
- "chrono",
  "env_logger",
  "http",
  "log",

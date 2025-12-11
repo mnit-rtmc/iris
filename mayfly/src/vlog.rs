@@ -13,44 +13,17 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
+use resin::event::{Mode, Stamp, VehEvent};
 use std::io::BufRead as _;
 use std::io::Read as BlockingRead;
-use std::num::{NonZeroU8, NonZeroU16, NonZeroU32};
-use std::str::FromStr;
 use tokio::io::{AsyncBufReadExt, AsyncReadExt, BufReader};
 
-/// Time stamp
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct Stamp(u32);
-
-/// Single logged vehicle event
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub struct VehicleEvent {
-    /// Time stamp
-    stamp: Stamp,
-
-    /// Headway from start of previous vehicle to this one (ms)
-    headway: Option<NonZeroU32>,
-
-    /// Duration vehicle was detected (ms)
-    duration: Option<NonZeroU16>,
-
-    /// Vehicle speed (mph)
-    speed: Option<NonZeroU8>,
-
-    /// Vehicle length (ft)
-    length: Option<NonZeroU8>,
-}
-
 /// Vehicle event log (`.vlog`) for one detector on one day
-#[derive(Default)]
-pub struct VehLogReader {
-    /// All events in the log
-    events: Vec<VehicleEvent>,
-    /// Previous event time stamp
-    previous: Option<u32>,
-    /// Latest logged time stamp
-    latest: Option<u32>,
+struct VehLogReader {
+    /// Stamp at midnight
+    midnight: Stamp,
+    /// All vehicle events in the log
+    events: Vec<VehEvent>,
 }
 
 /// Parse an hour from a time stamp
@@ -69,247 +42,95 @@ fn parse_min_sec(min_sec: &str) -> Result<u32> {
     }
 }
 
-/// Parse a time stamp from a vehicle log
-impl FromStr for Stamp {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self> {
-        if s.len() == 8 && s.get(2..3) == Some(":") && s.get(5..6) == Some(":")
-        {
-            let hour = parse_hour(s.get(..2).unwrap_or(""))?;
-            let minute = parse_min_sec(s.get(3..5).unwrap_or(""))?;
-            let second = parse_min_sec(s.get(6..).unwrap_or(""))?;
-            let sec = hour * 3600 + minute * 60 + second;
-            let st = Stamp::new(sec * 1000);
-            if st != Stamp::default() {
-                return Ok(st);
-            }
-        }
-        Err(Error::InvalidData("stamp"))
+/// Parse time-of-day from a vehicle log
+fn parse_tod(s: &str) -> Result<u32> {
+    if s.len() == 8 && s.get(2..3) == Some(":") && s.get(5..6) == Some(":") {
+        let hour = parse_hour(s.get(..2).unwrap_or(""))?;
+        let minute = parse_min_sec(s.get(3..5).unwrap_or(""))?;
+        let second = parse_min_sec(s.get(6..).unwrap_or(""))?;
+        let tod = hour * 3600 + minute * 60 + second;
+        return Ok(tod * 1000);
     }
+    Err(Error::InvalidData("stamp"))
 }
 
-impl Default for Stamp {
-    fn default() -> Self {
-        Stamp(Stamp::NONE)
+/// Parse a vehicle event from a `.vlog` file
+fn parse_event(line: &str, midnight: &Stamp) -> Result<VehEvent> {
+    let line = line.trim();
+    if line == "*" {
+        return Ok(VehEvent::default().with_gap(true));
     }
-}
-
-impl Stamp {
-    /// Valid time stamps range from 0 to MIDNIGHT
-    const MIDNIGHT: u32 = 24 * 60 * 60 * 1000;
-
-    /// Value indicating missing time stamp
-    const NONE: u32 = u32::MAX - 1;
-
-    /// Value indicating logging reset event
-    const RESET: u32 = u32::MAX;
-
-    /// Create a new time stamp
-    fn new(value: u32) -> Self {
-        if value < Stamp::MIDNIGHT {
-            Stamp(value)
-        } else {
-            Stamp::default()
-        }
+    let mut val = line.split(',');
+    let duration = val.next().ok_or(Error::InvalidData("duration"))?;
+    let duration = duration.parse().ok();
+    let headway = val.next().ok_or(Error::InvalidData("headway"))?;
+    let headway = headway.parse().ok();
+    let tod = match val.next() {
+        Some(tod) if !tod.is_empty() => Some(parse_tod(tod)?),
+        _ => None,
+    };
+    let speed = match val.next() {
+        Some(speed) if !speed.is_empty() => speed.parse().ok(),
+        _ => None,
+    };
+    let length = match val.next() {
+        Some(length) if !length.is_empty() => length.parse().ok(),
+        _ => None,
+    };
+    let mut ev = VehEvent::default();
+    if let Some(tod) = tod {
+        ev = ev.with_stamp_mode(
+            midnight.clone().with_ms_since_midnight(tod),
+            Mode::SensorRecorded,
+        );
     }
-
-    /// Create a new reset stamp
-    fn new_reset() -> Self {
-        Stamp(Stamp::RESET)
+    if let Some(headway) = headway {
+        ev = ev.with_headway_ms(headway);
     }
-
-    /// Check for reset
-    fn is_reset(self) -> bool {
-        self.0 == Stamp::RESET
+    if let Some(speed) = speed {
+        ev = ev.with_speed_mph(speed);
     }
-
-    /// Check for none
-    fn is_none(self) -> bool {
-        self.0 == Stamp::NONE
+    if let Some(length) = length {
+        ev = ev.with_length_ft(length);
     }
-
-    /// Get time stamp, if valid
-    fn stamp(self) -> Option<u32> {
-        if self.0 < Stamp::MIDNIGHT {
-            Some(self.0)
-        } else {
-            None
-        }
+    if let Some(duration) = duration {
+        ev = ev.with_duration_ms(duration);
     }
-}
-
-#[allow(dead_code)]
-impl VehicleEvent {
-    /// Create a new reset event
-    fn new_reset() -> Self {
-        VehicleEvent {
-            stamp: Stamp::new_reset(),
-            ..Default::default()
-        }
-    }
-
-    /// Create a new vehicle event
-    fn new(line: &str) -> Result<Self> {
-        let line = line.trim();
-        if line == "*" {
-            return Ok(VehicleEvent::new_reset());
-        }
-        let mut ev = Self::default();
-        let mut val = line.split(',');
-        match val.next() {
-            Some(dur) => {
-                if dur != "?" {
-                    ev.duration = dur.parse().ok();
-                }
-            }
-            None => return Err(Error::InvalidData("duration")),
-        }
-        match val.next() {
-            Some(hdw) => {
-                if hdw != "?" {
-                    ev.headway = hdw.parse().ok();
-                }
-            }
-            None => return Err(Error::InvalidData("headway")),
-        }
-        if let Some(stamp) = val.next()
-            && !stamp.is_empty()
-        {
-            ev.stamp = stamp.parse()?;
-        }
-        if let Some(speed) = val.next()
-            && !speed.is_empty()
-        {
-            ev.speed = speed.parse().ok();
-        }
-        if let Some(length) = val.next()
-            && !length.is_empty()
-        {
-            ev.length = length.parse().ok();
-        }
-        Ok(ev)
-    }
-
-    /// Set the stamp
-    pub fn with_stamp(mut self, stamp: u32) -> Self {
-        self.stamp = Stamp::new(stamp);
-        self
-    }
-
-    /// Set the duration
-    pub fn with_duration(mut self, duration: u16) -> Self {
-        self.duration = NonZeroU16::new(duration);
-        self
-    }
-
-    /// Set the headway
-    pub fn with_headway(mut self, headway: u32) -> Self {
-        self.headway = NonZeroU32::new(headway);
-        self
-    }
-
-    /// Set the speed
-    pub fn with_speed(mut self, speed: u8) -> Self {
-        self.speed = NonZeroU8::new(speed);
-        self
-    }
-
-    /// Set the length
-    pub fn with_length(mut self, length: u8) -> Self {
-        self.length = NonZeroU8::new(length);
-        self
-    }
-
-    /// Check for reset event
-    pub fn is_reset(&self) -> bool {
-        self.stamp.is_reset()
-    }
-
-    /// Get a (near) time stamp for the previous vehicle event
-    fn previous(&self) -> Stamp {
-        if let (Some(headway), Some(stamp)) = (self.headway(), self.stamp())
-            && stamp >= headway
-        {
-            return Stamp::new(stamp - headway);
-        }
-        Stamp::default()
-    }
-
-    /// Set time stamp or headway from previous stamp
-    fn set_previous(&mut self, st: u32) {
-        match (self.headway(), self.stamp()) {
-            (Some(headway), None) => {
-                self.stamp = Stamp::new(st + headway);
-            }
-            (None, Some(stamp)) if stamp >= st => {
-                self.headway = NonZeroU32::new(stamp - st)
-            }
-            _ => (),
-        }
-    }
-
-    /// Propogate time stamp from previous event
-    fn propogate_stamp(&mut self, previous: Option<u32>) {
-        if !self.is_reset()
-            && let Some(pr) = previous
-        {
-            self.set_previous(pr);
-        }
-    }
-
-    /// Get event time stamp
-    pub fn stamp(&self) -> Option<u32> {
-        self.stamp.stamp()
-    }
-
-    /// Get the duration (ms)
-    pub fn duration(&self) -> Option<u32> {
-        self.duration.map(|d| d.get().into())
-    }
-
-    /// Get the headway (ms)
-    pub fn headway(&self) -> Option<u32> {
-        self.headway.map(|h| h.get())
-    }
-
-    /// Get the speed (mph)
-    pub fn speed(&self) -> Option<u32> {
-        self.speed.map(|s| s.get().into())
-    }
-
-    /// Get the length (ft)
-    pub fn length(&self) -> Option<u32> {
-        self.length.map(|f| f.get().into())
-    }
+    Ok(ev)
 }
 
 impl VehLogReader {
-    /// Create a vehicle event log (`.vlog`) from an async reader
-    pub async fn from_reader_async<R>(reader: R) -> Result<Self>
-    where
-        R: AsyncReadExt + Unpin,
-    {
-        let mut log = Self::default();
-        let mut lines = BufReader::new(reader).lines();
-        while let Some(line) = lines.next_line().await? {
-            log.append(&line)?;
+    /// Create a new vlog reader
+    fn new(date: &str) -> Result<Self> {
+        match Stamp::try_from_date(date) {
+            Some(midnight) => Ok(VehLogReader {
+                midnight,
+                events: Vec::new(),
+            }),
+            None => Err(Error::InvalidQuery("date")),
         }
-        log.finish();
-        Ok(log)
     }
 
-    /// Create a vehicle event log from a reader (blocking)
-    pub fn from_reader_blocking<R>(reader: R) -> Result<Self>
-    where
-        R: BlockingRead,
-    {
-        let mut log = Self::default();
-        for line in std::io::BufReader::new(reader).lines() {
-            log.append(&line?)?;
+    /// Get the last event timestamp
+    fn last(&self) -> Option<Stamp> {
+        self.events.last().and_then(|last| last.stamp())
+    }
+
+    /// Get time-of-day of an event
+    fn event_ms(&self, i: usize) -> Option<u32> {
+        self.events[i].stamp().map(|st| st.ms_since_midnight())
+    }
+
+    /// Get elapsed time between two events (ms)
+    fn elapsed(&self, a: usize, b: usize) -> Option<u32> {
+        let begin = self.event_ms(a);
+        let end = self.event_ms(b);
+        if let (Some(begin), Some(end)) = (begin, end)
+            && end > begin
+        {
+            return Some(end - begin);
         }
-        log.finish();
-        Ok(log)
+        None
     }
 
     /// Append an event to the log
@@ -318,19 +139,12 @@ impl VehLogReader {
         if line.is_empty() {
             return Ok(());
         }
-        let mut ev = VehicleEvent::new(line)?;
-        ev.propogate_stamp(self.previous);
-        // Add Reset if time stamp went backwards
-        if let Some(latest) = self.latest
-            && let Some(stamp) = ev.stamp()
-            && stamp < latest
+        let mut ev = parse_event(line, &self.midnight)?;
+        // Add gap if time stamp went backwards
+        if let Some(st) = ev.stamp()
+            && let Some(last) = self.last()
         {
-            self.events.push(VehicleEvent::new_reset());
-            self.latest = Some(stamp);
-        }
-        self.previous = ev.stamp();
-        if self.previous.is_some() {
-            self.latest = self.previous;
+            ev = ev.with_gap(st.is_before(&last));
         }
         self.events.push(ev);
         Ok(())
@@ -338,124 +152,149 @@ impl VehLogReader {
 
     /// Fill in event gaps
     fn finish(&mut self) {
-        self.propogate_backward();
-        self.interpolate_missing_stamps();
+        // first, propogate timestamps for recorded headways
+        self.propogate_stamps();
+        // now, interpolate missing headways
+        self.interpolate_headways();
+        // finally, propogate timestamps for interpolated headways
+        self.propogate_stamps();
     }
 
-    /// Propogate timestamps backward to previous events
-    fn propogate_backward(&mut self) {
-        let mut stamp = Stamp::default();
-        let mut it = self.events.iter_mut();
-        while let Some(ev) = it.next_back() {
-            if ev.is_reset() {
-                stamp = Stamp::default();
-            } else {
-                if ev.stamp.is_none() {
-                    ev.stamp = stamp;
-                }
-                stamp = ev.previous();
+    /// Propogate timestamps with headway values
+    fn propogate_stamps(&mut self) {
+        let mut stamp: Option<Stamp> = None;
+        let mut mode = Mode::NoTimestamp;
+        for ev in self.events.iter_mut() {
+            if !ev.gap()
+                && ev.stamp().is_none()
+                && let (Some(st), Some(hw)) = (stamp, ev.headway_ms())
+            {
+                let ms = st.ms_since_midnight() + hw;
+                let st = st.with_ms_since_midnight(ms);
+                *ev = ev.clone().with_stamp_mode(st, mode);
             }
+            mode = ev.mode();
+            stamp = if mode.is_recorded() { ev.stamp() } else { None };
         }
     }
 
-    /// Interpolate timestamps in gaps where they are missing
-    fn interpolate_missing_stamps(&mut self) {
+    /// Interpolate headways in gaps where they are missing
+    fn interpolate_headways(&mut self) {
         let mut before = None; // index of event before gap
         for i in 0..self.events.len() {
-            if self.events[i].is_reset() {
+            let ev = &self.events[i];
+            if ev.gap() {
                 before = None;
+                continue;
             }
-            let stamp = &self.events[i].stamp();
-            if let Some(stamp) = stamp {
-                if let Some(b) = before {
-                    let total = (i - b) as u32;
-                    if total > 1 {
-                        // interpolate
-                        let cev: &VehicleEvent = &self.events[b];
-                        let mut st = cev.stamp().unwrap();
-                        let gap = stamp - st;
-                        let headway = gap / total;
-                        for j in b..i {
-                            let v = &mut self.events[j + 1];
-                            if !v.is_reset() {
-                                if v.headway.is_none() {
-                                    v.headway = NonZeroU32::new(headway);
-                                }
-                                v.set_previous(st);
-                            }
-                            st += headway;
-                        }
-                    }
+            if ev.headway_ms().is_none() && ev.stamp().is_none() {
+                continue;
+            }
+            if let Some(b) = before
+                && let Some(elapsed) = self.elapsed(b, i)
+            {
+                let periods = i - b;
+                let avg_headway = elapsed / (periods as u32);
+                for j in b + 1..i {
+                    let ev = &mut self.events[j];
+                    *ev = ev.clone().with_headway_ms(avg_headway);
                 }
-                before = Some(i);
             }
+            before = Some(i);
         }
     }
+}
 
-    /// Get all vehicle events
-    pub fn events(self) -> Vec<VehicleEvent> {
-        self.events
+/// Read a vehicle event log (`.vlog`) from an async reader
+pub async fn read_async<R>(date: &str, reader: R) -> Result<Vec<VehEvent>>
+where
+    R: AsyncReadExt + Unpin,
+{
+    let mut vlog = VehLogReader::new(date)?;
+    let mut lines = BufReader::new(reader).lines();
+    while let Some(line) = lines.next_line().await? {
+        vlog.append(&line)?;
     }
+    vlog.finish();
+    Ok(vlog.events)
+}
+
+/// Read a vehicle event log (`.vlog`) from a blocking reader
+pub fn read_blocking<R>(date: &str, reader: R) -> Result<Vec<VehEvent>>
+where
+    R: BlockingRead,
+{
+    let mut vlog = VehLogReader::new(date)?;
+    for line in std::io::BufReader::new(reader).lines() {
+        vlog.append(&line?)?;
+    }
+    vlog.finish();
+    Ok(vlog.events)
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
 
+    fn mk_stamp(ms: u32) -> Stamp {
+        let stamp = Stamp::try_from_date("20251211").unwrap();
+        stamp.with_ms_since_midnight(ms)
+    }
+
+    fn mk_event(line: &str) -> VehEvent {
+        let midnight = Stamp::try_from_date("20251211").unwrap();
+        parse_event(line, &midnight).unwrap()
+    }
+
     #[test]
     fn veh_events() {
-        assert_eq!(VehicleEvent::new("?,?").unwrap(), VehicleEvent::default());
+        assert_eq!(mk_event("?,?"), VehEvent::default());
+        assert_eq!(mk_event("37,?"), VehEvent::default().with_duration_ms(37));
+        assert_eq!(mk_event("?,666"), VehEvent::default().with_headway_ms(666));
         assert_eq!(
-            VehicleEvent::new("37,?").unwrap(),
-            VehicleEvent::default().with_duration(37)
+            mk_event("55,?,12:34:56"),
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(45_296_000), Mode::SensorRecorded)
+                .with_duration_ms(55)
         );
         assert_eq!(
-            VehicleEvent::new("?,666").unwrap(),
-            VehicleEvent::default().with_headway(666)
+            mk_event("74,1234,,61"),
+            VehEvent::default()
+                .with_duration_ms(74)
+                .with_headway_ms(1234)
+                .with_speed_mph(61.0)
         );
         assert_eq!(
-            VehicleEvent::new("55,?,12:34:56").unwrap(),
-            VehicleEvent::default()
-                .with_stamp(45_296_000)
-                .with_duration(55)
-        );
-        assert_eq!(
-            VehicleEvent::new("74,1234,,61").unwrap(),
-            VehicleEvent::default()
-                .with_duration(74)
-                .with_headway(1234)
-                .with_speed(61)
-        );
-        assert_eq!(
-            VehicleEvent::new("1,4321,,,19").unwrap(),
-            VehicleEvent::default()
-                .with_duration(1)
-                .with_headway(4321)
-                .with_length(19)
+            mk_event("1,4321,,,19"),
+            VehEvent::default()
+                .with_duration_ms(1)
+                .with_headway_ms(4321)
+                .with_length_ft(19.0)
         );
     }
 
     #[test]
     fn bad_veh_events() {
-        assert!(VehicleEvent::new("").is_err());
-        assert!(VehicleEvent::new("1").is_err());
-        assert!(VehicleEvent::new("?,?,?").is_err());
-        assert!(VehicleEvent::new("10,?,24:59:59").is_err());
-        assert!(VehicleEvent::new("15,?,23:60:59").is_err());
-        assert!(VehicleEvent::new("25,?,23:59:60").is_err());
+        let midnight = Stamp::try_from_date("20251211").unwrap();
+        assert!(parse_event("", &midnight).is_err());
+        assert!(parse_event("1", &midnight).is_err());
+        assert!(parse_event("?,?,?", &midnight).is_err());
+        assert!(parse_event("10,?,24:59:59", &midnight).is_err());
+        assert!(parse_event("15,?,23:60:59", &midnight).is_err());
+        assert!(parse_event("25,?,23:59:60", &midnight).is_err());
     }
 
     #[test]
     fn events() {
-        let ev = VehicleEvent::new_reset();
-        assert_eq!(VehicleEvent::new("*").unwrap(), ev);
-        assert_eq!(VehicleEvent::new("\t*  ").unwrap(), ev);
-        assert_eq!(VehicleEvent::new("*\n").unwrap(), ev);
+        let midnight = Stamp::try_from_date("20251211").unwrap();
+        let ev = VehEvent::default().with_gap(true);
+        assert_eq!(parse_event("*", &midnight).unwrap(), ev);
+        assert_eq!(parse_event("\t*  ", &midnight).unwrap(), ev);
+        assert_eq!(parse_event("*\n", &midnight).unwrap(), ev);
         assert_eq!(
-            VehicleEvent::new("37,?").unwrap(),
-            VehicleEvent::default().with_duration(37)
+            parse_event("37,?", &midnight).unwrap(),
+            VehEvent::default().with_duration_ms(37)
         );
-        assert_eq!(std::mem::size_of::<VehicleEvent>(), 12);
     }
 
     const LOG: &str = "*
@@ -474,88 +313,88 @@ mod test {
 
     #[test]
     fn log() {
-        let log = VehLogReader::from_reader_blocking(LOG.as_bytes()).unwrap();
-        assert_eq!(log.events[0], VehicleEvent::new_reset());
+        let events = read_blocking("20251211", LOG.as_bytes()).unwrap();
+        assert_eq!(events[0], VehEvent::default().with_gap(true));
         assert_eq!(
-            log.events[1],
-            VehicleEvent::default()
-                .with_stamp(64_176_000)
-                .with_duration(296)
-                .with_headway(9930)
+            events[1],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_176_000), Mode::SensorRecorded)
+                .with_duration_ms(296)
+                .with_headway_ms(9930)
         );
         assert_eq!(
-            log.events[2],
-            VehicleEvent::default()
-                .with_stamp(64_190_069)
-                .with_duration(231)
-                .with_headway(14_069)
+            events[2],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_190_069), Mode::SensorRecorded)
+                .with_duration_ms(231)
+                .with_headway_ms(14_069)
         );
         assert_eq!(
-            log.events[3],
-            VehicleEvent::default()
-                .with_stamp(64_190_522)
-                .with_duration(240)
-                .with_headway(453)
-                .with_speed(45)
-                .with_length(18)
+            events[3],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_190_522), Mode::SensorRecorded)
+                .with_duration_ms(240)
+                .with_headway_ms(453)
+                .with_speed_mph(45.0)
+                .with_length_ft(18.0)
         );
         assert_eq!(
-            log.events[4],
-            VehicleEvent::default()
-                .with_stamp(64_214_032)
-                .with_duration(496)
-                .with_headway(23_510)
-                .with_speed(53)
-                .with_length(62)
+            events[4],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_214_032), Mode::SensorRecorded)
+                .with_duration_ms(496)
+                .with_headway_ms(23_510)
+                .with_speed_mph(53.0)
+                .with_length_ft(62.0)
         );
         assert_eq!(
-            log.events[5],
-            VehicleEvent::default()
-                .with_stamp(64_215_353)
-                .with_duration(259)
-                .with_headway(1321)
+            events[5],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_215_353), Mode::SensorRecorded)
+                .with_duration_ms(259)
+                .with_headway_ms(1321)
         );
         assert_eq!(
-            log.events[6],
-            VehicleEvent::default()
-                .with_stamp(64_219_357)
-                .with_headway(4004)
+            events[6],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_219_568), Mode::SensorRecorded)
+                .with_headway_ms(4215)
         );
         assert_eq!(
-            log.events[7],
-            VehicleEvent::default()
-                .with_stamp(64_223_362)
-                .with_duration(249)
-                .with_headway(4004)
+            events[7],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_223_783), Mode::SensorRecorded)
+                .with_duration_ms(249)
+                .with_headway_ms(4215)
         );
         assert_eq!(
-            log.events[8],
-            VehicleEvent::default()
-                .with_stamp(64_228_000)
-                .with_duration(323)
-                .with_headway(4638)
+            events[8],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_228_000), Mode::SensorRecorded)
+                .with_duration_ms(323)
+                .with_headway_ms(4638)
         );
         assert_eq!(
-            log.events[9],
-            VehicleEvent::default()
-                .with_stamp(64_233_967)
-                .with_duration(258)
-                .with_headway(5967)
-                .with_speed(55)
+            events[9],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_233_967), Mode::SensorRecorded)
+                .with_duration_ms(258)
+                .with_headway_ms(5967)
+                .with_speed_mph(55.0)
         );
         assert_eq!(
-            log.events[10],
-            VehicleEvent::default()
-                .with_stamp(64_235_509)
-                .with_duration(111)
-                .with_headway(1542)
+            events[10],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_235_509), Mode::SensorRecorded)
+                .with_duration_ms(111)
+                .with_headway_ms(1542)
         );
         assert_eq!(
-            log.events[11],
-            VehicleEvent::default()
-                .with_stamp(64_247_538)
-                .with_duration(304)
-                .with_headway(12_029)
+            events[11],
+            VehEvent::default()
+                .with_stamp_mode(mk_stamp(64_247_538), Mode::SensorRecorded)
+                .with_duration_ms(304)
+                .with_headway_ms(12_029)
         );
     }
 }

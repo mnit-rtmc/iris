@@ -21,7 +21,8 @@ use mayfly::binned::{
 };
 use mayfly::error::Result;
 use mayfly::traffic::Traffic;
-use mayfly::vlog::{VehLogReader, VehicleEvent};
+use mayfly::vlog::read_blocking;
+use resin::event::VehEvent;
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::{BufWriter, ErrorKind, Write};
@@ -82,7 +83,10 @@ impl BinCommand {
             if traffic.needs_binning() {
                 let backup = backup_path(traffic.path())?;
                 let copier = Binner::new(&traffic)?;
-                let n_binned = copier.add_binned(traffic)?;
+                let date = String::from(
+                    traffic.path().file_stem().unwrap().to_string_lossy(),
+                );
+                let n_binned = copier.add_binned(traffic, &date)?;
                 info!("archive: {file:?} {n_files} files, {n_binned} binned");
                 std::fs::rename(&file, backup)?;
                 std::fs::rename(temp_path(&file), file)?;
@@ -103,15 +107,14 @@ impl Binner {
     }
 
     /// Add binned files to archive
-    fn add_binned(mut self, mut traffic: Traffic) -> Result<u32> {
+    fn add_binned(mut self, mut traffic: Traffic, date: &str) -> Result<u32> {
         let mut n_binned = 0;
         for i in 0..traffic.len() {
             let zf = traffic.by_index(i)?;
             match self.vlog_det_id(zf.name()) {
                 Some(det_id) => {
                     let mtime = zf.last_modified();
-                    let vlog = VehLogReader::from_reader_blocking(zf)?;
-                    let events = vlog.events();
+                    let events = read_blocking(date, zf)?;
                     n_binned += self.write_binned::<OccupancyData>(
                         det_id.to_string() + ".c30",
                         &events,
@@ -167,7 +170,7 @@ impl Binner {
     fn write_binned<T: TrafficData>(
         &mut self,
         name: String,
-        events: &[VehicleEvent],
+        events: &[VehEvent],
         mtime: &DateTime,
     ) -> Result<u32> {
         if self.contains(&name) {
@@ -218,7 +221,7 @@ fn make_writer(path: &impl AsRef<Path>) -> Result<ZipWriter<BufWriter<File>>> {
 }
 
 /// Pack traffic data into 30-second bins
-fn pack_binned<T: TrafficData>(events: &[VehicleEvent]) -> Option<Vec<u8>> {
+fn pack_binned<T: TrafficData>(events: &[VehEvent]) -> Option<Vec<u8>> {
     let len = 2880 * T::bin_bytes();
     let mut buf = Vec::with_capacity(len);
     let mut any_valid = false;
