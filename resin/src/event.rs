@@ -12,6 +12,8 @@
 //
 use crate::error::Result;
 use jiff::Zoned;
+use jiff::civil::Date;
+use jiff::tz::TimeZone;
 use mag::{Length, Speed, length, time};
 use std::num::{NonZeroU8, NonZeroU16, NonZeroU32};
 use std::path::PathBuf;
@@ -75,6 +77,43 @@ pub struct VehEventWriter {
     file: Option<File>,
 }
 
+/// Parse year parameter
+fn parse_year(year: &str) -> Option<i16> {
+    match year.parse() {
+        Ok(y) if (1900..=9999).contains(&y) => Some(y),
+        _ => None,
+    }
+}
+
+/// Parse month parameter
+fn parse_month(month: &str) -> Option<i8> {
+    match month.parse() {
+        Ok(m) if (1..=12).contains(&m) => Some(m),
+        _ => None,
+    }
+}
+
+/// Parse day parameter
+fn parse_day(day: &str) -> Option<i8> {
+    match day.parse() {
+        Ok(d) if (1..=31).contains(&d) => Some(d),
+        _ => None,
+    }
+}
+
+/// Parse an 8-digit date
+fn parse_date(date: &str) -> Option<Date> {
+    if date.len() == 8 {
+        let year = parse_year(&date[..4])?;
+        let month = parse_month(&date[4..6])?;
+        let day = parse_day(&date[6..8])?;
+        if let Ok(date) = Date::new(year, month, day) {
+            return Some(date);
+        }
+    }
+    None
+}
+
 impl Stamp {
     /// Maximum milliseconds since midnight (with DST)
     const MAX_MS: i128 = 25 * 60 * 60 * 1000;
@@ -84,11 +123,27 @@ impl Stamp {
         Stamp(Zoned::now())
     }
 
+    /// Get stamp at midnight of the given date
+    pub fn try_from_date(date: &str) -> Option<Self> {
+        if let Some(date) = parse_date(date) {
+            let dt = date.at(0, 0, 0, 0);
+            if let Ok(zoned) = dt.to_zoned(TimeZone::system()) {
+                return Some(Stamp(zoned));
+            }
+        }
+        None
+    }
+
     /// Set time-of-day (ms since midnight)
     pub fn with_ms_since_midnight(mut self, ms: u32) -> Self {
         let midnight = self.0.start_of_day().unwrap();
         self.0 = midnight + Duration::from_millis(u64::from(ms));
         self
+    }
+
+    /// Get elapsed time since another timestamp (ms)
+    pub fn elapsed(&self, other: &Self) -> i128 {
+        self.0.duration_since(&other.0).as_millis()
     }
 
     /// Check if a stamp is before another
