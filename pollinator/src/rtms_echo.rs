@@ -14,7 +14,7 @@ use crate::http;
 
 use futures_util::stream::{SplitSink, SplitStream};
 use futures_util::{SinkExt, StreamExt, TryStreamExt, pin_mut};
-use resin::event::{Stamp, VehEvent, VehEventWriter};
+use resin::event::{Mode, Stamp, VehEvent, VehEventWriter};
 use resin::{Database, Error, Result};
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -143,7 +143,7 @@ impl VehicleData {
     /// Convert to a gap vehicle event
     fn gap(&self) -> VehEvent {
         VehEvent::default()
-            .with_gap_event(Stamp::now())
+            .with_stamp_mode(Stamp::now(), Mode::ServerRecordedGap)
             .with_length_m(self.length)
             .with_speed_kph(self.speed)
     }
@@ -151,7 +151,7 @@ impl VehicleData {
     /// Convert to a server recorded vehicle event
     fn server_recorded(&self, wrong_way: bool) -> VehEvent {
         VehEvent::default()
-            .with_server_recorded(Stamp::now())
+            .with_stamp_mode(Stamp::now(), Mode::ServerRecorded)
             .with_wrong_way(wrong_way)
             .with_length_m(self.length)
             .with_speed_kph(self.speed)

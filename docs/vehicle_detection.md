@@ -315,7 +315,7 @@ vehicle event is recorded as 8 bytes (64 bits, little-endian):
 | Field     | Size    | Description           | Valid Range   |
 |-----------|---------|-----------------------|---------------|
 | Timestamp | 27 bits | Time of day (ms)      | *varies* †    |
-| Mode      | 3 bits  | Timestamp mode        | 0..4          |
+| Mode      | 3 bits  | Timestamp mode        | 0..5          |
 | Wrong Way | 1 bit   | Travel direction      | 0..1          |
 | Length    | 9 bits  | Vehicle length (dm)   | 1..511        |
 | Speed     | 8 bits  | Vehicle speed (kph)   | 1..255        |
@@ -333,12 +333,13 @@ since midnight local time.
 | DST ends   | 25    | 0..90,000,000 |
 
 **Mode** is the recorded timestamp mode:
-- `0`: No timestamp recorded for this vehicle event
-- `1`: Timestamp recorded by sensor; accurate to millisecond (ms) precision
-- `2`: Timestamp recorded by IRIS; may be affected by network latency
-- `3`: Timestamp estimated by IRIS; not accurate
-- `4`: Gap in recorded events; unknown number of vehicle events missed
-- `5`-`7`: *Reserved*
+- `0`: No timestamp for this vehicle event
+- `1`: Estimated by IRIS; not accurate
+- `2`: Recorded by sensor; accurate to millisecond (ms) precision
+- `3`: Recorded by sensor after a gap; unknown number of vehicle events missed
+- `4`: Recorded by IRIS; may be affected by network latency
+- `5`: Recorded by IRIS after a gap; unknown number of vehicle events missed
+- `6`-`7`: *Reserved*
 
 **Wrong Way** is a flag indicating whether the vehicle was traveling in the
 wrong direction (`1`).

@@ -15,6 +15,7 @@ use jiff::Zoned;
 use mag::{Length, Speed, length, time};
 use std::num::{NonZeroU8, NonZeroU16, NonZeroU32};
 use std::path::PathBuf;
+use std::time::Duration;
 use tokio::fs::{File, create_dir_all, try_exists};
 use tokio::io::AsyncWriteExt;
 
@@ -28,14 +29,29 @@ pub enum Mode {
     /// No timestamp recorded
     #[default]
     NoTimestamp = 0,
-    /// Timestamp recorded by field sensor
-    SensorRecorded = 1,
-    /// Timestamp recorded by central server
-    ServerRecorded = 2,
-    /// Timestamp estimated by central server
-    Estimated = 3,
-    /// Gap in event collection (missing events)
-    GapEvent = 4,
+    /// Estimated by central server
+    Estimated = 1,
+    /// Recorded by field sensor
+    SensorRecorded = 2,
+    /// Recorded by field sensor after gap (missing events)
+    SensorRecordedGap = 3,
+    /// Recorded by central server
+    ServerRecorded = 4,
+    /// Recorded by central server after gap (missing events)
+    ServerRecordedGap = 5,
+}
+
+impl Mode {
+    /// Check if the timestamp is recorded
+    pub fn is_recorded(self) -> bool {
+        matches!(
+            self,
+            Mode::SensorRecorded
+                | Mode::SensorRecordedGap
+                | Mode::ServerRecorded
+                | Mode::ServerRecordedGap
+        )
+    }
 }
 
 /// Vehicle event
@@ -74,6 +90,18 @@ impl Stamp {
     /// Get stamp of the current time
     pub fn now() -> Self {
         Stamp(Zoned::now())
+    }
+
+    /// Set time-of-day (ms since midnight)
+    pub fn with_ms_since_midnight(mut self, ms: u32) -> Self {
+        let midnight = self.0.start_of_day().unwrap();
+        self.0 = midnight + Duration::from_millis(u64::from(ms));
+        self
+    }
+
+    /// Check if a stamp is before another
+    pub fn is_before(&self, other: &Self) -> bool {
+        self.0 < other.0
     }
 
     /// Build path to traffic archive directory
@@ -138,31 +166,10 @@ impl From<VehEvent> for u64 {
 }
 
 impl VehEvent {
-    /// Set sensor-recorded timestamp
-    pub fn with_sensor_recorded(mut self, stamp: Stamp) -> Self {
+    /// Set timestamp and mode
+    pub fn with_stamp_mode(mut self, stamp: Stamp, mode: Mode) -> Self {
         self.stamp = stamp;
-        self.mode = Mode::SensorRecorded;
-        self
-    }
-
-    /// Set server-recorded timestamp
-    pub fn with_server_recorded(mut self, stamp: Stamp) -> Self {
-        self.stamp = stamp;
-        self.mode = Mode::ServerRecorded;
-        self
-    }
-
-    /// Set estimated timestamp
-    pub fn with_estimated(mut self, stamp: Stamp) -> Self {
-        self.stamp = stamp;
-        self.mode = Mode::Estimated;
-        self
-    }
-
-    /// Set gap event
-    pub fn with_gap_event(mut self, stamp: Stamp) -> Self {
-        self.stamp = stamp;
-        self.mode = Mode::GapEvent;
+        self.mode = mode;
         self
     }
 
@@ -221,8 +228,12 @@ impl VehEvent {
     }
 
     /// Get time stamp
-    pub fn stamp(&self) -> Stamp {
-        self.stamp.clone()
+    pub fn stamp(&self) -> Option<Stamp> {
+        if self.mode != Mode::NoTimestamp {
+            Some(self.stamp.clone())
+        } else {
+            None
+        }
     }
 
     /// Get time stamp mode
@@ -314,6 +325,17 @@ impl VehEventWriter {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn tod() {
+        const MS: u32 = (11 * 60 * 60 * 1000) + (37 * 60 * 1000);
+        let ts: Zoned = "2025-12-10 10:20[America/Chicago]".parse().unwrap();
+        let stamp = Stamp(ts).with_ms_since_midnight(MS);
+        assert_eq!(
+            stamp,
+            Stamp("2025-12-10 11:37[America/Chicago]".parse().unwrap())
+        );
+    }
 
     #[test]
     fn veh_event() {
