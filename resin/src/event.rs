@@ -29,28 +29,18 @@ pub enum Mode {
     /// No timestamp recorded
     #[default]
     NoTimestamp = 0,
-    /// Estimated by central server
-    Estimated = 1,
     /// Recorded by field sensor
-    SensorRecorded = 2,
-    /// Recorded by field sensor after gap (missing events)
-    SensorRecordedGap = 3,
+    SensorRecorded = 1,
     /// Recorded by central server
-    ServerRecorded = 4,
-    /// Recorded by central server after gap (missing events)
-    ServerRecordedGap = 5,
+    ServerRecorded = 2,
+    /// Estimated by central server
+    Estimated = 3,
 }
 
 impl Mode {
     /// Check if the timestamp is recorded
     pub fn is_recorded(self) -> bool {
-        matches!(
-            self,
-            Mode::SensorRecorded
-                | Mode::SensorRecordedGap
-                | Mode::ServerRecorded
-                | Mode::ServerRecordedGap
-        )
+        matches!(self, Mode::SensorRecorded | Mode::ServerRecorded)
     }
 }
 
@@ -61,6 +51,8 @@ pub struct VehEvent {
     stamp: Stamp,
     /// Time stamp mode
     mode: Mode,
+    /// Gap in collection flag
+    gap: bool,
     /// Wrong way vehicle flag
     wrong_way: bool,
     /// Vehicle length (dm)
@@ -145,6 +137,7 @@ impl From<&VehEvent> for u64 {
     fn from(ev: &VehEvent) -> Self {
         let mut val = u64::from(ev.stamp.ms_since_midnight());
         val |= (ev.mode as u64) << 27;
+        val |= u64::from(ev.gap) << 29;
         val |= u64::from(ev.wrong_way) << 30;
         if let Some(dm) = ev.length {
             val |= u64::from(dm.get()) << 31;
@@ -170,6 +163,12 @@ impl VehEvent {
     pub fn with_stamp_mode(mut self, stamp: Stamp, mode: Mode) -> Self {
         self.stamp = stamp;
         self.mode = mode;
+        self
+    }
+
+    /// Set collection gap flag
+    pub fn with_gap(mut self, gap: bool) -> Self {
+        self.gap = gap;
         self
     }
 
@@ -239,6 +238,16 @@ impl VehEvent {
     /// Get time stamp mode
     pub fn mode(&self) -> Mode {
         self.mode
+    }
+
+    /// Get collection gap flag
+    pub fn gap(&self) -> bool {
+        self.gap
+    }
+
+    /// Get wrong way flag
+    pub fn wrong_way(&self) -> bool {
+        self.wrong_way
     }
 
     /// Get vehicle length (dm)
@@ -338,7 +347,7 @@ mod test {
     }
 
     #[test]
-    fn veh_event() {
+    fn sensor_event() {
         const MS: i64 = (14 * 60 * 60 * 1000) + (53 * 60 * 1000);
         let stamp: Zoned = "2025-12-02 14:53[America/Chicago]".parse().unwrap();
         let ev = VehEvent::default()
@@ -348,7 +357,28 @@ mod test {
             .with_duration_ms(200);
         assert_eq!(
             u64::from(ev),
-            (2 << 27) + (MS as u64) + (30 << 31) + (80 << 40) + (200 << 48)
+            (1 << 27) + (MS as u64) + (30 << 31) + (80 << 40) + (200 << 48)
+        );
+    }
+
+    #[test]
+    fn server_event() {
+        const MS: i64 = (8 * 60 * 60 * 1000) + (25 * 60 * 1000);
+        let stamp: Zoned = "2025-12-11 08:25[America/Chicago]".parse().unwrap();
+        let ev = VehEvent::default()
+            .with_stamp_mode(Stamp(stamp), Mode::ServerRecorded)
+            .with_gap(true)
+            .with_length_m(3.5)
+            .with_speed_kph(75.0)
+            .with_duration_ms(250);
+        assert_eq!(
+            u64::from(ev),
+            (2 << 27)
+                + (MS as u64)
+                + (1 << 29)
+                + (35 << 31)
+                + (75 << 40)
+                + (250 << 48)
         );
     }
 }
