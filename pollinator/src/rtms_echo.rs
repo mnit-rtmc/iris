@@ -143,7 +143,8 @@ impl VehicleData {
     /// Convert to a gap vehicle event
     fn gap(&self) -> VehEvent {
         VehEvent::default()
-            .with_stamp_mode(Stamp::now(), Mode::ServerRecordedGap)
+            .with_stamp_mode(Stamp::now(), Mode::ServerRecorded)
+            .with_gap(true)
             .with_length_m(self.length)
             .with_speed_kph(self.speed)
     }
