@@ -342,13 +342,13 @@ mod test {
         const MS: i64 = (14 * 60 * 60 * 1000) + (53 * 60 * 1000);
         let stamp: Zoned = "2025-12-02 14:53[America/Chicago]".parse().unwrap();
         let ev = VehEvent::default()
-            .with_sensor_recorded(Stamp(stamp))
+            .with_stamp_mode(Stamp(stamp), Mode::SensorRecorded)
             .with_length_m(3.0)
             .with_speed_kph(80.0)
             .with_duration_ms(200);
         assert_eq!(
             u64::from(ev),
-            (1 << 27) + (MS as u64) + (30 << 31) + (80 << 40) + (200 << 48)
+            (2 << 27) + (MS as u64) + (30 << 31) + (80 << 40) + (200 << 48)
         );
     }
 }
