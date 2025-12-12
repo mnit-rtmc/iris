@@ -220,7 +220,7 @@ public class OpSendSensorSettings extends OpG4 {
 
 	/** Update the vehicle class config bounds */
 	private void updateClassConfig() {
-		for(G4VehClass vc: G4VehClass.values()) {
+		for (G4VehClass vc: G4VehClass.values()) {
 			int lb = vc.v_class.lower_bound.round(DECIMETERS);
 			class_config.setClassLen(vc, lb);
 		}
@@ -250,11 +250,6 @@ public class OpSendSensorSettings extends OpG4 {
 		       stamp > (now + TIME_THRESHOLD);
 	}
 
-	/** Update the RTC */
-	private void updateRTC() {
-		rtc.setStamp(TimeSteward.currentTimeMillis());
-	}
-
 	/** Phase to store the RTC */
 	private class StoreRTC extends Phase<G4Property> {
 
@@ -262,7 +257,7 @@ public class OpSendSensorSettings extends OpG4 {
 		protected Phase<G4Property> poll(
 			CommMessage<G4Property> mess) throws IOException
 		{
-			updateRTC();
+			rtc.setStamp(TimeSteward.currentTimeMillis());
 			mess.add(rtc);
 			mess.storeProps();
 			return null;

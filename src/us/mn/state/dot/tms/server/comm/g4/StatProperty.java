@@ -217,17 +217,12 @@ public class StatProperty extends G4Property {
 	/** Status flags */
 	private StatusFlags stat_flags;
 
-	/** Time stamp at beginning of interval */
+	/** Time stamp at end of interval */
 	private long stamp;
 
-	/** Get time stamp at beginning of interval */
+	/** Get time stamp at end of interval */
 	public long getStamp() {
 		return stamp;
-	}
-
-	/** Get time stamp at end of interval */
-	public long getStampEnd() {
-		return stamp + per_sec * 1000;
 	}
 
 	/** Check if time stamp is from the previous interval */
@@ -236,14 +231,7 @@ public class StatProperty extends G4Property {
 		long per_ms = per_sec * 1000;
 		long end = now / per_ms * per_ms; // end of previous interval
 		long start = end - per_ms;
-		return (stamp >= start && stamp <= end);
-	}
-
-	/** Is time stamp valid (within valid interval) */
-	public boolean isValidStamp() {
-		long valid_ms = 2 * per_sec * 1000;
-		long now = TimeSteward.currentTimeMillis();
-		return (stamp > now - valid_ms) && (stamp < now + valid_ms);
+		return (stamp > start && stamp <= end);
 	}
 
 	/** Low 4 bits are zone count; bit 6 is mounting (0: side-fired,

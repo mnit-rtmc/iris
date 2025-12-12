@@ -57,35 +57,22 @@ public class OpQueryStats extends OpG4 {
 		{
 			mess.add(stat);
 			mess.queryProps();
-			return (stat.isPreviousInterval())
-			      ? null
-			      : new StoreRTC();
-		}
-	}
-
-	/** Phase to store the RTC */
-	private class StoreRTC extends Phase<G4Property> {
-
-		/** Store the RTC */
-		protected Phase<G4Property> poll(
-			CommMessage<G4Property> mess) throws IOException
-		{
 			long stamp = stat.getStamp();
-			mess.logError("BAD TIMESTAMP: " + new Date(stamp));
-			if (!stat.isValidStamp())
-				stat.clear();
-			RTCProperty rtc = new RTCProperty();
-			rtc.setStamp(TimeSteward.currentTimeMillis());
-			mess.add(rtc);
-			mess.storeProps();
+			if (stamp != 0) {
+				storeStats();
+				// is there more data to collect?
+				if (!stat.isPreviousInterval()) {
+					stat.clear();
+					return this;
+				}
+			}
 			return null;
 		}
 	}
 
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		long stamp = stat.getStampEnd();
+	/** Store interval statistics */
+	private void storeStats() {
+		long stamp = stat.getStamp();
 		int per_sec = stat.per_sec;
 		controller.storeVehCount(stamp, per_sec, START_PIN,
 			stat.getVehCount());
@@ -105,6 +92,5 @@ public class OpQueryStats extends OpG4 {
 		controller.storeVehCount(stamp, per_sec, START_PIN,
 			stat.getVehCount(G4VehClass.EXTRA_LARGE),
 			G4VehClass.EXTRA_LARGE.v_class);
-		super.cleanup();
 	}
 }
