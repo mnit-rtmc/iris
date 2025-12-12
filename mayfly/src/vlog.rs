@@ -164,6 +164,7 @@ impl VehLogReader {
     fn propogate_stamps(&mut self) {
         let mut stamp: Option<Stamp> = None;
         let mut mode = Mode::NoTimestamp;
+        // propogate forwards
         for ev in self.events.iter_mut() {
             if !ev.gap()
                 && ev.stamp().is_none()
@@ -175,6 +176,26 @@ impl VehLogReader {
             }
             mode = ev.mode();
             stamp = if mode.is_recorded() { ev.stamp() } else { None };
+        }
+        // propogate backwards
+        stamp = None;
+        for ev in self.events.iter_mut().rev() {
+            if ev.stamp().is_none()
+                && let Some(st) = stamp
+            {
+                *ev = ev.clone().with_stamp_mode(st, mode);
+            }
+            stamp = None;
+            mode = ev.mode();
+            if mode.is_recorded()
+                && !ev.gap()
+                && let (Some(st), Some(hw)) = (ev.stamp(), ev.headway_ms())
+            {
+                let ms = st.ms_since_midnight();
+                if ms >= hw {
+                    stamp = Some(st.with_ms_since_midnight(ms - hw));
+                }
+            }
         }
     }
 
@@ -191,11 +212,11 @@ impl VehLogReader {
                 continue;
             }
             if let Some(b) = before
+                && (i - b) > 1
                 && let Some(elapsed) = self.elapsed(b, i)
             {
-                let periods = i - b;
-                let avg_headway = elapsed / (periods as u32);
-                for j in b + 1..i {
+                let avg_headway = elapsed / ((i - b) as u32);
+                for j in b + 1..=i {
                     let ev = &mut self.events[j];
                     *ev = ev.clone().with_headway_ms(avg_headway);
                 }
@@ -314,7 +335,12 @@ mod test {
     #[test]
     fn log() {
         let events = read_blocking("20251211", LOG.as_bytes()).unwrap();
-        assert_eq!(events[0], VehEvent::default().with_gap(true));
+        assert_eq!(
+            events[0],
+            VehEvent::default()
+                .with_gap(true)
+                .with_stamp_mode(mk_stamp(64_166_070), Mode::SensorRecorded)
+        );
         assert_eq!(
             events[1],
             VehEvent::default()
@@ -357,15 +383,15 @@ mod test {
         assert_eq!(
             events[6],
             VehEvent::default()
-                .with_stamp_mode(mk_stamp(64_219_568), Mode::SensorRecorded)
-                .with_headway_ms(4215)
+                .with_stamp_mode(mk_stamp(64_219_357), Mode::SensorRecorded)
+                .with_headway_ms(4004)
         );
         assert_eq!(
             events[7],
             VehEvent::default()
-                .with_stamp_mode(mk_stamp(64_223_783), Mode::SensorRecorded)
+                .with_stamp_mode(mk_stamp(64_223_362), Mode::SensorRecorded)
                 .with_duration_ms(249)
-                .with_headway_ms(4215)
+                .with_headway_ms(4004)
         );
         assert_eq!(
             events[8],
