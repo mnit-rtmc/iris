@@ -19,8 +19,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.AlertInfo;
@@ -47,6 +49,15 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class ReaperJob extends Job {
+
+	/** Reaper debug log */
+	static final DebugLog REAP_LOG = new DebugLog("reap");
+
+	/** Log a reaper message */
+	static private void logMsg(SonarObject so, String msg) {
+		if (REAP_LOG.isOpen())
+			REAP_LOG.log(so.getName() + ": " + msg);
+	}
 
 	/** Get the incident reap time threshold (ms) */
 	static private long getIncidentClearThreshold() {
@@ -141,12 +152,12 @@ public class ReaperJob extends Job {
 		// asynchronously from the namespace.
 		SignMessage m = SignMessageHelper.lookup(sm.getName());
 		if (m != sm)
-			sm.logMsg("lookup failed (reaper)");
+			logMsg(sm, "SignMessage lookup failed");
 		else if (!isReferenced(sm)) {
 			// NOTE: there is a race where a DMS could acquire
 			//       a reference just before notifyRemove
 			sm.notifyRemove();
-			sm.logMsg("removed (reaper)");
+			logMsg(sm, "SignMessage removed");
 		}
 	}
 
@@ -241,7 +252,10 @@ public class ReaperJob extends Job {
 
 	/** Check if an alert is reapable */
 	private boolean isReapable(AlertInfoImpl ai) {
-		return isPastReapTime(ai) && isReapable(ai.getActionPlan());
+		boolean reapable =
+			isPastReapTime(ai) && isReapable(ai.getActionPlan());
+		logMsg(ai, "isReapable: " + reapable);
+		return reapable;
 	}
 
 	/** Check if it is past the time an alert may be reaped */
@@ -268,10 +282,13 @@ public class ReaperJob extends Job {
 		// asynchronously from the namespace.
 		AlertInfo a = AlertInfoHelper.lookup(ai.getName());
 		if ((a == ai) && isReapable(ai)) {
+			logMsg(ai, "reapAlert: " + ai.getAlertState());
 			if (ai.getAlertState() != AlertState.CLEARED.ordinal())
 				ai.clear();
 			else
 				ai.notifyRemove();
+		} else {
+			logMsg(ai, "reapAlert not reapable!");
 		}
 	}
 
@@ -281,7 +298,8 @@ public class ReaperJob extends Job {
 		BaseObjectImpl.store.query(
 			"SELECT name, all_hashtag, action_plan " +
 			"FROM cap.alert_info " +
-			"WHERE now() - end_date > '30 days' " +
+			"WHERE now() - end_date > '1 days' " +
+			"AND alert_state = 2 " +
 			"ORDER BY end_date LIMIT 1;", new ResultFactory()
 		{
 			@Override public void create(ResultSet row)
@@ -296,6 +314,7 @@ public class ReaperJob extends Job {
 			String alert = values.get(0);
 			String all_hashtag = values.get(1);
 			String action_plan = values.get(2);
+			REAP_LOG.log("purgeOldestAlert: " + alert);
 			reapDmsHashtag(all_hashtag);
 			BaseObjectImpl.store.update(
 				"DELETE FROM cap.alert_info " +
@@ -319,6 +338,7 @@ public class ReaperJob extends Job {
 			DMS dms = it.next();
 			if (dms instanceof DMSImpl) {
 				DMSImpl dmsi = (DMSImpl) dms;
+				logMsg(dmsi, "reapDmsHashtag: " + ht);
 				dmsi.removeHashtagNotify(ht);
 			}
 		}
@@ -326,6 +346,7 @@ public class ReaperJob extends Job {
 
 	/** Reap an action plan */
 	private void reapActionPlan(ActionPlan ap) {
+		logMsg(ap, "reapActionPlan");
 		Iterator<TimeAction> it = TimeActionHelper.iterator();
 		while (it.hasNext()) {
 			TimeAction ta = it.next();

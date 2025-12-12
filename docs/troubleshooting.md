@@ -58,6 +58,7 @@ Filename               | Description
 `polling`              | Generic operaton polling log
 `prio`                 | Operation priority log
 `profile`              | System profiling log
+`reap`                 | Object reaper log
 `slow`                 | DMS [slow traffic] warning system log
 `snmp`                 | SNMP error log
 `sonar`                | SONAR connection log
