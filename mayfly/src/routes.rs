@@ -18,12 +18,12 @@ use crate::binned::{
 };
 use crate::error::{Error, Result};
 use crate::traffic::Traffic;
-use crate::vlog;
+use crate::{vlg, vlog};
 use axum::Router;
 use axum::extract::Query;
 use axum::response::IntoResponse;
 use axum::routing::get;
-use resin::event::Stamp;
+use resin::event::{Stamp, VehEvent};
 use serde::Deserialize;
 use std::collections::HashSet;
 use std::fmt::{Display, Write};
@@ -438,7 +438,7 @@ fn check_detector(nm: &str, is_dir: bool) -> bool {
 
 /// Check a archive file extension
 fn is_ext_valid(ext: &str) -> bool {
-    const EXTS: &[&str] = &["vlog", "v30", "c30", "s30"];
+    const EXTS: &[&str] = &["vlg", "vlog", "v30", "c30", "s30"];
     EXTS.contains(&ext)
 }
 
@@ -488,7 +488,9 @@ where
                 res => return res,
             }
         }
-        self.lookup_zipped_vlog(&mut traffic)
+        let events = self.lookup_zipped_events(&mut traffic)?;
+        let bi = BinIter::new(30, &events, self.filter());
+        Ok(bi.collect())
     }
 
     /// Lookup archived data from 30-second binned data (blocking)
@@ -504,14 +506,38 @@ where
             .collect())
     }
 
-    /// Read vehicle log data from a zip file (blocking)
-    fn lookup_zipped_vlog(&self, traffic: &mut Traffic) -> Result<Vec<T>> {
+    /// Lookup vehicle events from a zip file (blocking)
+    fn lookup_zipped_events(
+        &self,
+        traffic: &mut Traffic,
+    ) -> Result<Vec<VehEvent>> {
+        match self.lookup_zipped_vlg(traffic) {
+            Err(Error::Zip(ZipError::FileNotFound)) => (),
+            res => return res,
+        }
+        self.lookup_zipped_vlog(traffic)
+    }
+
+    /// Lookup events from a zipped `.vlg` file (blocking)
+    fn lookup_zipped_vlg(
+        &self,
+        traffic: &mut Traffic,
+    ) -> Result<Vec<VehEvent>> {
+        let name = self.vlg_file_name();
+        let zf = traffic.by_name(&name)?;
+        log::info!("opened {name} in {}.{EXT}", self.date);
+        vlg::read_blocking(&self.date, zf)
+    }
+
+    /// Lookup events from a zipped `.vlog` file (blocking)
+    fn lookup_zipped_vlog(
+        &self,
+        traffic: &mut Traffic,
+    ) -> Result<Vec<VehEvent>> {
         let name = self.vlog_file_name();
         let zf = traffic.by_name(&name)?;
         log::info!("opened {name} in {}.{EXT}", self.date);
-        let events = vlog::read_blocking(&self.date, zf)?;
-        let bi = BinIter::new(30, &events, self.filter());
-        Ok(bi.collect())
+        vlog::read_blocking(&self.date, zf)
     }
 
     /// Lookup data from file system (unzipped)
@@ -522,7 +548,9 @@ where
                 res => return res,
             }
         }
-        self.lookup_unzipped_vlog().await
+        let events = self.lookup_unzipped_events().await?;
+        let bi = BinIter::new(30, &events, self.filter());
+        Ok(bi.collect())
     }
 
     /// Lookup unzipped data from 30-second binned data
@@ -540,15 +568,31 @@ where
             .collect())
     }
 
-    /// Lookup unzipped data from vehicle log file
-    async fn lookup_unzipped_vlog(&self) -> Result<Vec<T>> {
+    /// Lookup vehicle events from an unzipped file
+    async fn lookup_unzipped_events(&self) -> Result<Vec<VehEvent>> {
+        match self.lookup_unzipped_vlg().await {
+            Err(Error::Io(e)) if e.kind() == ErrorKind::NotFound => (),
+            res => return res,
+        }
+        self.lookup_unzipped_vlog().await
+    }
+
+    /// Lookup events from an unzipped `.vlg` file
+    async fn lookup_unzipped_vlg(&self) -> Result<Vec<VehEvent>> {
+        let mut path = self.date_path()?;
+        path.push(self.vlg_file_name());
+        let file = File::open(&path).await?;
+        log::info!("opened {path:?}");
+        vlg::read_async(&self.date, file).await
+    }
+
+    /// Lookup events from an unzipped `.vlog` file
+    async fn lookup_unzipped_vlog(&self) -> Result<Vec<VehEvent>> {
         let mut path = self.date_path()?;
         path.push(self.vlog_file_name());
         let file = File::open(&path).await?;
         log::info!("opened {path:?}");
-        let events = vlog::read_async(&self.date, file).await?;
-        let bi = BinIter::new(30, &events, self.filter());
-        Ok(bi.collect())
+        vlog::read_async(&self.date, file).await
     }
 
     /// Create a vehicle filter
@@ -562,7 +606,12 @@ where
             .with_headway_sec_max(self.headway_sec_max)
     }
 
-    /// Get vehicle log file name
+    /// Get `.vlg` file name
+    fn vlg_file_name(&self) -> String {
+        format!("{}.vlg", self.detector)
+    }
+
+    /// Get `.vlog` file name
     fn vlog_file_name(&self) -> String {
         format!("{}.vlog", self.detector)
     }

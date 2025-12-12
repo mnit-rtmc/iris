@@ -48,13 +48,13 @@ impl Traffic {
         &self.path
     }
 
-    /// Check if any vehicle log needs binning
+    /// Check if any vehicle log (`.vlg` or `.vlog`) needs binning
     pub fn needs_binning(&self) -> bool {
         let mut det_ids = HashSet::new();
         for name in self.file_names() {
             let p = Path::new(name);
             if let (Some(det_id), Some(ext)) = (p.file_stem(), p.extension())
-                && ext == "vlog"
+                && (ext == "vlg" || ext == "vlog")
             {
                 det_ids.insert(det_id);
             }

@@ -214,6 +214,36 @@ impl From<VehEvent> for u64 {
 }
 
 impl VehEvent {
+    /// Create a vehicle event from a stamp + value
+    pub fn with_value(stamp: &Stamp, val: u64) -> Self {
+        let mut stamp = stamp.clone();
+        let ms = (val & 0x7FF_FFFF) as u32; // 27 bits
+        if (0..=90_000_000).contains(&ms) {
+            stamp = stamp.with_ms_since_midnight(ms);
+        }
+        let mode = match (val >> 27) & 0x3 {
+            1 => Mode::SensorRecorded,
+            2 => Mode::ServerRecorded,
+            3 => Mode::Estimated,
+            _ => Mode::NoTimestamp,
+        };
+        let gap = (val >> 29) & 1 != 0;
+        let wrong_way = (val >> 30) & 1 != 0;
+        let length = NonZeroU16::new(((val >> 31) & 0x1FF) as u16);
+        let speed = NonZeroU8::new(((val >> 40) & 0xFF) as u8);
+        let duration = NonZeroU16::new(((val >> 48) & 0xFFFF) as u16);
+        VehEvent {
+            stamp,
+            mode,
+            gap,
+            wrong_way,
+            length,
+            speed,
+            duration,
+            headway: None,
+        }
+    }
+
     /// Set timestamp and mode
     pub fn with_stamp_mode(mut self, stamp: Stamp, mode: Mode) -> Self {
         self.stamp = stamp;

@@ -18,4 +18,5 @@ pub mod binned;
 pub mod error;
 pub mod routes;
 pub mod traffic;
+pub mod vlg;
 pub mod vlog;

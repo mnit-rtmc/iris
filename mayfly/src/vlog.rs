@@ -1,4 +1,4 @@
-// vehicle.rs
+// vlog.rs
 //
 // Copyright (c) 2021-2025  Minnesota Department of Transportation
 //
@@ -18,7 +18,7 @@ use std::io::BufRead as _;
 use std::io::Read as BlockingRead;
 use tokio::io::{AsyncBufReadExt, AsyncReadExt, BufReader};
 
-/// Vehicle event log (`.vlog`) for one detector on one day
+/// Event log (`.vlog`) for one detector on one day
 struct VehLogReader {
     /// Stamp at midnight
     midnight: Stamp,
