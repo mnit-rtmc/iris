@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2021  Minnesota Department of Transportation
+ * Copyright (C) 2012-2025  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -217,12 +217,17 @@ public class StatProperty extends G4Property {
 	/** Status flags */
 	private StatusFlags stat_flags;
 
-	/** Time stamp */
+	/** Time stamp at beginning of interval */
 	private long stamp;
 
-	/** Time stamp */
+	/** Get time stamp at beginning of interval */
 	public long getStamp() {
 		return stamp;
+	}
+
+	/** Get time stamp at end of interval */
+	public long getStampEnd() {
+		return stamp + per_sec * 1000;
 	}
 
 	/** Check if time stamp is from the previous interval */

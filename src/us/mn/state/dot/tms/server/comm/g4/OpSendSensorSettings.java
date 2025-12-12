@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,7 +121,7 @@ public class OpSendSensorSettings extends OpG4 {
 	/** Get the operating mode for the selected comm protocol */
 	private PortConfig.Mode operatingMode() {
 		return (protocol == CommProtocol.RTMS_G4_VLOG)
-		      ?	PortConfig.Mode.PER_VEHICLE
+		      ? PortConfig.Mode.PER_VEHICLE
 		      : PortConfig.Mode.POLLED;
 	}
 

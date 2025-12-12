@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2021  Minnesota Department of Transportation
+ * Copyright (C) 2012-2025  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -85,7 +85,7 @@ public class OpQueryStats extends OpG4 {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		long stamp = stat.getStamp();
+		long stamp = stat.getStampEnd();
 		int per_sec = stat.per_sec;
 		controller.storeVehCount(stamp, per_sec, START_PIN,
 			stat.getVehCount());

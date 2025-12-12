@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2021  Minnesota Department of Transportation
+ * Copyright (C) 2012-2025  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -92,7 +92,7 @@ abstract public class G4Property extends ControllerProperty {
 		formatBCD2(data, pos + 6, cal.get(Calendar.YEAR) % 100);
 	}
 
-	/** Create a time stamp */
+	/** Create a time stamp from UTC values */
 	static private long createStamp(int year, int month, int day, int hour,
 		int minute, int second, int ms)
 	{
