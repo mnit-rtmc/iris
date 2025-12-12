@@ -104,7 +104,7 @@ There are a few types of [vehicle detection] data:
 | DR-500               | `tcp`          | 1               | 1         | [binned]  |
 | RTMS G4              | `tcp`          | 0-65535         | 1-12      | [binned]  |
 | RTMS G4 vlog         | `tcp`          | 0-65535         | 1-12      | event     |
-| RTMS Echo vev        | `http` ⸸       | 1               | 1-`??`    | event     |
+| RTMS Echo vlg        | `http` ⸸       | 1               | 1-`??`    | event     |
 | SmartSensor 105      | `tcp`          | 1-9999          | 1-8       | [binned]  |
 | SmartSensor 125 HD   | `tcp`          | 1-65534         | 1-8       | [binned]  |
 | SmartSensor 125 vlog | `tcp`          | 1-65534         | 1-8       | event     |

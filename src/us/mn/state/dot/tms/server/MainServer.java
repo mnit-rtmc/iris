@@ -274,7 +274,7 @@ public class MainServer {
 
 	/** Schedule jobs on FLUSH thread */
 	static private void scheduleFlushJobs() {
-		a_factory.addExtension(".vev");
+		a_factory.addExtension(".vlg");
 		FLUSH.addJob(new FlushSamplesJob(a_factory));
 		FLUSH.addJob(new ArchiveSamplesJob(a_factory));
 		FLUSH.addJob(new ProfilingJob());

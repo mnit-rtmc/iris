@@ -105,7 +105,7 @@ struct Zone {
     /// Observation direction
     direction: Option<ObsDirection>,
     /// Vehicle event log writer
-    vev_writer: Option<VehEventWriter>,
+    vlg_writer: Option<VehEventWriter>,
 }
 
 /// Sensor configuration
@@ -165,7 +165,7 @@ impl Zone {
         Zone {
             id,
             direction: None,
-            vev_writer: None,
+            vlg_writer: None,
         }
     }
 
@@ -173,15 +173,15 @@ impl Zone {
     async fn log_append(&mut self, veh: &VehicleData) -> Result<()> {
         let gap = self.direction.is_none();
         let dir = self.check_direction(veh);
-        match &mut self.vev_writer {
-            Some(vev_writer) => {
-                let vev = if gap {
+        match &mut self.vlg_writer {
+            Some(vlg_writer) => {
+                let ev = if gap {
                     veh.gap()
                 } else {
                     let wrong_way = dir != veh.direction;
                     veh.server_recorded(wrong_way)
                 };
-                vev_writer.append(&vev).await?;
+                vlg_writer.append(&ev).await?;
             }
             None => log::warn!("No log for zone: {}", self.id),
         }
@@ -344,8 +344,8 @@ impl Sensor {
             let pin = i + 1;
             match dets.get(&pin) {
                 Some(det) => {
-                    let vev_writer = VehEventWriter::new(det).await?;
-                    zone.vev_writer = Some(vev_writer);
+                    let vlg_writer = VehEventWriter::new(det).await?;
+                    zone.vlg_writer = Some(vlg_writer);
                     log::info!("pin #{pin}, zone: {}, det: {det}", zone.id);
                 }
                 None => {

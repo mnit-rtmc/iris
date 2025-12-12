@@ -67,7 +67,7 @@ pub struct VehEvent {
     headway: Option<NonZeroU32>,
 }
 
-/// Vehicle event (`.vev`) log writer
+/// Vehicle event (`.vlg`) log writer
 pub struct VehEventWriter {
     /// Detector ID
     det_id: String,
@@ -353,7 +353,7 @@ impl VehEvent {
 }
 
 impl VehEventWriter {
-    /// Make a vehicle event (`.vev`) log writer
+    /// Make a vehicle event (`.vlg`) log writer
     pub async fn new(det_id: &str) -> Result<Self> {
         let det_id = det_id.to_string();
         Ok(VehEventWriter {
@@ -363,7 +363,7 @@ impl VehEventWriter {
         })
     }
 
-    /// Append a vehicle event to `.vev` log file
+    /// Append a vehicle event to `.vlg` log file
     pub async fn append(&mut self, ev: &VehEvent) -> Result<()> {
         if self.file.is_none() || self.stamp.0.date() != ev.stamp.0.date() {
             self.stamp = ev.stamp.clone();
@@ -373,7 +373,7 @@ impl VehEventWriter {
                 create_dir_all(&path).await?;
             }
             path.push(&self.det_id);
-            path.set_extension("vev");
+            path.set_extension("vlg");
             let file =
                 File::options().append(true).create(true).open(path).await?;
             self.file = Some(file);
