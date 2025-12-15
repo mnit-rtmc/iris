@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.adectdc;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.BaseHelper;
-import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -40,11 +40,11 @@ public class OpPerVehicle extends OpTdc {
 		setSuccess(false);
 	}
 
-	/** Handle a communication error */
+	/** Handle a communication state */
 	@Override
-	public void handleCommError(EventType et) {
+	public void handleCommState(CommState cs) {
 		setSuccess(false);
-		super.handleCommError(et);
+		super.handleCommState(cs);
 	}
 
 	/** Create the first phase of the operation */

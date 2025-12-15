@@ -22,7 +22,6 @@ import java.util.GregorianCalendar;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;

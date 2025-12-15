@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2024  Minnesota Department of Transportation
+ * Copyright (C) 2016-2025  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,7 +36,7 @@ import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
 import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.SString;
@@ -61,7 +61,7 @@ abstract public class BasePoller implements DevicePoller {
 	/** Drain an operation queue */
 	static private void drainQueue(Collection<Operation> queue) {
 		for (Operation op: queue) {
-			op.handleEvent(EventType.QUEUE_DRAINED);
+			op.handleCommState(CommState.UNKNOWN);
 			op.destroy();
 		}
 		queue.clear();
@@ -341,7 +341,7 @@ abstract public class BasePoller implements DevicePoller {
 	private void checkTimeout(Operation op) {
 		long rt = op.getRemaining();
 		if (rt <= 0 && r_queue.remove(op)) {
-			op.handleEvent(EventType.POLL_TIMEOUT_ERROR);
+			op.handleCommState(CommState.TIMEOUT_ERROR);
 			if (close_on_timeout && op.isDone()) {
 				elog("CLOSE DUE TO TIMEOUT");
 				closeChannel();
@@ -535,12 +535,12 @@ abstract public class BasePoller implements DevicePoller {
 			op.putCtrlFaults("other", ex_msg(e));
 		}
 		catch (IOException e) {
-			op.handleEvent(EventType.COMM_ERROR);
+			op.handleCommState(CommState.ERROR);
 			closeChannel();
 		}
 		catch (BufferOverflowException e) {
 			op.setFailed();
-			op.handleEvent(EventType.COMM_ERROR);
+			op.handleCommState(CommState.ERROR);
 			closeChannel();
 		}
 		finally {
@@ -639,21 +639,21 @@ abstract public class BasePoller implements DevicePoller {
 			return false;
 		}
 		catch (ChecksumException e) {
-			op.handleEvent(EventType.CHECKSUM_ERROR);
+			op.handleCommState(CommState.CHECKSUM_ERROR);
 			return true;
 		}
 		catch (ParsingException e) {
-			op.handleEvent(EventType.PARSING_ERROR);
+			op.handleCommState(CommState.PARSING_ERROR);
 			return true;
 		}
 		catch (ControllerException e) {
-			op.handleEvent(EventType.CONTROLLER_ERROR);
+			op.handleCommState(CommState.CONTROLLER_ERROR);
 			op.setFailed();
 			op.putCtrlFaults("other", ex_msg(e));
 			return true;
 		}
 		catch (IOException e) {
-			op.handleEvent(EventType.COMM_ERROR);
+			op.handleCommState(CommState.ERROR);
 			closeChannel();
 			return true;
 		}

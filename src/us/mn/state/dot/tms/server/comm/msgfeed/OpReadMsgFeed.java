@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2024  Minnesota Department of Transportation
+ * Copyright (C) 2002-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.msgfeed;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
@@ -58,11 +58,11 @@ public class OpReadMsgFeed extends OpController<MsgFeedProperty> {
 		}
 	}
 
-	/** Handle a communication error */
+	/** Handle a communication state */
 	@Override
-	public void handleCommError(EventType et) {
-		MsgFeedPoller.slog("ERROR: " + et);
-		super.handleCommError(et);
+	public void handleCommState(CommState cs) {
+		MsgFeedPoller.slog("ERROR: " + cs);
+		super.handleCommState(cs);
 	}
 
 	/** Cleanup the operation */

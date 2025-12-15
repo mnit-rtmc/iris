@@ -19,8 +19,8 @@ import java.nio.ByteBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.ControllerIoImpl;
 import us.mn.state.dot.tms.utils.I18N;
@@ -263,9 +263,9 @@ public final class Operation implements Comparable<Operation> {
 		}
 	}
 
-	/** Handle an IO event */
-	public void handleEvent(EventType et) {
-		controller.logCommEvent(et, getId());
+	/** Handle a comm state change */
+	public void handleCommState(CommState cs) {
+		controller.setCommState(cs);
 		if (!retry())
 			setFailed();
 	}

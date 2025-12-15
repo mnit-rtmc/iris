@@ -22,9 +22,7 @@ import java.net.SocketTimeoutException;
 import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.EventType;
-import static us.mn.state.dot.tms.EventType.COMM_ERROR;
-import static us.mn.state.dot.tms.EventType.CONNECTION_REFUSED;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -213,7 +211,7 @@ public class CommThread<T extends ControllerProperty> {
 			}
 			catch (ConnectException e) {
 				String msg = logException(e);
-				if (poller.handleError(CONNECTION_REFUSED, msg))
+				if (poller.handleCommState(CommState.CONNECTION_ERROR, msg))
 					break;
 			}
 			catch (NoResponseException e) {
@@ -223,7 +221,7 @@ public class CommThread<T extends ControllerProperty> {
 			}
 			catch (IOException e) {
 				String msg = logException(e);
-				if (poller.handleError(COMM_ERROR, msg))
+				if (poller.handleCommState(CommState.ERROR, msg))
 					break;
 			}
 			// Rest a second before trying again
@@ -279,23 +277,23 @@ public class CommThread<T extends ControllerProperty> {
 		}
 		catch (ChecksumException e) {
 			logException(e);
-			o.handleCommError(EventType.CHECKSUM_ERROR);
+			o.handleCommState(CommState.CHECKSUM_ERROR);
 			m.drain();
 		}
 		catch (ParsingException e) {
 			logException(e);
-			o.handleCommError(EventType.PARSING_ERROR);
+			o.handleCommState(CommState.PARSING_ERROR);
 			m.drain();
 		}
 		catch (ControllerException e) {
 			String msg = logException(e);
 			o.putCtrlFaults("other", msg);
-			o.handleCommError(EventType.CONTROLLER_ERROR);
+			o.handleCommState(CommState.CONTROLLER_ERROR);
 			o.setFailed();
 		}
 		catch (SocketTimeoutException e) {
 			logException(e);
-			o.handleCommError(EventType.POLL_TIMEOUT_ERROR);
+			o.handleCommState(CommState.TIMEOUT_ERROR);
 			// Not sure if this is needed in addition
 			// to no_response_disconnect feature
 			if ((!o.isSuccess()) && needsReconnect(m))
@@ -306,13 +304,13 @@ public class CommThread<T extends ControllerProperty> {
 			if (m instanceof BasicMessenger) {
 				BasicMessenger bm = (BasicMessenger) m;
 				if (bm.hitNoResponseDisconnect()) {
-					o.handleCommError(EventType
-						.POLL_TIMEOUT_ERROR);
+					o.handleCommState(CommState
+						.TIMEOUT_ERROR);
 					o.setFailed();
 					throw new NoResponseException();
 				}
 			}
-			o.handleCommError(EventType.COMM_ERROR);
+			o.handleCommState(CommState.ERROR);
 			throw new ReconnectException();
 		}
 		finally {

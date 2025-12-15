@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2024  Minnesota Department of Transportation
+ * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.g4;
 import java.io.IOException;
 import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -35,11 +35,11 @@ public class OpPerVehicle extends OpG4 {
 		setSuccess(false);
 	}
 
-	/** Handle a communication error */
+	/** Handle a communication state */
 	@Override
-	public void handleCommError(EventType et) {
+	public void handleCommState(CommState cs) {
 		setSuccess(false);
-		super.handleCommError(et);
+		super.handleCommState(cs);
 	}
 
 	/** Create the first phase of the operation */
