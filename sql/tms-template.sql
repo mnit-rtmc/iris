@@ -1474,6 +1474,7 @@ CREATE VIEW controller_loc_view AS
     LEFT JOIN geo_loc_view l ON c.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
+-- FIXME: change to trigger when controller state changes
 CREATE TABLE event.comm_event (
     event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
