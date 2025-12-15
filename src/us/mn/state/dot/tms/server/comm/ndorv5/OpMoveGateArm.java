@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm.ndorv5;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;

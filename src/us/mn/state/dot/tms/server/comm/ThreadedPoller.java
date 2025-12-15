@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommConfig;
 import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -87,11 +87,11 @@ public class ThreadedPoller<T extends ControllerProperty>
 		log("DESTROYED");
 	}
 
-	/** Handle error for all operations in queue.
-	 * @param et Event type.
+	/** Handle comm state for all operations in queue.
+	 * @param cs Comm state.
 	 * @param msg Error message.
 	 * @return true If all operations are done. */
-	public boolean handleError(final EventType et, final String msg) {
+	public boolean handleCommState(final CommState cs, final String msg) {
 		log("HANDLING " + msg);
 		ArrayList<OpController<T>> not_done =
 			new ArrayList<OpController<T>>();
@@ -99,7 +99,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 			OpController<T> o = queue.tryNext();
 			if (null == o)
 				break;
-			o.handleCommError(et);
+			o.handleCommState(cs);
 			if (o.isDone()) {
 				try {
 					o.cleanup();

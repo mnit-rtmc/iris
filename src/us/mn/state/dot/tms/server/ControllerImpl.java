@@ -29,6 +29,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
@@ -45,7 +46,6 @@ import us.mn.state.dot.tms.server.comm.CamKeyboardPoller;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.FeedPoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
-import us.mn.state.dot.tms.server.event.CommEvent;
 
 /**
  * A controller represents a field device controller.
@@ -722,36 +722,39 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 		setStatusNotify(st);
 	}
 
-	/** Log a comm event */
-	public void logCommEvent(EventType et, String id) {
-		incrementCommCounter(et);
-		if (shouldLogEvent(et))
-			logEvent(new CommEvent(et, getName(), id));
-	}
-
-	/** Check if an event should be logged */
-	private boolean shouldLogEvent(EventType et) {
-		return et == EventType.COMM_FAILED ||
-		       et == EventType.COMM_RESTORED ||
-		       !isOffline();
+	/** Set comm state */
+	public void setCommState(CommState cs) {
+		incrementCommCounter(cs);
+		try {
+			store.update(this, "comm_state", cs.ordinal());
+		}
+		catch (TMSException e) {
+			// FIXME: what else can we do with this exception?
+			e.printStackTrace();
+		}
 	}
 
 	/** Time stamp of most recent comm failure */
 	private Long failTime = TimeSteward.currentTimeMillis();
 
-	/** Set the offline status of the controller */
-	private void setOffline(boolean f, String id) {
+	/** Set the controller offline status */
+	public void setOffline(boolean f) {
 		if (f == isOffline())
 			return;
 		if (f) {
 			setFailTime(TimeSteward.currentTimeMillis());
-			logCommEvent(EventType.COMM_FAILED, id);
+			setCommState(CommState.FAILED);
 		} else {
 			setFailTime(null);
-			logCommEvent(EventType.COMM_RESTORED, id);
+			setCommState(CommState.OK);
 		}
 		notifyAttribute("failTime");
 		updateStyles();
+	}
+
+	/** Get the controller offline status */
+	public boolean isOffline() {
+		return failTime != null;
 	}
 
 	/** Set the fail time */
@@ -764,16 +767,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 			e.printStackTrace();
 		}
 		failTime = ft;
-	}
-
-	/** Set the controller offline status */
-	public void setOffline(boolean f) {
-		setOffline(f, null);
-	}
-
-	/** Get the controller offline status */
-	public boolean isOffline() {
-		return failTime != null;
 	}
 
 	/** Get the controller fail time, or null if communication is not
@@ -871,9 +864,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	}
 
 	/** Increment a comm error counter */
-	private void incrementCommCounter(EventType et) {
-		switch (et) {
-		case POLL_TIMEOUT_ERROR:
+	private void incrementCommCounter(CommState cs) {
+		switch (cs) {
+		case TIMEOUT_ERROR:
 			incrementTimeoutErr();
 			break;
 		case CHECKSUM_ERROR:
@@ -953,7 +946,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 			incrementSuccessOps();
 		else
 			incrementFailedOps();
-		setOffline(!success, id);
+		setOffline(!success);
 	}
 
 	/** Get active device poller */
@@ -966,7 +959,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 		DevicePoller dp = getPoller(comm_link);
 		if ((null == dp) && !isOffline()) {
 			setStatusNotify(Controller.FAULTS, "comm_link error");
-			setOffline(true, null);
+			setOffline(true);
 		}
 		return dp;
 	}

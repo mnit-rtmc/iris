@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2024  Minnesota Department of Transportation
+ * Copyright (C) 2005-2025  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
@@ -19,8 +19,8 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -203,9 +203,9 @@ abstract public class OpController<T extends ControllerProperty> {
 		return phase == null;
 	}
 
-	/** Handle a communication error */
-	public void handleCommError(EventType et) {
-		controller.logCommEvent(et, id);
+	/** Handle a comm state change */
+	public void handleCommState(CommState cs) {
+		controller.setCommState(cs);
 		if (!shouldRetry())
 			setFailed();
 	}

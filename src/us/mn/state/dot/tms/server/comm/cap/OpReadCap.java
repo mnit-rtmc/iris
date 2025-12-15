@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.cap;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.CommProtocol;
-import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
@@ -64,11 +64,11 @@ public class OpReadCap extends OpController<CapProperty> {
 		}
 	}
 
-	/** Handle a communication error */
+	/** Handle a communication state */
 	@Override
-	public void handleCommError(EventType et) {
-		CapPoller.slog("ERROR: " + et);
-		super.handleCommError(et);
+	public void handleCommState(CommState cs) {
+		CapPoller.slog("ERROR: " + cs);
+		super.handleCommState(cs);
 	}
 
 	/** Cleanup the operation */

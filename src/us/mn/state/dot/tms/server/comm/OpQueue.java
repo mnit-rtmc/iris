@@ -16,7 +16,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.PrintStream;
-import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.CommState;
 
 /**
  * A prioritized queue which sorts Operation objects by their priority
@@ -209,7 +209,7 @@ public final class OpQueue<T extends ControllerProperty> {
 	public void drain() {
 		forEach(new OpHandler<T>() {
 			public boolean handle(OpController<T> o) {
-				o.handleCommError(EventType.QUEUE_DRAINED);
+				o.handleCommState(CommState.UNKNOWN);
 				o.cleanup();
 				return true;
 			}

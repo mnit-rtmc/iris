@@ -17,7 +17,6 @@
 package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgPriority;
