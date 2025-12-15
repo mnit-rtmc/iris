@@ -339,19 +339,10 @@ CREATE TABLE event.event_description (
 COPY event.event_description (event_desc_id, description) FROM stdin;
 1	Alarm TRIGGERED
 2	Alarm CLEARED
-8	Comm ERROR
-9	Comm RESTORED
-10	Comm QUEUE DRAINED
-11	Comm POLL TIMEOUT
-12	Comm PARSING ERROR
-13	Comm CHECKSUM ERROR
-14	Comm CONTROLLER ERROR
-15	Comm CONNECTION REFUSED
 21	Incident CRASH
 22	Incident STALL
 23	Incident HAZARD
 24	Incident ROADWORK
-65	Comm FAILED
 81	DMS MSG ERROR
 82	DMS PIXEL ERROR
 83	DMS MSG RESET
@@ -1416,6 +1407,23 @@ VALUES
     (4, 'Testing'),
     (5, 'Maintenance');
 
+CREATE TABLE iris.comm_state (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR NOT NULL
+);
+
+INSERT INTO iris.comm_state (id, description)
+VALUES
+    (0, 'Unknown'),
+    (1, 'OK'),
+    (2, 'FAILED'),
+    (3, 'Connection Error'),
+    (4, 'Controller Error'),
+    (5, 'Checksum Error'),
+    (6, 'Parsing Error'),
+    (7, 'Timeout Error'),
+    (8, 'Error');
+
 CREATE TABLE iris.controller (
     name VARCHAR(20) PRIMARY KEY,
     drop_id INTEGER NOT NULL CHECK (drop_id >= 0 AND drop_id <= 65535),
@@ -1427,6 +1435,7 @@ CREATE TABLE iris.controller (
     password VARCHAR CHECK (LENGTH(password) < 128),
     setup JSONB,
     status JSONB,
+    comm_state INTEGER NOT NULL REFERENCES iris.comm_state,
     fail_time TIMESTAMP WITH time zone
 );
 
@@ -1442,6 +1451,7 @@ BEGIN
        (NEW.condition IS DISTINCT FROM OLD.condition) OR
        (NEW.notes IS DISTINCT FROM OLD.notes) OR
        (NEW.setup IS DISTINCT FROM OLD.setup) OR
+       (NEW.comm_state IS DISTINCT FROM OLD.comm_state) OR
        (NEW.fail_time IS DISTINCT FROM OLD.fail_time)
     THEN
         NOTIFY controller;
@@ -1462,37 +1472,52 @@ CREATE TRIGGER controller_table_notify_trig
 
 CREATE VIEW controller_view AS
     SELECT c.name, drop_id, comm_link, cabinet_style, geo_loc,
-           cnd.description AS condition, notes, setup, status, fail_time
+           cnd.description AS condition, notes, setup, status,
+           comm_state, fail_time
     FROM iris.controller c
     LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON controller_view TO PUBLIC;
 
 CREATE VIEW controller_loc_view AS
-    SELECT c.name, drop_id, comm_link, cabinet_style, condition, c.notes,
+    SELECT c.name, drop_id, comm_link, cabinet_style,
+           cnd.description AS condition, c.notes,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir
-    FROM controller_view c
+    FROM iris.controller c
+    LEFT JOIN iris.condition cnd ON c.condition = cnd.id
     LEFT JOIN geo_loc_view l ON c.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
--- FIXME: change to trigger when controller state changes
 CREATE TABLE event.comm_event (
-    event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+    id SERIAL PRIMARY KEY,
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
-    event_desc_id INTEGER NOT NULL
-        REFERENCES event.event_description(event_desc_id),
     controller VARCHAR(20) NOT NULL REFERENCES iris.controller(name)
         ON DELETE CASCADE,
-    device_id VARCHAR(20)
+    comm_state INTEGER NOT NULL REFERENCES iris.comm_state
 );
 
 -- DELETE of iris.controller *very* slow without this index
 CREATE INDEX ON event.comm_event (controller);
 
+CREATE FUNCTION event.controller_comm_state_trig() RETURNS TRIGGER AS
+    $controller_comm_state_trig$
+BEGIN
+    IF NEW.comm_state != OLD.comm_state THEN
+        INSERT INTO event.comm_event (controller, comm_state)
+            VALUES (NEW.name, NEW.comm_state);
+    END IF;
+    RETURN NEW;
+END;
+$controller_comm_state_trig$ LANGUAGE plpgsql;
+
+CREATE TRIGGER controller_comm_state_trig
+    AFTER UPDATE ON iris.controller
+    FOR EACH ROW EXECUTE FUNCTION event.controller_comm_state_trig();
+
 CREATE VIEW comm_event_view AS
-    SELECT e.event_id, e.event_date, ed.description, e.controller,
+    SELECT e.id, e.event_date, cs.description, e.controller,
            c.comm_link, c.drop_id
     FROM event.comm_event e
-    JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+    JOIN iris.comm_state cs ON e.comm_state = cs.id
     LEFT JOIN iris.controller c ON e.controller = c.name;
 GRANT SELECT ON comm_event_view TO PUBLIC;
 
@@ -1863,14 +1888,15 @@ CREATE VIEW detector_view AS
            dl.label, dl.geo_loc, l.rd || '_' || l.road_dir AS cor_id,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            d.lane_number, d.field_length, lc.description AS lane_type,
-           d.lane_code, d.abandoned, d.force_fail, d.auto_fail, c.condition,
-           d.fake, d.notes
+           d.lane_code, d.abandoned, d.force_fail, d.auto_fail,
+           cnd.description AS condition, d.fake, d.notes
     FROM iris.detector d
     JOIN iris.controller_io cio ON d.name = cio.name
     LEFT JOIN detector_label_view dl ON d.name = dl.det_id
     LEFT JOIN geo_loc_view l ON dl.geo_loc = l.name
     LEFT JOIN iris.lane_code lc ON d.lane_code = lc.lcode
-    LEFT JOIN controller_view c ON cio.controller = c.name;
+    LEFT JOIN iris.controller c ON cio.controller = c.name
+    LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON detector_view TO PUBLIC;
 
 CREATE VIEW detector_event_view AS
@@ -2280,12 +2306,14 @@ CREATE VIEW camera_view AS
            c.publish, c.video_loss, c.geo_loc,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
-           cio.controller, ctr.comm_link, ctr.drop_id, ctr.condition, c.notes
+           cio.controller, ctr.comm_link, ctr.drop_id,
+           cnd.description AS condition, c.notes
     FROM iris._camera c
     JOIN iris.controller_io cio ON c.name = cio.name
     LEFT JOIN iris.encoder_type et ON c.encoder_type = et.name
     LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
+    LEFT JOIN iris.controller ctr ON cio.controller = ctr.name
+    LEFT JOIN iris.condition cnd ON ctr.condition = cnd.id;
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE TABLE iris.vid_src_template (
@@ -2588,14 +2616,16 @@ CREATE VIEW beacon_view AS
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location,
            cio.controller, cio.pin, b.verify_pin, b.ext_mode,
-           ctr.comm_link, ctr.drop_id, ctr.condition, bs.description AS state
+           c.comm_link, c.drop_id, cnd.description AS condition,
+           bs.description AS state
     FROM iris._beacon b
     JOIN iris.beacon_state bs ON b.state = bs.id
     JOIN iris.controller_io cio ON b.name = cio.name
     LEFT JOIN iris.device_preset p ON b.name = p.name
     LEFT JOIN iris.camera_preset cp ON cp.name = p.preset
     LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
+    LEFT JOIN iris.controller c ON cio.controller = c.name
+    LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON beacon_view TO PUBLIC;
 
 CREATE TABLE event.beacon_event (
@@ -3600,9 +3630,10 @@ CREATE VIEW gate_arm_view AS
     SELECT g.name, g.notes,
            g.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
-           cio.controller, cio.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-           cp.camera, cp.preset_num, g.opposing, g.downstream_hashtag,
-           gas.description AS arm_state, gai.description AS interlock, fault
+           cio.controller, cio.pin, c.comm_link, c.drop_id,
+           cnd.description AS condition, cp.camera, cp.preset_num, g.opposing,
+           g.downstream_hashtag, gas.description AS arm_state,
+           gai.description AS interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
     LEFT JOIN iris.device_preset p ON g.name = p.name
@@ -3610,7 +3641,8 @@ CREATE VIEW gate_arm_view AS
     JOIN iris.gate_arm_state gas ON g.arm_state = gas.id
     JOIN iris.gate_arm_interlock gai ON g.interlock = gai.id
     LEFT JOIN geo_loc_view l ON g.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
+    LEFT JOIN iris.controller c ON cio.controller = c.name
+    LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON gate_arm_view TO PUBLIC;
 
 CREATE TABLE event.gate_arm_event (
@@ -4910,10 +4942,12 @@ CREATE TRIGGER video_monitor_delete_trig
 
 CREATE VIEW video_monitor_view AS
     SELECT m.name, m.notes, mon_num, restricted, monitor_style,
-           cio.controller, cio.pin, ctr.condition, ctr.comm_link, camera
+           cio.controller, cio.pin, cnd.description AS condition,
+           c.comm_link, camera
     FROM iris._video_monitor m
     JOIN iris.controller_io cio ON m.name = cio.name
-    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
+    LEFT JOIN iris.controller c ON cio.controller = c.name
+    LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
 
 CREATE TABLE iris.play_list (
@@ -5083,13 +5117,14 @@ CREATE TRIGGER flow_stream_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW flow_stream_view AS
-    SELECT f.name, cio.controller, cio.pin, condition, comm_link, restricted,
-           loc_overlay, eq.description AS quality, camera, mon_num, address,
-           port, s.description AS status
+    SELECT f.name, cio.controller, cio.pin, cnd.description AS condition,
+           comm_link, restricted, loc_overlay, eq.description AS quality,
+           camera, mon_num, address, port, s.description AS status
     FROM iris._flow_stream f
     JOIN iris.controller_io cio ON f.name = cio.name
     JOIN iris.flow_stream_status s ON f.status = s.id
-    LEFT JOIN controller_view ctr ON controller = ctr.name
+    LEFT JOIN iris.controller c ON controller = c.name
+    LEFT JOIN iris.condition cnd ON c.condition = cnd.id
     LEFT JOIN iris.encoding_quality eq ON f.quality = eq.id;
 GRANT SELECT ON flow_stream_view TO PUBLIC;
 
@@ -5193,11 +5228,13 @@ CREATE VIEW weather_sensor_view AS
     SELECT w.name, site_id, alt_id, w.notes, settings, sample, sample_time,
            w.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
-           cio.controller, cio.pin, ctr.comm_link, ctr.drop_id, ctr.condition
+           cio.controller, cio.pin, c.comm_link, c.drop_id,
+           cnd.description AS condition
     FROM iris._weather_sensor w
     JOIN iris.controller_io cio ON w.name = cio.name
     LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
-    LEFT JOIN controller_view ctr ON cio.controller = ctr.name;
+    LEFT JOIN iris.controller c ON cio.controller = c.name
+    LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 CREATE TABLE iris.dms_weather_sensor (
