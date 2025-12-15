@@ -20,7 +20,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use tokio::join;
 use tokio::net::TcpStream;
-use tokio::time::{Duration, interval};
+use tokio::time::{Duration, MissedTickBehavior, interval};
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
 use tungstenite::client::IntoClientRequest;
 use tungstenite::{Bytes, Message};
@@ -274,21 +274,26 @@ impl SensorCfg {
 
     /// Run requested polling
     pub async fn run(self, db: Option<Database>) -> Result<()> {
+        let mut ticker = interval(Duration::from_secs(u64::from(self.per_s)));
+        ticker.set_missed_tick_behavior(MissedTickBehavior::Skip);
         loop {
+            ticker.tick().await;
             log::info!("connecting to {}", &self.comm_link);
             let res = self.do_run(db.clone()).await;
             log::info!("disconnected from {}", &self.comm_link);
+            if let Err(Error::Bb8(_) | Error::Postgres(_)) = res {
+                log::warn!("sensor: {self:?}");
+                return res;
+            }
             if let Some(db) = &db {
                 db.clone()
                     .log_disconnect(&self.comm_link, &self.controller)
                     .await?;
             }
-            if let Err(Error::StreamDisconnected) = &res {
-                continue;
-            }
-            if let Err(err) = res {
-                log::warn!("Sensor err: {err:?}");
-                return Err(err);
+            match res {
+                Err(Error::StreamDisconnected) => (),
+                Err(err) => log::warn!("Sensor err: {err:?}"),
+                _ => (),
             }
         }
     }
@@ -460,9 +465,8 @@ async fn send_pings(
     mut sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
     per: u32,
 ) -> Result<()> {
-    // FIXME: first, wait until start of next interval
     let mut ticker = interval(Duration::from_secs(u64::from(per)));
-    ticker.tick().await;
+    ticker.set_missed_tick_behavior(MissedTickBehavior::Skip);
     loop {
         ticker.tick().await;
         log::info!("Sending PING");
