@@ -45,11 +45,17 @@ impl LogReader {
     /// Append an event to the log
     fn append(&mut self, val: u64) -> Result<()> {
         let mut ev = VehEvent::with_value(&self.midnight, val);
-        // Add gap if time stamp went backwards
         if let Some(st) = ev.stamp()
             && let Some(last) = self.last()
         {
-            ev = ev.with_gap(st.is_before(&last));
+            let elapsed = st.elapsed(&last);
+            if (1..3_600_000).contains(&elapsed) {
+                // add headway from last event
+                ev = ev.with_headway_ms(elapsed as u32);
+            } else {
+                // Add gap if time stamp went backwards
+                ev = ev.with_gap(elapsed < 0);
+            }
         }
         self.events.push(ev);
         Ok(())
