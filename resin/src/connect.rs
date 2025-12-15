@@ -35,7 +35,8 @@ const COMM_LINK_DISCONNECT: &str = "\
 const CONTROLLER_DISCONNECT: &str = "\
   UPDATE iris.controller \
   SET fail_time = now() \
-  WHERE name = $1";
+  WHERE fail_time IS NULL \
+  AND name = $1";
 
 impl Database {
     /// Log controller connect in database
