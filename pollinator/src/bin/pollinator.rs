@@ -13,6 +13,7 @@
 use argh::FromArgs;
 use pollinator::rtms_echo::SensorCfg;
 use resin::{Database, Error, Result};
+use tokio::time::{Duration, interval};
 
 /// Command-line arguments
 #[derive(FromArgs)]
@@ -73,8 +74,16 @@ async fn main() -> Result<()> {
     let cfgs = args.sensor_configs().await?;
     if cfgs.is_empty() {
         let db = Database::new("tms").await?;
-        let cfgs = SensorCfg::lookup_all(db.clone()).await?;
-        poll_sensors(cfgs, Some(db)).await?;
+        loop {
+            let cfgs = SensorCfg::lookup_all(db.clone()).await?;
+            if !cfgs.is_empty() {
+                poll_sensors(cfgs, Some(db.clone())).await?;
+            }
+            let mut ticker = interval(Duration::from_secs(60));
+            // apparently, the first tick completes immediately
+            ticker.tick().await;
+            ticker.tick().await;
+        }
     } else {
         poll_sensors(cfgs, None).await?;
     }
