@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.79.0 (15 Dec 2025)
+ - Fixed gate arm interlock check
+ - mayfly: Add support for binary `.vlg` format
+ - Add pollinator service with RTMS Echo protocol
+ - Add `pollinator` flag to `comm_config` (external service)
+ - Fixed synchronization problem in RTMS G4 protocol
+ - Fixed client exception on DMS properties (permission-related)
+ - Reap weather alerts after 1 day (reduced from 30)
+ - Rename `clearguide_key` to `api_key_clearguide`
+ - Improved `rpt_conduit` permissions
+
 5.78.0 (17 Nov 2025)
  - Improved gate arm UI
  - Don't show "Fault" device markers as black on map
