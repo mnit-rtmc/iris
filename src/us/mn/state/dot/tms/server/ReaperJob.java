@@ -318,7 +318,7 @@ public class ReaperJob extends Job {
 			reapDmsHashtag(all_hashtag);
 			BaseObjectImpl.store.update(
 				"DELETE FROM cap.alert_info " +
-				" WHERE name = '" + alert + "';'"
+				" WHERE name = '" + alert + "';"
 			);
 			// Must delete action plan last, since
 			// alert_info has a foreign key to it
