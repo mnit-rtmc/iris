@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use argh::FromArgs;
-use pollinator::rtms_echo::SensorCfg;
+use pollinator::CommLinkCfg;
 use resin::{Database, Error, Result};
 use tokio::time::{Duration, interval};
 
@@ -30,30 +30,31 @@ struct Args {
 }
 
 impl Args {
-    /// Get sensor configurations
-    async fn sensor_configs(self) -> Result<Vec<SensorCfg>> {
+    /// Get comm link configurations
+    async fn comm_link_configs(self) -> Result<Vec<CommLinkCfg>> {
         let any = self.uri.is_some()
             || self.user.is_some()
             || self.password.is_some();
         if let (Some(uri), Some(user), Some(password)) =
             (self.uri, self.user, self.password)
         {
-            let cfg = SensorCfg::default()
+            let cfg = CommLinkCfg::default()
+                .with_protocol(31)
                 .with_uri(&uri)
                 .with_user(&user)
                 .with_password(&password);
             return Ok(vec![cfg]);
         }
         if any {
-            return Err(Error::InvalidConfiguration);
+            return Err(Error::InvalidConfig("arguments"));
         }
         Ok(vec![])
     }
 }
 
-/// Poll sensor configurations
-async fn poll_sensors(
-    cfgs: Vec<SensorCfg>,
+/// Poll comm links
+async fn poll_comm_links(
+    cfgs: Vec<CommLinkCfg>,
     db: Option<Database>,
 ) -> Result<()> {
     let mut handles = Vec::with_capacity(cfgs.len());
@@ -71,13 +72,13 @@ async fn poll_sensors(
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let args: Args = argh::from_env();
-    let cfgs = args.sensor_configs().await?;
+    let cfgs = args.comm_link_configs().await?;
     if cfgs.is_empty() {
         let db = Database::new("tms").await?;
         loop {
-            let cfgs = SensorCfg::lookup_all(db.clone()).await?;
+            let cfgs = CommLinkCfg::lookup_all(db.clone()).await?;
             if !cfgs.is_empty() {
-                poll_sensors(cfgs, Some(db.clone())).await?;
+                poll_comm_links(cfgs, Some(db.clone())).await?;
             }
             let mut ticker = interval(Duration::from_secs(60));
             // apparently, the first tick completes immediately
@@ -85,7 +86,7 @@ async fn main() -> Result<()> {
             ticker.tick().await;
         }
     } else {
-        poll_sensors(cfgs, None).await?;
+        poll_comm_links(cfgs, None).await?;
     }
     Ok(())
 }

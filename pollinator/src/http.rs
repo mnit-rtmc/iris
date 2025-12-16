@@ -42,7 +42,7 @@ impl Client {
     pub fn hostport(&self) -> Result<String> {
         let uri = self.uri.parse::<Uri>()?;
         let mut hostport =
-            uri.host().ok_or(Error::InvalidConfiguration)?.to_string();
+            uri.host().ok_or(Error::InvalidConfig("host"))?.to_string();
         let port = uri.port_u16().unwrap_or(80);
         hostport.push_str(&format!(":{port}"));
         Ok(hostport)

@@ -12,5 +12,8 @@
 //
 #![forbid(unsafe_code)]
 
+mod comm_link;
 mod http;
 pub mod rtms_echo;
+
+pub use comm_link::CommLinkCfg;

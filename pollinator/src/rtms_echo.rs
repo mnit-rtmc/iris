@@ -10,10 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::comm_link::CommLinkCfg;
 use crate::http;
 
 use futures_util::stream::{SplitSink, SplitStream};
-use futures_util::{SinkExt, StreamExt, TryStreamExt, pin_mut};
+use futures_util::{SinkExt, StreamExt};
 use resin::event::{Mode, Stamp, VehEvent, VehEventWriter};
 use resin::{Database, Error, Result};
 use serde::Deserialize;
@@ -24,26 +25,6 @@ use tokio::time::{Duration, MissedTickBehavior, interval};
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
 use tungstenite::client::IntoClientRequest;
 use tungstenite::{Bytes, Message};
-
-/// SQL query for RTMS Echo sensors
-const QUERY: &str = r#"
-SELECT row_to_json(row)::text FROM (
-       SELECT l.name AS comm_link, uri, poll_period_sec AS per_s,
-              long_poll_period_sec AS long_per_s, controller,
-              split_part(c.password, ':', 1) AS user,
-              split_part(c.password, ':', 2) AS password, pins, detectors
-       FROM iris.comm_link l
-       JOIN iris.comm_config cc ON cc.name = l.comm_config
-       JOIN iris.controller c ON c.comm_link = l.name
-       INNER JOIN (
-              SELECT controller,
-                     json_agg(pin ORDER BY pin) AS pins,
-                     json_agg(name ORDER BY pin) AS detectors
-              FROM iris.detector
-              GROUP BY controller
-       ) d ON d.controller = c.name
-       WHERE protocol = 31 AND poll_enabled = true AND condition = 1
-) row"#;
 
 /// Authentication response
 #[derive(Debug, Deserialize, PartialEq)]
@@ -106,29 +87,6 @@ struct Zone {
     direction: Option<ObsDirection>,
     /// Vehicle event log writer
     vlg_writer: Option<VehEventWriter>,
-}
-
-/// Sensor configuration
-#[derive(Debug, Deserialize, PartialEq)]
-pub struct SensorCfg {
-    /// Comm link name
-    comm_link: String,
-    /// URI address or host name
-    uri: String,
-    /// Poll period
-    per_s: u32,
-    /// Long poll period
-    long_per_s: u32,
-    /// Controller name
-    controller: String,
-    /// User name
-    user: Option<String>,
-    /// Password
-    password: Option<String>,
-    /// Detector pins
-    pins: Vec<usize>,
-    /// Detector pin mapping
-    detectors: Vec<String>,
 }
 
 /// RTMS Echo sensor connection
@@ -198,129 +156,27 @@ impl Zone {
     }
 }
 
-impl Default for SensorCfg {
-    fn default() -> Self {
-        let pins = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
-        let detectors = vec![
-            "X1".to_string(),
-            "X2".to_string(),
-            "X3".to_string(),
-            "X4".to_string(),
-            "X5".to_string(),
-            "X6".to_string(),
-            "X7".to_string(),
-            "X8".to_string(),
-            "X9".to_string(),
-        ];
-        SensorCfg {
-            comm_link: String::from("default comm link"),
-            uri: String::new(),
-            per_s: 30,
-            long_per_s: 300,
-            controller: String::from("default controller"),
-            user: None,
-            password: None,
-            pins,
-            detectors,
-        }
-    }
-}
-
-impl SensorCfg {
-    /// Lookup all sensor configurations in database
-    pub async fn lookup_all(db: Database) -> Result<Vec<Self>> {
-        let client = db.client().await?;
-        let params: &[&str] = &[];
-        let mut cfgs = Vec::new();
-        let it = client.query_raw(QUERY, params).await?;
-        pin_mut!(it);
-        while let Some(row) = it.try_next().await? {
-            let json = row.get::<usize, String>(0);
-            let cfg: SensorCfg = serde_json::from_str(&json)?;
-            cfgs.push(cfg);
-        }
-        if cfgs.is_empty() {
-            log::warn!("no sensors configured");
-        }
-        Ok(cfgs)
-    }
-
-    /// Set sensor URI
-    pub fn with_uri(mut self, uri: &str) -> Self {
-        self.uri = uri.to_string();
-        self
-    }
-
-    /// Set user name
-    pub fn with_user(mut self, user: &str) -> Self {
-        self.user = Some(user.to_string());
-        self
-    }
-
-    /// Set password
-    pub fn with_password(mut self, password: &str) -> Self {
-        self.password = Some(password.to_string());
-        self
-    }
-
-    /// Make sample detectors
-    fn make_detectors(&self) -> HashMap<usize, &str> {
-        let mut detectors = HashMap::new();
-        for (pin, det) in self.pins.iter().zip(&self.detectors) {
-            detectors.insert(*pin, &det[..]);
-        }
-        detectors
-    }
-
-    /// Run requested polling
-    pub async fn run(self, db: Option<Database>) -> Result<()> {
-        let mut ticker = interval(Duration::from_secs(u64::from(self.per_s)));
-        ticker.set_missed_tick_behavior(MissedTickBehavior::Skip);
-        loop {
-            ticker.tick().await;
-            log::info!("connecting to {}", &self.comm_link);
-            let res = self.do_run(db.clone()).await;
-            log::info!("disconnected from {}", &self.comm_link);
-            if let Err(Error::Bb8(_) | Error::Postgres(_)) = res {
-                log::warn!("sensor: {self:?}");
-                return res;
-            }
-            if let Some(db) = &db {
-                db.clone()
-                    .log_disconnect(&self.comm_link, &self.controller)
-                    .await?;
-            }
-            match res {
-                Err(Error::StreamDisconnected) => (),
-                Err(err) => log::warn!("Sensor err: {err:?}"),
-                _ => (),
-            }
-        }
-    }
-
-    /// Run requested sensor polling
-    async fn do_run(&self, db: Option<Database>) -> Result<()> {
-        let mut sensor = Sensor::new(&self.uri).await?;
-        let user = &self.user.as_ref().map_or("", |u| u);
-        let password = &self.password.as_ref().map_or("", |p| p);
-        sensor.login(user, password).await?;
-        if let Some(db) = &db {
-            db.clone()
-                .log_connect(&self.comm_link, &self.controller)
-                .await?;
-        }
-        sensor.init_detector_zones(&self.make_detectors()).await?;
-        sensor.periodic_poll(self.per_s, self.long_per_s).await?;
-        Ok(())
-    }
-}
-
 impl Sensor {
-    /// Create a new RTMS Echo sensor connection
-    pub async fn new(uri: &str) -> Result<Self> {
-        let client = http::Client::new(uri);
+    /// Create a RTMS Echo sensor
+    pub fn new(cfg: &CommLinkCfg) -> Self {
+        let client = http::Client::new(cfg.uri());
         let zones = Vec::new();
-        Ok(Sensor { client, zones })
+        Sensor { client, zones }
+    }
+
+    /// Run sensor comm link
+    pub async fn run(
+        mut self,
+        cfg: &CommLinkCfg,
+        db: Option<Database>,
+    ) -> Result<()> {
+        let user = cfg.user().unwrap_or_default();
+        let password = cfg.password().unwrap_or_default();
+        self.login(user, password).await?;
+        cfg.log_connect(&db).await?;
+        self.init_detector_zones(&cfg.make_detectors()).await?;
+        self.periodic_poll(cfg.per_s, cfg.long_per_s).await?;
+        Ok(())
     }
 
     /// Login with user credentials

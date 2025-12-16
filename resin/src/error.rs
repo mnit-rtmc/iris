@@ -46,7 +46,7 @@ pub enum Error {
     InvalidUri(#[from] hyper::http::uri::InvalidUri),
 
     /// Bb8 run error
-    #[error("Bb8 run error")]
+    #[error("Bb8 run error {0}")]
     Bb8(String),
 
     /// Postgres error
@@ -70,8 +70,8 @@ pub enum Error {
     Io(#[from] std::io::Error),
 
     /// Invalid configuration error
-    #[error("Invalid configuration")]
-    InvalidConfiguration,
+    #[error("Invalid config {0}")]
+    InvalidConfig(&'static str),
 
     /// Stream disconnected error
     #[error("Stream disconnected")]
