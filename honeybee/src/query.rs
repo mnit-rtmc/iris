@@ -160,6 +160,12 @@ pub const COMM_PROTOCOL_LUT: &str = "\
   FROM iris.comm_protocol \
   ORDER BY description";
 
+/// SQL query for comm states (LUT)
+pub const COMM_STATE_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.comm_state \
+  ORDER BY id";
+
 /// SQL query for controller conditions (LUT)
 pub const CONDITION_LUT: &str = "\
   SELECT id, description \
@@ -179,7 +185,7 @@ pub const CONTROLLER_ALL: &str = "\
 /// SQL query for one controller (secondary)
 pub const CONTROLLER_ONE: &str = "\
   SELECT c.name, location, geo_loc, comm_link, drop_id, cabinet_style, \
-         condition, notes, password, setup, status, fail_time \
+         condition, notes, password, setup, status, comm_state, fail_time \
   FROM iris.controller c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
   WHERE c.name = $1";

@@ -27,6 +27,7 @@ pub enum Res {
     CommConfig,
     CommLink,
     CommProtocol,
+    CommState,
     Condition,
     Controller,
     ControllerIo,
@@ -125,6 +126,7 @@ impl Res {
             CommConfig,
             CommLink,
             CommProtocol,
+            CommState,
             Condition,
             Controller,
             ControllerIo,
@@ -211,6 +213,7 @@ impl Res {
             CommConfig => "comm_config",
             CommLink => "comm_link",
             CommProtocol => "comm_protocol",
+            CommState => "comm_state",
             Condition => "condition",
             Controller => "controller",
             ControllerIo => "controller_io",
@@ -338,11 +341,12 @@ impl Res {
         use Res::*;
         #[allow(clippy::match_like_matches_macro)]
         match self {
-            BeaconState | CommProtocol | Condition | Direction | Encoding
-            | EventDescription | Font | GateArmInterlock | GateArmState
-            | Graphic | IncImpact | IncRange | LaneCode | LcsIndication
-            | LcsType | MeterAlgorithm | MeterType | ResourceType
-            | RnodeTransition | RnodeType | RoadClass | RoadModifier => true,
+            BeaconState | CommProtocol | CommState | Condition | Direction
+            | Encoding | EventDescription | Font | GateArmInterlock
+            | GateArmState | Graphic | IncImpact | IncRange | LaneCode
+            | LcsIndication | LcsType | MeterAlgorithm | MeterType
+            | ResourceType | RnodeTransition | RnodeType | RoadClass
+            | RoadModifier => true,
             _ => false,
         }
     }

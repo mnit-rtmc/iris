@@ -32,6 +32,13 @@ pub struct Condition {
     pub description: String,
 }
 
+/// Comm States
+#[derive(Debug, Deserialize, PartialEq)]
+pub struct CommState {
+    pub id: u32,
+    pub description: String,
+}
+
 /// Controller IO
 #[derive(Debug, Deserialize)]
 pub struct Io {
@@ -68,6 +75,7 @@ pub struct Controller {
     pub status: Option<ControllerStatus>,
     pub fail_time: Option<String>,
     // secondary attributes
+    pub comm_state: Option<CommState>,
     pub geo_loc: Option<String>,
     pub password: Option<String>,
 }
@@ -76,7 +84,8 @@ pub struct Controller {
 #[derive(Debug, Default)]
 pub struct ControllerAnc {
     loc: LocAnc<Controller>,
-    pub conditions: Vec<Condition>,
+    conditions: Vec<Condition>,
+    states: Vec<CommState>,
     pub cabinet_styles: Vec<CabinetStyle>,
     pub comm_links: Vec<CommLink>,
     pub comm_configs: Vec<CommConfig>,
@@ -92,17 +101,20 @@ impl AncillaryData for ControllerAnc {
         match view {
             View::Search => {
                 loc.assets.push(Asset::Conditions);
+                loc.assets.push(Asset::CommStates);
                 loc.assets.push(Asset::CommLinks);
                 loc.assets.push(Asset::CommConfigs);
             }
             View::Status => {
                 loc.assets.push(Asset::Conditions);
+                loc.assets.push(Asset::CommStates);
                 loc.assets.push(Asset::CommLinks);
                 loc.assets.push(Asset::CommConfigs);
                 loc.assets.push(Asset::ControllerIo(pri.name.to_string()));
             }
             View::Setup => {
                 loc.assets.push(Asset::Conditions);
+                loc.assets.push(Asset::CommStates);
                 loc.assets.push(Asset::CabinetStyles);
             }
             _ => (),
@@ -126,6 +138,12 @@ impl AncillaryData for ControllerAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::Conditions => {
+                self.conditions = serde_wasm_bindgen::from_value(value)?;
+            }
+            Asset::CommStates => {
+                self.states = serde_wasm_bindgen::from_value(value)?;
+            }
             Asset::CabinetStyles => {
                 self.cabinet_styles = serde_wasm_bindgen::from_value(value)?;
             }
@@ -134,9 +152,6 @@ impl AncillaryData for ControllerAnc {
             }
             Asset::CommLinks => {
                 self.comm_links = serde_wasm_bindgen::from_value(value)?;
-            }
-            Asset::Conditions => {
-                self.conditions = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::ControllerIo(_ctrl) => {
                 self.controller_io = serde_wasm_bindgen::from_value(value)?;

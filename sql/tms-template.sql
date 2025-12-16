@@ -1451,7 +1451,6 @@ BEGIN
        (NEW.condition IS DISTINCT FROM OLD.condition) OR
        (NEW.notes IS DISTINCT FROM OLD.notes) OR
        (NEW.setup IS DISTINCT FROM OLD.setup) OR
-       (NEW.comm_state IS DISTINCT FROM OLD.comm_state) OR
        (NEW.fail_time IS DISTINCT FROM OLD.fail_time)
     THEN
         NOTIFY controller;

@@ -24,6 +24,7 @@ pub enum Asset {
     CommConfigs,
     CommLinks,
     CommProtocols,
+    CommStates,
     Conditions,
     // For all CIO pins for one controller
     ControllerIo(String),
@@ -68,6 +69,7 @@ impl Asset {
             CommConfigs => "/iris/api/comm_config".into(),
             CommLinks => "/iris/api/comm_link".into(),
             CommProtocols => "/iris/lut/comm_protocol".into(),
+            CommStates => "/iris/lut/comm_state".into(),
             Conditions => "/iris/lut/condition".into(),
             ControllerIo(nm) => {
                 let mut uri = Uri::from("/iris/api/controller_io/");
