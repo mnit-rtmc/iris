@@ -13,6 +13,8 @@
 use argh::FromArgs;
 use pollinator::CommLinkCfg;
 use resin::{Database, Error, Result};
+use std::collections::HashMap;
+use tokio::task::{AbortHandle, JoinSet};
 use tokio::time::{Duration, interval};
 
 /// Command-line arguments
@@ -30,8 +32,8 @@ struct Args {
 }
 
 impl Args {
-    /// Get comm link configurations
-    async fn comm_link_configs(self) -> Result<Vec<CommLinkCfg>> {
+    /// Get comm link configuration
+    async fn comm_link_config(self) -> Result<Option<CommLinkCfg>> {
         let any = self.uri.is_some()
             || self.user.is_some()
             || self.password.is_some();
@@ -43,26 +45,61 @@ impl Args {
                 .with_uri(&uri)
                 .with_user(&user)
                 .with_password(&password);
-            return Ok(vec![cfg]);
+            return Ok(Some(cfg));
         }
         if any {
             return Err(Error::InvalidConfig("arguments"));
         }
-        Ok(vec![])
+        Ok(None)
     }
 }
 
+/// Comm link task
+struct CommLinkTask {
+    /// Configuration
+    cfg: CommLinkCfg,
+    /// Task abort handle
+    handle: AbortHandle,
+}
+
 /// Poll comm links
-async fn poll_comm_links(
-    cfgs: Vec<CommLinkCfg>,
-    db: Option<Database>,
-) -> Result<()> {
-    let mut handles = Vec::with_capacity(cfgs.len());
-    for cfg in cfgs {
-        handles.push(tokio::spawn(cfg.run(db.clone())));
-    }
-    for handle in handles {
-        handle.await??;
+async fn poll_comm_links(db: Database) -> Result<()> {
+    let mut tasks: HashMap<String, CommLinkTask> = HashMap::new();
+    let mut set = JoinSet::new();
+    loop {
+        let cfgs = CommLinkCfg::lookup_all(db.clone()).await?;
+        if cfgs.is_empty() {
+            break;
+        }
+        tasks.retain(|name, task| {
+            match cfgs.iter().find(|cfg| cfg.name() == name) {
+                Some(cfg) => {
+                    let changed = *cfg != task.cfg;
+                    if changed {
+                        // comm link changed: abort task
+                        task.handle.abort();
+                    }
+                    !changed
+                }
+                None => {
+                    // no comm link: abort task
+                    task.handle.abort();
+                    false
+                }
+            }
+        });
+        // spawn tasks for new comm links
+        for cfg in cfgs {
+            if !tasks.contains_key(cfg.name()) {
+                let name = cfg.name().to_string();
+                let db = Some(db.clone());
+                let handle = set.spawn(cfg.clone().run(db));
+                let task = CommLinkTask { cfg, handle };
+                tasks.insert(name, task);
+            }
+        }
+        // FIXME: listen for notify events
+        set.join_next().await;
     }
     Ok(())
 }
@@ -72,21 +109,16 @@ async fn poll_comm_links(
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let args: Args = argh::from_env();
-    let cfgs = args.comm_link_configs().await?;
-    if cfgs.is_empty() {
-        let db = Database::new("tms").await?;
-        loop {
-            let cfgs = CommLinkCfg::lookup_all(db.clone()).await?;
-            if !cfgs.is_empty() {
-                poll_comm_links(cfgs, Some(db.clone())).await?;
-            }
-            let mut ticker = interval(Duration::from_secs(60));
-            // apparently, the first tick completes immediately
-            ticker.tick().await;
-            ticker.tick().await;
-        }
-    } else {
-        poll_comm_links(cfgs, None).await?;
+    if let Some(cfg) = args.comm_link_config().await? {
+        tokio::spawn(cfg.run(None)).await??;
+        return Ok(());
     }
-    Ok(())
+    let db = Database::new("tms").await?;
+    loop {
+        poll_comm_links(db.clone()).await?;
+        let mut ticker = interval(Duration::from_secs(60));
+        // apparently, the first tick completes immediately
+        ticker.tick().await;
+        ticker.tick().await;
+    }
 }

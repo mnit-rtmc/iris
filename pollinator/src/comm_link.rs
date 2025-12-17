@@ -54,18 +54,18 @@ impl CommProtocol {
 }
 
 /// Comm link configuration
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq)]
 pub struct CommLinkCfg {
     /// Comm link name
-    pub name: String,
+    name: String,
     /// Protocol ID
     protocol: u32,
     /// URI address or host name
     uri: String,
     /// Poll period
-    pub per_s: u32,
+    per_s: u32,
     /// Long poll period
-    pub long_per_s: u32,
+    long_per_s: u32,
     /// Controller name
     controller: String,
     /// User name
@@ -126,6 +126,11 @@ impl CommLinkCfg {
         Ok(cfgs)
     }
 
+    /// Get comm link name
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
     /// Set protocol ID
     pub fn with_protocol(mut self, protocol: u32) -> Self {
         self.protocol = protocol;
@@ -141,6 +146,16 @@ impl CommLinkCfg {
     /// Get comm link URI
     pub fn uri(&self) -> &str {
         &self.uri
+    }
+
+    /// Get period (s)
+    pub fn per_s(&self) -> u32 {
+        self.per_s
+    }
+
+    /// Get long period (s)
+    pub fn long_per_s(&self) -> u32 {
+        self.long_per_s
     }
 
     /// Set user name

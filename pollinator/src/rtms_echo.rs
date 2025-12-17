@@ -238,7 +238,7 @@ impl Sensor {
             // FIXME: store in controller status
             log::debug!("{record:?}");
         }
-        self.collect_vehicle_data(cfg.per_s).await
+        self.collect_vehicle_data(cfg.per_s()).await
     }
 
     /// Poll the sensor for input voltage records
