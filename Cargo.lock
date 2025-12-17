@@ -1305,6 +1305,7 @@ dependencies = [
  "thiserror 2.0.17",
  "tokio",
  "tokio-postgres",
+ "tokio-stream",
  "tokio-tungstenite",
  "tungstenite",
  "whoami",
@@ -1503,6 +1504,7 @@ version = "5.79.2"
 dependencies = [
  "bb8",
  "bb8-postgres",
+ "futures",
  "hyper",
  "jiff",
  "log",
@@ -1511,6 +1513,7 @@ dependencies = [
  "thiserror 2.0.17",
  "tokio",
  "tokio-postgres",
+ "tokio-stream",
  "tokio-tungstenite",
  "tungstenite",
  "whoami",

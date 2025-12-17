@@ -20,7 +20,9 @@ resin = { path = "../resin" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
+tokio = { workspace = true }
 tokio-postgres = { workspace = true }
+tokio-stream = { workspace = true }
 tokio-tungstenite = "0.28"
 tungstenite = "0.28"
 whoami = "1"
@@ -29,8 +31,3 @@ whoami = "1"
 version = "0.3.28"
 default-features = false
 features = ["sink", "std"]
-
-[dependencies.tokio]
-version = "1.48.0"
-default-features = false
-features = ["fs", "io-util", "io-std", "macros", "net", "rt-multi-thread"]

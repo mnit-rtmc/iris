@@ -14,12 +14,9 @@ use argh::FromArgs;
 use pollinator::CommLinkCfg;
 use resin::{Database, Error, Result};
 use std::collections::HashMap;
-use std::pin::Pin;
-use std::task::{Context, Poll};
 use tokio::task::{AbortHandle, JoinSet};
 use tokio::time::{Duration, interval};
-use tokio_postgres::tls::NoTlsStream;
-use tokio_postgres::{AsyncMessage, Connection, Socket};
+use tokio_stream::StreamExt;
 
 /// Command-line arguments
 #[derive(FromArgs)]
@@ -66,52 +63,17 @@ struct CommLinkTask {
     handle: AbortHandle,
 }
 
-/// Handler for Postgres NOTIFY
-struct NotifyHandler {
-    /// DB connection
-    conn: Connection<Socket, NoTlsStream>,
-}
-
-impl Future for NotifyHandler {
-    type Output = bool;
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
-        match self.conn.poll_message(cx) {
-            Poll::Pending => Poll::Pending,
-            Poll::Ready(None) => {
-                log::warn!("DB notification stream ended");
-                Poll::Ready(false)
-            }
-            Poll::Ready(Some(Ok(AsyncMessage::Notification(n)))) => {
-                log::info!("NOTIFY: {} {}", n.channel(), n.payload());
-                Poll::Ready(true)
-            }
-            Poll::Ready(Some(Ok(AsyncMessage::Notice(n)))) => {
-                log::warn!("DB notice: {n}");
-                Poll::Pending
-            }
-            Poll::Ready(Some(Ok(_))) => {
-                log::warn!("DB AsyncMessage unknown");
-                Poll::Pending
-            }
-            Poll::Ready(Some(Err(e))) => {
-                log::error!("DB error: {e}");
-                Poll::Ready(false)
-            }
-        }
-    }
-}
-
 /// Poll comm links
 async fn poll_comm_links(db: Database) -> Result<()> {
-    let (client, conn) = db.dedicated_client().await?;
-    client.execute("LISTEN comm_config", &[]).await?;
-    client.execute("LISTEN comm_link", &[]).await?;
-    client.execute("LISTEN controller", &[]).await?;
-    client.execute("LISTEN detector", &[]).await?;
-    let mut notifier = NotifyHandler { conn };
+    let (notifier, mut stream) = db
+        .clone()
+        .notifier(
+            ["comm_config", "comm_link", "controller", "detector"].into_iter(),
+        )
+        .await?;
     let mut tasks: HashMap<String, CommLinkTask> = HashMap::new();
     let mut set = JoinSet::new();
+    set.spawn(notifier.run());
     loop {
         let cfgs = CommLinkCfg::lookup_all(db.clone()).await?;
         if cfgs.is_empty() {
@@ -144,9 +106,8 @@ async fn poll_comm_links(db: Database) -> Result<()> {
                 tasks.insert(name, task);
             }
         }
-        if !(&mut notifier).await {
-            break;
-        }
+        let _not = stream.next().await;
+        // FIXME: check notification channel / payload
     }
     Ok(())
 }

@@ -8,18 +8,19 @@ edition.workspace = true
 [dependencies]
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
+futures = { workspace = true }
 hyper = { version = "1.8", features = ["client", "http1"] }
 jiff = "0.2.16"
 log = { workspace = true }
 mag = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
+tokio = { workspace = true }
 tokio-postgres = { workspace = true }
 tokio-tungstenite = "0.28"
 tungstenite = "0.28"
 whoami = "1"
 
-[dependencies.tokio]
-version = "1.48.0"
-default-features = false
-features = ["fs"]
+[dependencies.tokio-stream]
+version = "0.1"
+features = ["time"]

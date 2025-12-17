@@ -16,6 +16,7 @@ mod connect;
 mod database;
 mod error;
 pub mod event;
+mod notify;
 
 pub use database::Database;
 pub use error::{Error, Result};

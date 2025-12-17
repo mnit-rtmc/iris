@@ -12,7 +12,7 @@ bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
 cidr = { workspace = true }
 env_logger = { workspace = true }
-futures = { version = "0.3", default-features = false }
+futures = { workspace = true }
 headers = "0.4"
 heck = "0.5"
 http = { workspace = true }
@@ -34,6 +34,7 @@ time = "0.3"
 tokio = { workspace = true }
 tokio-postgres = { workspace = true }
 tokio-rustls = "0.26"
+tokio-stream = { workspace = true }
 tokio-util = "0.7"
 tower-sessions-moka-store = "0.15"
 whoami = "1"
@@ -46,10 +47,6 @@ features = ["axum-core"]
 [dependencies.axum-extra]
 version = "0.10"
 features = ["typed-header"]
-
-[dependencies.tokio-stream]
-version = "0.1"
-features = ["time"]
 
 [dependencies.postgres-types]
 version = "0.2"
