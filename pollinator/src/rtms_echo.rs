@@ -164,23 +164,23 @@ impl Sensor {
         Sensor { client, zones }
     }
 
-    /// Run sensor comm link
+    /// Poll sensor continuously
     pub async fn run(
         mut self,
         cfg: &CommLinkCfg,
         db: Option<Database>,
     ) -> Result<()> {
-        let user = cfg.user().unwrap_or_default();
-        let password = cfg.password().unwrap_or_default();
-        self.login(user, password).await?;
+        self.login(cfg).await?;
         cfg.log_connect(&db).await?;
         self.init_detector_zones(&cfg.make_detectors()).await?;
-        self.periodic_poll(cfg.per_s, cfg.long_per_s).await?;
+        self.continuous_poll(cfg).await?;
         Ok(())
     }
 
     /// Login with user credentials
-    async fn login(&mut self, user: &str, pass: &str) -> Result<()> {
+    async fn login(&mut self, cfg: &CommLinkCfg) -> Result<()> {
+        let user = cfg.user().ok_or(Error::InvalidConfig("user"))?;
+        let pass = cfg.password().ok_or(Error::InvalidConfig("password"))?;
         let body =
             format!("{{\"username\": \"{user}\", \"password\": \"{pass}\" }}");
         let resp = self.client.post("api/v1/login", &body).await?;
@@ -231,14 +231,14 @@ impl Sensor {
     }
 
     /// Poll the sensor for vehicle events
-    async fn periodic_poll(&mut self, per: u32, _per_long: u32) -> Result<()> {
-        // FIXME: use per_long interval to poll for this
+    async fn continuous_poll(&mut self, cfg: &CommLinkCfg) -> Result<()> {
+        // FIXME: use cfg.per_long interval to poll for this
         let records = self.poll_input_voltage().await?;
         for record in records {
             // FIXME: store in controller status
             log::debug!("{record:?}");
         }
-        self.collect_vehicle_data(per).await
+        self.collect_vehicle_data(cfg.per_s).await
     }
 
     /// Poll the sensor for input voltage records

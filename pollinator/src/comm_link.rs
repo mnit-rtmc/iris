@@ -37,6 +37,22 @@ SELECT row_to_json(row)::text FROM (
        WHERE pollinator = true AND poll_enabled = true AND condition = 1
 ) row"#;
 
+/// Comm protocol
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+enum CommProtocol {
+    RtmsEcho,
+}
+
+impl CommProtocol {
+    /// Get protocol from ID
+    fn from_id(id: u32) -> Option<Self> {
+        match id {
+            31 => Some(Self::RtmsEcho),
+            _ => None,
+        }
+    }
+}
+
 /// Comm link configuration
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct CommLinkCfg {
@@ -158,14 +174,15 @@ impl CommLinkCfg {
         detectors
     }
 
-    /// Run requested polling
+    /// Run comm link polling
     pub async fn run(self, db: Option<Database>) -> Result<()> {
-        // FIXME: first wait until start of next `per_s` interval
         let mut ticker = interval(Duration::from_secs(u64::from(self.per_s)));
         ticker.set_missed_tick_behavior(MissedTickBehavior::Skip);
         loop {
             ticker.tick().await;
-            let res = self.do_run(db.clone()).await;
+            log::info!("{}: connecting", &self.name);
+            let res = try_run_link(&self, db.clone()).await;
+            log::info!("{}: disconnected", &self.name);
             if let Err(Error::Bb8(_) | Error::Postgres(_)) = res {
                 log::warn!("{}: database error", &self.name);
                 return res;
@@ -196,20 +213,12 @@ impl CommLinkCfg {
         }
         Ok(())
     }
-
-    /// Run requested comm link polling
-    async fn do_run(&self, db: Option<Database>) -> Result<()> {
-        log::info!("{}: connecting", &self.name);
-        let res = run_link(self, db).await;
-        log::info!("{}: disconnected", &self.name);
-        res
-    }
 }
 
-/// Runn a comm link
-async fn run_link(cfg: &CommLinkCfg, db: Option<Database>) -> Result<()> {
-    match cfg.protocol {
-        31 => {
+/// Try to run a comm link
+async fn try_run_link(cfg: &CommLinkCfg, db: Option<Database>) -> Result<()> {
+    match CommProtocol::from_id(cfg.protocol) {
+        Some(CommProtocol::RtmsEcho) => {
             let sensor = rtms_echo::Sensor::new(cfg);
             sensor.run(cfg, db).await
         }
