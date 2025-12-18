@@ -17,10 +17,7 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tokio-postgres = { workspace = true }
+tokio-stream = { workspace = true }
 tokio-tungstenite = "0.28"
 tungstenite = "0.28"
-whoami = "1"
-
-[dependencies.tokio-stream]
-version = "0.1"
-features = ["time"]
+whoami = { workspace = true }

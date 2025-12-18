@@ -37,7 +37,7 @@ tokio-rustls = "0.26"
 tokio-stream = { workspace = true }
 tokio-util = "0.7"
 tower-sessions-moka-store = "0.15"
-whoami = "1"
+whoami = { workspace = true }
 
 [dependencies.tower-sessions]
 version = "0.14"
