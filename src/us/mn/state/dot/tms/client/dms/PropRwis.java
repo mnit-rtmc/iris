@@ -161,11 +161,13 @@ public class PropRwis extends IPanel implements ProxyView<GeoLoc> {
 			if (sensors != null) {
 				StringBuilder names = new StringBuilder();
 				for (WeatherSensor ws: sensors) {
-					String nm = ws.getName();
-					if (nm != null) {
-						if (names.length() > 0)
-							names.append(' ');
-						names.append(nm);
+					if (ws != null) {
+						String nm = ws.getName();
+						if (nm != null) {
+							if (names.length() > 0)
+								names.append(' ');
+							names.append(nm);
+						}
 					}
 				}
 				weather_sensor_txt.setText(names.toString());
