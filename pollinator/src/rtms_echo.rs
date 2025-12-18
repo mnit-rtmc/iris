@@ -93,6 +93,8 @@ struct Zone {
 
 /// RTMS Echo sensor connection
 pub struct Sensor {
+    /// Controller name
+    controller: String,
     /// HTTP client
     client: http::Client,
     /// Detection zones
@@ -144,7 +146,7 @@ impl Zone {
                 };
                 vlg_writer.append(&ev).await?;
             }
-            None => log::warn!("{}: No detector on pin {}", self.id, self.pin),
+            None => log::warn!("{}: no detector on pin {}", self.id, self.pin),
         }
         Ok(())
     }
@@ -162,9 +164,14 @@ impl Zone {
 impl Sensor {
     /// Create a RTMS Echo sensor
     pub fn new(cfg: &CommLinkCfg) -> Self {
+        let controller = cfg.controller().to_string();
         let client = http::Client::new(cfg.uri());
         let zones = Vec::new();
-        Sensor { client, zones }
+        Sensor {
+            controller,
+            client,
+            zones,
+        }
     }
 
     /// Poll sensor continuously
@@ -210,17 +217,28 @@ impl Sensor {
                 Some(det) => {
                     let vlg_writer = VehEventWriter::new(det).await?;
                     zone.vlg_writer = Some(vlg_writer);
-                    log::debug!("pin #{pin}, zone: {}, det: {det}", zone.id);
+                    log::debug!(
+                        "{}: pin #{pin}, zone {}, det {det}",
+                        &self.controller,
+                        zone.id
+                    );
                 }
                 None => {
-                    log::debug!("pin #{pin}, zone: {}, NO detector", zone.id)
+                    log::warn!(
+                        "{}: pin #{pin}, zone {}, NO detector",
+                        &self.controller,
+                        zone.id
+                    )
                 }
             }
             self.zones.push(zone);
         }
         for (pin, det) in dets {
             if *pin < 1 || *pin > zones.len() {
-                log::warn!("Invalid pin #{pin} for detector: {det}");
+                log::warn!(
+                    "{}: invalid pin #{pin} for detector: {det}",
+                    &self.controller
+                );
             }
         }
         Ok(())
@@ -239,7 +257,7 @@ impl Sensor {
         let records = self.poll_input_voltage().await?;
         for record in records {
             // FIXME: store in controller status
-            log::debug!("{record:?}");
+            log::debug!("{}: {record:?}", &self.controller);
         }
         self.collect_vehicle_data(cfg.per_s()).await
     }
@@ -258,7 +276,7 @@ impl Sensor {
                 return Some(zone);
             }
         }
-        log::warn!("Unknown zoneId for vehicle: {veh:?}");
+        log::warn!("{}: unknown zoneId for vehicle: {veh:?}", &self.controller);
         None
     }
 
@@ -269,8 +287,15 @@ impl Sensor {
             .into_client_request()?;
         let (stream, res) = connect_async(req).await?;
         match res.into_body() {
-            Some(body) => log::warn!("resp: {}", String::from_utf8(body)?),
-            None => log::info!("WebSocket connected, waiting..."),
+            Some(body) => log::warn!(
+                "{}: resp {}",
+                &self.controller,
+                String::from_utf8(body)?
+            ),
+            None => log::info!(
+                "{}: WebSocket connected, waiting...",
+                &self.controller
+            ),
         }
         let (sink, stream) = stream.split();
         let (r0, r1) = join![send_pings(sink, per), self.read_messages(stream)];
@@ -286,7 +311,11 @@ impl Sensor {
         while let Some(msg) = stream.next().await {
             match msg? {
                 Message::Text(bytes) => {
-                    log::debug!("TEXT: {} bytes", bytes.len());
+                    log::debug!(
+                        "{}: TEXT, {} bytes",
+                        &self.controller,
+                        bytes.len()
+                    );
                     let data = bytes.as_str();
                     // split JSON objects on ending brace
                     for ev in data.split_inclusive('}') {
@@ -295,13 +324,25 @@ impl Sensor {
                     }
                 }
                 Message::Binary(bytes) => {
-                    log::debug!("BINARY: {} bytes, ignoring", bytes.len());
+                    log::debug!(
+                        "{}: BINARY, {} bytes, ignoring",
+                        &self.controller,
+                        bytes.len()
+                    );
                 }
                 Message::Ping(bytes) => {
-                    log::debug!("PING: {} bytes", bytes.len());
+                    log::debug!(
+                        "{}: PING, {} bytes",
+                        &self.controller,
+                        bytes.len()
+                    );
                 }
                 Message::Pong(bytes) => {
-                    log::debug!("PONG: {} bytes", bytes.len());
+                    log::debug!(
+                        "{}: PONG, {} bytes",
+                        &self.controller,
+                        bytes.len()
+                    );
                 }
                 _ => (),
             }
@@ -311,7 +352,7 @@ impl Sensor {
 
     /// Log a vehicle event
     async fn log_event(&mut self, veh: VehicleData) -> Result<()> {
-        log::debug!("veh data: {veh:?}");
+        log::debug!("{}: veh data: {veh:?}", &self.controller);
         if let Some(zone) = self.zone_mut(&veh) {
             zone.log_append(&veh).await?;
         }
