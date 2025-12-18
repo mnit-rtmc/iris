@@ -76,9 +76,6 @@ async fn poll_comm_links(db: Database) -> Result<()> {
         .await?;
     loop {
         let cfgs = CommLinkCfg::lookup_all(db.clone()).await?;
-        if cfgs.is_empty() {
-            break;
-        }
         tasks.retain(|name, task| {
             match cfgs.iter().find(|cfg| cfg.name() == name) {
                 Some(cfg) => {
@@ -112,6 +109,7 @@ async fn poll_comm_links(db: Database) -> Result<()> {
                 tasks.insert(name, task);
             }
         }
+        // wait for any configuration change
         while let Some(not) = receiver.recv().await {
             if should_reload(&not, &cfgs) {
                 log::info!(
@@ -128,7 +126,6 @@ async fn poll_comm_links(db: Database) -> Result<()> {
             }
         }
     }
-    Ok(())
 }
 
 /// Check if a notification should trigger reloading the configuration
