@@ -24,13 +24,18 @@ use tokio_postgres::{AsyncMessage, Client, Connection, Notification, Socket};
 
 /// Handler for Postgres NOTIFY
 pub struct Notifier {
-    /// DB client (kept so it's not dropped)
-    #[allow(unused)]
-    client: Client,
     /// DB connection
     conn: Connection<Socket, NoTlsStream>,
     /// Notification sender
     tx: UnboundedSender<Notification>,
+}
+
+/// Receiver for Postgres NOTIFY
+pub struct Receiver {
+    /// DB client
+    client: Client,
+    /// Notification receiver
+    rx: UnboundedReceiver<Notification>,
 }
 
 impl Future for Notifier {
@@ -72,18 +77,38 @@ impl Notifier {
     }
 }
 
-impl Database {
-    /// Create a new notifier
-    pub async fn notifier(
-        self,
+impl Receiver {
+    /// Listen for notifications on channels
+    pub async fn listen(
+        &self,
         channels: impl Iterator<Item = &str>,
-    ) -> Result<(Notifier, UnboundedReceiver<Notification>)> {
+    ) -> Result<()> {
+        for channel in channels {
+            self.client
+                .execute(&format!("LISTEN {channel}"), &[])
+                .await?;
+        }
+        Ok(())
+    }
+
+    /// Receive one notification
+    pub async fn recv(&mut self) -> Option<Notification> {
+        self.rx.recv().await
+    }
+
+    /// Check if channel is empty
+    pub fn is_empty(&self) -> bool {
+        self.rx.is_empty()
+    }
+}
+
+impl Database {
+    /// Create a new notifier / receiver
+    pub async fn notifier(self) -> Result<(Notifier, Receiver)> {
         let (client, conn) = self.dedicated_client().await?;
         let (tx, rx) = unbounded_channel();
-        for channel in channels {
-            client.execute(&format!("LISTEN {channel}"), &[]).await?;
-        }
-        let not = Notifier { client, conn, tx };
-        Ok((not, rx))
+        let not = Notifier { conn, tx };
+        let rcv = Receiver { client, rx };
+        Ok((not, rcv))
     }
 }

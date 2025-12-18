@@ -65,15 +65,15 @@ struct CommLinkTask {
 
 /// Poll comm links
 async fn poll_comm_links(db: Database) -> Result<()> {
-    let (notifier, mut stream) = db
-        .clone()
-        .notifier(
-            ["comm_config", "comm_link", "controller", "detector"].into_iter(),
-        )
-        .await?;
+    let (notifier, mut receiver) = db.clone().notifier().await?;
     let mut tasks: HashMap<String, CommLinkTask> = HashMap::new();
     let mut set = JoinSet::new();
     set.spawn(notifier.run());
+    receiver
+        .listen(
+            ["comm_config", "comm_link", "controller", "detector"].into_iter(),
+        )
+        .await?;
     loop {
         let cfgs = CommLinkCfg::lookup_all(db.clone()).await?;
         if cfgs.is_empty() {
@@ -112,7 +112,7 @@ async fn poll_comm_links(db: Database) -> Result<()> {
                 tasks.insert(name, task);
             }
         }
-        while let Some(not) = stream.recv().await {
+        while let Some(not) = receiver.recv().await {
             if should_reload(&not, &cfgs) {
                 log::info!(
                     "{} {}: reloading configuration",
@@ -120,9 +120,9 @@ async fn poll_comm_links(db: Database) -> Result<()> {
                     not.payload()
                 );
                 tokio::time::sleep(Duration::from_secs(2)).await;
-                // Empty the notification stream
-                while !stream.is_empty() {
-                    stream.recv().await;
+                // Empty the notification receiver
+                while !receiver.is_empty() {
+                    receiver.recv().await;
                 }
                 break;
             }
