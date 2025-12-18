@@ -158,6 +158,11 @@ impl CommLinkCfg {
         self.long_per_s
     }
 
+    /// Get controller
+    pub fn controller(&self) -> &str {
+        &self.controller
+    }
+
     /// Set user name
     pub fn with_user(mut self, user: &str) -> Self {
         self.user = Some(user.to_string());
@@ -178,6 +183,11 @@ impl CommLinkCfg {
     /// Get password
     pub fn password(&self) -> Option<&str> {
         self.password.as_deref()
+    }
+
+    /// Check if configuration has a detector
+    pub fn has_detector(&self, det_id: &str) -> bool {
+        self.detectors.iter().any(|d| d == det_id)
     }
 
     /// Make detector hashmap

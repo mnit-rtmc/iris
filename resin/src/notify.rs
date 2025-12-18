@@ -14,13 +14,13 @@
 //
 use crate::database::Database;
 use crate::error::Result;
-use futures::Stream;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
+use tokio::sync::mpsc::{
+    UnboundedReceiver, UnboundedSender, unbounded_channel,
+};
 use tokio_postgres::tls::NoTlsStream;
 use tokio_postgres::{AsyncMessage, Client, Connection, Notification, Socket};
-use tokio_stream::wrappers::UnboundedReceiverStream;
 
 /// Handler for Postgres NOTIFY
 pub struct Notifier {
@@ -77,14 +77,13 @@ impl Database {
     pub async fn notifier(
         self,
         channels: impl Iterator<Item = &str>,
-    ) -> Result<(Notifier, impl Stream<Item = Notification> + Unpin)> {
+    ) -> Result<(Notifier, UnboundedReceiver<Notification>)> {
         let (client, conn) = self.dedicated_client().await?;
         let (tx, rx) = unbounded_channel();
         for channel in channels {
             client.execute(&format!("LISTEN {channel}"), &[]).await?;
         }
         let not = Notifier { client, conn, tx };
-        let stream = Box::pin(UnboundedReceiverStream::new(rx));
-        Ok((not, stream))
+        Ok((not, rx))
     }
 }

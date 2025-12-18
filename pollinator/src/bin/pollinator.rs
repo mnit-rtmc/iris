@@ -15,8 +15,8 @@ use pollinator::CommLinkCfg;
 use resin::{Database, Error, Result};
 use std::collections::HashMap;
 use tokio::task::{AbortHandle, JoinSet};
-use tokio::time::{Duration, interval};
-use tokio_stream::StreamExt;
+use tokio::time::Duration;
+use tokio_postgres::Notification;
 
 /// Command-line arguments
 #[derive(FromArgs)]
@@ -84,12 +84,14 @@ async fn poll_comm_links(db: Database) -> Result<()> {
                 Some(cfg) => {
                     let changed = *cfg != task.cfg;
                     if changed {
+                        log::info!("{name}: changed, aborting");
                         // comm link changed: abort task
                         task.handle.abort();
                     }
                     !changed
                 }
                 None => {
+                    log::info!("{name}: removed, aborting");
                     // no comm link: abort task
                     task.handle.abort();
                     false
@@ -97,19 +99,54 @@ async fn poll_comm_links(db: Database) -> Result<()> {
             }
         });
         // spawn tasks for new comm links
-        for cfg in cfgs {
+        for cfg in &cfgs {
             if !tasks.contains_key(cfg.name()) {
                 let name = cfg.name().to_string();
                 let db = Some(db.clone());
+                log::info!("{name}: spawning");
                 let handle = set.spawn(cfg.clone().run(db));
-                let task = CommLinkTask { cfg, handle };
+                let task = CommLinkTask {
+                    cfg: cfg.clone(),
+                    handle,
+                };
                 tasks.insert(name, task);
             }
         }
-        let _not = stream.next().await;
-        // FIXME: check notification channel / payload
+        while let Some(not) = stream.recv().await {
+            if should_reload(&not, &cfgs) {
+                log::info!(
+                    "{} {}: reloading configuration",
+                    not.channel(),
+                    not.payload()
+                );
+                tokio::time::sleep(Duration::from_secs(2)).await;
+                // Empty the notification stream
+                while !stream.is_empty() {
+                    stream.recv().await;
+                }
+                break;
+            }
+        }
     }
     Ok(())
+}
+
+/// Check if a notification should trigger reloading the configuration
+fn should_reload(not: &Notification, cfgs: &[CommLinkCfg]) -> bool {
+    // FIXME: comm_link "connected" / controller "fail_time" should not reload
+    match (not.channel(), not.payload()) {
+        ("comm_config", _) => true,
+        ("comm_link", nm) => {
+            nm.is_empty() || cfgs.iter().any(|c| c.name() == nm)
+        }
+        ("controller", nm) => {
+            nm.is_empty() || cfgs.iter().any(|c| c.controller() == nm)
+        }
+        ("detector", nm) => {
+            nm.is_empty() || cfgs.iter().any(|c| c.has_detector(nm))
+        }
+        _ => false,
+    }
 }
 
 /// Main entry point
@@ -124,9 +161,6 @@ async fn main() -> Result<()> {
     let db = Database::new("tms").await?;
     loop {
         poll_comm_links(db.clone()).await?;
-        let mut ticker = interval(Duration::from_secs(60));
-        // apparently, the first tick completes immediately
-        ticker.tick().await;
-        ticker.tick().await;
+        tokio::time::sleep(Duration::from_secs(60)).await;
     }
 }

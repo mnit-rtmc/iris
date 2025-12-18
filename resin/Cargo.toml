@@ -8,7 +8,6 @@ edition.workspace = true
 [dependencies]
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
-futures = { workspace = true }
 hyper = { version = "1.8", features = ["client", "http1"] }
 jiff = "0.2.16"
 log = { workspace = true }
