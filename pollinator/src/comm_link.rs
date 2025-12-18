@@ -120,9 +120,6 @@ impl CommLinkCfg {
             let cfg: CommLinkCfg = serde_json::from_str(&json)?;
             cfgs.push(cfg);
         }
-        if cfgs.is_empty() {
-            log::warn!("no comm links configured");
-        }
         Ok(cfgs)
     }
 
@@ -208,14 +205,21 @@ impl CommLinkCfg {
             log::info!("{}: connecting", &self.name);
             let res = try_run_link(&self, db.clone()).await;
             log::info!("{}: disconnected", &self.name);
-            if let Err(Error::Bb8(_) | Error::Postgres(_)) = res {
-                log::warn!("{}: database error", &self.name);
-                return res;
+            match &res {
+                Err(Error::Bb8(err)) => {
+                    log::warn!("{}: pool {err}", &self.name);
+                    return res;
+                }
+                Err(Error::Postgres(err)) => {
+                    log::warn!("{}: postgres {err}", &self.name);
+                    return res;
+                }
+                _ => (),
             }
             self.log_disconnect(&db).await?;
             match res {
                 Err(Error::StreamDisconnected) => (),
-                Err(err) => log::warn!("{}: {err:?}", &self.name),
+                Err(err) => log::warn!("{}: {err}", &self.name),
                 _ => (),
             }
         }

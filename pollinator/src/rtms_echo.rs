@@ -83,6 +83,8 @@ struct VehicleData {
 struct Zone {
     /// Zone identifier
     id: u32,
+    /// Controller pin
+    pin: usize,
     /// Observation direction
     direction: Option<ObsDirection>,
     /// Vehicle event log writer
@@ -119,9 +121,10 @@ impl VehicleData {
 
 impl Zone {
     /// Create a new zone
-    fn new(id: u32) -> Self {
+    fn new(id: u32, pin: usize) -> Self {
         Zone {
             id,
+            pin,
             direction: None,
             vlg_writer: None,
         }
@@ -141,7 +144,7 @@ impl Zone {
                 };
                 vlg_writer.append(&ev).await?;
             }
-            None => log::warn!("No log for zone: {}", self.id),
+            None => log::warn!("{}: No detector on pin {}", self.id, self.pin),
         }
         Ok(())
     }
@@ -201,16 +204,16 @@ impl Sensor {
         let zones = self.poll_zone_identifiers().await?;
         self.zones = Vec::with_capacity(zones.len());
         for (i, zone) in zones.iter().enumerate() {
-            let mut zone = Zone::new(zone.id);
             let pin = i + 1;
+            let mut zone = Zone::new(zone.id, pin);
             match dets.get(&pin) {
                 Some(det) => {
                     let vlg_writer = VehEventWriter::new(det).await?;
                     zone.vlg_writer = Some(vlg_writer);
-                    log::info!("pin #{pin}, zone: {}, det: {det}", zone.id);
+                    log::debug!("pin #{pin}, zone: {}, det: {det}", zone.id);
                 }
                 None => {
-                    log::info!("pin #{pin}, zone: {}, NO detector", zone.id)
+                    log::debug!("pin #{pin}, zone: {}, NO detector", zone.id)
                 }
             }
             self.zones.push(zone);
@@ -266,7 +269,7 @@ impl Sensor {
             .into_client_request()?;
         let (stream, res) = connect_async(req).await?;
         match res.into_body() {
-            Some(body) => log::warn!("{}", String::from_utf8(body)?),
+            Some(body) => log::warn!("resp: {}", String::from_utf8(body)?),
             None => log::info!("WebSocket connected, waiting..."),
         }
         let (sink, stream) = stream.split();
@@ -283,7 +286,7 @@ impl Sensor {
         while let Some(msg) = stream.next().await {
             match msg? {
                 Message::Text(bytes) => {
-                    log::info!("TEXT: {} bytes", bytes.len());
+                    log::debug!("TEXT: {} bytes", bytes.len());
                     let data = bytes.as_str();
                     // split JSON objects on ending brace
                     for ev in data.split_inclusive('}') {
@@ -292,13 +295,13 @@ impl Sensor {
                     }
                 }
                 Message::Binary(bytes) => {
-                    log::info!("BINARY: {} bytes", bytes.len());
+                    log::debug!("BINARY: {} bytes, ignoring", bytes.len());
                 }
                 Message::Ping(bytes) => {
-                    log::info!("PING: {} bytes", bytes.len());
+                    log::debug!("PING: {} bytes", bytes.len());
                 }
                 Message::Pong(bytes) => {
-                    log::info!("PONG: {} bytes", bytes.len());
+                    log::debug!("PONG: {} bytes", bytes.len());
                 }
                 _ => (),
             }
@@ -325,7 +328,7 @@ async fn send_pings(
     ticker.set_missed_tick_behavior(MissedTickBehavior::Skip);
     loop {
         ticker.tick().await;
-        log::info!("Sending PING");
+        log::debug!("sending PING");
         let msg = Message::Ping(Bytes::new());
         sink.send(msg).await?;
     }

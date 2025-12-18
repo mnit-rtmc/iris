@@ -76,6 +76,9 @@ async fn poll_comm_links(db: Database) -> Result<()> {
         .await?;
     loop {
         let cfgs = CommLinkCfg::lookup_all(db.clone()).await?;
+        if cfgs.is_empty() {
+            log::warn!("no comm links configured");
+        }
         tasks.retain(|name, task| {
             match cfgs.iter().find(|cfg| cfg.name() == name) {
                 Some(cfg) => {
@@ -112,12 +115,12 @@ async fn poll_comm_links(db: Database) -> Result<()> {
         // wait for any configuration change
         while let Some(not) = receiver.recv().await {
             if should_reload(&not, &cfgs) {
-                log::info!(
-                    "{} {}: reloading configuration",
+                log::debug!(
+                    "reloading configuration: {} {}",
                     not.channel(),
                     not.payload()
                 );
-                tokio::time::sleep(Duration::from_secs(2)).await;
+                tokio::time::sleep(Duration::from_secs(5)).await;
                 // Empty the notification receiver
                 while !receiver.is_empty() {
                     receiver.recv().await;

@@ -97,8 +97,8 @@ impl Client {
 async fn parse_response(mut res: Response<Incoming>) -> Result<Vec<u8>> {
     let status = res.status();
     if !status.is_success() {
-        log::warn!("Status: {status:?}");
-        log::warn!("Headers: {:#?}", res.headers());
+        log::debug!("status: {status:?}");
+        log::debug!("headers: {:#?}", res.headers());
         return Err(Error::HttpStatus(status));
     }
 
