@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import us.mn.state.dot.sonar.SonarException;
@@ -361,7 +362,19 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	/** Choose the planned action */
 	@Override
 	public PlannedAction choosePlannedAction() {
-		PlannedAction pa = super.choosePlannedAction();
+		// Same as in DeviceImpl, but doesn't remove actions if condition is false
+		// Specific handling necessary to allow plan to undeploy
+		PlannedAction pa = null;
+		Iterator<PlannedAction> it =
+			planned_actions.descendingIterator();
+		while (it.hasNext()) {
+			pa = it.next();
+			if (checkPlannedAction(pa))
+				break;
+			else
+				pa = null;
+		}
+
 		if (!planned_actions.isEmpty()) {
 			BeaconState bs = (pa != null)
 				? BeaconState.FLASHING_REQ
