@@ -449,10 +449,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Check if gate arms are operatable, or none associated with plan */
 	private void checkGateArmsOperatable() throws ChangeVetoException {
+		if (ActionPlanHelper.countGateArms(this) < 1)
+			return;
 		Name name = new Name(GateArm.SONAR_TYPE, "oname", "lock");
-		if (accessLevel(name) < name.accessWrite() &&
-		    ActionPlanHelper.countGateArms(this) > 0)
-		{
+		if (accessLevel(name) < name.accessWrite()) {
 			throw new ChangeVetoException("Device action " +
 				"not allowed for gate arms");
 		}
