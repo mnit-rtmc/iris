@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public class ReaperJob extends Job {
 		return secs * (long) 1000;
 	}
 
-	/** Seconds to offset each poll from start of interval */
+	/** Seconds to offset each iteration from start of interval */
 	static private final int OFFSET_SECS = 27;
 
 	/** List of sign messages */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -269,7 +269,6 @@ public class MainServer {
 		TIMER.addJob(new ParkingAreaJob());
 		TIMER.addJob(new TimeActionJob(TIMER));
 		TIMER.addJob(new ActionPlanPhaseJob());
-		TIMER.addJob(new ReaperJob());
 	}
 
 	/** Schedule jobs on FLUSH thread */
@@ -284,6 +283,7 @@ public class MainServer {
 		FLUSH.addJob(new IncidentXmlJob());
 		FLUSH.addJob(new WeatherSensorXmlJob());
 		FLUSH.addJob(new EventPurgeJob());
+		FLUSH.addJob(new ReaperJob());
 	}
 
 	/** Start the protocol server */
