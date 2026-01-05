@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,55 +14,27 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 
 /**
- * Job to calculate station data and ramp metering.
+ * Job to calculate ramp meter rates.
  *
  * @author Douglas Lau
  */
 public class MeteringJob extends Job {
 
-	/** Seconds to offset from start of interval.
-	 *
-	 * This must be *after* binned detector data has been collected, to
-	 * enable station data calculation. */
-	static private final int OFFSET_SECS = 26;
-
-	/** FLUSH Scheduler for writing XML (I/O to disk) */
-	private final Scheduler flush;
-
-	/** Station manager */
-	private final StationManager station_manager;
-
-	/** Job to be performed after data has been processed */
-	private final FlushXmlJob flush_job;
-
 	/** Create a new metering job */
-	public MeteringJob(Scheduler f) {
-		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
-		flush = f;
-		station_manager = new StationManager();
-		flush_job = new FlushXmlJob(station_manager);
+	public MeteringJob() {
+		super(0);
 	}
 
 	/** Perform the metering job */
 	@Override
 	public void perform() {
-		try {
-			station_manager.calculateData();
-			// Perform flush job after station data calculated
-			flush.addJob(flush_job);
-			BaseObjectImpl.corridors.findBottlenecks();
-		}
-		finally {
-			validateMetering();
-		}
+		validateMetering();
 	}
 
 	/** Validate all metering algorithms */

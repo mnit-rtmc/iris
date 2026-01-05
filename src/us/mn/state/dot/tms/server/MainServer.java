@@ -261,13 +261,13 @@ public class MainServer {
 
 	/** Schedule jobs on TIMER thread */
 	static private void scheduleTimerJobs() {
-		TIMER.addJob(new MeteringJob(FLUSH));
+		TIMER.addJob(new StationDataJob(FLUSH));
 		TIMER.addJob(new LockExpireJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new TollZoneJob());
 		TIMER.addJob(new ParkingAreaJob());
-		TIMER.addJob(new TimeActionJob(TIMER));
+		TIMER.addJob(new TimeActionJob());
 		TIMER.addJob(new ActionPlanPhaseJob());
 	}
 
