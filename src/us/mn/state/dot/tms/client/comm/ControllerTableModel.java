@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2025  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,7 +166,10 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			Long.class)
 		{
 			public Object getValueAt(Controller c) {
-				return c.getFailTime();
+				if (!ControllerHelper.isPollinator(c))
+					return c.getFailTime();
+				else
+					return null;
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new TimeCellRenderer();
