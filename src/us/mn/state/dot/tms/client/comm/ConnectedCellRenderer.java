@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2022  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,25 +14,33 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
-import java.awt.Color;
 import java.awt.Component;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
  * Renderer for connected status in a table cell.
+ *
+ * NOTE: Null indicates the comm link is handled by `pollinator`.
  *
  * @author Douglas Lau
  */
 public class ConnectedCellRenderer extends DefaultTableCellRenderer {
 
 	/** Icon for OK status */
-	static private final Icon OK = new CommLinkIcon(Color.BLUE);
+	static private final Icon OK = new CommLinkIcon(
+		ProxyTheme.COLOR_AVAILABLE);
 
 	/** Icon for FAIL status */
-	static private final Icon FAIL = new CommLinkIcon(Color.GRAY);
+	static private final Icon FAIL = new CommLinkIcon(
+		ProxyTheme.COLOR_OFFLINE);
+
+	/** Icon for POLLINATOR status */
+	static private final Icon POLLINATOR = new CommLinkIcon(
+		ProxyTheme.COLOR_POLLINATOR);
 
 	/** Get the renderer component */
 	@Override
@@ -43,7 +51,7 @@ public class ConnectedCellRenderer extends DefaultTableCellRenderer {
 		JLabel label = (JLabel) super.getTableCellRendererComponent(
 			table, "", isSelected, hasFocus, row, column);
 		if (value == null)
-			label.setIcon(null);
+			label.setIcon(POLLINATOR);
 		else if (Boolean.TRUE.equals(value))
 			label.setIcon(OK);
 		else
