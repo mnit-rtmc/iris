@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2024  Minnesota Department of Transportation
+ * Copyright (C) 2006-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,8 +45,8 @@ public class LdapProvider {
 		env.put(Context.INITIAL_CONTEXT_FACTORY,
 			"com.sun.jndi.ldap.LdapCtxFactory");
 		env.put(Context.PROVIDER_URL, url);
-		env.put("com.sun.jndi.ldap.connect.timeout", "5000");
-		env.put("com.sun.jndi.ldap.read.timeout", "5000");
+		env.put("com.sun.jndi.ldap.connect.timeout", "4000");
+		env.put("com.sun.jndi.ldap.read.timeout", "4000");
 		if (url.startsWith("ldaps")) {
 			env.put(Context.SECURITY_PROTOCOL, "ssl");
 			env.put("java.naming.ldap.factory.socket",

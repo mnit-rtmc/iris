@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2022  Minnesota Department of Transportation
+ * Copyright (C) 2006-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,8 +61,7 @@ public class SSLState {
 	}
 
 	/** Get an array of protocol versions to enable */
-	static private String[] getProtocols(SSLEngine engine,
-			String regex) {
+	static private String[] getProtocols(SSLEngine engine, String regex) {
 		ArrayList<String> protocols = new ArrayList<String>();
 		for (String sp: engine.getSupportedProtocols()) {
 			if (sp.matches(regex)) {

@@ -1,6 +1,6 @@
 // sonar.rs
 //
-// Copyright (C) 2021-2024  Minnesota Department of Transportation
+// Copyright (C) 2021-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -334,7 +334,7 @@ impl Messenger {
         let tls_stream = connector.connect(domain, tcp_stream).await?;
         Ok(Messenger {
             tls_stream,
-            timeout: Duration::from_secs(5),
+            timeout: Duration::from_secs(6),
             rx_buf: vec![0; 32_768],
             offset: 0,
             count: 0,
