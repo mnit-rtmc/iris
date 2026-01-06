@@ -14,33 +14,19 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
-import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
  * Renderer for connected status in a table cell.
  *
- * NOTE: Null indicates the comm link is handled by `pollinator`.
- *
  * @author Douglas Lau
  */
 public class ConnectedCellRenderer extends DefaultTableCellRenderer {
-
-	/** Icon for OK status */
-	static private final Icon OK = new CommLinkIcon(
-		ProxyTheme.COLOR_AVAILABLE);
-
-	/** Icon for FAIL status */
-	static private final Icon FAIL = new CommLinkIcon(
-		ProxyTheme.COLOR_OFFLINE);
-
-	/** Icon for POLLINATOR status */
-	static private final Icon POLLINATOR = new CommLinkIcon(
-		ProxyTheme.COLOR_POLLINATOR);
 
 	/** Get the renderer component */
 	@Override
@@ -48,14 +34,12 @@ public class ConnectedCellRenderer extends DefaultTableCellRenderer {
 		Object value, boolean isSelected, boolean hasFocus,
 		int row, int column)
 	{
-		JLabel label = (JLabel) super.getTableCellRendererComponent(
+		JLabel lbl = (JLabel) super.getTableCellRendererComponent(
 			table, "", isSelected, hasFocus, row, column);
-		if (value == null)
-			label.setIcon(POLLINATOR);
-		else if (Boolean.TRUE.equals(value))
-			label.setIcon(OK);
-		else
-			label.setIcon(FAIL);
-		return label;
+		Color c = Color.BLACK;
+		if (value instanceof CommState)
+			c = ((CommState) value).color;
+		lbl.setIcon(new CommLinkIcon(c));
+		return lbl;
 	}
 }

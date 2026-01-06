@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2025  Minnesota Department of Transportation
+ * Copyright (C) 2014-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,12 +28,12 @@ public enum CommState {
 	OFFLINE    (ProxyTheme.COLOR_OFFLINE),
 	POLLINATOR (ProxyTheme.COLOR_POLLINATOR);
 
-	/** Icon for the comm state */
-	public final ControllerIcon icon;
+	/** Color for the comm state */
+	public final Color color;
 
 	/** Create a comm state */
 	private CommState(Color c) {
-		icon = new ControllerIcon(c);
+		color = c;
 	}
 
 	/** Get values with null as first */

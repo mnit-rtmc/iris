@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -32,13 +33,12 @@ public class CommCellRenderer extends DefaultTableCellRenderer {
 		Object value, boolean isSelected, boolean hasFocus,
 		int row, int col)
 	{
-		JLabel lbl = (JLabel)super.getTableCellRendererComponent(table,
-			"", isSelected, hasFocus, row, col);
-		if (value instanceof CommState) {
-			CommState cs = (CommState)value;
-			lbl.setIcon(cs.icon);
-		} else
-			lbl.setIcon(null);
+		JLabel lbl = (JLabel) super.getTableCellRendererComponent(
+			table, "", isSelected, hasFocus, row, col);
+		Color c = Color.BLACK;
+		if (value instanceof CommState)
+			c = ((CommState) value).color;
+		lbl.setIcon(new ControllerIcon(c));
 		return lbl;
 	}
 }
