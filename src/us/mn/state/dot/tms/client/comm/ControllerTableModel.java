@@ -67,16 +67,16 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 		};
 	}
 
-	/** Get a controller comm state */
-	static private CommState getCommState(Controller c) {
+	/** Get a controller connect state */
+	static private ConnectState getConnectState(Controller c) {
 		if (!ControllerHelper.isActive(c))
-			return CommState.INACTIVE;
+			return ConnectState.INACTIVE;
 		else if (ControllerHelper.isPollinator(c))
-			return CommState.POLLINATOR;
+			return ConnectState.POLLINATOR;
 		else if (ControllerHelper.isOffline(c))
-			return CommState.OFFLINE;
+			return ConnectState.OFFLINE;
 		else
-			return CommState.OK;
+			return ConnectState.OK;
 	}
 
 	/** Special value for unused drop */
@@ -145,11 +145,11 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 				return new DefaultCellEditor(cbx);
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.comm", 32,
-			CommState.class)
+		cols.add(new ProxyColumn<Controller>("controller.connect", 32,
+			ConnectState.class)
 		{
 			public Object getValueAt(Controller c) {
-				return getCommState(c);
+				return getConnectState(c);
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new CommCellRenderer();
@@ -198,12 +198,12 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 		condition = c;
 	}
 
-	/** Comm state filter */
-	private CommState comm_state = null;
+	/** Connect state filter */
+	private ConnectState connect_state = null;
 
-	/** Set the comm state filter */
-	public void setCommState(CommState cs) {
-		comm_state = cs;
+	/** Set the connect state filter */
+	public void setConnectState(ConnectState cs) {
+		connect_state = cs;
 	}
 
 	/** Get a proxy comparator */
@@ -248,7 +248,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	private boolean isFiltered() {
 		return (comm_link != null)
 		    || (condition != null)
-		    || (comm_state != null);
+		    || (connect_state != null);
 	}
 
 	/** Create a row filter */
@@ -263,7 +263,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 				return (c != null)
 				    && isMatchingLink(c)
 				    && isMatchingCondition(c)
-				    && isMatchingCommState(c);
+				    && isMatchingConnectState(c);
 			}
 		};
 	}
@@ -280,10 +280,10 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 		    || (condition.ordinal() == c.getCondition());
 	}
 
-	/** Check if comm state matches filter */
-	private boolean isMatchingCommState(Controller c) {
-		return (comm_state == null)
-		    || (comm_state == getCommState(c));
+	/** Check if connect state matches filter */
+	private boolean isMatchingConnectState(Controller c) {
+		return (connect_state == null)
+		    || (connect_state == getConnectState(c));
 	}
 
 	/** Check if the user can add a controller */

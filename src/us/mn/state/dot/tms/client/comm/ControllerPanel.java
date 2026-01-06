@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2020  Minnesota Department of Transportation
+ * Copyright (C) 2014-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,23 +54,24 @@ public class ControllerPanel extends ProxyTablePanel<Controller> {
 	private final JComboBox<CtrlCondition> cond_cbx =
 		new JComboBox<CtrlCondition>(CtrlCondition.values_with_null());
 
-	/** Comm filter label */
-	private final ILabel comm_lbl = new ILabel("controller.comm.filter");
+	/** Connect filter label */
+	private final ILabel connect_lbl =
+		new ILabel("controller.connect.filter");
 
-	/** Comm filter action */
-	private final IAction comm_act = new IAction("controller.comm") {
+	/** Connect filter action */
+	private final IAction connect_act = new IAction("controller.connect") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object v = comm_cbx.getSelectedItem();
-			if (v instanceof CommState)
-				setCommState((CommState)v);
+			Object v = connect_cbx.getSelectedItem();
+			if (v instanceof ConnectState)
+				setConnectState((ConnectState) v);
 			else
-				setCommState(null);
+				setConnectState(null);
 		}
 	};
 
-	/** Comm state combo box */
-	private final JComboBox<CommState> comm_cbx =
-		new JComboBox<CommState>(CommState.values_with_null());
+	/** Connect state combo box */
+	private final JComboBox<ConnectState> connect_cbx =
+		new JComboBox<ConnectState>(ConnectState.values_with_null());
 
 	/** Create a new controller panel */
 	public ControllerPanel(Session s) {
@@ -82,8 +83,8 @@ public class ControllerPanel extends ProxyTablePanel<Controller> {
 	public void initialize() {
 		super.initialize();
 		cond_cbx.setAction(cond_act);
-		comm_cbx.setRenderer(new CommListRenderer());
-		comm_cbx.setAction(comm_act);
+		connect_cbx.setRenderer(new CommListRenderer());
+		connect_cbx.setAction(connect_act);
 	}
 
 	/** Add create/delete widgets to the button panel */
@@ -97,11 +98,11 @@ public class ControllerPanel extends ProxyTablePanel<Controller> {
 		hg.addComponent(cond_cbx);
 		vg.addComponent(cond_cbx);
 		hg.addGap(UI.hgap);
-		hg.addComponent(comm_lbl);
-		vg.addComponent(comm_lbl);
+		hg.addComponent(connect_lbl);
+		vg.addComponent(connect_lbl);
 		hg.addGap(UI.hgap);
-		hg.addComponent(comm_cbx);
-		vg.addComponent(comm_cbx);
+		hg.addComponent(connect_cbx);
+		vg.addComponent(connect_cbx);
 		hg.addGap(UI.hgap);
 		super.addCreateDeleteWidgets(hg, vg);
 	}
@@ -124,11 +125,11 @@ public class ControllerPanel extends ProxyTablePanel<Controller> {
 		}
 	}
 
-	/** Set comm state filter */
-	private void setCommState(CommState cs) {
+	/** Set connect state filter */
+	private void setConnectState(ConnectState cs) {
 		if (model instanceof ControllerTableModel) {
-			ControllerTableModel mdl = (ControllerTableModel)model;
-			mdl.setCommState(cs);
+			ControllerTableModel mdl = (ControllerTableModel) model;
+			mdl.setConnectState(cs);
 			updateSortFilter();
 		}
 	}

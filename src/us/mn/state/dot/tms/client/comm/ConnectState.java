@@ -18,27 +18,27 @@ import java.awt.Color;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
- * Comm state enumeration.
+ * Connect state enumeration.
  *
  * @author Douglas Lau
  */
-public enum CommState {
+public enum ConnectState {
 	INACTIVE   (ProxyTheme.COLOR_INACTIVE),
 	OK         (ProxyTheme.COLOR_AVAILABLE),
 	OFFLINE    (ProxyTheme.COLOR_OFFLINE),
 	POLLINATOR (ProxyTheme.COLOR_POLLINATOR);
 
-	/** Color for the comm state */
+	/** Color for the connect state */
 	public final Color color;
 
-	/** Create a comm state */
-	private CommState(Color c) {
+	/** Create a connect state */
+	private ConnectState(Color c) {
 		color = c;
 	}
 
 	/** Get values with null as first */
-	static public CommState[] values_with_null() {
-		return new CommState[] {
+	static public ConnectState[] values_with_null() {
+		return new ConnectState[] {
 			null,
 			INACTIVE,
 			OK,

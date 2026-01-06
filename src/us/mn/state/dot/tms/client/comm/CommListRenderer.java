@@ -29,7 +29,7 @@ public class CommListRenderer extends DefaultListCellRenderer {
 
 	/** Get cell value as text */
 	static private String valueText(Object value) {
-		if (value instanceof CommState)
+		if (value instanceof ConnectState)
 			return value.toString();
 		else
 			return " ";
@@ -43,8 +43,8 @@ public class CommListRenderer extends DefaultListCellRenderer {
 		JLabel lbl = (JLabel) super.getListCellRendererComponent(list,
 			valueText(value), index, isSelected, hasFocus);
 		Color c = Color.BLACK;
-		if (value instanceof CommState)
-			c = ((CommState) value).color;
+		if (value instanceof ConnectState)
+			c = ((ConnectState) value).color;
 		lbl.setIcon(new ControllerIcon(c));
 		return lbl;
 	}

@@ -78,19 +78,19 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 			return value;
 	}
 
-	/** Get a comm link state */
-	static private CommState getCommState(CommLink cl) {
+	/** Get link connect state */
+	static private ConnectState getConnectState(CommLink cl) {
 		if (cl == null || !cl.getPollEnabled())
-			return CommState.INACTIVE;
+			return ConnectState.INACTIVE;
 		CommConfig cc = cl.getCommConfig();
 		if (cc == null)
-			return CommState.INACTIVE;
+			return ConnectState.INACTIVE;
 		if (cc.getPollinator())
-			return CommState.POLLINATOR;
+			return ConnectState.POLLINATOR;
 		if (cl.getConnected())
-			return CommState.OK;
+			return ConnectState.OK;
 		else
-			return CommState.OFFLINE;
+			return ConnectState.OFFLINE;
 	}
 
 	/** Create a proxy descriptor */
@@ -148,10 +148,10 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 			}
 		});
 		cols.add(new ProxyColumn<CommLink>("comm.link.connected", 50,
-			CommState.class)
+			ConnectState.class)
 		{
 			public Object getValueAt(CommLink cl) {
-				return getCommState(cl);
+				return getConnectState(cl);
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new ConnectedCellRenderer();

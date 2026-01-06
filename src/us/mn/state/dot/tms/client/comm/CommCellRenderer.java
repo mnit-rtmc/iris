@@ -36,8 +36,8 @@ public class CommCellRenderer extends DefaultTableCellRenderer {
 		JLabel lbl = (JLabel) super.getTableCellRendererComponent(
 			table, "", isSelected, hasFocus, row, col);
 		Color c = Color.BLACK;
-		if (value instanceof CommState)
-			c = ((CommState) value).color;
+		if (value instanceof ConnectState)
+			c = ((ConnectState) value).color;
 		lbl.setIcon(new ControllerIcon(c));
 		return lbl;
 	}
