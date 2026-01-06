@@ -36,6 +36,7 @@ update, and is caused by one of these conditions:
 `camera`           | ☑️   | ☑️   |     |
 `camera_publish` † |     |     |     |
 `camera_preset`    |     |     |     |
+`comm` †           |     |     |     |
 `comm_config`      |     |     |     |
 `comm_link`        |     |     |     |
 `controller`       | ☑️   |     |     |
@@ -83,7 +84,10 @@ update, and is caused by one of these conditions:
 `weather_sensor`   | ☑️   | ☑️   |     |
 `word`             |     |     |     |
 
-† _Notifies only on `UPDATE` to 'publish' attribute, with camera name payload_
+† Special channels:
+- `camera_publish`: _On `UPDATE` to 'publish', with camera name payload_
+- `comm`: _On `UPDATE` to `comm_link` 'connected' or `controller` 'comm_state',
+          with name payload_
 
 ## Backup & Restore
 

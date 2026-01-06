@@ -11,12 +11,12 @@ A **comm link** is a network connection to field [device]s or external system
 * `iris/api/comm_link` (primary)
 * `iris/api/comm_link/{name}`
 
-| Access       | Primary           |
-|--------------|-------------------|
-| 👁️  View      | name, connected   |
-| 👉 Operate   | poll\_enabled     |
-| 💡 Manage    | description       |
-| 🔧 Configure | uri, comm\_config |
+| Access       | Primary           | Secondary |
+|--------------|-------------------|-----------|
+| 👁️  View      | name              | connected |
+| 👉 Operate   | poll\_enabled     |           |
+| 💡 Manage    | description       |           |
+| 🔧 Configure | uri, comm\_config |           |
 
 </details>
 
