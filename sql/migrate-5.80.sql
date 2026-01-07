@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.79.0', '5.80.0');
+
 -- Add comm_state to comm_event
 DROP VIEW comm_event_view;
 DROP TABLE event.comm_event;
@@ -194,5 +196,59 @@ CREATE VIEW comm_event_view AS
     JOIN iris.comm_state cs ON e.comm_state = cs.id
     LEFT JOIN iris.controller c ON e.controller = c.name;
 GRANT SELECT ON comm_event_view TO PUBLIC;
+
+-- Update triggers for "comm" channel
+CREATE OR REPLACE FUNCTION iris.comm_link_notify() RETURNS TRIGGER AS
+    $comm_link_notify$
+BEGIN
+    IF (NEW.description IS DISTINCT FROM OLD.description) OR
+       (NEW.uri IS DISTINCT FROM OLD.uri) OR
+       (NEW.poll_enabled IS DISTINCT FROM OLD.poll_enabled) OR
+       (NEW.comm_config IS DISTINCT FROM OLD.comm_config)
+    THEN
+        NOTIFY comm_link;
+    ELSE
+        PERFORM pg_notify('comm_link', NEW.name);
+    END IF;
+    IF (NEW.connected IS DISTINCT FROM OLD.connected) THEN
+        -- notify "comm" channel on connected change
+        PERFORM pg_notify('comm', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$comm_link_notify$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION iris.controller_notify() RETURNS TRIGGER AS
+    $controller_notify$
+BEGIN
+    IF (NEW.drop_id IS DISTINCT FROM OLD.drop_id) OR
+       (NEW.comm_link IS DISTINCT FROM OLD.comm_link) OR
+       (NEW.cabinet_style IS DISTINCT FROM OLD.cabinet_style) OR
+       (NEW.condition IS DISTINCT FROM OLD.condition) OR
+       (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.setup IS DISTINCT FROM OLD.setup)
+    THEN
+        NOTIFY controller;
+    ELSE
+        PERFORM pg_notify('controller', NEW.name);
+    END IF;
+    IF (NEW.comm_state IS DISTINCT FROM OLD.comm_state) THEN
+        -- notify "comm" channel on comm_state change
+        PERFORM pg_notify('comm', NEW.name);
+    END IF;
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$controller_notify$ LANGUAGE plpgsql;
+
+-- DROP user_id from gate_arm_event
+DROP VIEW gate_arm_event_view;
+
+ALTER TABLE event.gate_arm_event DROP COLUMN user_id;
+
+CREATE VIEW gate_arm_event_view AS
+    SELECT ev.id, event_date, ed.description, device_id, fault
+    FROM event.gate_arm_event ev
+    JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
+GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
 COMMIT;
