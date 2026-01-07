@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,11 +40,13 @@ public class CommLinkIcon implements Icon {
 	static protected final float H35 = HEIGHT * 3.0f / 5;
 	static protected final float H15 = HEIGHT * 1.0f / 5;
 	static protected final float H45 = HEIGHT * 4.0f / 5;
-	protected final Color color;
-	protected final GeneralPath path = new GeneralPath();
 
-	public CommLinkIcon(Color c) {
-		color = c;
+	private final Color color;
+	private final GeneralPath path = new GeneralPath();
+
+	/** Create a comm link icon */
+	public CommLinkIcon(ConnectState cs) {
+		color = (cs != null) ? cs.color : Color.BLACK;
 		path.moveTo(0, H25);
 		path.lineTo(W25, H25);
 		path.curveTo(W25, H15, W25, H15, W2, 0);

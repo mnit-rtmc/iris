@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
-import java.awt.Color;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
@@ -42,10 +41,10 @@ public class CommListRenderer extends DefaultListCellRenderer {
 	{
 		JLabel lbl = (JLabel) super.getListCellRendererComponent(list,
 			valueText(value), index, isSelected, hasFocus);
-		Color c = Color.BLACK;
-		if (value instanceof ConnectState)
-			c = ((ConnectState) value).color;
-		lbl.setIcon(new ControllerIcon(c));
+		ConnectState cs = (value instanceof ConnectState)
+			? (ConnectState) value
+			: null;
+		lbl.setIcon(new ControllerIcon(cs));
 		return lbl;
 	}
 }

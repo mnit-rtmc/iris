@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,12 +45,14 @@ public class ControllerIcon implements Icon {
 	static protected final float H12 = HEIGHT / 12.0f;
 	static protected final float H20 = HEIGHT / 20.0f;
 	static protected final float H24 = HEIGHT / 24.0f;
-	protected final Color color;
-	protected final GeneralPath path =
+
+	private final Color color;
+	private final GeneralPath path =
 		new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 
-	public ControllerIcon(Color c) {
-		color = c;
+	/** Create a controller icon */
+	public ControllerIcon(ConnectState cs) {
+		color = (cs != null) ? cs.color : Color.BLACK;
 		path.moveTo(0, H1_5);
 		path.lineTo(WIDTH - H20, H1_5);
 		path.lineTo(WIDTH - H20, H4_5);
