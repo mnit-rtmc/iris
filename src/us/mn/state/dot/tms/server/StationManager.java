@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2024  Minnesota Department of Transportation
+ * Copyright (C) 2004-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,14 @@ class StationManager {
 	/** Name of station JSON file */
 	static private final String SAMPLE_JSON = "station_sample";
 
+	/** Period (ms) */
+	private final int per_ms;
+
+	/** Create a new station manager */
+	public StationManager(int per) {
+		per_ms = per;
+	}
+
 	/** Time stamp at end of interval */
 	private long stamp;
 
@@ -57,9 +65,8 @@ class StationManager {
 	}
 
 	/** Calculate the current data for all stations */
-	public void calculateData() {
-		int per_ms = DetectorImpl.BIN_PERIOD_MS;
-		stamp = DetectorImpl.calculateEndTime(per_ms);
+	public void calculateData(long st) {
+		stamp = st;
 		Iterator<Station> it = StationHelper.iterator();
 		while (it.hasNext()) {
 			Station s = it.next();
@@ -112,7 +119,6 @@ class StationManager {
 
 	/** Write the station data out as JSON */
 	private void writeSampleJson(BufferedWriter writer) throws IOException {
-		int per_ms = DetectorImpl.BIN_PERIOD_MS;
 		writer.write("{\n");
 		writer.write("\"time_stamp\":\"");
 		writer.write(RFC3339.format(new Date(stamp)));
@@ -161,7 +167,6 @@ class StationManager {
 
 	/** Print the body of the station XML file */
 	private void writeSampleXmlBody(Writer w) throws IOException {
-		int per_ms = DetectorImpl.BIN_PERIOD_MS;
 		Iterator<Station> it = StationHelper.iterator();
 		while (it.hasNext()) {
 			Station s = it.next();

@@ -59,6 +59,7 @@ Filename               | Description
 `prio`                 | Operation priority log
 `profile`              | System profiling log
 `reap`                 | Object reaper log
+`sensor_json`          | Sensor JSON from [pollinator]
 `slow`                 | DMS [slow traffic] warning system log
 `snmp`                 | SNMP error log
 `sonar`                | SONAR connection log
@@ -90,6 +91,7 @@ Filename               | Description
 [NTCIP]: protocols.html#ntcip
 [ORG-815]: protocols.html#org815
 [Pelco-D]: protocols.html#pelco-d
+[pollinator]: https://github.com/mnit-rtmc/iris/tree/master/pollinator
 [slow traffic]: slow_warning.html
 [station]: road_topology.html#r_node-types
 [SS105]: protocols.html#smartsensor

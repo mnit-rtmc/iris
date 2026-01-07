@@ -42,11 +42,15 @@ public class StationDataJob extends Job {
 	/** Job to be performed after data has been processed */
 	private final FlushXmlJob flush_job;
 
+	/** Period (ms) */
+	private final int per_ms;
+
 	/** Create a new station data job */
 	public StationDataJob(Scheduler f) {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
 		flush = f;
-		station_manager = new StationManager();
+		per_ms = DetectorImpl.BIN_PERIOD_MS;
+		station_manager = new StationManager(per_ms);
 		flush_job = new FlushXmlJob(station_manager);
 	}
 
@@ -54,8 +58,15 @@ public class StationDataJob extends Job {
 	@Override
 	public void perform() {
 		try {
-			// FIXME: read pollinator data
-			station_manager.calculateData();
+			long stamp = DetectorImpl.calculateEndTime(per_ms);
+			try {
+				// parse sensor data from pollinator
+				new LiveSensorParser(stamp);
+			}
+			catch (Exception e) {
+				// ignore errors
+			}
+			station_manager.calculateData(stamp);
 			// Perform flush job after station data calculated
 			flush.addJob(flush_job);
 			BaseObjectImpl.corridors.findBottlenecks();
