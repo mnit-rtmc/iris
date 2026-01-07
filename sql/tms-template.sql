@@ -3663,12 +3663,11 @@ CREATE TABLE event.gate_arm_event (
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc INTEGER NOT NULL REFERENCES event.event_description,
     device_id VARCHAR(20),
-    user_id VARCHAR(15), -- FIXME: remove (now in action_plan_event)
     fault VARCHAR(32)
 );
 
 CREATE VIEW gate_arm_event_view AS
-    SELECT ev.id, event_date, ed.description, device_id, user_id, fault
+    SELECT ev.id, event_date, ed.description, device_id, fault
     FROM event.gate_arm_event ev
     JOIN event.event_description ed ON ev.event_desc = ed.event_desc_id;
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;
