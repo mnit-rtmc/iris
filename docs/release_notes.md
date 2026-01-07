@@ -1,5 +1,17 @@
 # IRIS 5.x Release Notes
 
+5.80.0 (7 Jan 2026)
+ - Fixed action plan permission check (gate arm allowlist w/no gates)
+ - Fixed action plan unable to deactivate beacons
+ - Fixed crash in client DMS RWIS panel
+ - Fixed bug preventing alerts from being reaped
+ - Add controller `comm_state` column w/trigger for comm events
+ - Add "comm" channel to LISTEN for comm changes
+ - pollinator: LISTEN for comm configuration changes
+ - Ingest pollinator sensor data (JSON)
+ - Improve UI for pollinator comm links and controllers
+ - Tweaked LDAP / SONAR timeouts
+
 5.79.0 (15 Dec 2025)
  - Fixed gate arm interlock check
  - mayfly: Add support for binary `.vlg` format
