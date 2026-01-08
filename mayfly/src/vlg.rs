@@ -1,6 +1,6 @@
 // vlg.rs
 //
-// Copyright (c) 2025  Minnesota Department of Transportation
+// Copyright (c) 2025-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -70,7 +70,13 @@ where
     let mut vlg = LogReader::new(date)?;
     let mut reader = BufReader::new(reader);
     let mut buf: [u8; 8] = [0; 8];
-    while reader.read(&mut buf).await? == 8 {
+    loop {
+        let res = reader.read_exact(&mut buf).await;
+        if let Err(err) = &res
+            && err.kind() == std::io::ErrorKind::UnexpectedEof
+        {
+            break;
+        }
         let val = u64::from_le_bytes(buf);
         vlg.append(val)?;
     }
@@ -85,7 +91,14 @@ where
     let mut vlg = LogReader::new(date)?;
     let mut reader = std::io::BufReader::new(reader);
     let mut buf: [u8; 8] = [0; 8];
-    while reader.read(&mut buf)? == 8 {
+    loop {
+        let res = reader.read_exact(&mut buf);
+        if let Err(err) = &res
+            && err.kind() == std::io::ErrorKind::UnexpectedEof
+        {
+            break;
+        }
+        res?;
         let val = u64::from_le_bytes(buf);
         vlg.append(val)?;
     }
