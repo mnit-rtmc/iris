@@ -190,8 +190,10 @@ fn json_resp(
     let max_age = if is_recent {
         "max-age=30"
     } else {
+        // FIXME: this seems to cause weird caching problems...
         // 100 weeks => 100 * 7 * 24 * 60 * 60
-        "max-age=60480000"
+        // "max-age=60480000"
+        "max-age=30"
     };
     (
         [
