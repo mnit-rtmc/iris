@@ -702,7 +702,7 @@ fn make_body<T: TrafficData>(data: &[T]) -> Result<String> {
 /// Lookup archived count data.
 pub fn counts_get() -> Router {
     async fn handler(traf: Query<Traf<CountData>>) -> impl IntoResponse {
-        log::info!("GET /counts");
+        log::info!("GET /counts for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
     }
     Router::new().route("/counts", get(handler))
@@ -711,7 +711,7 @@ pub fn counts_get() -> Router {
 /// Lookup archived headway data.
 pub fn headway_get() -> Router {
     async fn handler(traf: Query<Traf<HeadwayData>>) -> impl IntoResponse {
-        log::info!("GET /headway");
+        log::info!("GET /headway for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
     }
     Router::new().route("/headway", get(handler))
@@ -720,7 +720,7 @@ pub fn headway_get() -> Router {
 /// Lookup archived occupancy data.
 pub fn occupancy_get() -> Router {
     async fn handler(traf: Query<Traf<OccupancyData>>) -> impl IntoResponse {
-        log::info!("GET /occupancy");
+        log::info!("GET /occupancy for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
     }
     Router::new().route("/occupancy", get(handler))
@@ -729,7 +729,7 @@ pub fn occupancy_get() -> Router {
 /// Lookup archived length data.
 pub fn length_get() -> Router {
     async fn handler(traf: Query<Traf<LengthData>>) -> impl IntoResponse {
-        log::info!("GET /length");
+        log::info!("GET /length for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
     }
     Router::new().route("/length", get(handler))
@@ -738,7 +738,7 @@ pub fn length_get() -> Router {
 /// Lookup archived speed data.
 pub fn speed_get() -> Router {
     async fn handler(traf: Query<Traf<SpeedData>>) -> impl IntoResponse {
-        log::info!("GET /speed");
+        log::info!("GET /speed for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
     }
     Router::new().route("/speed", get(handler))
@@ -747,7 +747,7 @@ pub fn speed_get() -> Router {
 /// Lookup estimated speed data.
 pub fn espeed_get() -> Router {
     async fn handler(traf: Query<Traf<SpeedData>>) -> impl IntoResponse {
-        log::info!("GET /espeed");
+        log::info!("GET /espeed for {} on {}", traf.detector, traf.date);
         let is_recent = traf.is_recent()?;
         let free_flow = traf.load_free_flow().await?;
         let traf_count = Traf::<CountData>::new_from(&traf.0);
