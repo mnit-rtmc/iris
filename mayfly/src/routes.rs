@@ -1,6 +1,6 @@
 // routes.rs
 //
-// Copyright (c) 2019-2025  Minnesota Department of Transportation
+// Copyright (c) 2019-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -190,10 +190,8 @@ fn json_resp(
     let max_age = if is_recent {
         "max-age=30"
     } else {
-        // FIXME: this seems to cause weird caching problems...
         // 100 weeks => 100 * 7 * 24 * 60 * 60
-        // "max-age=60480000"
-        "max-age=30"
+        "max-age=60480000"
     };
     (
         [
@@ -499,7 +497,7 @@ where
     fn lookup_zipped_bin(&self, traffic: &mut Traffic) -> Result<Vec<T>> {
         let name = self.binned_file_name();
         let mut zf = traffic.by_name(&name)?;
-        log::info!("opened {name} in {}.{EXT}", self.date);
+        log::debug!("opened {name} in {}.{EXT}", self.date);
         let mut buf = Self::make_bin_buffer(zf.size())?;
         zf.read_exact(&mut buf)?;
         Ok(buf
@@ -527,7 +525,7 @@ where
     ) -> Result<Vec<VehEvent>> {
         let name = self.vlg_file_name();
         let zf = traffic.by_name(&name)?;
-        log::info!("opened {name} in {}.{EXT}", self.date);
+        log::debug!("opened {name} in {}.{EXT}", self.date);
         vlg::read_blocking(&self.date, zf)
     }
 
@@ -538,7 +536,7 @@ where
     ) -> Result<Vec<VehEvent>> {
         let name = self.vlog_file_name();
         let zf = traffic.by_name(&name)?;
-        log::info!("opened {name} in {}.{EXT}", self.date);
+        log::debug!("opened {name} in {}.{EXT}", self.date);
         vlog::read_blocking(&self.date, zf)
     }
 
@@ -561,7 +559,7 @@ where
         path.push(self.binned_file_name());
         let mut file = File::open(&path).await?;
         let metadata = file.metadata().await?;
-        log::info!("opened {path:?}");
+        log::debug!("opened {path:?}");
         let mut buf = Self::make_bin_buffer(metadata.len())?;
         file.read_exact(&mut buf).await?;
         Ok(buf
@@ -584,7 +582,7 @@ where
         let mut path = self.date_path()?;
         path.push(self.vlg_file_name());
         let file = File::open(&path).await?;
-        log::info!("opened {path:?}");
+        log::debug!("opened {path:?}");
         vlg::read_async(&self.date, file).await
     }
 
@@ -593,7 +591,7 @@ where
         let mut path = self.date_path()?;
         path.push(self.vlog_file_name());
         let file = File::open(&path).await?;
-        log::info!("opened {path:?}");
+        log::debug!("opened {path:?}");
         vlog::read_async(&self.date, file).await
     }
 
