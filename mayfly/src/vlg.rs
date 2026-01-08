@@ -77,6 +77,8 @@ where
         {
             break;
         }
+        // was there an I/O error?
+        res?;
         let val = u64::from_le_bytes(buf);
         vlg.append(val)?;
     }
@@ -98,6 +100,7 @@ where
         {
             break;
         }
+        // was there an I/O error?
         res?;
         let val = u64::from_le_bytes(buf);
         vlg.append(val)?;
