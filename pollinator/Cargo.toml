@@ -6,7 +6,7 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-argh = "0.1"
+argh = { workspace = true }
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
 bytes = "1.11"
@@ -14,7 +14,7 @@ env_logger = { workspace = true }
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["tokio"] }
 hyper = { version = "1.8", features = ["client", "http1"] }
-jiff = "0.2.16"
+jiff = { workspace = true }
 log = { workspace = true }
 resin = { path = "../resin" }
 serde = { workspace = true }

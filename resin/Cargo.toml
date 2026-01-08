@@ -9,7 +9,7 @@ edition.workspace = true
 bb8 = { workspace = true }
 bb8-postgres = { workspace = true }
 hyper = { version = "1.8", features = ["client", "http1"] }
-jiff = "0.2.16"
+jiff = { workspace = true }
 log = { workspace = true }
 mag = { workspace = true }
 serde_json = { workspace = true }

@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2025  Minnesota Department of Transportation
+// Copyright (C) 2018-2026  Minnesota Department of Transportation
 //
 //! rendzina is for rendering DMS sign messages to .gif files
 #![forbid(unsafe_code)]
@@ -15,7 +15,7 @@ use pix::el::Pixel;
 use pix::gray::{Gray, Gray8};
 use pix::rgb::{Rgba8p, SRgb8};
 use pix::{Palette, Raster};
-use serde_derive::Deserialize;
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::io::{Read, Write};
 

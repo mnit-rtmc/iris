@@ -6,7 +6,7 @@ edition.workspace = true
 default-run = "mayfly"
 
 [dependencies]
-argh = "0.1"
+argh = { workspace = true }
 axum = { workspace = true }
 env_logger = { workspace = true }
 http = { workspace = true }
