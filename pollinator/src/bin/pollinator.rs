@@ -1,4 +1,4 @@
-// Copyright (C) 2025  Minnesota Department of Transportation
+// Copyright (C) 2025-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -133,7 +133,6 @@ async fn poll_comm_links(db: Database) -> Result<()> {
 
 /// Check if a notification should trigger reloading the configuration
 fn should_reload(not: &Notification, cfgs: &[CommLinkCfg]) -> bool {
-    // FIXME: comm_link "connected" / controller "fail_time" should not reload
     match (not.channel(), not.payload()) {
         ("comm_config", _) => true,
         ("comm_link", nm) => {
