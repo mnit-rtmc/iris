@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2023-2024  Minnesota Department of Transportation
+ * Copyright (C) 2023-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,18 +42,32 @@ public class Hashtags {
 
 	/** Add a hashtag to a notes field */
 	static public String add(String notes, String tag) {
-		return notes.trim() + '\n' + tag;
+		String ht = normalize(tag);
+		return (ht != null) ? notes.trim() + '\n' + ht : notes;
 	}
 
 	/** Remove a hashtag from a notes field */
 	static public String remove(String notes, String tag) {
-		String t = tag.toLowerCase();
-		int i = notes.toLowerCase().indexOf(t);
-		if (i >= 0) {
-			notes = (
-				notes.substring(0, i) +
-				notes.substring(i + t.length())
-			).trim();
+		String ht = normalize(tag);
+		if (ht == null)
+			return notes;
+		ht = ht.toLowerCase();
+		String lower_notes = notes.toLowerCase();
+		int len = notes.length();
+		for (int i = 0; i < len; i++) {
+			int j = lower_notes.indexOf(ht, i);
+			if (j >= 0) {
+				int end = j + ht.length();
+				if (end == len)
+					return notes.substring(0, j).trim();
+				// NOTE: end > len
+				if (!isTagChar(notes.charAt(end))) {
+					return (
+						notes.substring(0, j) +
+						notes.substring(end)
+					).trim();
+				}
+			}
 		}
 		return notes;
 	}
