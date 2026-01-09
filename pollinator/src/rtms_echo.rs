@@ -1,4 +1,4 @@
-// Copyright (C) 2025  Minnesota Department of Transportation
+// Copyright (C) 2025-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -92,6 +92,7 @@ struct Zone {
 }
 
 /// RTMS Echo sensor connection
+#[derive(Clone)]
 pub struct Sensor {
     /// Controller name
     controller: String,
@@ -118,6 +119,12 @@ impl VehicleData {
             .with_wrong_way(wrong_way)
             .with_length_m(self.length)
             .with_speed_kph(self.speed)
+    }
+}
+
+impl Clone for Zone {
+    fn clone(&self) -> Self {
+        Zone::new(self.id, self.pin)
     }
 }
 

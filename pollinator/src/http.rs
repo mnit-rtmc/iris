@@ -1,4 +1,4 @@
-// Copyright (C) 2025  Minnesota Department of Transportation
+// Copyright (C) 2025-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ use hyper_util::rt::TokioIo;
 use resin::{Error, Result};
 use tokio::net::TcpStream;
 
-/// HTTP client
-#[derive(Debug, Default)]
+/// HTTP client requestor
+#[derive(Clone, Debug, Default)]
 pub struct Client {
     /// URI address
     uri: String,
