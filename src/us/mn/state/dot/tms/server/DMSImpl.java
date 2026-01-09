@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2008-2009  AHMCT, University of California
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2016-2020  SRF Consulting Group
@@ -359,6 +359,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Remove a hashtag to the DMS */
 	public synchronized void removeHashtagNotify(String ht) {
+		ht = Hashtags.normalize(ht);
+		if (ht == null)
+			return;
 		if (!new Hashtags(notes).contains(ht))
 			return;
 		try {

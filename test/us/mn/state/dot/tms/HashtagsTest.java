@@ -94,5 +94,8 @@ public class HashtagsTest extends TestCase {
 		assertTrue("#PartialTag with more!".equals(
 			Hashtags.remove("#PartialTag with more!", "#Partial")
 		));
+		assertTrue("#PartialTag".equals(
+			Hashtags.remove("#PartialTag #Partial", "#Partial")
+		));
 	}
 }

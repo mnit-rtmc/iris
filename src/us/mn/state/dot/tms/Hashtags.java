@@ -60,7 +60,7 @@ public class Hashtags {
 				int end = j + ht.length();
 				if (end == len)
 					return notes.substring(0, j).trim();
-				// NOTE: end > len
+				// NOTE: end < len
 				if (!isTagChar(notes.charAt(end))) {
 					return (
 						notes.substring(0, j) +
