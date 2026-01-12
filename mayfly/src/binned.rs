@@ -508,6 +508,12 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
         (24 * 60 * 60) / self.period
     }
 
+    /// Get the maximum allowed gap (intervals) between events
+    fn max_gap(&self) -> u32 {
+        // 30 minutes
+        (30 * 60) / self.period
+    }
+
     /// Get the interval number for an event
     fn event_interval(&self, ev: &VehEvent) -> Option<u32> {
         ev.stamp().map(|st| st.interval(self.period))
@@ -534,9 +540,10 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
                     self.future_ev = Some(ev);
                     let interval =
                         self.event_interval(ev).unwrap_or(self.interval);
-                    // reset if there is a gap of 30 minutes or longer
-                    if interval > self.interval + 30 * 2 {
+                    // reset if the gap between events is too long
+                    if interval > self.interval + self.max_gap() {
                         self.reset = true;
+                        data.reset();
                     }
                     return data;
                 }
@@ -547,7 +554,10 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
             }
         }
         // no more events
-        self.reset = true;
+        if self.interval < self.max_interval() - self.max_gap() {
+            self.reset = true;
+            data.reset();
+        }
         data
     }
 
