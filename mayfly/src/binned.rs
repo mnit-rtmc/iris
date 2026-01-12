@@ -1,6 +1,6 @@
 // binned.rs
 //
-// Copyright (c) 2021-2025  Minnesota Department of Transportation
+// Copyright (c) 2021-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -532,7 +532,7 @@ impl<'a, T: TrafficData> BinIter<'a, T> {
         }
         self.future_ev = None;
         while let Some(ev) = self.event_iter.next() {
-            if ev.mode() == Mode::NoTimestamp {
+            if ev.mode() == Mode::NoTimestamp || ev.gap() {
                 self.reset = true;
                 data.reset();
             } else {

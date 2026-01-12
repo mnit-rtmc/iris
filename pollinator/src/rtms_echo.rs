@@ -104,7 +104,7 @@ pub struct Sensor {
 
 impl VehicleData {
     /// Convert to a gap vehicle event
-    fn gap(&self) -> VehEvent {
+    fn with_gap(&self) -> VehEvent {
         VehEvent::default()
             .with_stamp_mode(Stamp::now(), Mode::ServerRecorded)
             .with_gap(true)
@@ -146,7 +146,7 @@ impl Zone {
         match &mut self.vlg_writer {
             Some(vlg_writer) => {
                 let ev = if gap {
-                    veh.gap()
+                    veh.with_gap()
                 } else {
                     let wrong_way = dir != veh.direction;
                     veh.server_recorded(wrong_way)
