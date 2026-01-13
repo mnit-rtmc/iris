@@ -39,7 +39,7 @@ VALUES
     (8, 'Error');
 
 ALTER TABLE iris.controller
-    ADD COLUMN comm_state INTEGER REFERENCES iris.comm_state;
+    ADD COLUMN comm_state INTEGER DEFAULT 0 REFERENCES iris.comm_state;
 UPDATE iris.controller SET comm_state = 0;
 ALTER TABLE iris.controller ALTER COLUMN comm_state SET NOT NULL;
 

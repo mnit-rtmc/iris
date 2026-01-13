@@ -1446,7 +1446,7 @@ CREATE TABLE iris.controller (
     password VARCHAR CHECK (LENGTH(password) < 128),
     setup JSONB,
     status JSONB,
-    comm_state INTEGER NOT NULL REFERENCES iris.comm_state,
+    comm_state INTEGER DEFAULT 0 NOT NULL REFERENCES iris.comm_state,
     fail_time TIMESTAMP WITH time zone
 );
 
