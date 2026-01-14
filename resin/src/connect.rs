@@ -22,7 +22,7 @@ const COMM_LINK_CONNECT: &str = "\
 /// SQL to connect controller
 const CONTROLLER_CONNECT: &str = "\
   UPDATE iris.controller \
-  SET fail_time = NULL \
+  SET comm_state = 1, fail_time = NULL \
   WHERE name = $1";
 
 /// SQL to disconnect comm_link
@@ -34,7 +34,7 @@ const COMM_LINK_DISCONNECT: &str = "\
 /// SQL to disconnect controller
 const CONTROLLER_DISCONNECT: &str = "\
   UPDATE iris.controller \
-  SET fail_time = now() \
+  SET comm_state = 2, fail_time = now() \
   WHERE fail_time IS NULL \
   AND name = $1";
 
