@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2024  Minnesota Department of Transportation
+ * Copyright (C) 2016-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,15 +76,25 @@ abstract public class OnvifProp extends ControllerProperty {
 		DeviceService dev = DeviceService.getDeviceService(url + "/onvif/device_service", user, pass);
 		poller.dev = dev;
 		if (poller.dev == null)
-			return "initialize(): Missing Device Service for " + poller.name;
-
+			return "Missing Device Service for " + poller.name;
 
 		String capabilities = dev.getCapabilities();
 		poller.capabilities = capabilities;
 
-		poller.ptz = PTZService.getPTZService(dev.getPTZBinding(capabilities), user, pass);
-		poller.media = MediaService.getMediaService(dev.getMediaBinding(capabilities), user, pass);
-		poller.img = ImagingService.getImagingService(dev.getImagingBinding(capabilities), user, pass);
+		poller.ptz = PTZService.getPTZService(
+			dev.getPTZBinding(capabilities), user, pass);
+		if (poller.ptz == null)
+			return "Missing PTZ Service for " + poller.name;
+
+		poller.media = MediaService.getMediaService(
+			dev.getMediaBinding(capabilities), user, pass);
+		if (poller.media == null)
+			return "Missing Media Service for " + poller.name;
+
+		poller.img = ImagingService.getImagingService(
+			dev.getImagingBinding(capabilities), user, pass);
+		if (poller.img == null)
+			return "Missing Imaging Service for " + poller.name;
 
 		// Now get tokens:
 		int mediaWidth = 0, videoWidth = 0;  // to find largest source
