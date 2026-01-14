@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,8 @@ import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.CommConfig;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
@@ -655,8 +657,17 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Check if the detector is currently offline / 'failed' */
 	private boolean isFailed(boolean ignore_auto_fail) {
-		return force_fail || super.isOffline() ||
-		      (auto_fail && !ignore_auto_fail);
+		return force_fail ||
+		       (auto_fail && !ignore_auto_fail) ||
+		       (super.isOffline() && !isPollinator());
+	}
+
+	/** Check if the comm link is handled by pollinator */
+	private boolean isPollinator() {
+		ControllerImpl c = controller;
+		CommLink cl = (c != null) ? c.getCommLink() : null;
+		CommConfig cc = (cl != null) ? cl.getCommConfig() : null;
+		return cc != null && cc.getPollinator();
 	}
 
 	/** Get the active status */
