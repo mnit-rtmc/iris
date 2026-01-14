@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.PlanPhase;
+import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.TimeAction;
@@ -85,6 +86,12 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		throw new ChangeVetoException("IP ADDRESS NOT ALLOWED: " + a);
 	}
 
+	/** Lookup the first plan phase */
+	static private PlanPhase lookupFirstPhase() {
+		Iterator<PlanPhase> it = PlanPhaseHelper.iterator();
+		return it.hasNext() ? it.next() : null;
+	}
+
 	/** Create a unique ActionPlan record name */
 	static public String createUniqueName(String template) {
 		UniqueNameCreator unc = new UniqueNameCreator(template, 16,
@@ -123,6 +130,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public ActionPlanImpl(String n) {
 		super(n);
 		default_phase = lookupPlanPhase(PlanPhase.UNDEPLOYED);
+		// NOTE: can be null if `undeployed` has been deleted
+		if (default_phase == null)
+			default_phase = lookupFirstPhase();
 		phase = default_phase;
 	}
 

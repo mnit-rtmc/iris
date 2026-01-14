@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2025  Minnesota Department of Transportation
+ * Copyright (C) 2011-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,6 +13,8 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
+
+import java.util.Iterator;
 
 /**
  * Helper class for plan phases.
@@ -30,6 +32,12 @@ public class PlanPhaseHelper extends BaseHelper {
 	static public PlanPhase lookup(String name) {
 		return (PlanPhase) namespace.lookupObject(PlanPhase.SONAR_TYPE,
 			name);
+	}
+
+	/** Get a plan phase iterator */
+	static public Iterator<PlanPhase> iterator() {
+		return new IteratorWrapper<PlanPhase>(namespace.iterator(
+			PlanPhase.SONAR_TYPE));
 	}
 
 	/** Check if a plan phase is for alerts */

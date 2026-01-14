@@ -35,8 +35,21 @@ changed manually by an operator or at specific dates/times using
 [time actions](#time-actions).  Advanced plans can have many phases, each with
 separate actions.
 
-The basic phases are **deployed** and **undeployed**.  Additional phases can be
-added on the **Plan Phases** tab.  Each phase must have a unique name.
+There are 8 built-in phases required for proper action plan operation:
+
+| Phase Name     | Description                  |
+|----------------|------------------------------|
+| `deployed`     | Generic "in use" actions     |
+| `undeployed`   | Generic "not in use" actions |
+| `alert_before` | Before [alert] actions       |
+| `alert_during` | During [alert] actions       |
+| `alert_aftger` | After [alert] actions        |
+| `ga_open`      | [Gate arm] open actions      |
+| `ga_change`    | [Gate arm] change actions    |
+| `ga_closed`    | [Gate arm] closed actions    |
+
+Additional phases can be added on the **Plan Phases** tab.  Each phase must
+have a unique name, and names are case-sensitive.
 
 By specifying **Hold Time**, a plan will switch to the **Next Phase**
 automatically after the time passes.  Only **selectable** phases can be chosen
@@ -249,6 +262,7 @@ When a user changes the phase, if they are in the list specified by the
 the `email_event` table.
 
 
+[alert]: alerts.html
 [auto-fail]: vehicle_detection.html#auto-fail
 [beacon]: beacons.html
 [camera]: cameras.html
