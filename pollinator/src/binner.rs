@@ -14,12 +14,23 @@ use resin::Result;
 use resin::event::{Stamp, VehEvent};
 use std::collections::HashMap;
 use std::num::NonZeroU8;
+use tokio::fs::{File, rename};
+use tokio::io::{AsyncWriteExt, BufWriter};
 use tokio::sync::mpsc::{
     UnboundedReceiver, UnboundedSender, unbounded_channel,
 };
 use tokio::time::{
     Duration, Instant, MissedTickBehavior, interval, sleep_until,
 };
+
+/// Path to write binned sensor data
+const PATH: &str = "/var/lib/iris/web/sensor_data";
+
+/// Temporary path to write binned sensor data
+const TEMP_PATH: &str = "/var/lib/iris/web/sensor_data~";
+
+/// Number of 30-second periods per hour
+const PERIODS_PER_HOUR: u32 = 2 * 60;
 
 /// Detector vehicle event
 pub struct DetEvent {
@@ -101,10 +112,10 @@ impl IntervalBinner {
         ticker.set_missed_tick_behavior(MissedTickBehavior::Skip);
         loop {
             ticker.tick().await;
-            if self.tally_vehicle_events().await {
-                break;
+            match self.tally_vehicle_events().await {
+                Some(st) => self.write_json(st).await?,
+                None => break,
             }
-            self.write_json().await?;
             self.speeds_prev = self.speeds_curr;
             self.speeds_curr = HashMap::new();
         }
@@ -113,14 +124,14 @@ impl IntervalBinner {
     }
 
     /// Tally vehicle events for previous interval
-    async fn tally_vehicle_events(&mut self) -> bool {
+    async fn tally_vehicle_events(&mut self) -> Option<Stamp> {
         let st = Stamp::now();
         let curr = st.interval(30);
         log::debug!("interval {curr} at {}", st.ms_since_midnight());
         let prev = if curr > 0 {
             curr - 1
         } else {
-            (24 * 60 * 2) - 1
+            (24 * PERIODS_PER_HOUR) - 1
         };
         while !self.rx.is_empty() {
             match self.rx.recv().await {
@@ -135,15 +146,57 @@ impl IntervalBinner {
                         }
                     }
                 }
-                None => return true,
+                None => return None,
             }
         }
-        false
+        Some(st.with_ms_since_midnight(curr * 30_000))
     }
 
     /// Write binned interval as JSON
-    async fn write_json(&self) -> Result<()> {
-        // FIXME
-        unimplemented!();
+    async fn write_json(&self, st: Stamp) -> Result<()> {
+        log::debug!("writing JSON to {TEMP_PATH}");
+        let file = File::options()
+            .append(true)
+            .create(true)
+            .open(TEMP_PATH)
+            .await?;
+        let mut writer = BufWriter::new(file);
+        writer.write_all(b"{\n").await?;
+        writer.write_all(b"\"time_stamp\":\"").await?;
+        writer.write_all(st.rfc3339().as_bytes()).await?;
+        writer.write_all(b"\",\n").await?;
+        writer.write_all(b"\"period\":30,\n").await?;
+        writer.write_all(b"\"samples\":{").await?;
+        let mut first = true;
+        for (det, speeds) in self.speeds_prev.iter() {
+            if !first {
+                writer.write_all(b",").await?;
+            }
+            writer.write_all(b"\n\"").await?;
+            writer.write_all(det.as_bytes()).await?;
+            writer.write_all(b"\":[").await?;
+            let flow = speeds.len() as u32 * PERIODS_PER_HOUR;
+            writer.write_all(flow.to_string().as_bytes()).await?;
+            writer.write_all(b",").await?;
+            let mut count: u32 = 0;
+            let mut sum: u32 = 0;
+            for spd in speeds.iter().flatten() {
+                count += 1;
+                sum += u32::from(spd.get());
+            }
+            if count > 0 {
+                let spd = sum / count;
+                writer.write_all(spd.to_string().as_bytes()).await?;
+            } else {
+                writer.write_all(b"null").await?;
+            }
+            writer.write_all(b"]").await?;
+            first = false;
+        }
+        writer.write_all(b"\n}\n}\n").await?;
+        writer.flush().await?;
+        log::debug!("moving {TEMP_PATH} to {PATH}");
+        rename(TEMP_PATH, PATH).await?;
+        Ok(())
     }
 }
