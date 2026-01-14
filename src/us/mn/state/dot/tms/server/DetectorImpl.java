@@ -665,9 +665,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Check if the comm link is handled by pollinator */
 	private boolean isPollinator() {
 		ControllerImpl c = controller;
-		CommLink cl = (c != null) ? c.getCommLink() : null;
-		CommConfig cc = (cl != null) ? cl.getCommConfig() : null;
-		return cc != null && cc.getPollinator();
+		return (c != null) && c.isPollinator();
 	}
 
 	/** Get the active status */
