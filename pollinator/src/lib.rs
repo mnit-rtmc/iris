@@ -1,4 +1,4 @@
-// Copyright (C) 2025  Minnesota Department of Transportation
+// Copyright (C) 2025-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,8 +12,10 @@
 //
 #![forbid(unsafe_code)]
 
+mod binner;
 mod comm_link;
 mod http;
 pub mod rtms_echo;
 
-pub use comm_link::CommLinkCfg;
+pub use binner::IntervalBinner;
+pub use comm_link::{CommLink, CommLinkCfg};

@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::comm_link::CommLinkCfg;
+use crate::comm_link::CommLink;
 use crate::http;
 
 use futures_util::stream::{SplitSink, SplitStream};
@@ -18,7 +18,6 @@ use futures_util::{SinkExt, StreamExt};
 use resin::event::{Mode, Stamp, VehEvent, VehEventWriter};
 use resin::{Database, Error, Result};
 use serde::Deserialize;
-use std::collections::HashMap;
 use tokio::join;
 use tokio::net::TcpStream;
 use tokio::time::{Duration, MissedTickBehavior, interval};
@@ -94,8 +93,8 @@ struct Zone {
 /// RTMS Echo sensor connection
 #[derive(Clone)]
 pub struct Sensor {
-    /// Controller name
-    controller: String,
+    /// Comm link
+    link: CommLink,
     /// HTTP client
     client: http::Client,
     /// Detection zones
@@ -139,23 +138,16 @@ impl Zone {
         }
     }
 
-    /// Append a vehicle to log
-    async fn log_append(&mut self, veh: &VehicleData) -> Result<()> {
+    /// Make a vehicle event from vehicle data
+    fn make_event(&mut self, veh: &VehicleData) -> VehEvent {
         let gap = self.direction.is_none();
-        let dir = self.check_direction(veh);
-        match &mut self.vlg_writer {
-            Some(vlg_writer) => {
-                let ev = if gap {
-                    veh.with_gap()
-                } else {
-                    let wrong_way = dir != veh.direction;
-                    veh.server_recorded(wrong_way)
-                };
-                vlg_writer.append(&ev).await?;
-            }
-            None => log::warn!("{}: no detector on pin {}", self.id, self.pin),
+        if gap {
+            veh.with_gap()
+        } else {
+            let dir = self.check_direction(veh);
+            let wrong_way = dir != veh.direction;
+            veh.server_recorded(wrong_way)
         }
-        Ok(())
     }
 
     /// Check direction for a vehicle
@@ -166,38 +158,50 @@ impl Zone {
         }
         veh.direction
     }
+
+    /// Append a vehicle event to log
+    async fn log_append(&mut self, ev: &VehEvent) -> Result<()> {
+        match &mut self.vlg_writer {
+            Some(vlg_writer) => vlg_writer.append(ev).await?,
+            None => log::warn!("{}: no detector on pin {}", self.id, self.pin),
+        }
+        Ok(())
+    }
 }
 
 impl Sensor {
     /// Create a RTMS Echo sensor
-    pub fn new(cfg: &CommLinkCfg) -> Self {
-        let controller = cfg.controller().to_string();
-        let client = http::Client::new(cfg.uri());
+    pub fn new(link: CommLink) -> Self {
+        let client = http::Client::new(link.uri());
         let zones = Vec::new();
         Sensor {
-            controller,
+            link,
             client,
             zones,
         }
     }
 
+    /// Get controller name
+    fn controller(&self) -> &str {
+        self.link.controller()
+    }
+
     /// Poll sensor continuously
-    pub async fn run(
-        mut self,
-        cfg: &CommLinkCfg,
-        db: Option<Database>,
-    ) -> Result<()> {
-        self.login(cfg).await?;
-        cfg.log_connect(&db).await?;
-        self.init_detector_zones(&cfg.make_detectors()).await?;
-        self.continuous_poll(cfg).await?;
+    pub async fn run(mut self, db: Option<Database>) -> Result<()> {
+        self.login().await?;
+        self.link.log_connect(&db).await?;
+        self.init_detector_zones().await?;
+        self.continuous_poll().await?;
         Ok(())
     }
 
     /// Login with user credentials
-    async fn login(&mut self, cfg: &CommLinkCfg) -> Result<()> {
-        let user = cfg.user().ok_or(Error::InvalidConfig("user"))?;
-        let pass = cfg.password().ok_or(Error::InvalidConfig("password"))?;
+    async fn login(&mut self) -> Result<()> {
+        let user = self.link.user().ok_or(Error::InvalidConfig("user"))?;
+        let pass = self
+            .link
+            .password()
+            .ok_or(Error::InvalidConfig("password"))?;
         let body =
             format!("{{\"username\": \"{user}\", \"password\": \"{pass}\" }}");
         let resp = self.client.post("api/v1/login", &body).await?;
@@ -211,10 +215,8 @@ impl Sensor {
     }
 
     /// Initialize detector zones
-    async fn init_detector_zones(
-        &mut self,
-        dets: &HashMap<usize, &str>,
-    ) -> Result<()> {
+    async fn init_detector_zones(&mut self) -> Result<()> {
+        let dets = self.link.make_detectors();
         let zones = self.poll_zone_identifiers().await?;
         self.zones = Vec::with_capacity(zones.len());
         for (i, zone) in zones.iter().enumerate() {
@@ -226,14 +228,14 @@ impl Sensor {
                     zone.vlg_writer = Some(vlg_writer);
                     log::debug!(
                         "{}: pin #{pin}, zone {}, det {det}",
-                        &self.controller,
+                        self.controller(),
                         zone.id
                     );
                 }
                 None => {
                     log::warn!(
                         "{}: pin #{pin}, zone {}, NO detector",
-                        &self.controller,
+                        self.controller(),
                         zone.id
                     )
                 }
@@ -241,10 +243,10 @@ impl Sensor {
             self.zones.push(zone);
         }
         for (pin, det) in dets {
-            if *pin < 1 || *pin > zones.len() {
+            if pin < 1 || pin > zones.len() {
                 log::warn!(
                     "{}: invalid pin #{pin} for detector: {det}",
-                    &self.controller
+                    self.controller()
                 );
             }
         }
@@ -259,14 +261,14 @@ impl Sensor {
     }
 
     /// Poll the sensor for vehicle events
-    async fn continuous_poll(&mut self, cfg: &CommLinkCfg) -> Result<()> {
-        // FIXME: use cfg.per_long interval to poll for this
+    async fn continuous_poll(&mut self) -> Result<()> {
+        // FIXME: use link.per_long interval to poll for this
         let records = self.poll_input_voltage().await?;
         for record in records {
             // FIXME: store in controller status
-            log::debug!("{}: {record:?}", &self.controller);
+            log::debug!("{}: {record:?}", self.controller());
         }
-        self.collect_vehicle_data(cfg.per_s()).await
+        self.collect_vehicle_data().await
     }
 
     /// Poll the sensor for input voltage records
@@ -278,17 +280,12 @@ impl Sensor {
 
     /// Lookup zone for vehicle data
     fn zone_mut(&mut self, veh: &VehicleData) -> Option<&mut Zone> {
-        for zone in self.zones.iter_mut() {
-            if veh.zone_id == zone.id {
-                return Some(zone);
-            }
-        }
-        log::warn!("{}: unknown zoneId for vehicle: {veh:?}", &self.controller);
-        None
+        self.zones.iter_mut().find(|zone| veh.zone_id == zone.id)
     }
 
     /// Collect vehicle data
-    async fn collect_vehicle_data(&mut self, per: u32) -> Result<()> {
+    async fn collect_vehicle_data(&mut self) -> Result<()> {
+        let per = self.link.per_s();
         let hostport = self.client.hostport()?;
         let req = format!("ws://{hostport}/api/v1/live-vehicle-data")
             .into_client_request()?;
@@ -296,12 +293,12 @@ impl Sensor {
         match res.into_body() {
             Some(body) => log::warn!(
                 "{}: resp {}",
-                &self.controller,
+                self.controller(),
                 String::from_utf8(body)?
             ),
             None => log::info!(
                 "{}: WebSocket connected, waiting...",
-                &self.controller
+                self.controller()
             ),
         }
         let (sink, stream) = stream.split();
@@ -320,7 +317,7 @@ impl Sensor {
                 Message::Text(bytes) => {
                     log::debug!(
                         "{}: TEXT, {} bytes",
-                        &self.controller,
+                        self.controller(),
                         bytes.len()
                     );
                     let data = bytes.as_str();
@@ -333,21 +330,21 @@ impl Sensor {
                 Message::Binary(bytes) => {
                     log::debug!(
                         "{}: BINARY, {} bytes, ignoring",
-                        &self.controller,
+                        self.controller(),
                         bytes.len()
                     );
                 }
                 Message::Ping(bytes) => {
                     log::debug!(
                         "{}: PING, {} bytes",
-                        &self.controller,
+                        self.controller(),
                         bytes.len()
                     );
                 }
                 Message::Pong(bytes) => {
                     log::debug!(
                         "{}: PONG, {} bytes",
-                        &self.controller,
+                        self.controller(),
                         bytes.len()
                     );
                 }
@@ -359,9 +356,18 @@ impl Sensor {
 
     /// Log a vehicle event
     async fn log_event(&mut self, veh: VehicleData) -> Result<()> {
-        log::debug!("{}: veh data: {veh:?}", &self.controller);
-        if let Some(zone) = self.zone_mut(&veh) {
-            zone.log_append(&veh).await?;
+        log::debug!("{}: veh data: {veh:?}", self.controller());
+        match self.zone_mut(&veh) {
+            Some(zone) => {
+                let ev = zone.make_event(&veh);
+                zone.log_append(&ev).await?;
+                let pin = zone.pin;
+                self.link.bin_event(pin, ev);
+            }
+            None => {
+                let ctrl = self.controller();
+                log::warn!("{ctrl}: unknown zoneId for vehicle: {veh:?}");
+            }
         }
         Ok(())
     }

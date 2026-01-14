@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use argh::FromArgs;
-use pollinator::CommLinkCfg;
+use pollinator::{CommLink, CommLinkCfg, IntervalBinner};
 use resin::{Database, Error, Result};
 use std::collections::HashMap;
 use tokio::task::{AbortHandle, JoinSet};
@@ -65,9 +65,12 @@ struct CommLinkTask {
 
 /// Poll comm links
 async fn poll_comm_links(db: Database) -> Result<()> {
+    let binner = IntervalBinner::new();
+    let sender = binner.sender();
     let (notifier, mut receiver) = db.clone().notifier().await?;
     let mut tasks: HashMap<String, CommLinkTask> = HashMap::new();
     let mut set = JoinSet::new();
+    set.spawn(binner.run());
     set.spawn(notifier.run());
     receiver
         .listen(
@@ -104,7 +107,8 @@ async fn poll_comm_links(db: Database) -> Result<()> {
                 let name = cfg.name().to_string();
                 let db = Some(db.clone());
                 log::info!("{name}: spawning");
-                let handle = set.spawn(cfg.clone().run(db));
+                let link = CommLink::new(cfg.clone(), sender.clone());
+                let handle = set.spawn(link.run(db));
                 let task = CommLinkTask {
                     cfg: cfg.clone(),
                     handle,
@@ -154,7 +158,11 @@ async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let args: Args = argh::from_env();
     if let Some(cfg) = args.comm_link_config().await? {
-        tokio::spawn(cfg.run(None)).await??;
+        let binner = IntervalBinner::new();
+        let sender = binner.sender();
+        let link = CommLink::new(cfg, sender);
+        tokio::spawn(link.run(None)).await??;
+        tokio::spawn(binner.run());
         return Ok(());
     }
     let db = Database::new("tms").await?;

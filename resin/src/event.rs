@@ -1,4 +1,4 @@
-// Copyright (C) 2025  Minnesota Department of Transportation
+// Copyright (C) 2025-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -185,6 +185,11 @@ impl Stamp {
     pub fn interval(&self, period_s: u32) -> u32 {
         let ms = self.ms_since_midnight();
         ms / (period_s * 1000)
+    }
+
+    /// Get as RFC3339 string
+    pub fn rfc3339(&self) -> String {
+        self.0.timestamp().display_with_offset(self.0.offset()).to_string()
     }
 }
 
@@ -428,6 +433,16 @@ mod test {
         assert_eq!(
             stamp,
             Stamp("2025-12-10 11:37[America/Chicago]".parse().unwrap())
+        );
+    }
+
+    #[test]
+    fn rfc3339() {
+        let ts: Zoned = "2025-12-10 10:20[America/Chicago]".parse().unwrap();
+        let val = Stamp(ts).rfc3339();
+        assert_eq!(
+            val,
+            "2025-12-10T10:20:00-06:00"
         );
     }
 
