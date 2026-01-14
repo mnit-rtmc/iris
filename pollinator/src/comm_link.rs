@@ -223,9 +223,13 @@ impl CommLink {
 
     /// Send vehicle event to interval binner
     pub fn bin_event(&self, pin: usize, ev: VehEvent) {
-        let det = &self.cfg.detectors[pin];
-        if let Err(e) = self.sender.send(DetEvent::new(det, ev)) {
-            log::warn!("send failed: {e}");
+        match self.cfg.detectors.get(pin - 1) {
+            Some(det) => {
+                if let Err(e) = self.sender.send(DetEvent::new(det, ev)) {
+                    log::warn!("send failed: {e}");
+                }
+            }
+            None => log::warn!("no detector on pin {pin}"),
         }
     }
 
