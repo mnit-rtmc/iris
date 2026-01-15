@@ -27,7 +27,7 @@ import org.w3c.dom.Element;
 public class ImagingService extends Service {
 	public ImagingService(String imagingServiceAddress, String u, String p) {
 		endpoint = imagingServiceAddress;
-		namespace = "http://www.onvif.org/ver20/imaging/wsdl";
+		WSDL = "http://www.onvif.org/ver20/imaging/wsdl";
 		username = u;
 		password = p;
 	}
@@ -41,12 +41,12 @@ public class ImagingService extends Service {
 	/** Document builder function for GetOptions */
 	public Document getOptionsDocument(String vToken) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getOptions = doc.createElement("wsdl:GetOptions");
+		Element getOptions = doc.createElementNS(WSDL, "wsdl:GetOptions");
 		body.appendChild(getOptions);
 
-		Element videoSourceToken = doc.createElement("wsdl:VideoSourceToken");
+		Element videoSourceToken = doc.createElementNS(WSDL, "wsdl:VideoSourceToken");
 		videoSourceToken.appendChild(doc.createTextNode(vToken));
 		getOptions.appendChild(videoSourceToken);
 
@@ -66,12 +66,12 @@ public class ImagingService extends Service {
 	/** Document builder function for GetImagingSettings */
 	public Document getImagingSettingsDocument(String vToken) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getImagingSettings = doc.createElement("wsdl:GetImagingSettings");
+		Element getImagingSettings = doc.createElementNS(WSDL, "wsdl:GetImagingSettings");
 		body.appendChild(getImagingSettings);
 
-		Element videoSourceToken = doc.createElement("wsdl:VideoSourceToken");
+		Element videoSourceToken = doc.createElementNS(WSDL, "wsdl:VideoSourceToken");
 		videoSourceToken.appendChild(doc.createTextNode(vToken));
 		getImagingSettings.appendChild(videoSourceToken);
 
@@ -94,28 +94,28 @@ public class ImagingService extends Service {
 	 */
 	public Document setImagingSettingsDocument(String vToken, String setting, String value) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element setImagingSettings = doc.createElement("wsdl:SetImagingSettings");
+		Element setImagingSettings = doc.createElementNS(WSDL, "wsdl:SetImagingSettings");
 		body.appendChild(setImagingSettings);
 
-		Element videoSourceToken = doc.createElement("wsdl:VideoSourceToken");
+		Element videoSourceToken = doc.createElementNS(WSDL, "wsdl:VideoSourceToken");
 		videoSourceToken.appendChild(doc.createTextNode(vToken));
 		setImagingSettings.appendChild(videoSourceToken);
 
-		Element imagingSettings = doc.createElement("wsdl:ImagingSettings");
+		Element imagingSettings = doc.createElementNS(WSDL, "wsdl:ImagingSettings");
 		setImagingSettings.appendChild(imagingSettings);
 
 		// Add more as implemented:
 		switch (setting) {
 			case "focus":
-				Element focus = doc.createElement("tt:Focus");
+				Element focus = doc.createElementNS(TT, "tt:Focus");
 				imagingSettings.appendChild(focus);
 
-				Element afMode = doc.createElement("tt:AFMode");
+				Element afMode = doc.createElementNS(TT, "tt:AFMode");
 				focus.appendChild(afMode);
 
-				Element autoFocusMode = doc.createElement("tt:AutoFocusMode");
+				Element autoFocusMode = doc.createElementNS(TT, "tt:AutoFocusMode");
 				focus.appendChild(autoFocusMode);
 				if (!"auto".equalsIgnoreCase(value)) {
 					autoFocusMode.appendChild(doc.createTextNode("MANUAL"));
@@ -125,28 +125,28 @@ public class ImagingService extends Service {
 				}
 				break;
 			case "iris":
-				Element exposure = doc.createElement("tt:Exposure");
+				Element exposure = doc.createElementNS(TT, "tt:Exposure");
 				imagingSettings.appendChild(exposure);
 				if (!"auto".equalsIgnoreCase(value) && !"manual".equalsIgnoreCase(value)) {
-					Element mode = doc.createElement("tt:Mode");
+					Element mode = doc.createElementNS(TT, "tt:Mode");
 					mode.appendChild(doc.createTextNode("MANUAL"));
 					exposure.appendChild(mode);
 					// uncomment if necessary at some point:
-					//Element eTime = doc.createElement("tt:ExposureTime");
+					//Element eTime = doc.createElementNS(TT, "tt:ExposureTime");
 					//eTime.appendChild(doc.createTextNode("0.0"));
 					//exposure.appendChild(eTime);
-					//Element gain = doc.createElement("tt:Gain");
+					//Element gain = doc.createElementNS(TT, "tt:Gain");
 					//gain.appendChild(doc.createTextNode("0.48"));
 					//exposure.appendChild(gain);
-					Element iris = doc.createElement("tt:Iris");
+					Element iris = doc.createElementNS(TT, "tt:Iris");
 					iris.appendChild(doc.createTextNode(value));
 					exposure.appendChild(iris);
 				} else if ("auto".equalsIgnoreCase(value)) {
-					Element mode = doc.createElement("tt:Mode");
+					Element mode = doc.createElementNS(TT, "tt:Mode");
 					mode.appendChild(doc.createTextNode("AUTO"));
 					exposure.appendChild(mode);
 				} else {
-					Element mode = doc.createElement("tt:Mode");
+					Element mode = doc.createElementNS(TT, "tt:Mode");
 					mode.appendChild(doc.createTextNode("MANUAL"));
 					exposure.appendChild(mode);
 				}
@@ -214,12 +214,12 @@ public class ImagingService extends Service {
 	/** Document builder function for GetMoveOptions */
 	public Document getMoveOptionsDocument(String vToken) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getMoveOptions = doc.createElement("wsdl:GetMoveOptions");
+		Element getMoveOptions = doc.createElementNS(WSDL, "wsdl:GetMoveOptions");
 		body.appendChild(getMoveOptions);
 
-		Element videoSourceToken = doc.createElement("wsdl:VideoSourceToken");
+		Element videoSourceToken = doc.createElementNS(WSDL, "wsdl:VideoSourceToken");
 		videoSourceToken.appendChild(doc.createTextNode(vToken));
 		getMoveOptions.appendChild(videoSourceToken);
 
@@ -239,41 +239,41 @@ public class ImagingService extends Service {
 	/** Document builder function for Move request; takes move mode as a parameter. */
 	public Document getMoveDocument(String vToken, float distance, String mode) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element moveElement = doc.createElement("wsdl:Move");
+		Element moveElement = doc.createElementNS(WSDL, "wsdl:Move");
 		body.appendChild(moveElement);
 
-		Element videoSourceToken = doc.createElement("wsdl:VideoSourceToken");
+		Element videoSourceToken = doc.createElementNS(WSDL, "wsdl:VideoSourceToken");
 		videoSourceToken.appendChild(doc.createTextNode(vToken));
 		moveElement.appendChild(videoSourceToken);
 
-		Element focusElement = doc.createElement("wsdl:Focus");
+		Element focusElement = doc.createElementNS(WSDL, "wsdl:Focus");
 		moveElement.appendChild(focusElement);
 		// TODO: add autoselection with GetMoveOptions/verify Relative capability
 		switch (mode.toLowerCase()) {
 			case "absolute":
 				// TODO: use GetStatus to get current, then add distance
 				// (only necessary if camera doesn't support relative)
-				Element absolute = doc.createElement("tt:Absolute");
+				Element absolute = doc.createElementNS(TT, "tt:Absolute");
 				focusElement.appendChild(absolute);
-				Element position = doc.createElement("tt:Position");
+				Element position = doc.createElementNS(TT, "tt:Position");
 				position.appendChild(doc.createTextNode(String.valueOf(distance)));
 				absolute.appendChild(position);
 				break;
 			case "continuous":
 				// Treat distance like speed
-				Element continuous = doc.createElement("tt:Continuous");
+				Element continuous = doc.createElementNS(TT, "tt:Continuous");
 				focusElement.appendChild(continuous);
-				Element speed = doc.createElement("tt:Speed");
+				Element speed = doc.createElementNS(TT, "tt:Speed");
 				speed.appendChild(doc.createTextNode(String.valueOf(distance)));
 				continuous.appendChild(speed);
 				break;
 			case "relative":
 			default:
-				Element relative = doc.createElement("tt:Relative");
+				Element relative = doc.createElementNS(TT, "tt:Relative");
 				focusElement.appendChild(relative);
-				Element distanceElement = doc.createElement("tt:Distance");
+				Element distanceElement = doc.createElementNS(TT, "tt:Distance");
 				distanceElement.appendChild(doc.createTextNode(String.valueOf(distance)));
 				relative.appendChild(distanceElement);
 				break;
@@ -311,12 +311,12 @@ public class ImagingService extends Service {
 	/** Document builder function for GetStatus */
 	public Document getStatusDocument(String vToken) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getStatusElement = doc.createElement("wsdl:GetStatus");
+		Element getStatusElement = doc.createElementNS(WSDL, "wsdl:GetStatus");
 		body.appendChild(getStatusElement);
 
-		Element videoSourceToken = doc.createElement("wsdl:VideoSourceToken");
+		Element videoSourceToken = doc.createElementNS(WSDL, "wsdl:VideoSourceToken");
 		videoSourceToken.appendChild(doc.createTextNode(vToken));
 		getStatusElement.appendChild(videoSourceToken);
 
@@ -336,12 +336,12 @@ public class ImagingService extends Service {
 	/** Document builder function for Stop */
 	public Document getStopDocument(String vToken) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element stopElement = doc.createElement("wsdl:Stop");
+		Element stopElement = doc.createElementNS(WSDL, "wsdl:Stop");
 		body.appendChild(stopElement);
 
-		Element videoSourceToken = doc.createElement("wsdl:VideoSourceToken");
+		Element videoSourceToken = doc.createElementNS(WSDL, "wsdl:VideoSourceToken");
 		videoSourceToken.appendChild(doc.createTextNode(vToken));
 		stopElement.appendChild(videoSourceToken);
 

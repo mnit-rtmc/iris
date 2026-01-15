@@ -27,7 +27,7 @@ import org.w3c.dom.Element;
 public class MediaService extends Service {
 	public MediaService(String mediaServiceAddress, String u, String p) {
 		endpoint = mediaServiceAddress;
-		namespace = "http://www.onvif.org/ver10/media/wsdl";
+		WSDL = "http://www.onvif.org/ver10/media/wsdl";
 		username = u;
 		password = p;
 	}
@@ -41,9 +41,9 @@ public class MediaService extends Service {
 	/** Document builder function for GetProfiles */
 	public Document getProfilesDocument() {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getProfiles = doc.createElement("wsdl:GetProfiles");
+		Element getProfiles = doc.createElementNS(WSDL, "wsdl:GetProfiles");
 		body.appendChild(getProfiles);
 
 		return doc;
@@ -58,9 +58,9 @@ public class MediaService extends Service {
 	/** Document builder function for GetVideoSources */
 	public Document getVideoSourcesDocument() {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getVideoSources = doc.createElement("wsdl:GetVideoSources");
+		Element getVideoSources = doc.createElementNS(WSDL, "wsdl:GetVideoSources");
 		body.appendChild(getVideoSources);
 
 		return doc;

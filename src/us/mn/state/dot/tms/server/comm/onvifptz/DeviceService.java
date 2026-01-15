@@ -28,7 +28,7 @@ import org.w3c.dom.Element;
 public class DeviceService extends Service {
 	public DeviceService(String deviceServiceAddress, String u, String p) {
 		endpoint = deviceServiceAddress;
-		namespace = "http://www.onvif.org/ver10/device/wsdl";
+		WSDL = "http://www.onvif.org/ver10/device/wsdl";
 		username = u;
 		password = p;
 	}
@@ -42,9 +42,9 @@ public class DeviceService extends Service {
 	/** Document builder function for GetServices */
 	public Document getServicesDocument() {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getServices = doc.createElement("wsdl:GetServices");
+		Element getServices = doc.createElementNS(WSDL, "wsdl:GetServices");
 		body.appendChild(getServices);
 
 		return doc;
@@ -96,9 +96,9 @@ public class DeviceService extends Service {
 	/** Document builder function for GetScopes */
 	public Document getScopesDocument() {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getScopes = doc.createElement("wsdl:GetScopes");
+		Element getScopes = doc.createElementNS(WSDL, "wsdl:GetScopes");
 		body.appendChild(getScopes);
 
 		return doc;
@@ -110,12 +110,29 @@ public class DeviceService extends Service {
 		return sendRequestDocument(doc);
 	}
 
+	/** Document builder function for GetSystemDateAndTime */
+	public Document getSystemDateAndTimeDocument() {
+		Document doc = getBaseDocument();
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
+
+		Element getSystemDateAndTime = doc.createElementNS(WSDL, "wsdl:GetSystemDateAndTime");
+		body.appendChild(getSystemDateAndTime);
+
+		return doc;
+	}
+
+	/** Get the scope parameters of the device */
+	public String getSystemDateAndTime() throws IOException {
+		Document doc = getSystemDateAndTimeDocument();
+		return sendRequestDocument(doc, false, getSOAPAction(doc));
+	}
+
 	/** Document builder function for GetServiceCapabilities */
 	public Document getServiceCapabilitiesDocument() {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getServiceCapabilities = doc.createElement("wsdl:GetServiceCapabilities");
+		Element getServiceCapabilities = doc.createElementNS(WSDL, "wsdl:GetServiceCapabilities");
 		body.appendChild(getServiceCapabilities);
 
 		return doc;
@@ -130,10 +147,14 @@ public class DeviceService extends Service {
 	/** Document builder function for GetCapabilities */
 	public Document getCapabilitiesDocument() {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getCapabilities = doc.createElement("wsdl:GetCapabilities");
+		Element getCapabilities = doc.createElementNS(WSDL, "GetCapabilities");
 		body.appendChild(getCapabilities);
+
+		Element category = doc.createElement("Category");
+		category.setTextContent("All");
+		getCapabilities.appendChild(category);
 
 		return doc;
 	}
@@ -141,18 +162,18 @@ public class DeviceService extends Service {
 	/** Get the capabilities of the device */
 	public String getCapabilities() throws IOException {
 		Document doc = getCapabilitiesDocument();
-		return sendRequestDocument(doc);
+		return sendRequestDocument(doc, getSOAPAction(doc));
 	}
 
 	/** Document builder function for SendAuxiliaryCommand */
 	public Document getAuxiliaryCommandDocument(String command, String state) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element sendAuxiliaryCommand = doc.createElement("wsdl:SendAuxiliaryCommand");
+		Element sendAuxiliaryCommand = doc.createElementNS(WSDL, "wsdl:SendAuxiliaryCommand");
 		body.appendChild(sendAuxiliaryCommand);
 
-		Element auxiliaryCommand = doc.createElement("wsdl:AuxiliaryCommand");
+		Element auxiliaryCommand = doc.createElementNS(WSDL, "wsdl:AuxiliaryCommand");
 		sendAuxiliaryCommand.appendChild(auxiliaryCommand);
 		auxiliaryCommand.appendChild(doc.createTextNode("tt:" + command + "|" + state));
 
@@ -161,9 +182,9 @@ public class DeviceService extends Service {
 
 	public Document getSystemRebootDocument() {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element systemRebootElem = doc.createElement("wsdl:SystemReboot");
+		Element systemRebootElem = doc.createElementNS(WSDL, "wsdl:SystemReboot");
 		body.appendChild(systemRebootElem);
 
 		return doc;

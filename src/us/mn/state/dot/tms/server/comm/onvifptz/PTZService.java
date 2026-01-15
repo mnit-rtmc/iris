@@ -29,7 +29,7 @@ import org.w3c.dom.NodeList;
 public class PTZService extends Service {
 	public PTZService(String ptzServiceAddress, String u, String p) {
 		endpoint = ptzServiceAddress;
-		namespace = "http://www.onvif.org/ver20/ptz/wsdl";
+		WSDL = "http://www.onvif.org/ver20/ptz/wsdl";
 		username = u;
 		password = p;
 	}
@@ -43,9 +43,9 @@ public class PTZService extends Service {
 	/** Document builder function for GetConfigurations */
 	public Document getConfigurationsDocument() {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element elem = doc.createElement("wsdl:GetConfigurations");
+		Element elem = doc.createElementNS(WSDL, "wsdl:GetConfigurations");
 		body.appendChild(elem);
 
 		return doc;
@@ -60,12 +60,12 @@ public class PTZService extends Service {
 	/** Document builder function for GetConfigurationOptions */
 	public Document getConfigurationOptionsDocument(String cToken) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element configOptions = doc.createElement("wsdl:GetConfigurationOptions");
+		Element configOptions = doc.createElementNS(WSDL, "wsdl:GetConfigurationOptions");
 		body.appendChild(configOptions);
 
-		Element configToken = doc.createElement("wsdl:ConfigurationToken");
+		Element configToken = doc.createElementNS(WSDL, "wsdl:ConfigurationToken");
 		configToken.appendChild(doc.createTextNode(cToken));
 		configOptions.appendChild(configToken);
 
@@ -86,9 +86,9 @@ public class PTZService extends Service {
 	/** Document builder function for GetNodes */
 	public Document getNodesDocument() {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getNodes = doc.createElement("wsdl:GetNodes");
+		Element getNodes = doc.createElementNS(WSDL, "wsdl:GetNodes");
 		body.appendChild(getNodes);
 
 		return doc;
@@ -103,12 +103,12 @@ public class PTZService extends Service {
 	/** Document builder function for GetNode */
 	public Document getNodeDocument(String nToken) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getNode = doc.createElement("wsdl:GetNode");
+		Element getNode = doc.createElementNS(WSDL, "wsdl:GetNode");
 		body.appendChild(getNode);
 
-		Element nodeToken = doc.createElement("wsdl:NodeToken");
+		Element nodeToken = doc.createElementNS(WSDL, "wsdl:NodeToken");
 		nodeToken.appendChild(doc.createTextNode(nToken));
 		getNode.appendChild(nodeToken);
 
@@ -128,25 +128,25 @@ public class PTZService extends Service {
 	/** Document builder function for ContinuousMove */
 	public Document getContinuousMoveDocument(String profile, String xVel, String yVel, String zVel) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element continuousMove = doc.createElement("wsdl:ContinuousMove");
+		Element continuousMove = doc.createElementNS(WSDL, "wsdl:ContinuousMove");
 		body.appendChild(continuousMove);
 
-		Element profileToken = doc.createElement("wsdl:ProfileToken");
+		Element profileToken = doc.createElementNS(WSDL, "wsdl:ProfileToken");
 		profileToken.appendChild(doc.createTextNode(profile));
 		continuousMove.appendChild(profileToken);
 
-		Element velocity = doc.createElement("wsdl:Velocity");
+		Element velocity = doc.createElementNS(WSDL, "wsdl:Velocity");
 		continuousMove.appendChild(velocity);
 
-		Element panTilt = doc.createElement("tt:PanTilt");
+		Element panTilt = doc.createElementNS(TT, "tt:PanTilt");
 		panTilt.setAttribute("x", xVel);
 		panTilt.setAttribute("y", yVel);
 		panTilt.setAttribute("space", "http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace");
 		velocity.appendChild(panTilt);
 
-		Element zoom = doc.createElement("tt:Zoom");
+		Element zoom = doc.createElementNS(TT, "tt:Zoom");
 		zoom.setAttribute("x", zVel);
 		zoom.setAttribute("space", "http://www.onvif.org/ver10/tptz/ZoomSpaces/VelocityGenericSpace");
 		velocity.appendChild(zoom);
@@ -172,25 +172,25 @@ public class PTZService extends Service {
 	/** Document builder function for RelativeMove */
 	public Document getRelativeMoveDocument(String profile, float x, float y, float z) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element relativeMove = doc.createElement("wsdl:RelativeMove");
+		Element relativeMove = doc.createElementNS(WSDL, "wsdl:RelativeMove");
 		body.appendChild(relativeMove);
 
-		Element profileToken = doc.createElement("wsdl:ProfileToken");
+		Element profileToken = doc.createElementNS(WSDL, "wsdl:ProfileToken");
 		profileToken.appendChild(doc.createTextNode(profile));
 		relativeMove.appendChild(profileToken);
 
-		Element translation = doc.createElement("wsdl:Translation");
+		Element translation = doc.createElementNS(WSDL, "wsdl:Translation");
 		relativeMove.appendChild(translation);
 
-		Element panTilt = doc.createElement("tt:PanTilt");
+		Element panTilt = doc.createElementNS(TT, "tt:PanTilt");
 		panTilt.setAttribute("x", String.valueOf(x));
 		panTilt.setAttribute("y", String.valueOf(y));
 		panTilt.setAttribute("space", "http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace");
 		translation.appendChild(panTilt);
 
-		Element zoom = doc.createElement("tt:Zoom");
+		Element zoom = doc.createElementNS(TT, "tt:Zoom");
 		zoom.setAttribute("x", String.valueOf(z));
 		zoom.setAttribute("space", "http://www.onvif.org/ver10/tptz/ZoomSpaces/VelocityGenericSpace");
 		translation.appendChild(zoom);
@@ -215,12 +215,12 @@ public class PTZService extends Service {
 	/** Document builder function for GetPresets */
 	public Document getPresetsDocument(String profile) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element getPresetsElement = doc.createElement("wsdl:GetPresets");
+		Element getPresetsElement = doc.createElementNS(WSDL, "wsdl:GetPresets");
 		body.appendChild(getPresetsElement);
 
-		Element profileToken = doc.createElement("wsdl:ProfileToken");
+		Element profileToken = doc.createElementNS(WSDL, "wsdl:ProfileToken");
 		profileToken.appendChild(doc.createTextNode(profile));
 		getPresetsElement.appendChild(profileToken);
 
@@ -239,16 +239,16 @@ public class PTZService extends Service {
 	/** Document builder function for GotoPreset */
 	public Document gotoPresetDocument(String profToken, String pToken) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element gotoPresetElement = doc.createElement("wsdl:GotoPreset");
+		Element gotoPresetElement = doc.createElementNS(WSDL, "wsdl:GotoPreset");
 		body.appendChild(gotoPresetElement);
 
-		Element profileToken = doc.createElement("wsdl:ProfileToken");
+		Element profileToken = doc.createElementNS(WSDL, "wsdl:ProfileToken");
 		profileToken.appendChild(doc.createTextNode(profToken));
 		gotoPresetElement.appendChild(profileToken);
 
-		Element presetToken = doc.createElement("wsdl:PresetToken");
+		Element presetToken = doc.createElementNS(WSDL, "wsdl:PresetToken");
 		presetToken.appendChild(doc.createTextNode(pToken));
 		gotoPresetElement.appendChild(presetToken);
 
@@ -327,16 +327,16 @@ public class PTZService extends Service {
 	/** Document builder function for RemovePreset */
 	public Document removePresetDocument(String profToken, String pToken) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element removePresetElement = doc.createElement("wsdl:RemovePreset");
+		Element removePresetElement = doc.createElementNS(WSDL, "wsdl:RemovePreset");
 		body.appendChild(removePresetElement);
 
-		Element profileToken = doc.createElement("wsdl:ProfileToken");
+		Element profileToken = doc.createElementNS(WSDL, "wsdl:ProfileToken");
 		profileToken.appendChild(doc.createTextNode(profToken));
 		removePresetElement.appendChild(profileToken);
 
-		Element presetToken = doc.createElement("wsdl:PresetToken");
+		Element presetToken = doc.createElementNS(WSDL, "wsdl:PresetToken");
 		presetToken.appendChild(doc.createTextNode(pToken));
 		removePresetElement.appendChild(presetToken);
 
@@ -359,23 +359,23 @@ public class PTZService extends Service {
 	/** Document builder function for SetPreset */
 	public Document setPresetDocument(String profToken, String pToken, String pName) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element setPresetElement = doc.createElement("wsdl:SetPreset");
+		Element setPresetElement = doc.createElementNS(WSDL, "wsdl:SetPreset");
 		body.appendChild(setPresetElement);
 
-		Element profileToken = doc.createElement("wsdl:ProfileToken");
+		Element profileToken = doc.createElementNS(WSDL, "wsdl:ProfileToken");
 		profileToken.appendChild(doc.createTextNode(profToken));
 		setPresetElement.appendChild(profileToken);
 
 		// No token if creating new preset
 		if (pToken != null) {
-			Element presetToken = doc.createElement("wsdl:PresetToken");
+			Element presetToken = doc.createElementNS(WSDL, "wsdl:PresetToken");
 			presetToken.appendChild(doc.createTextNode(pToken));
 			setPresetElement.appendChild(presetToken);
 		}
 
-		Element presetName = doc.createElement("wsdl:PresetName");
+		Element presetName = doc.createElementNS(WSDL, "wsdl:PresetName");
 		presetName.appendChild(doc.createTextNode(pName));
 		setPresetElement.appendChild(presetName);
 
@@ -404,20 +404,20 @@ public class PTZService extends Service {
 	/** Document builder function for Stop */
 	public Document getStopDocument(String profile) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element stop = doc.createElement("wsdl:Stop");
+		Element stop = doc.createElementNS(WSDL, "wsdl:Stop");
 		body.appendChild(stop);
 
-		Element profileToken = doc.createElement("wsdl:ProfileToken");
+		Element profileToken = doc.createElementNS(WSDL, "wsdl:ProfileToken");
 		profileToken.appendChild(doc.createTextNode(profile));
 		stop.appendChild(profileToken);
 
-		Element panTilt = doc.createElement("wsdl:PanTilt");
+		Element panTilt = doc.createElementNS(WSDL, "wsdl:PanTilt");
 		panTilt.appendChild(doc.createTextNode("true"));
 		stop.appendChild(panTilt);
 
-		Element zoom = doc.createElement("wsdl:Zoom");
+		Element zoom = doc.createElementNS(WSDL, "wsdl:Zoom");
 		zoom.appendChild(doc.createTextNode("true"));
 		stop.appendChild(zoom);
 
@@ -437,16 +437,16 @@ public class PTZService extends Service {
 	 */
 	public Document getAuxiliaryCommandDocument(String profToken, String command, String state) {
 		Document doc = getBaseDocument();
-		Element body = (Element) doc.getElementsByTagName("SOAP-ENV:Body").item(0);
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
 
-		Element sendAuxiliaryCommand = doc.createElement("wsdl:SendAuxiliaryCommand");
+		Element sendAuxiliaryCommand = doc.createElementNS(WSDL, "wsdl:SendAuxiliaryCommand");
 		body.appendChild(sendAuxiliaryCommand);
 
-		Element profileToken = doc.createElement("wsdl:ProfileToken");
+		Element profileToken = doc.createElementNS(WSDL, "wsdl:ProfileToken");
 		profileToken.appendChild(doc.createTextNode(profToken));
 		sendAuxiliaryCommand.appendChild(profileToken);
 
-		Element auxiliaryData = doc.createElement("wsdl:AuxiliaryData");
+		Element auxiliaryData = doc.createElementNS(WSDL, "wsdl:AuxiliaryData");
 		auxiliaryData.appendChild(doc.createTextNode("tt:" + command + "|" + state));
 		sendAuxiliaryCommand.appendChild(auxiliaryData);
 
