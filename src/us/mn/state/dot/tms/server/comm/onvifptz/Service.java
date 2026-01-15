@@ -64,18 +64,30 @@ public abstract class Service {
 	}
 
 	protected String getSOAPAction(Document doc) {
-		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
-		Element action = null;
-
-		NodeList children = body.getChildNodes();
-		for (int i = 0; i < children.getLength(); i++) {
-			Node n = children.item(i);
-			if (n.getNodeType() == Node.ELEMENT_NODE) {
-				action = (Element) n;
-				break;
-			}
+		if (doc == null) {
+			log("Document is null, cannot build SOAP action");
+			return null;
 		}
-		return action.getNamespaceURI() + "/" + action.getLocalName();
+
+		try {
+			Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
+			Element action = null;
+
+			NodeList children = body.getChildNodes();
+			for (int i = 0; i < children.getLength(); i++) {
+				Node n = children.item(i);
+				if (n.getNodeType() == Node.ELEMENT_NODE) {
+					action = (Element) n;
+					break;
+				}
+			}
+			return action.getNamespaceURI() + "/" + action.getLocalName();
+		} catch (Exception e) {
+			log("Error building SOAP action from document: " + e.getMessage());
+			log("doc:\n" + DOMUtils.getString(doc) + "\n");
+		}
+
+		return null;
 	}
 
 	/**
@@ -185,14 +197,14 @@ public abstract class Service {
 	 * Adds security headers by default
 	 */
 	public String sendRequestDocument(Document doc) throws IOException {
-		return sendRequestDocument(doc, true, "");
+		return sendRequestDocument(doc, true, getSOAPAction(doc));
 	}
 
 	/**
 	 * Send request document and only specify security
 	 */
 	public String sendRequestDocument(Document doc, boolean doSecurity) throws IOException {
-		return sendRequestDocument(doc, doSecurity, "");
+		return sendRequestDocument(doc, doSecurity, getSOAPAction(doc));
 	}
 
 	/**
@@ -217,7 +229,7 @@ public abstract class Service {
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("POST");
 		connection.setDoOutput(true);
-		if (!"".equals(soapAction)) {
+		if (soapAction != null && !soapAction.isEmpty()) {
 			connection.setRequestProperty("Content-Type",
 					"application/soap+xml; charset=utf-8; action=\"" + soapAction + "\"");
 			connection.setRequestProperty("SOAPAction",
