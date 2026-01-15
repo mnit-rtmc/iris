@@ -124,7 +124,7 @@ public class DeviceService extends Service {
 	/** Get the scope parameters of the device */
 	public String getSystemDateAndTime() throws IOException {
 		Document doc = getSystemDateAndTimeDocument();
-		return sendRequestDocument(doc, false, getSOAPAction(doc));
+		return sendRequestDocument(doc, false);
 	}
 
 	/** Document builder function for GetServiceCapabilities */
@@ -162,7 +162,7 @@ public class DeviceService extends Service {
 	/** Get the capabilities of the device */
 	public String getCapabilities() throws IOException {
 		Document doc = getCapabilitiesDocument();
-		return sendRequestDocument(doc, getSOAPAction(doc));
+		return sendRequestDocument(doc);
 	}
 
 	/** Document builder function for SendAuxiliaryCommand */
