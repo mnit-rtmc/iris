@@ -37,6 +37,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -48,13 +49,33 @@ import org.w3c.dom.Element;
  */
 public abstract class Service {
 	protected String endpoint;
-	protected String namespace;
 	protected String username;
 	protected String password;
+	protected String WSDL;
+	protected final String SOAP = "http://www.w3.org/2003/05/soap-envelope";
+	protected final String TT = "http://www.onvif.org/ver10/schema";
+	protected final String WSSE = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
+	protected final String WSU = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+	static int nonceLength = 16;
 
 	/** Logger method */
 	protected void log(String s) {
 		OnvifPTZPoller.slog("Service:" + s);
+	}
+
+	protected String getSOAPAction(Document doc) {
+		Element body = (Element) doc.getElementsByTagNameNS(SOAP, "Body").item(0);
+		Element action = null;
+
+		NodeList children = body.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node n = children.item(i);
+			if (n.getNodeType() == Node.ELEMENT_NODE) {
+				action = (Element) n;
+				break;
+			}
+		}
+		return action.getNamespaceURI() + "/" + action.getLocalName();
 	}
 
 	/**
@@ -63,6 +84,7 @@ public abstract class Service {
 	 */
 	protected Document getBaseDocument() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
 		DocumentBuilder db;
 		try {
 			db = dbf.newDocumentBuilder();
@@ -74,26 +96,26 @@ public abstract class Service {
 		db.setErrorHandler(new DOMUtils.OnvifErrorHandler("New base document"));
 		Document d = db.newDocument();
 		d.setXmlStandalone(true);
-		Element envelope = d.createElementNS("http://www.w3.org/2003/05/soap-envelope", "SOAP-ENV:Envelope");
-		envelope.setAttribute("xmlns:wsdl", namespace);
-		envelope.setAttribute("xmlns:tt", "http://www.onvif.org/ver10/schema");
+		Element envelope = d.createElementNS(SOAP, "s:Envelope");
 		d.appendChild(envelope);
-		Element header = d.createElement("SOAP-ENV:Header");
+		Element header = d.createElementNS(SOAP, "s:Header");
 		envelope.appendChild(header);
 
-		Element body = d.createElement("SOAP-ENV:Body");
+		Element body = d.createElementNS(SOAP, "s:Body");
+		body.setAttribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
+		body.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		envelope.appendChild(body);
 
 		return d;
 	}
 
-	/** Generates a random 16-byte string for use as a nonce in password digest */
+	/** Generates a random nonceLength-byte string for use as a nonce in password digest */
 	private static String getNonce() {
 		Random random = new SecureRandom();
 		StringBuilder nonce = new StringBuilder();
 
 		char[] allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < nonceLength; i++) {
 			nonce.append(allowedChars[random.nextInt(allowedChars.length)]);
 		}
 
@@ -113,31 +135,27 @@ public abstract class Service {
 	 * @param doc the document for which to add headers
 	 */
 	protected Document addSecurityHeaderDocument(Document doc) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		Element env = (Element) doc.getElementsByTagName("SOAP-ENV:Envelope").item(0);
-		env.setAttribute("xmlns:wsse",
-			"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
-		env.setAttribute("xmlns:wsu",
-			"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
-
-		Element head = (Element) env.getElementsByTagName("SOAP-ENV:Header").item(0);
-		Element sec = doc.createElement("wsse:Security");
-		sec.setAttribute("SOAP-ENV:mustUnderstand", "1");
+		Element env = (Element) doc.getElementsByTagNameNS(SOAP, "Envelope").item(0);
+		Element head = (Element) env.getElementsByTagNameNS(SOAP, "Header").item(0);
+		Element sec = doc.createElementNS(WSSE, "Security");
+		sec.setAttributeNS(SOAP, "s:mustUnderstand", "1");
 		head.appendChild(sec);
-		Element usernameToken = doc.createElement("wsse:UsernameToken");
+		Element usernameToken = doc.createElement("UsernameToken");
 		sec.appendChild(usernameToken);
-		Element usernameElement = doc.createElement("wsse:Username");
+		Element usernameElement = doc.createElement("Username");
 		usernameElement.appendChild(doc.createTextNode(username));
 		usernameToken.appendChild(usernameElement);
-		Element passwordElement = doc.createElement("wsse:Password");
+		Element passwordElement = doc.createElement("Password");
 		usernameToken.appendChild(passwordElement);
-		Element nonce = doc.createElement("wsse:Nonce");
+		Element nonce = doc.createElement("Nonce");
 		usernameToken.appendChild(nonce);
-		Element created = doc.createElement("wsu:Created");
+		Element created = doc.createElementNS(WSU, "Created");
 		usernameToken.appendChild(created);
 
 		// Generate and encode nonce, inserting it into the Nonce element
 		Base64.Encoder e = Base64.getEncoder();
-		byte[] nonceBinaryData = getNonce().getBytes("UTF-8");
+		String n = getNonce();
+		byte[] nonceBinaryData = n.getBytes("UTF-8");
 		String nonceBase64 = e.encodeToString(nonceBinaryData);
 		nonce.setAttribute("EncodingType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary");
 		nonce.appendChild(doc.createTextNode(nonceBase64));
@@ -162,13 +180,36 @@ public abstract class Service {
 	}
 
 	/**
+	 * Default class to send a built request document
+	 *
+	 * Adds security headers by default
+	 */
+	public String sendRequestDocument(Document doc) throws IOException {
+		return sendRequestDocument(doc, true, "");
+	}
+
+	/**
+	 * Send request document and only specify security
+	 */
+	public String sendRequestDocument(Document doc, boolean doSecurity) throws IOException {
+		return sendRequestDocument(doc, doSecurity, "");
+	}
+
+	/**
+	 * Send request document and only specify SOAP Action
+	 */
+	public String sendRequestDocument(Document doc, String soapAction) throws IOException {
+		return sendRequestDocument(doc, true, soapAction);
+	}
+
+	/**
 	 * Sends an XML message to the handler URL, specified in the service fields;
 	 * adds authentication headers if specified.
 	 *
 	 * @param doc the XML DOM Document to send
 	 * @return the response from the device, as a String
 	 */
-	public String sendRequestDocument(Document doc) throws IOException {
+	public String sendRequestDocument(Document doc, boolean doSecurity, String soapAction) throws IOException {
 		if (endpoint == null) return "No service endpoint specified";
 		String resp = "";
 
@@ -176,9 +217,20 @@ public abstract class Service {
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("POST");
 		connection.setDoOutput(true);
-		connection.setRequestProperty("Content-Type", "application/soap+xml; charset=utf-8");
+		if (!"".equals(soapAction)) {
+			connection.setRequestProperty("Content-Type",
+					"application/soap+xml; charset=utf-8; action=\"" + soapAction + "\"");
+			connection.setRequestProperty("SOAPAction",
+					"\"" + soapAction + "\"");
+		} else {
+			connection.setRequestProperty("Content-Type",
+					"application/soap+xml; charset=utf-8");
+		}
+		connection.setRequestProperty("Connection", "Close");
+		connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+		connection.setRequestProperty("Accept", "application/soap+xml");
 
-		if (!"".equals(username)) {
+		if (doSecurity && !"".equals(username)) {
 			try {
 				addSecurityHeaderDocument(doc);
 			}

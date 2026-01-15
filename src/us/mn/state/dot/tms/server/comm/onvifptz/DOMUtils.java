@@ -89,6 +89,11 @@ public class DOMUtils {
 		return null;
 	}
 
+	/** Prints a Node */
+	public static void printNode(Node n) {
+		OnvifPTZPoller.slog(getString(n));
+	}
+
 	/** Gets Document from string */
 	public static Document getDocument(String s) throws IOException {
 		if (s == null) return null;
