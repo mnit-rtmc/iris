@@ -2534,6 +2534,7 @@ CREATE TABLE iris._beacon (
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
     message VARCHAR(128) NOT NULL,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
+    device VARCHAR(20) REFERENCES iris.controller_io,
     verify_pin INTEGER,
     ext_mode BOOLEAN NOT NULL,
     state INTEGER NOT NULL REFERENCES iris.beacon_state
@@ -2551,6 +2552,7 @@ CREATE FUNCTION iris.beacon_notify() RETURNS TRIGGER AS
 BEGIN
     IF (NEW.message IS DISTINCT FROM OLD.message) OR
        (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.device IS DISTINCT FROM OLD.device) OR
        (NEW.state IS DISTINCT FROM OLD.state)
     THEN
         NOTIFY beacon;
@@ -2570,8 +2572,8 @@ CREATE TRIGGER beacon_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW iris.beacon AS
-    SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin,
-           ext_mode, preset, state
+    SELECT b.name, geo_loc, controller, pin, notes, message, device,
+           verify_pin, ext_mode, preset, state
     FROM iris._beacon b
     JOIN iris.controller_io cio ON b.name = cio.name
     JOIN iris.device_preset p ON b.name = p.name;
@@ -2583,9 +2585,9 @@ BEGIN
         VALUES (NEW.name, 'beacon', NEW.controller, NEW.pin);
     INSERT INTO iris.device_preset (name, resource_n, preset)
         VALUES (NEW.name, 'beacon', NEW.preset);
-    INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin,
-                              ext_mode, state)
-        VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message,
+    INSERT INTO iris._beacon (name, geo_loc, notes, message, device,
+                              verify_pin, ext_mode, state)
+        VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message, NEW.device,
                 NEW.verify_pin, NEW.ext_mode, NEW.state);
     RETURN NEW;
 END;
@@ -2608,6 +2610,7 @@ BEGIN
     UPDATE iris._beacon
        SET notes = NEW.notes,
            message = NEW.message,
+           device = NEW.device,
            verify_pin = NEW.verify_pin,
            ext_mode = NEW.ext_mode,
            state = NEW.state
@@ -2625,9 +2628,9 @@ CREATE TRIGGER beacon_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW beacon_view AS
-    SELECT b.name, b.notes, b.message, cp.camera, cp.preset_num, b.geo_loc,
-           l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-           l.landmark, l.lat, l.lon, l.corridor, l.location,
+    SELECT b.name, b.notes, b.message, b.device, cp.camera, cp.preset_num,
+           b.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+           l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
            cio.controller, cio.pin, b.verify_pin, b.ext_mode,
            c.comm_link, c.drop_id, cnd.description AS condition,
            bs.description AS state
@@ -3166,8 +3169,6 @@ CREATE TABLE iris._dms (
     geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     static_graphic VARCHAR(20) REFERENCES iris.graphic,
-    -- FIXME: only allow one reference to a beacon
-    beacon VARCHAR(20) REFERENCES iris._beacon,
     sign_config VARCHAR(16) REFERENCES iris.sign_config,
     sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
     msg_sched VARCHAR(20) REFERENCES iris.sign_message,
@@ -3207,7 +3208,7 @@ CREATE TRIGGER dms_table_notify_trig
 
 CREATE VIEW iris.dms AS
     SELECT d.name, geo_loc, controller, pin, notes, static_graphic,
-           beacon, preset, sign_config, sign_detail,
+           preset, sign_config, sign_detail,
            msg_sched, msg_current, lock, status, pixel_failures
     FROM iris._dms d
     JOIN iris.controller_io cio ON d.name = cio.name
@@ -3221,11 +3222,11 @@ BEGIN
     INSERT INTO iris.device_preset (name, resource_n, preset)
          VALUES (NEW.name, 'dms', NEW.preset);
     INSERT INTO iris._dms (
-        name, geo_loc, notes, static_graphic, beacon, sign_config,
-        sign_detail, msg_sched, msg_current, lock, status, pixel_failures
+        name, geo_loc, notes, static_graphic, sign_config, sign_detail,
+        msg_sched, msg_current, lock, status, pixel_failures
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.static_graphic,
-        NEW.beacon, NEW.sign_config, NEW.sign_detail, NEW.msg_sched,
+        NEW.sign_config, NEW.sign_detail, NEW.msg_sched,
         NEW.msg_current, NEW.lock, NEW.status, NEW.pixel_failures
     );
     RETURN NEW;
@@ -3249,7 +3250,6 @@ BEGIN
     UPDATE iris._dms
        SET notes = NEW.notes,
            static_graphic = NEW.static_graphic,
-           beacon = NEW.beacon,
            sign_config = NEW.sign_config,
            sign_detail = NEW.sign_detail,
            msg_sched = NEW.msg_sched,
@@ -3272,7 +3272,7 @@ CREATE TRIGGER dms_delete_trig
 
 CREATE VIEW dms_view AS
     SELECT d.name, d.geo_loc, cio.controller, cio.pin, d.notes,
-           d.sign_config, d.sign_detail, d.static_graphic, d.beacon,
+           d.sign_config, d.sign_detail, d.static_graphic,
            cp.camera, cp.preset_num, default_font,
            msg_sched, msg_current, lock, status, pixel_failures,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street,
@@ -4363,8 +4363,6 @@ CREATE TABLE iris._ramp_meter (
     algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
     am_target INTEGER NOT NULL CHECK (am_target >= 0),
     pm_target INTEGER NOT NULL CHECK (pm_target >= 0),
-    -- FIXME: only allow one reference to a beacon
-    beacon VARCHAR(20) REFERENCES iris._beacon,
     lock JSONB,
     status JSONB
 );
@@ -4401,8 +4399,7 @@ CREATE TRIGGER ramp_meter_table_notify_trig
 
 CREATE VIEW iris.ramp_meter AS
     SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
-           max_wait, algorithm, am_target, pm_target, beacon, preset,
-           lock, status
+           max_wait, algorithm, am_target, pm_target, preset, lock, status
     FROM iris._ramp_meter m
     JOIN iris.controller_io cio ON m.name = cio.name
     JOIN iris.device_preset p ON m.name = p.name;
@@ -4416,10 +4413,10 @@ BEGIN
          VALUES (NEW.name, 'ramp_meter', NEW.preset);
     INSERT INTO iris._ramp_meter (
         name, geo_loc, notes, meter_type, storage, max_wait, algorithm,
-        am_target, pm_target, beacon, lock, status
+        am_target, pm_target, lock, status
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.meter_type, NEW.storage,
-        NEW.max_wait, NEW.algorithm, NEW.am_target, NEW.pm_target, NEW.beacon,
+        NEW.max_wait, NEW.algorithm, NEW.am_target, NEW.pm_target,
         NEW.lock, NEW.status
     );
     RETURN NEW;
@@ -4448,7 +4445,6 @@ BEGIN
            algorithm = NEW.algorithm,
            am_target = NEW.am_target,
            pm_target = NEW.pm_target,
-           beacon = NEW.beacon,
            lock = NEW.lock,
            status = NEW.status
      WHERE name = OLD.name;
@@ -4467,7 +4463,7 @@ CREATE TRIGGER ramp_meter_delete_trig
 CREATE VIEW ramp_meter_view AS
     SELECT m.name, geo_loc, cio.controller, cio.pin, notes,
            mt.description AS meter_type, storage, max_wait,
-           alg.description AS algorithm, am_target, pm_target, beacon,
+           alg.description AS algorithm, am_target, pm_target,
            camera, preset_num, lock, status,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
            l.landmark, l.lat, l.lon, l.corridor, l.location, l.rd
