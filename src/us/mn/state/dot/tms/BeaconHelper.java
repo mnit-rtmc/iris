@@ -40,8 +40,8 @@ public class BeaconHelper extends BaseHelper {
 			Beacon.SONAR_TYPE));
 	}
 
-	/** Get a beacon iterator for an associated device */
-	static public Iterator<Beacon> iterator(final Device dev) {
+	/** Get a beacon iterator for an associated device name */
+	static public Iterator<Beacon> iterator(final String dev) {
 		return new Iterator<Beacon>() {
 			final Iterator<Beacon> it = iterator();
 			boolean has_next;
@@ -49,7 +49,7 @@ public class BeaconHelper extends BaseHelper {
 			private Beacon filterNext() {
 				while (it.hasNext()) {
 					Beacon b = it.next();
-					if (b.getDevice() == dev) {
+					if (objectEquals(b.getDevice(), dev)) {
 						has_next = true;
 						return b;
 					}

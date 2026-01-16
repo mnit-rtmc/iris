@@ -373,7 +373,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Update remote beacons */
 	private void updateBeacons() {
-		Iterator<Beacon> it = BeaconHelper.iterator(this);
+		Iterator<Beacon> it = BeaconHelper.iterator(name);
 		while (it.hasNext()) {
 			Beacon b = it.next();
 			boolean f = isOnline() && isMsgBeacon();

@@ -45,11 +45,11 @@ public interface Beacon extends Device {
 	/** Get the message text */
 	String getMessage();
 
-	/** Set associated device */
-	void setDevice(Device d);
+	/** Set associated device name */
+	void setDevice(String d);
 
-	/** Get associated device */
-	Device getDevice();
+	/** Get associated device name */
+	String getDevice();
 
 	/** Set the controller I/O verify pin number */
 	void setVerifyPin(Integer p);
