@@ -32,7 +32,7 @@ The following features are supported:
 | 👁️  View      | name, location, msg\_current, has_faults | sign\_config, sign\_detail, geo\_loc, msg\_sched, status, pix\_failures |
 | 👉 Operate   | lock                                     | device\_request † |
 | 💡 Manage    |                                          | preset        |
-| 🔧 Configure | controller, notes                        | pin, static\_graphic, beacon |
+| 🔧 Configure | controller, notes                        | pin, static\_graphic |
 
 † _Write only_
 
@@ -47,11 +47,16 @@ The DMS properties form has setup information.
 Field          | Description
 ---------------|---------------------------------------------------
 Notes          | administrator notes, possibly including [hashtag]s
-Remote beacon  | beacon activated automatically when sign deployed
 Static graphic | image of static sign in which DMS is inset
 
-**Internal** beacons are controlled through the DMS controller using the [NTCIP]
-protocol.  **Remote** [beacon]s are controlled using a separate [comm link].
+### Beacons
+
+- **Internal** beacons are controlled through the DMS controller using the
+               [NTCIP] protocol.
+- **External** [beacon]s are controlled using a separate [comm link].
+
+In either case, the beacon will flash whenever a message with "flash beacon"
+enabled is displayed.
 
 ## Status JSON
 

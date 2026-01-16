@@ -10,8 +10,8 @@ with a sign config.  They can be:
   [hashtag]
 * Scheduled by [device actions] as part of an [action plan]
 
-If **flash beacon** is selected, the sign's _internal_ beacon will also be
-activated.
+If **flash beacon** is selected, any associated [beacon] (_internal_ or
+_external_) will also be activated.
 
 **Pixel service** indicates that the sign should perform scheduled pixel
 service while the message is active.  This is useful for messages that are
@@ -127,6 +127,7 @@ of the operator message.
 
 
 [action plan]: action_plans.html
+[beacon]: beacons.html
 [composing messages]: dms.html#composing-messages
 [device actions]: action_plans.html#device-actions
 [hashtag]: hashtags.html
