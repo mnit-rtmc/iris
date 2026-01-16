@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,12 +69,6 @@ public interface RampMeter extends Device {
 
 	/** Get the PM target rate */
 	int getPmTarget();
-
-	/** Set advance warning beacon */
-	void setBeacon(Beacon b);
-
-	/** Get advance warning beacon */
-	Beacon getBeacon();
 
 	/** Set verification camera preset */
 	void setPreset(CameraPreset cp);

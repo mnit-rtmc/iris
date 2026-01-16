@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -138,23 +137,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Field for PM target rate */
 	private final JTextField pm_target_txt = new JTextField(6);
 
-	/** Beacon action */
-	private final IAction beacon_act = new IAction("ramp.meter.beacon") {
-		protected void doActionPerformed(ActionEvent e) {
-			proxy.setBeacon(beacon_mdl.getSelectedProxy());
-		}
-		@Override
-		protected void doUpdateSelected() {
-			beacon_mdl.setSelectedItem(proxy.getBeacon());
-		}
-	};
-
-	/** Advance warning beacon combo box */
-	private final JComboBox<Beacon> beacon_cbx = new JComboBox<Beacon>();
-
-	/** Advance warning beacon combo box model */
-	private final IComboBoxModel<Beacon> beacon_mdl;
-
 	/** Lock reason component */
 	private final JLabel lock_lbl = new JLabel();
 
@@ -184,8 +166,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		loc_pnl = new LocationPanel(s);
 		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
-		beacon_mdl = new IComboBoxModel<Beacon>(
-			state.getBeaconModel());
 	}
 
 	/** Get the SONAR type cache */
@@ -272,8 +252,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private JPanel createSetupPanel() {
 		meter_type_cbx.setAction(meter_type_act);
 		algorithm_cbx.setAction(algorithm_act);
-		beacon_cbx.setModel(beacon_mdl);
-		beacon_cbx.setAction(beacon_act);
 		IPanel p = new IPanel();
 		p.add("ramp.meter.type");
 		p.add(meter_type_cbx, Stretch.LAST);
@@ -287,8 +265,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		p.add(am_target_txt, Stretch.LAST);
 		p.add("ramp.meter.target.pm");
 		p.add(pm_target_txt, Stretch.LAST);
-		p.add("ramp.meter.beacon");
-		p.add(beacon_cbx, Stretch.LAST);
 		return p;
 	}
 
@@ -323,7 +299,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		algorithm_act.setEnabled(canWrite("algorithm"));
 		am_target_txt.setEnabled(canWrite("amTarget"));
 		pm_target_txt.setEnabled(canWrite("pmTarget"));
-		beacon_act.setEnabled(canWrite("beacon"));
 	}
 
 	/** Update one attribute on the form */
@@ -349,8 +324,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			am_target_txt.setText("" + proxy.getAmTarget());
 		if (a == null || a.equals("pmTarget"))
 			pm_target_txt.setText("" + proxy.getPmTarget());
-		if (a == null || a.equals("beacon"))
-			beacon_act.updateSelected();
 		if (a == null || a.equals("lock")) {
 			MeterLock lk = new MeterLock(
 				RampMeterHelper.optLock(proxy));

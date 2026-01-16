@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2024  Minnesota Department of Transportation
+ * Copyright (C) 2004-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,12 @@ public interface Beacon extends Device {
 
 	/** Get the message text */
 	String getMessage();
+
+	/** Set associated device */
+	void setDevice(Device d);
+
+	/** Get associated device */
+	Device getDevice();
 
 	/** Set the controller I/O verify pin number */
 	void setVerifyPin(Integer p);
