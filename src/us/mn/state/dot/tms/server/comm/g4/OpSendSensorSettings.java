@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,9 +49,6 @@ public class OpSendSensorSettings extends OpG4 {
 
 	/** Vehicle classification property */
 	private final VehClassProperty class_config = new VehClassProperty();
-
-	/** RTC property */
-	private final RTCProperty rtc = new RTCProperty();
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, CommProtocol cp,
@@ -235,10 +232,7 @@ public class OpSendSensorSettings extends OpG4 {
 		{
 			mess.add(rtc);
 			mess.queryProps();
-			if (shouldUpdateRTC())
-				return new StoreRTC();
-			else
-				return null;
+			return shouldUpdateRTC() ? new StoreRTC() : null;
 		}
 	}
 
@@ -248,19 +242,5 @@ public class OpSendSensorSettings extends OpG4 {
 		long now = TimeSteward.currentTimeMillis();
 		return stamp < (now - TIME_THRESHOLD) ||
 		       stamp > (now + TIME_THRESHOLD);
-	}
-
-	/** Phase to store the RTC */
-	private class StoreRTC extends Phase<G4Property> {
-
-		/** Store the RTC */
-		protected Phase<G4Property> poll(
-			CommMessage<G4Property> mess) throws IOException
-		{
-			rtc.setStamp(TimeSteward.currentTimeMillis());
-			mess.add(rtc);
-			mess.storeProps();
-			return null;
-		}
 	}
 }

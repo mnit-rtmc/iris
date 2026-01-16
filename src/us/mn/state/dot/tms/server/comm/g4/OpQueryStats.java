@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2025  Minnesota Department of Transportation
+ * Copyright (C) 2012-2026  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -55,18 +55,24 @@ public class OpQueryStats extends OpG4 {
 		protected Phase<G4Property> poll(CommMessage<G4Property> mess)
 			throws IOException
 		{
+			int num = stat.getMsgNum();
 			mess.add(stat);
 			mess.queryProps();
-			long stamp = stat.getStamp();
-			if (stamp != 0) {
-				storeStats();
-				// is there more data to collect?
-				if (!stat.isPreviousInterval()) {
-					stat.clear();
-					return this;
-				}
+			if (!stat.isValid()) {
+				mess.logError("BAD STAT: " + stat);
+				return null;
 			}
-			return null;
+			// have we seen this message already?
+			if (stat.getMsgNum() == num) {
+				// maybe the clock is off...
+				return stat.isPreviousInterval()
+				      ? null
+				      : new StoreRTC();
+			}
+			storeStats();
+			stat.clear();
+			// are there more intervals to fetch?
+			return stat.isPreviousInterval() ? null : this;
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2025  Minnesota Department of Transportation
+ * Copyright (C) 2021-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
 import java.util.Date;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -70,21 +69,6 @@ public class OpPerVehicle extends OpG4 {
 					new Date(ev.getStamp()));
 				return new StoreRTC();
 			}
-		}
-	}
-
-	/** Phase to set the clock */
-	private class StoreRTC extends Phase<G4Property> {
-
-		/** Set the clock */
-		protected Phase<G4Property> poll(
-			CommMessage<G4Property> mess) throws IOException
-		{
-			RTCProperty rtc = new RTCProperty();
-			rtc.setStamp(TimeSteward.currentTimeMillis());
-			mess.add(rtc);
-			mess.storeProps();
-			return phaseOne();
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2025  Minnesota Department of Transportation
+ * Copyright (C) 2012-2026  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -180,7 +180,7 @@ public class StatProperty extends G4Property {
 		msg_num = MISSING_DATA;
 		page_num = MISSING_DATA;
 		stat_flags = new StatusFlags(0);
-		stamp = 0;
+		stamp = MISSING_DATA;
 		n_zones = MISSING_DATA;
 		msg_comp = new StatComposition(0);
 		volt = MISSING_DATA;
@@ -211,6 +211,11 @@ public class StatProperty extends G4Property {
 	/** Message number (0 - 255) */
 	private int msg_num;
 
+	/** Get message number */
+	public int getMsgNum() {
+		return msg_num;
+	}
+
 	/** Memory page where data is stored */
 	private int page_num;
 
@@ -223,6 +228,11 @@ public class StatProperty extends G4Property {
 	/** Get time stamp at end of interval */
 	public long getStamp() {
 		return stamp;
+	}
+
+	/** Check if the stamp is valid */
+	public boolean isValid() {
+		return stamp >= 0;
 	}
 
 	/** Check if time stamp is from the previous interval */
