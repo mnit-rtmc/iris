@@ -19,12 +19,12 @@ Beacons can be connected to controllers using one of these protocols:
 * `iris/api/beacon` (primary)
 * `iris/api/beacon/{name}`
 
-| Access       | Primary           | Secondary                   |
-|--------------|-------------------|-----------------------------|
-| 👁️  View      | name, location    | geo\_loc                    |
-| 👉 Operate   | state             |                             |
-| 💡 Manage    | message           | preset                      |
-| 🔧 Configure | controller, notes | pin, verify\_pin, ext\_mode |
+| Access       | Primary                   | Secondary                   |
+|--------------|---------------------------|-----------------------------|
+| 👁️  View      | name, location            | geo\_loc                    |
+| 👉 Operate   | state                     |                             |
+| 💡 Manage    | message                   | preset                      |
+| 🔧 Configure | controller, device, notes | pin, verify\_pin, ext\_mode |
 
 </details>
 
@@ -33,6 +33,9 @@ Beacons can be connected to controllers using one of these protocols:
 **Message** is a static text message on the sign.
 
 **Notes** can be any extra information about the beacon.
+
+**Device**, if specified, is a deivce to which the beacon is attached:
+_alarm_, _dms_, _gate arm_, _lcs_, _ramp meter_, or _tag reader_.
 
 **Pin** is the controller output pin to activate beacon.
 
@@ -60,10 +63,9 @@ being commanded:
 
 Beacons can be controlled in a few ways:
 - Changing state manually through the user interface
-- Deploying or blanking DMS with a [remote] beacon
-- Activating a ramp meter with an advance warning beacon
 - With [action plans] containing [device actions]
-
+- Deploying the associated **device** (for DMS, the message must be configured
+  with "flash beacon" enabled).
 
 ## Events
 

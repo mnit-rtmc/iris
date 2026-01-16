@@ -21,12 +21,12 @@ The following operations can be performed on a ramp meter:
 * `iris/api/ramp_meter` (primary)
 * `iris/api/ramp_meter/{name}`
 
-| Access       | Primary                | Secondary                        |
-|--------------|------------------------|----------------------------------|
-| 👁️  View      | name, location, status | geo\_loc                         |
-| 👉 Operate   | lock                   |                                  |
+| Access       | Primary                | Secondary                |
+|--------------|------------------------|--------------------------|
+| 👁️  View      | name, location, status | geo\_loc                 |
+| 👉 Operate   | lock                   |                          |
 | 💡 Manage    |                        | storage, max\_wait, algorithm, am\_target, pm\_target |
-| 🔧 Configure | controller, notes      | pin, meter\_type, beacon, preset |
+| 🔧 Configure | controller, notes      | pin, meter\_type, preset |
 
 </details>
 
@@ -41,7 +41,6 @@ Max Wait               | maximum allowed wait time (estimated)
 Metering Algorithm     | **simple** or **density adaptive**
 AM Target              | historical hourly AM target rate
 PM Target              | historical hourly PM target rate
-Advance Warning Beacon | beacon activated automatically when active
 
 For basic time-of-day operation, the **simple** metering `algorithm` will run
 the meter at a fixed release rate, equal to the target rate for the current
@@ -59,9 +58,11 @@ There are special rules for meters on [CD roads]:
 * The name of the CD road must be the same as the main roadway, but contain
   the word-token "CD"
 
-Advance warning beacons are flashing lights on a static sign, e.g. "PREPARE TO
-STOP WHEN FLASHING".  Typically, they are hard-wired to flash when the meter
-is operating, but they can be controlled by IRIS if that is not feasable.
+## Advance Warning Beacon
+
+Advance warning [beacon]s are flashing lights on a static sign, e.g. "PREPARE
+TO STOP WHEN FLASHING".  Typically, they are hard-wired to flash when the
+meter is operating, but they can be controlled by IRIS if that is not feasable.
 In that case, beacons will also flash if a [merge] detector on the entrance
 ramp has high occupancy (30%+).
 
@@ -83,6 +84,7 @@ construction | OFF   | N/A
 reserve      | OFF   | N/A
 
 
+[beacon]: beacons.html
 [CD roads]: road_topology.html#rnode-transitions
 [density adaptive]: density_adaptive.html
 [green]: vehicle_detection.html#lane-type
