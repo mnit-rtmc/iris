@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2025  Minnesota Department of Transportation
+ * Copyright (C) 2007-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -293,6 +293,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			op.setAssignedNotify(false);
 		if (np != null)
 			np.setAssignedNotify(true);
+	}
+
+	/** Lookup a ramp meter */
+	static protected RampMeterImpl lookupRampMeter(String name) {
+		SonarObject so = lookupObject(RampMeterImpl.SONAR_TYPE, name);
+		return (so instanceof RampMeterImpl) ? (RampMeterImpl) so : null;
 	}
 
 	/** Lookup a DMS */

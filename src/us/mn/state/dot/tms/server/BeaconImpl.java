@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2025  Minnesota Department of Transportation
+ * Copyright (C) 2004-2026  Minnesota Department of Transportation
  * Copyright (C) 2022       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
@@ -41,11 +42,24 @@ import us.mn.state.dot.tms.server.event.BeaconEvent;
  */
 public class BeaconImpl extends DeviceImpl implements Beacon {
 
+	/** Lookup an associated device */
+	static private DeviceImpl lookupDevice(String name) {
+		DeviceImpl dev = lookupDMS(name);
+		if (dev != null)
+			return dev;
+		dev = lookupRampMeter(name);
+		if (dev != null)
+			return dev;
+		// FIXME: add more device types
+		return null;
+	}
+
 	/** Load all the beacons */
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"preset, message, verify_pin, ext_mode, state " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"preset, message, device, verify_pin, ext_mode, " +
+			"state FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new BeaconImpl(row));
@@ -64,6 +78,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		map.put("notes", notes);
 		map.put("preset", preset);
 		map.put("message", message);
+		map.put("device", device);
 		map.put("verify_pin", verify_pin);
 		map.put("ext_mode", ext_mode);
 		map.put("state", state);
@@ -87,20 +102,22 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		     row.getString(5),           // notes
 		     row.getString(6),           // preset
 		     row.getString(7),           // message
-		     (Integer) row.getObject(8), // verify_pin
-		     row.getBoolean(9),          // ext_mode
-		     row.getInt(10)              // state
+		     row.getString(8),           // device
+		     (Integer) row.getObject(9), // verify_pin
+		     row.getBoolean(10),         // ext_mode
+		     row.getInt(11)              // state
 		);
 	}
 
 	/** Create a beacon */
 	private BeaconImpl(String n, String l, String c, int p, String nt,
-		String cp, String m, Integer vp, boolean em, int bs)
+		String cp, String m, String d, Integer vp, boolean em, int bs)
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(l);
 		setPreset(lookupPreset(cp));
 		message = m;
+		device = lookupDevice(d);
 		verify_pin = vp;
 		ext_mode = em;
 		state = bs;
@@ -232,6 +249,29 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	@Override
 	public String getMessage() {
 		return message;
+	}
+
+	/** Associated device */
+	private Device device;
+
+	/** Set the associated device */
+	@Override
+	public void setDevice(Device d) {
+		device = d;
+	}
+
+	/** Set the associated device */
+	public void doSetDevice(Device d) throws TMSException {
+		if (objectEquals(d, device)) {
+			store.update(this, "device", d);
+			setDevice(d);
+		}
+	}
+
+	/** Get the associated device */
+	@Override
+	public Device getDevice() {
+		return device;
 	}
 
 	/** Controller I/O verify pin number */

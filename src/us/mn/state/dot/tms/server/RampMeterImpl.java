@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -82,7 +83,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, algorithm, am_target, "+
-			"pm_target, beacon, preset, lock, status FROM iris." +
+			"pm_target, preset, lock, status FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -98,10 +99,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					row.getInt(9),     // algorithm
 					row.getInt(10),    // am_target
 					row.getInt(11),    // pm_target
-					row.getString(12), // beacon
-					row.getString(13), // preset
-					row.getString(14), // lock
-					row.getString(15)  // status
+					row.getString(12), // preset
+					row.getString(13), // lock
+					row.getString(14)  // status
 				));
 			}
 		});
@@ -122,7 +122,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		map.put("algorithm", algorithm);
 		map.put("am_target", am_target);
 		map.put("pm_target", pm_target);
-		map.put("beacon", beacon);
 		map.put("preset", preset);
 		map.put("lock", lock);
 		map.put("status", status);
@@ -142,7 +141,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Create a ramp meter */
 	private RampMeterImpl(String n, String loc, String c, int p,
 		String nt, int t, int s, int w, int alg, int at, int pt,
-		String b, String cp, String lk, String st)
+		String cp, String lk, String st)
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -153,7 +152,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		algorithm = alg;
 		am_target = at;
 		pm_target = pt;
-		beacon = lookupBeacon(b);
 		lock = lk;
 		status = st;
 		initTransients();
@@ -356,33 +354,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return TimeActionHelper.NOON;
 	}
 
-	/** Advance warning beacon */
-	private Beacon beacon;
-
-	/** Set advance warning beacon */
-	@Override
-	public void setBeacon(Beacon b) {
-		beacon = b;
-	}
-
-	/** Set advance warning beacon */
-	public void doSetBeacon(Beacon b) throws TMSException {
-		if (b != beacon) {
-			store.update(this, "beacon", b);
-			setBeacon(b);
-		}
-	}
-
-	/** Get advance warning beacon */
-	@Override
-	public Beacon getBeacon() {
-		return beacon;
-	}
-
-	/** Update advance warning beacon */
-	private void updateBeacon() {
-		Beacon b = beacon;
-		if (b != null) {
+	/** Update advance warning beacons */
+	private void updateBeacons() {
+		Iterator<Beacon> it = BeaconHelper.iterator(this);
+		while (it.hasNext()) {
+			Beacon b = it.next();
 			boolean f = (isOnline() && isMetering())
 			          || isMergeBackedUp();
 			BeaconState bs = (f)
@@ -727,7 +703,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Set the release rate (and notify clients) */
 	public void setRateNotify(Integer r) {
 		setStatusNotify(RampMeter.RATE, r);
-		updateBeacon();
+		updateBeacons();
 	}
 
 	/** Get the release rate (vehciels per hour) */

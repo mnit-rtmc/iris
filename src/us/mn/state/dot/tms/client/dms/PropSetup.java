@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2024  Minnesota Department of Transportation
+ * Copyright (C) 2019-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,8 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
-import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
@@ -41,23 +39,6 @@ public class PropSetup extends IPanel {
 
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(8, 32);
-
-	/** Remote beacon combo box model */
-	private final IComboBoxModel<Beacon> beacon_mdl;
-
-	/** Remote beacon action */
-	private final IAction beacon_act = new IAction("dms.beacon.rem") {
-		protected void doActionPerformed(ActionEvent e) {
-			dms.setBeacon(beacon_mdl.getSelectedProxy());
-		}
-		@Override
-		protected void doUpdateSelected() {
-			beacon_mdl.setSelectedItem(dms.getBeacon());
-		}
-	};
-
-	/** Remote beacon combo box */
-	private final JComboBox<Beacon> beacon_cbx = new JComboBox<Beacon>();
 
 	/** Numbered graphic model */
 	private final NumberedGraphicModel num_graph_mdl;
@@ -90,7 +71,6 @@ public class PropSetup extends IPanel {
 		session = s;
 		SonarState state = session.getSonarState();
 		dms = sign;
-		beacon_mdl = new IComboBoxModel<Beacon>(state.getBeaconModel());
 		num_graph_mdl = NumberedGraphicModel.create(session);
 		graphic_mdl = new IComboBoxModel<Graphic>(num_graph_mdl);
 	}
@@ -99,15 +79,11 @@ public class PropSetup extends IPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
-		beacon_cbx.setModel(beacon_mdl);
-		beacon_cbx.setAction(beacon_act);
 		graphic_cbx.setModel(graphic_mdl);
 		graphic_cbx.setAction(graphic_act);
 		graphic_cbx.setRenderer(new GraphicListCellRenderer());
 		add("device.notes");
 		add(notes_txt, Stretch.LAST);
-		add("dms.beacon.rem");
-		add(beacon_cbx, Stretch.LAST);
 		add("dms.static.graphic");
 		add(graphic_cbx, Stretch.LAST);
 		createJobs();
@@ -134,7 +110,6 @@ public class PropSetup extends IPanel {
 	public void updateEditMode() {
 		notes_txt.setEnabled(canWrite("notes"));
 		graphic_act.setEnabled(canWrite("staticGraphic"));
-		beacon_act.setEnabled(canWrite("beacon"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -145,8 +120,6 @@ public class PropSetup extends IPanel {
 		}
 		if (null == a || a.equals("staticGraphic"))
 			graphic_act.updateSelected();
-		if (null == a || a.equals("beacon"))
-			beacon_act.updateSelected();
 	}
 
 	/** Check if the user can write an attribute */

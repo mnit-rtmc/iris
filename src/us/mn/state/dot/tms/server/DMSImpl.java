@@ -34,6 +34,7 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.BeaconState;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -120,10 +121,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		ess_map = new TableMapping(store, "iris", SONAR_TYPE,
 			WeatherSensor.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"static_graphic, beacon, preset, sign_config, " +
-			"sign_detail, msg_sched, msg_current, lock, " +
-			"status, pixel_failures FROM iris." + SONAR_TYPE +
-			";", new ResultFactory()
+			"static_graphic, preset, sign_config, sign_detail, " +
+			"msg_sched, msg_current, lock, status, " +
+			"pixel_failures FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -153,7 +154,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("pin", pin);
 		map.put("notes", notes);
 		map.put("static_graphic", static_graphic);
-		map.put("beacon", beacon);
 		map.put("preset", preset);
 		map.put("sign_config", sign_config);
 		map.put("sign_detail", sign_detail);
@@ -184,34 +184,32 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a dynamic message sign */
 	private DMSImpl(ResultSet row) throws Exception {
-		this(row.getString(1),     // name
-		     row.getString(2),     // geo_loc
-		     row.getString(3),     // controller
-		     row.getInt(4),        // pin
-		     row.getString(5),     // notes
-		     row.getString(6),     // static_graphic
-		     row.getString(7),     // beacon
-		     row.getString(8),     // preset
-		     row.getString(9),     // sign_config
-		     row.getString(10),    // sign_detail
-		     row.getString(11),    // msg_sched
-		     row.getString(12),    // msg_current
-		     row.getString(13),    // lock
-		     row.getString(14),    // status
-		     row.getString(15)     // pixel_failures
+		this(row.getString(1),   // name
+		     row.getString(2),   // geo_loc
+		     row.getString(3),   // controller
+		     row.getInt(4),      // pin
+		     row.getString(5),   // notes
+		     row.getString(6),   // static_graphic
+		     row.getString(7),   // preset
+		     row.getString(8),   // sign_config
+		     row.getString(9),   // sign_detail
+		     row.getString(10),  // msg_sched
+		     row.getString(11),  // msg_current
+		     row.getString(12),  // lock
+		     row.getString(13),  // status
+		     row.getString(14)   // pixel_failures
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
-		String sg, String b, String cp, String sc, String sd,
-		String ms, String mc, String lk, String st, String pf)
+		String sg, String cp, String sc, String sd, String ms,
+		String mc, String lk, String st, String pf)
 		throws TMSException
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
 		static_graphic = lookupGraphic(sg);
-		beacon = lookupBeacon(b);
 		setPreset(lookupPreset(cp));
 		sign_config = SignConfigHelper.lookup(sc);
 		sign_detail = SignDetailHelper.lookup(sd);
@@ -373,33 +371,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Remote beacon */
-	private Beacon beacon;
-
-	/** Set remote beacon */
-	@Override
-	public void setBeacon(Beacon b) {
-		beacon = b;
-	}
-
-	/** Set remote beacon */
-	public void doSetBeacon(Beacon b) throws TMSException {
-		if (b != beacon) {
-			store.update(this, "beacon", b);
-			setBeacon(b);
-		}
-	}
-
-	/** Get remote beacon */
-	@Override
-	public Beacon getBeacon() {
-		return beacon;
-	}
-
-	/** Update remote beacon */
-	private void updateBeacon() {
-		Beacon b = beacon;
-		if (b != null) {
+	/** Update remote beacons */
+	private void updateBeacons() {
+		Iterator<Beacon> it = BeaconHelper.iterator(this);
+		while (it.hasNext()) {
+			Beacon b = it.next();
 			boolean f = isOnline() && isMsgBeacon();
 			BeaconState bs = (f)
 				? BeaconState.FLASHING_REQ
@@ -754,7 +730,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			notifyAttribute("msgCurrent");
 			updateStyles();
 		}
-		updateBeacon();
+		updateBeacons();
 		// If current msg is blank, check if a scheduled msg should be
 		// sent.  This is needed for comm links with long polling
 		// periods, otherwise the scheduled msg will not display until
