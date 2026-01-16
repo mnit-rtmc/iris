@@ -356,7 +356,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Update advance warning beacons */
 	private void updateBeacons() {
-		Iterator<Beacon> it = BeaconHelper.iterator(this);
+		Iterator<Beacon> it = BeaconHelper.iterator(name);
 		while (it.hasNext()) {
 			Beacon b = it.next();
 			boolean f = (isOnline() && isMetering())

@@ -42,18 +42,6 @@ import us.mn.state.dot.tms.server.event.BeaconEvent;
  */
 public class BeaconImpl extends DeviceImpl implements Beacon {
 
-	/** Lookup an associated device */
-	static private DeviceImpl lookupDevice(String name) {
-		DeviceImpl dev = lookupDMS(name);
-		if (dev != null)
-			return dev;
-		dev = lookupRampMeter(name);
-		if (dev != null)
-			return dev;
-		// FIXME: add more device types
-		return null;
-	}
-
 	/** Load all the beacons */
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
@@ -117,7 +105,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		geo_loc = lookupGeoLoc(l);
 		setPreset(lookupPreset(cp));
 		message = m;
-		device = lookupDevice(d);
+		device = d;
 		verify_pin = vp;
 		ext_mode = em;
 		state = bs;
@@ -251,26 +239,26 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		return message;
 	}
 
-	/** Associated device */
-	private Device device;
+	/** Associated device name */
+	private String device;
 
-	/** Set the associated device */
+	/** Set the associated device name */
 	@Override
-	public void setDevice(Device d) {
+	public void setDevice(String d) {
 		device = d;
 	}
 
-	/** Set the associated device */
-	public void doSetDevice(Device d) throws TMSException {
+	/** Set the associated device name */
+	public void doSetDevice(String d) throws TMSException {
 		if (objectEquals(d, device)) {
 			store.update(this, "device", d);
 			setDevice(d);
 		}
 	}
 
-	/** Get the associated device */
+	/** Get the associated device name */
 	@Override
-	public Device getDevice() {
+	public String getDevice() {
 		return device;
 	}
 
