@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ pub struct Beacon {
     pub location: Option<String>,
     pub message: String,
     pub notes: Option<String>,
+    pub device: Option<String>,
     pub controller: Option<String>,
     pub state: u32,
     // secondary attributes
@@ -228,6 +229,7 @@ impl Beacon {
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
+        // FIXME: device
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         html.div().class("row");
@@ -323,6 +325,7 @@ impl Card for Beacon {
             || self.item_states(anc).is_match(search)
             || self.message.contains_lower(search)
             || self.notes.contains_lower(search)
+            || self.device.contains_lower(search)
     }
 
     /// Convert to HTML view
@@ -341,6 +344,7 @@ impl Card for Beacon {
         let mut fields = Fields::new();
         fields.changed_text_area("message", &self.message);
         fields.changed_text_area("notes", &self.notes);
+        // FIXME: device
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.changed_input("verify_pin", self.verify_pin);

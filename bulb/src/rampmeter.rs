@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -80,7 +80,6 @@ pub struct RampMeter {
     // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
-    pub beacon: Option<String>,
     pub preset: Option<String>,
     pub meter_type: Option<u32>,
     pub algorithm: Option<u32>,
