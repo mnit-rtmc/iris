@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -182,7 +182,6 @@ pub struct Dms {
     // secondary attributes
     pub pin: Option<u32>,
     pub static_graphic: Option<String>,
-    pub beacon: Option<String>,
     pub preset: Option<String>,
     pub sign_config: Option<String>,
     pub sign_detail: Option<String>,

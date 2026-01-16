@@ -1,6 +1,6 @@
 // query.rs
 //
-// Copyright (C) 2018-2025  Minnesota Department of Transportation
+// Copyright (C) 2018-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ pub const ALARM_ONE: &str = "\
 
 /// SQL query for all beacons (primary)
 pub const BEACON_ALL: &str = "\
-  SELECT b.name, location, controller, message, notes, state \
+  SELECT b.name, location, controller, message, notes, device, state \
   FROM iris.beacon b \
   LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
   ORDER BY name";
@@ -48,7 +48,7 @@ pub const BEACON_ALL: &str = "\
 /// SQL query for one beacon (secondary)
 pub const BEACON_ONE: &str = "\
   SELECT b.name, location, controller, pin, verify_pin, ext_mode, geo_loc, \
-         message, notes, preset, state \
+         message, notes, device, preset, state \
   FROM iris.beacon b \
   LEFT JOIN geo_loc_view gl ON b.geo_loc = gl.name \
   WHERE b.name = $1";
@@ -274,7 +274,7 @@ pub const DMS_ALL: &str = "\
 /// SQL query for one DMS (secondary)
 pub const DMS_ONE: &str = "\
   SELECT d.name, location, geo_loc, controller, pin, notes, \
-         static_graphic, beacon, preset, sign_config, sign_detail, \
+         static_graphic, preset, sign_config, sign_detail, \
          lock, status, char_length(status->>'faults') > 0 AS has_faults, \
          msg_sched, msg_current, pixel_failures \
   FROM iris.dms d \
@@ -741,7 +741,7 @@ pub const RAMP_METER_ALL: &str = "\
 /// SQL query for one ramp meter (secondary)
 pub const RAMP_METER_ONE: &str = "\
   SELECT m.name, location, geo_loc, controller, pin, notes, meter_type, \
-         beacon, preset, storage, max_wait, algorithm, am_target, pm_target, \
+         preset, storage, max_wait, algorithm, am_target, pm_target, \
          lock, status \
   FROM iris.ramp_meter m \
   LEFT JOIN geo_loc_view gl ON m.geo_loc = gl.name \
