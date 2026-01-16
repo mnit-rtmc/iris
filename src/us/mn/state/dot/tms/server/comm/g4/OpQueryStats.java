@@ -62,16 +62,20 @@ public class OpQueryStats extends OpG4 {
 				mess.logError("BAD STAT: " + stat);
 				return null;
 			}
-			storeStats();
-			boolean prev = stat.isPreviousInterval();
+			// is this new statstical data?
+			if (stat.getMsgNum() != num)
+				storeStats();
+			if (stat.isPreviousInterval())
+				return null;
 			// have we seen this message already?
 			if (stat.getMsgNum() == num) {
-				// maybe the clock is off...
-				return prev ? null : new StoreRTC();
+				// the clock seems to be off...
+				return new StoreRTC();
+			} else {
+				// maybe more intervals to fetch?
+				stat.clear();
+				return this;
 			}
-			stat.clear();
-			// are there more intervals to fetch?
-			return prev ? null : this;
 		}
 	}
 
