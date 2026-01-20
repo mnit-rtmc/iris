@@ -229,7 +229,6 @@ impl Beacon {
             .text(opt_ref(&self.notes))
             .end();
         html.end(); /* div */
-        // FIXME: device
         anc.cio.controller_html(self, &mut html);
         anc.cio.pin_html(self.pin, &mut html);
         html.div().class("row");
@@ -241,6 +240,16 @@ impl Beacon {
             .max(104)
             .size(8)
             .value(opt_str(self.verify_pin));
+        html.end(); /* div */
+        html.div().class("row");
+        html.label()
+            .r#for("device")
+            .text("Device")
+            .end();
+        html.input()
+            .id("device")
+            .r#type("text")
+            .value(opt_ref(&self.device));
         html.end(); /* div */
         html.div().class("row");
         html.label().r#for("ext_mode").text("Ext Mode").end();
@@ -344,10 +353,10 @@ impl Card for Beacon {
         let mut fields = Fields::new();
         fields.changed_text_area("message", &self.message);
         fields.changed_text_area("notes", &self.notes);
-        // FIXME: device
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.changed_input("verify_pin", self.verify_pin);
+        fields.changed_input("device", &self.device);
         fields.changed_input("ext_mode", self.ext_mode);
         fields.into_value().to_string()
     }
