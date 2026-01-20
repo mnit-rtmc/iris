@@ -6,20 +6,20 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-argh = { workspace = true }
-axum = { workspace = true }
-bb8 = { workspace = true }
-bb8-postgres = { workspace = true }
-cidr = { workspace = true }
-env_logger = { workspace = true }
-futures = { workspace = true }
+argh.workspace = true
+axum.workspace = true
+bb8.workspace = true
+bb8-postgres.workspace = true
+cidr.workspace = true
+env_logger.workspace = true
+futures.workspace = true
 headers = "0.4"
 heck = "0.5"
-http = { workspace = true }
+http.workspace = true
 loam = "0.4"
-log = { workspace = true }
+log.workspace = true
 mvt = "0.10"
-ntcip = { workspace = true }
+ntcip.workspace = true
 percent-encoding = "2"
 pointy = "0.7"
 rendzina = { path = "../rendzina" }
@@ -27,17 +27,17 @@ resin = { path = "../resin" }
 resources = { path = "../resources" }
 rosewood = "0.4"
 rustls = "0.23"
-serde = { workspace = true }
-serde_json = { workspace = true }
-thiserror = { workspace = true }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
 time = "0.3"
-tokio = { workspace = true }
-tokio-postgres = { workspace = true }
+tokio.workspace = true
+tokio-postgres.workspace = true
 tokio-rustls = "0.26"
-tokio-stream = { workspace = true }
+tokio-stream.workspace = true
 tokio-util = "0.7"
 tower-sessions-moka-store = "0.15"
-whoami = { workspace = true }
+whoami.workspace = true
 
 [dependencies.tower-sessions]
 version = "0.14"

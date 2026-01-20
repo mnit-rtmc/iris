@@ -6,16 +6,16 @@ edition.workspace = true
 default-run = "mayfly"
 
 [dependencies]
-argh = { workspace = true }
-axum = { workspace = true }
-env_logger = { workspace = true }
-http = { workspace = true }
-log = { workspace = true }
+argh.workspace = true
+axum.workspace = true
+env_logger.workspace = true
+http.workspace = true
+log.workspace = true
 resin = { path = "../resin" }
-serde = { workspace = true }
-serde_json = { workspace = true }
-thiserror = { workspace = true }
-tokio = { workspace = true }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
 
 [dependencies.zip]
 version = "0.6"

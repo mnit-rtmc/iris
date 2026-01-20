@@ -7,10 +7,10 @@ edition.workspace = true
 
 [dependencies]
 fstr = "0.2"
-gift = { workspace = true }
-log = { workspace = true }
-ntcip = { workspace = true }
-pix = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-thiserror = { workspace = true }
+gift.workspace = true
+log.workspace = true
+ntcip.workspace = true
+pix.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

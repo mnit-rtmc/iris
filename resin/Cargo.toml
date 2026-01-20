@@ -6,17 +6,17 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-bb8 = { workspace = true }
-bb8-postgres = { workspace = true }
+bb8.workspace = true
+bb8-postgres.workspace = true
 hyper = { version = "1.8", features = ["client", "http1"] }
-jiff = { workspace = true }
-log = { workspace = true }
-mag = { workspace = true }
-serde_json = { workspace = true }
-thiserror = { workspace = true }
-tokio = { workspace = true }
-tokio-postgres = { workspace = true }
-tokio-stream = { workspace = true }
-tokio-tungstenite = "0.28"
-tungstenite = "0.28"
-whoami = { workspace = true }
+jiff.workspace = true
+log.workspace = true
+mag.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-postgres.workspace = true
+tokio-stream.workspace = true
+tokio-tungstenite.workspace = true
+tungstenite.workspace = true
+whoami.workspace = true

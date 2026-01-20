@@ -6,26 +6,26 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-argh = { workspace = true }
-bb8 = { workspace = true }
-bb8-postgres = { workspace = true }
+argh.workspace = true
+bb8.workspace = true
+bb8-postgres.workspace = true
 bytes = "1.11"
-env_logger = { workspace = true }
+env_logger.workspace = true
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["tokio"] }
 hyper = { version = "1.8", features = ["client", "http1"] }
-jiff = { workspace = true }
-log = { workspace = true }
+jiff.workspace = true
+log.workspace = true
 resin = { path = "../resin" }
-serde = { workspace = true }
-serde_json = { workspace = true }
-thiserror = { workspace = true }
-tokio = { workspace = true }
-tokio-postgres = { workspace = true }
-tokio-stream = { workspace = true }
-tokio-tungstenite = "0.28"
-tungstenite = "0.28"
-whoami = "1"
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-postgres.workspace = true
+tokio-stream.workspace = true
+tokio-tungstenite.workspace = true
+tungstenite.workspace = true
+whoami.workspace = true
 
 [dependencies.futures-util]
 version = "0.3.28"
