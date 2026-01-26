@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.80.0', '5.81.0');
+
 -- Add device to beacon
 DROP VIEW beacon_view;
 DROP VIEW iris.beacon;
