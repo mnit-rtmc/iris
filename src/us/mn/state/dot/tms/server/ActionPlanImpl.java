@@ -86,6 +86,14 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		throw new ChangeVetoException("IP ADDRESS NOT ALLOWED: " + a);
 	}
 
+	/** Throw an undeployable exception */
+	static private void throwUndeployable(DeviceImpl dev)
+		throws ChangeVetoException
+	{
+		throw new ChangeVetoException("Device " + dev.getName() +
+			" is not deployable");
+	}
+
 	/** Lookup the first plan phase */
 	static private PlanPhase lookupFirstPhase() {
 		Iterator<PlanPhase> it = PlanPhaseHelper.iterator();
@@ -488,25 +496,25 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	private void validateDeviceActions() throws ChangeVetoException {
 		Iterator<DeviceAction> it = DeviceActionHelper.iterator(this);
 		while (it.hasNext()) {
-			DeviceAction da = it.next();
-			if (!isDeployable(da)) {
-				throw new ChangeVetoException("Device action " +
-					da.getName() + " not deployable");
-			}
+			checkDeployable(it.next());
 		}
 	}
 
 	/** Check if a device action is deployable */
-	private boolean isDeployable(DeviceAction da) {
+	private void checkDeployable(DeviceAction da)
+		throws ChangeVetoException
+	{
 		String ht = da.getHashtag();
-		return areBeaconsDeployable(ht)
-		    && areDmsDeployable(ht)
-		    && areGateArmsDeployable(da, ht)
-		    && areRampMetersDeployable(ht);
+		checkBeaconsDeployable(ht);
+		checkDmsDeployable(ht);
+		checkGateArmsDeployable(da, ht);
+		checkRampMetersDeployable(ht);
 	}
 
 	/** Check if all beacons for a hashtag are deployable */
-	private boolean areBeaconsDeployable(String ht) {
+	private void checkBeaconsDeployable(String ht)
+		throws ChangeVetoException
+	{
 		Iterator<Beacon> it = BeaconHelper.iterator();
 		while (it.hasNext()) {
 			Beacon b = it.next();
@@ -515,15 +523,14 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 				if (bi.isActive() && bi.isOffline()) {
 					if (new Hashtags(bi.getNotes())
 					   .contains(ht))
-						return false;
+						throwUndeployable(bi);
 				}
 			}
 		}
-		return true;
 	}
 
 	/** Check if all DMS for a hashtag are deployable */
-	private boolean areDmsDeployable(String ht) {
+	private void checkDmsDeployable(String ht) throws ChangeVetoException {
 		Iterator<DMS> it = DMSHelper.iterator();
 		while (it.hasNext()) {
 			DMS d = it.next();
@@ -532,15 +539,16 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 				if (dms.isActive() && !dms.isDeployable()) {
 					if (new Hashtags(d.getNotes())
 					   .contains(ht))
-						return false;
+						throwUndeployable(dms);
 				}
 			}
 		}
-		return true;
 	}
 
 	/** Check if all gate arms for a hashtag are deployable */
-	private boolean areGateArmsDeployable(DeviceAction da, String ht) {
+	private void checkGateArmsDeployable(DeviceAction da, String ht)
+		throws ChangeVetoException
+	{
 		PlanPhase pp = da.getPhase();
 		boolean open = !PlanPhase.GATE_ARM_CLOSED.equals(pp.getName());
 		Iterator<GateArm> it = GateArmHelper.iterator();
@@ -551,15 +559,16 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 				if (gai.isActive() && !gai.isDeployable(open)) {
 					if (new Hashtags(gai.getNotes())
 					   .contains(ht))
-						return false;
+						throwUndeployable(gai);
 				}
 			}
 		}
-		return true;
 	}
 
 	/** Check if all ramp meters for a hashtag are deployable */
-	private boolean areRampMetersDeployable(String ht) {
+	private void checkRampMetersDeployable(String ht)
+		throws ChangeVetoException
+	{
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
 		while (it.hasNext()) {
 			RampMeter rm = it.next();
@@ -568,11 +577,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 				if (rmi.isActive() && rmi.isOffline()) {
 					if (new Hashtags(rmi.getNotes())
 					   .contains(ht))
-						return false;
+						throwUndeployable(rmi);
 				}
 			}
 		}
-		return true;
 	}
 
 	/** Update the plan phase */
