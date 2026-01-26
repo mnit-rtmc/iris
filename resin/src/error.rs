@@ -1,4 +1,4 @@
-// Copyright (C) 2025  Minnesota Department of Transportation
+// Copyright (C) 2025-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -68,6 +68,10 @@ pub enum Error {
     /// I/O error
     #[error("IO {0}")]
     Io(#[from] std::io::Error),
+
+    /// Whoami error
+    #[error("{0}")]
+    Whoami(#[from] whoami::Error),
 
     /// Invalid configuration error
     #[error("Invalid config {0}")]

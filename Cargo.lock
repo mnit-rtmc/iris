@@ -811,7 +811,7 @@ dependencies = [
  "tokio-util",
  "tower-sessions",
  "tower-sessions-moka-store",
- "whoami 1.6.1",
+ "whoami",
 ]
 
 [[package]]
@@ -1019,7 +1019,6 @@ checksum = "3d0b95e02c851351f877147b7deea7b1afb1df71b63aa5f8270716e0c5720616"
 dependencies = [
  "bitflags",
  "libc",
- "redox_syscall 0.7.0",
 ]
 
 [[package]]
@@ -1225,7 +1224,7 @@ checksum = "2621685985a2ebf1c516881c026032ac7deafcda1a2c9b7850dc81e3dfcb64c1"
 dependencies = [
  "cfg-if",
  "libc",
- "redox_syscall 0.5.18",
+ "redox_syscall",
  "smallvec",
  "windows-link",
 ]
@@ -1307,7 +1306,7 @@ dependencies = [
  "tokio-stream",
  "tokio-tungstenite",
  "tungstenite",
- "whoami 1.6.1",
+ "whoami",
 ]
 
 [[package]]
@@ -1483,15 +1482,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "redox_syscall"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49f3fe0889e69e2ae9e41f4d6c4c0181701d00e4697b356fb1f74173a5e0ee27"
-dependencies = [
- "bitflags",
-]
-
-[[package]]
 name = "rendzina"
 version = "5.81.0"
 dependencies = [
@@ -1522,7 +1512,7 @@ dependencies = [
  "tokio-stream",
  "tokio-tungstenite",
  "tungstenite",
- "whoami 1.6.1",
+ "whoami",
 ]
 
 [[package]]
@@ -1941,7 +1931,7 @@ dependencies = [
  "socket2",
  "tokio",
  "tokio-util",
- "whoami 2.0.2",
+ "whoami",
 ]
 
 [[package]]
@@ -2265,12 +2255,6 @@ dependencies = [
 
 [[package]]
 name = "wasite"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8dad83b4f25e74f184f64c43b150b91efe7647395b42289f38e50566d82855b"
-
-[[package]]
-name = "wasite"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "66fe902b4a6b8028a753d5424909b764ccf79b7a209eac9bf97e59cda9f71a42"
@@ -2358,23 +2342,12 @@ dependencies = [
 
 [[package]]
 name = "whoami"
-version = "1.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d4a4db5077702ca3015d3d02d74974948aba2ad9e12ab7df718ee64ccd7e97d"
-dependencies = [
- "libredox",
- "wasite 0.1.0",
- "web-sys",
-]
-
-[[package]]
-name = "whoami"
 version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ace4d5c7b5ab3d99629156d4e0997edbe98a4beb6d5ba99e2cae830207a81983"
 dependencies = [
  "libredox",
- "wasite 1.0.2",
+ "wasite",
  "web-sys",
 ]
 

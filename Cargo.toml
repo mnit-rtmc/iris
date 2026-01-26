@@ -26,7 +26,7 @@ thiserror = "2"
 tokio-postgres = "0.7"
 tokio-tungstenite = "0.28"
 tungstenite = "0.28"
-whoami = "1"
+whoami = "2"
 
 [workspace.dependencies.axum]
 version = "0.8"

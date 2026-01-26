@@ -1,6 +1,6 @@
 // database.rs
 //
-// Copyright (C) 2021-2025  Minnesota Department of Transportation
+// Copyright (C) 2021-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ pub struct Database {
 
 /// Make database configuration
 fn make_config(db: &str) -> error::Result<Config> {
-    let username = whoami::username();
+    let username = whoami::username()?;
     // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{username}@%2Frun%2Fpostgresql/{db}");
     Ok(uds.parse()?)
