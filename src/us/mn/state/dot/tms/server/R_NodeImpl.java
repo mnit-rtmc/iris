@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2025  Minnesota Department of Transportation
+ * Copyright (C) 2007-2026  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -521,7 +521,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Set the administrator notes */
 	public void doSetNotes(String n) throws TMSException {
-		if (!n.equals(notes)) {
+		if (!objectEquals(n, notes)) {
 			store.update(this, "notes", n);
 			setNotes(n);
 		}
