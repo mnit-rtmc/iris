@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.81.0 (26 Jan 2026)
+ - Enabled live sensor data from `pollinator` => `IRIS server`
+ - Add `device` column to beacon table (removed DMS/meter `beacon`)
+ - Fixed hashtag cleanup bugs
+ - Fixed mayfly event binning bugs
+ - Fixed RTMS G4 binned data polling quirks
+ - Improved ONVIF compatibility
+ - Fixed CBW driver (X401)
+ - Updated web UI dependencies
+
 5.80.0 (7 Jan 2026)
  - Fixed action plan permission check (gate arm allowlist w/no gates)
  - Fixed action plan unable to deactivate beacons
