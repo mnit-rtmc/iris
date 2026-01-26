@@ -20,7 +20,9 @@ HTTP, because why not?
 
 ## X-401
 
-- Control: `state.xml?digitalIO2=0`
+- Control:
+  * new firmware: `state.xml?relay2=0`
+  * old firmware: `state.xml?digitalIO2=0`
 - Relay: `<relay2>0</relay2>`
 - Input: `<digitalInput1>0</digitalInput1>`
 - Serial #: `<serialNumber>...</serialNumber>`

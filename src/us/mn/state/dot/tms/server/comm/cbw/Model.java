@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022  Minnesota Department of Transportation
+ * Copyright (C) 2022-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,8 @@ public enum Model {
 		if (this == X_WR_1R12) {
 			sb.append("relayState");
 		} else if (this == X_401) {
-			sb.append("digitalIO");
+			// NOTE: older firmware versions used "digitalIO"
+			sb.append("relay");
 			sb.append(relay);
 		} else if (this == X_410) {
 			sb.append("relay");
