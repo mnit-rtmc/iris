@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, Input};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -32,22 +32,23 @@ type FlowStreamAnc = ControllerIoAnc<FlowStream>;
 impl FlowStream {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(anc.item_states(self).to_string());
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(anc.item_states(self).to_string());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &FlowStreamAnc) -> String {
-        let mut html = self.title(View::Setup);
-        anc.controller_html(self, &mut html);
-        anc.pin_html(self.pin, &mut html);
-        self.footer_html(true, &mut html);
-        html.to_string()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        anc.controller_html(self, &mut page.frag::<html::Div>());
+        anc.pin_html(self.pin, &mut page.frag::<html::Div>());
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

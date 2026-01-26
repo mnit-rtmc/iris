@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 //
 use crate::card::{AncillaryData, Card, View};
 use crate::util::{ContainsLower, Fields, Input, opt_str};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -42,66 +42,74 @@ impl AncillaryData for CabinetStyleAnc {
 }
 
 /// Build pin row HTML
-fn pin_row_html(id: &str, name: &str, pin: Option<u32>, html: &mut Html) {
-    html.div().class("row");
-    html.label().r#for(id).text(name).end();
-    html.input()
+fn pin_row_html<'p>(
+    id: &str,
+    name: &str,
+    pin: Option<u32>,
+    div: &'p mut html::Div<'p>,
+) {
+    div.class("row");
+    div.label().r#for(id).cdata(name).close();
+    div.input()
         .id(id)
         .r#type("number")
         .min(1)
         .max(104)
         .size(8)
         .value(opt_str(pin));
-    html.end(); /* div */
+    div.close();
 }
 
 impl CabinetStyle {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut html = Html::new();
-        html.div().text(self.name());
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.cdata(self.name());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let mut html = self.title(View::Setup);
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
         pin_row_html(
             "police_panel_pin_1",
             "Police Panel Pin 1",
             self.police_panel_pin_1,
-            &mut html,
+            &mut page.frag::<html::Div>(),
         );
         pin_row_html(
             "police_panel_pin_2",
             "Police Panel Pin 2",
             self.police_panel_pin_2,
-            &mut html,
+            &mut page.frag::<html::Div>(),
         );
         pin_row_html(
             "watchdog_reset_pin_1",
             "Watchdog Reset Pin 1",
             self.watchdog_reset_pin_1,
-            &mut html,
+            &mut page.frag::<html::Div>(),
         );
         pin_row_html(
             "watchdog_reset_pin_2",
             "Watchdog Reset Pin 2",
             self.watchdog_reset_pin_2,
-            &mut html,
+            &mut page.frag::<html::Div>(),
         );
-        html.div().class("row");
-        html.label().r#for("dip").text("Dip").end();
-        html.input()
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("dip").cdata("Dip").close();
+        div.input()
             .id("dip")
             .r#type("number")
             .min(0)
             .max(255)
             .size(8)
             .value(opt_str(self.dip));
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

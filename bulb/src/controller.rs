@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, Select, TextArea, opt_ref};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -174,32 +174,41 @@ impl ControllerAnc {
     }
 
     /// Build controller conditions HTML
-    fn conditions_html(&self, pri: &Controller, html: &mut Html) {
-        html.select().id("condition");
+    fn conditions_html<'p>(
+        &self,
+        pri: &Controller,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("condition");
         for condition in &self.conditions {
-            let option = html.option().value(condition.id);
+            let mut option = select.option();
+            option.value(condition.id);
             if pri.condition == condition.id {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&condition.description).end();
+            option.cdata(&condition.description).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Build cabinet styles HTML
-    fn cabinet_styles_html(&self, pri: &Controller, html: &mut Html) {
-        html.select().id("cabinet_style");
-        html.option().end(); /* empty */
+    fn cabinet_styles_html<'p>(
+        &self,
+        pri: &Controller,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("cabinet_style");
+        select.option().close(); /* empty */
         for cabinet_style in &self.cabinet_styles {
-            let option = html.option();
+            let mut option = select.option();
             if let Some(cab) = &pri.cabinet_style
                 && cab == &cabinet_style.name
             {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&cabinet_style.name).end();
+            option.cdata(&cabinet_style.name).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Get the comm config
@@ -218,33 +227,34 @@ impl ControllerAnc {
     }
 
     /// Build IO pins HTML
-    fn io_pins_html(&self, html: &mut Html) {
+    fn io_pins_html<'p>(&self, div: &'p mut html::Div<'p>) {
         if !self.controller_io.is_empty() {
-            html.ul().class("pins");
+            let mut ul = div.ul();
+            ul.class("pins");
             for cio in &self.controller_io {
-                cio.button_link_html(html);
+                cio.button_link_html(&mut ul.li());
             }
-            html.end(); /* ul */
+            ul.close();
         }
     }
 }
 
 impl Io {
     /// Build controller IO link button HTML
-    fn button_link_html(&self, html: &mut Html) {
+    fn button_link_html<'p>(&self, li: &'p mut html::Li<'p>) {
         if let Ok(res) = Res::try_from(self.resource_n.as_str()) {
-            html.li().class("row");
-            html.span().text("#").text(self.pin).end();
-            html.span().text(res.symbol());
-            html.button()
+            li.class("row");
+            li.span().cdata("#").cdata(self.pin).close();
+            let mut span = li.span();
+            span.cdata(res.symbol());
+            span.button()
                 .r#type("button")
                 .class("go_link")
-                .attr("data-link", &self.name)
-                .attr("data-type", res.as_str())
-                .text(&self.name)
-                .end();
-            html.end(); /* span */
-            html.end(); /* li */
+                .data_("link", &self.name)
+                .data_("type", res.as_str())
+                .cdata(&self.name)
+                .close();
+            li.close();
         }
     }
 }
@@ -296,147 +306,157 @@ impl Controller {
     }
 
     /// Build controller button HTML
-    pub fn button_html(&self, html: &mut Html) {
-        html.button()
+    pub fn button_html<'p>(&self, button: &'p mut html::Button<'p>) {
+        button
             .r#type("button")
             .class("go_link")
-            .attr("data-link", self.link_drop())
-            .attr("data-type", Res::Controller.as_str())
-            .text(self.link_drop())
-            .end();
+            .data_("link", self.link_drop())
+            .data_("type", Res::Controller.as_str())
+            .cdata(self.link_drop())
+            .close();
     }
 
     /// Build button and location HTML
-    pub fn button_loc_html(&self, html: &mut Html) {
-        html.div().class("row start");
-        self.button_html(html);
-        html.span()
+    pub fn button_loc_html<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.class("row start");
+        self.button_html(&mut div.button());
+        div.span()
             .class("info")
-            .text_len(opt_ref(&self.location), 32)
-            .end();
-        html.end(); /* div */
+            .cdata_len(opt_ref(&self.location), 32)
+            .close();
+        div.close();
     }
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states().to_string())
-            .end();
-        html.div().class("info fill").text(self.link_drop());
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states().to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill").cdata(self.link_drop());
+        String::from(page)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
-        let mut html = self.title(View::Status);
-        html.div().class("row");
-        html.span();
-        self.item_states().tooltips(&mut html);
-        html.end(); /* span */
-        html.span().text(anc.condition(self)).end();
-        html.span();
-        html.button()
+        let mut page = Page::new();
+        self.title(View::Status, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        self.item_states().tooltips(&mut div.span());
+        div.span().cdata(anc.condition(self)).close();
+        let mut span = div.span();
+        span.button()
             .r#type("button")
             .class("go_link")
-            .attr("data-link", opt_ref(&self.comm_link))
-            .attr("data-type", Res::CommLink.as_str())
-            .text(opt_ref(&self.comm_link))
-            .end();
-        html.text(":").text(self.drop_id);
-        html.end(); /* span */
-        html.end(); /* div */
-        html.div()
-            .class("info end")
-            .text(anc.comm_config(self))
-            .end();
-        html.div().class("row");
-        html.span().text_len(opt_ref(&self.location), 64).end();
-        html.span().class("into").text(opt_ref(&self.notes)).end();
-        html.end(); /* div */
+            .data_("link", opt_ref(&self.comm_link))
+            .data_("type", Res::CommLink.as_str())
+            .cdata(opt_ref(&self.comm_link))
+            .close();
+        span.cdata(":").cdata(self.drop_id);
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("info end").cdata(anc.comm_config(self)).close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata_len(opt_ref(&self.location), 64).close();
+        div.span().class("into").cdata(opt_ref(&self.notes)).close();
+        div.close();
         if let Some(model) = self.model() {
-            html.div().class("row fill");
-            html.span().text("Model").end();
-            html.span().class("info").text_len(model, 32).end();
-            html.end(); /* div */
+            div = page.frag::<html::Div>();
+            div.class("row fill");
+            div.span().cdata("Model").close();
+            div.span().class("info").cdata_len(model, 32).close();
+            div.close();
         }
         if let Some(version) = self.version() {
-            html.div().class("row fill");
-            html.span().text("Version").end();
-            html.span().class("info").text_len(version, 32).end();
-            html.end(); /* div */
+            div = page.frag::<html::Div>();
+            div.class("row fill");
+            div.span().cdata("Version").close();
+            div.span().class("info").cdata_len(version, 32).close();
+            div.close();
         }
         if let Some(serial_num) = self.serial_num() {
-            html.div().class("row fill");
-            html.span().text("S/N").end();
-            html.span().class("info").text_len(serial_num, 32).end();
-            html.end(); /* div */
+            div = page.frag::<html::Div>();
+            div.class("row fill");
+            div.span().cdata("S/N").close();
+            div.span().class("info").cdata_len(serial_num, 32).close();
+            div.close();
         }
         if let Some(fail_time) = &self.fail_time {
-            html.div().class("row");
-            html.span().text("Fail Time").end();
-            html.span().class("info").text(fail_time).end();
-            html.end(); /* div */
+            div = page.frag::<html::Div>();
+            div.class("row");
+            div.span().cdata("Fail Time").close();
+            div.span().class("info").cdata(fail_time).close();
+            div.close();
         }
-        anc.io_pins_html(&mut html);
-        html.to_string()
+        anc.io_pins_html(&mut page.frag::<html::Div>());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &ControllerAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("comm_link").text("Comm Link").end();
-        html.input()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("comm_link").cdata("Comm Link").close();
+        div.input()
             .id("comm_link")
             .maxlength(20)
             .size(20)
             .value(opt_ref(&self.comm_link));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("drop_id").text("Drop ID").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("drop_id").cdata("Drop ID").close();
+        div.input()
             .id("drop_id")
             .r#type("number")
             .min(0)
             .max(65535)
             .size(6)
             .value(self.drop_id);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("cabinet_style")
-            .text("Cabinet Style")
-            .end();
-        anc.cabinet_styles_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("condition").text("Condition").end();
-        anc.conditions_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("notes").text("Notes").end();
-        html.textarea()
+            .cdata("Cabinet Style")
+            .close();
+        anc.cabinet_styles_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("condition").cdata("Condition").close();
+        anc.conditions_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
             .id("notes")
             .maxlength(128)
-            .attr("rows", 2)
-            .attr("cols", 26)
-            .text(opt_ref(&self.notes))
-            .end();
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("password").text("Password").end();
-        html.input()
+            .rows(2)
+            .cols(26)
+            .cdata(opt_ref(&self.notes))
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("password").cdata("Password").close();
+        div.input()
             .id("password")
             .maxlength(32)
             .size(26)
             .value(opt_ref(&self.password));
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

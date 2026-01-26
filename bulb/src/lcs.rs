@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
 use chrono::DateTime;
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
@@ -149,16 +149,17 @@ impl LcsLock {
 
 impl LcsAnc {
     /// Build LCS types HTML
-    fn lcs_types_html(&self, pri: &Lcs, html: &mut Html) {
-        html.select().id("lcs_type");
+    fn lcs_types_html<'p>(&self, pri: &Lcs, select: &'p mut html::Select<'p>) {
+        select.id("lcs_type");
         for tp in &self.lcs_types {
-            let option = html.option().value(tp.id);
+            let mut option = select.option();
+            option.value(tp.id);
             if Some(tp.id) == pri.lcs_type {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&tp.description).end();
+            option.cdata(&tp.description).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Check if an LCS has a given lane/indication
@@ -259,22 +260,23 @@ impl Lcs {
     }
 
     /// Build lock reason HTML
-    fn lock_reason_html(&self, html: &mut Html) {
+    fn lock_reason_html<'p>(&self, span: &'p mut html::Span<'p>) {
         let reason = self.lock_reason();
-        html.span();
-        html.text(match reason {
+        span.cdata(match reason {
             LockReason::Unlocked => "🔓",
             _ => "🔒",
         });
-        html.select().id("lk_reason");
+        let mut select = span.select();
+        select.id("lk_reason");
         for r in LockReason::all_lcs() {
-            let option = html.option();
+            let mut option = select.option();
             if *r == reason {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(r.as_str()).end();
+            option.cdata(r.as_str()).close();
         }
-        html.end().end();
+        select.close();
+        span.close();
     }
 
     /// Get lock indications
@@ -318,9 +320,9 @@ impl Lcs {
     }
 
     /// Build indications HTML
-    fn indications_html(&self, anc: &LcsAnc, html: &mut Html) {
+    fn indications_html<'p>(&self, anc: &LcsAnc, div: &'p mut html::Div<'p>) {
         let enabled = self.lock_reason().is_deployable();
-        html.div().class("row center");
+        div.class("row center");
         let indications = self.indications();
         let lock_indications = self.lock_indications().unwrap_or(&[0]);
         let len = indications.len().max(lock_indications.len());
@@ -329,71 +331,81 @@ impl Lcs {
             let lki = *lock_indications.get(ln).unwrap_or(&1);
             let ln = (ln + 1) as u16;
             let ind_id = format!("ind_{ln}");
-            let span = html.div().class("column").span();
+            let mut div2 = div.div();
+            div2.class("column");
+            let mut span = div2.span();
             match ind {
-                1 => span.class("lcs lcs_dark").text("⍽"),
-                2 => span.class("lcs lcs_lane_open").text("↓"),
-                3 => span.class("lcs lcs_use_caution").text("⇣"),
-                4 => span.class("lcs lcs_lane_closed_ahead").text("✕"),
-                5 => span.class("lcs lcs_lane_closed").text("✖"),
-                _ => span.class("lcs lcs_unknown").text("?"),
+                1 => span.class("lcs lcs_dark").cdata("⍽"),
+                2 => span.class("lcs lcs_lane_open").cdata("↓"),
+                3 => span.class("lcs lcs_use_caution").cdata("⇣"),
+                4 => span.class("lcs lcs_lane_closed_ahead").cdata("✕"),
+                5 => span.class("lcs lcs_lane_closed").cdata("✖"),
+                _ => span.class("lcs lcs_unknown").cdata("?"),
             };
-            html.end(); /* span */
-            let select = html.select().id(ind_id);
+            span.close();
+            let mut select = div2.select();
+            select.id(ind_id);
             if !enabled {
-                select.attr_bool("disabled");
+                select.disabled();
             }
-            html.button().end();
             // FIXME: use customizable select elements once browsers have
             //        support for them: https://caniuse.com/selectlist
-            html.option().class("lcs lcs_dark").value("1");
-            html.text(" ").end();
+            let mut option = select.option();
+            option.class("lcs lcs_dark").value("1").cdata(" ").close();
             if anc.has_indication(self, ln, 2) {
-                let opt = html.option().class("lcs lcs_lane_open").value("2");
+                let mut option = select.option();
+                option.class("lcs lcs_lane_open").value("2");
                 if lki == 2 {
-                    opt.attr_bool("selected");
+                    option.selected();
                 }
-                html.text("↓").end();
+                option.cdata("↓").close();
             }
             if anc.has_indication(self, ln, 3) {
-                let opt = html.option().class("lcs lcs_use_caution").value("3");
+                let mut option = select.option();
+                option.class("lcs lcs_use_caution").value("3");
                 if lki == 3 {
-                    opt.attr_bool("selected");
+                    option.selected();
                 }
-                html.text("⇣").end();
+                option.cdata("⇣").close();
             }
             if anc.has_indication(self, ln, 4) {
-                let opt =
-                    html.option().class("lcs lcs_lane_closed_ahead").value("4");
+                let mut option = select.option();
+                option.class("lcs lcs_lane_closed_ahead").value("4");
                 if lki == 4 {
-                    opt.attr_bool("selected");
+                    option.selected();
                 }
-                html.text("✕").end();
+                option.cdata("✕").close();
             }
             if anc.has_indication(self, ln, 5) {
-                let opt = html.option().class("lcs lcs_lane_closed").value("5");
+                let mut option = select.option();
+                option.class("lcs lcs_lane_closed").value("5");
                 if lki == 5 {
-                    opt.attr_bool("selected");
+                    option.selected();
                 }
-                html.text("✖").end();
+                option.cdata("✖").close();
             }
-            html.end(); /* select */
-            html.end(); /* div */
+            select.close();
+            div2.close();
         }
-        html.div().class("column");
-        self.lock_reason_html(html);
-        html.span();
-        let send = html.button().id("lk_send").r#type("button");
-        send.attr_bool("disabled");
-        html.text("Send").end();
-        let blank = html.button().id("lk_blank").r#type("button");
+        let mut div2 = div.div();
+        div2.class("column");
+        self.lock_reason_html(&mut div2.span());
+        let mut span = div2.span();
+        span.button()
+            .id("lk_send")
+            .r#type("button")
+            .disabled()
+            .cdata("Send")
+            .close();
+        let mut blank = span.button();
+        blank.id("lk_blank").r#type("button");
         if !enabled || !self.is_deployed() {
-            blank.attr_bool("disabled");
+            blank.disabled();
         }
-        html.text("Blank").end();
-        html.end(); /* span */
-        html.end(); /* div */
-        html.end(); /* div */
+        blank.cdata("Blank").close();
+        span.close();
+        div2.close();
+        div.close();
     }
 
     /// Get selected indications
@@ -455,17 +467,17 @@ impl Lcs {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states(anc).to_string())
-            .end();
-        html.div()
-            .class("info fill")
-            .text_len(opt_ref(&self.location), 32);
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states(anc).to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 32);
+        String::from(page)
     }
 
     /// Convert to Control HTML
@@ -473,58 +485,63 @@ impl Lcs {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = self.title(View::Control);
-        html.div().class("row fill");
-        self.item_states(anc).tooltips(&mut html);
-        html.span();
+        let mut page = Page::new();
+        self.title(View::Control, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row fill");
+        self.item_states(anc).tooltips(&mut div.span());
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
         {
-            html.text(expires);
+            div.span().cdata(expires);
         }
-        html.end(); /* span */
-        html.end(); /* div */
-        html.div().class("row");
-        html.span()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span()
             .class("info")
-            .text_len(opt_ref(&self.location), 64)
-            .end();
-        html.end(); /* div */
-        self.indications_html(anc, &mut html);
-        html.to_string()
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
+        div.close();
+        self.indications_html(anc, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("notes").text("Notes").end();
-        html.textarea()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
             .id("notes")
             .maxlength(255)
-            .attr("rows", 4)
-            .attr("cols", 24)
-            .text(opt_ref(&self.notes))
-            .end();
-        html.end(); /* div */
-        anc.cio.controller_html(self, &mut html);
-        anc.cio.pin_html(self.pin, &mut html);
-        html.div().class("row");
-        html.label().r#for("lcs_type").text("LCS Type").end();
-        anc.lcs_types_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("shift").text("Lane Shift").end();
-        html.input()
+            .rows(4)
+            .cols(24)
+            .cdata(opt_ref(&self.notes))
+            .close();
+        div.close();
+        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("lcs_type").cdata("LCS Type").close();
+        anc.lcs_types_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("shift").cdata("Lane Shift").close();
+        div.input()
             .id("shift")
             .r#type("number")
             .min(1)
             .max(9)
             .size(2)
             .value(opt_str(self.shift));
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

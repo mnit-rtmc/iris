@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::util::Doc;
-use hatmil::Html;
+use hatmil::{Page, html};
 use js_sys::JsString;
 use resources::Res;
 use std::error::Error as _;
@@ -125,73 +125,81 @@ async fn add_sidebar() -> JsResult<()> {
 
 /// Build sidebar HTML
 fn sidebar_html() -> String {
-    let mut html = Html::new();
-    html.div().class("sb_row");
-    html.label().r#for("sb_resource").text("Resource").end();
-    html.select().id("sb_resource").end();
-    html.input()
+    let mut page = Page::new();
+    let mut div = page.frag::<html::Div>();
+    div.class("sb_row");
+    div.label().r#for("sb_resource").cdata("Resource").close();
+    div.select().id("sb_resource").close();
+    div.input()
         .id("sb_config")
         .r#type("checkbox")
         .class("toggle");
-    html.label().r#for("sb_config").text("🧰").end();
-    html.input()
+    div.label().r#for("sb_config").cdata("🧰").close();
+    div.input()
         .id("sb_fullscreen")
         .r#type("checkbox")
         .class("toggle");
-    html.label().r#for("sb_fullscreen").text(" ⛶ ").end();
-    html.end(); /* div */
-    html.div().class("sb_row");
-    html.input()
+    div.label().r#for("sb_fullscreen").cdata(" ⛶ ").close();
+    div.close();
+    div = page.frag::<html::Div>();
+    div.class("sb_row");
+    div.input()
         .id("sb_search")
         .r#type("search")
         .size(16)
-        .attr("placeholder", "🔍");
-    html.select().id("sb_state").end();
-    html.button()
-        .id("sb_refresh")
-        .r#type("button")
-        .text("⭮ ⚪")
-        .end();
-    html.end(); /* div */
-    html.div().id("sb_list").end();
-    html.div().id("sb_toast").end();
-    html.div().id("sb_login").class("hide");
-    html.div().class("form");
-    html.div().class("row center");
-    html.img().src("bulb/iris.svg");
-    html.end(); /* div */
-    html.div().class("row end");
-    html.span().text("IRIS authentication required").end();
-    html.end(); /* div */
-    html.div().class("row end");
-    html.label().r#for("login_user").text("User name").end();
-    html.input()
+        .placeholder("🔍");
+    div.select().id("sb_state").close();
+    div.button().id("sb_refresh").r#type("button").cdata("⭮ ⚪");
+    div.close();
+    div = page.frag::<html::Div>();
+    div.id("sb_list").close();
+    div = page.frag::<html::Div>();
+    div.id("sb_toast").close();
+    div = page.frag::<html::Div>();
+    div.id("sb_login").class("hide");
+    let mut div2 = div.div();
+    div2.class("form");
+    let mut div3 = div2.div();
+    div3.class("row center");
+    div3.img().src("bulb/iris.svg");
+    div3.close();
+    div3 = div2.div();
+    div3.class("row end");
+    div3.span().cdata("IRIS authentication required").close();
+    div3.close();
+    div3 = div2.div();
+    div3.class("row end");
+    div3.label().r#for("login_user").cdata("User name").close();
+    div3.input()
         .id("login_user")
         .r#type("text")
-        .attr("name", "username")
-        .attr("autocomplete", "username")
+        .name("username")
+        .autocomplete("username")
         .required();
-    html.end(); /* div */
-    html.div().class("row end");
-    html.label().r#for("login_pass").text("Password").end();
-    html.input()
+    div3.close();
+    div3 = div2.div();
+    div3.class("row end");
+    div3.label().r#for("login_pass").cdata("Password").close();
+    div3.input()
         .id("login_pass")
         .r#type("password")
-        .attr("name", "password")
-        .attr("autocomplete", "current-password")
+        .name("password")
+        .autocomplete("current-password")
         .required();
-    html.end(); /* div */
-    html.div().class("row end");
-    html.button()
+    div3.close();
+    div3 = div2.div();
+    div3.class("row end");
+    div3.button()
         .id("ob_login")
         .r#type("button")
-        .text("Login")
-        .end();
-    html.end(); /* div */
-    html.end(); /* div (form) */
-    html.div().id("sb_shade").end();
-    html.end(); /* div (sb_login) */
-    html.to_string()
+        .cdata("Login")
+        .close();
+    div3.close();
+    div2.close();
+    div2 = div.div();
+    div2.id("sb_shade").close();
+    div.close();
+    String::from(page)
 }
 
 /// Finish initialization
@@ -573,7 +581,7 @@ async fn handle_button_cv(cv: CardView, id: String) {
 /// Handle a `click` event within a card element
 fn handle_card_click_ev(elem: &Element) {
     if let Some(id) = elem.get_attribute("id")
-        && let Some(name) = elem.get_attribute("name")
+        && let Some(name) = elem.get_attribute("data-name")
         && let Some(res) = resource_value()
     {
         spawn_local(do_future(click_card(res, name, id)));

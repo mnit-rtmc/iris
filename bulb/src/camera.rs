@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -127,33 +127,38 @@ impl AncillaryData for CameraAnc {
 
 impl CameraAnc {
     /// Build encoder types HTML
-    fn encoder_type_html(&self, pri: &Camera, html: &mut Html) {
-        html.select().id("encoder_type");
+    fn encoder_type_html<'p>(
+        &self,
+        pri: &Camera,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("encoder_type");
         for tp in &self.enc_types {
-            let option = html.option().value(&tp.name);
+            let mut option = select.option();
+            option.value(&tp.name);
             if Some(&tp.name) == pri.encoder_type.as_ref() {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(tp.to_string()).end();
+            option.cdata(tp.to_string()).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 }
 
 impl Camera {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(anc.cio.item_states(self).to_string())
-            .end();
-        html.div()
-            .class("info fill")
-            .text_len(opt_ref(&self.location), 32);
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(anc.cio.item_states(self).to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 32);
+        String::from(page)
     }
 
     /// Convert to Control HTML
@@ -161,15 +166,18 @@ impl Camera {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = self.title(View::Control);
-        html.div().class("row");
-        anc.cio.item_states(self).tooltips(&mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.span()
+        let mut page = Page::new();
+        self.title(View::Control, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        anc.cio.item_states(self).tooltips(&mut div.span());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span()
             .class("info")
-            .text_len(opt_ref(&self.location), 64);
-        html.to_string()
+            .cdata_len(opt_ref(&self.location), 64);
+        String::from(page)
     }
 
     /// Create action to handle click on a device request button
@@ -186,106 +194,122 @@ impl Camera {
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &CameraAnc) -> String {
-        let mut html = self.title(View::Request);
-        html.div().class("row");
-        html.span().text("Reset/Reboot").end();
-        html.button().id("rq_reset").r#type("button").text("Reboot");
-        html.to_string()
+        let mut page = Page::new();
+        self.title(View::Request, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Reset/Reboot").close();
+        div.button().id("rq_reset").r#type("button").cdata("Reboot");
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CameraAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("cam_num").text("Cam Num").end();
-        html.input()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("cam_num").cdata("Cam Num").close();
+        div.input()
             .id("cam_num")
             .r#type("number")
             .min(1)
             .max(9999)
             .size(8)
             .value(opt_str(self.cam_num));
-        html.end();
-        html.div().class("row");
-        html.label().r#for("notes").text("Notes").end();
-        html.textarea()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
             .id("notes")
             .maxlength(255)
-            .attr("rows", 4)
-            .attr("cols", 24)
-            .text(opt_ref(&self.notes))
-            .end();
-        html.end(); /* div */
-        anc.cio.controller_html(self, &mut html);
-        anc.cio.pin_html(self.pin, &mut html);
-        html.div().class("row");
-        html.label()
+            .rows(4)
+            .cols(24)
+            .cdata(opt_ref(&self.notes))
+            .close();
+        div.close();
+        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("encoder_type")
-            .text("Encoder Type")
-            .end();
-        anc.encoder_type_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("enc_address").text("Enc. Address").end();
-        html.input()
+            .cdata("Encoder Type")
+            .close();
+        anc.encoder_type_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("enc_address")
+            .cdata("Enc. Address")
+            .close();
+        div.input()
             .id("enc_address")
             .r#type("text")
             .value(opt_ref(&self.enc_address));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("enc_port")
-            .text("Enc. Port Override")
-            .end();
-        html.input()
+            .cdata("Enc. Port Override")
+            .close();
+        div.input()
             .id("enc_port")
             .r#type("number")
             .min(1)
             .size(4)
             .value(opt_str(self.enc_port));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("enc_mcast")
-            .text("Multicast Address")
-            .end();
-        html.input()
+            .cdata("Multicast Address")
+            .close();
+        div.input()
             .id("enc_mcast")
             .r#type("text")
             .value(opt_ref(&self.enc_mcast));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("enc_channel")
-            .text("Encoder Channel")
-            .end();
-        html.input()
+            .cdata("Encoder Channel")
+            .close();
+        div.input()
             .id("enc_channel")
             .r#type("number")
             .min(1)
             .size(8)
             .value(opt_str(self.enc_channel));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("cam_template")
-            .text("Camera Template")
-            .end();
-        html.span()
+            .cdata("Camera Template")
+            .close();
+        div.span()
             .id("cam_template")
             .class("info")
-            .text(opt_ref(&self.cam_template))
-            .end();
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("publish").text("Publish").end();
-        let publish = html.input().id("publish").r#type("checkbox");
+            .cdata(opt_ref(&self.cam_template))
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("publish").cdata("Publish").close();
+        let mut input = div.input();
+        input.id("publish").r#type("checkbox");
         if self.publish {
-            publish.checked();
+            input.checked();
         }
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

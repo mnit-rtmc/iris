@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025  Minnesota Department of Transportation
+// Copyright (C) 2024-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ use crate::factor;
 use crate::item::{ItemState, ItemStates};
 use crate::rend::Renderer;
 use crate::util::{ContainsLower, Fields, Select, opt_str};
-use hatmil::Html;
+use hatmil::{Page, html};
 use mag::length::mm;
 use ntcip::dms::{FontTable, tfon};
 pub use rendzina::SignConfig;
@@ -112,18 +112,22 @@ impl AncillaryData for SignConfigAnc {
 
 impl SignConfigAnc {
     /// Build fonts HTML
-    fn select_fonts_html(&self, font_num: u8, html: &mut Html) {
-        html.select().id("default_font");
+    fn select_fonts_html<'p>(
+        &self,
+        font_num: u8,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("default_font");
         for num in 1..=255 {
             if let Some(_f) = self.fonts.font(num) {
-                let option = html.option();
+                let mut option = select.option();
                 if num == font_num {
-                    option.attr_bool("selected");
+                    option.selected();
                 }
-                html.text(num).end();
+                option.cdata(num).close();
             }
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Make an NTCIP sign
@@ -146,13 +150,13 @@ impl SignConfigAnc {
 
 /// Convert to compact HTML
 fn to_html_compact(sc: &SignConfig) -> String {
-    let mut html = Html::new();
-    html.div()
-        .class("title row")
-        .text(&sc.name)
-        .text(" ")
-        .text(item_states(sc).to_string());
-    html.to_string()
+    let mut page = Page::new();
+    let mut div = page.frag::<html::Div>();
+    div.class("title row")
+        .cdata(&sc.name)
+        .cdata(" ")
+        .cdata(item_states(sc).to_string());
+    String::from(page)
 }
 
 /// Get item states
@@ -166,158 +170,166 @@ fn item_states(sc: &SignConfig) -> ItemStates<'_> {
 
 /// Convert to setup HTML
 fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
-    let mut html = sc.title(View::Setup);
-    html.div().class("row");
-    html.label().text("Color Scheme").end();
-    html.span().class("info").text(&sc.color_scheme).end();
-    html.end(); /* div */
-    monochrome_html(sc, &mut html);
-    html.div()
-        .class("center info")
-        .text(sc.pixel_width)
-        .text(" x ")
-        .text(sc.pixel_height)
-        .text(" px")
-        .end();
-    html.div().class("center");
-    render_sign(sc, anc, &mut html);
-    html.end(); /* div */
-    html.div().class("row");
-    html.label().text("Pitch").end();
-    html.span()
+    let mut page = Page::new();
+    sc.title(View::Setup, &mut page.frag::<html::Div>());
+    let mut div = page.frag::<html::Div>();
+    div.class("row");
+    div.label().cdata("Color Scheme").close();
+    div.span().class("info").cdata(&sc.color_scheme).close();
+    div.close();
+    monochrome_html(sc, &mut page.frag::<html::Div>());
+    div = page.frag::<html::Div>();
+    div.class("center info")
+        .cdata(sc.pixel_width)
+        .cdata(" x ")
+        .cdata(sc.pixel_height)
+        .cdata(" px")
+        .close();
+    div = page.frag::<html::Div>();
+    div.class("center");
+    render_sign(sc, anc, &mut div.table());
+    div.close();
+    div = page.frag::<html::Div>();
+    div.class("row").label().cdata("Pitch").close();
+    div.span()
         .class("info")
-        .text(format_len_sm(sc.pitch_horiz))
-        .text(" x ")
-        .text(format_len_sm(sc.pitch_vert))
-        .end();
-    html.end(); /* div */
-    html.div().class("row");
-    html.label().text("Character Width").end();
-    html.span()
+        .cdata(format_len_sm(sc.pitch_horiz))
+        .cdata(" x ")
+        .cdata(format_len_sm(sc.pitch_vert))
+        .close();
+    div.close();
+    div = page.frag::<html::Div>();
+    div.class("row").label().cdata("Character Width").close();
+    div.span()
         .class("info")
-        .text(format_px(sc.char_width))
-        .end();
-    html.label().text("x Height").end();
-    html.span()
+        .cdata(format_px(sc.char_width))
+        .close();
+    div.label().cdata("x Height").close();
+    div.span()
         .class("info")
-        .text(format_px(sc.char_height))
-        .end();
-    html.end(); /* div */
-    html.div().class("row");
-    html.label()
+        .cdata(format_px(sc.char_height))
+        .close();
+    div.close();
+    div = page.frag::<html::Div>();
+    div.class("row")
+        .label()
         .r#for("module_width")
-        .text("Module Width")
-        .end();
+        .cdata("Module Width")
+        .close();
     select_factors_html(
         "module_width",
         sc.pixel_width,
         sc.module_width,
-        &mut html,
+        &mut div.select(),
     );
-    html.label()
+    div.label()
         .r#for("module_height")
-        .text("Module Height")
-        .end();
+        .cdata("Module Height")
+        .close();
     select_factors_html(
         "module_height",
         sc.pixel_height,
         sc.module_height,
-        &mut html,
+        &mut div.select(),
     );
-    html.end(); /* div */
-    html.div().class("row");
-    html.label()
+    div.close();
+    div = page.frag::<html::Div>();
+    div.class("row")
+        .label()
         .r#for("default_font")
-        .text("Default Font")
-        .end();
-    anc.select_fonts_html(sc.default_font, &mut html);
-    html.end(); /* div */
-    sc.footer_html(true, &mut html);
-    html.to_string()
+        .cdata("Default Font")
+        .close();
+    anc.select_fonts_html(sc.default_font, &mut div.select());
+    div.close();
+    sc.footer_html(true, &mut page.frag::<html::Div>());
+    String::from(page)
 }
 
 /// Build monochrome color HTML
-fn monochrome_html(sc: &SignConfig, html: &mut Html) {
+fn monochrome_html<'p>(sc: &SignConfig, div: &'p mut html::Div<'p>) {
     let fg = sc.monochrome_foreground;
     let bg = sc.monochrome_background;
     if fg > 0 || bg > 0 {
-        let style = format!("color: #{fg:06X}; background-color: #{bg:06X}");
-        let text = format!("#{fg:06X} / #{bg:06X}");
-        html.div().class("row");
-        html.label().text("FG / BG").end();
-        html.span().attr("style", style).text(text).end();
-        html.end(); /* div */
+        div.class("row");
+        div.label().cdata("FG / BG").close();
+        div.span()
+            .style(&format!("color: #{fg:06X}; background-color: #{bg:06X}"))
+            .cdata(&format!("#{fg:06X} / #{bg:06X}"))
+            .close();
     }
+    div.close();
 }
 
 /// Render the sign HTML
-fn render_sign(sc: &SignConfig, anc: &SignConfigAnc, html: &mut Html) {
+fn render_sign<'p>(
+    sc: &SignConfig,
+    anc: &SignConfigAnc,
+    table: &'p mut html::Table<'p>,
+) {
     let dms = anc.make_dms(sc);
-    html.table();
-    html.tr().td().end();
-    html.td()
-        .attr("style", "text-align: center;")
-        .text(format_len(sc.face_width))
-        .end();
-    let td = html.td();
+    let mut tr = table.tr();
+    tr.td().close(); // empty cell
+    tr.td()
+        .style("text-align: center;")
+        .cdata(format_len(sc.face_width))
+        .close();
     if dms.is_none() {
-        td.class("fault").text("Invalid");
+        tr.td().class("fault").cdata("Invalid").close();
+    } else {
+        tr.td().close(); // empty cell
     }
-    html.end().end(); /* td; tr */
-    html.tr()
-        .td()
-        .attr("style", "text-align: right;")
-        .text(format_len(sc.face_height))
-        .end();
-    html.td();
+    tr.close();
+    tr = table.tr();
+    tr.td()
+        .style("text-align: right;")
+        .cdata(format_len(sc.face_height))
+        .close();
     let mod_size = match (sc.module_width, sc.module_height) {
         (Some(mw), Some(mh)) if mw > 0 && mh > 0 => {
             Some((mw as u32, mh as u32))
         }
         _ => None,
     };
+    let mut td = tr.td();
     if let Some(dms) = &dms {
-        let mut rend = Renderer::new(html)
+        let mut rend = Renderer::new()
             .with_dms(dms)
             .with_max_width(240)
             .with_max_height(80)
             .with_mod_size(mod_size);
-        rend.render_multi("A1");
+        rend.render_multi("A1", &mut td.img());
     }
-    html.end(); /* td */
-    html.td()
-        .attr("style", "vertical-align: bottom;")
-        .text(format_len_sm(sc.border_horiz))
-        .end();
-    html.tr().td().end();
-    html.td()
-        .attr("style", "text-align: right;")
-        .text(format_len_sm(sc.border_vert))
-        .end();
-    html.td()
-        .span()
-        .attr("style", "color:#116")
-        .text("(border)")
-        .end();
-    html.end().end().end(); /* td; tr; table */
+    td.close();
+    tr.td()
+        .style("vertical-align: bottom;")
+        .cdata(format_len_sm(sc.border_horiz))
+        .close();
+    tr.td().close(); // empty cell
+    tr.td()
+        .style("text-align: right;")
+        .cdata(format_len_sm(sc.border_vert))
+        .close();
+    tr.td().span().style("color:#116").cdata("(border)").close();
+    tr.close();
+    table.close();
 }
 
 /// Build factors HTML
-fn select_factors_html(
+fn select_factors_html<'p>(
     id: &str,
     max: i32,
     value: Option<i32>,
-    html: &mut Html,
+    select: &'p mut html::Select<'p>,
 ) {
-    html.select().id(id);
+    select.id(id);
     for fact in std::iter::once(None).chain(factor::unique(max).map(Some)) {
-        let option = html.option();
+        let mut option = select.option();
         if value == fact {
-            option.attr_bool("selected");
+            option.selected();
         }
-        html.text(opt_str(fact)).end();
+        option.cdata(opt_str(fact)).close();
     }
-    html.end(); /* select */
+    select.close();
 }
 
 impl Card for SignConfig {

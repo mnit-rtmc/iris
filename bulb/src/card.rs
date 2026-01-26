@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
 use futures::StreamExt;
 use futures::stream::FuturesUnordered;
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
@@ -189,14 +189,6 @@ impl CardView {
         self.view = v;
         self
     }
-
-    /// Build card view list item HTML
-    fn list_item_html(&self, html: &mut Html) {
-        html.li()
-            .id(self.id())
-            .attr("name", &self.name)
-            .class(self.view.class_name());
-    }
 }
 
 /// Search term
@@ -297,15 +289,16 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Convert to Create HTML
     fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
-        let mut html = Html::new();
-        html.div().class("row");
-        html.label().r#for("create_name").text("Name").end();
-        html.input()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("create_name").cdata("Name").close();
+        div.input()
             .id("create_name")
             .maxlength(24)
             .size(24)
             .value(self.name());
-        html.to_string()
+        String::from(page)
     }
 
     /// Convert to HTML view
@@ -332,64 +325,68 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     }
 
     /// Build card title
-    fn title(&self, view: View) -> Html {
-        let mut html = Html::new();
-        html.div().class("title row");
-        html.span()
-            .text(Self::res().symbol())
-            .text(" ")
-            .text(self.name())
-            .end();
-        self.views_html(view, &mut html);
-        html.end(); // div
-        html
+    fn title<'p>(&self, view: View, div: &'p mut html::Div<'p>) {
+        div.class("title row");
+        div.span()
+            .cdata(Self::res().symbol())
+            .cdata(" ")
+            .cdata(self.name())
+            .close();
+        self.views_html(view, &mut div.select());
+        div.close();
     }
 
     /// Build views select
-    fn views_html(&self, view: View, html: &mut Html) {
-        html.select().id("ob_view");
+    fn views_html<'p>(&self, view: View, select: &'p mut html::Select<'p>) {
+        select.id("ob_view");
         for v in res_views(Self::res()) {
-            let option = html.option();
+            let mut option = select.option();
             if *v == view {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(v.as_str()).end();
+            option.cdata(v.as_str()).close();
         }
-        html.end(); // select
+        select.close();
     }
 
     /// Build card footer HTML
-    fn footer_html(&self, delete: bool, html: &mut Html) {
-        html.div().class("row");
-        html.span().end(); /* empty */
+    fn footer_html<'p>(&self, delete: bool, div: &'p mut html::Div<'p>) {
+        div.class("row");
+        div.span().close(); /* empty */
         if delete {
-            html.button()
+            div.button()
                 .id("ob_delete")
                 .r#type("button")
-                .text("🗑️ Delete")
-                .end();
+                .cdata("🗑️ Delete")
+                .close();
         };
-        html.button()
+        div.button()
             .id("ob_save")
             .r#type("button")
-            .text("🖍️ Save")
-            .end();
-        html.end(); /* div */
+            .cdata("🖍️ Save")
+            .close();
+        div.close();
     }
 }
 
 /// Build all item states HTML
 pub fn item_states_html(res: Res) -> String {
-    let mut html = Html::new();
-    html.option().value("").text("all ↴").end();
+    let mut page = Page::new();
+    let mut option = page.frag::<html::Option>();
+    option.value("").cdata("all ↴").close();
     for st in item_states_all(res) {
-        let option = html.option().value(st.code());
+        let mut option = page.frag::<html::Option>();
+        option.value(st.code());
         if *st == ItemState::Deployed {
-            option.attr_bool("selected");
+            option.selected();
         }
-        html.text(st.code()).text(" ").text(st.description()).end();
+        option
+            .cdata(st.code())
+            .cdata(" ")
+            .cdata(st.description())
+            .close();
     }
-    html.to_string()
+    String::from(page)
 }
 
 /// Get slice of all item states for a resource
@@ -509,58 +506,63 @@ pub async fn delete_one(cv: &CardView) -> Result<()> {
 pub async fn fetch_resource(config: bool) -> Result<String> {
     let json = Uri::from("/iris/api/access").get().await?;
     let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
-    let mut html = Html::new();
-    html.option().end();
-    add_option::<ActionPlan>(&access, &mut html);
+    let mut page = Page::new();
+    let mut option = page.frag::<html::Option>();
+    option.close();
+    add_option::<ActionPlan>(&access, &mut page.frag::<html::Option>());
     if config {
-        add_option::<Alarm>(&access, &mut html);
+        add_option::<Alarm>(&access, &mut page.frag::<html::Option>());
     }
-    add_option::<Beacon>(&access, &mut html);
+    add_option::<Beacon>(&access, &mut page.frag::<html::Option>());
     if config {
-        add_option::<CabinetStyle>(&access, &mut html);
+        add_option::<CabinetStyle>(&access, &mut page.frag::<html::Option>());
     }
-    add_option::<Camera>(&access, &mut html);
+    add_option::<Camera>(&access, &mut page.frag::<html::Option>());
     if config {
-        add_option::<CommConfig>(&access, &mut html);
-        add_option::<CommLink>(&access, &mut html);
-        add_option::<Controller>(&access, &mut html);
-        add_option::<Detector>(&access, &mut html);
+        add_option::<CommConfig>(&access, &mut page.frag::<html::Option>());
+        add_option::<CommLink>(&access, &mut page.frag::<html::Option>());
+        add_option::<Controller>(&access, &mut page.frag::<html::Option>());
+        add_option::<Detector>(&access, &mut page.frag::<html::Option>());
     }
-    add_option::<Dms>(&access, &mut html);
+    add_option::<Dms>(&access, &mut page.frag::<html::Option>());
     if config {
-        add_option::<Domain>(&access, &mut html);
-        add_option::<FlowStream>(&access, &mut html);
+        add_option::<Domain>(&access, &mut page.frag::<html::Option>());
+        add_option::<FlowStream>(&access, &mut page.frag::<html::Option>());
     }
-    add_option::<GateArm>(&access, &mut html);
+    add_option::<GateArm>(&access, &mut page.frag::<html::Option>());
     if config {
-        add_option::<Gps>(&access, &mut html);
+        add_option::<Gps>(&access, &mut page.frag::<html::Option>());
     }
-    add_option::<Incident>(&access, &mut html);
-    add_option::<Lcs>(&access, &mut html);
+    add_option::<Incident>(&access, &mut page.frag::<html::Option>());
+    add_option::<Lcs>(&access, &mut page.frag::<html::Option>());
     if config {
-        add_option::<LcsState>(&access, &mut html);
-        add_option::<Modem>(&access, &mut html);
-        add_option::<Permission>(&access, &mut html);
+        add_option::<LcsState>(&access, &mut page.frag::<html::Option>());
+        add_option::<Modem>(&access, &mut page.frag::<html::Option>());
+        add_option::<Permission>(&access, &mut page.frag::<html::Option>());
     }
-    add_option::<RampMeter>(&access, &mut html);
+    add_option::<RampMeter>(&access, &mut page.frag::<html::Option>());
     if config {
-        add_option::<Role>(&access, &mut html);
-        add_option::<SignConfig>(&access, &mut html);
-        add_option::<TagReader>(&access, &mut html);
-        add_option::<User>(&access, &mut html);
+        add_option::<Role>(&access, &mut page.frag::<html::Option>());
+        add_option::<SignConfig>(&access, &mut page.frag::<html::Option>());
+        add_option::<TagReader>(&access, &mut page.frag::<html::Option>());
+        add_option::<User>(&access, &mut page.frag::<html::Option>());
     }
-    add_option::<VideoMonitor>(&access, &mut html);
-    add_option::<WeatherSensor>(&access, &mut html);
-    Ok(html.to_string())
+    add_option::<VideoMonitor>(&access, &mut page.frag::<html::Option>());
+    add_option::<WeatherSensor>(&access, &mut page.frag::<html::Option>());
+    Ok(String::from(page))
 }
 
 /// Add option to access select
-fn add_option<C: Card>(access: &[Permission], html: &mut Html) {
+fn add_option<'p, C: Card>(
+    access: &[Permission],
+    option: &'p mut html::Option<'p>,
+) {
     for perm in access {
         if perm.hashtag.is_none() {
             let res = C::res();
             if perm.base_resource == res.base().as_str() {
-                html.option().value(res.as_str()).text(C::DNAME).end();
+                option.value(res.as_str()).cdata(C::DNAME).close();
+                return;
             }
         }
     }
@@ -695,17 +697,21 @@ impl CardList {
         // Use default value for ancillary data lookup
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
         self.views.clear();
-        let mut html = Html::new();
-        html.ul().class("cards");
+        let mut page = Page::new();
+        let mut ul = page.frag::<html::Ul>();
+        ul.class("cards");
         if self.config {
             let cv = CardView::new(
                 C::res(),
                 Self::next_name(&cards),
                 View::CreateCompact,
             );
-            cv.list_item_html(&mut html);
-            html.span().class("create").text("Create 🆕").end();
-            html.end(); /* li */
+            let mut li = ul.li();
+            li.id(cv.id())
+                .data_("name", &cv.name)
+                .class(cv.view.class_name());
+            li.span().class("create").cdata("Create 🆕").close();
+            li.close();
             self.views.push(cv);
         }
         for pri in &cards {
@@ -715,14 +721,17 @@ impl CardList {
                 View::Hidden
             };
             let cv = CardView::new(C::res(), pri.name(), view);
-            cv.list_item_html(&mut html);
-            html.raw(pri.to_html(view, &anc));
-            html.end(); /* li */
+            let mut li = ul.li();
+            li.id(cv.id())
+                .data_("name", &cv.name)
+                .class(cv.view.class_name());
+            li.raw(pri.to_html(view, &anc));
+            li.close();
             self.views.push(cv);
         }
-        html.end(); /* ul */
+        ul.close();
         self.states_main = item_states_main(&cards, &anc);
-        Ok(html.to_string())
+        Ok(String::from(page))
     }
 
     /// Get next suggested name
@@ -926,9 +935,10 @@ fn item_states_main<C: Card>(cards: &[C], anc: &C::Ancillary) -> String {
 pub async fn fetch_one(cv: &CardView) -> Result<String> {
     let html = match cv.view {
         View::CreateCompact => {
-            let mut html = Html::new();
-            html.span().class("create").text("Create 🆕");
-            String::from(html)
+            let mut page = Page::new();
+            let mut span = page.frag::<html::Span>();
+            span.class("create").cdata("Create 🆕");
+            String::from(page)
         }
         View::Create => {
             let html = fetch_one_res(cv).await?;
@@ -1126,26 +1136,28 @@ async fn handle_input_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
 
 /// Build a create card
 fn html_card_create(res: Res, create: &str) -> String {
-    let mut html = Html::new();
-    html.div().class("title row");
-    html.span().text(res.symbol()).text(" 🆕").end();
-    html.select().id("ob_view");
-    html.option()
+    let mut page = Page::new();
+    let mut div = page.frag::<html::Div>();
+    div.class("title row");
+    div.span().cdata(res.symbol()).cdata(" 🆕").close();
+    let mut select = div.select();
+    select.id("ob_view");
+    select
+        .option()
         .value(View::CreateCompact.as_str())
-        .text(View::Compact.as_str())
-        .end();
-    html.option()
-        .attr_bool("selected")
-        .text(View::Create.as_str())
-        .end();
-    html.end(); /* select */
-    html.end(); /* div */
-    html.raw(create);
-    html.div().class("row end");
-    html.button()
-        .id("ob_save")
-        .r#type("button")
-        .text("🖍️ Save")
-        .end();
-    html.to_string()
+        .cdata(View::Compact.as_str())
+        .close();
+    select
+        .option()
+        .selected()
+        .cdata(View::Create.as_str())
+        .close();
+    div.close();
+    div = page.frag::<html::Div>();
+    div.raw(create);
+    div.close();
+    div = page.frag::<html::Div>();
+    div.class("row end");
+    div.button().id("ob_save").r#type("button").cdata("🖍️ Save");
+    String::from(page)
 }

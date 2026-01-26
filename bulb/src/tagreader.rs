@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -140,38 +140,41 @@ impl AncillaryData for TagReaderAnc {
 impl TagReader {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &TagReaderAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(anc.cio.item_states(self).to_string())
-            .end();
-        html.div()
-            .class("info fill")
-            .text_len(opt_ref(&self.location), 32);
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(anc.cio.item_states(self).to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 32);
+        String::from(page)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &TagReaderAnc) -> String {
-        let mut html = self.title(View::Status);
-        html.div();
-        anc.cio.item_states(self).tooltips(&mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.span()
+        let mut page = Page::new();
+        self.title(View::Status, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        anc.cio.item_states(self).tooltips(&mut div.span());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span()
             .class("info")
-            .text_len(opt_ref(&self.location), 64);
-        html.to_string()
+            .cdata_len(opt_ref(&self.location), 64);
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &TagReaderAnc) -> String {
-        let mut html = self.title(View::Setup);
-        anc.cio.controller_html(self, &mut html);
-        anc.cio.pin_html(self.pin, &mut html);
-        html.to_string()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

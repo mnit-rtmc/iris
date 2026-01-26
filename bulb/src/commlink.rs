@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ use crate::controller::Controller;
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, Select};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -101,22 +101,27 @@ impl CommLinkAnc {
     }
 
     /// Build comm configs HTML
-    fn comm_configs_html(&self, pri: &CommLink, html: &mut Html) {
-        html.select().id("comm_config");
+    fn comm_configs_html<'p>(
+        &self,
+        pri: &CommLink,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("comm_config");
         for config in &self.comm_configs {
-            let option = html.option().value(&config.name);
+            let mut option = select.option();
+            option.value(&config.name);
             if pri.comm_config == config.name {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&config.description).end();
+            option.cdata(&config.description).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Build controller links HTML
-    fn controllers_html(&self, html: &mut Html) {
+    fn controllers_html<'p>(&self, div: &'p mut html::Div<'p>) {
         for ctrl in &self.controllers {
-            ctrl.button_loc_html(html);
+            ctrl.button_loc_html(&mut div.div());
         }
     }
 }
@@ -133,66 +138,82 @@ impl CommLink {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states().to_string())
-            .end();
-        html.div().class("info fill").text(&self.description);
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states().to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill").cdata(&self.description);
+        String::from(page)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
-        let mut html = self.title(View::Status);
-        html.div().class("row");
-        self.item_states().tooltips(&mut html);
-        html.span().class("info end").text(&self.description).end();
-        html.end(); /* div */
-        html.div().class("row");
-        html.span().text(anc.comm_config_desc(self)).end();
-        html.end(); /* div */
-        anc.controllers_html(&mut html);
-        html.to_string()
+        let mut page = Page::new();
+        self.title(View::Status, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        self.item_states().tooltips(&mut div.span());
+        div.span().class("info end").cdata(&self.description);
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata(anc.comm_config_desc(self)).close();
+        div.close();
+        anc.controllers_html(&mut page.frag::<html::Div>());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CommLinkAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("description").text("Description").end();
-        html.input()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("description")
+            .cdata("Description")
+            .close();
+        div.input()
             .id("description")
             .maxlength(32)
             .size(24)
             .value(&self.description);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("uri").text("URI").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("uri").cdata("URI").close();
+        div.input()
             .id("uri")
             .maxlength(256)
             .size(28)
             .value(&self.uri);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("comm_config").text("Comm Config").end();
-        anc.comm_configs_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("comm_config")
+            .cdata("Comm Config")
+            .close();
+        anc.comm_configs_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("poll_enabled")
-            .text("Poll Enabled")
-            .end();
-        let enabled = html.input().id("poll_enabled").r#type("checkbox");
+            .cdata("Poll Enabled")
+            .close();
+        let mut input = div.input();
+        input.id("poll_enabled").r#type("checkbox");
         if self.poll_enabled {
-            enabled.checked();
+            input.checked();
         }
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

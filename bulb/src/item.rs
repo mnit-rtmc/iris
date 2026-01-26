@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use hatmil::Html;
+use hatmil::html;
 use std::fmt;
 
 /// Item state
@@ -233,23 +233,25 @@ impl<'a> ItemStates<'a> {
     }
 
     /// Build item state tooltips HTML
-    pub fn tooltips(&self, html: &mut Html) {
-        html.div();
+    pub fn tooltips<'p>(&self, span: &'p mut html::Span<'p>) {
         for (state, dtl) in self.all.iter() {
-            html.span().class("tooltip");
-            html.text(state.code()).text(" ").text(state.description());
+            let mut span2 = span.span();
+            span2.class("tooltip");
+            span2
+                .cdata(state.code())
+                .cdata(" ")
+                .cdata(state.description());
             if !dtl.is_empty() {
                 let mut cls = String::from("item_");
                 cls.push_str(state.description());
-                html.span().class(cls);
+                let mut span3 = span2.span();
+                span3.class(cls);
                 for d in dtl.split(';') {
-                    html.text(d);
-                    html.text(" ");
+                    span3.cdata(d).cdata(" ");
                 }
-                html.end(); /* span */
+                span3.close();
             }
-            html.end(); /* span */
+            span2.close();
         }
-        html.end(); /* div */
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ use crate::error::{Error, Result};
 use crate::item::ItemState;
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, Input, Select, opt_ref};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use serde_json::{Map, Value};
@@ -95,31 +95,39 @@ impl AncillaryData for PermissionAnc {
 
 impl PermissionAnc {
     /// Create resource types HTML
-    fn resource_types_html(&self, pri: &Permission, html: &mut Html) {
-        html.select().id("base_resource");
+    fn resource_types_html<'p>(
+        &self,
+        pri: &Permission,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("base_resource");
         for resource_type in &self.resource_types {
             if resource_type.base.is_none() {
-                let option = html.option();
+                let mut option = select.option();
                 if pri.base_resource == resource_type.name {
-                    option.attr_bool("selected");
+                    option.selected();
                 }
-                html.text(&resource_type.name).end();
+                option.cdata(&resource_type.name).close();
             }
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Create roles HTML
-    fn roles_html(&self, pri: &Permission, html: &mut Html) {
-        html.select().id("role");
+    fn roles_html<'p>(
+        &self,
+        pri: &Permission,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("role");
         for role in &self.roles {
-            let option = html.option();
+            let mut option = select.option();
             if pri.role == role.name {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&role.name).end();
+            option.cdata(&role.name).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 }
 
@@ -135,20 +143,22 @@ fn item_state(access_level: u32) -> ItemState {
 }
 
 /// Create an HTML `select` element of access level
-fn access_level_html(selected: u32, html: &mut Html) {
-    html.select().id("access_level");
+fn access_level_html<'p>(selected: u32, select: &'p mut html::Select<'p>) {
+    select.id("access_level");
     for access in 1..=4 {
-        let option = html.option().value(access.to_string());
+        let mut option = select.option();
+        option.value(access.to_string());
         if selected == access {
-            option.attr_bool("selected");
+            option.selected();
         }
         let item = item_state(access);
-        html.text(item.code())
-            .text(" ")
-            .text(item.description())
-            .end();
+        option
+            .cdata(item.code())
+            .cdata(" ")
+            .cdata(item.description())
+            .close();
     }
-    html.end(); /* select */
+    select.close();
 }
 
 impl Permission {
@@ -172,44 +182,50 @@ impl Permission {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(&self.role)
-            .text(" ")
-            .text(item_state(self.access_level).to_string())
-            .text(&self.name)
-            .end();
-        html.div().class("info fill").text(&self.base_resource);
-        html.span().text(opt_ref(&self.hashtag)).end();
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(&self.role)
+            .cdata(" ")
+            .cdata(item_state(self.access_level).to_string())
+            .cdata(&self.name)
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill").cdata(&self.base_resource);
+        div.span().cdata(opt_ref(&self.hashtag));
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &PermissionAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("role").text("Role").end();
-        anc.roles_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("base_resource").text("Resource").end();
-        anc.resource_types_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("hashtag").text("Hashtag").end();
-        html.input()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("role").cdata("Role").close();
+        anc.roles_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("base_resource").cdata("Resource").close();
+        anc.resource_types_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("hashtag").cdata("Hashtag").close();
+        div.input()
             .id("hashtag")
             .maxlength(16)
             .size(16)
             .value(opt_ref(&self.hashtag));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("access_level").text("Access").end();
-        access_level_html(self.access_level, &mut html);
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("access_level").cdata("Access").close();
+        access_level_html(self.access_level, &mut div.select());
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 
@@ -258,23 +274,26 @@ impl Card for Permission {
 
     /// Get row for Create card
     fn to_html_create(&self, anc: &PermissionAnc) -> String {
-        let mut html = Html::new();
-        html.div().class("row");
-        html.label().r#for("create_name").text("Name").end();
-        html.input()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("create_name").cdata("Name").close();
+        div.input()
             .id("create_name")
             .maxlength(24)
             .size(24)
             .value(self.name());
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("role").text("Role").end();
-        anc.roles_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("base_resource").text("Resource").end();
-        anc.resource_types_html(self, &mut html);
-        html.to_string()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("role").cdata("Role").close();
+        anc.roles_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("base_resource").cdata("Resource").close();
+        anc.resource_types_html(self, &mut div.select());
+        String::from(page)
     }
 
     /// Convert to HTML view

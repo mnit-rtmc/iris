@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
-use hatmil::Html;
+use hatmil::html;
 use ntcip::dms::multi::join_text;
 use web_sys::console;
 
@@ -20,7 +20,6 @@ type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
 
 /// Ntcip DMS renderer
 pub struct Renderer<'r> {
-    html: &'r mut Html,
     dms: Option<&'r NtcipDms>,
     gif: Option<&'r str>,
     id: Option<&'r str>,
@@ -32,9 +31,8 @@ pub struct Renderer<'r> {
 
 impl<'r> Renderer<'r> {
     /// Make an NTCIP renderer
-    pub fn new(html: &'r mut Html) -> Self {
+    pub fn new() -> Self {
         Renderer {
-            html,
             dms: None,
             gif: None,
             id: None,
@@ -95,23 +93,22 @@ impl<'r> Renderer<'r> {
     }
 
     /// Render sign MULTI to a GIF image
-    pub fn render_multi(&mut self, multi: &str) {
+    pub fn render_multi<'p>(
+        &mut self,
+        multi: &str,
+        img: &'p mut html::Img<'p>,
+    ) {
         let (width, height) = self.size();
-        let mut img = self
-            .html
-            .img()
-            .alt(join_text(multi, " "))
-            .width(width)
-            .height(height);
+        img.alt(join_text(multi, " ")).width(width).height(height);
         if let Some(id) = &self.id {
-            img = img.id(*id);
+            img.id(*id);
         }
         if let Some(class) = &self.class {
-            img = img.class(*class);
+            img.class(*class);
         }
         match (&self.dms, &self.gif) {
             (_, Some(gif)) => {
-                img = img.src(*gif);
+                img.src(*gif);
             }
             (Some(dms), _) => {
                 let mut buf = Vec::with_capacity(4096);
@@ -124,7 +121,7 @@ impl<'r> Renderer<'r> {
                     self.mod_size,
                 ) {
                     Ok(()) => {
-                        img = img.src(encode_gif(&buf[..]));
+                        img.src(encode_gif(&buf[..]));
                     }
                     Err(e) => {
                         console::log_1(&format!("render_multi: {e:?}").into())
@@ -133,42 +130,43 @@ impl<'r> Renderer<'r> {
             }
             _ => console::log_1(&"render_multi: no image".into()),
         }
-        img.end();
+        img.close();
     }
 
     /// Render sign pixels to a GIF image
-    pub fn render_pixels(&mut self, pix: &[u32]) {
+    pub fn render_pixels<'p>(
+        &mut self,
+        pix: &[u32],
+        img: &'p mut html::Img<'p>,
+    ) {
         let (width, height) = self.size();
         // NOTE: the title attribute makes a tooltip on img elements
         let failed_count = format!(
             "Failed pixels: {}",
             pix.iter().filter(|p| **p != 0).count()
         );
-        let mut img = self
-            .html
-            .img()
-            .attr("title", &failed_count)
+        img.title(&failed_count)
             .alt(failed_count)
             .width(width)
             .height(height);
         if let Some(id) = &self.id {
-            img = img.id(*id);
+            img.id(*id);
         }
         if let Some(class) = &self.class {
-            img = img.class(*class);
+            img.class(*class);
         }
         if let Some(dms) = &self.dms {
             let mut buf = Vec::with_capacity(4096);
             match rendzina::render_pixels(&mut buf, dms, pix, width, height) {
                 Ok(()) => {
-                    img = img.src(encode_gif(&buf[..]));
+                    img.src(encode_gif(&buf[..]));
                 }
                 Err(e) => {
                     console::log_1(&format!("render_pixels: {e:?}").into())
                 }
             }
         }
-        img.end();
+        img.close();
     }
 }
 

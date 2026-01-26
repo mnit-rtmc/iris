@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::util::{Fields, Input, Select, opt_ref, opt_str};
-use hatmil::Html;
+use hatmil::{Page, html};
 use serde::Deserialize;
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
@@ -156,45 +156,57 @@ impl<L> LocAnc<L> {
     }
 
     /// Build roads HTML
-    fn roads_html(&self, id: &str, groad: Option<&str>, html: &mut Html) {
-        html.select().id(id);
-        html.option().end(); /* empty */
+    fn roads_html<'p>(
+        &self,
+        id: &str,
+        groad: Option<&str>,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id(id);
+        select.option().close(); /* empty */
         for road in &self.roads {
-            let option = html.option();
+            let mut option = select.option();
             if let Some(groad) = groad
                 && groad == road.name
             {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&road.name).end();
+            option.cdata(&road.name).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Build road directions HTML
-    fn directions_html(&self, id: &str, dir: u16, html: &mut Html) {
-        html.select().id(id);
+    fn directions_html<'p>(
+        &self,
+        id: &str,
+        dir: u16,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id(id);
         for direction in &self.directions {
-            let option = html.option().value(direction.id);
+            let mut option = select.option();
+            option.value(direction.id);
             if dir == direction.id {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&direction.direction).end();
+            option.cdata(&direction.direction).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Build road modifiers HTML
-    fn modifiers_html(&self, md: u16, html: &mut Html) {
-        html.select().id("cross_mod");
+    fn modifiers_html<'p>(&self, md: u16, select: &'p mut html::Select<'p>) {
+        select.id("cross_mod");
         for modifier in &self.modifiers {
-            let option = html.option().value(modifier.id);
+            let mut option = select.option();
+            option.value(modifier.id);
             if md == modifier.id {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&modifier.modifier).end();
+            option.cdata(&modifier.modifier).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Convert to Location HTML
@@ -202,56 +214,67 @@ impl<L> LocAnc<L> {
     where
         C: Card,
     {
-        let mut html = card.title(View::Location);
+        let mut page = Page::new();
+        card.title(View::Location, &mut page.frag::<html::Div>());
         match &self.geoloc {
-            Some(geoloc) => self.location_html(geoloc, &mut html),
+            Some(geoloc) => self.location_html(geoloc, &mut page),
             None => {
-                html.span().text("Error: missing geo_loc!").end();
+                let mut span = page.frag::<html::Span>();
+                span.cdata("Error: missing geo_loc!").close();
             }
         };
-        card.footer_html(false, &mut html);
-        html.to_string()
+        card.footer_html(false, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 
     /// Build Location HTML
-    fn location_html(&self, loc: &GeoLoc, html: &mut Html) {
-        html.div().class("row");
-        html.label().r#for("roadway").text("Roadway").end();
-        self.roads_html("roadway", loc.roadway.as_deref(), html);
-        self.directions_html("road_dir", loc.road_dir, html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("cross_street").text(" ").end();
-        self.modifiers_html(loc.cross_mod, html);
-        self.roads_html("cross_street", loc.cross_street.as_deref(), html);
-        self.directions_html("cross_dir", loc.cross_dir, html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("landmark").text("Landmark").end();
-        html.input()
+    fn location_html(&self, loc: &GeoLoc, page: &mut Page) {
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("roadway").cdata("Roadway").close();
+        self.roads_html("roadway", loc.roadway.as_deref(), &mut div.select());
+        self.directions_html("road_dir", loc.road_dir, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("cross_street").cdata(" ").close();
+        self.modifiers_html(loc.cross_mod, &mut div.select());
+        self.roads_html(
+            "cross_street",
+            loc.cross_street.as_deref(),
+            &mut div.select(),
+        );
+        self.directions_html("cross_dir", loc.cross_dir, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("landmark").cdata("Landmark").close();
+        div.input()
             .id("landmark")
             .maxlength(22)
             .size(24)
             .value(opt_ref(&loc.landmark));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("lat").text("Latitude").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("lat").cdata("Latitude").close();
+        div.input()
             .id("lat")
             .r#type("number")
-            .attr("step", "0.00001")
-            .attr("inputmode", "decimal")
+            .step("0.00001")
+            .inputmode("decimal")
             .value(opt_str(loc.lat));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("lon").text("Longitude").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("lon").cdata("Longitude").close();
+        div.input()
             .id("lon")
             .r#type("number")
-            .attr("step", "0.00001")
-            .attr("inputmode", "decimal")
+            .step("0.00001")
+            .inputmode("decimal")
             .value(opt_str(loc.lon));
-        html.end(); /* div */
+        div.close();
     }
 
     /// Get changed fields from Location form

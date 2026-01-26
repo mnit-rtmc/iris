@@ -27,7 +27,7 @@ use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use chrono::DateTime;
 use gift::block::DisposalMethod;
 use gift::{Encoder, Step};
-use hatmil::Html;
+use hatmil::{Page, html};
 use pix::matte::Matte8;
 use pix::ops::SrcOver;
 use pix::rgb::{Rgba8p, SRgb8};
@@ -116,29 +116,39 @@ pub struct RampMeterAnc {
 
 impl RampMeterAnc {
     /// Build meter types HTML
-    fn meter_types_html(&self, pri: &RampMeter, html: &mut Html) {
-        html.select().id("meter_type");
+    fn meter_types_html<'p>(
+        &self,
+        pri: &RampMeter,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("meter_type");
         for tp in &self.meter_types {
-            let option = html.option().value(tp.id);
+            let mut option = select.option();
+            option.value(tp.id);
             if Some(tp.id) == pri.meter_type {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&tp.description).end();
+            option.cdata(&tp.description).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 
     /// Build metering algorithms HTML
-    fn algorithms_html(&self, pri: &RampMeter, html: &mut Html) {
-        html.select().id("algorithm");
+    fn algorithms_html<'p>(
+        &self,
+        pri: &RampMeter,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("algorithm");
         for alg in &self.algorithms {
-            let option = html.option().value(alg.id);
+            let mut option = select.option();
+            option.value(alg.id);
             if Some(alg.id) == pri.algorithm {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&alg.description).end();
+            option.cdata(&alg.description).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 }
 
@@ -290,12 +300,12 @@ fn encode_meter_2<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
 }
 
 /// Build meter signal HTML
-fn meter_html(buf: Vec<u8>, html: &mut Html) {
+fn meter_html<'p>(buf: Vec<u8>, img: &'p mut html::Img<'p>) {
     const WIDTH: u32 = 24;
     const HEIGHT: u32 = 64;
     let mut src = "data:image/gif;base64,".to_owned();
     b64enc.encode_string(buf, &mut src);
-    html.img().width(WIDTH).height(HEIGHT).src(&src);
+    img.width(WIDTH).height(HEIGHT).src(&src);
 }
 
 impl fmt::Display for MeterLock {
@@ -475,7 +485,7 @@ impl RampMeter {
     }
 
     /// Build meter image HTML
-    fn meter_image_html(&self, num: u32, html: &mut Html) {
+    fn meter_image_html<'p>(&self, num: u32, img: &'p mut html::Img<'p>) {
         if let Some(r) = self.status_rate() {
             let c = 3_600.0 / (r as f32);
             let ds = (c * 10.0).round() as i32;
@@ -490,7 +500,7 @@ impl RampMeter {
                 };
                 match res {
                     Ok(()) => {
-                        meter_html(buf, html);
+                        meter_html(buf, img);
                         return;
                     }
                     Err(e) => {
@@ -501,7 +511,7 @@ impl RampMeter {
         }
         let mut buf = Vec::with_capacity(4096);
         match encode_meter_off(Encoder::new(&mut buf)) {
-            Ok(()) => meter_html(buf, html),
+            Ok(()) => meter_html(buf, img),
             Err(e) => {
                 console::log_1(&format!("encode_meter_off: {e:?}").into())
             }
@@ -509,56 +519,58 @@ impl RampMeter {
     }
 
     /// Build metering rate HTML
-    fn rate_html(&self, html: &mut Html) {
-        let span = html.span();
+    fn rate_html<'p>(&self, span: &'p mut html::Span<'p>) {
         match self.status_rate() {
             Some(r) => {
                 let c = 3_600.0 / (r as f32);
-                span.text(format!("⏱️ {c:.1} s ({r} veh/hr)"));
+                span.cdata(format!("⏱️ {c:.1} s ({r} veh/hr)"));
             }
             None => {
-                span.class("hidden").text("⏱️ 0.0 s (N/A veh/hr)");
+                span.class("hidden").cdata("⏱️ 0.0 s (N/A veh/hr)");
             }
         }
-        html.end();
+        span.close();
     }
 
     /// Build lock reason HTML
-    fn lock_reason_html(&self, html: &mut Html) {
+    fn lock_reason_html<'p>(&self, span: &'p mut html::Span<'p>) {
         let reason = self.lock_reason();
-        html.span().text(match reason {
+        span.cdata(match reason {
             LockReason::Unlocked => "🔓",
             _ => "🔒",
         });
-        html.select().id("lk_reason");
+        let mut select = span.select();
+        select.id("lk_reason");
         for r in LockReason::all_meter() {
-            let option = html.option();
+            let mut option = select.option();
             if *r == reason {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(r.as_str()).end();
+            option.cdata(r.as_str()).close();
         }
-        html.end().end();
+        select.close();
+        span.close();
     }
 
     /// Build shrink/grow buttons HTML
-    fn shrink_grow_html(&self, html: &mut Html) {
-        html.span();
-        let button = html.button().id("lk_shrink").r#type("button");
+    fn shrink_grow_html<'p>(&self, span: &'p mut html::Span<'p>) {
+        let mut button = span.button();
+        button.id("lk_shrink").r#type("button");
         if !self.is_shrink_allowed() {
             button.disabled();
         }
-        html.text("Shrink ↩").end();
-        let button = html.button().id("lk_grow").r#type("button");
+        button.cdata("Shrink ↩").close();
+        button = span.button();
+        button.id("lk_grow").r#type("button");
         if !self.is_grow_allowed() {
             button.disabled();
         }
-        html.text("Grow ↪").end();
-        html.end(); /* span */
+        button.cdata("Grow ↪").close();
+        span.close();
     }
 
     /// Build queue HTML
-    fn queue_html(&self, html: &mut Html) {
+    fn queue_html<'p>(&self, span: &'p mut html::Span<'p>) {
         let value = self.status.as_ref().and_then(|s| {
             s.queue.as_ref().and_then(|q| match q.as_str() {
                 "empty" => Some(8),
@@ -567,36 +579,35 @@ impl RampMeter {
                 _ => None,
             })
         });
-        let elem = html.span();
         if value.is_none() {
-            elem.class("hidden");
+            span.class("hidden");
         }
-        html.text("🚗 queue ");
+        span.cdata("🚗 queue ");
         let value = value.unwrap_or(0);
-        html.meter()
+        span.meter()
             .min(0)
-            .attr("optimum", 0)
-            .attr("low", 25)
-            .attr("high", 75)
+            .optimum(0)
+            .low(25)
+            .high(75)
             .max(100)
             .value(value)
-            .end();
-        html.end(); /* span */
+            .close();
+        span.close();
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states(anc).to_string())
-            .end();
-        html.div()
-            .class("info fill")
-            .text_len(opt_ref(&self.location), 32);
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states(anc).to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 32);
+        String::from(page)
     }
 
     /// Convert to Control HTML
@@ -604,123 +615,138 @@ impl RampMeter {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = self.title(View::Control);
-        html.div().class("row fill");
-        self.item_states(anc).tooltips(&mut html);
-        html.span();
+        let mut page = Page::new();
+        self.title(View::Control, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row fill");
+        self.item_states(anc).tooltips(&mut div.span());
+        let mut span = div.span();
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
         {
-            html.text(expires);
+            span.cdata(expires);
         }
-        html.end(); /* span */
-        html.end(); /* div */
-        html.div().class("row");
-        html.span()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span()
             .class("info")
-            .text_len(opt_ref(&self.location), 64)
-            .end();
-        html.end(); /* div */
-        html.div().class("row center");
-        self.meter_image_html(1, &mut html);
-        html.div().class("column");
-        self.rate_html(&mut html);
-        self.lock_reason_html(&mut html);
-        self.shrink_grow_html(&mut html);
-        self.queue_html(&mut html);
-        html.end(); /* div */
-        self.meter_image_html(2, &mut html);
-        html.to_string()
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row center");
+        self.meter_image_html(1, &mut div.img());
+        let mut div2 = div.div();
+        div2.class("column");
+        self.rate_html(&mut div2.span());
+        self.lock_reason_html(&mut div2.span());
+        self.shrink_grow_html(&mut div2.span());
+        self.queue_html(&mut div2.span());
+        div2.close();
+        self.meter_image_html(2, &mut div.img());
+        String::from(page)
     }
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &RampMeterAnc) -> String {
         let work = "http://example.com"; // FIXME
-        let mut html = self.title(View::Request);
-        html.div().class("row");
-        html.span().text("Settings").end();
-        html.button()
+        let mut page = Page::new();
+        self.title(View::Request, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Settings").close();
+        div.button()
             .id("rq_settings")
             .r#type("button")
-            .text("Send")
-            .end()
-            .end(); /* div */
-        html.div().class("row");
-        html.span().text("Work Request").end();
-        html.a()
+            .cdata("Send")
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Work Request").close();
+        div.a()
             .href(work)
-            .attr("target", "_blank")
-            .attr("rel", "noopener noreferrer")
-            .text("🔗 ")
-            .text(self.name());
-        html.to_string()
+            .target("_blank")
+            .rel("noopener noreferrer")
+            .cdata("🔗 ")
+            .cdata(self.name());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("notes").text("Notes").end();
-        html.textarea()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
             .id("notes")
             .maxlength(255)
-            .attr("rows", 4)
-            .attr("cols", 24)
-            .text(opt_ref(&self.notes))
-            .end();
-        html.end(); /* div */
-        anc.cio.controller_html(self, &mut html);
-        anc.cio.pin_html(self.pin, &mut html);
-        html.div().class("row");
-        html.label().r#for("meter_type").text("Type").end();
-        anc.meter_types_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("algorithm").text("Algorithm").end();
-        anc.algorithms_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("storage").text("Storage (ft)").end();
-        html.input()
+            .rows(4)
+            .cols(24)
+            .cdata(opt_ref(&self.notes))
+            .close();
+        div.close();
+        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("meter_type").cdata("Type").close();
+        anc.meter_types_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("algorithm").cdata("Algorithm").close();
+        anc.algorithms_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("storage").cdata("Storage (ft)").close();
+        div.input()
             .id("storage")
             .r#type("number")
             .min(1)
             .max(5000)
             .size(8)
             .value(opt_str(self.storage));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("max_wait").text("Max Wait (s)").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("max_wait").cdata("Max Wait (s)").close();
+        div.input()
             .id("max_wait")
             .r#type("number")
             .min(1)
             .max(600)
             .size(8)
             .value(opt_str(self.max_wait));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("am_target").text("AM Target").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("am_target").cdata("AM Target").close();
+        div.input()
             .id("am_target")
             .r#type("number")
             .min(0)
             .max(2000)
             .size(8)
             .value(opt_str(self.am_target));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("pm_target").text("PM Target").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("pm_target").cdata("PM Target").close();
+        div.input()
             .id("pm_target")
             .r#type("number")
             .min(0)
             .max(2000)
             .size(8)
             .value(opt_str(self.pm_target));
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

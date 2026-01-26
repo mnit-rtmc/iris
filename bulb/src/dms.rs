@@ -27,7 +27,7 @@ use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use chrono::{DateTime, Local, format::SecondsFormat};
-use hatmil::Html;
+use hatmil::{Page, html};
 use js_sys::{ArrayBuffer, Uint8Array};
 use mag::temp::DegC;
 use ntcip::dms::multi::{
@@ -491,12 +491,12 @@ impl DmsAnc {
     }
 
     /// Make line select elements
-    fn make_lines_html(
+    fn make_lines_html<'p>(
         &self,
         dms: &NtcipDms,
         pat_def: &MsgPattern,
         ms_cur: &str,
-        html: &mut Html,
+        div: &'p mut html::Div<'p>,
     ) {
         // NOTE: this prevents lifetime from escaping
         let mut pat = pat_def;
@@ -511,7 +511,7 @@ impl DmsAnc {
         let cur_lines = MessagePattern::new(dms, &pat_def.multi)
             .lines(ms_cur)
             .chain(repeat(""));
-        html.div().id("mc_lines").class("column");
+        div.id("mc_lines").class("column");
         let mut rect_num = 0;
         for (i, ((width, font_num, rn), cur_line)) in
             widths.zip(cur_lines).enumerate()
@@ -519,26 +519,32 @@ impl DmsAnc {
             let ln = 1 + i as u16;
             let mc_line = format!("mc_line{ln}");
             let mc_choice = format!("mc_choice{ln}");
-            let input = html
-                .input()
-                .id(mc_line)
-                .value(cur_line)
-                .attr("list", &mc_choice);
+            let mut input = div.input();
             if rn != rect_num {
                 input.class("mc_line_gap");
                 rect_num = rn;
             }
-            html.datalist().id(mc_choice);
+            input.id(mc_line).value(cur_line).list(&mc_choice);
+            let mut datalist = div.datalist();
+            datalist.id(mc_choice);
             if let Some(font) = dms.font_definition().font(font_num) {
                 for ml in self.pat_lines(pat) {
                     if ml.line == ln {
-                        self.line_html(&ml.multi, width, font, html)
+                        if let Some(ms) =
+                            self.line_multi(&ml.multi, width, font)
+                        {
+                            let mut option = datalist.option();
+                            option
+                                .value(&ms)
+                                .cdata(join_text(&ms, " "))
+                                .close();
+                        }
                     }
                 }
             }
-            html.end(); /* datalist */
+            datalist.close();
         }
-        html.end(); /* div */
+        div.close();
     }
 
     /// Find a substitute message pattern
@@ -568,18 +574,22 @@ impl DmsAnc {
         self.lines.iter().filter(|ml| ml.msg_pattern == pat.name)
     }
 
-    /// Build line HTML
-    fn line_html(&self, multi: &str, width: u16, font: &Font, html: &mut Html) {
+    /// Get line that fits on sign
+    fn line_multi(
+        &self,
+        multi: &str,
+        width: u16,
+        font: &Font,
+    ) -> Option<String> {
         // FIXME: handle line-allowed MULTI tags
-        let mut ms = multi;
-        let mut line;
+        let mut line = String::from(multi);
+        let mut ms = &line[..];
         loop {
             let Ok(w) = font.text_width(ms, None) else {
-                return;
+                break;
             };
             if w <= width {
-                html.option().value(ms).text(join_text(ms, " ")).end();
-                break;
+                return Some(line);
             } else if let Some(abbrev) = self.abbreviate_text(ms) {
                 line = abbrev;
                 ms = &line[..];
@@ -587,6 +597,7 @@ impl DmsAnc {
                 break;
             }
         }
+        None
     }
 
     /// Abbreviate message text
@@ -751,27 +762,29 @@ impl Dms {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
-        let mut html = Html::new();
-        html.div().class("title row");
-        html.span()
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states(anc).to_string())
-            .end();
-        html.span().class("info").text(self.user(anc)).end();
-        html.end(); /* div */
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row");
+        div.span()
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states(anc).to_string())
+            .close();
+        div.span().class("info").cdata(self.user(anc)).close();
+        div.close();
         if let Some(gif) = self.msg_current_gif() {
             let multi = self.current_multi(anc);
-            let mut rend = Renderer::new(&mut html)
+            let mut rend = Renderer::new()
                 .with_class("sign_message")
                 .with_gif(&gif)
                 .with_max_width(240)
                 .with_max_height(80);
-            rend.render_multi(multi);
+            rend.render_multi(multi, &mut page.frag::<html::Img>());
         }
-        html.div().class("info fill");
-        html.text_len(opt_ref(&self.location), 64);
-        html.to_string()
+        div = page.frag::<html::Div>();
+        div.class("info fill");
+        div.cdata_len(opt_ref(&self.location), 64);
+        String::from(page)
     }
 
     /// Get user to display
@@ -794,19 +807,20 @@ impl Dms {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = self.title(View::Control);
-        html.div().class("row fill");
-        self.item_states(anc).tooltips(&mut html);
-        html.span();
+        let mut page = Page::new();
+        self.title(View::Control, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row fill");
+        self.item_states(anc).tooltips(&mut div.span());
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
         {
-            html.text(expires);
+            div.span().cdata(expires);
         }
-        html.end(); /* span */
-        html.end(); /* div */
-        html.div().id("sign_msg");
-        let mut rend = Renderer::new(&mut html)
+        div.close();
+        div = page.frag::<html::Div>();
+        div.id("sign_msg");
+        let mut rend = Renderer::new()
             .with_class("sign_message")
             .with_max_width(450)
             .with_max_height(100);
@@ -818,19 +832,26 @@ impl Dms {
         if let Some(dms) = &dms {
             rend = rend.with_dms(dms)
         }
-        rend.render_multi(self.current_multi(anc));
-        self.render_pixels(anc, &mut rend);
-        html.end(); // div
-        html.div().class("info fill");
-        html.text_len(opt_ref(&self.location), 64);
-        html.end(); /* div */
-        self.message_composer_html(anc, &mut html);
-        self.action_plans_html(anc, &mut html);
-        html.to_string()
+        rend.render_multi(self.current_multi(anc), &mut div.img());
+        if let Some(pix) = self.failed_pixels(anc) {
+            rend.render_pixels(&pix[..], &mut div.img());
+        }
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
+        self.message_composer_html(anc, &mut page.frag::<html::Div>());
+        self.action_plans_html(anc, &mut page.frag::<html::Details>());
+        String::from(page)
     }
 
     /// Build message composer HTML
-    fn message_composer_html(&self, anc: &DmsAnc, html: &mut Html) {
+    fn message_composer_html<'p>(
+        &self,
+        anc: &DmsAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
         if anc.compose_patterns.is_empty() {
             console::log_1(
                 &format!("{}: No compose patterns", self.name).into(),
@@ -842,58 +863,65 @@ impl Dms {
         };
         let pat_def = self.pattern_default(anc);
         let multi = pat_def.map(|pat| &pat.multi[..]).unwrap_or("");
-        html.div().id("mc_grid");
-        let mut rend = Renderer::new(html)
+        div.id("mc_grid");
+        let mut rend = Renderer::new()
             .with_dms(&dms)
             .with_id("mc_pixels")
             .with_class("preview")
             .with_max_width(240)
             .with_max_height(80);
-        self.render_pixels(anc, &mut rend);
-        let mut rend = rend.with_id("mc_preview");
-        rend.render_multi(multi);
-        html.select().id("mc_pattern");
+        if let Some(pix) = self.failed_pixels(anc) {
+            rend.render_pixels(&pix[..], &mut div.img());
+        }
+        // now, render the MULTI on top
+        rend = rend.with_id("mc_preview");
+        rend.render_multi(multi, &mut div.img());
+        let mut select = div.select();
+        select.id("mc_pattern");
         for pat in &anc.compose_patterns {
-            let option = html.option();
+            let mut option = select.option();
             if let Some(p) = pat_def
                 && p.name == pat.name
             {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&pat.name).end();
+            option.cdata(&pat.name).close();
         }
-        html.end(); /* select */
+        select.close();
         if let Some(pat) = pat_def {
-            anc.make_lines_html(&dms, pat, self.current_multi(anc), html);
+            anc.make_lines_html(
+                &dms,
+                pat,
+                self.current_multi(anc),
+                &mut div.div(),
+            );
         }
-        make_expire_select(html);
-        html.button()
+        make_expire_select(&mut div.select());
+        div.button()
             .id("mc_send")
             .r#type("button")
-            .text("Send")
-            .end();
-        html.button()
+            .cdata("Send")
+            .close();
+        div.button()
             .id("mc_blank")
             .r#type("button")
-            .text("Blank")
-            .end();
-        html.end(); /* div */
+            .cdata("Blank")
+            .close();
+        div.close();
     }
 
-    /// Render pixel failure status
-    fn render_pixels(&self, anc: &DmsAnc, rend: &mut Renderer) {
-        let Some(pf) = &self.pixel_failures else {
-            return;
-        };
-        let Some(cfg) = anc.sign_config(self.sign_config.as_deref()) else {
-            return;
-        };
+    /// Decode failed pixels
+    fn failed_pixels(&self, anc: &DmsAnc) -> Option<Vec<u32>> {
+        let pf = self.pixel_failures.as_deref()?;
+        let cfg = anc.sign_config(self.sign_config.as_deref())?;
         let rle = Table::new(String::from(pf));
         let pix: Vec<_> = rle.iter().collect();
         if pix.len() == (cfg.pixel_width * cfg.pixel_height) as usize
             && pix.iter().any(|p| *p != 0)
         {
-            rend.render_pixels(&pix[..]);
+            Some(pix)
+        } else {
+            None
         }
     }
 
@@ -932,30 +960,39 @@ impl Dms {
     }
 
     /// Build action plans HTML
-    fn action_plans_html(&self, anc: &DmsAnc, html: &mut Html) {
+    fn action_plans_html<'p>(
+        &self,
+        anc: &DmsAnc,
+        details: &'p mut html::Details<'p>,
+    ) {
         if anc.action_plans.is_empty() {
             return;
         }
-        html.details().summary().text("📋 Action Plans").end();
-        html.div().class("row fill");
-        html.span().text("Name").end();
-        html.span().text("Phase").end();
-        html.end(); // div
+        details.summary().cdata("📋 Action Plans").close();
+        let mut div = details.div();
+        div.class("row fill");
+        div.span().cdata("Name").close();
+        div.span().cdata("Phase").close();
+        div.close();
         for act in &anc.action_plans {
-            html.div().class("row fill");
-            html.span().class("info").text(&act.name).end();
-            html.span();
-            html.select().id("phase").disabled();
+            let mut div = details.div();
+            div.class("row fill");
+            div.span().class("info").cdata(&act.name).close();
+            let mut span = div.span();
+            let mut select = span.select();
+            select.id("phase").disabled();
             for p in anc.phases(act) {
-                let option = html.option();
+                let mut option = select.option();
                 if p == act.phase {
-                    option.attr_bool("selected");
+                    option.selected();
                 }
-                html.text(p).end();
+                option.cdata(p).close();
             }
-            html.end().end().end(); // select, span, div
+            select.close();
+            span.close();
+            div.close();
         }
-        html.end(); // details
+        details.close();
     }
 
     // Get selected message pattern
@@ -1026,292 +1063,257 @@ impl Dms {
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &DmsAnc) -> String {
         let work = "http://example.com"; // FIXME
-        let mut html = self.title(View::Request);
-        html.div().class("row");
-        html.span().text("Current Message").end();
-        html.button()
+        let mut page = Page::new();
+        self.title(View::Request, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Current Message").close();
+        div.button()
             .id("rq_msg_query")
             .r#type("button")
-            .text("Query");
-        html.end().end(); /* button, div */
-        html.div().class("row");
-        html.span().text("Current Status").end();
-        html.button()
+            .cdata("Query")
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Current Status").close();
+        div.button()
             .id("rq_status_query")
             .r#type("button")
-            .text("Query");
-        html.end().end(); /* button, div */
-        html.div().class("row");
-        html.span().text("Pixel Errors").end();
-        html.span();
-        html.button()
+            .cdata("Query")
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Pixel Errors").close();
+        let mut span = div.span();
+        span.button()
             .id("rq_pixel_text")
             .r#type("button")
-            .text("Test")
-            .end();
-        html.button()
+            .cdata("Test")
+            .close();
+        span.button()
             .id("rq_pixel_query")
             .r#type("button")
-            .text("Query");
-        html.end().end().end(); /* button, span, div */
-        html.div().class("row");
-        html.span().text("Settings").end();
-        html.span();
-        html.button()
+            .cdata("Query")
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Settings").close();
+        span = div.span();
+        span.button()
             .id("rq_settings_send")
             .r#type("button")
-            .text("Send");
-        html.end();
-        html.button()
+            .cdata("Send")
+            .close();
+        span.button()
             .id("rq_settings_query")
             .r#type("button")
-            .text("Query");
-        html.end().end().end(); /* button, span, div */
-        html.div().class("row");
-        html.span().text("Configuration").end();
-        html.span();
-        html.button()
+            .cdata("Query")
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Configuration").close();
+        span = div.span();
+        span.button()
             .id("rq_config_reset")
             .r#type("button")
-            .text("Reset");
-        html.end();
-        html.button()
+            .cdata("Reset")
+            .close();
+        span.button()
             .id("rq_config_query")
             .r#type("button")
-            .text("Query");
-        html.end().end().end(); /* button, span, div */
-        html.div().class("row");
-        html.span().text("Work Request").end();
-        html.a()
+            .cdata("Query")
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Work Request").close();
+        div.a()
             .href(work)
-            .attr("target", "_blank")
-            .attr("rel", "noopener noreferrer")
-            .text("🔗 ")
-            .text(self.name());
-        html.to_string()
+            .target("_blank")
+            .rel("noopener noreferrer")
+            .cdata("🔗 ")
+            .cdata(self.name());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &DmsAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("notes").text("Notes").end();
-        html.textarea()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
             .id("notes")
             .maxlength(255)
-            .attr("rows", 4)
-            .attr("cols", 24)
-            .text(opt_ref(&self.notes))
-            .end();
-        html.end(); /* div */
-        anc.cio.controller_html(self, &mut html);
-        anc.cio.pin_html(self.pin, &mut html);
-        self.sign_config_html(anc, &mut html);
+            .rows(4)
+            .cols(24)
+            .cdata(opt_ref(&self.notes))
+            .close();
+        div.close();
+        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
+        self.sign_config_html(anc, &mut page.frag::<html::Div>());
         // FIXME: add sign_detail button
-        self.footer_html(true, &mut html);
-        html.to_string()
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 
     /// Make sign config row as HTML
-    fn sign_config_html(&self, anc: &DmsAnc, html: &mut Html) {
-        html.div().class("row");
-        html.label().text("Sign Config").end();
+    fn sign_config_html<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
+        div.class("row");
+        div.label().cdata("Sign Config").close();
         match anc.sign_config(self.sign_config.as_deref()) {
             Some(cfg) => {
-                html.button()
+                div.button()
                     .r#type("button")
                     .class("go_link")
-                    .attr("data-link", &cfg.name)
-                    .attr("data-type", Res::SignConfig.as_str())
-                    .text(&cfg.name)
-                    .end();
+                    .data_("link", &cfg.name)
+                    .data_("type", Res::SignConfig.as_str())
+                    .cdata(&cfg.name)
+                    .close();
             }
             None => {
-                html.span().end(); /* empty */
+                div.span().close(); /* empty */
             }
         }
-        html.end(); /* div */
+        div.close();
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc) -> String {
-        let mut html = self.title(View::Status);
-        html.div();
-        self.item_states(anc).tooltips(&mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.span()
+        let mut page = Page::new();
+        self.title(View::Status, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        self.item_states(anc).tooltips(&mut div.span());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span()
             .class("info")
-            .text_len(opt_ref(&self.location), 64)
-            .end();
-        html.end(); /* div */
-        self.temp_html(&mut html);
-        self.light_html(&mut html);
-        self.power_html(&mut html);
-        html.to_string()
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
+        div.close();
+        self.temp_html(&mut page.frag::<html::Div>());
+        self.light_html(&mut page.frag::<html::Div>());
+        self.power_html(&mut page.frag::<html::Div>());
+        String::from(page)
     }
 
     /// Build temperature status HTML
-    fn temp_html(&self, html: &mut Html) {
+    fn temp_html<'p>(&self, div: &'p mut html::Div<'p>) {
         if let Some(status) = &self.status {
-            html.div().text("🌡️ ").b().text("Temperature").end().end();
-            html.ul();
+            div.cdata("🌡️ ");
+            div.b().cdata("Temperature").close();
+            let mut ul = div.ul();
             if let Some(temps) = &status.ambient_temps {
-                temp_range_html("Ambient", temps, html);
+                temp_range_html("Ambient", temps, &mut ul);
             }
             if let Some(temps) = &status.housing_temps {
-                temp_range_html("Housing", temps, html);
+                temp_range_html("Housing", temps, &mut ul);
             }
             if let Some(temps) = &status.cabinet_temps {
-                temp_range_html("Cabinet", temps, html);
+                temp_range_html("Cabinet", temps, &mut ul);
             }
-            html.end(); /* ul */
         }
+        div.close();
     }
 
     /// Build light status HTML
-    fn light_html(&self, html: &mut Html) {
+    fn light_html<'p>(&self, div: &'p mut html::Div<'p>) {
         if let Some(status) = &self.status {
-            html.div().text("🔅 ").b().text("Light Output").end();
+            div.cdata("🔅 ").b().cdata("Light Output").close();
             if let Some(light) = &status.light_output {
-                html.meter().max(100).value(*light).end();
-                html.text("🔆 ").text(*light).text("%");
+                div.meter().max(100).value(*light).close();
+                div.cdata("🔆 ").cdata(*light).cdata("%");
             }
-            html.end(); /* div */
             if let Some(photocells) = &status.photocells {
-                html.table();
+                let mut table = div.table();
                 for (i, photocell) in photocells.iter().enumerate() {
-                    html.tr();
-                    html.td().text(i + 1).end();
-                    html.td().text_len(&photocell.description, 20).end();
-                    let td = html.td();
+                    let mut tr = table.tr();
+                    tr.td().cdata(i + 1).close();
+                    tr.td().cdata_len(&photocell.description, 20).close();
+                    let mut td = tr.td();
                     let reading = &photocell.reading;
                     match reading.parse::<f32>() {
                         Ok(_r) => {
-                            html.meter().max(100).value(reading).end();
-                            html.text("☀️ ").text(reading).text("%");
+                            td.meter().max(100).value(reading).close();
+                            td.cdata("☀️ ").cdata(reading).cdata("%");
                         }
                         Err(_e) => {
-                            td.class("fault").text_len(reading, 16);
+                            td.class("fault").cdata_len(reading, 16);
                         }
                     }
-                    html.end().end(); /* td, tr */
+                    tr.close();
                 }
-                html.end(); /* table */
             }
         }
+        div.close();
     }
 
     /// Build power supply status HTML
-    fn power_html(&self, html: &mut Html) {
+    fn power_html<'p>(&self, div: &'p mut html::Div<'p>) {
         if let Some(status) = &self.status
             && let Some(power_supplies) = &status.power_supplies
         {
-            html.div().text("⚡ ").b().text("Power").end().end();
-            html.table();
+            div.cdata("⚡ ");
+            div.b().cdata("Power").close();
+            let mut table = div.table();
             for (i, supply) in power_supplies.iter().enumerate() {
-                html.tr();
-                html.td().text(i + 1).end();
-                html.td().text_len(&supply.description, 20).end();
-                let td = html.td();
+                let mut tr = table.tr();
+                tr.td().cdata(i + 1).close();
+                tr.td().cdata_len(&supply.description, 20).close();
+                let mut td = tr.td();
                 let voltage = &supply.voltage;
                 match voltage.parse::<f32>() {
                     Ok(v) => {
                         if v <= 0.0 {
                             td.class("fault");
                         }
-                        html.text(voltage).text("V");
+                        td.cdata(voltage).cdata("V");
                     }
                     Err(_e) => {
-                        td.class("fault").text_len(voltage, 16);
+                        td.class("fault").cdata_len(voltage, 16);
                     }
                 }
-                html.end(); /* td */
-                html.td().text_len(&supply.supply_type, 12).end();
-                html.end(); /* tr */
+                td.close();
+                tr.td().cdata_len(&supply.supply_type, 12).close();
+                tr.close();
             }
-            html.end(); /* table */
         }
+        div.close();
     }
 }
 
 /// Make expire select element
-fn make_expire_select(html: &mut Html) {
-    html.select()
-        .id("mc_expire")
-        .option()
-        .value("")
-        .text("⏲️ ")
-        .end()
-        .option()
-        .value("5")
-        .text("5 m")
-        .end()
-        .option()
-        .value("10")
-        .text("10 m")
-        .end()
-        .option()
-        .value("15")
-        .text("15 m")
-        .end()
-        .option()
-        .value("30")
-        .text("30 m")
-        .end()
-        .option()
-        .value("60")
-        .text("60 m")
-        .end()
-        .option()
-        .value("90")
-        .text("90 m")
-        .end()
-        .option()
-        .value("120")
-        .text("2 h")
-        .end()
-        .option()
-        .value("180")
-        .text("3 h")
-        .end()
-        .option()
-        .value("240")
-        .text("4 h")
-        .end()
-        .option()
-        .value("300")
-        .text("5 h")
-        .end()
-        .option()
-        .value("360")
-        .text("6 h")
-        .end()
-        .option()
-        .value("480")
-        .text("8 h")
-        .end()
-        .option()
-        .value("600")
-        .text("10 h")
-        .end()
-        .option()
-        .value("720")
-        .text("12 h")
-        .end()
-        .option()
-        .value("960")
-        .text("16 h")
-        .end()
-        .option()
-        .value("1440")
-        .text("24 h")
-        .end()
-        .end(); // select
+fn make_expire_select<'p>(select: &'p mut html::Select<'p>) {
+    select.id("mc_expire");
+    select.option().value("").cdata("⏲️ ").close();
+    select.option().value("5").cdata("5 m").close();
+    select.option().value("10").cdata("10 m").close();
+    select.option().value("15").cdata("15 m").close();
+    select.option().value("30").cdata("30 m").close();
+    select.option().value("60").cdata("60 m").close();
+    select.option().value("90").cdata("90 m").close();
+    select.option().value("120").cdata("2 h").close();
+    select.option().value("180").cdata("3 h").close();
+    select.option().value("240").cdata("4 h").close();
+    select.option().value("300").cdata("5 h").close();
+    select.option().value("360").cdata("6 h").close();
+    select.option().value("480").cdata("8 h").close();
+    select.option().value("600").cdata("10 h").close();
+    select.option().value("720").cdata("12 h").close();
+    select.option().value("960").cdata("16 h").close();
+    select.option().value("1440").cdata("24 h").close();
+    select.close();
 }
 
 /// Build temperature range HTML
-fn temp_range_html(label: &str, temps: &[i32], html: &mut Html) {
+fn temp_range_html<'p>(label: &str, temps: &[i32], ul: &'p mut html::Ul) {
     let mut mn = None;
     let mut mx = None;
     for &temp in temps {
@@ -1336,7 +1338,7 @@ fn temp_range_html(label: &str, temps: &[i32], html: &mut Html) {
                 (f64::from(mx) * DegC).to::<TempUnit>(),
             )
         };
-        html.li().text(label).text(t).end();
+        ul.li().cdata(label).cdata(t).close();
     }
 }
 
@@ -1476,10 +1478,10 @@ impl Card for Dms {
         };
         let lines = if &id == "mc_pattern" {
             // update mc_lines element
-            let mut html = Html::new();
-            anc.make_lines_html(&dms, pat, "", &mut html);
+            let mut page = Page::new();
+            anc.make_lines_html(&dms, pat, "", &mut page.frag::<html::Div>());
             let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");
-            mc_lines.set_outer_html(&html.to_string());
+            mc_lines.set_outer_html(&String::from(page));
             Vec::new()
         } else {
             self.selected_lines()
@@ -1488,16 +1490,17 @@ impl Card for Dms {
             .fill(lines.iter().map(|l| &l[..]));
         let multi = multi_normalize(&multi);
         // update mc_preview image element
-        let mut html = Html::new();
-        let mut rend = Renderer::new(&mut html)
+        let mut page = Page::new();
+        let mut rend = Renderer::new()
             .with_dms(&dms)
             .with_id("mc_preview")
             .with_class("preview")
             .with_max_width(240)
             .with_max_height(80);
-        rend.render_multi(&multi);
+        let mut img = page.frag::<html::Img>();
+        rend.render_multi(&multi, &mut img);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
-        preview.set_outer_html(&String::from(html));
+        preview.set_outer_html(&String::from(page));
         Vec::new()
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@ use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::util::{ContainsLower, Fields, Input, Select, opt_ref, opt_str};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -73,16 +73,21 @@ impl LcsStateAnc {
     }
 
     /// Build indications HTML
-    fn indications_html(&self, pri: &LcsState, html: &mut Html) {
-        html.select().id("indication");
+    fn indications_html<'p>(
+        &self,
+        pri: &LcsState,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("indication");
         for ind in &self.indications {
-            let option = html.option().value(ind.id);
+            let mut option = select.option();
+            option.value(ind.id);
             if ind.id == pri.indication {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(ind.to_string()).end();
+            option.cdata(ind.to_string()).close();
         }
-        html.end(); /* select */
+        select.close();
     }
 }
 
@@ -131,62 +136,72 @@ impl ControllerIo for LcsState {
 impl LcsState {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsStateAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(anc.cio.item_states(self).to_string())
-            .end();
-        html.div().class("info row").text(&self.lcs);
-        html.span().text(self.lane).end();
-        html.span().text(anc.indication(self).symbol).end();
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(anc.cio.item_states(self).to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info row").cdata(&self.lcs);
+        div.span().cdata(self.lane).close();
+        div.span().cdata(anc.indication(self).symbol).close();
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsStateAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().text("LCS").end();
-        html.span().text(&self.lcs).end();
-        html.end(); /* div */
-        anc.cio.controller_html(self, &mut html);
-        anc.cio.pin_html(self.pin, &mut html);
-        html.div().class("row");
-        html.label().r#for("lane").text("Lane").end();
-        html.input()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().cdata("LCS").close();
+        div.span().cdata(&self.lcs).close();
+        div.close();
+        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("lane").cdata("Lane").close();
+        div.input()
             .id("lane")
             .r#type("number")
             .min(1)
             .max(9)
             .size(2)
             .value(self.lane);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("indication").text("Indication").end();
-        anc.indications_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("msg_pattern").text("Msg Pattern").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("indication").cdata("Indication").close();
+        anc.indications_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("msg_pattern")
+            .cdata("Msg Pattern")
+            .close();
+        div.input()
             .id("msg_pattern")
             .maxlength(20)
             .size(20)
             .value(opt_ref(&self.msg_pattern));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("msg_num").text("Msg #").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("msg_num").cdata("Msg #").close();
+        div.input()
             .id("msg_num")
             .r#type("number")
             .min(2)
             .max(65535)
             .size(5)
             .value(opt_str(self.msg_num));
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

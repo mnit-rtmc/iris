@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@ use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -46,49 +46,62 @@ impl Alarm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states(anc).to_string())
-            .end();
-        html.div().class("info fill").text(&self.description);
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states(anc).to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill").cdata(&self.description);
+        String::from(page)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
-        let mut html = self.title(View::Status);
-        html.div().class("row");
-        self.item_states(anc).tooltips(&mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.span().class("info full").text(&self.description).end();
-        html.end(); /* div */
-        html.div().class("row");
-        html.span().text("Triggered").end();
-        html.span()
+        let mut page = Page::new();
+        self.title(View::Status, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        self.item_states(anc).tooltips(&mut div.span());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span()
+            .class("info full")
+            .cdata(&self.description)
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span().cdata("Triggered").close();
+        div.span()
             .class("info")
-            .text(self.trigger_time.as_deref().unwrap_or("-"));
-        html.to_string()
+            .cdata(self.trigger_time.as_deref().unwrap_or("-"));
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &AlarmAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("description").text("Description").end();
-        html.input()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("description")
+            .cdata("Description")
+            .close();
+        div.input()
             .id("description")
             .maxlength(24)
             .size(24)
             .value(&self.description);
-        html.end(); /* div */
-        anc.controller_html(self, &mut html);
-        anc.pin_html(self.pin, &mut html);
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        anc.controller_html(self, &mut page.frag::<html::Div>());
+        anc.pin_html(self.pin, &mut page.frag::<html::Div>());
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

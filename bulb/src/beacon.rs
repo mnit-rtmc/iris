@@ -19,7 +19,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref, opt_str};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -151,25 +151,28 @@ impl Beacon {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states(anc).to_string())
-            .end();
-        html.div().class("beacon-container row center");
-        html.button().id("ob_flashing").disabled().end();
-        html.label().r#for("ob_flashing").class("signal-housing");
-        html.span().class(self.class_flash()).text("🔆").end();
-        html.end(); /* label */
-        html.span()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states(anc).to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("beacon-container row center");
+        div.button().id("ob_flashing").disabled().close();
+        let mut label = div.label();
+        label.r#for("ob_flashing").class("signal-housing");
+        label.span().class(self.class_flash()).cdata("🔆").close();
+        label.close();
+        div.span()
             .class("beacon-sign tiny")
-            .text(&self.message)
-            .end();
-        html.label().r#for("ob_flashing").class("signal-housing");
-        html.span().class(self.class_delayed()).text("🔆");
-        html.to_string()
+            .cdata(&self.message)
+            .close();
+        label = div.label();
+        label.r#for("ob_flashing").class("signal-housing");
+        label.span().class(self.class_delayed()).cdata("🔆");
+        String::from(page)
     }
 
     /// Convert to Control HTML
@@ -177,89 +180,93 @@ impl Beacon {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = self.title(View::Control);
-        html.div().class("row");
-        self.item_states(anc).tooltips(&mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.span()
+        let mut page = Page::new();
+        self.title(View::Control, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        self.item_states(anc).tooltips(&mut div.span());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span()
             .class("info")
-            .text_len(opt_ref(&self.location), 64)
-            .end();
-        html.end(); /* div */
-        html.div().class("beacon-container row center");
-        html.button().id("ob_flashing").end();
-        html.label()
-            .r#for("ob_flashing")
-            .class("beacon signal-housing");
-        html.span().class(self.class_flash()).text("🔆").end();
-        html.end(); /* label */
-        html.span().class("beacon-sign").text(&self.message).end();
-        html.label()
-            .r#for("ob_flashing")
-            .class("beacon signal-housing");
-        html.span().class(self.class_delayed()).text("🔆").end();
-        html.end(); /* label */
-        html.end(); /* div */
-        html.div().class("row center");
-        html.span().text(self.beacon_state(anc));
-        html.to_string()
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("beacon-container row center");
+        div.button().id("ob_flashing").close();
+        let mut label = div.label();
+        label.r#for("ob_flashing").class("beacon signal-housing");
+        label.span().class(self.class_flash()).cdata("🔆").close();
+        label.close();
+        div.span().class("beacon-sign").cdata(&self.message).close();
+        label = div.label();
+        label.r#for("ob_flashing").class("beacon signal-housing");
+        label.span().class(self.class_delayed()).cdata("🔆");
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row center");
+        div.span().cdata(self.beacon_state(anc));
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &BeaconAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("message").text("Message").end();
-        html.textarea()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("message").cdata("Message").close();
+        div.textarea()
             .id("message")
             .maxlength(128)
-            .attr("rows", 3)
-            .attr("cols", 24)
-            .text(&self.message)
-            .end();
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("notes").text("Notes").end();
-        html.textarea()
+            .rows(3)
+            .cols(24)
+            .cdata(&self.message);
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
             .id("notes")
             .maxlength(128)
-            .attr("rows", 2)
-            .attr("cols", 24)
-            .text(opt_ref(&self.notes))
-            .end();
-        html.end(); /* div */
-        anc.cio.controller_html(self, &mut html);
-        anc.cio.pin_html(self.pin, &mut html);
-        html.div().class("row");
-        html.label().r#for("verify_pin").text("Verify Pin").end();
-        html.input()
+            .rows(2)
+            .cols(24)
+            .cdata(opt_ref(&self.notes));
+        div.close();
+        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("verify_pin").cdata("Verify Pin").close();
+        div.input()
             .id("verify_pin")
             .r#type("number")
             .min(1)
             .max(104)
             .size(8)
             .value(opt_str(self.verify_pin));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
-            .r#for("device")
-            .text("Device")
-            .end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("device").cdata("Device").close();
+        div.input()
             .id("device")
             .r#type("text")
             .value(opt_ref(&self.device));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("ext_mode").text("Ext Mode").end();
-        let ext_mode = html.input().id("ext_mode").r#type("checkbox");
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("ext_mode").cdata("Ext Mode").close();
+        let mut input = div.input();
+        input.id("ext_mode").r#type("checkbox");
         if let Some(true) = self.ext_mode {
-            ext_mode.checked();
+            input.checked();
         }
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

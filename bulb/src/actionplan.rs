@@ -1,4 +1,4 @@
-// Copyright (C) 2025  Minnesota Department of Transportation
+// Copyright (C) 2025-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ use crate::item::{ItemState, ItemStates};
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
 };
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -67,18 +67,17 @@ pub struct TimeAction {
 
 impl TimeAction {
     fn to_html(&self) -> String {
-        let mut html = Html::new();
-        html.tr();
+        let mut page = Page::new();
+        let mut tr = page.frag::<html::Tr>();
         if let Some(day_plan) = &self.day_plan {
-            html.td().text(day_plan).end();
+            tr.td().cdata(day_plan).close();
         }
         if let Some(sched_date) = &self.sched_date {
-            html.td().text(sched_date).end();
+            tr.td().cdata(sched_date).close();
         }
-        html.td().text(&self.time_of_day).end();
-        html.td().text("⇨ ").text(&self.phase).end();
-        html.end(); // tr
-        html.to_string()
+        tr.td().cdata(&self.time_of_day).close();
+        tr.td().cdata("⇨ ").cdata(&self.phase).close();
+        String::from(page)
     }
 }
 
@@ -241,113 +240,126 @@ impl ActionPlan {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &ActionPlanAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states(anc).to_string())
-            .end();
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states(anc).to_string());
+        String::from(page)
     }
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &ActionPlanAnc) -> String {
-        let mut html = self.title(View::Control);
-        html.div().class("row fill");
-        self.item_states(anc).tooltips(&mut html);
-        html.end(); /* div */
-        html.div().class("row");
+        let mut page = Page::new();
+        self.title(View::Control, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row fill");
+        self.item_states(anc).tooltips(&mut div.span());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
         let tags = anc.hashtags(self).collect::<Vec<_>>().join(" ");
-        html.span().class("info").text(tags).end();
-        html.span();
-        html.label().r#for("phase").text("Phase").end();
-        html.select().id("phase");
+        div.span().class("info").cdata(tags).close();
+        let mut span = div.span();
+        span.label().r#for("phase").cdata("Phase").close();
+        let mut select = span.select();
+        select.id("phase");
         for p in anc.phases(self) {
-            let option = html.option();
+            let mut option = select.option();
             if p == self.phase {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(p).end();
+            option.cdata(p).close();
         }
-        html.end(); /* select */
-        html.end(); /* span */
-        html.end(); /* div */
+        div.close();
         if !anc.time_actions.is_empty() {
-            html.div().class("row").text("Schedule 🗓️").end();
-            html.table();
+            div = page.frag::<html::Div>();
+            div.class("row").cdata("Schedule 🗓️").close();
+            let mut table = page.frag::<html::Table>();
             for ta in &anc.time_actions {
-                html.raw(ta.to_html());
+                table.raw(ta.to_html());
             }
-            html.end();
+            table.close();
         }
-        html.to_string()
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &ActionPlanAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("notes").text("Notes").end();
-        html.textarea()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
             .id("notes")
             .maxlength(128)
-            .attr("rows", 3)
-            .attr("cols", 24)
-            .text(opt_ref(&self.notes))
-            .end();
-        html.end(); // div
-        html.div().class("row");
-        html.label().r#for("active").text("Active").end();
-        let active = html.input().id("active").r#type("checkbox");
+            .rows(3)
+            .cols(24)
+            .cdata(opt_ref(&self.notes))
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("active").cdata("Active").close();
+        let mut input = div.input();
+        input.id("active").r#type("checkbox");
         if self.active {
-            active.checked();
+            input.checked();
         }
-        html.end(); // div
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("default_phase")
-            .text("Default Phase")
-            .end();
-        html.select().id("default_phase");
+            .cdata("Default Phase")
+            .close();
+        let mut select = div.select();
+        select.id("default_phase");
         for p in &anc.phases {
-            let option = html.option();
+            let mut option = select.option();
             if p.name == self.default_phase {
-                option.attr_bool("selected");
+                option.selected();
             }
-            html.text(&p.name).end();
+            option.cdata(&p.name).close();
         }
-        html.end().end(); // select, div
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("sync_actions")
-            .text("Sync Actions")
-            .end();
-        let sync_actions = html.input().id("sync_actions").r#type("checkbox");
+            .cdata("Sync Actions")
+            .close();
+        let mut input = div.input();
+        input.id("sync_actions").r#type("checkbox");
         if let Some(true) = self.sync_actions {
-            sync_actions.checked();
+            input.checked();
         }
-        html.end(); // div
-        html.div().class("row");
-        html.label().r#for("sticky").text("Sticky").end();
-        let sticky = html.input().id("sticky").r#type("checkbox");
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("sticky").cdata("Sticky").close();
+        input = div.input();
+        input.id("sticky").r#type("checkbox");
         if let Some(true) = self.sticky {
-            sticky.checked();
+            input.checked();
         }
-        html.end(); // div
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("ignore_auto_fail")
-            .text("Ignore Auto-Fail")
-            .end();
-        let ignore_auto_fail =
-            html.input().id("ignore_auto_fail").r#type("checkbox");
+            .cdata("Ignore Auto-Fail")
+            .close();
+        input = div.input();
+        input.id("ignore_auto_fail").r#type("checkbox");
         if let Some(true) = self.ignore_auto_fail {
-            ignore_auto_fail.checked();
+            input.checked();
         }
-        html.end(); // div
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

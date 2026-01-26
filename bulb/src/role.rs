@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
 use crate::card::{AncillaryData, Card, View};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -52,27 +52,33 @@ impl Role {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut html = Html::new();
-        html.div()
+        let mut page = Page::new();
+        page.frag::<html::Div>()
             .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_state().to_string());
-        html.to_string()
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_state().to_string());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("enabled").text("Enabled").end();
-        let input = html.input().id("enabled").r#type("checkbox");
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row")
+            .label()
+            .r#for("enabled")
+            .cdata("Enabled")
+            .close();
+        let mut input = div.input();
+        input.id("enabled").r#type("checkbox");
         if self.enabled {
             input.checked();
         }
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

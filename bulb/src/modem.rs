@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
 use crate::card::{AncillaryData, Card, View};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -53,51 +53,60 @@ impl Modem {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states().to_string());
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states().to_string());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("uri").text("URI").end();
-        html.input()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("uri").cdata("URI").close();
+        div.input()
             .id("uri")
             .maxlength(64)
             .size(30)
             .value(opt_ref(&self.uri));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("config").text("Config").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("config").cdata("Config").close();
+        div.input()
             .id("config")
             .maxlength(64)
             .size(28)
             .value(opt_ref(&self.config));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("timeout_ms").text("Timeout (ms)").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("timeout_ms")
+            .cdata("Timeout (ms)")
+            .close();
+        div.input()
             .id("timeout_ms")
             .r#type("number")
             .min(0)
             .max(90000)
             .size(8)
             .value(opt_str(self.timeout_ms));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("enabled").text("Enabled").end();
-        let enabled = html.input().id("enabled").r#type("checkbox");
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("enabled").cdata("Enabled").close();
+        let mut input = div.input();
+        input.id("enabled").r#type("checkbox");
         if self.enabled {
-            enabled.attr_bool("checked");
+            input.checked();
         }
-        html.to_string()
+        String::from(page)
     }
 }
 

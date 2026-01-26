@@ -1,4 +1,4 @@
-// Copyright (C) 2025  Minnesota Department of Transportation
+// Copyright (C) 2025-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ use crate::geoloc::Direction;
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -153,10 +153,10 @@ impl Incident {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &IncidentAnc) -> String {
-        let mut html = Html::new();
-        html.div().class("title row").text(self.description(anc));
-        html.end(); /* div */
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row").cdata(self.description(anc));
+        String::from(page)
     }
 
     /// Convert to Control HTML
@@ -164,23 +164,26 @@ impl Incident {
         if let Some((lat, lon)) = self.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = Html::new();
-        html.div().class("title row").text(self.description(anc));
-        self.views_html(View::Control, &mut html);
-        html.end(); /* div */
-        html.div().class("row info").text(self.detail(anc)).end();
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row").cdata(self.description(anc));
+        self.views_html(View::Control, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row info").cdata(self.detail(anc));
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, _anc: &IncidentAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.end(); /* div */
-        html.div().class("row");
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row").close(); // empty
+        let mut div = page.frag::<html::Div>();
+        div.class("row").close(); // empty
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

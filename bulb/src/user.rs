@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ use crate::error::Result;
 use crate::item::ItemState;
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, Input, Select, opt_ref};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -81,19 +81,19 @@ impl UserAnc {
     }
 
     /// Build roles HTML
-    fn roles_html(&self, pri: &User, html: &mut Html) {
-        html.select().id("role");
-        html.option().end();
+    fn roles_html<'p>(&self, pri: &User, select: &'p mut html::Select<'p>) {
+        select.id("role");
+        select.option().close();
         if let Some(roles) = &self.roles {
             for role in roles {
-                let option = html.option();
+                let mut option = select.option();
                 if pri.role.as_ref() == Some(&role.name) {
-                    option.attr_bool("selected");
+                    option.selected();
                 }
-                html.text(&role.name).end();
+                option.cdata(&role.name).close();
             }
         }
-        html.end(); /* select */
+        select.close();
     }
 }
 
@@ -110,47 +110,53 @@ impl User {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &UserAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_state(anc).to_string());
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_state(anc).to_string());
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &UserAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("full_name").text("Full Name").end();
-        html.input()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("full_name").cdata("Full Name").close();
+        div.input()
             .id("full_name")
             .maxlength(31)
             .size(20)
             .value(&self.full_name);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("dn").text("Dn").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("dn").cdata("Dn").close();
+        div.input()
             .id("dn")
             .maxlength(128)
             .size(32)
             .value(opt_ref(&self.dn));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("role").text("Role").end();
-        anc.roles_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("enabled").text("Enabled").end();
-        let enabled = html.input().id("enabled").r#type("checkbox");
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("role").cdata("Role").close();
+        anc.roles_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("enabled").cdata("Enabled").close();
+        let mut input = div.input();
+        input.id("enabled").r#type("checkbox");
         if self.enabled {
-            enabled.checked();
+            input.checked();
         }
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
-use hatmil::Html;
+use hatmil::{Page, html};
 use humantime::format_duration;
 use mag::length::{m, mm};
 use mag::temp::DegC;
@@ -235,12 +235,12 @@ fn dir_arrow(deg: u32) -> Option<&'static str> {
 }
 
 /// Build wind direction HTML
-fn wind_dir_html(deg: u32, html: &mut Html) {
-    html.span().class("info");
+fn wind_dir_html<'p>(deg: u32, span: &'p mut html::Span<'p>) {
+    span.class("info");
     if let Some(arrow) = dir_arrow(deg) {
-        html.text(arrow);
+        span.cdata(arrow);
     }
-    html.end(); /* span */
+    span.close();
 }
 
 /// Format temperature quantity
@@ -331,27 +331,35 @@ impl WeatherData {
     }
 
     /// Build weather data HTML
-    fn build_html(&self, settings: Option<&WeatherSettings>, html: &mut Html) {
+    fn build_html<'p>(
+        &self,
+        settings: Option<&WeatherSettings>,
+        div: &'p mut html::Div<'p>,
+    ) {
         if self.temperature_exists() {
-            self.temperature_html(html);
+            self.temperature_html(&mut div.details());
         }
         if self.atmospheric_exists() {
-            self.atmospheric_html(html);
+            self.atmospheric_html(&mut div.details());
         }
         if self.radiation_exists() {
-            self.radiation_html(html);
+            self.radiation_html(&mut div.details());
         }
         if let Some(wind_sensor) = &self.wind_sensor {
-            self.wind_html(wind_sensor, html);
+            self.wind_html(wind_sensor, &mut div.details());
         }
         if self.precip_exists() {
-            self.precipitation_html(html);
+            self.precipitation_html(&mut div.details());
         }
         if let Some(data) = &self.pavement_sensor {
-            pavement_html(pavement_settings(settings), data, html);
+            pavement_html(pavement_settings(settings), data, &mut div.div());
         }
         if let Some(data) = &self.sub_surface_sensor {
-            sub_surface_html(sub_surface_settings(settings), data, html);
+            sub_surface_html(
+                sub_surface_settings(settings),
+                data,
+                &mut div.div(),
+            );
         }
     }
 
@@ -368,122 +376,140 @@ impl WeatherData {
     }
 
     /// Build temperature HTML
-    fn temperature_html(&self, html: &mut Html) {
-        html.details().summary().text("🌡️ ");
+    fn temperature_html<'p>(&self, details: &'p mut html::Details<'p>) {
+        let mut summary = details.summary();
+        summary.cdata("🌡️ ");
         if let Some(avg) = self.temperature_avg() {
-            html.text(format_temp(avg));
+            summary.cdata(format_temp(avg));
         }
-        html.end(); /* summary */
-        html.ul();
+        summary.close();
+        let mut ul = details.ul();
         if let Some(sensor) = &self.temperature_sensor
             && sensor.len() > 1
         {
             for (i, temp) in sensor.iter().enumerate() {
-                html.li().text("#").text(i).text(" Air ");
+                let mut li = ul.li();
+                li.cdata("#").cdata(i).cdata(" Air ");
                 if let Some(temp) = temp.air_temp {
-                    html.text(format_temp(temp));
+                    li.cdata(format_temp(temp));
                 }
-                html.end(); /* li */
+                li.close();
             }
         }
         if let Some(temp) = self.min_air_temp {
-            html.li().text("24h low ").text(format_temp(temp)).end();
+            ul.li().cdata("24h low ").cdata(format_temp(temp)).close();
         }
         if let Some(temp) = self.max_air_temp {
-            html.li().text("24h high ").text(format_temp(temp)).end();
+            ul.li().cdata("24h high ").cdata(format_temp(temp)).close();
         }
         if let Some(temp) = self.dew_point_temp {
-            html.li().text("Dew point ").text(format_temp(temp)).end();
+            ul.li().cdata("Dew point ").cdata(format_temp(temp)).close();
         }
         if let Some(temp) = self.wet_bulb_temp {
-            html.li().text("Wet bulb ").text(format_temp(temp)).end();
+            ul.li().cdata("Wet bulb ").cdata(format_temp(temp)).close();
         }
-        html.end(); /* ul */
-        html.end(); /* details */
+        ul.close();
+        details.close();
     }
 
     /// Build atmospheric HTML
-    fn atmospheric_html(&self, html: &mut Html) {
-        html.details().summary();
-        html.text(vis_situation(
+    fn atmospheric_html<'p>(&self, details: &'p mut html::Details<'p>) {
+        let mut summary = details.summary();
+        summary.cdata(vis_situation(
             self.visibility_situation.as_deref().unwrap_or("unknown"),
         ));
-        html.end(); /* summary */
-        html.ul();
+        summary.close();
+        let mut ul = details.ul();
         if let Some(visibility) = self.visibility {
             let v = (f64::from(visibility) * m).to::<DistUnit>();
-            html.li().text("Visibility ").text(format!("{v:.1}")).end();
+            ul.li()
+                .cdata("Visibility ")
+                .cdata(format!("{v:.1}"))
+                .close();
         }
         if let Some(rh) = self.relative_humidity {
-            html.li().text("RH ").text(rh).text("%").end();
+            ul.li().cdata("RH ").cdata(rh).cdata("%").close();
         }
         if let Some(p) = self.atmospheric_pressure {
             let p = (p as f32) * PASCALS_TO_IN_HG;
-            html.li()
-                .text("Barometer ")
-                .text(format!("{p:.2}"))
-                .text(" inHg")
-                .end();
+            ul.li()
+                .cdata("Barometer ")
+                .cdata(format!("{p:.2}"))
+                .cdata(" inHg");
         }
-        html.end(); /* ul */
-        html.end(); /* details */
+        details.close();
     }
 
     /// Build radiation data HTML
-    fn radiation_html(&self, html: &mut Html) {
-        html.details().summary();
+    fn radiation_html<'p>(&self, details: &'p mut html::Details<'p>) {
+        let mut summary = details.summary();
         match self.cloud_situation.as_ref() {
-            Some(cs) => html.text(cloud_situation(cs)),
-            None => html.text("Sky"),
+            Some(cs) => summary.cdata(cloud_situation(cs)),
+            None => summary.cdata("Sky"),
         };
-        html.end(); /* summary */
-        html.ul();
+        summary.close();
+        let mut ul = details.ul();
         if let Some(sun) = self.total_sun {
             let d = format_duration(Duration::from_secs(60 * u64::from(sun)))
                 .to_string();
-            html.li().text(d).text(" of sun").end();
+            ul.li().cdata(d).cdata(" of sun").close();
         }
         if let Some(r) = &self.solar_radiation {
-            html.li().text("Solar radiation: ").text(*r);
-            html.text(" J/m²").end();
+            ul.li()
+                .cdata("Solar radiation: ")
+                .cdata(*r)
+                .cdata(" J/m²")
+                .close();
         }
         if let Some(r) = &self.instantaneous_terrestrial_radiation {
-            html.li().text("Instantaneous terrestrial: ");
-            html.text(*r).text(" W/m²").end();
+            ul.li()
+                .cdata("Instantaneous terrestrial: ")
+                .cdata(*r)
+                .cdata(" W/m²")
+                .close();
         }
         if let Some(r) = &self.instantaneous_solar_radiation {
-            html.li().text("Instantaneous solar: ");
-            html.text(*r).text(" W/m²").end();
+            ul.li()
+                .cdata("Instantaneous solar: ")
+                .cdata(*r)
+                .cdata(" W/m²")
+                .close();
         }
         if let Some(r) = &self.total_radiation {
-            html.li().text("Total radiation: ");
-            html.text(*r).text(" W/m²").end();
+            ul.li()
+                .cdata("Total radiation: ")
+                .cdata(*r)
+                .cdata(" W/m²")
+                .close();
             if let Some(p) = self.total_radiation_period {
                 let d =
                     format_duration(Duration::from_secs(p.into())).to_string();
-                html.li().text("Total radiation period: ").text(d).end();
+                ul.li().cdata("Total radiation period: ").cdata(d).close();
             }
         }
-        html.end(); /* ul */
-        html.end(); /* details */
+        details.close();
     }
 
     /// Build wind data HTML
-    fn wind_html(&self, data: &[WindData], html: &mut Html) {
-        html.details().summary();
-        html.text("🌬️ Wind");
+    fn wind_html<'p>(
+        &self,
+        data: &[WindData],
+        details: &'p mut html::Details<'p>,
+    ) {
+        let mut summary = details.summary();
+        summary.cdata("🌬️ Wind");
         if let Some(ws) = data.iter().next() {
             if let Some(dir) = ws.avg_direction {
-                html.text(" 🧭 ");
-                wind_dir_html(dir, html);
+                summary.cdata(" 🧭 ");
+                wind_dir_html(dir, &mut summary.span());
             }
             if let Some(speed) = ws.avg_speed {
-                html.text(" ");
-                html.text(format_speed(speed));
+                summary.cdata(" ");
+                summary.cdata(format_speed(speed));
             }
         }
-        html.end(); /* summary */
-        html.ul();
+        summary.close();
+        let mut ul = details.ul();
         for (i, ws) in data.iter().enumerate() {
             let num = if data.len() > 1 {
                 Some(format!("#{i} "))
@@ -491,80 +517,78 @@ impl WeatherData {
                 None
             };
             if i > 0 && (ws.avg_direction.is_some() || ws.avg_speed.is_some()) {
-                html.li();
+                let mut li = ul.li();
                 if let Some(num) = &num {
-                    html.text(num);
+                    li.cdata(num);
                 }
                 if let Some(dir) = ws.avg_direction {
-                    html.text("Avg 🧭 ");
-                    wind_dir_html(dir, html);
+                    li.cdata("Avg 🧭 ");
+                    wind_dir_html(dir, &mut li.span());
                 }
                 if let Some(speed) = ws.avg_speed {
-                    html.text(" ");
-                    html.text(format_speed(speed));
+                    li.cdata(" ");
+                    li.cdata(format_speed(speed));
                 }
-                html.end(); /* li */
+                li.close();
             }
             if ws.spot_direction.is_some() || ws.spot_speed.is_some() {
-                html.li();
+                let mut li = ul.li();
                 if let Some(num) = &num {
-                    html.text(num);
+                    li.cdata(num);
                 }
                 if let Some(dir) = ws.spot_direction {
-                    html.text("Spot 🧭 ");
-                    wind_dir_html(dir, html);
+                    li.cdata("Spot 🧭 ");
+                    wind_dir_html(dir, &mut li.span());
                 }
                 if let Some(speed) = ws.spot_speed {
-                    html.text(" ");
-                    html.text(format_speed(speed));
+                    li.cdata(" ");
+                    li.cdata(format_speed(speed));
                 }
-                html.end(); /* li */
+                li.close();
             }
             if ws.gust_direction.is_some() || ws.gust_speed.is_some() {
-                html.li();
+                let mut li = ul.li();
                 if let Some(num) = &num {
-                    html.text(num);
+                    li.cdata(num);
                 }
                 if let Some(dir) = ws.gust_direction {
-                    html.text("Gust 🧭 ");
-                    wind_dir_html(dir, html);
+                    li.cdata("Gust 🧭 ");
+                    wind_dir_html(dir, &mut li.span());
                 }
                 if let Some(speed) = ws.gust_speed {
-                    html.text(" ");
-                    html.text(format_speed(speed));
+                    li.cdata(" ");
+                    li.cdata(format_speed(speed));
                 }
-                html.end(); /* li */
+                li.close();
             }
         }
-        html.end(); /* ul */
-        html.end(); /* details */
+        details.close();
     }
 
     /// Build precipitation data HTML
-    fn precipitation_html(&self, html: &mut Html) {
-        html.details().summary();
-        html.text(precip_situation(
+    fn precipitation_html<'p>(&self, details: &'p mut html::Details<'p>) {
+        let mut summary = details.summary();
+        summary.cdata(precip_situation(
             self.precip_situation.as_deref().unwrap_or("unknown"),
         ));
-        html.end(); /* summary */
-        html.ul();
+        summary.close();
+        let mut ul = details.ul();
         if let Some(precip) = self.precip_1_hour {
-            html.li().text("1h, ").text(format_depth(precip)).end();
+            ul.li().cdata("1h, ").cdata(format_depth(precip)).close();
         }
         if let Some(precip) = self.precip_3_hours {
-            html.li().text("3h, ").text(format_depth(precip)).end();
+            ul.li().cdata("3h, ").cdata(format_depth(precip)).close();
         }
         if let Some(precip) = self.precip_6_hours {
-            html.li().text("6h, ").text(format_depth(precip)).end();
+            ul.li().cdata("6h, ").cdata(format_depth(precip)).close();
         }
         if let Some(precip) = self.precip_12_hours {
-            html.li().text("12h, ").text(format_depth(precip)).end();
+            ul.li().cdata("12h, ").cdata(format_depth(precip)).close();
         }
         if let Some(precip) = self.precip_24_hours {
-            html.li().text("24h, ").text(format_depth(precip)).end();
+            ul.li().cdata("24h, ").cdata(format_depth(precip)).close();
         }
-        html.end(); /* ul */
-        html.end(); /* details */
+        details.close();
     }
 }
 
@@ -581,87 +605,89 @@ fn pavement_settings(
 }
 
 /// Get pavement data as HTML
-fn pavement_html(
+fn pavement_html<'p>(
     settings: &[PavementSettings],
     data: &[PavementData],
-    html: &mut Html,
+    div: &'p mut html::Div<'p>,
 ) {
     let len = settings.len().max(data.len());
     for i in 0..len {
-        html.details().summary().text("Pavement ");
+        let mut details = div.details();
+        let mut summary = details.summary();
+        summary.cdata("Pavement ");
         if len > 1 {
-            html.text(format!("#{i} "));
+            summary.cdata(format!("#{i} "));
         };
         if let Some(pd) = data.get(i) {
             if let Some(status) = &pd.surface_status {
-                html.text(status);
+                summary.cdata(status);
                 if pd.surface_temp.is_some() {
-                    html.text(", ");
+                    summary.cdata(", ");
                 }
             }
             if let Some(temp) = pd.surface_temp {
-                html.text(format_temp(temp));
+                summary.cdata(format_temp(temp));
             }
         }
-        html.end(); /* summary */
-        html.ul();
+        summary.close();
+        let mut ul = details.ul();
         if let Some(pd) = data.get(i) {
             if let Some(err) = &pd.sensor_error {
-                html.li().text(err).text(" error").end();
+                ul.li().cdata(err).cdata(" error").close();
             }
             if let Some(temp) = pd.pavement_temp {
-                html.li().text("Pavement ").text(format_temp(temp)).end();
+                ul.li().cdata("Pavement ").cdata(format_temp(temp)).close();
             }
             if let Some(temp) = pd.freeze_point {
-                html.li()
-                    .text("Freeze point ")
-                    .text(format_temp(temp))
-                    .end();
+                ul.li()
+                    .cdata("Freeze point ")
+                    .cdata(format_temp(temp))
+                    .close();
             }
             if let Some(depth_m) = pd.ice_or_water_depth {
                 let d = format_depth(depth_m * 1_000.0);
-                html.li().text("Water/ice depth ").text(d).end();
+                ul.li().cdata("Water/ice depth ").cdata(d).close();
             }
             if let Some(salinity) = pd.salinity {
                 let sl = salinity;
-                html.li().text("Salinity ").text(sl).text(" ppm").end();
+                ul.li().cdata("Salinity ").cdata(sl).cdata(" ppm").close();
             }
             if let Some(signal) = &pd.black_ice_signal {
-                html.li().text(signal).end();
+                ul.li().cdata(signal).close();
             }
             if let Some(friction) = &pd.friction {
                 let f = friction;
-                html.li()
-                    .text("Coef. of friction ")
-                    .text(*f)
-                    .text("%")
-                    .end();
+                ul.li()
+                    .cdata("Coef. of friction ")
+                    .cdata(*f)
+                    .cdata("%")
+                    .close();
             }
         }
         if let Some(ps) = settings.get(i) {
             if let Some(loc) = &ps.location
                 && !loc.trim().is_empty()
             {
-                html.li().text(loc).end();
+                ul.li().cdata(loc).close();
             }
             if let Some(tp) = &ps.pavement_type {
-                html.li().text(tp).text(" pavement").end();
+                ul.li().cdata(tp).cdata(" pavement").close();
             }
             if let Some(tp) = &ps.sensor_type {
-                html.li().text("Type: ").text(tp).end();
+                ul.li().cdata("Type: ").cdata(tp).close();
             }
             if let Some(height) = ps.height {
                 let h = format!("{height:.2}");
-                html.li().text("Height ").text(h).text(" m").end();
+                ul.li().cdata("Height ").cdata(h).cdata(" m").close();
             }
             if let Some(exposure) = ps.exposure {
                 let e = exposure;
-                html.li().text("Exposure ").text(e).text("%").end();
+                ul.li().cdata("Exposure ").cdata(e).cdata("%").close();
             }
         }
-        html.end(); /* ul */
-        html.end(); /* details */
+        details.close();
     }
+    div.close();
 }
 
 /// Get sub-surface settings
@@ -677,67 +703,69 @@ fn sub_surface_settings(
 }
 
 /// Build sub-surface data HTML
-fn sub_surface_html(
+fn sub_surface_html<'p>(
     settings: &[SubSurfaceSettings],
     data: &[SubSurfaceData],
-    html: &mut Html,
+    div: &'p mut html::Div<'p>,
 ) {
     let len = settings.len().max(data.len());
     for i in 0..len {
-        html.details().summary().text("Sub-surface ");
+        let mut details = div.details();
+        let mut summary = details.summary();
+        summary.cdata("Sub-surface ");
         if len > 1 {
-            html.text(format!("#{i} "));
+            summary.cdata(format!("#{i} "));
         };
         if let Some(sd) = data.get(i)
             && let Some(temp) = sd.temp
         {
-            html.text(format_temp(temp));
+            summary.cdata(format_temp(temp));
         }
-        html.end(); /* summary */
-        html.ul();
+        summary.close();
+        let mut ul = details.ul();
         if let Some(ss) = settings.get(i) {
             if let Some(loc) = &ss.location {
                 let loc = loc.trim();
                 if !loc.is_empty() {
-                    html.li().text(loc).end();
+                    ul.li().cdata(loc).close();
                 }
             }
             if let Some(tp) = &ss.sub_surface_type {
-                html.li().text("Type: ").text(tp).end();
+                ul.li().cdata("Type: ").cdata(tp).close();
             }
             if let Some(depth) = ss.depth {
                 let d = format!("{depth:.2}");
-                html.li().text("Depth ").text(d).text(" m").end();
+                ul.li().cdata("Depth ").cdata(d).cdata(" m").close();
             }
         }
         if let Some(sd) = data.get(i) {
             if let Some(err) = &sd.sensor_error {
-                html.li().text(err).text(" error").end();
+                ul.li().cdata(err).cdata(" error").close();
             }
             if let Some(moisture) = &sd.moisture {
                 let mo = moisture;
-                html.li().text("Moisture ").text(*mo).text("%").end();
+                ul.li().cdata("Moisture ").cdata(*mo).cdata("%").close();
             }
         }
-        html.end(); /* ul */
-        html.end(); /* details */
+        details.close();
     }
+    div.close();
 }
 
 impl WeatherSensor {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(anc.cio.item_states(self).to_string())
-            .end();
-        html.div()
-            .class("info fill")
-            .text_len(opt_ref(&self.location), 32);
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(anc.cio.item_states(self).to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 32);
+        String::from(page)
     }
 
     /// Convert to Status HTML
@@ -745,65 +773,84 @@ impl WeatherSensor {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut html = self.title(View::Status);
-        html.div().class("row");
-        anc.cio.item_states(self).tooltips(&mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.span()
+        let mut page = Page::new();
+        self.title(View::Status, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        anc.cio.item_states(self).tooltips(&mut div.span());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span()
             .class("info")
-            .text_len(opt_ref(&self.location), 64)
-            .end();
-        html.end(); /* div */
-        html.div().class("row");
-        html.span().class("info").text(opt_ref(&self.site_id)).end();
-        html.span().class("info").text(opt_ref(&self.alt_id)).end();
-        html.end(); /* div */
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.span()
+            .class("info")
+            .cdata(opt_ref(&self.site_id))
+            .close();
+        div.span()
+            .class("info")
+            .cdata(opt_ref(&self.alt_id))
+            .close();
+        div.close();
         if let Some(sample_time) = &self.sample_time {
-            html.div().class("row");
-            html.span().text("Obs").end();
-            html.span().class("info").text(sample_time).end();
-            html.end(); /* div */
+            div = page.frag::<html::Div>();
+            div.class("row");
+            div.span().cdata("Obs").close();
+            div.span().class("info").cdata(sample_time).close();
+            div.close();
         }
         if let Some(data) = &self.sample {
-            data.build_html(self.settings.as_ref(), &mut html);
+            data.build_html(
+                self.settings.as_ref(),
+                &mut page.frag::<html::Div>(),
+            );
         }
-        html.to_string()
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &WeatherSensorAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("site_id").text("Site ID").end();
-        html.input()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        self.title(View::Setup, &mut div);
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("site_id").cdata("Site ID").close();
+        div.input()
             .id("site_id")
             .maxlength(20)
             .size(20)
             .value(opt_ref(&self.site_id));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("alt_id").text("Alt ID").end();
-        html.input()
+        div.close();
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("alt_id").cdata("Alt ID").close();
+        div.input()
             .id("alt_id")
             .maxlength(20)
             .size(20)
             .value(opt_ref(&self.alt_id));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("notes").text("Notes").end();
-        html.textarea()
+        div.close();
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
             .id("notes")
             .maxlength(64)
-            .attr("rows", 2)
-            .attr("cols", 26)
-            .text(opt_ref(&self.notes))
-            .end();
-        html.end(); /* div */
-        anc.cio.controller_html(self, &mut html);
-        anc.cio.pin_html(self.pin, &mut html);
-        self.footer_html(true, &mut html);
-        html.to_string()
+            .rows(2)
+            .cols(26)
+            .cdata(opt_ref(&self.notes))
+            .close();
+        div.close();
+        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

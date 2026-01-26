@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ use crate::controller::Controller;
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::util::opt_str;
-use hatmil::Html;
+use hatmil::html;
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
 
@@ -53,34 +53,35 @@ where
     }
 
     /// Make controller row as HTML
-    pub fn controller_html(&self, pri: &C, html: &mut Html) {
-        html.div().class("row");
-        html.label().r#for("controller").text("Controller").end();
-        let input = html.input().id("controller").maxlength(20).size(20);
+    pub fn controller_html<'p>(&self, pri: &C, div: &'p mut html::Div<'p>) {
+        div.class("row");
+        div.label().r#for("controller").cdata("Controller").close();
+        let mut input = div.input();
+        input.id("controller").maxlength(20).size(20);
         match self.controller(pri) {
             Some(c) => {
                 input.value(c.name());
-                c.button_html(html);
+                c.button_html(&mut div.button());
             }
             None => {
-                html.span().end(); /* empty */
+                div.span().close(); /* empty */
             }
         }
-        html.end(); /* div */
+        div.close();
     }
 
     /// Make pin row as HTML
-    pub fn pin_html(&self, pin: Option<u32>, html: &mut Html) {
-        html.div().class("row");
-        html.label().r#for("pin").text("Pin").end();
-        html.input()
+    pub fn pin_html<'p>(&self, pin: Option<u32>, div: &'p mut html::Div<'p>) {
+        div.class("row");
+        div.label().r#for("pin").cdata("Pin").close();
+        div.input()
             .id("pin")
             .r#type("number")
             .min(1)
             .max(104)
             .size(8)
             .value(opt_str(pin));
-        html.end(); /* div */
+        div.close();
     }
 
     /// Get item states

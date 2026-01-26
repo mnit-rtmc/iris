@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::Result;
 use crate::util::{ContainsLower, Fields, Input, Select, opt_str};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -95,24 +95,25 @@ const PERIODS: &[Period] = &[
 ];
 
 /// Build periods HTML
-fn periods_html(
+fn periods_html<'p>(
     id: &str,
     seconds: Option<u32>,
     periods: &[Period],
-    html: &mut Html,
+    select: &'p mut html::Select<'p>,
 ) {
-    html.select().id(id);
+    select.id(id);
     for period in periods {
         let sec = period.seconds();
-        let option = html.option().value(sec);
+        let mut option = select.option();
+        option.value(sec);
         if let Some(s) = seconds
             && s == sec
         {
-            option.attr_bool("selected");
+            option.selected();
         }
-        html.text(period.to_string()).end();
+        option.cdata(period.to_string()).close();
     }
-    html.end(); /* select */
+    select.close();
 }
 
 /// Comm protocol
@@ -177,128 +178,152 @@ impl AncillaryData for CommConfigAnc {
 
 impl CommConfigAnc {
     /// Build comm protocols HTML
-    fn protocols_html(&self, pri: &CommConfig, html: &mut Html) {
-        html.select().id("protocol");
+    fn protocols_html<'p>(
+        &self,
+        pri: &CommConfig,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("protocol");
         if let Some(protocols) = &self.protocols {
             for protocol in protocols {
-                let option = html.option().value(protocol.id);
+                let mut option = select.option();
+                option.value(protocol.id);
                 if let Some(p) = pri.protocol
                     && p == protocol.id
                 {
-                    option.attr_bool("selected");
+                    option.selected();
                 }
-                html.text(&protocol.description).end();
+                option.cdata(&protocol.description).close();
             }
         }
-        html.end(); /* select */
+        select.close();
     }
 }
 
 impl CommConfig {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let mut html = Html::new();
-        html.div().class("title row").text(self.name()).end();
-        html.div().class("info fill").text(&self.description);
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row").cdata(self.name()).close();
+        div = page.frag::<html::Div>();
+        div.class("info fill").cdata(&self.description);
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CommConfigAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("description").text("Description").end();
-        html.input()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("description")
+            .cdata("Description")
+            .close();
+        div.input()
             .id("description")
             .maxlength(20)
             .size(20)
             .value(&self.description);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("pollinator").text("Pollinator").end();
-        let pollinator = html.input().id("pollinator").r#type("checkbox");
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("pollinator").cdata("Pollinator").close();
+        let mut input = div.input();
+        input.id("pollinator").r#type("checkbox");
         if let Some(true) = self.pollinator {
-            pollinator.checked();
+            input.checked();
         }
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("protocol").text("Protocol").end();
-        anc.protocols_html(self, &mut html);
-        html.end(); /* div */
-        html.div().class("row");
-        html.label().r#for("timeout_ms").text("Timeout (ms)").end();
-        html.input()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("protocol").cdata("Protocol").close();
+        anc.protocols_html(self, &mut div.select());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("timeout_ms")
+            .cdata("Timeout (ms)")
+            .close();
+        div.input()
             .id("timeout_ms")
             .r#type("number")
             .min(0)
             .max(20000)
             .size(8)
-            .attr("step", "50")
+            .step("50")
             .value(opt_str(self.timeout_ms));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("retry_threshold")
-            .text("Retry Threshold")
-            .end();
-        html.input()
+            .cdata("Retry Threshold")
+            .close();
+        div.input()
             .id("retry_threshold")
             .r#type("number")
             .min(0)
             .max(8)
             .size(2)
             .value(opt_str(self.retry_threshold));
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("poll_period_sec")
-            .text("Poll Period")
-            .end();
+            .cdata("Poll Period")
+            .close();
         periods_html(
             "poll_period_sec",
             self.poll_period_sec,
             &PERIODS[1..],
-            &mut html,
+            &mut div.select(),
         );
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("long_poll_period_sec")
-            .text("Long Poll Period")
-            .end();
+            .cdata("Long Poll Period")
+            .close();
         periods_html(
             "long_poll_period_sec",
             self.long_poll_period_sec,
             &PERIODS[1..],
-            &mut html,
+            &mut div.select(),
         );
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("idle_disconnect_sec")
-            .text("Idle Disconnect")
-            .end();
+            .cdata("Idle Disconnect")
+            .close();
         periods_html(
             "idle_disconnect_sec",
             self.idle_disconnect_sec,
             PERIODS,
-            &mut html,
+            &mut div.select(),
         );
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("no_response_disconnect_sec")
-            .text("No Response Disconnect")
-            .end();
+            .cdata("No Response Disconnect")
+            .close();
         periods_html(
             "no_response_disconnect_sec",
             self.no_response_disconnect_sec,
             PERIODS,
-            &mut html,
+            &mut div.select(),
         );
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 

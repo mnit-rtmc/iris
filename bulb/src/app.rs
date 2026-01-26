@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{CardList, CardView};
-use hatmil::Html;
+use hatmil::{Page, html};
 use std::cell::RefCell;
 
 /// Interval (ms) between ticks for deferred actions
@@ -53,10 +53,11 @@ impl NotifyState {
     /// Build state HTML
     pub fn build_html(self) -> String {
         // NOTE: these have &nbsp; to keep from splitting lines
-        let mut html = Html::new();
-        html.div().class("tooltip").text("⭮ ").text(self.symbol());
-        html.span().class("right").text(self.description());
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("tooltip").cdata("⭮ ").cdata(self.symbol());
+        div.span().class("right").cdata(self.description());
+        String::from(page)
     }
 
     /// Get button disabled value for a state

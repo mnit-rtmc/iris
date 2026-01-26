@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
-use hatmil::Html;
+use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -135,78 +135,85 @@ impl GateArm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GateArmAnc) -> String {
-        let mut html = Html::new();
-        html.div()
-            .class("title row")
-            .text(self.name())
-            .text(" ")
-            .text(self.item_states(anc).to_string())
-            .end();
-        html.div()
-            .class("info fill")
-            .text_len(opt_ref(&self.location), 32);
-        html.to_string()
+        let mut page = Page::new();
+        let mut div = page.frag::<html::Div>();
+        div.class("title row")
+            .cdata(self.name())
+            .cdata(" ")
+            .cdata(self.item_states(anc).to_string())
+            .close();
+        div = page.frag::<html::Div>();
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 32);
+        String::from(page)
     }
 
     /// Convert to Control HTML
     fn to_html_control(&self) -> String {
-        let mut html = self.title(View::Control);
-        html.div().class("row");
-        item_states(self.arm_state).tooltips(&mut html);
-        html.end(); /* div */
-        html.div()
-            .class("info")
-            .text_len(opt_ref(&self.location), 64);
-        html.to_string()
+        let mut page = Page::new();
+        self.title(View::Control, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        item_states(self.arm_state).tooltips(&mut div.span());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("info").cdata_len(opt_ref(&self.location), 64);
+        String::from(page)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &GateArmAnc) -> String {
-        let mut html = self.title(View::Status);
-        html.div().class("row");
-        self.item_states(anc).tooltips(&mut html);
-        html.end(); /* div */
-        html.div()
-            .class("info")
-            .text_len(opt_ref(&self.location), 64);
-        html.to_string()
+        let mut page = Page::new();
+        self.title(View::Status, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        self.item_states(anc).tooltips(&mut div.span());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("info").cdata_len(opt_ref(&self.location), 64);
+        String::from(page)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GateArmAnc) -> String {
-        let mut html = self.title(View::Setup);
-        html.div().class("row");
-        html.label().r#for("notes").text("Notes").end();
-        html.textarea()
+        let mut page = Page::new();
+        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
             .id("notes")
             .maxlength(255)
-            .attr("rows", 2)
-            .attr("cols", 24)
-            .text(opt_ref(&self.notes))
-            .end();
-        html.end(); /* div */
-        anc.cio.controller_html(self, &mut html);
-        anc.cio.pin_html(self.pin, &mut html);
-        html.div().class("row");
-        html.label().r#for("opposing").text("Opposing").end();
-        let opposing = html.input().id("opposing").r#type("checkbox");
+            .rows(2)
+            .cols(24)
+            .cdata(opt_ref(&self.notes))
+            .close();
+        div.close();
+        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("opposing").cdata("Opposing").close();
+        let mut input = div.input();
+        input.id("opposing").r#type("checkbox");
         if let Some(true) = self.opposing {
-            opposing.checked();
+            input.checked();
         }
-        html.end(); /* div */
-        html.div().class("row");
-        html.label()
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
             .r#for("downstream")
-            .text("Downstream (#tag)")
-            .end();
-        html.input()
+            .cdata("Downstream (#tag)")
+            .close();
+        div.input()
             .id("downstream")
             .maxlength(16)
             .size(16)
             .value(opt_ref(&self.downstream_hashtag));
-        html.end(); /* div */
-        self.footer_html(true, &mut html);
-        html.to_string()
+        div.close();
+        self.footer_html(true, &mut page.frag::<html::Div>());
+        String::from(page)
     }
 }
 
