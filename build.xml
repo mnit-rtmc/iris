@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2025  Minnesota Department of Transportation
+     Copyright (C) 2007-2026  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 	<!-- Base directory configuration -->
 	<property name="src.dir" value="src"/>
 	<property name="etc.dir" value="etc"/>
-	<property name="bulb.dir" value="bulb"/>
 	<property name="fonts.dir" value="tfon"/>
 	<property name="images.dir" value="images"/>
 	<property name="bin.dir" value="bin"/>
@@ -357,15 +356,7 @@
 		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
 		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
 		<mkdir dir="${install.dir}/var/lib/iris/web"/>
-		<mkdir dir="${install.dir}/var/lib/iris/web/bulb"/>
 		<mkdir dir="${install.dir}/var/log/iris"/>
-
-		<copy todir="${install.dir}/var/lib/iris/web">
-			<fileset file="${bulb.dir}/index.html"/>
-		</copy>
-		<copy todir="${install.dir}/var/lib/iris/web/bulb">
-			<fileset dir="${bulb.dir}/static"/>
-		</copy>
 
 		<copy todir="${install.dir}/var/www/html">
 			<fileset file="${build.etc}/index.html"/>
@@ -373,7 +364,6 @@
 
 		<mkdir dir="${install.dir}/var/www/html/iris-gstreamer"/>
 		<mkdir dir="${install.dir}/var/www/html/iris_xml"/>
-		<mkdir dir="${install.dir}/var/cache/nginx/earthwyrm-iris"/>
 
 		<copy todir="${install.dir}/usr/share/java/${dist.server}">
 			<fileset dir="${dist.server}"/>

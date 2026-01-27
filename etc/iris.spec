@@ -4,7 +4,7 @@
 #     and Douglas Lau
 #
 # IRIS -- Intelligent Roadway Information System
-# Copyright (C) 2009-2025  Minnesota Department of Transportation
+# Copyright (C) 2009-2026  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -122,10 +122,6 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %{_serverdir}/postgis-geometry-@@POSTGIS.VERSION@@.jar
 %{_serverdir}/jsch-@@JSCH.VERSION@@.jar
 
-# /var/cache/nginx/earthwyrm-iris
-%dir %attr(0755,nginx,nginx) /var/cache/nginx
-%dir %attr(0755,nginx,nginx) /var/cache/nginx/earthwyrm-iris
-
 # /var/lib/iris
 %dir %attr(0775,tms,tms) /var/lib/iris
 %dir %attr(0775,tms,tms) /var/lib/iris/backup
@@ -137,8 +133,6 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %dir %attr(0775,tms,tms) /var/lib/iris/traffic
 %dir %attr(0775,tms,tms) /var/lib/iris/web
 %attr(0444,tms,tms) /var/lib/iris/web/index.html
-%dir %attr(0775,tms,tms) /var/lib/iris/web/bulb
-%attr(0444,tms,tms) /var/lib/iris/web/bulb/*
 
 # /var/log/iris
 %dir %attr(3775,tms,tms) /var/log/iris
