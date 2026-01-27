@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -218,16 +219,17 @@ public class SSLState {
 
 	/** Wrap application data into SSL buffer */
 	private void doWrap() throws SSLException {
-		ssl_out.clear();
+		// NOTE: workaround backcompat issues with Java 9+
+		((Buffer) ssl_out).clear();
 		ByteBuffer app_out = encoder.getBuffer();
-		app_out.flip();
+		((Buffer) app_out).flip();
 		try {
 			engine.wrap(app_out, ssl_out);
 		}
 		finally {
 			encoder.compact();
 		}
-		ssl_out.flip();
+		((Buffer) ssl_out).flip();
 		int n_bytes;
 		synchronized (net_out) {
 			net_out.put(ssl_out);
@@ -240,13 +242,13 @@ public class SSLState {
 	/** Unwrap SSL data into appcliation buffer */
 	private void doUnwrap() throws SSLException {
 		synchronized (net_in) {
-			net_in.flip();
+			((Buffer) net_in).flip();
 			try {
 				int n_rem = net_in.remaining();
 				if (n_rem > 0) {
-					ssl_in.clear();
+					((Buffer) ssl_in).clear();
 					engine.unwrap(net_in, ssl_in);
-					ssl_in.flip();
+					((Buffer) ssl_in).flip();
 					app_in.put(ssl_in);
 				}
 			}

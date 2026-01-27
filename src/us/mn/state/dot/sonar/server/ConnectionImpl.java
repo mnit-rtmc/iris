@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2024  Minnesota Department of Transportation
+ * Copyright (C) 2006-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.sonar.server;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.BufferOverflowException;
 import java.nio.channels.SelectionKey;
@@ -263,7 +264,7 @@ public class ConnectionImpl extends Conduit implements Connection {
 	void doWrite() throws IOException {
 		ByteBuffer net_out = state.getNetOutBuffer();
 		synchronized (net_out) {
-			net_out.flip();
+			((Buffer) net_out).flip();
 			channel.write(net_out);
 			if (!net_out.hasRemaining())
 				disableWrite();

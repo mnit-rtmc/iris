@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2010-2017  Minnesota Department of Transportation
+ * Copyright (C) 2010-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.sonar;
 
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 /**
@@ -80,7 +81,7 @@ public class ByteBufferOutputStream extends OutputStream {
 	/** Expand the buffer by the specified number of bytes */
 	private void expand(int n_bytes) {
 		ByteBuffer buf = allocate(buffer.position() + n_bytes);
-		buffer.flip();
+		((Buffer) buffer).flip();
 		buf.put(buffer);
 		buffer = buf;
 	}
@@ -91,7 +92,7 @@ public class ByteBufferOutputStream extends OutputStream {
 			buffer.compact();
 		else {
 			buffer = o_buffer;
-			o_buffer.clear();
+			((Buffer) o_buffer).clear();
 		}
 	}
 }
