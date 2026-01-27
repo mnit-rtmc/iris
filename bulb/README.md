@@ -8,6 +8,8 @@
 2. Install the [IRIS] package
 3. Install the [honeybee] REST server
 4. Install and configure the [earthwyrm] map server
+ - Use example config from `bulb/earthwyrm.muon`
+ - Cache tiles with NGINX at `/var/cache/nginx/earthwyrm-iris`
 
 Then, build the bulb front-end:
 
