@@ -75,7 +75,7 @@ pub struct Controller {
     pub status: Option<ControllerStatus>,
     pub fail_time: Option<String>,
     // secondary attributes
-    pub comm_state: Option<CommState>,
+    pub comm_state: Option<u32>,
     pub geo_loc: Option<String>,
     pub password: Option<String>,
 }
@@ -114,7 +114,6 @@ impl AncillaryData for ControllerAnc {
             }
             View::Setup => {
                 loc.assets.push(Asset::Conditions);
-                loc.assets.push(Asset::CommStates);
                 loc.assets.push(Asset::CabinetStyles);
             }
             _ => (),
@@ -168,6 +167,18 @@ impl ControllerAnc {
         for condition in &self.conditions {
             if pri.condition == condition.id {
                 return &condition.description;
+            }
+        }
+        ""
+    }
+
+    /// Get comm state description
+    fn comm_state(&self, pri: &Controller) -> &str {
+        if let Some(cs) = pri.comm_state {
+            for state in &self.states {
+                if cs == state.id {
+                    return &state.description;
+                }
             }
         }
         ""
@@ -394,6 +405,14 @@ impl Controller {
             div.span().class("info").cdata(fail_time).close();
             div.close();
         }
+        let state = anc.comm_state(self);
+        if !state.is_empty() {
+            div = page.frag::<html::Div>();
+            div.class("row");
+            div.span().cdata("Comm State").close();
+            div.span().class("info").cdata(state).close();
+            div.close();
+        }
         anc.io_pins_html(&mut page.frag::<html::Div>());
         String::from(page)
     }
@@ -505,6 +524,7 @@ impl Card for Controller {
             || self.notes.contains_lower(search)
             || self.cabinet_style.contains_lower(search)
             || self.version().contains_lower(search)
+            || anc.comm_state(self).contains_lower(search)
     }
 
     /// Convert to HTML view
