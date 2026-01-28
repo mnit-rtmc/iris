@@ -1,6 +1,6 @@
 // honey.rs
 //
-// Copyright (C) 2021-2025  Minnesota Department of Transportation
+// Copyright (C) 2021-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -449,13 +449,13 @@ fn login_resource(honey: Honey) -> Router {
         match domain::any_contains(&domains, addr.ip()) {
             Ok(true) => (),
             _ => {
-                event::insert_client(
+                insert_client_ev(
                     &honey.db,
                     EventTp::FailDomain,
                     &addr.to_string(),
                     user,
                 )
-                .await?;
+                .await;
                 return Err(Error::Forbidden)?;
             }
         }
@@ -463,13 +463,13 @@ fn login_resource(honey: Honey) -> Router {
             match domain::any_contains(&domains, addr) {
                 Ok(true) => (),
                 _ => {
-                    event::insert_client(
+                    insert_client_ev(
                         &honey.db,
                         EventTp::FailDomainXff,
                         &addr.to_string(),
                         user,
                     )
-                    .await?;
+                    .await;
                     return Err(Error::Forbidden)?;
                 }
             }
@@ -483,6 +483,20 @@ fn login_resource(honey: Honey) -> Router {
     Router::new()
         .route("/login", get(handle_get).post(handle_post))
         .with_state(honey)
+}
+
+/// Insert a client event to DB
+async fn insert_client_ev(
+    db: &Database,
+    event_tp: EventTp,
+    host_port: &str,
+    iris_user: &str,
+) {
+    if let Err(e) =
+        event::insert_client(db, event_tp, host_port, iris_user).await
+    {
+        log::warn!("insert_client_ev: {e}");
+    }
 }
 
 /// `GET` access permissions
