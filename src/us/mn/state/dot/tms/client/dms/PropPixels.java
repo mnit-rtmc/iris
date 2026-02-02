@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,6 +75,15 @@ public class PropPixels extends IPanel {
 		}
 	};
 
+	/** Action to reset pixel errors */
+	private final IAction reset_status = new IAction("dms.reset.pixels") {
+		protected void doActionPerformed(ActionEvent e) {
+			dms.setDeviceRequest(
+				DeviceRequest.RESET_STATUS.ordinal());
+			updatePixelStatus();
+		}
+	};
+
 	/** User session */
 	private final Session session;
 
@@ -116,6 +125,8 @@ public class PropPixels extends IPanel {
 		box.add(new JButton(query_pixels));
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(test_pixels));
+		box.add(Box.createHorizontalStrut(UI.hgap));
+		box.add(new JButton(reset_status));
 		return box;
 	}
 
@@ -130,6 +141,7 @@ public class PropPixels extends IPanel {
 			boolean r = canRequest();
 			query_pixels.setEnabled(r);
 			test_pixels.setEnabled(r);
+			reset_status.setEnabled(r);
 		}
 	}
 

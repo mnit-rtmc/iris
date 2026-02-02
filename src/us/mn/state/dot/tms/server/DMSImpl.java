@@ -480,7 +480,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 			sign_config = sc;
 			notifyAttribute("signConfig");
-			resetStateNotify();
+			resetStateNotify(true);
 			updateStyles();
 		}
 	}
@@ -510,12 +510,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Reset sign state (and notify clients) */
-	private void resetStateNotify() {
+	private void resetStateNotify(boolean full) {
 		setStatusNotify(null);
 		setPixelFailuresNotify(null);
-		resetLock();
-		setMsgSchedNotify(null);
-		setMsgCurrentNotify(null, false);
+		if (full) {
+			resetLock();
+			setMsgSchedNotify(null);
+			setMsgCurrentNotify(null, false);
+		}
 	}
 
 	/** Create a blank message for the sign */
@@ -1222,8 +1224,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Send a device request operation */
 	@Override
 	protected void sendDeviceRequest(DeviceRequest dr) {
+		if (DeviceRequest.RESET_STATUS == dr) {
+			resetStateNotify(false);
+			return;
+		}
 		if (DeviceRequest.RESET_DEVICE == dr)
-			resetStateNotify();
+			resetStateNotify(true);
 		DMSPoller p = getDMSPoller();
 		if (p != null)
 			p.sendRequest(this, dr);
