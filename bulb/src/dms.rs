@@ -1088,9 +1088,14 @@ impl Dms {
         div.span().cdata("Pixel Errors").close();
         let mut span = div.span();
         span.button()
-            .id("rq_pixel_text")
+            .id("rq_pixel_test")
             .r#type("button")
             .cdata("Test")
+            .close();
+        span.button()
+            .id("rq_pixel_clear")
+            .r#type("button")
+            .cdata("Clear")
             .close();
         span.button()
             .id("rq_pixel_query")
@@ -1459,6 +1464,7 @@ impl Card for Dms {
             "rq_msg_query" => self.device_req(DeviceReq::QueryMessage),
             "rq_status_query" => self.device_req(DeviceReq::QueryStatus),
             "rq_pixel_test" => self.device_req(DeviceReq::TestPixels),
+            "rq_pixel_clear" => self.device_req(DeviceReq::ResetStatus),
             "rq_pixel_query" => self.device_req(DeviceReq::QueryPixelFailures),
             "rq_settings_send" => self.device_req(DeviceReq::SendSettings),
             "rq_settings_query" => self.device_req(DeviceReq::QuerySettings),
