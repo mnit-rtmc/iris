@@ -23,7 +23,7 @@ var item_states = null;
 function osm_styles() {
     let county = {
         fill: true,
-        fillColor: "#bbb",
+        fillColor: "#677",
         fillOpacity: 1,
         weight: 0.1,
         color: '#000',
@@ -31,7 +31,7 @@ function osm_styles() {
     };
     let city = {
         fill: true,
-        fillColor: "#bbb",
+        fillColor: "#677",
         fillOpacity: 1,
         weight: 0.15,
         color: '#000',
@@ -236,7 +236,7 @@ function item_style(state) {
             style.fillColor = "#55acee";
             return style;
         case '🔶':
-            style.fillColor = "#e78e0b";
+            style.fillColor = "#e8900b";
             return style;
         case '💥':
             style.fillColor = "#ff8080";
@@ -252,8 +252,8 @@ function item_style(state) {
             return style;
         case '📋':
         case '👽':
-            style.fillColor = "#ffca81";
-            style.fillOpacity = 0.5;
+            style.fillColor = "#bb6655";
+            style.fillOpacity = 0.8;
             return style;
         case '⚠️':
             style.fillColor = "black";
