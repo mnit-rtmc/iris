@@ -519,12 +519,21 @@ impl DmsAnc {
             let ln = 1 + i as u16;
             let mc_line = format!("mc_line{ln}");
             let mc_choice = format!("mc_choice{ln}");
+            // NOTE: these labels are a workaround for a Firefox 147 bug:
+            //       if "Save and autofill addresses" is enabled,
+            //       setting onfocus on a second consecutive input !?!
+            //       triggers autocomplete with saved street addresses
+            div.label().hidden("hidden").close();
             let mut input = div.input();
             if rn != rect_num {
                 input.class("mc_line_gap");
                 rect_num = rn;
             }
-            input.id(mc_line).value(cur_line).list(&mc_choice);
+            input
+                .id(mc_line)
+                .value(cur_line)
+                .list(&mc_choice)
+                .onfocus("this.value=''");
             let mut datalist = div.datalist();
             datalist.id(mc_choice);
             if let Some(font) = dms.font_definition().font(font_num) {
