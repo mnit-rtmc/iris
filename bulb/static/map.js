@@ -222,7 +222,7 @@ function tms_style_base() {
 // Get TMS style
 function tms_style(res, lzoom) {
     function my_style(properties, zoom) {
-        var visible = (res == selected_resource) || (zoom >= lzoom);
+        let visible = (res == selected_resource) || (zoom >= lzoom);
         return tms_style_feature(
             properties.name,
             properties.station_id,
