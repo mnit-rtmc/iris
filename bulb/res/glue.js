@@ -5,8 +5,13 @@ export function update_stat_sample(data) {
 }
 
 // Update TMS main item states
-export function update_item_states(data) {
-  item_states = JSON.parse(data);
+export function update_item_states(res, data) {
+  selected_resource = res;
+  if (item_states) {
+    item_states = { ...item_states, ...JSON.parse(data) };
+  } else {
+    item_states = JSON.parse(data);
+  }
   tms_layers.redraw();
 }
 

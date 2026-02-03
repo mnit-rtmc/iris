@@ -39,7 +39,7 @@ extern "C" {
     /// Update station data
     fn update_stat_sample(data: &JsValue);
     // Update TMS main item states
-    fn update_item_states(data: &JsValue);
+    fn update_item_states(res: &JsValue, data: &JsValue);
     // Fly map to given item
     fn fly_map_to(fid: &JsValue, lat: &JsValue, lng: &JsValue);
     // Enable/disable flying map
@@ -371,7 +371,10 @@ async fn build_card_list(search: &str) -> Result<String> {
         Some(mut cards) => {
             cards.search(search);
             let html = cards.make_html().await?;
-            update_item_states(&JsValue::from_str(cards.states_main()));
+            update_item_states(
+                &JsValue::from_str(cards.res().as_str()),
+                &JsValue::from_str(cards.states_main())
+            );
             app::card_list(Some(cards));
             Ok(html)
         }
@@ -815,7 +818,10 @@ async fn update_card_list() -> Result<()> {
     for (cv, html) in cards.changed_vec(json).await? {
         replace_card_html(&cv, &html);
     }
-    update_item_states(&JsValue::from_str(cards.states_main()));
+    update_item_states(
+        &JsValue::from_str(cards.res().as_str()),
+        &JsValue::from_str(cards.states_main())
+    );
     app::card_list(Some(cards));
     search_card_list().await
 }

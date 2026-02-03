@@ -16,6 +16,9 @@ var fly_enabled = true;
 // Current station sample data
 var stat_sample = null;
 
+// Current selected resource type
+var selected_resource = null;
+
 // Current TMS main item states
 var item_states = null;
 
@@ -122,76 +125,84 @@ function osm_styles() {
 
 // Get styles for TMS layers
 function tms_styles() {
+    let segment_style = tms_style("segment", 9);
+    let beacon_style = tms_style("beacon", 14);
+    let camera_style = tms_style("camera", 13);
+    let dms_style = tms_style("dms", 12);
+    let incident_style = tms_style("incident", 14);
+    let lcs_style = tms_style("lcs", 16);
+    let meter_style = tms_style("ramp_meter", 15);
+    let weather_style = tms_style("weather_sensor", 16);
     return {
-        segment_9: tms_style,
-        segment_10: tms_style,
-        segment_11: tms_style,
-        segment_12: tms_style,
-        segment_13: tms_style,
-        segment_14: tms_style,
-        segment_15: tms_style,
-        segment_16: tms_style,
-        segment_17: tms_style,
-        segment_18: tms_style,
-        beacon_10: tms_style,
-        beacon_11: tms_style,
-        beacon_12: tms_style,
-        beacon_13: tms_style,
-        beacon_14: tms_style,
-        beacon_15: tms_style,
-        beacon_16: tms_style,
-        beacon_17: tms_style,
-        beacon_18: tms_style,
-        camera_10: tms_style,
-        camera_11: tms_style,
-        camera_12: tms_style,
-        camera_13: tms_style,
-        camera_14: tms_style,
-        camera_15: tms_style,
-        camera_16: tms_style,
-        camera_17: tms_style,
-        camera_18: tms_style,
-        dms_11: tms_style,
-        dms_12: tms_style,
-        dms_13: tms_style,
-        dms_14: tms_style,
-        dms_15: tms_style,
-        dms_16: tms_style,
-        dms_17: tms_style,
-        dms_18: tms_style,
-        incident_10: tms_style,
-        incident_11: tms_style,
-        incident_12: tms_style,
-        incident_13: tms_style,
-        incident_14: tms_style,
-        incident_15: tms_style,
-        incident_16: tms_style,
-        incident_17: tms_style,
-        incident_18: tms_style,
-        lcs_12: tms_style,
-        lcs_13: tms_style,
-        lcs_14: tms_style,
-        lcs_15: tms_style,
-        lcs_16: tms_style,
-        lcs_17: tms_style,
-        lcs_18: tms_style,
-        ramp_meter_11: tms_style,
-        ramp_meter_12: tms_style,
-        ramp_meter_13: tms_style,
-        ramp_meter_14: tms_style,
-        ramp_meter_15: tms_style,
-        ramp_meter_16: tms_style,
-        ramp_meter_17: tms_style,
-        ramp_meter_18: tms_style,
-        weather_sensor_10: tms_style,
-        weather_sensor_11: tms_style,
-        weather_sensor_12: tms_style,
-        weather_sensor_13: tms_style,
-        weather_sensor_14: tms_style,
-        weather_sensor_15: tms_style,
-        weather_sensor_16: tms_style,
-        weather_sensor_17: tms_style,
-        weather_sensor_18: tms_style,
+        segment_9: segment_style,
+        segment_10: segment_style,
+        segment_11: segment_style,
+        segment_12: segment_style,
+        segment_13: segment_style,
+        segment_14: segment_style,
+        segment_15: segment_style,
+        segment_16: segment_style,
+        segment_17: segment_style,
+        segment_18: segment_style,
+        beacon_10: beacon_style,
+        beacon_11: beacon_style,
+        beacon_12: beacon_style,
+        beacon_13: beacon_style,
+        beacon_14: beacon_style,
+        beacon_15: beacon_style,
+        beacon_16: beacon_style,
+        beacon_17: beacon_style,
+        beacon_18: beacon_style,
+        camera_10: camera_style,
+        camera_11: camera_style,
+        camera_12: camera_style,
+        camera_13: camera_style,
+        camera_14: camera_style,
+        camera_15: camera_style,
+        camera_16: camera_style,
+        camera_17: camera_style,
+        camera_18: camera_style,
+        dms_11: dms_style,
+        dms_12: dms_style,
+        dms_13: dms_style,
+        dms_14: dms_style,
+        dms_15: dms_style,
+        dms_16: dms_style,
+        dms_17: dms_style,
+        dms_18: dms_style,
+        incident_10: incident_style,
+        incident_11: incident_style,
+        incident_12: incident_style,
+        incident_13: incident_style,
+        incident_14: incident_style,
+        incident_15: incident_style,
+        incident_16: incident_style,
+        incident_17: incident_style,
+        incident_18: incident_style,
+        lcs_12: lcs_style,
+        lcs_13: lcs_style,
+        lcs_14: lcs_style,
+        lcs_15: lcs_style,
+        lcs_16: lcs_style,
+        lcs_17: lcs_style,
+        lcs_18: lcs_style,
+        ramp_meter_11: meter_style,
+        ramp_meter_12: meter_style,
+        ramp_meter_13: meter_style,
+        ramp_meter_14: meter_style,
+        ramp_meter_15: meter_style,
+        ramp_meter_16: meter_style,
+        ramp_meter_17: meter_style,
+        ramp_meter_18: meter_style,
+        weather_sensor_10: weather_style,
+        weather_sensor_11: weather_style,
+        weather_sensor_12: weather_style,
+        weather_sensor_13: weather_style,
+        weather_sensor_14: weather_style,
+        weather_sensor_15: weather_style,
+        weather_sensor_16: weather_style,
+        weather_sensor_17: weather_style,
+        weather_sensor_18: weather_style,
     };
 }
 
@@ -209,19 +220,27 @@ function tms_style_base() {
 }
 
 // Get TMS style
-function tms_style(properties) {
-    return tms_style_feature(properties.name, properties.station_id);
+function tms_style(res, lzoom) {
+    function my_style(properties, zoom) {
+        var visible = (res == selected_resource) || (zoom >= lzoom);
+        return tms_style_feature(
+            properties.name,
+            properties.station_id,
+            visible
+        );
+    }
+    return my_style;
 }
 
 // Get style for a TMS feature
-function tms_style_feature(name, sid) {
-    return (name) ? tms_style_item(name) : tms_style_station(sid);
+function tms_style_feature(name, sid, visible) {
+    return (name) ? tms_style_item(name, visible) : tms_style_station(sid);
 }
 
 // Get style for a TMS item
-function tms_style_item(name) {
+function tms_style_item(name, visible) {
     let state = '';
-    if (item_states) {
+    if (visible && item_states) {
         state = item_states[name];
     }
     return item_style(state);
@@ -313,7 +332,7 @@ function select_tms_feature(fid, name, sid) {
         tms_select = null;
     }
     if (change) {
-        let style = tms_style_feature(name, sid);
+        let style = tms_style_feature(name, sid, true);
         style.weight = 2;
         style.color = 'white';
         style.opacity = 1,
@@ -328,6 +347,7 @@ function init_map() {
     map = L.map('mapid', {
         center: [45, -93],
         zoom: 12,
+        zoomControl: false,
     });
     map.attributionControl.setPrefix("");
     const osm_url = "/tile/{z}/{x}/{y}.mvt";

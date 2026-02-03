@@ -630,6 +630,11 @@ impl CardList {
         std::mem::take(&mut self.json)
     }
 
+    /// Get resource type
+    pub fn res(&self) -> Res {
+        self.res
+    }
+
     /// Get main item states JSON
     pub fn states_main(&self) -> &str {
         &self.states_main
