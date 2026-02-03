@@ -9,7 +9,7 @@ edition.workspace = true
 argh.workspace = true
 bb8.workspace = true
 bb8-postgres.workspace = true
-bytes = "1.11"
+bytes = "1.11.1"
 env_logger.workspace = true
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["tokio"] }
