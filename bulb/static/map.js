@@ -38,7 +38,7 @@ function osm_styles() {
     };
     let water = {
         fill: true,
-        fillColor: "#b5d0d0",
+        fillColor: "#b5c0d0",
         fillOpacity: 0.8,
         stroke: false,
     };
@@ -199,7 +199,7 @@ function tms_styles() {
 function tms_style_base() {
     return {
         fill: true,
-        fillColor: "#666",
+        fillColor: "#888",
         fillOpacity: 0.8,
         stroke: true,
         weight: 0.5,

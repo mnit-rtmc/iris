@@ -156,6 +156,7 @@ button.go_link {
   margin-left: auto;
 }
 label:has(+ #sb_resource) {
+  color: white;
   margin-top: auto;
   margin-bottom: auto;
   margin-left: 0;
