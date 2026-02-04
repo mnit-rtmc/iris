@@ -78,7 +78,7 @@ pub struct Honey {
     debug: bool,
     /// Database connection pool
     db: Database,
-    /// Sse notifiers for each session
+    /// SSE notifiers for each session
     notifiers: Arc<Mutex<HashMap<Id, SseNotifier>>>,
 }
 
@@ -115,6 +115,15 @@ fn json_resp(json: String) -> Resp2 {
 }
 
 impl SseNotifier {
+    /// Make a new SSE notifier
+    fn new() -> Self {
+        SseNotifier {
+            channels: Vec::new(),
+            tx: None,
+            activity: SystemTime::now(),
+        }
+    }
+
     /// Check if notifier is listening to a channel
     fn is_listening(&self, nm: &Name) -> bool {
         for chan in &self.channels {
@@ -131,6 +140,27 @@ impl SseNotifier {
             }
         }
         false
+    }
+
+    /// Send an SSE event
+    fn send_event_checked(&mut self, id: &Id, nm: &Name) {
+        log::debug!("checking {nm} for {id}");
+        if self.is_listening(nm) {
+            self.send_event(id, nm);
+        }
+    }
+
+    /// Send an SSE event
+    fn send_event(&mut self, id: &Id, nm: &Name) {
+        log::warn!("SSE notify: {nm} to {id}");
+        if let Some(tx) = &self.tx {
+            self.activity = SystemTime::now();
+            let ev = Event::default().data(nm.to_string());
+            if let Err(e) = tx.send(Ok(ev)) {
+                log::warn!("SSE notification: {e}");
+                self.tx = None;
+            }
+        }
     }
 }
 
@@ -230,11 +260,8 @@ impl Honey {
                 notifier.channels = names;
             }
             None => {
-                let notifier = SseNotifier {
-                    channels: names,
-                    tx: None,
-                    activity: SystemTime::now(),
-                };
+                let mut notifier = SseNotifier::new();
+                notifier.channels = names;
                 map.insert(id, notifier);
             }
         }
@@ -242,6 +269,7 @@ impl Honey {
 
     /// Store SSE sender for a session Id
     fn store_sender(&self, id: Id, tx: UnboundedSender<EventResult>) {
+        let nm = Name::from(Res::ResourceType);
         let mut map = self.notifiers.lock().unwrap();
         log::debug!("Adding SSE sender for {id}");
         match map.get_mut(&id) {
@@ -250,13 +278,12 @@ impl Honey {
                     log::info!("SSE sender exists {id}");
                 }
                 notifier.tx = Some(tx);
+                notifier.send_event(&id, &nm);
             }
             None => {
-                let notifier = SseNotifier {
-                    channels: Vec::new(),
-                    tx: Some(tx),
-                    activity: SystemTime::now(),
-                };
+                let mut notifier = SseNotifier::new();
+                notifier.tx = Some(tx);
+                notifier.send_event(&id, &nm);
                 map.insert(id, notifier);
             }
         }
@@ -267,18 +294,7 @@ impl Honey {
         log::debug!("Notify SSE {nm}");
         let mut map = self.notifiers.lock().unwrap();
         for (id, notifier) in map.iter_mut() {
-            log::debug!("checking {nm} for {id}");
-            if let Some(tx) = &notifier.tx
-                && notifier.is_listening(&nm)
-            {
-                notifier.activity = SystemTime::now();
-                log::debug!("SSE notify: {nm} to {id}");
-                let ev = Event::default().data(nm.to_string());
-                if let Err(e) = tx.send(Ok(ev)) {
-                    log::warn!("SSE notification: {e}");
-                    notifier.tx = None;
-                }
-            }
+            notifier.send_event_checked(id, &nm);
         }
     }
 

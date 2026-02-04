@@ -1,6 +1,6 @@
 // honeybee.rs
 //
-// Copyright (C) 2018-2025  Minnesota Department of Transportation
+// Copyright (C) 2018-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -52,28 +52,21 @@ async fn main() -> Result<()> {
                 // hold event until timeout passes
                 events.insert(nm);
             }
-            Some(Err(_)) => {
-                // timeout has passed, deliver all events
-                let mut client = db.client().await?;
-                for nm in events.drain() {
-                    Resource::notify(&mut client, &mut state, &nm).await?;
-                    let hon = honey.clone();
-                    tokio::spawn(async move { hon.notify_sse(nm).await });
+            Some(Err(_elapsed)) => {
+                // timeout expired, deliver all pending events
+                if !events.is_empty() {
+                    let mut client = db.client().await?;
+                    for nm in events.drain() {
+                        Resource::notify(&mut client, &mut state, &nm).await?;
+                        let hon = honey.clone();
+                        tokio::spawn(async move { hon.notify_sse(nm).await });
+                    }
                 }
             }
         }
     }
     log::warn!("Notification stream ended");
     Ok(())
-}
-
-/// Check for expired notifiers
-async fn check_expired(honey: Honey) {
-    let min = std::time::Duration::from_secs(60);
-    loop {
-        tokio::time::sleep(min).await;
-        honey.purge_expired();
-    }
 }
 
 /// Serve routes
@@ -85,4 +78,13 @@ async fn serve_routes(honey: Honey) -> Result<()> {
     axum::serve(listener, app).await?;
     log::warn!("Axum serve ended");
     Ok(())
+}
+
+/// Check for expired notifiers
+async fn check_expired(honey: Honey) {
+    let min = std::time::Duration::from_secs(60);
+    loop {
+        tokio::time::sleep(min).await;
+        honey.purge_expired();
+    }
 }

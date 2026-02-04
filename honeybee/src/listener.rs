@@ -1,6 +1,6 @@
 // listener.rs
 //
-// Copyright (C) 2018-2025  Minnesota Department of Transportation
+// Copyright (C) 2018-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 use tokio_postgres::tls::NoTlsStream;
-use tokio_postgres::{AsyncMessage, Connection, Socket};
+use tokio_postgres::{AsyncMessage, Connection, Notification, Socket};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 /// DB notification handler
@@ -60,28 +60,7 @@ impl Future for NotificationHandler {
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notification(n)))) => {
                 log::debug!("Notification: {} {}", n.channel(), n.payload());
-                match Name::new(n.channel()) {
-                    Ok(nm) => {
-                        let obj_n = n.payload();
-                        let nm = if obj_n.is_empty() {
-                            nm
-                        } else {
-                            match nm.clone().obj(obj_n) {
-                                Ok(nm) => nm,
-                                Err(_e) => {
-                                    log::warn!("Invalid payload: {obj_n}");
-                                    nm
-                                }
-                            }
-                        };
-                        if let Err(e) = self.tx.send(nm) {
-                            log::warn!("Send notification: {e}");
-                        }
-                    }
-                    Err(_) => {
-                        log::warn!("Unknown channel: {}", n.channel());
-                    }
-                }
+                self.notify_channel(n);
                 Poll::Ready(true)
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notice(n)))) => {
@@ -96,6 +75,30 @@ impl Future for NotificationHandler {
                 log::error!("DB error: {e}");
                 Poll::Ready(false)
             }
+        }
+    }
+}
+
+impl NotificationHandler {
+    /// Notify channel with an event
+    fn notify_channel(&self, n: Notification) {
+        match Name::new(n.channel()) {
+            Ok(nm) => {
+                let obj_n = n.payload();
+                let nm = if obj_n.is_empty() {
+                    nm
+                } else {
+                    match nm.clone().obj(obj_n) {
+                        Ok(nm) => nm,
+                        Err(_e) => {
+                            log::warn!("Invalid payload: {obj_n}");
+                            nm
+                        }
+                    }
+                };
+                send_event(&self.tx, nm);
+            }
+            Err(_) => log::warn!("Unknown channel: {}", n.channel()),
         }
     }
 }
