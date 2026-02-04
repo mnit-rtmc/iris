@@ -253,8 +253,8 @@ fn monochrome_html<'p>(sc: &SignConfig, div: &'p mut html::Div<'p>) {
         div.class("row");
         div.label().cdata("FG / BG").close();
         div.span()
-            .style(&format!("color: #{fg:06X}; background-color: #{bg:06X}"))
-            .cdata(&format!("#{fg:06X} / #{bg:06X}"))
+            .style(format!("color: #{fg:06X}; background-color: #{bg:06X}"))
+            .cdata(format!("#{fg:06X} / #{bg:06X}"))
             .close();
     }
     div.close();

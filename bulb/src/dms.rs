@@ -538,16 +538,12 @@ impl DmsAnc {
             datalist.id(mc_choice);
             if let Some(font) = dms.font_definition().font(font_num) {
                 for ml in self.pat_lines(pat) {
-                    if ml.line == ln {
-                        if let Some(ms) =
+                    if ml.line == ln
+                        && let Some(ms) =
                             self.line_multi(&ml.multi, width, font)
-                        {
-                            let mut option = datalist.option();
-                            option
-                                .value(&ms)
-                                .cdata(join_text(&ms, " "))
-                                .close();
-                        }
+                    {
+                        let mut option = datalist.option();
+                        option.value(&ms).cdata(join_text(&ms, " ")).close();
                     }
                 }
             }
@@ -1327,7 +1323,7 @@ fn make_expire_select<'p>(select: &'p mut html::Select<'p>) {
 }
 
 /// Build temperature range HTML
-fn temp_range_html<'p>(label: &str, temps: &[i32], ul: &'p mut html::Ul) {
+fn temp_range_html(label: &str, temps: &[i32], ul: &mut html::Ul) {
     let mut mn = None;
     let mut mx = None;
     for &temp in temps {
