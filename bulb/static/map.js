@@ -224,7 +224,7 @@ function tms_style_base() {
 
 // Get TMS style
 function tms_style(res, lzoom) {
-    function my_style(properties, zoom) {
+    function make_style(properties, zoom) {
         var visible = 0;
         if ((res == selected_resource) || (zoom >= lzoom)) {
             visible = 1;
@@ -232,13 +232,17 @@ function tms_style(res, lzoom) {
         if (properties.name == selected_name) {
             visible = 2;
         }
-        return tms_style_feature(
+        var style = tms_style_feature(
             properties.name,
             properties.station_id,
             visible
         );
+        if (zoom <= 10) {
+            style.stroke = false;
+        }
+        return style;
     }
-    return my_style;
+    return make_style;
 }
 
 // Get style for a TMS feature
@@ -337,7 +341,8 @@ function density_color(density) {
 
 // Select feature on TMS layers
 function select_tms_feature(fid, name, sid) {
-    let change = (typeof fid != "undefined") && (fid != tms_select);
+    let old_fid = tms_select;
+    let change = (typeof fid != "undefined") && (fid != old_fid);
     if (tooltip) {
         tooltip.close();
         tooltip = null;
@@ -353,8 +358,12 @@ function select_tms_feature(fid, name, sid) {
         style.opacity = 1,
         tms_layers.setFeatureStyle(fid, style);
         tms_select = fid;
+        return fid;
+    } else if (old_fid) {
+        return "";
+    } else {
+        return null;
     }
-    return change;
 }
 
 // Initialize leaflet map
@@ -420,17 +429,19 @@ function init_map() {
         let fid = tms_layer_id(e.propagatedFrom);
         let name = e.propagatedFrom.properties.name;
         let sid = e.propagatedFrom.properties.station_id;
-        let change = select_tms_feature(fid, name, sid);
-        if (change) {
-            let label = tms_layer_label(e.propagatedFrom);
-            if (label) {
-                tooltip = L.tooltip()
-                           .setContent(label)
-                           .setLatLng(e.latlng)
-                           .openOn(map);
-            };
+        let new_fid = select_tms_feature(fid, name, sid);
+        if (!(new_fid === null)) {
+            if (new_fid) {
+                let label = tms_layer_label(e.propagatedFrom);
+                if (label) {
+                    tooltip = L.tooltip()
+                               .setContent(label)
+                               .setLatLng(e.latlng)
+                               .openOn(map);
+                };
+            }
             const ev = new CustomEvent("tmsevent", {
-                detail: fid,
+                detail: new_fid,
                 bubbles: true,
                 cancelable: true,
                 composed: false,

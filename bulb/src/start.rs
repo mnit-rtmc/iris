@@ -374,7 +374,7 @@ async fn build_card_list(search: &str) -> Result<String> {
             update_item_states(
                 &JsValue::from_str(cards.res().as_str()),
                 &JsValue::from_str(&cards.selected_name()),
-                &JsValue::from_str(cards.states_main())
+                &JsValue::from_str(cards.states_main()),
             );
             app::card_list(Some(cards));
             Ok(html)
@@ -726,8 +726,8 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
         .dyn_into::<JsString>()
     {
         Ok(name) => {
-            let name = String::from(name);
             if let Some(res) = resource_value() {
+                let name = String::from(name);
                 spawn_local(do_future(select_card_map(res, name)));
             }
         }
@@ -744,10 +744,17 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
 
 /// Select a card from a map marker click
 async fn select_card_map(res: Res, name: String) -> Result<()> {
-    let id = format!("{res}_{name}");
-    fly_enable(JsValue::FALSE);
-    click_card(res, name, id).await?;
-    search_card_list().await
+    if name.is_empty() {
+        if let Some(cv) = app::form() {
+            replace_card(cv.compact()).await?;
+        }
+        Ok(())
+    } else {
+        let id = format!("{res}_{name}");
+        fly_enable(JsValue::FALSE);
+        click_card(res, name, id).await?;
+        search_card_list().await
+    }
 }
 
 /// Add event source listener for notifications
@@ -822,7 +829,7 @@ async fn update_card_list() -> Result<()> {
     update_item_states(
         &JsValue::from_str(cards.res().as_str()),
         &JsValue::from_str(&cards.selected_name()),
-        &JsValue::from_str(cards.states_main())
+        &JsValue::from_str(cards.states_main()),
     );
     app::card_list(Some(cards));
     search_card_list().await
