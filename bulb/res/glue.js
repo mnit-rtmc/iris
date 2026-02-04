@@ -5,8 +5,9 @@ export function update_stat_sample(data) {
 }
 
 // Update TMS main item states
-export function update_item_states(res, data) {
+export function update_item_states(res, name, data) {
   selected_resource = res;
+  selected_name = name;
   if (item_states) {
     item_states = { ...item_states, ...JSON.parse(data) };
   } else {

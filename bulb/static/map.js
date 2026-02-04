@@ -19,6 +19,9 @@ var stat_sample = null;
 // Current selected resource type
 var selected_resource = null;
 
+// Current selected name
+var selected_name = null;
+
 // Current TMS main item states
 var item_states = null;
 
@@ -115,7 +118,7 @@ function osm_styles() {
         primary: { color: "#ffeaa9" },
         secondary: { color: "#fff4a9" },
         tertiary: { color: "#ffffa9" },
-        road: { weight: 2, color: "#eee" },
+        road: { weight: 1.5, color: "#ccc" },
         path: path,
         railway: railway,
         building: building,
@@ -210,19 +213,25 @@ function tms_styles() {
 function tms_style_base() {
     return {
         fill: true,
-        fillColor: "#888",
+        fillColor: "#aaa",
         fillOpacity: 0.8,
         stroke: true,
         weight: 0.5,
         color: "#000",
-        opacity: 0.5,
+        opacity: 0.8,
     };
 }
 
 // Get TMS style
 function tms_style(res, lzoom) {
     function my_style(properties, zoom) {
-        let visible = (res == selected_resource) || (zoom >= lzoom);
+        var visible = 0;
+        if ((res == selected_resource) || (zoom >= lzoom)) {
+            visible = 1;
+        }
+        if (properties.name == selected_name) {
+            visible = 2;
+        }
         return tms_style_feature(
             properties.name,
             properties.station_id,
@@ -243,11 +252,11 @@ function tms_style_item(name, visible) {
     if (visible && item_states) {
         state = item_states[name];
     }
-    return item_style(state);
+    return item_style(state, visible);
 }
 
 // Get style based on main item state
-function item_style(state) {
+function item_style(state, visible) {
     let style = tms_style_base();
     switch (state) {
         case '🔹':
@@ -283,6 +292,12 @@ function item_style(state) {
         default:
             style.fill = false;
             style.stroke = false;
+            if (visible >= 2) {
+                style.fill = true;
+                style.fillColor = "white";
+                style.fillOpacity = 0.2;
+                style.stroke = true;
+            }
             return style;
     }
 }
@@ -332,7 +347,7 @@ function select_tms_feature(fid, name, sid) {
         tms_select = null;
     }
     if (change) {
-        let style = tms_style_feature(name, sid, true);
+        let style = tms_style_feature(name, sid, 2);
         style.weight = 2;
         style.color = 'white';
         style.opacity = 1,

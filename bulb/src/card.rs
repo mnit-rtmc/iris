@@ -630,9 +630,17 @@ impl CardList {
         std::mem::take(&mut self.json)
     }
 
-    /// Get resource type
+    /// Get selected resource type
     pub fn res(&self) -> Res {
         self.res
+    }
+
+    /// Get selected name
+    pub fn selected_name(&self) -> String {
+        match self.form() {
+            Some(cv) => cv.name,
+            None => String::new(),
+        }
     }
 
     /// Get main item states JSON
@@ -701,7 +709,7 @@ impl CardList {
         let cards: Vec<C> = serde_json::from_str(&self.json)?;
         // Use default value for ancillary data lookup
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
-        self.views.clear();
+        let mut views = Vec::with_capacity(cards.len());
         let mut page = Page::new();
         let mut ul = page.frag::<html::Ul>();
         ul.class("cards");
@@ -717,7 +725,7 @@ impl CardList {
                 .class(cv.view.class_name());
             li.span().class("create").cdata("Create 🆕").close();
             li.close();
-            self.views.push(cv);
+            views.push(cv);
         }
         for pri in &cards {
             let view = if self.search.is_match(pri, &anc) {
@@ -732,9 +740,10 @@ impl CardList {
                 .class(cv.view.class_name());
             li.raw(pri.to_html(view, &anc));
             li.close();
-            self.views.push(cv);
+            views.push(cv);
         }
         ul.close();
+        self.views = views;
         self.states_main = item_states_main(&cards, &anc);
         Ok(String::from(page))
     }
