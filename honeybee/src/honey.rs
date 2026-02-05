@@ -44,7 +44,6 @@ use std::time::SystemTime;
 use tokio::fs::metadata;
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 use tokio_postgres::types::ToSql;
-use tokio_stream::Stream;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 use tokio_util::io::ReaderStream;
 use tower_sessions::session::Id;
@@ -152,7 +151,7 @@ impl SseNotifier {
 
     /// Send an SSE event
     fn send_event(&mut self, id: &Id, nm: &Name) {
-        log::warn!("SSE notify: {nm} to {id}");
+        log::debug!("SSE notify: {nm} to {id}");
         if let Some(tx) = &self.tx {
             self.activity = SystemTime::now();
             let ev = Event::default().data(nm.to_string());
@@ -160,6 +159,14 @@ impl SseNotifier {
                 log::warn!("SSE notification: {e}");
                 self.tx = None;
             }
+        }
+    }
+
+    /// Send an SSE event for all listening channels
+    fn send_channels(&mut self, id: &Id) {
+        log::info!("SSE send channels {id} {}", self.channels.len());
+        for nm in &self.channels.clone() {
+            self.send_event(&id, nm);
         }
     }
 }
@@ -258,8 +265,10 @@ impl Honey {
         match map.get_mut(&id) {
             Some(notifier) => {
                 notifier.channels = names;
+                notifier.send_channels(&id);
             }
             None => {
+                log::info!("SSE sender unknown {id}");
                 let mut notifier = SseNotifier::new();
                 notifier.channels = names;
                 map.insert(id, notifier);
@@ -269,7 +278,6 @@ impl Honey {
 
     /// Store SSE sender for a session Id
     fn store_sender(&self, id: Id, tx: UnboundedSender<EventResult>) {
-        let nm = Name::from(Res::ResourceType);
         let mut map = self.notifiers.lock().unwrap();
         log::debug!("Adding SSE sender for {id}");
         match map.get_mut(&id) {
@@ -278,12 +286,11 @@ impl Honey {
                     log::info!("SSE sender exists {id}");
                 }
                 notifier.tx = Some(tx);
-                notifier.send_event(&id, &nm);
+                notifier.send_channels(&id);
             }
             None => {
                 let mut notifier = SseNotifier::new();
                 notifier.tx = Some(tx);
-                notifier.send_event(&id, &nm);
                 map.insert(id, notifier);
             }
         }
@@ -558,17 +565,25 @@ fn notify_resource(honey: Honey) -> Router {
     async fn handle_get(
         session: Session,
         State(honey): State<Honey>,
-    ) -> Sse<impl Stream<Item = EventResult>> {
+    ) -> impl IntoResponse {
         log::info!("GET notify");
+        let nm = Name::from(Res::Permission);
+        // NOTE: no question-mark operator -- unable to infer return type
+        let Ok(cred) = Credentials::load(&session).await else {
+            return Err(StatusCode::UNAUTHORIZED);
+        };
+        if honey.name_access(cred.user(), &nm, Access::View).await.is_err() {
+            return Err(StatusCode::UNAUTHORIZED);
+        }
         let id = session.id().unwrap_or_default();
         let (tx, rx) = unbounded_channel();
         honey.store_sender(id, tx);
         let stream = UnboundedReceiverStream::new(rx);
-        Sse::new(stream).keep_alive(
+        Ok(Sse::new(stream).keep_alive(
             KeepAlive::new()
                 .interval(std::time::Duration::from_secs(60))
                 .text("keep alive"),
-        )
+        ))
     }
 
     /// Handle `POST` request
