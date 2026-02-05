@@ -2,6 +2,7 @@
 export function js_set_selected(res, name) {
   selected_resource = res;
   selected_name = name;
+  tms_layers.redraw();
 }
 
 // Update TMS main item states
@@ -11,7 +12,6 @@ export function js_update_item_states(data) {
   } else {
     item_states = JSON.parse(data);
   }
-  tms_layers.redraw();
 }
 
 // Update station data JSON

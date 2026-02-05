@@ -326,9 +326,10 @@ fn notify_list(res: Option<Res>) -> String {
         Res::RampMeter.as_str(),
         Res::WeatherSensor.as_str(),
     ];
-    if let Some(r) = res
-        && !resources.contains(&r.as_str())
-    {
+    if let Some(r) = res {
+        // Ensure selected `res` is last, since the map will redraw after
+        // receiving that notification (js_set_selected)
+        resources.retain(|rs| *rs != r.as_str());
         resources.push(r.as_str());
     }
     format!("[\"{}\"]", &resources.join("\",\""))
@@ -387,10 +388,6 @@ async fn build_card_list(search: &str) -> Result<String> {
         Some(mut cards) => {
             cards.search(search);
             let html = cards.make_html().await?;
-            js_set_selected(
-                &JsValue::from_str(cards.res().as_str()),
-                &JsValue::from_str(&cards.selected_name()),
-            );
             js_update_item_states(&JsValue::from_str(cards.states_main()));
             app::card_list(Some(cards));
             Ok(html)
@@ -851,11 +848,11 @@ async fn update_card_list() -> Result<()> {
     for (cv, html) in cards.changed_vec(json).await? {
         replace_card_html(&cv, &html);
     }
+    js_update_item_states(&JsValue::from_str(cards.states_main()));
     js_set_selected(
         &JsValue::from_str(cards.res().as_str()),
         &JsValue::from_str(&cards.selected_name()),
     );
-    js_update_item_states(&JsValue::from_str(cards.states_main()));
     app::card_list(Some(cards));
     search_card_list().await
 }
