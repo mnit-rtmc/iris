@@ -36,14 +36,16 @@ pub type JsResult<T> = std::result::Result<T, JsValue>;
 /// JavaScript imports
 #[wasm_bindgen(module = "/res/glue.js")]
 extern "C" {
-    /// Update station data
-    fn update_stat_sample(data: &JsValue);
+    // Set the selected resource
+    fn js_set_selected(res: &JsValue, name: &JsValue);
     // Update TMS main item states
-    fn update_item_states(res: &JsValue, name: &JsValue, data: &JsValue);
+    fn js_update_item_states(data: &JsValue);
+    /// Update station data
+    fn js_update_stat_sample(data: &JsValue);
     // Fly map to given item
-    fn fly_map_to(fid: &JsValue, lat: &JsValue, lng: &JsValue);
+    fn js_fly_map_to(fid: &JsValue, lat: &JsValue, lng: &JsValue);
     // Enable/disable flying map
-    fn fly_enable(enable: JsValue);
+    fn js_fly_enable(enable: JsValue);
 }
 
 /// Button attributes
@@ -90,7 +92,7 @@ pub fn fly_map_item(fid: &str, lat: f64, lon: f64) {
     let fid = JsValue::from_str(fid);
     let lat = JsValue::from_f64(lat);
     let lon = JsValue::from_f64(lon);
-    fly_map_to(&fid, &lat, &lon);
+    js_fly_map_to(&fid, &lat, &lon);
 }
 
 /// Application starting function
@@ -307,15 +309,29 @@ async fn handle_resource_change() {
     do_future(fetch_card_list()).await;
     do_future(populate_card_list()).await;
     let uri = Uri::from("/iris/api/notify");
-    let rname = res.map_or("", |res| res.as_str());
-    let json = if rname.is_empty() {
-        "[]".to_string()
-    } else {
-        format!("[\"{rname}\"]")
-    };
+    let json = notify_list(res);
     if let Err(e) = uri.post(&json.into()).await {
         console::log_1(&format!("/iris/api/notify POST: {e}").into());
     }
+}
+
+/// Build resource list for notifications
+fn notify_list(res: Option<Res>) -> String {
+    // Always listen for resources with map markers
+    let mut resources = vec![
+        Res::Beacon.as_str(),
+        Res::Camera.as_str(),
+        Res::Dms.as_str(),
+        Res::Lcs.as_str(),
+        Res::RampMeter.as_str(),
+        Res::WeatherSensor.as_str(),
+    ];
+    if let Some(r) = res
+        && !resources.contains(&r.as_str())
+    {
+        resources.push(r.as_str());
+    }
+    format!("[\"{}\"]", &resources.join("\",\""))
 }
 
 /// Fetch card list for selected resource type
@@ -371,11 +387,11 @@ async fn build_card_list(search: &str) -> Result<String> {
         Some(mut cards) => {
             cards.search(search);
             let html = cards.make_html().await?;
-            update_item_states(
+            js_set_selected(
                 &JsValue::from_str(cards.res().as_str()),
                 &JsValue::from_str(&cards.selected_name()),
-                &JsValue::from_str(cards.states_main()),
             );
+            js_update_item_states(&JsValue::from_str(cards.states_main()));
             app::card_list(Some(cards));
             Ok(html)
         }
@@ -604,7 +620,7 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     }
     let cv = CardView::new(res, &name, view);
     replace_card(cv).await?;
-    fly_enable(JsValue::TRUE);
+    js_fly_enable(JsValue::TRUE);
     Ok(())
 }
 
@@ -715,7 +731,7 @@ fn fetch_station_sample() {
 /// Actually fetch station sample data
 async fn do_fetch_station_sample() -> Result<()> {
     let stat = Uri::from("/iris/station_sample").get().await?;
-    update_stat_sample(&stat);
+    js_update_stat_sample(&stat);
     Ok(())
 }
 
@@ -751,7 +767,7 @@ async fn select_card_map(res: Res, name: String) -> Result<()> {
         Ok(())
     } else {
         let id = format!("{res}_{name}");
-        fly_enable(JsValue::FALSE);
+        js_fly_enable(JsValue::FALSE);
         click_card(res, name, id).await?;
         search_card_list().await
     }
@@ -782,7 +798,7 @@ fn add_eventsource_listener() {
     let onmessage: Closure<dyn Fn(_)> = Closure::new(|e: MessageEvent| {
         set_notify_state(NotifyState::Good);
         if let Ok(payload) = e.data().dyn_into::<JsString>() {
-            spawn_local(handle_notify(String::from(payload)));
+            spawn_local(do_future(handle_notify(String::from(payload))));
         }
     });
     es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
@@ -798,19 +814,28 @@ fn set_notify_state(ns: NotifyState) {
 }
 
 /// Handle SSE notify from server
-async fn handle_notify(payload: String) {
+async fn handle_notify(payload: String) -> Result<()> {
     let rname = resource_value().map_or("", |res| res.as_str());
     let (chan, _name) = match payload.split_once('$') {
         Some((a, b)) => (a, Some(b)),
         None => (payload.as_str(), None),
     };
-    if chan != rname {
-        console::log_1(&format!("unknown channel: {chan}").into());
-        return;
+    if chan == rname {
+        set_notify_state(NotifyState::Updating);
+        app::defer_action(
+            DeferredAction::SetNotifyState(NotifyState::Good),
+            600,
+        );
+        do_future(update_card_list()).await;
+    } else if let Ok(res) = Res::try_from(chan) {
+        let mut cards = CardList::new(res);
+        cards.fetch().await?;
+        // FIXME: this initializes states_main as a side-effect...
+        // FIXME: this also GETs unnecessary associated controllers...
+        let _html = cards.make_html().await?;
+        js_update_item_states(&JsValue::from_str(cards.states_main()));
     }
-    set_notify_state(NotifyState::Updating);
-    app::defer_action(DeferredAction::SetNotifyState(NotifyState::Good), 600);
-    do_future(update_card_list()).await;
+    Ok(())
 }
 
 /// Update `sb_list` with changed result
@@ -826,11 +851,11 @@ async fn update_card_list() -> Result<()> {
     for (cv, html) in cards.changed_vec(json).await? {
         replace_card_html(&cv, &html);
     }
-    update_item_states(
+    js_set_selected(
         &JsValue::from_str(cards.res().as_str()),
         &JsValue::from_str(&cards.selected_name()),
-        &JsValue::from_str(cards.states_main()),
     );
+    js_update_item_states(&JsValue::from_str(cards.states_main()));
     app::card_list(Some(cards));
     search_card_list().await
 }
