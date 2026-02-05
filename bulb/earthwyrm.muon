@@ -208,10 +208,6 @@ layer_group: tms
     geom_type: polygon
     zoom: 18
     tags: ?name
-  layer: camera_10
-    geom_type: polygon
-    zoom: 10
-    tags: ?name
   layer: camera_11
     geom_type: polygon
     zoom: 11

@@ -156,7 +156,6 @@ function tms_styles() {
         beacon_16: beacon_style,
         beacon_17: beacon_style,
         beacon_18: beacon_style,
-        camera_10: camera_style,
         camera_11: camera_style,
         camera_12: camera_style,
         camera_13: camera_style,
