@@ -404,6 +404,16 @@ function init_map() {
             osm_select = null;
         }
         if (change) {
+            let name = e.propagatedFrom.properties.name;
+            let sid = e.propagatedFrom.properties.station_id;
+            let tms_fid = select_tms_feature(tms_select, name, sid);
+            const ev = new CustomEvent("tmsevent", {
+                detail: tms_fid,
+                bubbles: true,
+                cancelable: true,
+                composed: false,
+            });
+            document.querySelector('#mapid').dispatchEvent(ev);
             osm_select = fid;
             osm_layers.setFeatureStyle(osm_select, {
                 fill: true,
@@ -425,6 +435,10 @@ function init_map() {
     }
     osm_layers.on('click', osm_on_click);
     function tms_on_click(e) {
+        if (osm_select) {
+            osm_layers.resetFeatureStyle(osm_select);
+            osm_select = null;
+        }
         let fid = tms_layer_id(e.propagatedFrom);
         let name = e.propagatedFrom.properties.name;
         let sid = e.propagatedFrom.properties.station_id;
