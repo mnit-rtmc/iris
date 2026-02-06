@@ -12,6 +12,7 @@ base64 = "0.22"
 chrono.workspace = true
 cidr.workspace = true
 console_error_panic_hook = "0.1"
+foldhash = "0.2"
 gift.workspace = true
 hatmil = "1.1.0"
 humantime = "2.1"

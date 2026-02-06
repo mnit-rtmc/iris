@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction, NotifyState};
-use crate::card::{self, CardList, CardView, View};
+use crate::card::{self, CardList, CardState, CardView, View};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
@@ -344,7 +344,8 @@ async fn fetch_card_list() -> Result<()> {
         cards = res.map(|res| CardList::new(res).config(config));
     }
     if let Some(cards) = &mut cards {
-        cards.fetch().await?;
+        let json = cards.fetch_all().await?;
+        cards.swap_json(json);
     }
     app::card_list(cards);
     Ok(())
@@ -388,7 +389,6 @@ async fn build_card_list(search: &str) -> Result<String> {
         Some(mut cards) => {
             cards.search(search);
             let html = cards.make_html().await?;
-            js_update_item_states(&JsValue::from_str(cards.states_main()));
             app::card_list(Some(cards));
             Ok(html)
         }
@@ -738,12 +738,7 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
         .detail()
         .dyn_into::<JsString>()
     {
-        Ok(name) => {
-            if let Some(res) = resource_value() {
-                let name = String::from(name);
-                spawn_local(do_future(select_card_map(res, name)));
-            }
-        }
+        Ok(name) => spawn_local(do_future(select_card_map(name.into()))),
         Err(e) => console::log_1(&format!("tmsevent: {e:?}").into()),
     });
     elem.add_event_listener_with_callback(
@@ -756,22 +751,35 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
 }
 
 /// Select a card from a map marker click
-async fn select_card_map(res: Res, name: String) -> Result<()> {
+async fn select_card_map(name: String) -> Result<()> {
     if name.is_empty() {
         if let Some(cv) = app::form() {
             replace_card(cv.compact()).await?;
         }
-        Ok(())
-    } else {
+        return Ok(());
+    }
+    let res = app::name_res(&name);
+    if let Some(res) = res {
+        if resource_value() != Some(res) {
+            let doc = Doc::get();
+            let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+            sb_resource.set_value(res.as_str());
+            let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+            sb_search.set_value("");
+            handle_resource_change().await;
+        }
         let id = format!("{res}_{name}");
         js_fly_enable(JsValue::FALSE);
         click_card(res, name, id).await?;
         search_card_list().await
+    } else {
+        Ok(())
     }
 }
 
 /// Add event source listener for notifications
 fn add_eventsource_listener() {
+    set_notify_state(NotifyState::Disconnected);
     let es = match EventSource::new("/iris/api/notify") {
         Ok(es) => es,
         Err(e) => {
@@ -781,7 +789,6 @@ fn add_eventsource_listener() {
             return;
         }
     };
-    set_notify_state(NotifyState::Disconnected);
     let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
         set_notify_state(NotifyState::Connecting);
     });
@@ -826,29 +833,53 @@ async fn handle_notify(payload: String) -> Result<()> {
         do_future(update_card_list()).await;
     } else if let Ok(res) = Res::try_from(chan) {
         let mut cards = CardList::new(res);
-        cards.fetch().await?;
-        // FIXME: this initializes states_main as a side-effect...
+        let json = cards.fetch_all().await?;
+        cards.swap_json(json);
         // FIXME: this also GETs unnecessary associated controllers...
         let _html = cards.make_html().await?;
-        js_update_item_states(&JsValue::from_str(cards.states_main()));
+        let items = cards.states_main().await?;
+        let json = item_states_json(&items);
+        app::set_resources(items);
+        js_update_item_states(&json);
     }
     Ok(())
+}
+
+/// Build item states JSON object
+fn item_states_json(states: &[CardState]) -> JsValue {
+    let mut json = String::new();
+    json.push('{');
+    for st in states {
+        if json.len() > 1 {
+            json.push(',');
+        }
+        json.push('"');
+        json.push_str(&st.name);
+        json.push_str("\":\"");
+        json.push_str(st.state.code());
+        json.push('"');
+    }
+    json.push('}');
+    JsValue::from_str(&json)
 }
 
 /// Update `sb_list` with changed result
 async fn update_card_list() -> Result<()> {
     let Some(mut cards) = app::card_list(None) else {
-        fetch_card_list().await?;
-        return populate_card_list().await;
+        console::log_1(&JsValue::from("update_card_list: None"));
+        return Ok(());
     };
-    let json = cards.json();
+    let old_json = cards.swap_json(String::new());
     app::card_list(Some(cards));
     fetch_card_list().await?;
     let mut cards = app::card_list(None).unwrap();
-    for (cv, html) in cards.changed_vec(json).await? {
+    for (cv, html) in cards.changed_vec(old_json).await? {
         replace_card_html(&cv, &html);
     }
-    js_update_item_states(&JsValue::from_str(cards.states_main()));
+    let items = cards.states_main().await?;
+    let json = item_states_json(&items);
+    app::set_resources(items);
+    js_update_item_states(&json);
     js_set_selected(
         &JsValue::from_str(cards.res().as_str()),
         &JsValue::from_str(&cards.selected_name()),

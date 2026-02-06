@@ -52,6 +52,17 @@ use serde_json::map::Map;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
+/// Card state
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CardState {
+    /// Resource type
+    pub res: Res,
+    /// Object name
+    pub name: String,
+    /// Item state
+    pub state: ItemState,
+}
+
 /// Card element view
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum View {
@@ -589,8 +600,6 @@ pub struct CardList {
     json: String,
     /// Views in order of JSON list
     views: Vec<CardView>,
-    /// Main item states for all cards, as a JSON map
-    states_main: String,
 }
 
 impl CardList {
@@ -600,14 +609,12 @@ impl CardList {
         let search = Search::Empty();
         let json = String::new();
         let views = Vec::new();
-        let states_main = String::new();
         CardList {
             res,
             config,
             search,
             json,
             views,
-            states_main,
         }
     }
 
@@ -625,9 +632,11 @@ impl CardList {
         self.search = Search::new(search);
     }
 
-    /// Take current JSON value
-    pub fn json(&mut self) -> String {
-        std::mem::take(&mut self.json)
+    /// Swap current JSON value
+    pub fn swap_json(&mut self, json: String) -> String {
+        let js = std::mem::take(&mut self.json);
+        self.json = json;
+        js
     }
 
     /// Get selected resource type
@@ -643,9 +652,54 @@ impl CardList {
         }
     }
 
-    /// Get main item states JSON
-    pub fn states_main(&self) -> &str {
-        &self.states_main
+    /// Get main item states
+    pub async fn states_main(&self) -> Result<Vec<CardState>> {
+        match self.res {
+            Res::ActionPlan => self.states_main_x::<ActionPlan>().await,
+            Res::Alarm => self.states_main_x::<Alarm>().await,
+            Res::Beacon => self.states_main_x::<Beacon>().await,
+            Res::CabinetStyle => self.states_main_x::<CabinetStyle>().await,
+            Res::Camera => self.states_main_x::<Camera>().await,
+            Res::CommConfig => self.states_main_x::<CommConfig>().await,
+            Res::CommLink => self.states_main_x::<CommLink>().await,
+            Res::Controller => self.states_main_x::<Controller>().await,
+            Res::Detector => self.states_main_x::<Detector>().await,
+            Res::Dms => self.states_main_x::<Dms>().await,
+            Res::Domain => self.states_main_x::<Domain>().await,
+            Res::FlowStream => self.states_main_x::<FlowStream>().await,
+            Res::GateArm => self.states_main_x::<GateArm>().await,
+            Res::Gps => self.states_main_x::<Gps>().await,
+            Res::Incident => self.states_main_x::<Incident>().await,
+            Res::Lcs => self.states_main_x::<Lcs>().await,
+            Res::LcsState => self.states_main_x::<LcsState>().await,
+            Res::Modem => self.states_main_x::<Modem>().await,
+            Res::Permission => self.states_main_x::<Permission>().await,
+            Res::RampMeter => self.states_main_x::<RampMeter>().await,
+            Res::Role => self.states_main_x::<Role>().await,
+            Res::SignConfig => self.states_main_x::<SignConfig>().await,
+            Res::TagReader => self.states_main_x::<TagReader>().await,
+            Res::User => self.states_main_x::<User>().await,
+            Res::VideoMonitor => self.states_main_x::<VideoMonitor>().await,
+            Res::WeatherSensor => self.states_main_x::<WeatherSensor>().await,
+            _ => unreachable!(),
+        }
+    }
+
+    /// Get main item states
+    async fn states_main_x<C: Card>(&self) -> Result<Vec<CardState>> {
+        let cards: Vec<C> = serde_json::from_str(&self.json)?;
+        // Use default value for ancillary data lookup
+        let anc = fetch_ancillary(&C::default(), View::Search).await?;
+        let res = C::res();
+        let mut states = Vec::new();
+        for pri in &cards {
+            states.push(CardState {
+                res,
+                name: pri.name().to_string(),
+                state: pri.item_state_main(&anc),
+            });
+        }
+        Ok(states)
     }
 
     /// Get form card (if any)
@@ -664,11 +718,10 @@ impl CardList {
     }
 
     /// Fetch card list
-    pub async fn fetch(&mut self) -> Result<()> {
+    pub async fn fetch_all(&mut self) -> Result<String> {
         let json = uri_all(self.res).get().await?;
         let json: Value = serde_wasm_bindgen::from_value(json)?;
-        self.json = json.to_string();
-        Ok(())
+        Ok(json.to_string())
     }
 
     /// Make HTML view of card list
@@ -744,7 +797,6 @@ impl CardList {
         }
         ul.close();
         self.views = views;
-        self.states_main = item_states_main(&cards, &anc);
         Ok(String::from(page))
     }
 
@@ -873,11 +925,11 @@ impl CardList {
     /// Make a Vec of changed cards
     async fn changed<C: Card>(
         &mut self,
-        json: String,
+        old_json: String,
     ) -> Result<Vec<(CardView, String)>> {
-        // Use default value for ancillary data lookup
-        let cards0 = serde_json::from_str::<Vec<C>>(&json)?.into_iter();
+        let cards0 = serde_json::from_str::<Vec<C>>(&old_json)?.into_iter();
         let cards1 = serde_json::from_str::<Vec<C>>(&self.json)?;
+        // Use default value for ancillary data lookup
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
         let mut values = Vec::new();
         let mut views = self.views.iter();
@@ -903,7 +955,6 @@ impl CardList {
                 values.push((cv, html));
             }
         }
-        self.states_main = item_states_main(&cards1, &anc);
         Ok(values)
     }
 }
@@ -925,24 +976,6 @@ async fn fetch_ancillary<C: Card>(pri: &C, view: View) -> Result<C::Ancillary> {
         }
     }
     Ok(anc)
-}
-
-/// Build item states JSON object
-fn item_states_main<C: Card>(cards: &[C], anc: &C::Ancillary) -> String {
-    let mut states = String::new();
-    states.push('{');
-    for pri in cards {
-        if states.len() > 1 {
-            states.push(',');
-        }
-        states.push('"');
-        states.push_str(&pri.name());
-        states.push_str("\":\"");
-        states.push_str(pri.item_state_main(anc).code());
-        states.push('"');
-    }
-    states.push('}');
-    states
 }
 
 /// Fetch a card for a given view
