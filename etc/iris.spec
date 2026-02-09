@@ -132,7 +132,6 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 %attr(0444,tms,tms) /var/lib/iris/tfon/*.tfon
 %dir %attr(0775,tms,tms) /var/lib/iris/traffic
 %dir %attr(0775,tms,tms) /var/lib/iris/web
-%attr(0444,tms,tms) /var/lib/iris/web/index.html
 
 # /var/log/iris
 %dir %attr(3775,tms,tms) /var/log/iris
