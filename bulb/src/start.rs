@@ -535,13 +535,12 @@ async fn handle_button_card(attrs: ButtonAttrs) {
 /// Replace a card view element with another view
 async fn replace_card(cv: CardView) -> Result<()> {
     let html = card::fetch_one(&cv).await?;
-    replace_card_html(&cv, &html);
-    app::set_view(cv);
+    replace_card_html(cv, &html);
     Ok(())
 }
 
 /// Replace a card with provided HTML
-fn replace_card_html(cv: &CardView, html: &str) {
+fn replace_card_html(cv: CardView, html: &str) {
     let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id()) else {
         console::log_1(
             &format!("replace_card_html: {} not found", cv.id()).into(),
@@ -556,6 +555,7 @@ fn replace_card_html(cv: &CardView, html: &str) {
         opt.set_block(ScrollLogicalPosition::Nearest);
         elem.scroll_into_view_with_scroll_into_view_options(&opt);
     }
+    app::set_view(cv);
 }
 
 /// Handle delete button click
@@ -617,7 +617,6 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     }
     let cv = CardView::new(res, &name, view);
     replace_card(cv).await?;
-    js_fly_enable(JsValue::TRUE);
     Ok(())
 }
 
@@ -771,10 +770,9 @@ async fn select_card_map(name: String) -> Result<()> {
         let id = format!("{res}_{name}");
         js_fly_enable(JsValue::FALSE);
         click_card(res, name, id).await?;
-        search_card_list().await
-    } else {
-        Ok(())
+        js_fly_enable(JsValue::TRUE);
     }
+    Ok(())
 }
 
 /// Add event source listener for notifications
@@ -835,7 +833,6 @@ async fn handle_notify(payload: String) -> Result<()> {
         let mut cards = CardList::new(res);
         let json = cards.fetch_all().await?;
         cards.swap_json(json);
-        // FIXME: this also GETs unnecessary associated controllers...
         let _html = cards.make_html().await?;
         let items = cards.states_main().await?;
         let json = item_states_json(&items);
@@ -872,9 +869,9 @@ async fn update_card_list() -> Result<()> {
     let old_json = cards.swap_json(String::new());
     app::card_list(Some(cards));
     fetch_card_list().await?;
-    let mut cards = app::card_list(None).unwrap();
+    let cards = app::card_list(None).unwrap();
     for (cv, html) in cards.changed_vec(old_json).await? {
-        replace_card_html(&cv, &html);
+        replace_card_html(cv, &html);
     }
     let items = cards.states_main().await?;
     let json = item_states_json(&items);

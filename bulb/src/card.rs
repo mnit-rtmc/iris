@@ -889,7 +889,7 @@ impl CardList {
 
     /// Get a Vec of changed cards
     pub async fn changed_vec(
-        &mut self,
+        &self,
         json: String,
     ) -> Result<Vec<(CardView, String)>> {
         match self.res {
@@ -924,7 +924,7 @@ impl CardList {
 
     /// Make a Vec of changed cards
     async fn changed<C: Card>(
-        &mut self,
+        &self,
         old_json: String,
     ) -> Result<Vec<(CardView, String)>> {
         let cards0 = serde_json::from_str::<Vec<C>>(&old_json)?.into_iter();
@@ -947,12 +947,15 @@ impl CardList {
                     Some(cv) => cv.clone(),
                     None => CardView::new(C::res(), c1.name(), View::Compact),
                 };
-                let html = if cv.view.is_form() {
-                    fetch_one(&cv).await?
+                if cv.view.is_form() {
+                    // FIXME: this messes up current message selection
+                    //
+                    // let html = fetch_one(&cv).await?;
+                    // values.push((cv, html));
                 } else {
-                    c1.to_html(cv.view, &anc)
-                };
-                values.push((cv, html));
+                    let html = c1.to_html(cv.view, &anc);
+                    values.push((cv, html));
+                }
             }
         }
         Ok(values)
