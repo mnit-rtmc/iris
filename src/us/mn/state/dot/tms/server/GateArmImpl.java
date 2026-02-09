@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2025  Minnesota Department of Transportation
+ * Copyright (C) 2013-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,6 +62,18 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 				namespace.addObject(new GateArmImpl(row));
 			}
 		});
+		initAllTransients();
+	}
+
+	/** Initialize transients for all gate arms.  This needs to happen after
+	 * all gate arms are loaded (for resolving dependencies). */
+	static private void initAllTransients() throws TMSException {
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while (it.hasNext()) {
+			GateArm ga = it.next();
+			if (ga instanceof GateArmImpl)
+				((GateArmImpl) ga).initTransients();
+		}
 	}
 
 	/** Get a mapping of the columns */
@@ -123,7 +135,6 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		arm_state = GateArmState.fromOrdinal(as);
 		interlock = GateArmInterlock.fromOrdinal(lk);
 		fault = flt;
-		initTransients();
 	}
 
 	/** Initialize the gate arm */
