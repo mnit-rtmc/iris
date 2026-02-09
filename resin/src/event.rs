@@ -189,7 +189,10 @@ impl Stamp {
 
     /// Get as RFC3339 string
     pub fn rfc3339(&self) -> String {
-        self.0.timestamp().display_with_offset(self.0.offset()).to_string()
+        self.0
+            .timestamp()
+            .display_with_offset(self.0.offset())
+            .to_string()
     }
 }
 
@@ -440,10 +443,7 @@ mod test {
     fn rfc3339() {
         let ts: Zoned = "2025-12-10 10:20[America/Chicago]".parse().unwrap();
         let val = Stamp(ts).rfc3339();
-        assert_eq!(
-            val,
-            "2025-12-10T10:20:00-06:00"
-        );
+        assert_eq!(val, "2025-12-10T10:20:00-06:00");
     }
 
     #[test]

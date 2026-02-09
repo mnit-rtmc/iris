@@ -166,7 +166,7 @@ impl SseNotifier {
     fn send_channels(&mut self, id: &Id) {
         log::info!("SSE send channels {id} {}", self.channels.len());
         for nm in &self.channels.clone() {
-            self.send_event(&id, nm);
+            self.send_event(id, nm);
         }
     }
 }
@@ -572,7 +572,11 @@ fn notify_resource(honey: Honey) -> Router {
         let Ok(cred) = Credentials::load(&session).await else {
             return Err(StatusCode::UNAUTHORIZED);
         };
-        if honey.name_access(cred.user(), &nm, Access::View).await.is_err() {
+        if honey
+            .name_access(cred.user(), &nm, Access::View)
+            .await
+            .is_err()
+        {
             return Err(StatusCode::UNAUTHORIZED);
         }
         let id = session.id().unwrap_or_default();

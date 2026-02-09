@@ -240,7 +240,7 @@ dependencies = [
 
 [[package]]
 name = "bulb"
-version = "5.81.1"
+version = "5.81.2"
 dependencies = [
  "base64",
  "chrono",
@@ -780,7 +780,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "5.81.1"
+version = "5.81.2"
 dependencies = [
  "anyhow",
  "argh",
@@ -1068,7 +1068,7 @@ checksum = "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3"
 
 [[package]]
 name = "mayfly"
-version = "5.81.1"
+version = "5.81.2"
 dependencies = [
  "argh",
  "axum",
@@ -1289,7 +1289,7 @@ dependencies = [
 
 [[package]]
 name = "pollinator"
-version = "5.81.1"
+version = "5.81.2"
 dependencies = [
  "argh",
  "bb8",
@@ -1488,7 +1488,7 @@ dependencies = [
 
 [[package]]
 name = "rendzina"
-version = "5.81.1"
+version = "5.81.2"
 dependencies = [
  "fstr",
  "gift",
@@ -1502,7 +1502,7 @@ dependencies = [
 
 [[package]]
 name = "resin"
-version = "5.81.1"
+version = "5.81.2"
 dependencies = [
  "bb8",
  "bb8-postgres",
@@ -1522,7 +1522,7 @@ dependencies = [
 
 [[package]]
 name = "resources"
-version = "5.81.1"
+version = "5.81.2"
 
 [[package]]
 name = "ring"
