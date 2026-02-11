@@ -253,5 +253,6 @@ impl<'a> ItemStates<'a> {
             }
             span2.close();
         }
+        span.close();
     }
 }

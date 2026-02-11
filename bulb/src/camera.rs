@@ -146,6 +146,15 @@ impl CameraAnc {
 }
 
 impl Camera {
+    /// Search for camera number
+    fn check_number(&self, search: &str) -> bool {
+        let cam_num = opt_str(self.cam_num);
+        match search.strip_prefix('#') {
+            Some(s) => cam_num.starts_with(s),
+            None => cam_num.contains(search),
+        }
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
         let mut page = Page::new();
@@ -153,11 +162,10 @@ impl Camera {
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
-            .cdata(anc.cio.item_states(self).to_string())
-            .close();
-        div = page.frag::<html::Div>();
-        div.class("info fill")
-            .cdata_len(opt_ref(&self.location), 32);
+            .cdata(anc.cio.item_states(self).to_string());
+        if let Some(num) = self.cam_num {
+            div.cdata(format!(" #{num}"));
+        }
         String::from(page)
     }
 
@@ -171,6 +179,9 @@ impl Camera {
         let mut div = page.frag::<html::Div>();
         div.class("row");
         anc.cio.item_states(self).tooltips(&mut div.span());
+        if let Some(num) = self.cam_num {
+            div.span().cdata(format!("#{num}")).close();
+        }
         div.close();
         div = page.frag::<html::Div>();
         div.class("row");
@@ -367,6 +378,7 @@ impl Card for Camera {
             || self.location.contains_lower(search)
             || self.notes.contains_lower(search)
             || anc.cio.item_states(self).is_match(search)
+            || self.check_number(search)
     }
 
     /// Convert to HTML view
