@@ -31,6 +31,15 @@ pub struct VideoMonitor {
 type VideoMonitorAnc = ControllerIoAnc<VideoMonitor>;
 
 impl VideoMonitor {
+    /// Search for monitor number
+    fn check_number(&self, search: &str) -> bool {
+        let mon_num = self.mon_num.to_string();
+        match search.strip_prefix('#') {
+            Some(s) => mon_num.starts_with(s),
+            None => mon_num.contains(search),
+        }
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
         let mut page = Page::new();
@@ -38,20 +47,19 @@ impl VideoMonitor {
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
-            .cdata(anc.item_states(self).to_string())
-            .close();
-        div = page.frag::<html::Div>();
-        div.class("info fill").cdata(self.mon_num);
+            .cdata(anc.item_states(self).to_string());
+        div.span().class("info").cdata(format!("#{}", self.mon_num));
         String::from(page)
     }
 
     /// Convert to Status HTML
-    fn to_html_status(&self) -> String {
+    fn to_html_status(&self, anc: &VideoMonitorAnc) -> String {
         let mut page = Page::new();
         self.title(View::Status, &mut page.frag::<html::Div>());
         let mut div = page.frag::<html::Div>();
         div.class("row");
-        div.span().class("info").cdata(self.mon_num);
+        anc.item_states(self).tooltips(&mut div.span());
+        div.span().class("info").cdata(format!("#{}", self.mon_num));
         String::from(page)
     }
 
@@ -98,15 +106,15 @@ impl Card for VideoMonitor {
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &VideoMonitorAnc) -> bool {
         self.name.contains_lower(search)
-            || self.mon_num.to_string().contains(search)
             || anc.item_states(self).is_match(search)
+            || self.check_number(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &VideoMonitorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(),
+            View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }

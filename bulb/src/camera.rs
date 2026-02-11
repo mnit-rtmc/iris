@@ -164,7 +164,7 @@ impl Camera {
             .cdata(" ")
             .cdata(anc.cio.item_states(self).to_string());
         if let Some(num) = self.cam_num {
-            div.cdata(format!(" #{num}"));
+            div.span().class("info").cdata(format!("#{num}"));
         }
         String::from(page)
     }
@@ -180,7 +180,7 @@ impl Camera {
         div.class("row");
         anc.cio.item_states(self).tooltips(&mut div.span());
         if let Some(num) = self.cam_num {
-            div.span().cdata(format!("#{num}")).close();
+            div.span().class("info").cdata(format!("#{num}"));
         }
         div.close();
         div = page.frag::<html::Div>();
