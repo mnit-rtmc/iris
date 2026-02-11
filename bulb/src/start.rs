@@ -111,7 +111,6 @@ async fn add_sidebar() -> JsResult<()> {
     let doc = Doc(doc);
     let sidebar: HtmlElement = doc.elem("sidebar");
     sidebar.set_inner_html(&sidebar_html());
-    add_fullscreenchange_listener(&sidebar)?;
     add_change_listener(&sidebar)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
@@ -122,6 +121,9 @@ async fn add_sidebar() -> JsResult<()> {
     add_eventsource_listener();
     do_future(finish_init()).await;
     fetch_station_sample();
+    if let Some(doc_elem) = doc.doc_elem() {
+        add_fullscreenchange_listener(&doc_elem)?;
+    }
     Ok(())
 }
 
@@ -135,12 +137,14 @@ fn sidebar_html() -> String {
     div.input()
         .id("sb_config")
         .r#type("checkbox")
-        .class("toggle");
+        .class("toggle")
+        .aria_label("Configuration");
     div.label().r#for("sb_config").cdata("🧰").close();
     div.input()
         .id("sb_fullscreen")
         .r#type("checkbox")
-        .class("toggle");
+        .class("toggle")
+        .aria_label("Toggle fullscreen");
     div.label().r#for("sb_fullscreen").cdata(" ⛶ ").close();
     div.close();
     div = page.frag::<html::Div>();
@@ -148,9 +152,10 @@ fn sidebar_html() -> String {
     div.input()
         .id("sb_search")
         .r#type("search")
+        .aria_label("Search")
         .size(16)
         .placeholder("🔍");
-    div.select().id("sb_state").close();
+    div.select().id("sb_state").aria_label("State").close();
     div.button().id("sb_refresh").r#type("button").cdata("⭮ ⚪");
     div.close();
     div = page.frag::<html::Div>();
@@ -238,7 +243,7 @@ fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
         btn.set_checked(doc.is_fullscreen());
     });
     elem.add_event_listener_with_callback(
-        "change",
+        "fullscreenchange",
         closure.as_ref().unchecked_ref(),
     )?;
     // can't drop closure, just forget it to make JS happy
@@ -253,7 +258,7 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
         let id = target.id();
         match id.as_str() {
             "sb_config" => spawn_local(reload_resources()),
-            "sb_fullscreen" => Doc::get().toggle_fullscreen(),
+            "sb_fullscreen" => set_fullscreen(),
             _ => (),
         }
     });
@@ -264,6 +269,14 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
+}
+
+/// Set fullscreen mode
+fn set_fullscreen() {
+    let doc = Doc::get();
+    let btn = doc.elem::<HtmlInputElement>("sb_fullscreen");
+    let checked = btn.checked();
+    doc.request_fullscreen(checked);
 }
 
 /// Reload resource select element

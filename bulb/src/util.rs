@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ use std::fmt;
 use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::{
-    Document, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
+    Document, Element, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
 };
 
 /// Check for items containing a search string (lower case)
@@ -145,6 +145,11 @@ impl Doc {
         Doc(doc)
     }
 
+    /// Get the document element
+    pub fn doc_elem(&self) -> Option<Element> {
+        self.0.document_element()
+    }
+
     /// Try to get an element by ID and cast it
     pub fn try_elem<E: JsCast>(&self, id: &str) -> Option<E> {
         Some(
@@ -208,16 +213,16 @@ impl Doc {
         self.0.fullscreen_element().is_some()
     }
 
-    /// Request the document to toggle full screen
-    pub fn toggle_fullscreen(&self) {
-        if self.is_fullscreen() {
-            self.0.exit_fullscreen();
-        } else {
+    /// Request full screen mode
+    pub fn request_fullscreen(&self, yes: bool) {
+        if yes {
             self.0
                 .document_element()
                 .unwrap_throw()
                 .request_fullscreen()
                 .unwrap_throw();
+        } else {
+            self.0.exit_fullscreen();
         }
     }
 }
