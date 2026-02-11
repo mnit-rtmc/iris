@@ -388,7 +388,7 @@ pub fn item_states_html(res: Res) -> String {
     for st in item_states_all(res) {
         let mut option = page.frag::<html::Option>();
         option.value(st.code());
-        if *st == ItemState::Deployed {
+        if Some(*st) == default_state(res) {
             option.selected();
         }
         option
@@ -398,6 +398,17 @@ pub fn item_states_html(res: Res) -> String {
             .close();
     }
     String::from(page)
+}
+
+/// Get the default item state for a resource
+fn default_state(res: Res) -> Option<ItemState> {
+    if item_states_all(res).contains(&ItemState::Deployed) {
+        Some(ItemState::Deployed)
+    } else if item_states_all(res).contains(&ItemState::Available) {
+        Some(ItemState::Available)
+    } else {
+        None
+    }
 }
 
 /// Get slice of all item states for a resource
