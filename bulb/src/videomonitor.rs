@@ -10,22 +10,26 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::app;
 use crate::card::{Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::util::{ContainsLower, Fields, Input};
+use crate::util::{ContainsLower, Doc, Fields, Input, opt_ref};
 use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
+use web_sys::HtmlElement;
 
 /// Video Monitor
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct VideoMonitor {
     pub name: String,
     pub mon_num: u32,
+    pub notes: Option<String>,
     pub controller: Option<String>,
     // secondary attributes
     pub pin: Option<u32>,
+    pub restricted: Option<bool>,
 }
 
 type VideoMonitorAnc = ControllerIoAnc<VideoMonitor>;
@@ -38,6 +42,18 @@ impl VideoMonitor {
             Some(s) => mon_num.starts_with(s),
             None => mon_num.contains(search),
         }
+    }
+
+    /// Set this card as the selected video monitor
+    fn set_selected(&self) {
+        // FIXME: check role for monitor operate permission
+        app::set_mon_num(Some(self.mon_num));
+        let mon_num = match app::mon_num() {
+            Some(num) => format!("📺 #{num} "),
+            None => "📺".to_string(),
+        };
+        let t = Doc::get().elem::<HtmlElement>("sb_monitor");
+        t.set_inner_html(&mon_num);
     }
 
     /// Convert to Compact HTML
@@ -54,6 +70,7 @@ impl VideoMonitor {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &VideoMonitorAnc) -> String {
+        self.set_selected();
         let mut page = Page::new();
         self.title(View::Status, &mut page.frag::<html::Div>());
         let mut div = page.frag::<html::Div>();
@@ -67,6 +84,37 @@ impl VideoMonitor {
     fn to_html_setup(&self, anc: &VideoMonitorAnc) -> String {
         let mut page = Page::new();
         self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("mon_num").cdata("Mon Num").close();
+        div.input()
+            .id("mon_num")
+            .r#type("number")
+            .min(0)
+            .max(9999)
+            .size(8)
+            .value(self.mon_num);
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
+            .id("notes")
+            .maxlength(255)
+            .rows(4)
+            .cols(24)
+            .cdata(opt_ref(&self.notes))
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("restricted").cdata("Restricted").close();
+        let mut input = div.input();
+        input.id("restricted").r#type("checkbox");
+        if self.restricted == Some(true) {
+            input.checked();
+        }
+        div.close();
         anc.controller_html(self, &mut page.frag::<html::Div>());
         anc.pin_html(self.pin, &mut page.frag::<html::Div>());
         self.footer_html(true, &mut page.frag::<html::Div>());

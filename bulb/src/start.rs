@@ -140,6 +140,7 @@ fn sidebar_html() -> String {
         .class("toggle")
         .aria_label("Configuration");
     div.label().r#for("sb_config").cdata("🧰").close();
+    div.label().id("sb_monitor").cdata("📺").close();
     div.input()
         .id("sb_fullscreen")
         .r#type("checkbox")

@@ -164,6 +164,12 @@ label:has(+ #sb_resource) {
 #sb_resource {
   margin-left: 0.1rem;
 }
+#sb_monitor {
+  color: black;
+  background-color: #888;
+  align-content: center;
+  border-radius: 0.5rem;
+}
 #sb_search {
   margin-left: 0;
 }

@@ -52,7 +52,7 @@ a [switching](#switching) system.
 | 👁️  View      | name                        |                            |
 | 👉 Operate   |                             | camera, device\_request †  |                    |
 | 💡 Manage    |                             | restricted, monitor\_style |
-| 🔧 Configure | mon\_num, controller, notes | pin                        |
+| 🔧 Configure | mon\_num, notes, controller | pin                        |
 
 † _Write only_
 

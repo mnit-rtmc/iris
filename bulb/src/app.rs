@@ -103,6 +103,8 @@ struct AppState {
     res_names: HashMap<String, Res>,
     /// Card list
     cards: Option<CardList>,
+    /// Selected video monitor number
+    mon_num: Option<u32>,
 }
 
 thread_local! {
@@ -226,4 +228,14 @@ pub fn next_action() -> Option<DeferredAction> {
         }
         None
     })
+}
+
+/// Set video monitor number in global app state
+pub fn set_mon_num(num: Option<u32>) {
+    STATE.with(|rc| rc.borrow_mut().mon_num = num);
+}
+
+/// Get video monitor number from global app state
+pub fn mon_num() -> Option<u32> {
+    STATE.with(|rc| rc.borrow().mon_num)
 }
