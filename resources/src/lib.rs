@@ -1,6 +1,6 @@
 // lib.rs
 //
-// Copyright (C) 2024-2025  Minnesota Department of Transportation
+// Copyright (C) 2024-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -318,7 +318,7 @@ impl Res {
             Lcs => "🠟✖🠟",
             LcsState => "🠟",
             Modem => "🖀 ",
-            MonitorStyle => "FIXME",
+            MonitorStyle => "🖵 ",
             Permission => "🗝️ ",
             PlanPhase => "🪜",
             PlayList => "FIXME",

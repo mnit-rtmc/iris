@@ -33,6 +33,7 @@ use crate::item::ItemState;
 use crate::lcs::Lcs;
 use crate::lcsstate::LcsState;
 use crate::modem::Modem;
+use crate::monitorstyle::MonitorStyle;
 use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
 use crate::role::Role;
@@ -452,6 +453,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::Gps
         | Res::LcsState
         | Res::Modem
+        | Res::MonitorStyle
         | Res::Permission
         | Res::Role
         | Res::SignConfig
@@ -570,6 +572,9 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
         add_option::<User>(&access, &mut page);
     }
     add_option::<VideoMonitor>(&access, &mut page);
+    if config {
+        add_option::<MonitorStyle>(&access, &mut page);
+    }
     add_option::<WeatherSensor>(&access, &mut page);
     Ok(String::from(page))
 }
@@ -689,6 +694,7 @@ impl CardList {
             Res::Lcs => self.states_main_x::<Lcs>().await,
             Res::LcsState => self.states_main_x::<LcsState>().await,
             Res::Modem => self.states_main_x::<Modem>().await,
+            Res::MonitorStyle => self.states_main_x::<MonitorStyle>().await,
             Res::Permission => self.states_main_x::<Permission>().await,
             Res::RampMeter => self.states_main_x::<RampMeter>().await,
             Res::Role => self.states_main_x::<Role>().await,
@@ -761,6 +767,7 @@ impl CardList {
             Res::Lcs => self.make_html_x::<Lcs>().await,
             Res::LcsState => self.make_html_x::<LcsState>().await,
             Res::Modem => self.make_html_x::<Modem>().await,
+            Res::MonitorStyle => self.make_html_x::<MonitorStyle>().await,
             Res::Permission => self.make_html_x::<Permission>().await,
             Res::RampMeter => self.make_html_x::<RampMeter>().await,
             Res::Role => self.make_html_x::<Role>().await,
@@ -855,6 +862,7 @@ impl CardList {
             Res::Lcs => self.view_change_x::<Lcs>().await,
             Res::LcsState => self.view_change_x::<LcsState>().await,
             Res::Modem => self.view_change_x::<Modem>().await,
+            Res::MonitorStyle => self.view_change_x::<MonitorStyle>().await,
             Res::Permission => self.view_change_x::<Permission>().await,
             Res::RampMeter => self.view_change_x::<RampMeter>().await,
             Res::Role => self.view_change_x::<Role>().await,
@@ -927,6 +935,7 @@ impl CardList {
             Res::Lcs => self.changed::<Lcs>(json).await,
             Res::LcsState => self.changed::<LcsState>(json).await,
             Res::Modem => self.changed::<Modem>(json).await,
+            Res::MonitorStyle => self.changed::<MonitorStyle>(json).await,
             Res::Permission => self.changed::<Permission>(json).await,
             Res::RampMeter => self.changed::<RampMeter>(json).await,
             Res::Role => self.changed::<Role>(json).await,
@@ -1036,6 +1045,7 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::Lcs => fetch_one_x::<Lcs>(cv).await,
         Res::LcsState => fetch_one_x::<LcsState>(cv).await,
         Res::Modem => fetch_one_x::<Modem>(cv).await,
+        Res::MonitorStyle => fetch_one_x::<MonitorStyle>(cv).await,
         Res::Permission => fetch_one_x::<Permission>(cv).await,
         Res::RampMeter => fetch_one_x::<RampMeter>(cv).await,
         Res::Role => fetch_one_x::<Role>(cv).await,
@@ -1096,6 +1106,7 @@ async fn patch_setup(cv: &CardView) -> Result<()> {
         Res::Lcs => patch_setup_x::<Lcs>(cv).await,
         Res::LcsState => patch_setup_x::<LcsState>(cv).await,
         Res::Modem => patch_setup_x::<Modem>(cv).await,
+        Res::MonitorStyle => patch_setup_x::<MonitorStyle>(cv).await,
         Res::Permission => patch_setup_x::<Permission>(cv).await,
         Res::RampMeter => patch_setup_x::<RampMeter>(cv).await,
         Res::Role => patch_setup_x::<Role>(cv).await,

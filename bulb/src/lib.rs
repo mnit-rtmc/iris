@@ -40,6 +40,7 @@ mod lcs;
 mod lcsstate;
 mod lock;
 mod modem;
+mod monitorstyle;
 mod notes;
 mod permission;
 mod rampmeter;

@@ -16,8 +16,11 @@ use crate::card::{AncillaryData, Card, View};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
+use crate::monitorstyle::MonitorStyle;
 use crate::permission::Permission;
-use crate::util::{ContainsLower, Doc, Fields, Input, opt_ref};
+use crate::util::{
+    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
+};
 use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
@@ -35,6 +38,8 @@ pub struct VideoMonitor {
     // secondary attributes
     pub pin: Option<u32>,
     pub restricted: Option<bool>,
+    pub monitor_style: Option<String>,
+    pub camera: Option<String>,
 }
 
 /// Video monitor ancillary data
@@ -42,6 +47,7 @@ pub struct VideoMonitor {
 pub struct VideoMonitorAnc {
     cio: ControllerIoAnc<VideoMonitor>,
     access: Vec<Permission>,
+    monitor_styles: Vec<MonitorStyle>,
 }
 
 impl AncillaryData for VideoMonitorAnc {
@@ -51,9 +57,13 @@ impl AncillaryData for VideoMonitorAnc {
     fn new(pri: &VideoMonitor, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
         cio.assets.push(Asset::Access);
+        if view == View::Setup {
+            cio.assets.push(Asset::MonitorStyles);
+        }
         VideoMonitorAnc {
             cio,
             access: Vec::new(),
+            monitor_styles: Vec::new(),
         }
     }
 
@@ -74,6 +84,10 @@ impl AncillaryData for VideoMonitorAnc {
                 self.access = serde_wasm_bindgen::from_value(value)?;
                 Ok(())
             }
+            Asset::MonitorStyles => {
+                self.monitor_styles = serde_wasm_bindgen::from_value(value)?;
+                Ok(())
+            }
             _ => self.cio.set_asset(pri, asset, value),
         }
     }
@@ -89,6 +103,26 @@ impl VideoMonitorAnc {
             }
         }
         access_level
+    }
+
+    /// Build monitor styles HTML
+    fn monitor_styles_html<'p>(
+        &self,
+        pri: &VideoMonitor,
+        select: &'p mut html::Select<'p>,
+    ) {
+        select.id("monitor_style");
+        select.option().close(); /* empty */
+        for mon_style in &self.monitor_styles {
+            let mut option = select.option();
+            if let Some(sty) = &pri.monitor_style
+                && sty == &mon_style.name
+            {
+                option.selected();
+            }
+            option.cdata(&mon_style.name).close();
+        }
+        select.close();
     }
 }
 
@@ -178,12 +212,23 @@ impl VideoMonitor {
         div.close();
         div = page.frag::<html::Div>();
         div.class("row");
-        div.label().r#for("restricted").cdata("Restricted").close();
+        div.label()
+            .r#for("restricted")
+            .cdata("Restricted (published only)")
+            .close();
         let mut input = div.input();
         input.id("restricted").r#type("checkbox");
         if self.restricted == Some(true) {
             input.checked();
         }
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("monitor_style")
+            .cdata("Monitor Style")
+            .close();
+        anc.monitor_styles_html(self, &mut div.select());
         div.close();
         anc.cio.controller_html(self, &mut page.frag::<html::Div>());
         anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
@@ -250,6 +295,10 @@ impl Card for VideoMonitor {
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
+        fields.changed_input("mon_num", self.mon_num);
+        fields.changed_text_area("notes", &self.notes);
+        fields.changed_input("restricted", self.restricted);
+        fields.changed_select("monitor_style", &self.monitor_style);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
