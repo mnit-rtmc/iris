@@ -14,6 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
 use crate::error::{Error, Result};
 use crate::item::ItemState;
+use crate::notes::contains_hashtag;
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, Input, Select, opt_ref};
 use hatmil::{Page, html};
@@ -162,6 +163,15 @@ fn access_level_html<'p>(selected: u32, select: &'p mut html::Select<'p>) {
 }
 
 impl Permission {
+    /// Check access for a resource with notes containing hashtags
+    pub fn check_access(&self, res: Res, notes: Option<&str>) -> bool {
+        res.base().as_str() == self.base_resource
+            && self
+                .hashtag
+                .as_deref()
+                .is_none_or(|ht| notes.is_some_and(|n| contains_hashtag(n, ht)))
+    }
+
     /// Get value to create a new object
     pub fn create_value(doc: &Doc) -> Result<String> {
         let name = doc

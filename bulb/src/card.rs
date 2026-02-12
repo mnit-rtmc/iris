@@ -531,63 +531,68 @@ pub async fn fetch_resource(config: bool) -> Result<String> {
     let mut page = Page::new();
     let mut option = page.frag::<html::Option>();
     option.close();
-    add_option::<ActionPlan>(&access, &mut page.frag::<html::Option>());
+    add_option::<ActionPlan>(&access, &mut page);
     if config {
-        add_option::<Alarm>(&access, &mut page.frag::<html::Option>());
+        add_option::<Alarm>(&access, &mut page);
     }
-    add_option::<Beacon>(&access, &mut page.frag::<html::Option>());
+    add_option::<Beacon>(&access, &mut page);
     if config {
-        add_option::<CabinetStyle>(&access, &mut page.frag::<html::Option>());
+        add_option::<CabinetStyle>(&access, &mut page);
     }
-    add_option::<Camera>(&access, &mut page.frag::<html::Option>());
+    add_option::<Camera>(&access, &mut page);
     if config {
-        add_option::<CommConfig>(&access, &mut page.frag::<html::Option>());
-        add_option::<CommLink>(&access, &mut page.frag::<html::Option>());
-        add_option::<Controller>(&access, &mut page.frag::<html::Option>());
-        add_option::<Detector>(&access, &mut page.frag::<html::Option>());
+        add_option::<CommConfig>(&access, &mut page);
+        add_option::<CommLink>(&access, &mut page);
+        add_option::<Controller>(&access, &mut page);
+        add_option::<Detector>(&access, &mut page);
     }
-    add_option::<Dms>(&access, &mut page.frag::<html::Option>());
+    add_option::<Dms>(&access, &mut page);
     if config {
-        add_option::<Domain>(&access, &mut page.frag::<html::Option>());
-        add_option::<FlowStream>(&access, &mut page.frag::<html::Option>());
+        add_option::<Domain>(&access, &mut page);
+        add_option::<FlowStream>(&access, &mut page);
     }
-    add_option::<GateArm>(&access, &mut page.frag::<html::Option>());
+    add_option::<GateArm>(&access, &mut page);
     if config {
-        add_option::<Gps>(&access, &mut page.frag::<html::Option>());
+        add_option::<Gps>(&access, &mut page);
     }
-    add_option::<Incident>(&access, &mut page.frag::<html::Option>());
-    add_option::<Lcs>(&access, &mut page.frag::<html::Option>());
+    add_option::<Incident>(&access, &mut page);
+    add_option::<Lcs>(&access, &mut page);
     if config {
-        add_option::<LcsState>(&access, &mut page.frag::<html::Option>());
-        add_option::<Modem>(&access, &mut page.frag::<html::Option>());
-        add_option::<Permission>(&access, &mut page.frag::<html::Option>());
+        add_option::<LcsState>(&access, &mut page);
+        add_option::<Modem>(&access, &mut page);
+        add_option::<Permission>(&access, &mut page);
     }
-    add_option::<RampMeter>(&access, &mut page.frag::<html::Option>());
+    add_option::<RampMeter>(&access, &mut page);
     if config {
-        add_option::<Role>(&access, &mut page.frag::<html::Option>());
-        add_option::<SignConfig>(&access, &mut page.frag::<html::Option>());
-        add_option::<TagReader>(&access, &mut page.frag::<html::Option>());
-        add_option::<User>(&access, &mut page.frag::<html::Option>());
+        add_option::<Role>(&access, &mut page);
+        add_option::<SignConfig>(&access, &mut page);
+        add_option::<TagReader>(&access, &mut page);
+        add_option::<User>(&access, &mut page);
     }
-    add_option::<VideoMonitor>(&access, &mut page.frag::<html::Option>());
-    add_option::<WeatherSensor>(&access, &mut page.frag::<html::Option>());
+    add_option::<VideoMonitor>(&access, &mut page);
+    add_option::<WeatherSensor>(&access, &mut page);
     Ok(String::from(page))
 }
 
 /// Add option to access select
-fn add_option<'p, C: Card>(
-    access: &[Permission],
-    option: &'p mut html::Option<'p>,
-) {
+fn add_option<C: Card>(access: &[Permission], page: &mut Page) {
+    if has_view_access::<C>(access) {
+        let mut option = page.frag::<html::Option>();
+        option.value(C::res().as_str()).cdata(C::DNAME).close();
+    }
+}
+
+/// Check for view access to a resource type
+fn has_view_access<C: Card>(access: &[Permission]) -> bool {
     for perm in access {
         if perm.hashtag.is_none() {
             let res = C::res();
             if perm.base_resource == res.base().as_str() {
-                option.value(res.as_str()).cdata(C::DNAME).close();
-                return;
+                return true;
             }
         }
     }
+    false
 }
 
 /// Card list for one resource type

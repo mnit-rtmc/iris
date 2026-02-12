@@ -18,6 +18,7 @@ use wasm_bindgen::JsValue;
 /// Fetchable assets for ancillary card data
 #[derive(Clone, Debug, PartialEq)]
 pub enum Asset {
+    Access,
     ActionPlans,
     BeaconStates,
     CabinetStyles,
@@ -63,6 +64,7 @@ impl Asset {
     fn uri(&self) -> Uri {
         use Asset::*;
         match self {
+            Access => "/iris/api/access".into(),
             ActionPlans => "/iris/api/action_plan".into(),
             BeaconStates => "/iris/lut/beacon_state".into(),
             CabinetStyles => "/iris/api/cabinet_style".into(),

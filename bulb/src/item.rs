@@ -22,6 +22,8 @@ pub enum ItemState {
     Deployed,
     /// Deployed by plan / schedule
     Planned,
+    /// Prohibited from use
+    Prohibited,
     /// Deployed for incident
     Incident,
     /// Locked by operator
@@ -91,6 +93,7 @@ impl ItemState {
             "🔹" => Some(Self::Available),
             "🔶" => Some(Self::Deployed),
             "📋" => Some(Self::Planned),
+            "🚫" => Some(Self::Prohibited),
             "🚨" => Some(Self::Incident),
             "🔒" => Some(Self::Locked),
             "👽" => Some(Self::External),
@@ -125,6 +128,7 @@ impl ItemState {
             Self::Available => "🔹",
             Self::Deployed => "🔶",
             Self::Planned => "📋",
+            Self::Prohibited => "🚫",
             Self::Incident => "🚨",
             Self::Locked => "🔒",
             Self::External => "👽",
@@ -158,6 +162,7 @@ impl ItemState {
             Self::Available => "available",
             Self::Deployed => "deployed",
             Self::Planned => "planned",
+            Self::Prohibited => "prohibited",
             Self::Incident => "incident",
             Self::Locked => "locked",
             Self::External => "external",
@@ -220,6 +225,11 @@ impl<'a> ItemStates<'a> {
             self.all.push((state, dtl));
         }
         self
+    }
+
+    /// Remove an item state
+    pub fn remove(&mut self, state: ItemState) {
+        self.all.retain(|(s, _dtl)| *s != state);
     }
 
     /// Check if states contains an item state
