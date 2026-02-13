@@ -28,7 +28,94 @@
   <body>
     <div class="root">
       <div id="mapid"></div>
-      <div id="sidebar"></div>
+      <div id="sidebar">
+        <div class="sb_row">
+          <label for="sb_resource">Resource</label>
+          <select id="sb_resource"></select>
+          <label id="sb_monitor">📺 </label>
+          <input id="sb_fullscreen" class="toggle" type="checkbox" aria-label="Toggle fullscreen">
+          <label for="sb_fullscreen"> ⛶ </label>
+        </div>
+        <div id="res_dms_row" class="no-display">
+          <input id="res_dms" class="toggle" type="radio" name="res_dms" checked>
+          <label for="res_dms">⬛ Dms</label>
+          <input id="res_sign_config" class="toggle" type="radio" name="res_dms">
+          <label for="res_sign_config">📐 Config</label>
+        </div>
+        <div id="res_lcs_row" class="no-display">
+          <input id="res_lcs" class="toggle" type="radio" name="res_lcs" checked>
+          <label for="res_lcs">🠟✖🠟 LCS</label>
+          <input id="res_lcs_state" class="toggle" type="radio" name="res_lcs">
+          <label for="res_lcs_state">🠟 State</label>
+        </div>
+        <div id="res_video_monitor_row" class="no-display">
+          <input id="res_video_monitor" class="toggle" type="radio" name="res_video" checked>
+          <label for="res_video_monitor">📺 Monitor</label>
+          <input id="res_monitor_style" class="toggle" type="radio" name="res_video">
+          <label for="res_monitor_style">🖵 Style</label>
+          <input id="res_flow_stream" class="toggle" type="radio" name="res_video">
+          <label for="res_flow_stream">🎞️ Stream</label>
+        </div>
+        <div id="res_controller_row" class="no-display">
+          <input id="res_controller" class="toggle" type="radio" name="res_cont" checked>
+          <label for="res_controller">🎛️ Controller</label>
+          <input id="res_comm_link" class="toggle" type="radio" name="res_cont">
+          <label for="res_comm_link">🔗 Link</label>
+          <input id="res_alarm" class="toggle" type="radio" name="res_cont">
+          <label for="res_alarm">📢 Alarm</label>
+          <input id="res_gps" class="toggle" type="radio" name="res_cont">
+          <label for="res_gps">🌐 GPS</label>
+          <input id="res_modem" class="toggle" type="radio" name="res_cont">
+          <label for="res_modem">🖀 Modem</label>
+        </div>
+        <div id="res_system_row" class="no-display">
+<!--      <input id="res_system_attr" class="toggle" type="radio" name="res_system" checked>
+          <label for="res_system_attr">📃 Attribute</label> -->
+          <input id="res_comm_config" class="toggle" type="radio" name="res_system">
+          <label for="res_comm_config">📡 Comm Config</label>
+          <input id="res_cabinet_style" class="toggle" type="radio" name="res_system">
+          <label for="res_cabinet_style">🗄️ Cabinet Style</label>
+        </div>
+        <div id="res_permission_row" class="no-display">
+          <input id="res_permission" class="toggle" type="radio" name="res_perm" checked>
+          <label for="res_permission">🗝️ Permission</label>
+          <input id="res_user" class="toggle" type="radio" name="res_perm">
+          <label for="res_user">👤 User</label>
+          <input id="res_role" class="toggle" type="radio" name="res_perm">
+          <label for="res_role">💪 Role</label>
+          <input id="res_domain" class="toggle" type="radio" name="res_perm">
+          <label for="res_domain">🖧 Domain</label>
+        </div>
+        <div class="sb_row">
+          <input id="sb_search" type="search" placeholder="🔍" size="16">
+          <select id="sb_state" aria-label="State"></select>
+          <button id="sb_refresh" type="button">⭮ ⚪</button>
+        </div>
+        <div id="sb_list"></div>
+        <div id="sb_toast"></div>
+        <div id="sb_login" class="hide">
+          <div class="form">
+            <div class="row center">
+              <img src="bulb/iris.svg">
+            </div>
+            <div class="row end">
+              <span>IRIS authentication required</span>
+            </div>
+            <div class="row end">
+              <label for="login_user">User name</label>
+              <input id="login_user" type="text" name="username" autocomplete="username" required>
+            </div>
+            <div class="row end">
+              <label for="login_pass">Password</label>
+              <input id="login_pass" type="password" name="password" autocomplete="current-password" required>
+            </div>
+            <div class="row end">
+              <button id="ob_login" type="button">Login</button>
+            </div>
+          </div>
+          <div id="sb_shade"></div>
+        </div>
+      </div>
     </div>
   </body>
 </html>

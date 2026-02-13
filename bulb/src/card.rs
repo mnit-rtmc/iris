@@ -93,7 +93,7 @@ impl View {
     /// Get view class name
     pub const fn class_name(self) -> &'static str {
         match self {
-            View::Hidden | View::Search => "card-hidden",
+            View::Hidden | View::Search => "no-display",
             View::CreateCompact | View::Compact => "card-compact",
             _ => "card-form",
         }
@@ -224,6 +224,14 @@ impl Search {
             Search::Exact(se.trim_matches('"').to_string())
         } else {
             Search::Normal(se)
+        }
+    }
+
+    /// Check if item state all
+    fn is_all(&self) -> bool {
+        match self {
+            Search::Empty() => true,
+            _ => false,
         }
     }
 
@@ -527,55 +535,30 @@ pub async fn delete_one(cv: &CardView) -> Result<()> {
 }
 
 /// Fetch `sb_resource` access list
-pub async fn fetch_resource(config: bool) -> Result<String> {
+pub async fn fetch_resource() -> Result<String> {
     let json = Uri::from("/iris/api/access").get().await?;
     let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
     let mut page = Page::new();
     let mut option = page.frag::<html::Option>();
     option.close();
     add_option::<ActionPlan>(&access, &mut page);
-    if config {
-        add_option::<Alarm>(&access, &mut page);
-    }
     add_option::<Beacon>(&access, &mut page);
-    if config {
-        add_option::<CabinetStyle>(&access, &mut page);
-    }
     add_option::<Camera>(&access, &mut page);
-    if config {
-        add_option::<CommConfig>(&access, &mut page);
-        add_option::<CommLink>(&access, &mut page);
-        add_option::<Controller>(&access, &mut page);
-        add_option::<Detector>(&access, &mut page);
-    }
     add_option::<Dms>(&access, &mut page);
-    if config {
-        add_option::<Domain>(&access, &mut page);
-        add_option::<FlowStream>(&access, &mut page);
-    }
     add_option::<GateArm>(&access, &mut page);
-    if config {
-        add_option::<Gps>(&access, &mut page);
-    }
     add_option::<Incident>(&access, &mut page);
     add_option::<Lcs>(&access, &mut page);
-    if config {
-        add_option::<LcsState>(&access, &mut page);
-        add_option::<Modem>(&access, &mut page);
-        add_option::<Permission>(&access, &mut page);
-    }
     add_option::<RampMeter>(&access, &mut page);
-    if config {
-        add_option::<Role>(&access, &mut page);
-        add_option::<SignConfig>(&access, &mut page);
-        add_option::<TagReader>(&access, &mut page);
-        add_option::<User>(&access, &mut page);
-    }
     add_option::<VideoMonitor>(&access, &mut page);
-    if config {
-        add_option::<MonitorStyle>(&access, &mut page);
-    }
     add_option::<WeatherSensor>(&access, &mut page);
+    option = page.frag::<html::Option>();
+    option.disabled().cdata("──────").close();
+    add_option::<Controller>(&access, &mut page);
+    add_option::<Detector>(&access, &mut page);
+    // FIXME: replace with system attribute
+    add_option::<CommConfig>(&access, &mut page);
+    add_option::<TagReader>(&access, &mut page);
+    add_option::<Permission>(&access, &mut page);
     Ok(String::from(page))
 }
 
@@ -613,8 +596,6 @@ fn has_view_access<C: Card>(access: &[Permission]) -> bool {
 pub struct CardList {
     /// Resource type
     res: Res,
-    /// Config mode
-    config: bool,
     /// Search term
     search: Search,
     /// JSON list of cards
@@ -626,26 +607,15 @@ pub struct CardList {
 impl CardList {
     /// Create a new card list
     pub fn new(res: Res) -> Self {
-        let config = false;
         let search = Search::Empty();
         let json = String::new();
         let views = Vec::new();
         CardList {
             res,
-            config,
             search,
             json,
             views,
         }
-    }
-
-    /// Set config mode
-    pub fn config(mut self, config: bool) -> Self {
-        // sign configs cannot be created manually
-        if self.res != Res::SignConfig {
-            self.config = config;
-        }
-        self
     }
 
     /// Set search term
@@ -789,20 +759,20 @@ impl CardList {
         let mut page = Page::new();
         let mut ul = page.frag::<html::Ul>();
         ul.class("cards");
-        if self.config {
-            let cv = CardView::new(
-                C::res(),
-                Self::next_name(&cards),
-                View::CreateCompact,
-            );
-            let mut li = ul.li();
-            li.id(cv.id())
-                .data_("name", &cv.name)
-                .class(cv.view.class_name());
-            li.span().class("create").cdata("Create 🆕").close();
-            li.close();
-            views.push(cv);
-        }
+        // "Create" card (not valid for SignConfig)
+        let view = if self.search.is_all() {
+            View::CreateCompact
+        } else {
+            View::Hidden
+        };
+        let cv = CardView::new(C::res(), Self::next_name(&cards), view);
+        let mut li = ul.li();
+        li.id(cv.id())
+            .data_("name", &cv.name)
+            .class(cv.view.class_name());
+        li.span().class("create").cdata("Create 🆕").close();
+        li.close();
+        views.push(cv);
         for pri in &cards {
             let view = if self.search.is_match(pri, &anc) {
                 View::Compact
@@ -882,9 +852,17 @@ impl CardList {
         let mut changes = Vec::new();
         let mut views = Vec::with_capacity(self.views.len());
         let mut old_views = self.views.drain(..);
-        if self.config
-            && let Some(cv) = old_views.next()
-        {
+        if let Some(mut cv) = old_views.next() {
+            // "Create" card view
+            let view = if self.search.is_all() {
+                View::CreateCompact
+            } else {
+                View::Hidden
+            };
+            if view != cv.view {
+                cv.view = view;
+                changes.push(cv.clone());
+            }
             views.push(cv);
         }
         for pri in serde_json::from_str::<Vec<C>>(&self.json)? {
@@ -939,6 +917,7 @@ impl CardList {
             Res::Permission => self.changed::<Permission>(json).await,
             Res::RampMeter => self.changed::<RampMeter>(json).await,
             Res::Role => self.changed::<Role>(json).await,
+            Res::SignConfig => self.changed::<SignConfig>(json).await,
             Res::TagReader => self.changed::<TagReader>(json).await,
             Res::User => self.changed::<User>(json).await,
             Res::VideoMonitor => self.changed::<VideoMonitor>(json).await,
@@ -958,10 +937,8 @@ impl CardList {
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
         let mut values = Vec::new();
         let mut views = self.views.iter();
-        if self.config {
-            // skip "Create" card
-            views.next();
-        }
+        // skip "Create" card view
+        let _cv = views.next();
         for (c0, c1) in cards0.zip(&cards1) {
             let cv = views.next();
             if c0.name() != c1.name() {

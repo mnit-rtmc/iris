@@ -155,6 +155,12 @@ button.go_link {
 .sb_row > * {
   margin-left: auto;
 }
+.sb_row_left {
+  flex: 0 1;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
 label:has(+ #sb_resource) {
   color: white;
   margin-top: auto;
@@ -325,9 +331,6 @@ label:has(+ #sb_resource) {
   padding: 0;
   margin: 0;
 }
-.card-hidden {
-  display: none;
-}
 .card-compact {
   display: flex;
   flex: 1 0 8rem;
@@ -460,6 +463,9 @@ label:has(+ #sb_resource) {
   margin: 0;
 }
 
+.no-display {
+  display: none;
+}
 .hidden {
   visibility: hidden;
 }

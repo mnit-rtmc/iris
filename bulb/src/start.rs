@@ -16,7 +16,6 @@ use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::util::Doc;
-use hatmil::{Page, html};
 use js_sys::JsString;
 use resources::Res;
 use std::error::Error as _;
@@ -110,7 +109,6 @@ async fn add_sidebar() -> JsResult<()> {
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
     let sidebar: HtmlElement = doc.elem("sidebar");
-    sidebar.set_inner_html(&sidebar_html());
     add_change_listener(&sidebar)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
@@ -125,89 +123,6 @@ async fn add_sidebar() -> JsResult<()> {
         add_fullscreenchange_listener(&doc_elem)?;
     }
     Ok(())
-}
-
-/// Build sidebar HTML
-fn sidebar_html() -> String {
-    let mut page = Page::new();
-    let mut div = page.frag::<html::Div>();
-    div.class("sb_row");
-    div.label().r#for("sb_resource").cdata("Resource").close();
-    div.select().id("sb_resource").close();
-    div.input()
-        .id("sb_config")
-        .r#type("checkbox")
-        .class("toggle")
-        .aria_label("Configuration");
-    div.label().r#for("sb_config").cdata("🧰").close();
-    div.label().id("sb_monitor").cdata("📺 ").close();
-    div.input()
-        .id("sb_fullscreen")
-        .r#type("checkbox")
-        .class("toggle")
-        .aria_label("Toggle fullscreen");
-    div.label().r#for("sb_fullscreen").cdata(" ⛶ ").close();
-    div.close();
-    div = page.frag::<html::Div>();
-    div.class("sb_row");
-    div.input()
-        .id("sb_search")
-        .r#type("search")
-        .aria_label("Search")
-        .size(16)
-        .placeholder("🔍");
-    div.select().id("sb_state").aria_label("State").close();
-    div.button().id("sb_refresh").r#type("button").cdata("⭮ ⚪");
-    div.close();
-    div = page.frag::<html::Div>();
-    div.id("sb_list").close();
-    div = page.frag::<html::Div>();
-    div.id("sb_toast").close();
-    div = page.frag::<html::Div>();
-    div.id("sb_login").class("hide");
-    let mut div2 = div.div();
-    div2.class("form");
-    let mut div3 = div2.div();
-    div3.class("row center");
-    div3.img().src("bulb/iris.svg");
-    div3.close();
-    div3 = div2.div();
-    div3.class("row end");
-    div3.span().cdata("IRIS authentication required").close();
-    div3.close();
-    div3 = div2.div();
-    div3.class("row end");
-    div3.label().r#for("login_user").cdata("User name").close();
-    div3.input()
-        .id("login_user")
-        .r#type("text")
-        .name("username")
-        .autocomplete("username")
-        .required();
-    div3.close();
-    div3 = div2.div();
-    div3.class("row end");
-    div3.label().r#for("login_pass").cdata("Password").close();
-    div3.input()
-        .id("login_pass")
-        .r#type("password")
-        .name("password")
-        .autocomplete("current-password")
-        .required();
-    div3.close();
-    div3 = div2.div();
-    div3.class("row end");
-    div3.button()
-        .id("ob_login")
-        .r#type("button")
-        .cdata("Login")
-        .close();
-    div3.close();
-    div2.close();
-    div2 = div.div();
-    div2.id("sb_shade").close();
-    div.close();
-    String::from(page)
 }
 
 /// Finish initialization
@@ -229,8 +144,7 @@ async fn finish_init() -> Result<()> {
 /// Fill resource select element
 async fn fill_sb_resource() -> Result<()> {
     let doc = Doc::get();
-    let config = doc.input_bool("sb_config");
-    let perm = card::fetch_resource(config).await?;
+    let perm = card::fetch_resource().await?;
     let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
     sb_resource.set_inner_html(&perm);
     Ok(())
@@ -258,7 +172,6 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
-            "sb_config" => spawn_local(reload_resources()),
             "sb_fullscreen" => set_fullscreen(),
             _ => (),
         }
@@ -272,20 +185,18 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
+/// Handle resource change
+fn change_resource() {
+    let res = selected_resource();
+    spawn_local(handle_resource_change(res, ""));
+}
+
 /// Set fullscreen mode
 fn set_fullscreen() {
     let doc = Doc::get();
     let btn = doc.elem::<HtmlInputElement>("sb_fullscreen");
     let checked = btn.checked();
     doc.request_fullscreen(checked);
-}
-
-/// Reload resource select element
-async fn reload_resources() {
-    do_future(fill_sb_resource()).await;
-    let sb_search = Doc::get().elem::<HtmlInputElement>("sb_search");
-    sb_search.set_value("");
-    handle_resource_change().await;
 }
 
 /// Handle a fallible future function
@@ -310,11 +221,39 @@ async fn do_future(future: impl Future<Output = Result<()>>) {
     }
 }
 
+/// Get dependent resource row class name
+fn row_class(show: bool) -> &'static str {
+    if show { "sb_row_left" } else { "no-display" }
+}
+
 /// Handle change to selected resource type
-async fn handle_resource_change() {
-    let res = resource_value();
+async fn handle_resource_change(res: Option<Res>, search: &str) {
+    let doc = Doc::get();
+    if let Some(res) = res {
+        let base = res.base();
+        if let Some(elem) = doc.try_elem::<Element>(&"res_dms_row") {
+            elem.set_class_name(row_class(base == Res::Dms));
+        }
+        if let Some(elem) = doc.try_elem::<Element>(&"res_lcs_row") {
+            elem.set_class_name(row_class(base == Res::Lcs));
+        }
+        if let Some(elem) = doc.try_elem::<Element>(&"res_video_monitor_row") {
+            elem.set_class_name(row_class(base == Res::VideoMonitor));
+        }
+        if let Some(elem) = doc.try_elem::<Element>(&"res_controller_row") {
+            elem.set_class_name(row_class(base == Res::Controller));
+        }
+        if let Some(elem) = doc.try_elem::<Element>(&"res_system_row") {
+            elem.set_class_name(row_class(base == Res::SystemAttribute));
+        }
+        if let Some(elem) = doc.try_elem::<Element>(&"res_permission_row") {
+            elem.set_class_name(row_class(base == Res::Permission));
+        }
+    }
+    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    sb_search.set_value(search);
     app::card_list(None);
-    let sb_state = Doc::get().elem::<HtmlSelectElement>("sb_state");
+    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
     let html = match res {
         Some(res) => card::item_states_html(res),
         None => String::new(),
@@ -353,9 +292,8 @@ fn notify_list(res: Option<Res>) -> String {
 async fn fetch_card_list() -> Result<()> {
     let mut cards = app::card_list(None);
     if cards.is_none() {
-        let res = resource_value();
-        let config = Doc::get().input_bool("sb_config");
-        cards = res.map(|res| CardList::new(res).config(config));
+        let res = selected_resource();
+        cards = res.map(|res| CardList::new(res));
     }
     if let Some(cards) = &mut cards {
         let json = cards.fetch_all().await?;
@@ -366,10 +304,75 @@ async fn fetch_card_list() -> Result<()> {
 }
 
 /// Get the selected resource value
-fn resource_value() -> Option<Res> {
-    match Doc::get().select_parse::<String>("sb_resource") {
-        Some(rname) => Res::try_from(rname.as_str()).ok(),
-        None => None,
+fn selected_resource() -> Option<Res> {
+    let doc = Doc::get();
+    let rname = doc.select_parse::<String>("sb_resource");
+    let res = Res::try_from(rname?.as_str()).ok()?;
+    match res.base() {
+        Res::Dms
+            if doc.elem::<HtmlInputElement>("res_sign_config").checked() =>
+        {
+            Some(Res::SignConfig)
+        }
+        Res::Lcs if doc.elem::<HtmlInputElement>("res_lcs_state").checked() => {
+            Some(Res::LcsState)
+        }
+        Res::VideoMonitor
+            if doc.elem::<HtmlInputElement>("res_monitor_style").checked() =>
+        {
+            Some(Res::MonitorStyle)
+        }
+        Res::VideoMonitor
+            if doc.elem::<HtmlInputElement>("res_flow_stream").checked() =>
+        {
+            Some(Res::FlowStream)
+        }
+        Res::Controller
+            if doc.elem::<HtmlInputElement>("res_comm_link").checked() =>
+        {
+            Some(Res::CommLink)
+        }
+        Res::Controller
+            if doc.elem::<HtmlInputElement>("res_alarm").checked() =>
+        {
+            Some(Res::Alarm)
+        }
+        Res::Controller
+            if doc.elem::<HtmlInputElement>("res_gps").checked() =>
+        {
+            Some(Res::Gps)
+        }
+        Res::Controller
+            if doc.elem::<HtmlInputElement>("res_modem").checked() =>
+        {
+            Some(Res::Modem)
+        }
+        Res::SystemAttribute
+            if doc.elem::<HtmlInputElement>("res_comm_config").checked() =>
+        {
+            Some(Res::CommConfig)
+        }
+        Res::SystemAttribute
+            if doc.elem::<HtmlInputElement>("res_cabinet_style").checked() =>
+        {
+            Some(Res::CabinetStyle)
+        }
+        Res::Permission
+            if doc.elem::<HtmlInputElement>("res_user").checked() =>
+        {
+            Some(Res::User)
+        }
+        Res::Permission
+            if doc.elem::<HtmlInputElement>("res_role").checked() =>
+        {
+            Some(Res::Role)
+        }
+        Res::Permission
+            if doc.elem::<HtmlInputElement>("res_domain").checked() =>
+        {
+            Some(Res::Domain)
+        }
+        _ => Some(res),
     }
 }
 
@@ -416,9 +419,15 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
-            "sb_config" => (),
+            "sb_resource" => change_resource(),
+            "res_dms" | "res_sign_config" | "res_lcs" | "res_lcs_state"
+            | "res_video_monitor" | "res_monitor_style" | "res_flow_stream"
+            | "res_controller" | "res_comm_link" | "res_alarm" | "res_gps"
+            | "res_modem" | "res_comm_config" | "res_cabinet_style"
+            | "res_permission" | "res_user" | "res_role" | "res_domain" => {
+                change_resource()
+            }
             "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
-            "sb_resource" => handle_sb_resource_ev(),
             "ob_view" => handle_ob_view_ev(),
             _ => spawn_local(do_future(handle_input(id))),
         }
@@ -458,13 +467,6 @@ async fn search_card_list() -> Result<()> {
         None => console::log_1(&"search failed - no card list".into()),
     }
     Ok(())
-}
-
-/// Handle an event from `sb_resource` select element
-fn handle_sb_resource_ev() {
-    let sb_search = Doc::get().elem::<HtmlInputElement>("sb_search");
-    sb_search.set_value("");
-    spawn_local(handle_resource_change());
 }
 
 /// Handle an event from `ob_view` select element
@@ -613,7 +615,7 @@ async fn handle_button_cv(cv: CardView, id: String) {
 fn handle_card_click_ev(elem: &Element) {
     if let Some(id) = elem.get_attribute("id")
         && let Some(name) = elem.get_attribute("data-name")
-        && let Some(res) = resource_value()
+        && let Some(res) = selected_resource()
     {
         spawn_local(do_future(click_card(res, name, id)));
     }
@@ -660,12 +662,12 @@ async fn handle_login() {
 /// Go to resource from target's `data-link` attribute
 async fn go_resource(attrs: ButtonAttrs) {
     let doc = Doc::get();
-    if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type) {
+    if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type)
+        && let Ok(res) = Res::try_from(rname.as_str())
+    {
         let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
-        sb_resource.set_value(&rname);
-        let sb_search = doc.elem::<HtmlInputElement>("sb_search");
-        sb_search.set_value(&link);
-        handle_resource_change().await;
+        sb_resource.set_value(res.base().as_str());
+        handle_resource_change(Some(res), &link).await;
     }
 }
 
@@ -773,13 +775,11 @@ async fn select_card_map(name: String) -> Result<()> {
     }
     let res = app::name_res(&name);
     if let Some(res) = res {
-        if resource_value() != Some(res) {
+        if selected_resource() != Some(res) {
             let doc = Doc::get();
             let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
-            sb_resource.set_value(res.as_str());
-            let sb_search = doc.elem::<HtmlInputElement>("sb_search");
-            sb_search.set_value("");
-            handle_resource_change().await;
+            sb_resource.set_value(res.base().as_str());
+            handle_resource_change(Some(res), "").await;
         }
         let id = format!("{res}_{name}");
         js_fly_enable(JsValue::FALSE);
@@ -831,7 +831,7 @@ fn set_notify_state(ns: NotifyState) {
 
 /// Handle SSE notify from server
 async fn handle_notify(payload: String) -> Result<()> {
-    let rname = resource_value().map_or("", |res| res.as_str());
+    let rname = selected_resource().map_or("", |res| res.as_str());
     let (chan, _name) = match payload.split_once('$') {
         Some((a, b)) => (a, Some(b)),
         None => (payload.as_str(), None),
