@@ -847,6 +847,7 @@ async fn handle_notify(payload: String) -> Result<()> {
         let mut cards = CardList::new(res);
         let json = cards.fetch_all().await?;
         cards.swap_json(json);
+        // FIXME: only needed for resources with map markers
         let _html = cards.make_html().await?;
         let items = cards.states_main().await?;
         let json = item_states_json(&items);

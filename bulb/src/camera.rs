@@ -174,6 +174,7 @@ impl Camera {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
+        // FIXME: set selected video monitor to this camera
         let mut page = Page::new();
         self.title(View::Control, &mut page.frag::<html::Div>());
         let mut div = page.frag::<html::Div>();
