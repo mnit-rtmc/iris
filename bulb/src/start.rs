@@ -171,9 +171,8 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
-        match id.as_str() {
-            "sb_fullscreen" => set_fullscreen(),
-            _ => (),
+        if id.as_str() == "sb_fullscreen" {
+            set_fullscreen();
         }
     });
     elem.add_event_listener_with_callback(
@@ -231,22 +230,22 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
     let doc = Doc::get();
     if let Some(res) = res {
         let base = res.base();
-        if let Some(elem) = doc.try_elem::<Element>(&"res_dms_row") {
+        if let Some(elem) = doc.try_elem::<Element>("res_dms_row") {
             elem.set_class_name(row_class(base == Res::Dms));
         }
-        if let Some(elem) = doc.try_elem::<Element>(&"res_lcs_row") {
+        if let Some(elem) = doc.try_elem::<Element>("res_lcs_row") {
             elem.set_class_name(row_class(base == Res::Lcs));
         }
-        if let Some(elem) = doc.try_elem::<Element>(&"res_video_monitor_row") {
+        if let Some(elem) = doc.try_elem::<Element>("res_video_monitor_row") {
             elem.set_class_name(row_class(base == Res::VideoMonitor));
         }
-        if let Some(elem) = doc.try_elem::<Element>(&"res_controller_row") {
+        if let Some(elem) = doc.try_elem::<Element>("res_controller_row") {
             elem.set_class_name(row_class(base == Res::Controller));
         }
-        if let Some(elem) = doc.try_elem::<Element>(&"res_system_row") {
+        if let Some(elem) = doc.try_elem::<Element>("res_system_row") {
             elem.set_class_name(row_class(base == Res::SystemAttribute));
         }
-        if let Some(elem) = doc.try_elem::<Element>(&"res_permission_row") {
+        if let Some(elem) = doc.try_elem::<Element>("res_permission_row") {
             elem.set_class_name(row_class(base == Res::Permission));
         }
     }
@@ -293,7 +292,7 @@ async fn fetch_card_list() -> Result<()> {
     let mut cards = app::card_list(None);
     if cards.is_none() {
         let res = selected_resource();
-        cards = res.map(|res| CardList::new(res));
+        cards = res.map(CardList::new);
     }
     if let Some(cards) = &mut cards {
         let json = cards.fetch_all().await?;
