@@ -181,8 +181,7 @@
 		       debug="${debug}"
 		       deprecation="off"
 		       includeantruntime="false"
-		       source="1.8"
-		       target="1.8">
+		       release="9">
 			<classpath refid="classpath"/>
 			<compilerarg value="-Xlint:unchecked"/>
 			<compilerarg value="-Xlint:cast"/>
@@ -467,8 +466,7 @@
 		       debug="true"
 		       deprecation="on"
 		       includeantruntime="true"
-		       source="1.8"
-		       target="1.8">
+		       release="9">
 			<classpath refid="junit.classpath"/>
 		</javac>
 	</target>
