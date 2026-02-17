@@ -175,7 +175,7 @@ pub const CONDITION_LUT: &str = "\
 /// SQL query for all controllers (primary)
 pub const CONTROLLER_ALL: &str = "\
   SELECT c.name, location, comm_link, drop_id, cabinet_style, condition, \
-         notes, setup, fail_time \
+         notes, status, fail_time \
   FROM iris.controller c \
   LEFT JOIN geo_loc_view gl ON c.geo_loc = gl.name \
   ORDER BY COALESCE(regexp_replace(comm_link, '[0-9]', '', 'g'), ''), \
@@ -906,14 +906,16 @@ pub const SIGN_MSG_ONE: &str = "\
 
 /// SQL query for system attributes (all)
 pub const SYSTEM_ATTRIBUTE_ALL: &str = "\
-  SELECT jsonb_object_agg(name, value)::text \
-  FROM iris.system_attribute";
+  SELECT name, value \
+  FROM iris.system_attribute \
+  ORDER BY name";
 
 /// SQL query for system attributes (public)
 pub const SYSTEM_ATTRIBUTE_PUB: &str = "\
-  SELECT jsonb_object_agg(name, value)::text \
+  SELECT name, value \
   FROM iris.system_attribute \
-  WHERE name LIKE 'dms\\_%' OR name LIKE 'map\\_%'";
+  WHERE name LIKE 'dms\\_%' OR name LIKE 'map\\_%' \
+  ORDER BY name";
 
 /// SQL query for all tag readers (primary)
 pub const TAG_READER_ALL: &str = "\
