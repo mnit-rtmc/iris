@@ -871,9 +871,6 @@ impl Loc for WeatherSensor {
 impl Card for WeatherSensor {
     type Ancillary = WeatherSensorAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🌦️ Weather Sensor";
-
     /// Get the resource
     fn res() -> Res {
         Res::WeatherSensor

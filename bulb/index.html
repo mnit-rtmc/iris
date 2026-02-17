@@ -31,7 +31,25 @@
       <div id="sidebar">
         <div class="sb_row">
           <label for="sb_resource">Resource</label>
-          <select id="sb_resource"></select>
+          <select id="sb_resource">
+            <option></option>
+            <option id="opt_action_plan" class="no-display" value="action_plan">📋 Action Plan</option>
+            <option id="opt_beacon" class="no-display" value="beacon">🔆 Beacon</option>
+            <option id="opt_camera" class="no-display" value="camera">🎥 Camera</option>
+            <option id="opt_dms" class="no-display" value="dms">⬛ Dms</option>
+            <option id="opt_gate_arm" class="no-display" value="gate_arm">⫬ Gate Arm</option>
+            <option id="opt_incident" class="no-display" value="incident">🚨 Incident</option>
+            <option id="opt_lcs" class="no-display" value="lcs">🠟✖🠟 LCS</option>
+            <option id="opt_ramp_meter" class="no-display" value="ramp_meter">🚦 Ramp Meter</option>
+            <option id="opt_video_monitor" class="no-display" value="video_monitor">📺 Video Monitor</option>
+            <option id="opt_weather_sensor" class="no-display" value="weather_sensor">🌦️ Weather Sensor</option>
+            <option disabled>────────</option>
+            <option id="opt_controller" class="no-display" value="controller">🎛️ Controller</option>
+            <option id="opt_detector" class="no-display" value="detector">🚗⬚ Detector</option>
+            <option id="opt_permission" class="no-display" value="permission">🗝️ Permission</option>
+            <option id="opt_system_attribute" class="no-display" value="comm_config">📡 Comm Config</option>
+            <option id="opt_toll_zone" class="no-display" value="tag_reader">🏷️ Tag Reader</option>
+          </select>
           <label id="sb_monitor">📺 </label>
           <input id="sb_fullscreen" class="toggle" type="checkbox" aria-label="Toggle fullscreen">
           <label for="sb_fullscreen"> ⛶ </label>

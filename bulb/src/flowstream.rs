@@ -62,9 +62,6 @@ impl ControllerIo for FlowStream {
 impl Card for FlowStream {
     type Ancillary = FlowStreamAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🎞️ Flow Stream";
-
     /// Get the resource
     fn res() -> Res {
         Res::FlowStream

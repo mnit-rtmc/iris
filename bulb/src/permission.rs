@@ -242,9 +242,6 @@ impl Permission {
 impl Card for Permission {
     type Ancillary = PermissionAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🗝️ Permission";
-
     /// Suggested name prefix
     const PREFIX: &'static str = "prm";
 

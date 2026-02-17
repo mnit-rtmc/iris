@@ -482,9 +482,6 @@ impl Controller {
 impl Card for Controller {
     type Ancillary = ControllerAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🎛️ Controller";
-
     /// Suggested name prefix
     const PREFIX: &'static str = "ctl";
 

@@ -190,9 +190,6 @@ impl Incident {
 impl Card for Incident {
     type Ancillary = IncidentAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🚨 Incident";
-
     /// Get the resource
     fn res() -> Res {
         Res::Incident

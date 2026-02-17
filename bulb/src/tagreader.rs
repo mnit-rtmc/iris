@@ -195,9 +195,6 @@ impl Loc for TagReader {
 impl Card for TagReader {
     type Ancillary = TagReaderAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🏷️ Tag Reader";
-
     /// Get the resource
     fn res() -> Res {
         Res::TagReader

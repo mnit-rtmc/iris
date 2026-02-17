@@ -163,9 +163,6 @@ impl User {
 impl Card for User {
     type Ancillary = UserAnc;
 
-    /// Display name
-    const DNAME: &'static str = "👤 User";
-
     /// Get the resource
     fn res() -> Res {
         Res::User

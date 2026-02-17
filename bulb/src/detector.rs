@@ -92,9 +92,6 @@ impl ControllerIo for Detector {
 impl Card for Detector {
     type Ancillary = DetectorAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🚗⬚ Detector";
-
     /// Get the resource
     fn res() -> Res {
         Res::Detector

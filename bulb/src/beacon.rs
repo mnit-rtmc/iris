@@ -287,9 +287,6 @@ impl Loc for Beacon {
 impl Card for Beacon {
     type Ancillary = BeaconAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🔆 Beacon";
-
     /// Get the resource
     fn res() -> Res {
         Res::Beacon

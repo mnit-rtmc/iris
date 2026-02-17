@@ -220,9 +220,6 @@ impl GateArm {
 impl Card for GateArm {
     type Ancillary = GateArmAnc;
 
-    /// Display name
-    const DNAME: &'static str = "⫬ Gate Arm";
-
     /// Get the resource
     fn res() -> Res {
         Res::GateArm

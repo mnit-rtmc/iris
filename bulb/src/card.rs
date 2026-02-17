@@ -272,9 +272,6 @@ pub trait AncillaryData {
 pub trait Card: Default + DeserializeOwned + PartialEq {
     type Ancillary: AncillaryData<Primary = Self>;
 
-    /// Display name
-    const DNAME: &'static str;
-
     /// Suggested name prefix
     const PREFIX: &'static str = "";
 
@@ -532,55 +529,6 @@ fn create_value(doc: &Doc) -> Result<String> {
 /// Delete a resource by name
 pub async fn delete_one(cv: &CardView) -> Result<()> {
     uri_one(cv.res, &cv.name).delete().await
-}
-
-/// Fetch `sb_resource` access list
-pub async fn fetch_resource() -> Result<String> {
-    let json = Uri::from("/iris/api/access").get().await?;
-    let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
-    let mut page = Page::new();
-    let mut option = page.frag::<html::Option>();
-    option.close();
-    add_option::<ActionPlan>(&access, &mut page);
-    add_option::<Beacon>(&access, &mut page);
-    add_option::<Camera>(&access, &mut page);
-    add_option::<Dms>(&access, &mut page);
-    add_option::<GateArm>(&access, &mut page);
-    add_option::<Incident>(&access, &mut page);
-    add_option::<Lcs>(&access, &mut page);
-    add_option::<RampMeter>(&access, &mut page);
-    add_option::<VideoMonitor>(&access, &mut page);
-    add_option::<WeatherSensor>(&access, &mut page);
-    option = page.frag::<html::Option>();
-    option.disabled().cdata("──────").close();
-    add_option::<Controller>(&access, &mut page);
-    add_option::<Detector>(&access, &mut page);
-    // FIXME: replace with system attribute
-    add_option::<CommConfig>(&access, &mut page);
-    add_option::<TagReader>(&access, &mut page);
-    add_option::<Permission>(&access, &mut page);
-    Ok(String::from(page))
-}
-
-/// Add option to access select
-fn add_option<C: Card>(access: &[Permission], page: &mut Page) {
-    if has_view_access::<C>(access) {
-        let mut option = page.frag::<html::Option>();
-        option.value(C::res().as_str()).cdata(C::DNAME).close();
-    }
-}
-
-/// Check for view access to a resource type
-fn has_view_access<C: Card>(access: &[Permission]) -> bool {
-    for perm in access {
-        if perm.hashtag.is_none() {
-            let res = C::res();
-            if perm.base_resource == res.base().as_str() {
-                return true;
-            }
-        }
-    }
-    false
 }
 
 /// Card list for one resource type

@@ -95,9 +95,6 @@ impl Domain {
 impl Card for Domain {
     type Ancillary = DomainAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🖧 Domain";
-
     /// Get the resource
     fn res() -> Res {
         Res::Domain

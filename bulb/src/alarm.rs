@@ -115,9 +115,6 @@ impl ControllerIo for Alarm {
 impl Card for Alarm {
     type Ancillary = AlarmAnc;
 
-    /// Display name
-    const DNAME: &'static str = "📢 Alarm";
-
     /// Get the resource
     fn res() -> Res {
         Res::Alarm

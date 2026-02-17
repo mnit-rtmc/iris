@@ -330,9 +330,6 @@ impl CommConfig {
 impl Card for CommConfig {
     type Ancillary = CommConfigAnc;
 
-    /// Display name
-    const DNAME: &'static str = "📡 Comm Config";
-
     /// Suggested name prefix
     const PREFIX: &'static str = "cfg";
 

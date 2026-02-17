@@ -1369,9 +1369,6 @@ impl Loc for Dms {
 impl Card for Dms {
     type Ancillary = DmsAnc;
 
-    /// Display name
-    const DNAME: &'static str = "⬛ Dms";
-
     /// Get the resource
     fn res() -> Res {
         Res::Dms

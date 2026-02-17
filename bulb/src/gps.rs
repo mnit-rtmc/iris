@@ -86,9 +86,6 @@ impl ControllerIo for Gps {
 impl Card for Gps {
     type Ancillary = GpsAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🌐 Gps";
-
     /// Get the resource
     fn res() -> Res {
         Res::Gps

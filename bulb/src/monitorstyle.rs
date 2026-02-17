@@ -141,9 +141,6 @@ impl MonitorStyle {
 impl Card for MonitorStyle {
     type Ancillary = MonitorStyleAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🖵 Monitor Style";
-
     /// Get the resource
     fn res() -> Res {
         Res::MonitorStyle

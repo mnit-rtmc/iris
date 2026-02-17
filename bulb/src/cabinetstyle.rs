@@ -116,9 +116,6 @@ impl CabinetStyle {
 impl Card for CabinetStyle {
     type Ancillary = CabinetStyleAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🗄️ Cabinet Style";
-
     /// Get the resource
     fn res() -> Res {
         Res::CabinetStyle

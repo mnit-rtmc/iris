@@ -342,9 +342,6 @@ impl Loc for Camera {
 impl Card for Camera {
     type Ancillary = CameraAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🎥 Camera";
-
     /// Get the resource
     fn res() -> Res {
         Res::Camera

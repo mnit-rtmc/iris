@@ -220,9 +220,6 @@ impl CommLink {
 impl Card for CommLink {
     type Ancillary = CommLinkAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🔗 Comm Link";
-
     /// Get the resource
     fn res() -> Res {
         Res::CommLink

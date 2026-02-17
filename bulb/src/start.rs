@@ -15,6 +15,7 @@ use crate::card::{self, CardList, CardState, CardView, View};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
+use crate::permission::Permission;
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
@@ -132,7 +133,7 @@ async fn finish_init() -> Result<()> {
         Some(user) => {
             app::set_user(Some(user));
             if !app::initialized() {
-                fill_sb_resource().await?;
+                update_sb_resource().await?;
                 app::set_initialized();
             }
         }
@@ -141,13 +142,67 @@ async fn finish_init() -> Result<()> {
     Ok(())
 }
 
-/// Fill resource select element
-async fn fill_sb_resource() -> Result<()> {
+/// Update resource select options
+async fn update_sb_resource() -> Result<()> {
+    let json = Uri::from("/iris/api/access").get().await?;
+    let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
     let doc = Doc::get();
-    let perm = card::fetch_resource().await?;
-    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
-    sb_resource.set_inner_html(&perm);
+    if let Some(elem) = doc.try_elem::<Element>("opt_action_plan") {
+        elem.set_class_name(opt_class(&access, Res::ActionPlan));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_beacon") {
+        elem.set_class_name(opt_class(&access, Res::Beacon));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_camera") {
+        elem.set_class_name(opt_class(&access, Res::Camera));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_dms") {
+        elem.set_class_name(opt_class(&access, Res::Dms));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_gate_arm") {
+        elem.set_class_name(opt_class(&access, Res::GateArm));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_incident") {
+        elem.set_class_name(opt_class(&access, Res::Incident));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_lcs") {
+        elem.set_class_name(opt_class(&access, Res::Lcs));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_ramp_meter") {
+        elem.set_class_name(opt_class(&access, Res::RampMeter));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_video_monitor") {
+        elem.set_class_name(opt_class(&access, Res::VideoMonitor));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_weather_sensor") {
+        elem.set_class_name(opt_class(&access, Res::WeatherSensor));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_controller") {
+        elem.set_class_name(opt_class(&access, Res::Controller));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_detector") {
+        elem.set_class_name(opt_class(&access, Res::Detector));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_permission") {
+        elem.set_class_name(opt_class(&access, Res::Permission));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_system_attribute") {
+        elem.set_class_name(opt_class(&access, Res::SystemAttribute));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("opt_toll_zone") {
+        elem.set_class_name(opt_class(&access, Res::TollZone));
+    }
     Ok(())
+}
+
+/// Check for view access to a (base) resource name
+fn opt_class(access: &[Permission], res: Res) -> &'static str {
+    for perm in access {
+        if perm.base_resource == res.as_str() {
+            return "";
+        }
+    }
+    "no-display"
 }
 
 /// Add a "fullscreenchange" event listener to an element
@@ -418,14 +473,12 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
-            "sb_resource" => change_resource(),
             "res_dms" | "res_sign_config" | "res_lcs" | "res_lcs_state"
             | "res_video_monitor" | "res_monitor_style" | "res_flow_stream"
             | "res_controller" | "res_comm_link" | "res_alarm" | "res_gps"
             | "res_modem" | "res_comm_config" | "res_cabinet_style"
-            | "res_permission" | "res_user" | "res_role" | "res_domain" => {
-                change_resource()
-            }
+            | "res_permission" | "res_user" | "res_role" | "res_domain"
+            | "sb_resource" => handle_res_change(),
             "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
             "ob_view" => handle_ob_view_ev(),
             _ => spawn_local(do_future(handle_input(id))),

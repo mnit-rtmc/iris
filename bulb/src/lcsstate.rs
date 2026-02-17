@@ -208,9 +208,6 @@ impl LcsState {
 impl Card for LcsState {
     type Ancillary = LcsStateAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🠟 LCS State";
-
     /// Get the resource
     fn res() -> Res {
         Res::LcsState

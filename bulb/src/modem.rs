@@ -113,9 +113,6 @@ impl Modem {
 impl Card for Modem {
     type Ancillary = ModemAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🖀 Modem";
-
     /// Get the resource
     fn res() -> Res {
         Res::Modem

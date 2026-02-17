@@ -548,9 +548,6 @@ impl Lcs {
 impl Card for Lcs {
     type Ancillary = LcsAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🠟✖🠟 LCS";
-
     /// Get the resource
     fn res() -> Res {
         Res::Lcs

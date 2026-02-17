@@ -247,9 +247,6 @@ impl ControllerIo for VideoMonitor {
 impl Card for VideoMonitor {
     type Ancillary = VideoMonitorAnc;
 
-    /// Display name
-    const DNAME: &'static str = "📺 Video Monitor";
-
     /// Get the resource
     fn res() -> Res {
         Res::VideoMonitor

@@ -366,9 +366,6 @@ impl ActionPlan {
 impl Card for ActionPlan {
     type Ancillary = ActionPlanAnc;
 
-    /// Display name
-    const DNAME: &'static str = "📋 Action Plan";
-
     /// Get the resource
     fn res() -> Res {
         Res::ActionPlan

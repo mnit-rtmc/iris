@@ -85,9 +85,6 @@ impl Role {
 impl Card for Role {
     type Ancillary = RoleAnc;
 
-    /// Display name
-    const DNAME: &'static str = "💪 Role";
-
     /// Get the resource
     fn res() -> Res {
         Res::Role

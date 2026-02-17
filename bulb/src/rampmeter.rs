@@ -767,9 +767,6 @@ impl Loc for RampMeter {
 impl Card for RampMeter {
     type Ancillary = RampMeterAnc;
 
-    /// Display name
-    const DNAME: &'static str = "🚦 Ramp Meter";
-
     /// Get the resource
     fn res() -> Res {
         Res::RampMeter

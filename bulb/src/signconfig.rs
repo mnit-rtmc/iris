@@ -335,9 +335,6 @@ fn select_factors_html<'p>(
 impl Card for SignConfig {
     type Ancillary = SignConfigAnc;
 
-    /// Display name
-    const DNAME: &'static str = "📐 Sign Config";
-
     /// Get the resource
     fn res() -> Res {
         Res::SignConfig

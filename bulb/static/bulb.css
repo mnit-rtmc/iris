@@ -115,10 +115,10 @@ button.go_link {
   background-color: #bbb;
 }
 .toggle:checked + label {
-  background-color: #3584e4;
+  background-color: #6ce;
 }
 .toggle:checked + label:hover {
-  background-color: #26e;
+  background-color: #5bd;
 }
 
 .root {
