@@ -148,24 +148,29 @@ impl SignConfigAnc {
     }
 }
 
+/// Get item states
+fn item_states(sc: &SignConfig, anc: &SignConfigAnc) -> ItemStates<'static> {
+    let mut states = ItemStates::default();
+    states = if sc.sign_count > 0 {
+        states.with(ItemState::Available, "")
+    } else {
+        states.with(ItemState::Inactive.into(), "")
+    };
+    if anc.make_dms(sc).is_none() {
+        states = states.with(ItemState::Fault, "Invalid");
+    }
+    states
+}
+
 /// Convert to compact HTML
-fn to_html_compact(sc: &SignConfig) -> String {
+fn to_html_compact(sc: &SignConfig, anc: &SignConfigAnc) -> String {
     let mut page = Page::new();
     let mut div = page.frag::<html::Div>();
     div.class("title row")
         .cdata(&sc.name)
         .cdata(" ")
-        .cdata(item_states(sc).to_string());
+        .cdata(item_states(sc, anc).to_string());
     String::from(page)
-}
-
-/// Get item states
-fn item_states(sc: &SignConfig) -> ItemStates<'_> {
-    if sc.sign_count > 0 {
-        ItemState::Available.into()
-    } else {
-        ItemState::Inactive.into()
-    }
 }
 
 /// Convert to setup HTML
@@ -340,6 +345,11 @@ impl Card for SignConfig {
         Res::SignConfig
     }
 
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[ItemState::Available, ItemState::Fault, ItemState::Inactive]
+    }
+
     /// Get the name
     fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)
@@ -351,16 +361,29 @@ impl Card for SignConfig {
         self
     }
 
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let states = item_states(self, anc);
+        if states.contains(ItemState::Inactive) {
+            ItemState::Inactive
+        } else if states.contains(ItemState::Fault) {
+            ItemState::Fault
+        } else {
+            ItemState::Available
+        }
+    }
+
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &SignConfigAnc) -> bool {
-        self.name.contains_lower(search) || item_states(self).is_match(search)
+    fn is_match(&self, search: &str, anc: &SignConfigAnc) -> bool {
+        self.name.contains_lower(search)
+            || item_states(self, anc).is_match(search)
     }
 
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &SignConfigAnc) -> String {
         match view {
             View::Setup => to_html_setup(self, anc),
-            _ => to_html_compact(self),
+            _ => to_html_compact(self, anc),
         }
     }
 
