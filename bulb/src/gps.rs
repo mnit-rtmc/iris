@@ -107,9 +107,21 @@ impl Card for Gps {
         self
     }
 
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let states = anc.item_states(self);
+        if states.contains(ItemState::Inactive) {
+            ItemState::Inactive
+        } else {
+            ItemState::Available
+        }
+    }
+
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &GpsAnc) -> bool {
-        self.name.contains_lower(search) || self.notes.contains_lower(search)
+    fn is_match(&self, search: &str, anc: &GpsAnc) -> bool {
+        self.name.contains_lower(search)
+            || self.notes.contains_lower(search)
+            || anc.item_states(self).is_match(search)
     }
 
     /// Convert to HTML view
