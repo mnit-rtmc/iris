@@ -347,6 +347,16 @@ impl Card for Camera {
         Res::Camera
     }
 
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[
+            ItemState::Available,
+            ItemState::Offline,
+            ItemState::Fault,
+            ItemState::Inactive,
+        ]
+    }
+
     /// Get the name
     fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)
