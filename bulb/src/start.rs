@@ -363,6 +363,11 @@ fn selected_resource() -> Option<Res> {
     let res = Res::try_from(rname?.as_str()).ok()?;
     match res.base() {
         Res::Dms
+            if doc.elem::<HtmlInputElement>("res_msg_pattern").checked() =>
+        {
+            Some(Res::MsgPattern)
+        }
+        Res::Dms
             if doc.elem::<HtmlInputElement>("res_sign_config").checked() =>
         {
             Some(Res::SignConfig)
@@ -472,12 +477,12 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
         let target = e.target().unwrap().dyn_into::<Element>().unwrap();
         let id = target.id();
         match id.as_str() {
-            "res_dms" | "res_sign_config" | "res_lcs" | "res_lcs_state"
-            | "res_video_monitor" | "res_monitor_style" | "res_flow_stream"
-            | "res_controller" | "res_comm_link" | "res_alarm" | "res_gps"
-            | "res_modem" | "res_comm_config" | "res_cabinet_style"
-            | "res_permission" | "res_user" | "res_role" | "res_domain"
-            | "sb_resource" => handle_res_change(),
+            "res_dms" | "res_msg_pattern" | "res_sign_config" | "res_lcs"
+            | "res_lcs_state" | "res_video_monitor" | "res_monitor_style"
+            | "res_flow_stream" | "res_controller" | "res_comm_link"
+            | "res_alarm" | "res_gps" | "res_modem" | "res_comm_config"
+            | "res_cabinet_style" | "res_permission" | "res_user"
+            | "res_role" | "res_domain" | "sb_resource" => handle_res_change(),
             "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
             "ob_view" => handle_ob_view_ev(),
             _ => spawn_local(do_future(handle_input(id))),

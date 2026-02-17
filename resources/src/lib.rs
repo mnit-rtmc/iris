@@ -319,6 +319,7 @@ impl Res {
             LcsState => "🠟",
             Modem => "🖀 ",
             MonitorStyle => "🖵 ",
+            MsgPattern => "📑",
             Permission => "🗝️ ",
             PlanPhase => "🪜",
             PlayList => "FIXME",

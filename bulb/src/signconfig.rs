@@ -25,7 +25,6 @@ pub use rendzina::SignConfig;
 use resources::Res;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
-use web_sys::console;
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
@@ -132,19 +131,13 @@ impl SignConfigAnc {
 
     /// Make an NTCIP sign
     fn make_dms(&self, sc: &SignConfig) -> Option<NtcipDms> {
-        match NtcipDms::builder()
+        NtcipDms::builder()
             .with_font_definition(self.fonts.clone())
             .with_sign_cfg(sc.sign_cfg())
             .with_vms_cfg(sc.vms_cfg())
             .with_multi_cfg(sc.multi_cfg())
             .build()
-        {
-            Ok(dms) => Some(dms),
-            Err(e) => {
-                console::log_1(&format!("make_dms: {e:?}").into());
-                None
-            }
-        }
+            .ok()
     }
 }
 

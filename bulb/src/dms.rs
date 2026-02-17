@@ -20,6 +20,7 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
+use crate::msgpattern::MsgPattern;
 use crate::notes::contains_hashtag;
 use crate::rend::Renderer;
 use crate::rle::Table;
@@ -30,16 +31,13 @@ use chrono::{DateTime, Local, format::SecondsFormat};
 use hatmil::{Page, html};
 use js_sys::{ArrayBuffer, Uint8Array};
 use mag::temp::DegC;
-use ntcip::dms::multi::{
-    join_text, normalize as multi_normalize, split as multi_split,
-};
+use ntcip::dms::multi::{join_text, normalize as multi_normalize};
 use ntcip::dms::{Font, FontTable, GraphicTable, MessagePattern, tfon};
 use rendzina::{SignConfig, load_graphic};
 use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
 use std::borrow::Cow;
-use std::cmp::Ordering;
 use std::collections::BTreeSet;
 use std::fmt;
 use std::iter::repeat;
@@ -191,16 +189,6 @@ pub struct Dms {
     pub pixel_failures: Option<String>,
 }
 
-/// Message Pattern
-#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
-pub struct MsgPattern {
-    pub name: String,
-    pub compose_hashtag: Option<String>,
-    pub multi: String,
-    pub flash_beacon: Option<bool>,
-    pub pixel_service: Option<bool>,
-}
-
 /// Message Line
 #[derive(Debug, Default, Deserialize)]
 #[allow(dead_code)]
@@ -250,69 +238,6 @@ pub struct DmsAnc {
     graphics: GraphicTable<32>,
     device_actions: Vec<DeviceAction>,
     action_plans: Vec<ActionPlan>,
-}
-
-impl PartialOrd for MsgPattern {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for MsgPattern {
-    fn cmp(&self, other: &Self) -> Ordering {
-        if self == other {
-            return Ordering::Equal;
-        }
-        // prefer patterns which can be conbined (shared)
-        let self_combine = self.can_combine_shared_second();
-        let other_combine = other.can_combine_shared_second();
-        if self_combine && !other_combine {
-            return Ordering::Less;
-        } else if other_combine && !self_combine {
-            return Ordering::Greater;
-        }
-        let len_ord = self.multi.len().cmp(&other.multi.len());
-        if len_ord != Ordering::Equal {
-            return len_ord;
-        }
-        let ms_ord = self.multi.cmp(&other.multi);
-        if ms_ord != Ordering::Equal {
-            ms_ord
-        } else {
-            self.name.cmp(&other.name)
-        }
-    }
-}
-
-impl MsgPattern {
-    // Check if pattern can combine (shared) in second position
-    fn can_combine_shared_second(&self) -> bool {
-        let mut it = multi_split(&self.multi);
-        // check that:
-        // - the first value is a text rectangle
-        // - the same text rectangle starts every page
-        // - there are no other text rectangles
-        if let Some(first) = it.next()
-            && first.starts_with("[tr")
-        {
-            let mut tr_this_page = true;
-            for val in it {
-                if tr_this_page {
-                    if val.starts_with("[tr") {
-                        return false;
-                    } else if val == "[np]" {
-                        tr_this_page = false;
-                    }
-                } else if val == first {
-                    tr_this_page = true;
-                } else {
-                    return false;
-                }
-            }
-            return tr_this_page;
-        }
-        false
-    }
 }
 
 impl AncillaryData for DmsAnc {
@@ -948,20 +873,14 @@ impl Dms {
     /// Make an NTCIP sign
     fn make_dms(&self, anc: &DmsAnc) -> Option<NtcipDms> {
         let cfg = anc.sign_config(self.sign_config.as_deref())?;
-        match NtcipDms::builder()
+        NtcipDms::builder()
             .with_font_definition(anc.fonts.clone())
             .with_graphic_definition(anc.graphics.clone())
             .with_sign_cfg(cfg.sign_cfg())
             .with_vms_cfg(cfg.vms_cfg())
             .with_multi_cfg(cfg.multi_cfg())
             .build()
-        {
-            Ok(dms) => Some(dms),
-            Err(e) => {
-                console::log_1(&format!("make_dms: {e:?}").into());
-                None
-            }
-        }
+            .ok()
     }
 
     /// Build action plans HTML

@@ -34,6 +34,7 @@ use crate::lcs::Lcs;
 use crate::lcsstate::LcsState;
 use crate::modem::Modem;
 use crate::monitorstyle::MonitorStyle;
+use crate::msgpattern::MsgPattern;
 use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
 use crate::role::Role;
@@ -433,6 +434,7 @@ fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::Gps => Gps::item_states_all(),
         Res::Incident => Incident::item_states_all(),
         Res::Lcs => Lcs::item_states_all(),
+        Res::MsgPattern => MsgPattern::item_states_all(),
         Res::Permission => Permission::item_states_all(),
         Res::RampMeter => RampMeter::item_states_all(),
         Res::Role => Role::item_states_all(),
@@ -459,6 +461,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::LcsState
         | Res::Modem
         | Res::MonitorStyle
+        | Res::MsgPattern
         | Res::Permission
         | Res::Role
         | Res::SignConfig
@@ -613,6 +616,7 @@ impl CardList {
             Res::LcsState => self.states_main_x::<LcsState>().await,
             Res::Modem => self.states_main_x::<Modem>().await,
             Res::MonitorStyle => self.states_main_x::<MonitorStyle>().await,
+            Res::MsgPattern => self.states_main_x::<MsgPattern>().await,
             Res::Permission => self.states_main_x::<Permission>().await,
             Res::RampMeter => self.states_main_x::<RampMeter>().await,
             Res::Role => self.states_main_x::<Role>().await,
@@ -686,6 +690,7 @@ impl CardList {
             Res::LcsState => self.make_html_x::<LcsState>().await,
             Res::Modem => self.make_html_x::<Modem>().await,
             Res::MonitorStyle => self.make_html_x::<MonitorStyle>().await,
+            Res::MsgPattern => self.make_html_x::<MsgPattern>().await,
             Res::Permission => self.make_html_x::<Permission>().await,
             Res::RampMeter => self.make_html_x::<RampMeter>().await,
             Res::Role => self.make_html_x::<Role>().await,
@@ -781,6 +786,7 @@ impl CardList {
             Res::LcsState => self.view_change_x::<LcsState>().await,
             Res::Modem => self.view_change_x::<Modem>().await,
             Res::MonitorStyle => self.view_change_x::<MonitorStyle>().await,
+            Res::MsgPattern => self.view_change_x::<MsgPattern>().await,
             Res::Permission => self.view_change_x::<Permission>().await,
             Res::RampMeter => self.view_change_x::<RampMeter>().await,
             Res::Role => self.view_change_x::<Role>().await,
@@ -862,6 +868,7 @@ impl CardList {
             Res::LcsState => self.changed::<LcsState>(json).await,
             Res::Modem => self.changed::<Modem>(json).await,
             Res::MonitorStyle => self.changed::<MonitorStyle>(json).await,
+            Res::MsgPattern => self.changed::<MsgPattern>(json).await,
             Res::Permission => self.changed::<Permission>(json).await,
             Res::RampMeter => self.changed::<RampMeter>(json).await,
             Res::Role => self.changed::<Role>(json).await,
@@ -971,6 +978,7 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::LcsState => fetch_one_x::<LcsState>(cv).await,
         Res::Modem => fetch_one_x::<Modem>(cv).await,
         Res::MonitorStyle => fetch_one_x::<MonitorStyle>(cv).await,
+        Res::MsgPattern => fetch_one_x::<MsgPattern>(cv).await,
         Res::Permission => fetch_one_x::<Permission>(cv).await,
         Res::RampMeter => fetch_one_x::<RampMeter>(cv).await,
         Res::Role => fetch_one_x::<Role>(cv).await,
@@ -1032,6 +1040,7 @@ async fn patch_setup(cv: &CardView) -> Result<()> {
         Res::LcsState => patch_setup_x::<LcsState>(cv).await,
         Res::Modem => patch_setup_x::<Modem>(cv).await,
         Res::MonitorStyle => patch_setup_x::<MonitorStyle>(cv).await,
+        Res::MsgPattern => patch_setup_x::<MsgPattern>(cv).await,
         Res::Permission => patch_setup_x::<Permission>(cv).await,
         Res::RampMeter => patch_setup_x::<RampMeter>(cv).await,
         Res::Role => patch_setup_x::<Role>(cv).await,
@@ -1113,15 +1122,19 @@ async fn handle_click_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
 
 /// Handle input event for an element owned by the resource
 pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
-    if cv.view != View::Control {
-        return Ok(());
-    }
-    match cv.res {
-        Res::ActionPlan => handle_input_x::<ActionPlan>(cv, id).await,
-        Res::Dms => handle_input_x::<Dms>(cv, id).await,
-        Res::Domain => handle_input_x::<Domain>(cv, id).await,
-        Res::Lcs => handle_input_x::<Lcs>(cv, id).await,
-        Res::RampMeter => handle_input_x::<RampMeter>(cv, id).await,
+    match (cv.res, cv.view) {
+        (Res::ActionPlan, View::Control) => {
+            handle_input_x::<ActionPlan>(cv, id).await
+        }
+        (Res::Dms, View::Control) => handle_input_x::<Dms>(cv, id).await,
+        (Res::Domain, View::Control) => handle_input_x::<Domain>(cv, id).await,
+        (Res::Lcs, View::Control) => handle_input_x::<Lcs>(cv, id).await,
+        (Res::MsgPattern, View::Setup) => {
+            handle_input_x::<MsgPattern>(cv, id).await
+        }
+        (Res::RampMeter, View::Control) => {
+            handle_input_x::<RampMeter>(cv, id).await
+        }
         _ => Ok(()),
     }
 }
