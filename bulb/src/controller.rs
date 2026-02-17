@@ -58,7 +58,8 @@ pub struct Setup {
 /// Optional status data
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct ControllerStatus {
-    pub faults: Option<String>,
+    pub faults: String,
+    pub msg: Option<String>,
 }
 
 /// Controller
@@ -71,10 +72,10 @@ pub struct Controller {
     pub cabinet_style: Option<String>,
     pub condition: u32,
     pub notes: Option<String>,
-    pub setup: Option<Setup>,
     pub status: Option<ControllerStatus>,
     pub fail_time: Option<String>,
     // secondary attributes
+    pub setup: Option<Setup>,
     pub comm_state: Option<u32>,
     pub geo_loc: Option<String>,
     pub password: Option<String>,
@@ -286,12 +287,23 @@ impl Controller {
 
     /// Get item states
     pub fn item_states(&self) -> ItemStates<'_> {
-        match (self.is_active(), &self.fail_time) {
-            (true, Some(fail_time)) => {
-                ItemStates::default().with(ItemState::Offline, fail_time)
-            }
-            (true, None) => ItemState::Available.into(),
-            (false, _) => ItemState::Inactive.into(),
+        if !self.is_active() {
+            return ItemState::Inactive.into();
+        }
+        let mut states = ItemStates::default();
+        if let Some(status) = &self.status {
+            let msg = if let Some(msg) = status.msg.as_ref()
+                && status.faults == "other"
+            {
+                &msg
+            } else {
+                &status.faults
+            };
+            states = states.with(ItemState::Fault, msg);
+        }
+        match &self.fail_time {
+            Some(fail_time) => states.with(ItemState::Offline, fail_time),
+            None => states.with(ItemState::Available, ""),
         }
     }
 
@@ -495,6 +507,7 @@ impl Card for Controller {
         &[
             ItemState::Available,
             ItemState::Offline,
+            ItemState::Fault,
             ItemState::Inactive,
         ]
     }
@@ -510,6 +523,20 @@ impl Card for Controller {
         self
     }
 
+    /// Get the main item state
+    fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
+        let states = self.item_states();
+        if states.contains(ItemState::Inactive) {
+            ItemState::Inactive
+        } else if states.contains(ItemState::Offline) {
+            ItemState::Offline
+        } else if states.contains(ItemState::Fault) {
+            ItemState::Fault
+        } else {
+            ItemState::Available
+        }
+    }
+
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.contains_lower(search)
@@ -520,7 +547,6 @@ impl Card for Controller {
             || self.location.contains_lower(search)
             || self.notes.contains_lower(search)
             || self.cabinet_style.contains_lower(search)
-            || self.version().contains_lower(search)
             || anc.comm_state(self).contains_lower(search)
     }
 
