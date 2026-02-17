@@ -134,6 +134,7 @@ async fn finish_init() -> Result<()> {
             app::set_user(Some(user));
             if !app::initialized() {
                 update_sb_resource().await?;
+                set_resource(None, "").await;
                 app::set_initialized();
             }
         }
@@ -239,12 +240,6 @@ fn add_change_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
-/// Handle resource change
-fn change_resource() {
-    let res = selected_resource();
-    spawn_local(handle_resource_change(res, ""));
-}
-
 /// Set fullscreen mode
 fn set_fullscreen() {
     let doc = Doc::get();
@@ -302,6 +297,10 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
         }
         if let Some(elem) = doc.try_elem::<Element>("res_permission_row") {
             elem.set_class_name(row_class(base == Res::Permission));
+        }
+        let id = format!("res_{}", res.as_str());
+        if let Some(elem) = doc.try_elem::<HtmlInputElement>(&id) {
+            elem.set_checked(true);
         }
     }
     let sb_search = doc.elem::<HtmlInputElement>("sb_search");
@@ -491,6 +490,12 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
+}
+
+/// Handle resource change
+fn handle_res_change() {
+    let res = selected_resource();
+    spawn_local(handle_resource_change(res, ""));
 }
 
 /// Handle search input
@@ -713,14 +718,20 @@ async fn handle_login() {
 
 /// Go to resource from target's `data-link` attribute
 async fn go_resource(attrs: ButtonAttrs) {
-    let doc = Doc::get();
     if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type)
         && let Ok(res) = Res::try_from(rname.as_str())
     {
-        let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
-        sb_resource.set_value(res.base().as_str());
-        handle_resource_change(Some(res), &link).await;
+        set_resource(Some(res), &link).await;
     }
+}
+
+/// Set selected resource
+async fn set_resource(res: Option<Res>, search: &str) {
+    let doc = Doc::get();
+    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+    let base = res.map(|r| r.base().as_str()).unwrap_or("");
+    sb_resource.set_value(base);
+    handle_resource_change(res, search).await;
 }
 
 /// Handle refresh button click
@@ -828,10 +839,7 @@ async fn select_card_map(name: String) -> Result<()> {
     let res = app::name_res(&name);
     if let Some(res) = res {
         if selected_resource() != Some(res) {
-            let doc = Doc::get();
-            let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
-            sb_resource.set_value(res.base().as_str());
-            handle_resource_change(Some(res), "").await;
+            set_resource(Some(res), "").await;
         }
         let id = format!("{res}_{name}");
         js_fly_enable(JsValue::FALSE);
