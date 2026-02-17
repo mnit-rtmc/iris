@@ -1,6 +1,6 @@
 // resource.rs
 //
-// Copyright (C) 2018-2025  Minnesota Department of Transportation
+// Copyright (C) 2018-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -493,15 +493,6 @@ impl Resource {
         }
     }
 
-    /// Check if all_sql produces JSON
-    const fn all_sql_json(self) -> bool {
-        use Resource::*;
-        match self {
-            SystemAttribute | SystemAttributePub => false,
-            _ => true,
-        }
-    }
-
     /// Handle a notification event.
     ///
     /// * `client` Database connection.
@@ -584,14 +575,10 @@ impl Resource {
         let dir = Path::new("");
         let file = AtomicFile::new(dir, name).await?;
         let writer = file.writer().await?;
-        let sql = self.all_sql();
-        let sql = if self.all_sql_json() {
-            format!(
-                "SELECT json_strip_nulls(row_to_json(r))::text FROM ({sql}) r"
-            )
-        } else {
-            sql.to_string()
-        };
+        let sql = format!(
+            "SELECT json_strip_nulls(row_to_json(r))::text FROM ({}) r",
+            self.all_sql(),
+        );
         let count = query_json(client, &sql, writer).await?;
         file.commit().await?;
         log::info!("{name}: wrote {count} rows in {:?}", t.elapsed());
