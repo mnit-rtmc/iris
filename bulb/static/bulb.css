@@ -436,6 +436,11 @@ label:has(+ #sb_resource) {
 #mc_clear {
   grid-area: bc;
 }
+.multi {
+  font-family: monospace;
+  word-break: break-all;
+  width: 100%;
+}
 
 .start {
   align-self: start;

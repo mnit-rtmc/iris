@@ -245,6 +245,12 @@ impl MsgPattern {
             .r#type("radio")
             .name("pattern_tab");
         div.label().r#for("tab_multi").cdata("MULTI").close();
+        div.input()
+            .id("tab_lines")
+            .class("toggle")
+            .r#type("radio")
+            .name("pattern_tab");
+        div.label().r#for("tab_lines").cdata("Lines").close();
         div.close();
         div = page.frag::<html::Div>();
         div.id("div_wysiwyg").class("row");
@@ -253,15 +259,18 @@ impl MsgPattern {
         div.id("div_multi").class("row hidden");
         div.textarea()
             .id("multi")
+            .class("multi")
             .autocorrect("off")
             .autocomplete("off")
             .spellcheck("false")
-            .style("word-break: break-all; font-family: monospace;")
             .maxlength(1024)
             .rows(5)
-            .cols(30)
             .cdata(&self.multi)
             .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.id("div_lines").class("row hidden");
+        // FIXME
         div.close();
         div = page.frag::<html::Div>();
         div.class("row");
@@ -361,6 +370,7 @@ impl Card for MsgPattern {
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_text_area("multi", &self.multi);
+        fields.changed_input("compose_hashtag", &self.compose_hashtag);
         fields.changed_input("flash_beacon", self.flash_beacon);
         fields.changed_input("pixel_service", self.pixel_service);
         fields.into_value().to_string()
@@ -368,23 +378,47 @@ impl Card for MsgPattern {
 
     /// Handle input event for an element on the card
     fn handle_input(&self, anc: MsgPatternAnc, id: String) -> Vec<Action> {
-        let tab = match id.as_str() {
-            "tab_wysiwyg" => Some(true),
-            "tab_multi" => Some(false),
-            _ => None,
-        };
-        if let Some(wysiwyg) = tab {
+        if let Ok(tab) = Tab::try_from(id.as_str()) {
             let doc = Doc::get();
             doc.elem::<HtmlElement>("div_wysiwyg")
-                .set_class_name(row_class(wysiwyg));
+                .set_class_name(tab.row_class(Tab::Wysiwyg));
             doc.elem::<HtmlElement>("div_multi")
-                .set_class_name(row_class(!wysiwyg));
+                .set_class_name(tab.row_class(Tab::Multi));
+            doc.elem::<HtmlElement>("div_lines")
+                .set_class_name(tab.row_class(Tab::Lines));
         }
         Vec::new()
     }
 }
 
-/// Get class name for a row
-fn row_class(show: bool) -> &'static str {
-    if show { "row" } else { "row hidden" }
+/// Message pattern card tabs
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Tab {
+    Wysiwyg,
+    Lines,
+    Multi,
+}
+
+impl TryFrom<&str> for Tab {
+    type Error = ();
+
+    fn try_from(id: &str) -> std::result::Result<Self, Self::Error> {
+        match id {
+            id if id == "tab_wysiwyg" => Ok(Self::Wysiwyg),
+            id if id == "tab_multi" => Ok(Tab::Multi),
+            id if id == "tab_lines" => Ok(Tab::Lines),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Tab {
+    /// Get class for a tab
+    fn row_class(self, chk: Self) -> &'static str {
+        if self == chk {
+            "row"
+        } else {
+            "row hidden"
+        }
+    }
 }

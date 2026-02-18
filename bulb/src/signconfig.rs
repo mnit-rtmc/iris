@@ -147,7 +147,7 @@ fn item_states(sc: &SignConfig, anc: &SignConfigAnc) -> ItemStates<'static> {
     states = if sc.sign_count > 0 {
         states.with(ItemState::Available, "")
     } else {
-        states.with(ItemState::Inactive.into(), "")
+        states.with(ItemState::Inactive, "")
     };
     if anc.make_dms(sc).is_none() {
         states = states.with(ItemState::Fault, "Invalid");
