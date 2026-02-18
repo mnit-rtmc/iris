@@ -221,6 +221,47 @@ impl Ord for MsgPattern {
 }
 
 impl MsgPattern {
+    /// Get MULTI string with action tags replaced with a filler character
+    fn multi(&self) -> String {
+        let mut multi = String::new();
+        for val in multi_split(&self.multi) {
+            if val.starts_with("[exit") {
+                // replaced with empty string
+            } else if val.starts_with("[pa") {
+                let mut v = "**";
+                let mut it = val.split(',');
+                if it.next().is_some() {
+                    // skip ID
+                    if let Some(low) = it.next() {
+                        if low.len() > v.len() {
+                            v = low;
+                        }
+                        if let Some(closed) = it.next()
+                            && let Some(closed) = closed.strip_suffix(']')
+                            && closed.len() > v.len()
+                        {
+                            v = closed;
+                        }
+                    }
+                }
+                multi.push_str(v);
+            } else if val.starts_with("[slow") {
+                if val.ends_with("dist]") || val.ends_with("speed]") {
+                    multi.push_str("**");
+                }
+            } else if val.starts_with("[tt") {
+                multi.push_str("**");
+            } else if val.starts_with("[tzp") {
+                multi.push_str("*.**");
+            } else if val.starts_with("[tz") {
+                // replaced with empty string
+            } else {
+                multi.push_str(val);
+            }
+        }
+        multi
+    }
+
     // Check if pattern can combine (shared) in second position
     fn can_combine_shared_second(&self) -> bool {
         let mut it = multi_split(&self.multi);
@@ -383,7 +424,7 @@ impl MsgPattern {
                     .with_dms(dms)
                     .with_max_width(360)
                     .with_max_height(120);
-                rend.render_multi(&self.multi, &mut div.img());
+                rend.render_multi(&self.multi(), &mut div.img());
             }
         }
         div.close();
