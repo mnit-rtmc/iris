@@ -237,18 +237,14 @@ impl MsgPattern {
         let mut page = Page::new();
         self.title(View::Setup, &mut page.frag::<html::Div>());
         let mut div = page.frag::<html::Div>();
-        div.class("center");
-        self.render_sign(anc, &mut div.div());
-        div.close();
-        div = page.frag::<html::Div>();
         div.class("sb_row_left");
         div.input()
-            .id("tab_wysiwyg")
+            .id("tab_preview")
             .class("toggle")
             .r#type("radio")
             .name("pattern_tab")
             .checked();
-        div.label().r#for("tab_wysiwyg").cdata("WYSIWYG").close();
+        div.label().r#for("tab_preview").cdata("Preview").close();
         div.input()
             .id("tab_multi")
             .class("toggle")
@@ -263,7 +259,8 @@ impl MsgPattern {
         div.label().r#for("tab_lines").cdata("Lines").close();
         div.close();
         div = page.frag::<html::Div>();
-        div.id("div_wysiwyg").class("row");
+        div.id("div_preview").class("row center");
+        self.render_multi(anc, &mut div.div());
         div.close();
         div = page.frag::<html::Div>();
         div.id("div_multi").class("row hidden");
@@ -395,8 +392,8 @@ impl Card for MsgPattern {
     fn handle_input(&self, anc: MsgPatternAnc, id: String) -> Vec<Action> {
         if let Ok(tab) = Tab::try_from(id.as_str()) {
             let doc = Doc::get();
-            doc.elem::<HtmlElement>("div_wysiwyg")
-                .set_class_name(tab.row_class(Tab::Wysiwyg));
+            doc.elem::<HtmlElement>("div_preview")
+                .set_class_name(tab.row_class(Tab::Preview));
             doc.elem::<HtmlElement>("div_multi")
                 .set_class_name(tab.row_class(Tab::Multi));
             doc.elem::<HtmlElement>("div_lines")
@@ -409,9 +406,9 @@ impl Card for MsgPattern {
 /// Message pattern card tabs
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Tab {
-    Wysiwyg,
-    Lines,
+    Preview,
     Multi,
+    Lines,
 }
 
 impl TryFrom<&str> for Tab {
@@ -419,7 +416,7 @@ impl TryFrom<&str> for Tab {
 
     fn try_from(id: &str) -> std::result::Result<Self, Self::Error> {
         match id {
-            id if id == "tab_wysiwyg" => Ok(Self::Wysiwyg),
+            id if id == "tab_preview" => Ok(Self::Preview),
             id if id == "tab_multi" => Ok(Tab::Multi),
             id if id == "tab_lines" => Ok(Tab::Lines),
             _ => Err(()),
@@ -430,10 +427,6 @@ impl TryFrom<&str> for Tab {
 impl Tab {
     /// Get class for a tab
     fn row_class(self, chk: Self) -> &'static str {
-        if self == chk {
-            "row"
-        } else {
-            "row hidden"
-        }
+        if self == chk { "row" } else { "row hidden" }
     }
 }
