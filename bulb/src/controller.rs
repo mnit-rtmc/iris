@@ -295,7 +295,7 @@ impl Controller {
             let msg = if let Some(msg) = status.msg.as_ref()
                 && status.faults == "other"
             {
-                &msg
+                msg
             } else {
                 &status.faults
             };

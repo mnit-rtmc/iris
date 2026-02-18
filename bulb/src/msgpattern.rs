@@ -12,34 +12,49 @@
 //
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
-use crate::dms::FontName;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::rend::Renderer;
-use crate::util::{
-    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
-};
+use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use hatmil::{Page, html};
-use ntcip::dms::multi::{
-    join_text, normalize as multi_normalize, split as multi_split,
-};
-use ntcip::dms::{FontTable, tfon};
+use js_sys::{ArrayBuffer, Uint8Array};
+use ntcip::dms::multi::split as multi_split;
+use ntcip::dms::{FontTable, GraphicTable, tfon};
+use rendzina::{SignConfig, load_graphic};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 use std::cmp::Ordering;
-use wasm_bindgen::JsValue;
-use web_sys::HtmlElement;
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{HtmlElement, console};
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
+
+/// Font name
+#[derive(Debug, Default, Deserialize)]
+#[allow(dead_code)]
+pub struct FontName {
+    pub font_number: u8,
+    pub name: String,
+}
+
+/// Graphic name
+#[derive(Debug, Default, Deserialize)]
+#[allow(dead_code)]
+pub struct GraphicName {
+    pub number: u8,
+    pub name: String,
+}
 
 /// Ancillary message pattern data
 #[derive(Default)]
 pub struct MsgPatternAnc {
     assets: Vec<Asset>,
+    configs: Vec<SignConfig>,
     fonts: FontTable<256, 24>,
+    graphics: GraphicTable<32>,
 }
 
 /// Message Pattern
@@ -62,7 +77,9 @@ impl AncillaryData for MsgPatternAnc {
     fn new(_pri: &MsgPattern, view: View) -> Self {
         let mut assets = Vec::new();
         if let View::Setup = view {
+            assets.push(Asset::SignConfigs);
             assets.push(Asset::Fonts);
+            assets.push(Asset::Graphics);
         }
         MsgPatternAnc {
             assets,
@@ -83,6 +100,9 @@ impl AncillaryData for MsgPatternAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::SignConfigs => {
+                self.configs = serde_wasm_bindgen::from_value(value)?;
+            }
             Asset::Fonts => {
                 let fnames: Vec<FontName> =
                     serde_wasm_bindgen::from_value(value)?;
@@ -99,6 +119,31 @@ impl AncillaryData for MsgPatternAnc {
                     *f = font;
                 }
             }
+            Asset::Graphics => {
+                let gnames: Vec<GraphicName> =
+                    serde_wasm_bindgen::from_value(value)?;
+                for gname in gnames {
+                    self.assets.push(Asset::Graphic(gname.name));
+                }
+            }
+            Asset::Graphic(nm) => {
+                if let Ok(number) = nm
+                    .as_str()
+                    .replace(|c: char| !c.is_numeric(), "")
+                    .parse::<u8>()
+                {
+                    let abuf = value.dyn_into::<ArrayBuffer>().unwrap();
+                    let graphic = Uint8Array::new(&abuf).to_vec();
+                    let graphic = load_graphic(&graphic[..], number)?;
+                    if let Some(g) = self.graphics.graphic_mut(number) {
+                        *g = graphic;
+                    } else if let Some(g) = self.graphics.graphic_mut(0) {
+                        *g = graphic;
+                    }
+                } else {
+                    console::log_1(&format!("invalid graphic: {nm}").into());
+                }
+            }
             _ => unreachable!(),
         }
         Ok(())
@@ -106,6 +151,11 @@ impl AncillaryData for MsgPatternAnc {
 }
 
 impl MsgPatternAnc {
+    /// Find a sign config
+    fn sign_config(&self, cfg: Option<&String>) -> Option<&SignConfig> {
+        cfg.and_then(|cfg| self.configs.iter().find(|c| c.name == *cfg))
+    }
+
     /// Build fonts HTML
     fn select_fonts_html<'p>(
         &self,
@@ -126,17 +176,15 @@ impl MsgPatternAnc {
     }
 
     /// Make an NTCIP sign
-    fn make_dms(&self, pri: &MsgPattern) -> Option<NtcipDms> {
-        None
-        // FIXME: find sign config...
-        /*
+    fn make_dms(&self, sc: &SignConfig) -> Option<NtcipDms> {
         NtcipDms::builder()
             .with_font_definition(self.fonts.clone())
+            .with_graphic_definition(self.graphics.clone())
             .with_sign_cfg(sc.sign_cfg())
             .with_vms_cfg(sc.vms_cfg())
             .with_multi_cfg(sc.multi_cfg())
             .build()
-            .ok()*/
+            .ok()
     }
 }
 
@@ -259,11 +307,10 @@ impl MsgPattern {
         div.label().r#for("tab_lines").cdata("Lines").close();
         div.close();
         div = page.frag::<html::Div>();
-        div.id("div_preview").class("row center");
-        self.render_multi(anc, &mut div.div());
-        div.close();
+        div.id("div_preview");
+        self.render_multi(anc, &mut div);
         div = page.frag::<html::Div>();
-        div.id("div_multi").class("row hidden");
+        div.id("div_multi").class("row no-display");
         div.textarea()
             .id("multi")
             .class("multi")
@@ -276,7 +323,7 @@ impl MsgPattern {
             .close();
         div.close();
         div = page.frag::<html::Div>();
-        div.id("div_lines").class("row hidden");
+        div.id("div_lines").class("row no-display");
         // FIXME
         div.close();
         div = page.frag::<html::Div>();
@@ -320,18 +367,26 @@ impl MsgPattern {
     }
 
     /// Render the message pattern image HTML
-    fn render_sign<'p>(&self, anc: &MsgPatternAnc, div: &'p mut html::Div<'p>) {
-        // FIXME
-        /*
-        let dms = anc.make_dms(mp);
-        if let Some(dms) = &dms {
-            let mut rend = Renderer::new()
-                .with_dms(dms)
-                .with_max_width(240)
-                .with_max_height(80)
-                .with_mod_size(mod_size);
-            rend.render_multi("A1", &mut td.img());
-        }*/
+    fn render_multi<'p>(
+        &self,
+        anc: &MsgPatternAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        let sc = self
+            .compose_cfgs
+            .first()
+            .or_else(|| self.planned_cfgs.first());
+        if let Some(cfg) = anc.sign_config(sc) {
+            let dms = anc.make_dms(cfg);
+            if let Some(dms) = &dms {
+                let mut rend = Renderer::new()
+                    .with_dms(dms)
+                    .with_max_width(360)
+                    .with_max_height(120);
+                rend.render_multi(&self.multi, &mut div.img());
+            }
+        }
+        div.close();
     }
 }
 
@@ -389,7 +444,7 @@ impl Card for MsgPattern {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, anc: MsgPatternAnc, id: String) -> Vec<Action> {
+    fn handle_input(&self, _anc: MsgPatternAnc, id: String) -> Vec<Action> {
         if let Ok(tab) = Tab::try_from(id.as_str()) {
             let doc = Doc::get();
             doc.elem::<HtmlElement>("div_preview")
@@ -416,9 +471,9 @@ impl TryFrom<&str> for Tab {
 
     fn try_from(id: &str) -> std::result::Result<Self, Self::Error> {
         match id {
-            id if id == "tab_preview" => Ok(Self::Preview),
-            id if id == "tab_multi" => Ok(Tab::Multi),
-            id if id == "tab_lines" => Ok(Tab::Lines),
+            "tab_preview" => Ok(Self::Preview),
+            "tab_multi" => Ok(Tab::Multi),
+            "tab_lines" => Ok(Tab::Lines),
             _ => Err(()),
         }
     }
@@ -427,6 +482,6 @@ impl TryFrom<&str> for Tab {
 impl Tab {
     /// Get class for a tab
     fn row_class(self, chk: Self) -> &'static str {
-        if self == chk { "row" } else { "row hidden" }
+        if self == chk { "row" } else { "row no-display" }
     }
 }

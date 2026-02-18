@@ -12,10 +12,10 @@
 //
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
-use crate::dms::FontName;
 use crate::error::Result;
 use crate::factor;
 use crate::item::{ItemState, ItemStates};
+use crate::msgpattern::FontName;
 use crate::rend::Renderer;
 use crate::util::{ContainsLower, Fields, Select, opt_str};
 use hatmil::{Page, html};

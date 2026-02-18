@@ -20,7 +20,7 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
-use crate::msgpattern::MsgPattern;
+use crate::msgpattern::{FontName, GraphicName, MsgPattern};
 use crate::notes::contains_hashtag;
 use crate::rend::Renderer;
 use crate::rle::Table;
@@ -206,22 +206,6 @@ pub struct Word {
     pub name: String,
     pub abbr: Option<String>,
     pub allowed: bool,
-}
-
-/// Font name
-#[derive(Debug, Default, Deserialize)]
-#[allow(dead_code)]
-pub struct FontName {
-    pub font_number: u8,
-    pub name: String,
-}
-
-/// Graphic name
-#[derive(Debug, Default, Deserialize)]
-#[allow(dead_code)]
-pub struct GraphicName {
-    pub number: u8,
-    pub name: String,
 }
 
 /// DMS ancillary data
