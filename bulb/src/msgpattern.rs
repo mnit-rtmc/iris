@@ -48,6 +48,8 @@ pub struct MsgPattern {
     pub name: String,
     pub compose_hashtag: Option<String>,
     pub multi: String,
+    pub compose_cfgs: Vec<String>,
+    pub planned_cfgs: Vec<String>,
     // secondary attributes
     pub flash_beacon: Option<bool>,
     pub pixel_service: Option<bool>,
@@ -203,11 +205,19 @@ impl MsgPattern {
     /// Get item states
     fn item_states(&self, _anc: &MsgPatternAnc) -> ItemStates<'static> {
         let mut states = ItemStates::default();
-        if self.compose_hashtag.is_some() {
+        if !self.compose_cfgs.is_empty() {
             states = states.with(ItemState::Available, "");
         }
-        // FIXME: Planned : if device actions use pattern
-        // FIXME: Fault : if pattern doesn't fit on a sign config
+        if !self.planned_cfgs.is_empty() {
+            states = states.with(ItemState::Planned, "");
+        }
+        if self.compose_cfgs.is_empty() && self.planned_cfgs.is_empty() {
+            states = states.with(ItemState::Inactive, "");
+        }
+        // FIXME: check whether pattern fits on all sign configs
+        if false {
+            states = states.with(ItemState::Fault, "");
+        }
         states
     }
 
@@ -338,7 +348,12 @@ impl Card for MsgPattern {
 
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
-        &[ItemState::Available, ItemState::Planned, ItemState::Fault]
+        &[
+            ItemState::Available,
+            ItemState::Planned,
+            ItemState::Fault,
+            ItemState::Inactive,
+        ]
     }
 
     /// Get the name

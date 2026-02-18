@@ -635,15 +635,35 @@ pub const MSG_LINE_ONE: &str = "\
 
 /// SQL query for all message patterns (primary)
 pub const MSG_PATTERN_ALL: &str = "\
-  SELECT name, multi, compose_hashtag \
-  FROM iris.msg_pattern \
-  ORDER BY name";
+  SELECT mp.name, multi, compose_hashtag, \
+         to_jsonb(array_remove(array_agg(DISTINCT cd.sign_config), null)) \
+      AS compose_cfgs, \
+         to_jsonb(array_remove(array_agg(DISTINCT pd.sign_config), null)) \
+      AS planned_cfgs \
+  FROM iris.msg_pattern mp \
+  LEFT JOIN iris.hashtag ch ON LOWER(ch.hashtag) = LOWER(mp.compose_hashtag) \
+  LEFT JOIN iris.dms cd ON ch.name = cd.name \
+  LEFT JOIN iris.device_action da ON da.msg_pattern = mp.name \
+  LEFT JOIN iris.hashtag ph ON LOWER(ph.hashtag) = LOWER(da.hashtag) \
+  LEFT JOIN iris.dms pd ON ph.name = pd.name \
+  GROUP BY mp.name \
+  ORDER BY mp.name";
 
 /// SQL query for one message pattern (secondary)
 pub const MSG_PATTERN_ONE: &str = "\
-  SELECT name, multi, flash_beacon, pixel_service, compose_hashtag \
-  FROM iris.msg_pattern \
-  WHERE name = $1";
+  SELECT mp.name, multi, flash_beacon, pixel_service, compose_hashtag, \
+         to_jsonb(array_remove(array_agg(DISTINCT cd.sign_config), null)) \
+      AS compose_cfgs, \
+         to_jsonb(array_remove(array_agg(DISTINCT pd.sign_config), null)) \
+      AS planned_cfgs \
+  FROM iris.msg_pattern mp \
+  LEFT JOIN iris.hashtag ch ON LOWER(ch.hashtag) = LOWER(mp.compose_hashtag) \
+  LEFT JOIN iris.dms cd ON ch.name = cd.name \
+  LEFT JOIN iris.device_action da ON da.msg_pattern = mp.name \
+  LEFT JOIN iris.hashtag ph ON LOWER(ph.hashtag) = LOWER(da.hashtag) \
+  LEFT JOIN iris.dms pd ON ph.name = pd.name \
+  WHERE mp.name = $1 \
+  GROUP BY mp.name";
 
 /// SQL query for all parking areas (public)
 pub const PARKING_AREA_PUB: &str = "\

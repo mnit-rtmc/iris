@@ -25,7 +25,7 @@ active for long periods of time.
 
 | Access       | Primary                 | Secondary                     |
 |--------------|-------------------------|-------------------------------|
-| 👁️  View      | name                    |                               |
+| 👁️  View      | name, compose\_cfgs, planned\_cfgs |                    |
 | 👉 Operate   |                         |                               |
 | 💡 Manage    | compose\_hashtag, multi | flash\_beacon, pixel\_service |
 | 🔧 Configure |                         |                               |
