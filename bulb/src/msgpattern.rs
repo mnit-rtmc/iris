@@ -27,7 +27,7 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{HtmlElement, HtmlSelectElement, console};
+use web_sys::{HtmlElement, HtmlSelectElement, HtmlTextAreaElement, console};
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
@@ -156,25 +156,6 @@ impl MsgPatternAnc {
         cfg.and_then(|cfg| self.configs.iter().find(|c| c.name == *cfg))
     }
 
-    /// Build fonts HTML
-    fn select_fonts_html<'p>(
-        &self,
-        font_num: u8,
-        select: &'p mut html::Select<'p>,
-    ) {
-        select.id("default_font");
-        for num in 1..=255 {
-            if let Some(_f) = self.fonts.font(num) {
-                let mut option = select.option();
-                if num == font_num {
-                    option.selected();
-                }
-                option.cdata(num).close();
-            }
-        }
-        select.close();
-    }
-
     /// Make an NTCIP sign
     fn make_dms(&self, sc: &SignConfig) -> Option<NtcipDms> {
         NtcipDms::builder()
@@ -221,11 +202,21 @@ impl Ord for MsgPattern {
 }
 
 impl MsgPattern {
+    /// Get entered MULTI string
+    fn multi_string(&self) -> String {
+        match Doc::get().try_elem::<HtmlTextAreaElement>("multi") {
+            Some(elem) => elem.value(),
+            None => self.multi.clone(),
+        }
+    }
+
     /// Get MULTI string with action tags replaced with a filler character
     fn multi(&self) -> String {
         let mut multi = String::new();
-        for val in multi_split(&self.multi) {
-            if val.starts_with("[exit") {
+        for val in multi_split(&self.multi_string()) {
+            if val.starts_with("[cg") {
+                multi.push_str("**");
+            } else if val.starts_with("[exit") {
                 // replaced with empty string
             } else if val.starts_with("[pa") {
                 let mut v = "**";
@@ -469,7 +460,7 @@ impl MsgPattern {
     fn replace_preview(&self, anc: &MsgPatternAnc) {
         let mut page = Page::new();
         let mut img = page.frag::<html::Img>();
-        self.render_preview(&anc, &mut img);
+        self.render_preview(anc, &mut img);
         let preview = Doc::get().elem::<HtmlElement>("mp_preview");
         preview.set_outer_html(&String::from(page));
     }
