@@ -441,7 +441,8 @@ label:has(+ #sb_resource) {
   word-break: break-all;
   width: 100%;
 }
-#div_preview img {
+#mp_preview_div img {
+  height: 100%;
   width: 100%;
 }
 

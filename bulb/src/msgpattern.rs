@@ -27,7 +27,7 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{HtmlElement, console};
+use web_sys::{HtmlElement, HtmlSelectElement, console};
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
@@ -348,10 +348,12 @@ impl MsgPattern {
         div.label().r#for("tab_lines").cdata("Lines").close();
         div.close();
         div = page.frag::<html::Div>();
-        div.id("div_preview");
-        self.render_multi(anc, &mut div);
+        div.id("mp_preview_div").class("row");
+        self.configs_select(&mut div.select());
+        self.render_preview(anc, &mut div.img());
+        div.close();
         div = page.frag::<html::Div>();
-        div.id("div_multi").class("row no-display");
+        div.id("mp_multi_div").class("row no-display");
         div.textarea()
             .id("multi")
             .class("multi")
@@ -364,7 +366,7 @@ impl MsgPattern {
             .close();
         div.close();
         div = page.frag::<html::Div>();
-        div.id("div_lines").class("row no-display");
+        div.id("mp_lines_div").class("row no-display");
         // FIXME
         div.close();
         div = page.frag::<html::Div>();
@@ -407,27 +409,69 @@ impl MsgPattern {
         String::from(page)
     }
 
-    /// Render the message pattern image HTML
-    fn render_multi<'p>(
+    /// Make a select element for sign configs
+    fn configs_select<'p>(&self, select: &'p mut html::Select<'p>) {
+        select.id("mp_config").size(4).style("min-width: 25%;");
+        let mut cfgs: Vec<&str> =
+            self.compose_cfgs.iter().map(String::as_str).collect();
+        cfgs.extend(self.planned_cfgs.iter().map(String::as_str));
+        let sc = cfgs.first().map(|c| c.to_owned());
+        cfgs.sort();
+        cfgs.dedup();
+        for cfg in cfgs {
+            let mut option = select.option();
+            if sc == Some(cfg) {
+                option.selected();
+            }
+            option.cdata(cfg).close();
+        }
+        select.close();
+    }
+
+    /// Get selected sign configuration
+    fn selected_config(&self) -> Option<String> {
+        if let Some(elem) =
+            Doc::get().try_elem::<HtmlSelectElement>("mp_config")
+        {
+            return Some(elem.value());
+        }
+        self.compose_cfgs
+            .first()
+            .or_else(|| self.planned_cfgs.first())
+            .cloned()
+    }
+
+    /// Render the message pattern image preview
+    fn render_preview<'p>(
         &self,
         anc: &MsgPatternAnc,
-        div: &'p mut html::Div<'p>,
+        img: &'p mut html::Img<'p>,
     ) {
-        let sc = self
-            .compose_cfgs
-            .first()
-            .or_else(|| self.planned_cfgs.first());
-        if let Some(cfg) = anc.sign_config(sc) {
-            let dms = anc.make_dms(cfg);
-            if let Some(dms) = &dms {
-                let mut rend = Renderer::new()
-                    .with_dms(dms)
-                    .with_max_width(360)
-                    .with_max_height(120);
-                rend.render_multi(&self.multi(), &mut div.img());
+        img.id("mp_preview");
+        let sc = self.selected_config();
+        if let Some(cfg) = anc.sign_config(sc.as_ref()) {
+            match &anc.make_dms(cfg) {
+                Some(dms) => {
+                    let mut rend = Renderer::new()
+                        .with_dms(dms)
+                        .with_max_width(240)
+                        .with_max_height(80);
+                    rend.render_multi(&self.multi(), img);
+                }
+                None => {
+                    img.alt("FAILED TO RENDER");
+                }
             }
         }
-        div.close();
+    }
+
+    /// Replace preview image
+    fn replace_preview(&self, anc: &MsgPatternAnc) {
+        let mut page = Page::new();
+        let mut img = page.frag::<html::Img>();
+        self.render_preview(&anc, &mut img);
+        let preview = Doc::get().elem::<HtmlElement>("mp_preview");
+        preview.set_outer_html(&String::from(page));
     }
 }
 
@@ -485,14 +529,19 @@ impl Card for MsgPattern {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: MsgPatternAnc, id: String) -> Vec<Action> {
-        if let Ok(tab) = Tab::try_from(id.as_str()) {
-            let doc = Doc::get();
-            doc.elem::<HtmlElement>("div_preview")
+    fn handle_input(&self, anc: MsgPatternAnc, id: String) -> Vec<Action> {
+        let doc = Doc::get();
+        if id == "mp_config" {
+            self.replace_preview(&anc);
+        } else if let Ok(tab) = Tab::try_from(id.as_str()) {
+            if let Tab::Preview = tab {
+                self.replace_preview(&anc);
+            }
+            doc.elem::<HtmlElement>("mp_preview_div")
                 .set_class_name(tab.row_class(Tab::Preview));
-            doc.elem::<HtmlElement>("div_multi")
+            doc.elem::<HtmlElement>("mp_multi_div")
                 .set_class_name(tab.row_class(Tab::Multi));
-            doc.elem::<HtmlElement>("div_lines")
+            doc.elem::<HtmlElement>("mp_lines_div")
                 .set_class_name(tab.row_class(Tab::Lines));
         }
         Vec::new()

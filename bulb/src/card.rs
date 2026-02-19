@@ -1142,7 +1142,7 @@ pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
 /// Handle input event for an element on a card
 async fn handle_input_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
     let pri = fetch_primary::<C>(cv).await?;
-    let anc = fetch_ancillary(&pri, View::Control).await?;
+    let anc = fetch_ancillary(&pri, cv.view).await?;
     for action in pri.handle_input(anc, id) {
         action.perform().await?;
     }
