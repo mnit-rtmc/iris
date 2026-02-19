@@ -74,13 +74,12 @@ impl AncillaryData for MsgPatternAnc {
     type Primary = MsgPattern;
 
     /// Construct ancillary message pattern data
-    fn new(_pri: &MsgPattern, view: View) -> Self {
-        let mut assets = Vec::new();
-        if let View::Setup = view {
-            assets.push(Asset::SignConfigs);
-            assets.push(Asset::Fonts);
-            assets.push(Asset::Graphics);
-        }
+    #[allow(clippy::vec_init_then_push)]
+    fn new(_pri: &MsgPattern, _view: View) -> Self {
+        let mut assets = Vec::with_capacity(3);
+        assets.push(Asset::SignConfigs);
+        assets.push(Asset::Fonts);
+        assets.push(Asset::Graphics);
         MsgPatternAnc {
             assets,
             ..Default::default()
@@ -283,7 +282,7 @@ impl MsgPattern {
     }
 
     /// Get item states
-    fn item_states(&self, _anc: &MsgPatternAnc) -> ItemStates<'static> {
+    fn item_states(&self, anc: &MsgPatternAnc) -> ItemStates<'static> {
         let mut states = ItemStates::default();
         if !self.compose_cfgs.is_empty() {
             states = states.with(ItemState::Available, "");
@@ -294,11 +293,27 @@ impl MsgPattern {
         if self.compose_cfgs.is_empty() && self.planned_cfgs.is_empty() {
             states = states.with(ItemState::Inactive, "");
         }
-        // FIXME: check whether pattern fits on all sign configs
-        if false {
+        if !self.is_renderable(anc) {
             states = states.with(ItemState::Fault, "");
         }
         states
+    }
+
+    /// Check if the pattern is renderable
+    fn is_renderable(&self, anc: &MsgPatternAnc) -> bool {
+        let sc = self
+            .compose_cfgs
+            .first()
+            .or_else(|| self.planned_cfgs.first());
+        anc.sign_config(sc).is_some_and(|cfg| {
+            anc.make_dms(cfg).is_some_and(|dms| {
+                let rend = Renderer::new()
+                    .with_dms(&dms)
+                    .with_max_width(240)
+                    .with_max_height(80);
+                rend.is_renderable(&self.multi())
+            })
+        })
     }
 
     /// Convert to compact HTML

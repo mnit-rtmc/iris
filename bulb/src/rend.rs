@@ -92,6 +92,12 @@ impl<'r> Renderer<'r> {
         })
     }
 
+    /// Check if MULTI is renderable
+    pub fn is_renderable(&self, multi: &str) -> bool {
+        self.dms
+            .is_some_and(|dms| rendzina::is_renderable(dms, multi))
+    }
+
     /// Render sign MULTI to a GIF image
     pub fn render_multi<'p>(
         &mut self,

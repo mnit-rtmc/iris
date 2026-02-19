@@ -162,6 +162,11 @@ pub fn load_graphic<R: Read>(reader: R, number: u8) -> Result<Graphic> {
     }
 }
 
+/// Check if a MULTI string is renderable
+pub fn is_renderable(dms: &Dms<256, 24, 32>, multi: &str) -> bool {
+    !Pages::new(dms, multi).any(|p| p.is_err())
+}
+
 /// Render a sign message to a .gif file
 pub fn render_multi<W: Write>(
     mut writer: W,
