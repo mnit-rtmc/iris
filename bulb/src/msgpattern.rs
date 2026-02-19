@@ -392,7 +392,7 @@ impl MsgPattern {
         div.close();
         div = page.frag::<html::Div>();
         div.id("mp_lines_div").class("row no-display");
-        self.render_lines(anc, &mut div.table());
+        self.render_lines(anc, &mut div.div());
         div.close();
         div = page.frag::<html::Div>();
         div.class("row");
@@ -503,14 +503,25 @@ impl MsgPattern {
     fn render_lines<'p>(
         &self,
         anc: &MsgPatternAnc,
-        table: &'p mut html::Table<'p>,
+        div: &'p mut html::Div<'p>,
     ) {
+        div.class("scroll_table");
+        let mut table = div.table();
+        let mut thead = table.thead();
+        let mut tr = thead.tr();
+        tr.th().cdata("L#").close();
+        tr.th().cdata("MULTI").close();
+        tr.th().cdata("Restrict").close();
+        thead.close();
         for ln in &anc.lines {
             let mut tr = table.tr();
             tr.td().cdata(ln.line).close();
             tr.td().cdata(&ln.multi).close();
+            tr.td().cdata(opt_ref(&ln.restrict_hashtag)).close();
+            tr.close();
         }
         table.close();
+        div.close();
     }
 }
 

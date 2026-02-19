@@ -37,6 +37,20 @@ table {
   padding: 0;
   margin: 0.1rem;
 }
+.scroll_table {
+  padding-left: 0.5rem;
+  height: 8rem;
+  overflow-y: auto;
+  direction: rtl;
+}
+.scroll_table * {
+  direction: ltr;
+}
+.scroll_table thead th {
+  position: sticky;
+  top: 0;
+  background-color: white;
+}
 tr {
   padding: 0;
   margin: 0;
