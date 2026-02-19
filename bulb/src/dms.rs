@@ -20,7 +20,7 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
-use crate::msgpattern::{FontName, GraphicName, MsgPattern};
+use crate::msgpattern::{FontName, GraphicName, MsgLine, MsgPattern};
 use crate::notes::contains_hashtag;
 use crate::rend::Renderer;
 use crate::rle::Table;
@@ -187,17 +187,6 @@ pub struct Dms {
     pub geo_loc: Option<String>,
     pub status: Option<SignStatus>,
     pub pixel_failures: Option<String>,
-}
-
-/// Message Line
-#[derive(Debug, Default, Deserialize)]
-#[allow(dead_code)]
-pub struct MsgLine {
-    pub name: String,
-    pub msg_pattern: String,
-    pub restrict_hashtag: Option<String>,
-    pub line: u16,
-    pub multi: String,
 }
 
 /// Word (for messages)

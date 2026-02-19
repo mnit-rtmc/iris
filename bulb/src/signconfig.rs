@@ -265,6 +265,7 @@ fn render_sign<'p>(
     table: &'p mut html::Table<'p>,
 ) {
     let dms = anc.make_dms(sc);
+    // make a 3x3 cell table
     let mut tr = table.tr();
     tr.td().close(); // empty cell
     tr.td()
@@ -289,26 +290,37 @@ fn render_sign<'p>(
         _ => None,
     };
     let mut td = tr.td();
-    if let Some(dms) = &dms {
-        let mut rend = Renderer::new()
-            .with_dms(dms)
-            .with_max_width(240)
-            .with_max_height(80)
-            .with_mod_size(mod_size);
-        rend.render_multi("A1", &mut td.img());
+    let mut img = td.img();
+    match &dms {
+        Some(dms) => {
+            let mut rend = Renderer::new()
+                .with_dms(dms)
+                .with_max_width(240)
+                .with_max_height(80)
+                .with_mod_size(mod_size);
+            rend.render_multi("A1", &mut img);
+        }
+        None => {
+            img.width(240).height(80);
+        }
     }
     td.close();
     tr.td()
         .style("vertical-align: bottom;")
+        .cdata("↤")
         .cdata(format_len_sm(sc.border_horiz))
         .close();
+    tr.close();
+    tr = table.tr();
     tr.td().close(); // empty cell
     tr.td()
         .style("text-align: right;")
         .cdata(format_len_sm(sc.border_vert))
+        .cdata("↥")
         .close();
-    tr.td().span().style("color:#116").cdata("(border)").close();
-    tr.close();
+    tr.td()
+        .style("text-align: left; color:#116;")
+        .cdata("(border)");
     table.close();
 }
 

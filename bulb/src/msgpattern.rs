@@ -48,6 +48,17 @@ pub struct GraphicName {
     pub name: String,
 }
 
+/// Message Line
+#[derive(Debug, Default, Deserialize)]
+#[allow(dead_code)]
+pub struct MsgLine {
+    pub name: String,
+    pub msg_pattern: String,
+    pub restrict_hashtag: Option<String>,
+    pub line: u16,
+    pub multi: String,
+}
+
 /// Ancillary message pattern data
 #[derive(Default)]
 pub struct MsgPatternAnc {
@@ -55,6 +66,7 @@ pub struct MsgPatternAnc {
     configs: Vec<SignConfig>,
     fonts: FontTable<256, 24>,
     graphics: GraphicTable<32>,
+    lines: Vec<MsgLine>,
 }
 
 /// Message Pattern
@@ -74,12 +86,13 @@ impl AncillaryData for MsgPatternAnc {
     type Primary = MsgPattern;
 
     /// Construct ancillary message pattern data
-    #[allow(clippy::vec_init_then_push)]
     fn new(_pri: &MsgPattern, _view: View) -> Self {
-        let mut assets = Vec::with_capacity(3);
-        assets.push(Asset::SignConfigs);
-        assets.push(Asset::Fonts);
-        assets.push(Asset::Graphics);
+        let assets = vec![
+            Asset::SignConfigs,
+            Asset::Fonts,
+            Asset::Graphics,
+            Asset::MsgLines,
+        ];
         MsgPatternAnc {
             assets,
             ..Default::default()
@@ -94,7 +107,7 @@ impl AncillaryData for MsgPatternAnc {
     /// Set asset value
     fn set_asset(
         &mut self,
-        _pri: &MsgPattern,
+        pri: &MsgPattern,
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
@@ -142,6 +155,12 @@ impl AncillaryData for MsgPatternAnc {
                 } else {
                     console::log_1(&format!("invalid graphic: {nm}").into());
                 }
+            }
+            Asset::MsgLines => {
+                let mut lines: Vec<MsgLine> =
+                    serde_wasm_bindgen::from_value(value)?;
+                lines.retain(|ln| ln.msg_pattern == pri.name);
+                self.lines = lines;
             }
             _ => unreachable!(),
         }
@@ -373,7 +392,7 @@ impl MsgPattern {
         div.close();
         div = page.frag::<html::Div>();
         div.id("mp_lines_div").class("row no-display");
-        // FIXME
+        self.render_lines(anc, &mut div.table());
         div.close();
         div = page.frag::<html::Div>();
         div.class("row");
@@ -478,6 +497,20 @@ impl MsgPattern {
         self.render_preview(anc, &mut img);
         let preview = Doc::get().elem::<HtmlElement>("mp_preview");
         preview.set_outer_html(&String::from(page));
+    }
+
+    /// Render the message lines table
+    fn render_lines<'p>(
+        &self,
+        anc: &MsgPatternAnc,
+        table: &'p mut html::Table<'p>,
+    ) {
+        for ln in &anc.lines {
+            let mut tr = table.tr();
+            tr.td().cdata(ln.line).close();
+            tr.td().cdata(&ln.multi).close();
+        }
+        table.close();
     }
 }
 

@@ -32,6 +32,8 @@ textarea {
   margin: 0.1rem;
 }
 table {
+  table-layout: fixed;
+  border-collapse: collapse;
   padding: 0;
   margin: 0.1rem;
 }
