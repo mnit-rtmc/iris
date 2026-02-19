@@ -441,9 +441,12 @@ label:has(+ #sb_resource) {
   word-break: break-all;
   width: 100%;
 }
-#mp_preview_div img {
-  height: 100%;
-  width: 100%;
+#mp_preview_div {
+  align-items: center;
+  justify-content: center
+}
+#mp_preview_div select {
+  min-width: 25%;
 }
 
 .start {

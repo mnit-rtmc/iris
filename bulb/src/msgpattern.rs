@@ -417,7 +417,7 @@ impl MsgPattern {
 
     /// Make a select element for sign configs
     fn configs_select<'p>(&self, select: &'p mut html::Select<'p>) {
-        select.id("mp_config").size(4).style("min-width: 25%;");
+        select.id("mp_config").size(4);
         let mut cfgs: Vec<&str> =
             self.compose_cfgs.iter().map(String::as_str).collect();
         cfgs.extend(self.planned_cfgs.iter().map(String::as_str));
