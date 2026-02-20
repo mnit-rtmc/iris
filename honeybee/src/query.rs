@@ -647,7 +647,8 @@ pub const MSG_PATTERN_ALL: &str = "\
   LEFT JOIN iris.hashtag ph ON LOWER(ph.hashtag) = LOWER(da.hashtag) \
   LEFT JOIN iris.dms pd ON ph.name = pd.name \
   GROUP BY mp.name \
-  ORDER BY mp.name COLLATE unicode";
+  ORDER BY mp.name COLLATE \"C\"";
+/* FIXME: COLLATE unicode is not supported by PostgreSQL 15 */
 
 /// SQL query for one message pattern (secondary)
 pub const MSG_PATTERN_ONE: &str = "\
