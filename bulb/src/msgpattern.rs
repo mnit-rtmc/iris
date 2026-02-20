@@ -27,7 +27,10 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{HtmlElement, HtmlSelectElement, HtmlTextAreaElement, console};
+use web_sys::{
+    HtmlElement, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
+    console,
+};
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
@@ -86,13 +89,12 @@ impl AncillaryData for MsgPatternAnc {
     type Primary = MsgPattern;
 
     /// Construct ancillary message pattern data
-    fn new(_pri: &MsgPattern, _view: View) -> Self {
-        let assets = vec![
-            Asset::SignConfigs,
-            Asset::Fonts,
-            Asset::Graphics,
-            Asset::MsgLines,
-        ];
+    fn new(_pri: &MsgPattern, view: View) -> Self {
+        let mut assets =
+            vec![Asset::SignConfigs, Asset::Fonts, Asset::Graphics];
+        if view == View::Setup {
+            assets.push(Asset::MsgLines);
+        }
         MsgPatternAnc {
             assets,
             ..Default::default()
@@ -351,50 +353,6 @@ impl MsgPattern {
         let mut page = Page::new();
         self.title(View::Setup, &mut page.frag::<html::Div>());
         let mut div = page.frag::<html::Div>();
-        div.class("sb_row_left");
-        div.input()
-            .id("tab_preview")
-            .class("toggle")
-            .r#type("radio")
-            .name("pattern_tab")
-            .checked();
-        div.label().r#for("tab_preview").cdata("Preview").close();
-        div.input()
-            .id("tab_multi")
-            .class("toggle")
-            .r#type("radio")
-            .name("pattern_tab");
-        div.label().r#for("tab_multi").cdata("MULTI").close();
-        div.input()
-            .id("tab_lines")
-            .class("toggle")
-            .r#type("radio")
-            .name("pattern_tab");
-        div.label().r#for("tab_lines").cdata("Lines").close();
-        div.close();
-        div = page.frag::<html::Div>();
-        div.id("mp_preview_div").class("row");
-        self.configs_select(&mut div.select());
-        self.render_preview(anc, &mut div.img());
-        div.close();
-        div = page.frag::<html::Div>();
-        div.id("mp_multi_div").class("row no-display");
-        div.textarea()
-            .id("multi")
-            .class("multi")
-            .autocorrect("off")
-            .autocomplete("off")
-            .spellcheck("false")
-            .maxlength(1024)
-            .rows(5)
-            .cdata(&self.multi)
-            .close();
-        div.close();
-        div = page.frag::<html::Div>();
-        div.id("mp_lines_div").class("row no-display");
-        self.render_lines(anc, &mut div.div());
-        div.close();
-        div = page.frag::<html::Div>();
         div.class("row");
         div.label()
             .r#for("compose_hashtag")
@@ -424,11 +382,66 @@ impl MsgPattern {
             .r#for("pixel_service")
             .cdata("Pixel Service")
             .close();
-        let mut input = div.input();
+        input = div.input();
         input.id("pixel_service").r#type("checkbox");
         if let Some(true) = self.pixel_service {
             input.checked();
         }
+        div.close();
+        div = page.frag::<html::Div>();
+        div.class("sb_row_left");
+        div.input()
+            .id("tab_preview")
+            .class("toggle")
+            .r#type("radio")
+            .name("pattern_tab")
+            .checked();
+        div.label().r#for("tab_preview").cdata("Preview").close();
+        div.input()
+            .id("tab_multi")
+            .class("toggle")
+            .r#type("radio")
+            .name("pattern_tab");
+        div.label().r#for("tab_multi").cdata("MULTI").close();
+        div.input()
+            .id("tab_lines")
+            .class("toggle")
+            .r#type("radio")
+            .name("pattern_tab");
+        div.label().r#for("tab_lines").cdata("Lines").close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.id("mp_preview_div");
+        let mut div2 = div.div();
+        div2.class("sb_row_left");
+        self.configs_select(&mut div2.select());
+        self.render_preview(anc, &mut div2.img());
+        div.close();
+        div = page.frag::<html::Div>();
+        div.id("mp_multi_div").class("no-display");
+        div.textarea()
+            .id("multi")
+            .class("multi")
+            .autocorrect("off")
+            .autocomplete("off")
+            .spellcheck("false")
+            .maxlength(1024)
+            .rows(5)
+            .cdata(&self.multi)
+            .close();
+        div.close();
+        div = page.frag::<html::Div>();
+        div.id("mp_lines_div").class("no-display");
+        let mut div2 = div.div();
+        div2.class("row");
+        div2.label()
+            .r#for("mp_filter")
+            .cdata("Filter Restrict")
+            .close();
+        div2.input().id("mp_filter").r#type("checkbox");
+        div2.input().id("mp_restrict").maxlength(16).size(16);
+        div2.close();
+        self.render_lines(anc, None, &mut div.div());
         div.close();
         self.footer_html(true, &mut page.frag::<html::Div>());
         String::from(page)
@@ -503,25 +516,61 @@ impl MsgPattern {
     fn render_lines<'p>(
         &self,
         anc: &MsgPatternAnc,
+        filter: Option<&str>,
         div: &'p mut html::Div<'p>,
     ) {
-        div.class("scroll_table");
+        div.id("mp_lines").class("scroll_table");
         let mut table = div.table();
         let mut thead = table.thead();
         let mut tr = thead.tr();
-        tr.th().cdata("L#").close();
+        tr.th().cdata("Ln").close();
         tr.th().cdata("MULTI").close();
-        tr.th().cdata("Restrict").close();
+        if filter.is_some() {
+            tr.th().cdata("Restrict").close();
+        }
         thead.close();
         for ln in &anc.lines {
+            match (&filter, &ln.restrict_hashtag) {
+                (Some(filter), Some(restrict)) => {
+                    if !restrict.to_lowercase().contains(filter) {
+                        continue;
+                    }
+                }
+                (Some(_filter), None) => continue,
+                (None, Some(_restrict)) => continue,
+                (None, None) => (),
+            }
             let mut tr = table.tr();
             tr.td().cdata(ln.line).close();
             tr.td().cdata(&ln.multi).close();
-            tr.td().cdata(opt_ref(&ln.restrict_hashtag)).close();
+            if filter.is_some() {
+                tr.td().cdata(opt_ref(&ln.restrict_hashtag)).close();
+            }
             tr.close();
         }
         table.close();
         div.close();
+    }
+
+    /// Replace message lines
+    fn replace_lines(&self, anc: &MsgPatternAnc) {
+        let doc = Doc::get();
+        if let Some(mp_filter) = doc.try_elem::<HtmlInputElement>("mp_filter") {
+            let restrict; // String
+            let mut filter = None;
+            if mp_filter.checked()
+                && let Some(mp_restrict) =
+                    doc.try_elem::<HtmlInputElement>("mp_restrict")
+            {
+                restrict = mp_restrict.value().to_lowercase();
+                filter = Some(restrict.as_str());
+            }
+            let mut page = Page::new();
+            let mut div = page.frag::<html::Div>();
+            self.render_lines(anc, filter, &mut div);
+            let mp_lines = doc.elem::<HtmlElement>("mp_lines");
+            mp_lines.set_outer_html(&String::from(page));
+        }
     }
 }
 
@@ -583,6 +632,8 @@ impl Card for MsgPattern {
         let doc = Doc::get();
         if id == "mp_config" {
             self.replace_preview(&anc);
+        } else if id == "mp_filter" || id == "mp_restrict" {
+            self.replace_lines(&anc);
         } else if let Ok(tab) = Tab::try_from(id.as_str()) {
             if let Tab::Preview = tab {
                 self.replace_preview(&anc);
@@ -622,6 +673,6 @@ impl TryFrom<&str> for Tab {
 impl Tab {
     /// Get class for a tab
     fn row_class(self, chk: Self) -> &'static str {
-        if self == chk { "row" } else { "row no-display" }
+        if self == chk { "" } else { "no-display" }
     }
 }

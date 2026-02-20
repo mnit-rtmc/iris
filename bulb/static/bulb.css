@@ -37,20 +37,6 @@ table {
   padding: 0;
   margin: 0.1rem;
 }
-.scroll_table {
-  padding-left: 0.5rem;
-  height: 8rem;
-  overflow-y: auto;
-  direction: rtl;
-}
-.scroll_table * {
-  direction: ltr;
-}
-.scroll_table thead th {
-  position: sticky;
-  top: 0;
-  background-color: white;
-}
 tr {
   padding: 0;
   margin: 0;
@@ -58,6 +44,24 @@ tr {
 th, td {
   padding: 0;
   margin: 0;
+}
+.scroll_table {
+  padding-left: 0.4rem;
+  height: 8rem;
+  overflow-y: auto;
+  direction: rtl;
+}
+.scroll_table table {
+  direction: ltr;
+}
+.scroll_table thead th {
+  position: sticky;
+  top: 0;
+  padding-left: 0.2rem;
+  background-color: white;
+}
+.scroll_table tr {
+  width: 100%;
 }
 
 #sign_msg {
@@ -457,7 +461,7 @@ label:has(+ #sb_resource) {
   word-break: break-all;
   width: 100%;
 }
-#mp_preview_div {
+#mp_preview_div * {
   align-items: center;
   justify-content: center
 }
