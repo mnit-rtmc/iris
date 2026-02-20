@@ -46,13 +46,8 @@ th, td {
   margin: 0;
 }
 .scroll_table {
-  padding-left: 0.4rem;
   height: 8rem;
   overflow-y: auto;
-  direction: rtl;
-}
-.scroll_table table {
-  direction: ltr;
 }
 .scroll_table thead th {
   position: sticky;
@@ -463,7 +458,7 @@ label:has(+ #sb_resource) {
 }
 #mp_preview_div * {
   align-items: center;
-  justify-content: center
+  justify-content: space-between;
 }
 #mp_preview_div select {
   min-width: 25%;

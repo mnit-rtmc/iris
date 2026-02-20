@@ -364,6 +364,65 @@ impl MsgPattern {
             .size(16)
             .value(opt_ref(&self.compose_hashtag));
         div.close();
+        let mut fs = page.frag::<html::FieldSet>();
+        let mut legend = fs.legend();
+        legend
+            .input()
+            .id("tab_preview")
+            .class("toggle")
+            .r#type("radio")
+            .name("pattern_tab")
+            .checked();
+        legend.label().r#for("tab_preview").cdata("Preview").close();
+        legend
+            .input()
+            .id("tab_multi")
+            .class("toggle")
+            .r#type("radio")
+            .name("pattern_tab");
+        legend.label().r#for("tab_multi").cdata("MULTI").close();
+        legend
+            .input()
+            .id("tab_lines")
+            .class("toggle")
+            .r#type("radio")
+            .name("pattern_tab");
+        legend.label().r#for("tab_lines").cdata("Lines").close();
+        legend.close();
+        div = fs.div();
+        div.id("mp_preview_div");
+        let mut div2 = div.div();
+        div2.class("sb_row_left");
+        self.configs_select(&mut div2.select());
+        self.render_preview(anc, &mut div2.img());
+        div.close();
+        div = fs.div();
+        div.id("mp_multi_div").class("no-display");
+        div.textarea()
+            .id("multi")
+            .class("multi")
+            .autocorrect("off")
+            .autocomplete("off")
+            .spellcheck("false")
+            .maxlength(1024)
+            .rows(5)
+            .cdata(&self.multi)
+            .close();
+        div.close();
+        div = fs.div();
+        div.id("mp_lines_div").class("no-display");
+        let mut div2 = div.div();
+        div2.class("row");
+        div2.label()
+            .r#for("mp_filter")
+            .cdata("Filter Restrict")
+            .close();
+        div2.input().id("mp_filter").r#type("checkbox");
+        div2.input().id("mp_restrict").maxlength(16).size(16);
+        div2.close();
+        self.render_lines(anc, None, &mut div.div());
+        div.close();
+        fs.close();
         div = page.frag::<html::Div>();
         div.class("row");
         div.label()
@@ -387,61 +446,6 @@ impl MsgPattern {
         if let Some(true) = self.pixel_service {
             input.checked();
         }
-        div.close();
-        div = page.frag::<html::Div>();
-        div.class("sb_row_left");
-        div.input()
-            .id("tab_preview")
-            .class("toggle")
-            .r#type("radio")
-            .name("pattern_tab")
-            .checked();
-        div.label().r#for("tab_preview").cdata("Preview").close();
-        div.input()
-            .id("tab_multi")
-            .class("toggle")
-            .r#type("radio")
-            .name("pattern_tab");
-        div.label().r#for("tab_multi").cdata("MULTI").close();
-        div.input()
-            .id("tab_lines")
-            .class("toggle")
-            .r#type("radio")
-            .name("pattern_tab");
-        div.label().r#for("tab_lines").cdata("Lines").close();
-        div.close();
-        div = page.frag::<html::Div>();
-        div.id("mp_preview_div");
-        let mut div2 = div.div();
-        div2.class("sb_row_left");
-        self.configs_select(&mut div2.select());
-        self.render_preview(anc, &mut div2.img());
-        div.close();
-        div = page.frag::<html::Div>();
-        div.id("mp_multi_div").class("no-display");
-        div.textarea()
-            .id("multi")
-            .class("multi")
-            .autocorrect("off")
-            .autocomplete("off")
-            .spellcheck("false")
-            .maxlength(1024)
-            .rows(5)
-            .cdata(&self.multi)
-            .close();
-        div.close();
-        div = page.frag::<html::Div>();
-        div.id("mp_lines_div").class("no-display");
-        let mut div2 = div.div();
-        div2.class("row");
-        div2.label()
-            .r#for("mp_filter")
-            .cdata("Filter Restrict")
-            .close();
-        div2.input().id("mp_filter").r#type("checkbox");
-        div2.input().id("mp_restrict").maxlength(16).size(16);
-        div2.close();
-        self.render_lines(anc, None, &mut div.div());
         div.close();
         self.footer_html(true, &mut page.frag::<html::Div>());
         String::from(page)
