@@ -264,9 +264,9 @@ pub const DIRECTION_LUT: &str = "\
 
 /// SQL query for all DMS (primary)
 pub const DMS_ALL: &str = "\
-  SELECT d.name, location, msg_current, lock, \
+  SELECT d.name, location, controller, notes, \
          NULLIF(char_length(status->>'faults') > 0, false) AS has_faults, \
-         notes, controller \
+         msg_current, lock \
   FROM iris.dms d \
   LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
   ORDER BY d.name";
@@ -275,8 +275,8 @@ pub const DMS_ALL: &str = "\
 pub const DMS_ONE: &str = "\
   SELECT d.name, location, geo_loc, controller, pin, notes, \
          static_graphic, preset, sign_config, sign_detail, \
-         lock, status, char_length(status->>'faults') > 0 AS has_faults, \
-         msg_sched, msg_current, pixel_failures \
+         NULLIF(char_length(status->>'faults') > 0, false) AS has_faults, \
+         status, msg_sched, msg_current, lock, pixel_failures \
   FROM iris.dms d \
   LEFT JOIN geo_loc_view gl ON d.geo_loc = gl.name \
   WHERE d.name = $1";
