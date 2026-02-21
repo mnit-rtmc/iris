@@ -304,15 +304,15 @@ impl MsgPattern {
 
     /// Get item states
     fn item_states(&self, anc: &MsgPatternAnc) -> ItemStates<'static> {
+        if self.compose_cfgs.is_empty() && self.planned_cfgs.is_empty() {
+            return ItemState::Inactive.into();
+        }
         let mut states = ItemStates::default();
         if !self.compose_cfgs.is_empty() {
             states = states.with(ItemState::Available, "");
         }
         if !self.planned_cfgs.is_empty() {
             states = states.with(ItemState::Planned, "");
-        }
-        if self.compose_cfgs.is_empty() && self.planned_cfgs.is_empty() {
-            states = states.with(ItemState::Inactive, "");
         }
         if !self.is_renderable(anc) {
             states = states.with(ItemState::Fault, "");
