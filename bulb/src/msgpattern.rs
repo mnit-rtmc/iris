@@ -238,6 +238,8 @@ impl MsgPattern {
                 multi.push_str("**");
             } else if val.starts_with("[exit") {
                 // replaced with empty string
+            } else if val.starts_with("[feed") {
+                // replaced with empty string
             } else if val.starts_with("[pa") {
                 let mut v = "**";
                 let mut it = val.split(',');
