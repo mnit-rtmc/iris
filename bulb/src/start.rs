@@ -305,13 +305,14 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
     }
     let sb_search = doc.elem::<HtmlInputElement>("sb_search");
     sb_search.set_value(search);
-    app::card_list(None);
     let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
     let html = match res {
         Some(res) => card::item_states_html(res),
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
+    // FIXME: rework card_list API
+    app::card_list(None);
     do_future(fetch_card_list()).await;
     do_future(populate_card_list()).await;
     let uri = Uri::from("/iris/api/notify");
