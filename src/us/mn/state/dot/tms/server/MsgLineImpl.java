@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2024  Minnesota Department of Transportation
+ * Copyright (C) 2004-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.MsgLineHelper;
@@ -35,9 +34,8 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 
 	/** Load all the message lines */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, msg_pattern, restrict_hashtag," +
-			"line, multi, rank FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, msg_pattern, line, rank, multi " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new MsgLineImpl(row));
@@ -51,10 +49,9 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("msg_pattern", msg_pattern);
-		map.put("restrict_hashtag", restrict_hashtag);
 		map.put("line", line);
-		map.put("multi", multi);
 		map.put("rank", rank);
+		map.put("multi", multi);
 		return map;
 	}
 
@@ -67,22 +64,18 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 	private MsgLineImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // msg_pattern
-		     row.getString(3),  // restrict_hashtag
-		     row.getShort(4),   // line
-		     row.getString(5),  // multi
-		     row.getShort(6));  // rank
+		     row.getShort(3),   // line
+		     row.getShort(4),   // rank
+		     row.getString(5)); // multi
 	}
 
 	/** Create a message line */
-	private MsgLineImpl(String n, String mp, String rht, short l,
-		String m, short r)
-	{
+	private MsgLineImpl(String n, String mp, short l, short r, String m) {
 		super(n);
 		msg_pattern = lookupMsgPattern(mp);
-		restrict_hashtag = rht;
 		line = l;
-		multi = m;
 		rank = r;
+		multi = m;
 	}
 
 	/** Message pattern */
@@ -92,38 +85,6 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 	@Override
 	public MsgPattern getMsgPattern() {
 		return msg_pattern;
-	}
-
-	/** Restrict hashtag */
-	private String restrict_hashtag;
-
-	/** Get restrict hashtag, or null for none */
-	@Override
-	public String getRestrictHashtag() {
-		return restrict_hashtag;
-	}
-
-	/** Set restrict hashtag, or null for none */
-	@Override
-	public void setRestrictHashtag(String rht) {
-		restrict_hashtag = rht;
-	}
-
-	/** Set restrict hashtag, or null for none */
-	public void doSetRestrictHashtag(String rht) throws TMSException {
-		String ht = Hashtags.normalize(rht);
-		if (!objectEquals(ht, rht))
-			throw new ChangeVetoException("Bad hashtag");
-		if (!objectEquals(rht, restrict_hashtag)) {
-			store.update(this, "restrict_hashtag", rht);
-			setRestrictHashtag(rht);
-		}
-	}
-
-	/** Get notes (including hashtag) */
-	@Override
-	public String getNotes() {
-		return getRestrictHashtag();
 	}
 
 	/** Line number on sign (usually 1-3) */
@@ -149,6 +110,29 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 		return line;
 	}
 
+	/** Message ordering rank */
+	private short rank;
+
+	/** Set the rank */
+	@Override
+	public void setRank(short r) {
+		rank = r;
+	}
+
+	/** Set the rank */
+	public void doSetRank(short r) throws TMSException {
+		if (r != rank) {
+			store.update(this, "rank", r);
+			setRank(r);
+		}
+	}
+
+	/** Get the rank */
+	@Override
+	public short getRank() {
+		return rank;
+	}
+
 	/** MULTI string */
 	private String multi;
 
@@ -172,28 +156,5 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 	@Override
 	public String getMulti() {
 		return multi;
-	}
-
-	/** Message ordering rank */
-	private short rank;
-
-	/** Set the rank */
-	@Override
-	public void setRank(short r) {
-		rank = r;
-	}
-
-	/** Set the rank */
-	public void doSetRank(short r) throws TMSException {
-		if (r != rank) {
-			store.update(this, "rank", r);
-			setRank(r);
-		}
-	}
-
-	/** Get the rank */
-	@Override
-	public short getRank() {
-		return rank;
 	}
 }
