@@ -10,6 +10,10 @@ with a sign config.  They can be:
   [hashtag]
 * Scheduled by [device actions] as part of an [action plan]
 
+Setting a **prototype** [extends](#message-lines) another pattern.  Both
+patterns should have the same configuration of
+[fillable text rectangles](#fillable-text-rectangles).
+
 If **flash beacon** is selected, any associated [beacon] (_internal_ or
 _external_) will also be activated.
 
@@ -23,12 +27,12 @@ active for long periods of time.
 * `iris/api/msg_pattern` (primary)
 * `iris/api/msg_pattern/{name}`
 
-| Access       | Primary                 | Secondary                     |
-|--------------|-------------------------|-------------------------------|
-| 👁️  View      | name, compose\_cfgs, planned\_cfgs |                    |
-| 👉 Operate   |                         |                               |
-| 💡 Manage    | compose\_hashtag, multi | flash\_beacon, pixel\_service |
-| 🔧 Configure |                         |                               |
+| Access       | Primary                            | Secondary |
+|--------------|------------------------------------|-----------|
+| 👁️  View      | name, compose\_cfgs, planned\_cfgs |           |
+| 👉 Operate   |                                    |           |
+| 💡 Manage    | compose\_hashtag, prototype, multi | flash\_beacon, pixel\_service |
+| 🔧 Configure |                                    |           |
 
 </details>
 
@@ -51,12 +55,10 @@ be `[tr1,1,100,16]CRASH[nl]AHEAD[g5]`.
 
 A pattern with fillable text rectangles can have lines of text associated with
 it.  Each line is used in a specific fillable rectangle of the pattern.  Lines
-can be ordered in the message composer by **rank**, 1-99.  Lines can also be
-restricted to specific signs by adding a **restrict** [hashtag].
+can be ordered in the message composer by **rank**, 1-99.
 
-If a pattern has fillable text rectangles but no lines, a **substitute**
-pattern will be chosen to provide them instead.  Both patterns must have the
-same number of lines in their text rectangles.
+All lines from a **prototype** pattern will also be included, allowing a
+pattern to be extended for specific _compose_ [hashtag]s.
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -64,12 +66,12 @@ same number of lines in their text rectangles.
 * `iris/api/msg_line` (primary)
 * `iris/api/msg_line/{name}`
 
-| Access       | Primary                        | Secondary |
-|--------------|--------------------------------|-----------|
-| 👁️  View      | name, msg\_pattern             |           |
-| 👉 Operate   |                                |           |
-| 💡 Manage    | line, multi, restrict\_hashtag | rank      |
-| 🔧 Configure |                                |           |
+| Access       | Primary            | Secondary |
+|--------------|--------------------|-----------|
+| 👁️  View      | name, msg\_pattern |           |
+| 👉 Operate   |                    |           |
+| 💡 Manage    | line, rank, multi  |           |
+| 🔧 Configure |                    |           |
 
 </details>
 
