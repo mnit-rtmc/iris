@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2024  Minnesota Department of Transportation
+ * Copyright (C) 2011-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,42 +50,25 @@ public class MsgLineHelper extends BaseHelper {
 		       m.equals(new MultiString(m).normalizeLine().toString());
 	}
 
-	/** Find all lines for a message pattern */
+	/** Find all lines for a message pattern, including prototype */
 	static public List<MsgLine> findAllLines(MsgPattern pat, DMS dms) {
 		ArrayList<MsgLine> lines = new ArrayList<MsgLine>();
 		List<TextRect> line_rects =
 			MsgPatternHelper.lineTextRects(pat, dms);
 		if (line_rects == null || line_rects.size() <= 1)
 			return lines;
-		if (MsgPatternHelper.lineCount(pat) == 0) {
-			int n_lines = line_rects.size() - 1;
-			pat = MsgPatternHelper.findSubstitute(pat, dms,
-				n_lines);
-			if (pat == null)
-				return lines;
-		}
-		Hashtags hashtags = new Hashtags(dms.getNotes());
+		String prototype = pat.getPrototype();
 		Iterator<MsgLine> it = iterator();
 		while (it.hasNext()) {
 			MsgLine ml = it.next();
-			if (checkLine(ml, pat, hashtags)) {
+			MsgPattern mp = ml.getMsgPattern();
+			if (mp == pat || mp.getName().equals(prototype)) {
 				MsgLine aml = abbreviateLine(ml, line_rects);
 				if (aml != null)
 					lines.add(aml);
 			}
 		}
 		return lines;
-	}
-
-	/** Check if a message line belongs */
-	static private boolean checkLine(MsgLine ml, MsgPattern pat,
-		Hashtags hashtags)
-	{
-		if (ml.getMsgPattern() == pat) {
-			String rht = ml.getRestrictHashtag();
-			return (rht == null) || hashtags.contains(rht);
-		}
-		return false;
 	}
 
 	/** Abbreviate a line for available text rectangle */

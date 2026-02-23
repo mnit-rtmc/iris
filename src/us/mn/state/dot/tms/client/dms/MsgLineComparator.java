@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2023  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,27 +29,12 @@ public class MsgLineComparator implements Comparator<MsgLine> {
 	public int compare(MsgLine ml0, MsgLine ml1) {
 		int c = compareLine(ml0, ml1);
 		if (c == 0)
-			c = compareRestrictHashtag(ml0, ml1);
-		if (c == 0)
 			c = compareRank(ml0, ml1);
 		if (c == 0)
 			c = compareMulti(ml0, ml1);
 		if (c == 0)
 			c = compareName(ml0, ml1);
 		return c;
-	}
-
-	/** Compare hashtags */
-	private int compareRestrictHashtag(MsgLine ml0, MsgLine ml1) {
-		String ht0 = ml0.getRestrictHashtag();
-		String ht1 = ml1.getRestrictHashtag();
-		if (ht0 == ht1)
-			return 0;
-		if (ht0 == null)
-			return -1;
-		if (ht1 == null)
-			return 1;
-		return ht0.compareTo(ht1);
 	}
 
 	/** Compare line numbers */

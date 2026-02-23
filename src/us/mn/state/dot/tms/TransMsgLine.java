@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2024  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,18 +67,6 @@ public class TransMsgLine implements MsgLine {
 	/** Get the message pattern */
 	@Override
 	public MsgPattern getMsgPattern() {
-		return null;
-	}
-
-	/** Set restrict hashtag, or null for none */
-	@Override
-	public void setRestrictHashtag(String rht) {
-		// do nothing
-	}
-
-	/** Get restrict hashtag, or null for none */
-	@Override
-	public String getRestrictHashtag() {
 		return null;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 
 	/** Load all the message patterns */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, multi, flash_beacon, " +
-			"pixel_service, compose_hashtag FROM iris." +
+		store.query("SELECT name, compose_hashtag, prototype, " +
+			"multi, flash_beacon, pixel_service FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -59,10 +59,11 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("compose_hashtag", compose_hashtag);
+		map.put("prototype", prototype);
 		map.put("multi", multi);
 		map.put("flash_beacon", flash_beacon);
 		map.put("pixel_service", pixel_service);
-		map.put("compose_hashtag", compose_hashtag);
 		return map;
 	}
 
@@ -80,28 +81,83 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 	/** Create a message pattern */
 	private MsgPatternImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
-		     row.getString(2),  // multi
-		     row.getBoolean(3), // flash_beacon
-		     row.getBoolean(4), // pixel_service
-		     row.getString(5)   // compose_hashtag
+		     row.getString(2),  // compose_hashtag
+		     row.getString(3),  // prototype
+		     row.getString(4),  // multi
+		     row.getBoolean(5), // flash_beacon
+		     row.getBoolean(6)  // pixel_service
 		);
 	}
 
 	/** Create a message pattern */
-	private MsgPatternImpl(String n, String m, boolean fb, boolean ps,
-		String cht)
+	private MsgPatternImpl(String n, String cht, String p, String m,
+		boolean fb, boolean ps)
 	{
 		super(n);
+		compose_hashtag = cht;
+		prototype = p;
 		multi = m;
 		flash_beacon = fb;
 		pixel_service = ps;
-		compose_hashtag = cht;
 	}
 
 	/** Get notes (including hashtags) */
 	@Override
 	public String getNotes() {
 		return getComposeHashtag();
+	}
+
+	/** DMS hashtag for composing */
+	private String compose_hashtag;
+
+	/** Get the hashtag for composing with the pattern.
+	 * @return hashtag; null for no composing. */
+	@Override
+	public String getComposeHashtag() {
+		return compose_hashtag;
+	}
+
+	/** Set the hashtag for composing with the pattern.
+	 * @param cht hashtag; null for no composing. */
+	@Override
+	public void setComposeHashtag(String cht) {
+		compose_hashtag = cht;
+	}
+
+	/** Set the hashtag for composing with the pattern */
+	public void doSetComposeHashtag(String cht) throws TMSException {
+		String ht = Hashtags.normalize(cht);
+		if (!objectEquals(ht, cht))
+			throw new ChangeVetoException("Bad hashtag");
+		if (!objectEquals(cht, compose_hashtag)) {
+			store.update(this, "compose_hashtag", cht);
+			setComposeHashtag(cht);
+		}
+	}
+
+	/** Prototype message pattern */
+	private String prototype;
+
+	/** Get prototype pattern to derive from.
+	 * @return Prototype pattern name. */
+	@Override
+	public String getPrototype() {
+		return prototype;
+	}
+
+	/** Set prototype pattern to derive from.
+	 @param prototype Name of prototype pattern. */
+	@Override
+	public void setPrototype(String p) {
+		prototype = p;
+	}
+
+	/** Set prototype pattern to derive from */
+	public void doSetPrototype(String p) throws TMSException {
+		if (!objectEquals(p, prototype)) {
+			store.update(this, "prototype", p);
+			setPrototype(p);
+		}
 	}
 
 	/** Message MULTI string, contains message text for all pages */
@@ -176,34 +232,6 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 		if (ps != pixel_service) {
 			store.update(this, "pixel_service", ps);
 			setPixelService(ps);
-		}
-	}
-
-	/** DMS hashtag for composing */
-	private String compose_hashtag;
-
-	/** Get the hashtag for composing with the pattern.
-	 * @return hashtag; null for no composing. */
-	@Override
-	public String getComposeHashtag() {
-		return compose_hashtag;
-	}
-
-	/** Set the hashtag for composing with the pattern.
-	 * @param cht hashtag; null for no composing. */
-	@Override
-	public void setComposeHashtag(String cht) {
-		compose_hashtag = cht;
-	}
-
-	/** Set the hashtag for composing with the pattern */
-	public void doSetComposeHashtag(String cht) throws TMSException {
-		String ht = Hashtags.normalize(cht);
-		if (!objectEquals(ht, cht))
-			throw new ChangeVetoException("Bad hashtag");
-		if (!objectEquals(cht, compose_hashtag)) {
-			store.update(this, "compose_hashtag", cht);
-			setComposeHashtag(cht);
 		}
 	}
 }
