@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -141,18 +141,6 @@ public class MsgPatternHelper extends BaseHelper {
 		return cfgs;
 	}
 
-	/** Get the count of lines associated with a message pattern */
-	static public int lineCount(MsgPattern pat) {
-		int n_lines = 0;
-		Iterator<MsgLine> it = MsgLineHelper.iterator();
-		while (it.hasNext()) {
-			MsgLine ml = it.next();
-			if (ml.getMsgPattern() == pat)
-				n_lines = Math.max(n_lines, ml.getLine());
-		}
-		return n_lines;
-	}
-
 	/** Get full text rectangle for a sign */
 	static private TextRect fullTextRect(DMS dms) {
 		return (dms != null)
@@ -245,24 +233,5 @@ public class MsgPatternHelper extends BaseHelper {
 				rects.add(tr);
 		}
 		return rects;
-	}
-
-	/** Find a substitute pattern with associated message lines */
-	static public MsgPattern findSubstitute(MsgPattern pat, DMS dms,
-		int n_lines)
-	{
-		Hashtags tags = new Hashtags(dms.getNotes());
-		Iterator<MsgPattern> it = iterator();
-		while (it.hasNext()) {
-			MsgPattern mp = it.next();
-			if (mp != pat && isValidMulti(mp)) {
-				if (lineCount(mp) == n_lines) {
-					String ht = mp.getComposeHashtag();
-					if (tags.contains(ht))
-						return mp;
-				}
-			}
-		}
-		return null;
 	}
 }

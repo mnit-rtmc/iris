@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,14 @@ public interface MsgPattern extends SonarObject {
 
 	/** SONAR base type name */
 	String SONAR_BASE = DMS.SONAR_TYPE;
+
+	/** Get prototype pattern to derive from.
+	 * @return Prototype pattern name. */
+	String getPrototype();
+
+	/** Set prototype pattern to derive from.
+	 @param prototype Name of prototype pattern. */
+	void setPrototype(String prototype);
 
 	/** Get the message MULTI string.
 	 * @return Message text in MULTI markup.

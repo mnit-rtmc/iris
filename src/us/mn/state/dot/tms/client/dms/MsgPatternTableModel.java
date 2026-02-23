@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 	@Override
 	protected ArrayList<ProxyColumn<MsgPattern>> createColumns() {
 		ArrayList<ProxyColumn<MsgPattern>> cols =
-			new ArrayList<ProxyColumn<MsgPattern>>(2);
+			new ArrayList<ProxyColumn<MsgPattern>>(3);
 		cols.add(new ProxyColumn<MsgPattern>("msg.pattern.name", 168){
 			public Object getValueAt(MsgPattern pat) {
 				return pat.getName();
@@ -60,6 +60,19 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 			public void setValueAt(MsgPattern pat, Object value) {
 				String cht = Hashtags.normalize(value.toString());
 				pat.setComposeHashtag(cht);
+			}
+		});
+		cols.add(new ProxyColumn<MsgPattern>(
+			"msg.pattern.prototype", 168)
+		{
+			public Object getValueAt(MsgPattern pat) {
+				return pat.getPrototype();
+			}
+			public boolean isEditable(MsgPattern pat) {
+				return canWrite(pat);
+			}
+			public void setValueAt(MsgPattern pat, Object value) {
+				pat.setPrototype(value.toString());
 			}
 		});
 		return cols;

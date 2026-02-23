@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2024  Minnesota Department of Transportation
+ * Copyright (C) 2005-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.client.Session;
@@ -64,20 +63,7 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 	@Override
 	protected ArrayList<ProxyColumn<MsgLine>> createColumns() {
 		ArrayList<ProxyColumn<MsgLine>> cols =
-			new ArrayList<ProxyColumn<MsgLine>>(4);
-		cols.add(new ProxyColumn<MsgLine>("hashtag", 72) {
-			public Object getValueAt(MsgLine ml) {
-				return ml.getRestrictHashtag();
-			}
-			public boolean isEditable(MsgLine ml) {
-				return canWrite(ml);
-			}
-			public void setValueAt(MsgLine ml, Object value) {
-				selected = ml.getName();
-				String ht = Hashtags.normalize(value.toString());
-				ml.setRestrictHashtag(ht);
-			}
-		});
+			new ArrayList<ProxyColumn<MsgLine>>(3);
 		cols.add(new ProxyColumn<MsgLine>("dms.line", 36, Short.class){
 			public Object getValueAt(MsgLine ml) {
 				return ml.getLine();
@@ -91,21 +77,6 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 					Number n = (Number) value;
 					ml.setLine(n.shortValue());
 				}
-			}
-		});
-		cols.add(new ProxyColumn<MsgLine>("dms.multi", 320) {
-			public Object getValueAt(MsgLine ml) {
-				return ml.getMulti();
-			}
-			public boolean isEditable(MsgLine ml) {
-				return canWrite(ml);
-			}
-			public void setValueAt(MsgLine ml, Object value) {
-				selected = ml.getName();
-				ml.setMulti(formatMulti(value));
-			}
-			protected TableCellRenderer createCellRenderer() {
-				return RENDERER;
 			}
 		});
 		cols.add(new ProxyColumn<MsgLine>("dms.rank", 40, Short.class)
@@ -125,6 +96,21 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 			}
 			protected TableCellEditor createCellEditor() {
 				return new RankCellEditor();
+			}
+		});
+		cols.add(new ProxyColumn<MsgLine>("dms.multi", 320) {
+			public Object getValueAt(MsgLine ml) {
+				return ml.getMulti();
+			}
+			public boolean isEditable(MsgLine ml) {
+				return canWrite(ml);
+			}
+			public void setValueAt(MsgLine ml, Object value) {
+				selected = ml.getName();
+				ml.setMulti(formatMulti(value));
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return RENDERER;
 			}
 		});
 		return cols;

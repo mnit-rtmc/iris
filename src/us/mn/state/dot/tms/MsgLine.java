@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2024  Minnesota Department of Transportation
+ * Copyright (C) 2004-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,12 +41,6 @@ public interface MsgLine extends SonarObject {
 
 	/** Get the message pattern */
 	MsgPattern getMsgPattern();
-
-	/** Set restrict hashtag, or null for none */
-	void setRestrictHashtag(String rht);
-
-	/** Get restrict hashtag, or null for none */
-	String getRestrictHashtag();
 
 	/** Set the line number */
 	void setLine(short l);
