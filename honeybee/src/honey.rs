@@ -932,7 +932,7 @@ const fn one_sql(res: Res) -> Option<&'static str> {
         LcsState => query::LCS_STATE_ONE,
         Modem => query::MODEM_ONE,
         MonitorStyle => query::MONITOR_STYLE_ONE,
-        MsgLine => query::MSG_LINE_ONE,
+        MsgLine => return None, /* NOTE: all request only */
         MsgPattern => query::MSG_PATTERN_ONE,
         Permission => query::PERMISSION_ONE,
         PlanPhase => query::PLAN_PHASE_ONE,
