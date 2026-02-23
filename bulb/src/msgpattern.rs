@@ -27,10 +27,7 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{
-    HtmlElement, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
-    console,
-};
+use web_sys::{HtmlElement, HtmlSelectElement, HtmlTextAreaElement, console};
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
@@ -52,14 +49,41 @@ pub struct GraphicName {
 }
 
 /// Message Line
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
 #[allow(dead_code)]
 pub struct MsgLine {
     pub name: String,
     pub msg_pattern: String,
-    pub restrict_hashtag: Option<String>,
     pub line: u16,
+    pub rank: u16,
     pub multi: String,
+}
+
+impl PartialOrd for MsgLine {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for MsgLine {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self == other {
+            return Ordering::Equal;
+        }
+        let line_ord = self.line.cmp(&other.line);
+        if line_ord != Ordering::Equal {
+            return line_ord;
+        }
+        let rank_ord = self.rank.cmp(&other.rank);
+        if rank_ord != Ordering::Equal {
+            return rank_ord;
+        }
+        let ms_ord = self.multi.cmp(&other.multi);
+        if ms_ord != Ordering::Equal {
+            return ms_ord;
+        }
+        self.name.cmp(&other.name)
+    }
 }
 
 /// Ancillary message pattern data
@@ -77,6 +101,7 @@ pub struct MsgPatternAnc {
 pub struct MsgPattern {
     pub name: String,
     pub compose_hashtag: Option<String>,
+    pub prototype: Option<String>,
     pub multi: String,
     pub compose_cfgs: Vec<String>,
     pub planned_cfgs: Vec<String>,
@@ -208,16 +233,22 @@ impl Ord for MsgPattern {
         } else if other_combine && !self_combine {
             return Ordering::Greater;
         }
+        // prefer patterns with shorter MULTI strings
         let len_ord = self.multi.len().cmp(&other.multi.len());
         if len_ord != Ordering::Equal {
             return len_ord;
         }
         let ms_ord = self.multi.cmp(&other.multi);
         if ms_ord != Ordering::Equal {
-            ms_ord
-        } else {
-            self.name.cmp(&other.name)
+            return ms_ord;
         }
+        // prefer patterns with prototypes
+        if self.prototype.is_some() && other.prototype.is_none() {
+            return Ordering::Less;
+        } else if self.prototype.is_none() && other.prototype.is_some() {
+            return Ordering::Greater;
+        }
+        self.name.cmp(&other.name)
     }
 }
 
@@ -366,6 +397,15 @@ impl MsgPattern {
             .size(16)
             .value(opt_ref(&self.compose_hashtag));
         div.close();
+        div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("mp_prototype").cdata("Prototype").close();
+        div.input()
+            .id("mp_prototype")
+            .maxlength(20)
+            .size(20)
+            .value(opt_ref(&self.prototype));
+        div.close();
         let mut fs = page.frag::<html::FieldSet>();
         let mut legend = fs.legend();
         legend
@@ -413,16 +453,7 @@ impl MsgPattern {
         div.close();
         div = fs.div();
         div.id("mp_lines_div").class("no-display");
-        let mut div2 = div.div();
-        div2.class("row");
-        div2.label()
-            .r#for("mp_filter")
-            .cdata("Filter Restrict")
-            .close();
-        div2.input().id("mp_filter").r#type("checkbox");
-        div2.input().id("mp_restrict").maxlength(16).size(16);
-        div2.close();
-        self.render_lines(anc, None, &mut div.div());
+        self.render_lines(anc, &mut div.div());
         div.close();
         fs.close();
         div = page.frag::<html::Div>();
@@ -522,61 +553,25 @@ impl MsgPattern {
     fn render_lines<'p>(
         &self,
         anc: &MsgPatternAnc,
-        filter: Option<&str>,
         div: &'p mut html::Div<'p>,
     ) {
-        div.id("mp_lines").class("scroll_table");
+        div.class("scroll_table");
         let mut table = div.table();
         let mut thead = table.thead();
         let mut tr = thead.tr();
         tr.th().cdata("Ln").close();
+        tr.th().cdata("Rank").close();
         tr.th().cdata("MULTI").close();
-        if filter.is_some() {
-            tr.th().cdata("Restrict").close();
-        }
         thead.close();
         for ln in &anc.lines {
-            match (&filter, &ln.restrict_hashtag) {
-                (Some(filter), Some(restrict)) => {
-                    if !restrict.to_lowercase().contains(filter) {
-                        continue;
-                    }
-                }
-                (Some(_filter), None) => continue,
-                (None, Some(_restrict)) => continue,
-                (None, None) => (),
-            }
             let mut tr = table.tr();
             tr.td().cdata(ln.line).close();
+            tr.td().cdata(ln.rank).close();
             tr.td().cdata(&ln.multi).close();
-            if filter.is_some() {
-                tr.td().cdata(opt_ref(&ln.restrict_hashtag)).close();
-            }
             tr.close();
         }
         table.close();
         div.close();
-    }
-
-    /// Replace message lines
-    fn replace_lines(&self, anc: &MsgPatternAnc) {
-        let doc = Doc::get();
-        if let Some(mp_filter) = doc.try_elem::<HtmlInputElement>("mp_filter") {
-            let restrict; // String
-            let mut filter = None;
-            if mp_filter.checked()
-                && let Some(mp_restrict) =
-                    doc.try_elem::<HtmlInputElement>("mp_restrict")
-            {
-                restrict = mp_restrict.value().to_lowercase();
-                filter = Some(restrict.as_str());
-            }
-            let mut page = Page::new();
-            let mut div = page.frag::<html::Div>();
-            self.render_lines(anc, filter, &mut div);
-            let mp_lines = doc.elem::<HtmlElement>("mp_lines");
-            mp_lines.set_outer_html(&String::from(page));
-        }
     }
 }
 
@@ -628,6 +623,7 @@ impl Card for MsgPattern {
         let mut fields = Fields::new();
         fields.changed_text_area("multi", &self.multi);
         fields.changed_input("compose_hashtag", &self.compose_hashtag);
+        fields.changed_input("mp_prototype", &self.prototype);
         fields.changed_input("flash_beacon", self.flash_beacon);
         fields.changed_input("pixel_service", self.pixel_service);
         fields.into_value().to_string()
@@ -638,8 +634,6 @@ impl Card for MsgPattern {
         let doc = Doc::get();
         if id == "mp_config" {
             self.replace_preview(&anc);
-        } else if id == "mp_filter" || id == "mp_restrict" {
-            self.replace_lines(&anc);
         } else if let Ok(tab) = Tab::try_from(id.as_str()) {
             if let Tab::Preview = tab {
                 self.replace_preview(&anc);

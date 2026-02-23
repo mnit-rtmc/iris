@@ -285,14 +285,8 @@ impl AncillaryData for DmsAnc {
                 let mut lines: Vec<MsgLine> =
                     serde_wasm_bindgen::from_value(value)?;
                 // NOTE: patterns *must* be populated before this!
-                lines.retain(|ln| {
-                    self.has_compose_pattern(&ln.msg_pattern)
-                        && (ln.restrict_hashtag.is_none()
-                            || ln
-                                .restrict_hashtag
-                                .as_ref()
-                                .is_some_and(|h| pri.has_hashtag(h)))
-                });
+                lines.retain(|ln| self.has_compose_pattern(&ln.msg_pattern));
+                lines.sort();
                 self.lines = lines;
             }
             Asset::Words => {
@@ -392,21 +386,12 @@ impl DmsAnc {
     fn make_lines_html<'p>(
         &self,
         dms: &NtcipDms,
-        pat_def: &MsgPattern,
+        pat: &MsgPattern,
         ms_cur: &str,
         div: &'p mut html::Div<'p>,
     ) {
-        // NOTE: this prevents lifetime from escaping
-        let mut pat = pat_def;
-        if self.pat_lines(pat).count() == 0 {
-            let n_lines = MessagePattern::new(dms, &pat.multi).widths().count();
-            match self.find_substitute(pat, n_lines) {
-                Some(sub) => pat = sub,
-                None => return,
-            }
-        }
-        let widths = MessagePattern::new(dms, &pat_def.multi).widths();
-        let cur_lines = MessagePattern::new(dms, &pat_def.multi)
+        let widths = MessagePattern::new(dms, &pat.multi).widths();
+        let cur_lines = MessagePattern::new(dms, &pat.multi)
             .lines(ms_cur)
             .chain(repeat(""));
         div.id("mc_lines").class("column");
@@ -450,31 +435,15 @@ impl DmsAnc {
         div.close();
     }
 
-    /// Find a substitute message pattern
-    fn find_substitute(
-        &self,
-        pat: &MsgPattern,
-        n_lines: usize,
-    ) -> Option<&MsgPattern> {
-        self.compose_patterns
-            .iter()
-            .find(|&mp| mp != pat && self.max_line(mp) == n_lines)
-    }
-
-    /// Get max line number of a pattern
-    fn max_line(&self, pat: &MsgPattern) -> usize {
-        self.pat_lines(pat)
-            .map(|ml| usize::from(ml.line))
-            .max()
-            .unwrap_or_default()
-    }
-
     /// Get iterator of lines in a message pattern
     fn pat_lines<'a>(
         &'a self,
         pat: &'a MsgPattern,
     ) -> impl Iterator<Item = &'a MsgLine> {
-        self.lines.iter().filter(|ml| ml.msg_pattern == pat.name)
+        self.lines.iter().filter(|ml| {
+            ml.msg_pattern == pat.name
+                || Some(&ml.msg_pattern) == pat.prototype.as_ref()
+        })
     }
 
     /// Get line that fits on sign
