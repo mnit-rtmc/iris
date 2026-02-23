@@ -3302,86 +3302,85 @@ CREATE TRIGGER dms_hashtag_trig
 
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
+    compose_hashtag VARCHAR(16),
+    prototype VARCHAR(20) REFERENCES iris.msg_pattern,
     multi VARCHAR(1024) NOT NULL,
     flash_beacon BOOLEAN NOT NULL,
     pixel_service BOOLEAN NOT NULL,
-    compose_hashtag VARCHAR(16),
 
     CONSTRAINT hashtag_ck CHECK (compose_hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
-INSERT INTO iris.msg_pattern (name, multi, flash_beacon, pixel_service,
-    compose_hashtag)
-VALUES
-    ('.1_LINE', '', false, false, '#OneLine'),
-    ('.2_LINE', '[np]', false, false, '#TwoLine'),
-    ('.3_LINE', '', false, false, '#ThreeLine'),
-    ('.4_LINE', '', false, false, '#FourLine'),
-    ('.2_PAGE', '[np]', false, false, '#Small'),
+INSERT INTO iris.msg_pattern (
+    name, compose_hashtag, multi, flash_beacon, pixel_service
+) VALUES
+    ('.1_LINE', '#OneLine', '', false, false),
+    ('.2_LINE', '#TwoLine', '[np]', false, false),
+    ('.3_LINE', '#ThreeLine', '', false, false),
+    ('.4_LINE', '#FourLine', '', false, false),
+    ('.2_PAGE', '#Small', '[np]', false, false),
     ('RWIS_slippery_1',
+        NULL,
         '[rwis_slippery,1]SLIPPERY[nl]ROAD[nl]DETECTED[np]USE[nl]CAUTION',
         false,
-        false,
-        NULL),
+        false),
     ('RWIS_slippery_2',
+        NULL,
         '[rwis_slippery,2]SLIPPERY[nl]ROAD[nl]DETECTED[np]REDUCE[nl]SPEED',
         false,
-        false,
-        NULL),
+        false),
     ('RWIS_slippery_3',
+        NULL,
         '[rwis_slippery,3]ICE[nl]DETECTED[np]REDUCE[nl]SPEED',
         false,
-        false,
-        NULL),
+        false),
     ('RWIS_windy_1',
+        NULL,
         '[rwis_windy,1]WIND GST[nl]>40 MPH[nl]DETECTED[np]USE[nl]CAUTION',
         false,
-        false,
-        NULL),
+        false),
     ('RWIS_windy_2',
+        NULL,
         '[rwis_windy,2]WIND GST[nl]>60 MPH[nl]DETECTED[np]REDUCE[nl]SPEED',
         false,
-        false,
-        NULL),
+        false),
     ('RWIS_visibility_1',
+        NULL,
         '[rwis_visibility,1]REDUCED[nl]VISBLITY[nl]DETECTED[np]USE[nl]CAUTION',
         false,
-        false,
-        NULL),
+        false),
     ('RWIS_visibility_2',
+        NULL,
         '[rwis_visibility,2]LOW[nl]VISBLITY[nl]DETECTED[np]REDUCE[nl]SPEED',
         false,
-        false,
-        NULL),
+        false),
     ('RWIS_flooding_1',
+        NULL,
         '[rwis_flooding,1]FLOODING[nl]POSSIBLE[np]USE[nl]CAUTION',
         false,
-        false,
-        NULL),
+        false),
     ('RWIS_flooding_2',
+        NULL,
         '[rwis_flooding,2]FLASH[nl]FLOODING[np]USE[nl]CAUTION',
         false,
-        false,
-        NULL);
+        false);
 
 CREATE TRIGGER msg_pattern_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.msg_pattern
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW msg_pattern_view AS
-    SELECT name, multi, flash_beacon, pixel_service, compose_hashtag
+    SELECT name, compose_hashtag, prototype, multi, flash_beacon, pixel_service
     FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
 CREATE TABLE iris.msg_line (
     name VARCHAR(10) PRIMARY KEY,
     msg_pattern VARCHAR(20) NOT NULL REFERENCES iris.msg_pattern,
-    restrict_hashtag VARCHAR(16),
     line SMALLINT NOT NULL,
     multi VARCHAR(64) NOT NULL,
     rank SMALLINT NOT NULL,
 
-    CONSTRAINT hashtag_ck CHECK (restrict_hashtag ~ '^#[A-Za-z0-9]+$'),
     CONSTRAINT msg_line_line CHECK ((line >= 1) AND (line <= 12)),
     CONSTRAINT msg_line_rank CHECK ((rank >= 1) AND (rank <= 99))
 );
@@ -3391,7 +3390,7 @@ CREATE TRIGGER msg_line_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW msg_line_view AS
-    SELECT name, msg_pattern, restrict_hashtag, line, multi, rank
+    SELECT name, msg_pattern, line, rank, multi
     FROM iris.msg_line;
 GRANT SELECT ON msg_line_view TO PUBLIC;
 
