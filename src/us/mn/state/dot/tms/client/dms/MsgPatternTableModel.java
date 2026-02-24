@@ -42,8 +42,8 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 	@Override
 	protected ArrayList<ProxyColumn<MsgPattern>> createColumns() {
 		ArrayList<ProxyColumn<MsgPattern>> cols =
-			new ArrayList<ProxyColumn<MsgPattern>>(3);
-		cols.add(new ProxyColumn<MsgPattern>("msg.pattern.name", 168){
+			new ArrayList<ProxyColumn<MsgPattern>>(2);
+		cols.add(new ProxyColumn<MsgPattern>("msg.pattern.name", 162) {
 			public Object getValueAt(MsgPattern pat) {
 				return pat.getName();
 			}
@@ -60,19 +60,6 @@ public class MsgPatternTableModel extends ProxyTableModel<MsgPattern> {
 			public void setValueAt(MsgPattern pat, Object value) {
 				String cht = Hashtags.normalize(value.toString());
 				pat.setComposeHashtag(cht);
-			}
-		});
-		cols.add(new ProxyColumn<MsgPattern>(
-			"msg.pattern.prototype", 168)
-		{
-			public Object getValueAt(MsgPattern pat) {
-				return pat.getPrototype();
-			}
-			public boolean isEditable(MsgPattern pat) {
-				return canWrite(pat);
-			}
-			public void setValueAt(MsgPattern pat, Object value) {
-				pat.setPrototype(value.toString());
 			}
 		});
 		return cols;
