@@ -278,26 +278,26 @@ fn row_class(show: bool) -> &'static str {
 /// Handle change to selected resource type
 async fn handle_resource_change(res: Option<Res>, search: &str) {
     let doc = Doc::get();
+    let base = res.map(|r| r.base());
+    if let Some(elem) = doc.try_elem::<Element>("res_dms_row") {
+        elem.set_class_name(row_class(base == Some(Res::Dms)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_lcs_row") {
+        elem.set_class_name(row_class(base == Some(Res::Lcs)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_video_monitor_row") {
+        elem.set_class_name(row_class(base == Some(Res::VideoMonitor)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_controller_row") {
+        elem.set_class_name(row_class(base == Some(Res::Controller)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_permission_row") {
+        elem.set_class_name(row_class(base == Some(Res::Permission)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_system_row") {
+        elem.set_class_name(row_class(base == Some(Res::SystemAttribute)));
+    }
     if let Some(res) = res {
-        let base = res.base();
-        if let Some(elem) = doc.try_elem::<Element>("res_dms_row") {
-            elem.set_class_name(row_class(base == Res::Dms));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_lcs_row") {
-            elem.set_class_name(row_class(base == Res::Lcs));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_video_monitor_row") {
-            elem.set_class_name(row_class(base == Res::VideoMonitor));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_controller_row") {
-            elem.set_class_name(row_class(base == Res::Controller));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_system_row") {
-            elem.set_class_name(row_class(base == Res::SystemAttribute));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_permission_row") {
-            elem.set_class_name(row_class(base == Res::Permission));
-        }
         let id = format!("res_{}", res.as_str());
         if let Some(elem) = doc.try_elem::<HtmlInputElement>(&id) {
             elem.set_checked(true);
