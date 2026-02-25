@@ -950,7 +950,7 @@ const fn one_sql(res: Res) -> Option<&'static str> {
         User => query::USER_ONE,
         VideoMonitor => query::VIDEO_MONITOR_ONE,
         WeatherSensor => query::WEATHER_SENSOR_ONE,
-        Word => return None, /* NOTE: all request only */
+        Word => query::WORD_ONE,
         _ => return None,
     })
 }

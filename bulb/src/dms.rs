@@ -27,6 +27,7 @@ use crate::rle::Table;
 use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
+use crate::word::Word;
 use chrono::{DateTime, Local, format::SecondsFormat};
 use hatmil::{Page, html};
 use js_sys::{ArrayBuffer, Uint8Array};
@@ -187,14 +188,6 @@ pub struct Dms {
     pub geo_loc: Option<String>,
     pub status: Option<SignStatus>,
     pub pixel_failures: Option<String>,
-}
-
-/// Word (for messages)
-#[derive(Clone, Debug, Default, Deserialize)]
-pub struct Word {
-    pub name: String,
-    pub abbr: Option<String>,
-    pub allowed: bool,
 }
 
 /// DMS ancillary data
@@ -513,8 +506,8 @@ impl DmsAnc {
                 for word in &self.words {
                     if word.allowed
                         && word.name == w
-                        && let Some(ab) = &word.abbr
-                        && ab != w
+                        && !word.abbr.is_empty()
+                        && word.abbr != w
                     {
                         abbrev = word.clone();
                     }
@@ -525,7 +518,7 @@ impl DmsAnc {
             let mut t = String::new();
             for w in text.split(' ') {
                 if w == abbrev.name {
-                    t.push_str(abbrev.abbr.as_ref().unwrap());
+                    t.push_str(&abbrev.abbr);
                 } else {
                     t.push_str(w);
                 }

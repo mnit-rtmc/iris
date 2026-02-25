@@ -19,7 +19,7 @@ use serde::Deserialize;
 use std::borrow::Cow;
 
 /// Word
-#[derive(Debug, Default, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq)]
 pub struct Word {
     pub name: String,
     pub allowed: bool,

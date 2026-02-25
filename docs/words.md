@@ -11,6 +11,7 @@ free-form text as long as none of the words are banned.
 <summary>API Resources 🕵️ </summary>
 
 * `iris/api/word` (primary)
+* `iris/api/word/{name}`
 
 | Access       | Primary        | Secondary |
 |--------------|----------------|-----------|
