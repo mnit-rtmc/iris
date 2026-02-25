@@ -187,7 +187,7 @@ async fn update_sb_resource() -> Result<()> {
     if let Some(elem) = doc.try_elem::<Element>("opt_permission") {
         elem.set_class_name(opt_class(&access, Res::Permission));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_system_attribute") {
+    if let Some(elem) = doc.try_elem::<Element>("opt_system_attr") {
         elem.set_class_name(opt_class(&access, Res::SystemAttribute));
     }
     if let Some(elem) = doc.try_elem::<Element>("opt_toll_zone") {
@@ -485,10 +485,9 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
             | "res_lcs" | "res_lcs_state" | "res_video_monitor"
             | "res_monitor_style" | "res_flow_stream" | "res_controller"
             | "res_comm_link" | "res_alarm" | "res_gps" | "res_modem"
-            | "res_comm_config" | "res_cabinet_style" | "res_permission"
-            | "res_user" | "res_role" | "res_domain" | "sb_resource" => {
-                handle_res_change()
-            }
+            | "res_system_attr" | "res_comm_config" | "res_cabinet_style"
+            | "res_permission" | "res_user" | "res_role" | "res_domain"
+            | "sb_resource" => handle_res_change(),
             "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
             "ob_view" => handle_ob_view_ev(),
             _ => spawn_local(do_future(handle_input(id))),

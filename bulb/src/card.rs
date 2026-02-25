@@ -39,6 +39,7 @@ use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
 use crate::role::Role;
 use crate::signconfig::SignConfig;
+use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::user::User;
 use crate::util::Doc;
@@ -440,6 +441,7 @@ fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::RampMeter => RampMeter::item_states_all(),
         Res::Role => Role::item_states_all(),
         Res::SignConfig => SignConfig::item_states_all(),
+        Res::SystemAttribute => SystemAttr::item_states_all(),
         Res::TagReader => TagReader::item_states_all(),
         Res::User => User::item_states_all(),
         Res::VideoMonitor => VideoMonitor::item_states_all(),
@@ -467,6 +469,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::Permission
         | Res::Role
         | Res::SignConfig
+        | Res::SystemAttribute
         | Res::User
         | Res::Word => &[View::Compact, View::Setup],
         Res::Beacon | Res::GateArm | Res::Lcs => {
@@ -624,6 +627,7 @@ impl CardList {
             Res::RampMeter => self.states_main_x::<RampMeter>().await,
             Res::Role => self.states_main_x::<Role>().await,
             Res::SignConfig => self.states_main_x::<SignConfig>().await,
+            Res::SystemAttribute => self.states_main_x::<SystemAttr>().await,
             Res::TagReader => self.states_main_x::<TagReader>().await,
             Res::User => self.states_main_x::<User>().await,
             Res::VideoMonitor => self.states_main_x::<VideoMonitor>().await,
@@ -699,6 +703,7 @@ impl CardList {
             Res::RampMeter => self.make_html_x::<RampMeter>().await,
             Res::Role => self.make_html_x::<Role>().await,
             Res::SignConfig => self.make_html_x::<SignConfig>().await,
+            Res::SystemAttribute => self.make_html_x::<SystemAttr>().await,
             Res::TagReader => self.make_html_x::<TagReader>().await,
             Res::User => self.make_html_x::<User>().await,
             Res::VideoMonitor => self.make_html_x::<VideoMonitor>().await,
@@ -796,6 +801,7 @@ impl CardList {
             Res::RampMeter => self.view_change_x::<RampMeter>().await,
             Res::Role => self.view_change_x::<Role>().await,
             Res::SignConfig => self.view_change_x::<SignConfig>().await,
+            Res::SystemAttribute => self.view_change_x::<SystemAttr>().await,
             Res::TagReader => self.view_change_x::<TagReader>().await,
             Res::User => self.view_change_x::<User>().await,
             Res::VideoMonitor => self.view_change_x::<VideoMonitor>().await,
@@ -879,6 +885,7 @@ impl CardList {
             Res::RampMeter => self.changed::<RampMeter>(json).await,
             Res::Role => self.changed::<Role>(json).await,
             Res::SignConfig => self.changed::<SignConfig>(json).await,
+            Res::SystemAttribute => self.changed::<SystemAttr>(json).await,
             Res::TagReader => self.changed::<TagReader>(json).await,
             Res::User => self.changed::<User>(json).await,
             Res::VideoMonitor => self.changed::<VideoMonitor>(json).await,
@@ -990,6 +997,7 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::RampMeter => fetch_one_x::<RampMeter>(cv).await,
         Res::Role => fetch_one_x::<Role>(cv).await,
         Res::SignConfig => fetch_one_x::<SignConfig>(cv).await,
+        Res::SystemAttribute => fetch_one_x::<SystemAttr>(cv).await,
         Res::TagReader => fetch_one_x::<TagReader>(cv).await,
         Res::User => fetch_one_x::<User>(cv).await,
         Res::VideoMonitor => fetch_one_x::<VideoMonitor>(cv).await,
@@ -1053,6 +1061,7 @@ async fn patch_setup(cv: &CardView) -> Result<()> {
         Res::RampMeter => patch_setup_x::<RampMeter>(cv).await,
         Res::Role => patch_setup_x::<Role>(cv).await,
         Res::SignConfig => patch_setup_x::<SignConfig>(cv).await,
+        Res::SystemAttribute => patch_setup_x::<SystemAttr>(cv).await,
         Res::TagReader => patch_setup_x::<TagReader>(cv).await,
         Res::User => patch_setup_x::<User>(cv).await,
         Res::VideoMonitor => patch_setup_x::<VideoMonitor>(cv).await,

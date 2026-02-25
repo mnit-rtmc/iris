@@ -51,6 +51,7 @@ mod role;
 mod signconfig;
 mod signmessage;
 mod start;
+mod systemattr;
 mod tagreader;
 mod user;
 mod util;

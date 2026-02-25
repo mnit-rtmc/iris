@@ -931,6 +931,12 @@ pub const SYSTEM_ATTRIBUTE_ALL: &str = "\
   FROM iris.system_attribute \
   ORDER BY name";
 
+/// SQL query for one system attribute
+pub const SYSTEM_ATTRIBUTE_ONE: &str = "\
+  SELECT name, value \
+  FROM iris.system_attribute \
+  WHERE name = $1";
+
 /// SQL query for system attributes (public)
 pub const SYSTEM_ATTRIBUTE_PUB: &str = "\
   SELECT name, value \
