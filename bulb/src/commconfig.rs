@@ -143,7 +143,7 @@ pub struct CommConfig {
 #[derive(Debug, Default)]
 pub struct CommConfigAnc {
     assets: Vec<Asset>,
-    pub protocols: Option<Vec<Protocol>>,
+    pub protocols: Vec<Protocol>,
 }
 
 impl AncillaryData for CommConfigAnc {
@@ -155,7 +155,7 @@ impl AncillaryData for CommConfigAnc {
             View::Setup => vec![Asset::CommProtocols],
             _ => Vec::new(),
         };
-        let protocols = None;
+        let protocols = Vec::new();
         CommConfigAnc { assets, protocols }
     }
 
@@ -171,7 +171,7 @@ impl AncillaryData for CommConfigAnc {
         _asset: Asset,
         value: JsValue,
     ) -> Result<()> {
-        self.protocols = Some(serde_wasm_bindgen::from_value(value)?);
+        self.protocols = serde_wasm_bindgen::from_value(value)?;
         Ok(())
     }
 }
@@ -184,17 +184,15 @@ impl CommConfigAnc {
         select: &'p mut html::Select<'p>,
     ) {
         select.id("protocol");
-        if let Some(protocols) = &self.protocols {
-            for protocol in protocols {
-                let mut option = select.option();
-                option.value(protocol.id);
-                if let Some(p) = pri.protocol
-                    && p == protocol.id
-                {
-                    option.selected();
-                }
-                option.cdata(&protocol.description).close();
+        for protocol in &self.protocols {
+            let mut option = select.option();
+            option.value(protocol.id);
+            if let Some(p) = pri.protocol
+                && p == protocol.id
+            {
+                option.selected();
             }
+            option.cdata(&protocol.description).close();
         }
         select.close();
     }
