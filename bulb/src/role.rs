@@ -10,13 +10,17 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, View};
+use crate::error::Result;
 use crate::item::ItemState;
+use crate::permission::Permission;
 use crate::util::{ContainsLower, Fields, Input};
 use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
+use wasm_bindgen::JsValue;
 
 /// Role
 #[derive(Debug, Default, Deserialize, PartialEq)]
@@ -29,14 +33,45 @@ pub struct Role {
 
 /// Ancillary role data
 #[derive(Debug, Default)]
-pub struct RoleAnc;
+pub struct RoleAnc {
+    assets: Vec<Asset>,
+    pub permissions: Vec<Permission>,
+}
 
 impl AncillaryData for RoleAnc {
     type Primary = Role;
 
     /// Construct ancillary role data
-    fn new(_pri: &Role, _view: View) -> Self {
-        RoleAnc
+    fn new(_pri: &Role, view: View) -> Self {
+        let assets = match view {
+            View::Setup => vec![Asset::Permissions],
+            _ => Vec::new(),
+        };
+        let permissions = Vec::new();
+        RoleAnc {
+            assets,
+            permissions,
+        }
+    }
+
+    /// Get next asset to fetch
+    fn asset(&mut self) -> Option<Asset> {
+        self.assets.pop()
+    }
+
+    /// Set asset value
+    fn set_asset(
+        &mut self,
+        pri: &Role,
+        _asset: Asset,
+        value: JsValue,
+    ) -> Result<()> {
+        let mut permissions: Vec<Permission> =
+            serde_wasm_bindgen::from_value(value)?;
+        permissions.retain(|p| p.role == pri.name);
+        permissions.sort();
+        self.permissions = permissions;
+        Ok(())
     }
 }
 
@@ -62,7 +97,7 @@ impl Role {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self) -> String {
+    fn to_html_setup(&self, anc: &RoleAnc) -> String {
         let mut page = Page::new();
         self.title(View::Setup, &mut page.frag::<html::Div>());
         let mut div = page.frag::<html::Div>();
@@ -77,6 +112,15 @@ impl Role {
             input.checked();
         }
         div.close();
+        if !anc.permissions.is_empty() {
+            div = page.frag::<html::Div>();
+            div.class("row").cdata("🗝️ Permissions").close();
+            let mut table = page.frag::<html::Table>();
+            for perm in &anc.permissions {
+                table.raw(perm.to_html_row());
+            }
+            table.close();
+        }
         self.footer_html(true, &mut page.frag::<html::Div>());
         String::from(page)
     }
@@ -110,7 +154,7 @@ impl Card for Role {
     fn to_html(&self, view: View, anc: &RoleAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Setup => self.to_html_setup(),
+            View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(),
         }
     }

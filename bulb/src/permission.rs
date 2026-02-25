@@ -25,13 +25,14 @@ use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
 /// Permission
-#[derive(Debug, Default, Deserialize, PartialEq)]
+#[derive(Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Permission {
-    pub name: String,
-    pub role: String,
+    // NOTE: field order affects derived PartialOrd / Ord
     pub base_resource: String,
     pub hashtag: Option<String>,
     pub access_level: u32,
+    pub name: String,
+    pub role: String,
 }
 
 /// Resource Type
@@ -188,6 +189,21 @@ impl Permission {
         obj.insert("role".to_string(), Value::String(role));
         obj.insert("base_resource".to_string(), Value::String(base_resource));
         Ok(Value::Object(obj).to_string())
+    }
+
+    /// Convert to HTML table row
+    pub fn to_html_row(&self) -> String {
+        let mut page = Page::new();
+        let mut tr = page.frag::<html::Tr>();
+        tr.td().cdata(&self.base_resource).close();
+        tr.td().cdata(opt_ref(&self.hashtag)).close();
+        let st = item_state(self.access_level);
+        tr.td()
+            .cdata(st.code())
+            .cdata(' ')
+            .cdata(st.description())
+            .close();
+        String::from(page)
     }
 
     /// Convert to Compact HTML

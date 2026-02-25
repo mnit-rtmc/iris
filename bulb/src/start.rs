@@ -281,7 +281,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
     let sidebar = doc.elem::<HtmlElement>("sidebar");
     sidebar.set_class_name("wait");
     let sb_list = doc.elem::<Element>("sb_list");
-    sb_list.set_inner_html(&"");
+    sb_list.set_inner_html("");
     let base = res.map(|r| r.base());
     if let Some(elem) = doc.try_elem::<Element>("res_dms_row") {
         elem.set_class_name(row_class(base == Some(Res::Dms)));

@@ -58,7 +58,7 @@ resource, at the same access level.
 | [incident]         | inc\_advice, inc\_descriptor, inc\_detail, inc\_locator, road\_affix |
 | [lcs]              | [lcs state]                                           |
 | [parking area]     |                                                       |
-| permission         | connection, [domain], [role], [user id]               |
+| permission         | [domain], [role], [user id], connection               |
 | [ramp meter]       |                                                       |
 | [system attribute] | [cabinet style], [comm config], [event config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                          |

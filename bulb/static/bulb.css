@@ -498,7 +498,7 @@ label:has(+ #sb_resource) {
 }
 .wait {
   filter: opacity(50%);
-  cursor: wait;
+  cursor: wait !important;
 }
 
 /* ---------------
