@@ -325,7 +325,7 @@ function tms_style_station(sid) {
 function density_color(density) {
     if (density) {
         if (density < 30) {
-            return "#292";
+            return "#2c2";
         }
         if (density < 50) {
             return "#fc0";
@@ -335,7 +335,7 @@ function density_color(density) {
         }
         return "#c0f";
     }
-    return "#666";
+    return "#aaa";
 }
 
 // Select feature on TMS layers
