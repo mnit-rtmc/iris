@@ -496,6 +496,10 @@ label:has(+ #sb_resource) {
 .hidden {
   visibility: hidden;
 }
+.wait {
+  filter: opacity(50%);
+  cursor: wait;
+}
 
 /* ---------------
  * Signal Housings

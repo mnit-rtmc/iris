@@ -278,6 +278,10 @@ fn row_class(show: bool) -> &'static str {
 /// Handle change to selected resource type
 async fn handle_resource_change(res: Option<Res>, search: &str) {
     let doc = Doc::get();
+    let sidebar = doc.elem::<HtmlElement>("sidebar");
+    sidebar.set_class_name("wait");
+    let sb_list = doc.elem::<Element>("sb_list");
+    sb_list.set_inner_html(&"");
     let base = res.map(|r| r.base());
     if let Some(elem) = doc.try_elem::<Element>("res_dms_row") {
         elem.set_class_name(row_class(base == Some(Res::Dms)));
@@ -320,6 +324,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
     if let Err(e) = uri.post(&json.into()).await {
         console::log_1(&format!("/iris/api/notify POST: {e}").into());
     }
+    sidebar.set_class_name("");
 }
 
 /// Build resource list for notifications
