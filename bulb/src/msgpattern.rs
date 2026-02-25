@@ -231,6 +231,7 @@ impl MsgPattern {
     }
 
     /// Get MULTI string with action tags replaced with a filler character
+    #[allow(clippy::if_same_then_else)]
     fn multi(&self) -> String {
         let mut multi = String::new();
         for val in multi_split(&self.multi_string()) {

@@ -506,8 +506,9 @@ impl DmsAnc {
                 for word in &self.words {
                     if word.allowed
                         && word.name == w
-                        && !word.abbr.is_empty()
-                        && word.abbr != w
+                        && let Some(abbr) = &word.abbr
+                        && !abbr.is_empty()
+                        && abbr != w
                     {
                         abbrev = word.clone();
                     }
@@ -518,7 +519,7 @@ impl DmsAnc {
             let mut t = String::new();
             for w in text.split(' ') {
                 if w == abbrev.name {
-                    t.push_str(&abbrev.abbr);
+                    t.push_str(abbrev.abbr.as_ref().unwrap());
                 } else {
                     t.push_str(w);
                 }

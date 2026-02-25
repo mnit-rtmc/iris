@@ -12,7 +12,7 @@
 //
 use crate::card::{AncillaryData, Card, View};
 use crate::item::ItemState;
-use crate::util::{ContainsLower, Fields, Input};
+use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
@@ -23,7 +23,7 @@ use std::borrow::Cow;
 pub struct Word {
     pub name: String,
     pub allowed: bool,
-    pub abbr: String,
+    pub abbr: Option<String>,
 }
 
 /// Ancillary Word data
@@ -46,9 +46,11 @@ impl Word {
         let mut div = page.frag::<html::Div>();
         div.cdata(self.name());
         if self.allowed {
-            if !self.abbr.is_empty() {
+            if let Some(abbr) = &self.abbr
+                && !abbr.is_empty()
+            {
                 div.cdata(" ➡ ");
-                div.cdata(&self.abbr);
+                div.cdata(opt_ref(&self.abbr));
             }
         } else {
             div.cdata(" 🚫");
@@ -73,7 +75,11 @@ impl Word {
         div.class("row");
         div.label().r#for("abbr").cdata("Abbreviation").close();
         let mut input = div.input();
-        input.id("abbr").maxlength(12).size(12).value(&self.abbr);
+        input
+            .id("abbr")
+            .maxlength(12)
+            .size(12)
+            .value(opt_ref(&self.abbr));
         div.close();
         self.footer_html(true, &mut page.frag::<html::Div>());
         String::from(page)
@@ -107,9 +113,9 @@ impl Card for Word {
     /// Get the main item state
     fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
         if self.allowed {
-            ItemState::Available.into()
+            ItemState::Available
         } else {
-            ItemState::Prohibited.into()
+            ItemState::Prohibited
         }
     }
 
