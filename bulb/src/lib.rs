@@ -56,3 +56,4 @@ mod user;
 mod util;
 mod videomonitor;
 mod weathersensor;
+mod word;

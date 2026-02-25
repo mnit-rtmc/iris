@@ -334,6 +334,7 @@ impl Res {
             User => "👤",
             VideoMonitor => "📺",
             WeatherSensor => "🌦️ ",
+            Word => "🔠",
             _ => "❓",
         }
     }

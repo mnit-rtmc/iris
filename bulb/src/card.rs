@@ -44,6 +44,7 @@ use crate::user::User;
 use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
+use crate::word::Word;
 use futures::StreamExt;
 use futures::stream::FuturesUnordered;
 use hatmil::{Page, html};
@@ -443,6 +444,7 @@ fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::User => User::item_states_all(),
         Res::VideoMonitor => VideoMonitor::item_states_all(),
         Res::WeatherSensor => WeatherSensor::item_states_all(),
+        Res::Word => Word::item_states_all(),
         _ => &[],
     }
 }
@@ -465,7 +467,8 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::Permission
         | Res::Role
         | Res::SignConfig
-        | Res::User => &[View::Compact, View::Setup],
+        | Res::User
+        | Res::Word => &[View::Compact, View::Setup],
         Res::Beacon | Res::GateArm | Res::Lcs => {
             &[View::Compact, View::Control, View::Location, View::Setup]
         }
@@ -625,6 +628,7 @@ impl CardList {
             Res::User => self.states_main_x::<User>().await,
             Res::VideoMonitor => self.states_main_x::<VideoMonitor>().await,
             Res::WeatherSensor => self.states_main_x::<WeatherSensor>().await,
+            Res::Word => self.states_main_x::<Word>().await,
             _ => unreachable!(),
         }
     }
@@ -699,6 +703,7 @@ impl CardList {
             Res::User => self.make_html_x::<User>().await,
             Res::VideoMonitor => self.make_html_x::<VideoMonitor>().await,
             Res::WeatherSensor => self.make_html_x::<WeatherSensor>().await,
+            Res::Word => self.make_html_x::<Word>().await,
             _ => unreachable!(),
         }
     }
@@ -795,6 +800,7 @@ impl CardList {
             Res::User => self.view_change_x::<User>().await,
             Res::VideoMonitor => self.view_change_x::<VideoMonitor>().await,
             Res::WeatherSensor => self.view_change_x::<WeatherSensor>().await,
+            Res::Word => self.view_change_x::<Word>().await,
             _ => unreachable!(),
         }
     }
@@ -877,6 +883,7 @@ impl CardList {
             Res::User => self.changed::<User>(json).await,
             Res::VideoMonitor => self.changed::<VideoMonitor>(json).await,
             Res::WeatherSensor => self.changed::<WeatherSensor>(json).await,
+            Res::Word => self.changed::<Word>(json).await,
             _ => unreachable!(),
         }
     }
@@ -987,6 +994,7 @@ async fn fetch_one_res(cv: &CardView) -> Result<String> {
         Res::User => fetch_one_x::<User>(cv).await,
         Res::VideoMonitor => fetch_one_x::<VideoMonitor>(cv).await,
         Res::WeatherSensor => fetch_one_x::<WeatherSensor>(cv).await,
+        Res::Word => fetch_one_x::<Word>(cv).await,
         _ => unreachable!(),
     }
 }
@@ -1049,6 +1057,7 @@ async fn patch_setup(cv: &CardView) -> Result<()> {
         Res::User => patch_setup_x::<User>(cv).await,
         Res::VideoMonitor => patch_setup_x::<VideoMonitor>(cv).await,
         Res::WeatherSensor => patch_setup_x::<WeatherSensor>(cv).await,
+        Res::Word => patch_setup_x::<Word>(cv).await,
         _ => unreachable!(),
     }
 }

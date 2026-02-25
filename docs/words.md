@@ -7,6 +7,20 @@ Words can either be **banned** or **allowed** for use in messages.
 If an operator has **Manage** [permissions] for a [DMS], they can enter
 free-form text as long as none of the words are banned.
 
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/word` (primary)
+
+| Access       | Primary        | Secondary |
+|--------------|----------------|-----------|
+| 👁️  View      | name           |           |
+| 👉 Operate   |                |           |
+| 💡 Manage    |                |           |
+| 🔧 Configure | abbr, allowed  |           |
+
+</details>
+
 ## Abbreviation
 
 _Allowed_ words are used for automatic abbreviation of [message lines] and

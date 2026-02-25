@@ -1029,9 +1029,3 @@ pub const WORD_ALL: &str = "\
   SELECT name, abbr, allowed \
   FROM iris.word \
   ORDER BY name";
-
-/// SQL query for one word (secondary)
-pub const WORD_ONE: &str = "\
-  SELECT name, abbr, allowed \
-  FROM iris.word \
-  WHERE name = $1";
