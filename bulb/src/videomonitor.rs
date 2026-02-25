@@ -257,6 +257,7 @@ impl Card for VideoMonitor {
         &[
             ItemState::Available,
             ItemState::Prohibited,
+            ItemState::Offline,
             ItemState::Inactive,
         ]
     }
@@ -270,6 +271,20 @@ impl Card for VideoMonitor {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let states = anc.cio.item_states(self);
+        if states.contains(ItemState::Inactive) {
+            ItemState::Inactive
+        } else if states.contains(ItemState::Prohibited) {
+            ItemState::Prohibited
+        } else if states.contains(ItemState::Offline) {
+            ItemState::Offline
+        } else {
+            ItemState::Available
+        }
     }
 
     /// Check if a search string matches
