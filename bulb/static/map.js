@@ -113,12 +113,18 @@ function osm_styles() {
         leisure: leisure,
         cemetery: cemetery,
         retail: retail,
-        motorway: { weight: 3, color: "#ffd9a9" },
-        trunk: { color: "#ffe0a9" },
-        primary: { color: "#ffeaa9" },
-        secondary: { color: "#fff4a9" },
-        tertiary: { color: "#ffffa9" },
-        road: { weight: 1.5, color: "#ccc" },
+        /* #ffd9a9, 60% opacity over #667777 => #d3ba98 */
+        motorway: { weight: 3, color: "#d3ba98" },
+        /* #ffe0a9, 60% opacity over #667777 => #d3bf98 */
+        trunk: { color: "#d3bf98" },
+        /* #ffeaa9, 60% opacity over #667777 => #d3c698 */
+        primary: { color: "#d3c698" },
+        /* #fff4a9, 60% opacity over #667777 => #d3ce98 */
+        secondary: { color: "#d3ce98" },
+        /* #ffffa9, 60% opacity over #667777 => #ded698 */
+        tertiary: { color: "#d3d698" },
+        /* #cccccc, 60% opacity over #667777 => #adb0b0 */
+        road: { weight: 1.5, color: "#adb0b0" },
         path: path,
         railway: railway,
         building: building,
