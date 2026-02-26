@@ -500,6 +500,9 @@ label:has(+ #sb_resource) {
   filter: opacity(50%);
   cursor: wait !important;
 }
+.wait * {
+  cursor: wait !important;
+}
 
 /* ---------------
  * Signal Housings
