@@ -392,10 +392,11 @@ fn selected_resource() -> Option<Res> {
         {
             Some(Res::MonitorStyle)
         }
-        Res::VideoMonitor
-            if doc.elem::<HtmlInputElement>("res_flow_stream").checked() =>
-        {
-            Some(Res::FlowStream)
+        Res::VideoMonitor => {
+            match doc.try_elem::<HtmlInputElement>("res_flow_stream") {
+                Some(input) => input.checked().then_some(Res::FlowStream),
+                None => Some(res),
+            }
         }
         Res::Controller
             if doc.elem::<HtmlInputElement>("res_comm_link").checked() =>
