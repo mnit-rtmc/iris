@@ -614,6 +614,8 @@ impl Card for MsgPattern {
     fn is_match(&self, search: &str, anc: &MsgPatternAnc) -> bool {
         self.name.contains_lower(search)
             || self.item_states(anc).is_match(search)
+            || self.compose_hashtag.contains_lower(search)
+            || self.multi.contains_lower(search)
     }
 
     /// Convert to HTML view
