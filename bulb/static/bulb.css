@@ -31,6 +31,29 @@ textarea {
   font-size: 100%;
   margin: 0.1rem;
 }
+button {
+  appearance: none;
+  display: inline-block;
+  border: 1px solid #888;
+  border-radius: 0.2rem;
+  padding: 0.1rem 0.2rem;
+  background-color: #eee;
+  color: black;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #ccc;
+}
+button:active {
+  background-color: #bbb;
+}
+button:disabled {
+  background-color: #888;
+}
+button.go_link {
+  font-size: smaller;
+  padding: 0 0.2rem;
+}
 table {
   table-layout: fixed;
   border-collapse: collapse;
@@ -59,50 +82,25 @@ th, td {
   width: 100%;
 }
 
-#sign_msg {
-  display: grid;
-  grid-template-areas: "ms";
-  justify-items: center;
+/* Generic CSS classes */
+.no-display {
+  display: none;
 }
-.sign_message {
-  grid-area: ms;
+.hidden {
+  visibility: hidden;
 }
-.card-compact img.sign_message {
-  max-height: 3rem;
+.wait {
+  filter: opacity(50%);
+  cursor: wait !important;
 }
-.card-form img.sign_message {
-  max-height: 6rem;
+.wait * {
+  cursor: wait !important;
 }
-
 .fault {
   background-color: rgba(128, 32, 0, 0.25);
 }
 .invalid {
   border-color: red;
-}
-
-button {
-  appearance: none;
-  display: inline-block;
-  border: 1px solid #888;
-  border-radius: 0.2rem;
-  padding: 0.1rem 0.2rem;
-  background-color: #eee;
-  color: black;
-  cursor: pointer;
-}
-button:hover {
-  background-color: #ccc;
-}
-button:active {
-  background-color: #bbb;
-}
-button:disabled {
-  background-color: #888;
-}
-button.go_link {
-  font-size: smaller;
-  padding: 0 0.2rem;
 }
 
 /* Checkbox toggle buttons:
@@ -228,7 +226,7 @@ label:has(+ #sb_resource) {
   left: -100%;
   top: 0;
   content: "";
-  background-color: #bbb;
+  background-color: #5bd;
 }
 #ob_delete:active::before {
   transition: left 1s;
@@ -283,7 +281,6 @@ label:has(+ #sb_resource) {
   position: relative;
   display: inline-block;
 }
-
 .tooltip * {
   position: absolute;
   z-index: 4;
@@ -296,12 +293,6 @@ label:has(+ #sb_resource) {
   color: #fff;
   background-color: #000;
 }
-
-.right {
-  left: unset;
-  right: 0;
-}
-
 .tooltip:hover * {
   visibility: visible;
 }
@@ -406,7 +397,50 @@ label:has(+ #sb_resource) {
   flex-direction: column;
   padding: 0.2rem;
 }
+.start {
+  align-self: start;
+  justify-content: start;
+}
+.center {
+  align-self: center;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+}
+.end {
+  align-self: end;
+  justify-content: end;
+}
+.right {
+  left: unset;
+  right: 0;
+}
+.fill {
+  /* Setting width: 0 and min-width: 100% ignores element size */
+  width: 0;
+  min-width: 100%;
+}
+.tiny {
+  font-size: xx-small;
+}
 
+/* Sign messages */
+#sign_msg {
+  display: grid;
+  grid-template-areas: "ms";
+  justify-items: center;
+}
+.sign_message {
+  grid-area: ms;
+}
+.card-compact img.sign_message {
+  max-height: 3rem;
+}
+.card-form img.sign_message {
+  max-height: 6rem;
+}
+
+/* Message composer */
 .mc_line_gap {
   margin-top: 3px;
 }
@@ -464,25 +498,6 @@ label:has(+ #sb_resource) {
   min-width: 25%;
 }
 
-.start {
-  align-self: start;
-  justify-content: start;
-}
-.center {
-  align-self: center;
-  align-content: center;
-  align-items: center;
-  justify-content: center;
-}
-.end {
-  align-self: end;
-  justify-content: end;
-}
-.fill {
-  /* Setting width: 0 and min-width: 100% ignores element size */
-  width: 0;
-  min-width: 100%;
-}
 .pins {
   column-count: 2;
   list-style: none;
@@ -490,32 +505,9 @@ label:has(+ #sb_resource) {
   margin: 0;
 }
 
-.no-display {
-  display: none;
-}
-.hidden {
-  visibility: hidden;
-}
-.wait {
-  filter: opacity(50%);
-  cursor: wait !important;
-}
-.wait * {
-  cursor: wait !important;
-}
-
-/* ---------------
- * Signal Housings
- * --------------- */
-.signal-housing {
-  align-self: start;
-  background-color: black;
-  text-indent: 0;
-  padding: 0.2rem 0.2rem 0 0.2rem;
-  border-radius: 0.2rem;
-  border: 1px solid black;
-}
-
+/* --------------------
+ * Lane Control Signals
+ * -------------------- */
 .lcs {
   background-color: black;
   font-size: x-large;
@@ -525,27 +517,21 @@ label:has(+ #sb_resource) {
   width: 2rem;
   padding: 0.2rem 0.3rem 0;
 }
-
 .lcs_dark {
   color: black;
 }
-
 .lcs_lane_open {
   color: lawngreen;
 }
-
 .lcs_use_caution {
   color: yellow;
 }
-
 .lcs_lane_closed_ahead {
   color: yellow;
 }
-
 .lcs_lane_closed {
   color: red;
 }
-
 .lcs_unknown {
   color: gray;
 }
@@ -590,6 +576,11 @@ label:has(+ #sb_resource) {
   border: 1px solid black;
   border-radius: 0.2rem;
 }
-.tiny {
-  font-size: xx-small;
+.signal-housing {
+  align-self: start;
+  background-color: black;
+  text-indent: 0;
+  padding: 0.2rem 0.2rem 0 0.2rem;
+  border-radius: 0.2rem;
+  border: 1px solid black;
 }
