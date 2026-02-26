@@ -56,6 +56,81 @@ use serde_json::map::Map;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
+/// Create a generic resource method for CardList or CardView
+macro_rules! cards_meth {
+    ($cards:ident, $meth:ident) => {
+        match $cards.res {
+            Res::ActionPlan => $cards.$meth::<ActionPlan>().await,
+            Res::Alarm => $cards.$meth::<Alarm>().await,
+            Res::Beacon => $cards.$meth::<Beacon>().await,
+            Res::CabinetStyle => $cards.$meth::<CabinetStyle>().await,
+            Res::Camera => $cards.$meth::<Camera>().await,
+            Res::CommConfig => $cards.$meth::<CommConfig>().await,
+            Res::CommLink => $cards.$meth::<CommLink>().await,
+            Res::Controller => $cards.$meth::<Controller>().await,
+            Res::Detector => $cards.$meth::<Detector>().await,
+            Res::Dms => $cards.$meth::<Dms>().await,
+            Res::Domain => $cards.$meth::<Domain>().await,
+            Res::FlowStream => $cards.$meth::<FlowStream>().await,
+            Res::GateArm => $cards.$meth::<GateArm>().await,
+            Res::Gps => $cards.$meth::<Gps>().await,
+            Res::Incident => $cards.$meth::<Incident>().await,
+            Res::Lcs => $cards.$meth::<Lcs>().await,
+            Res::LcsState => $cards.$meth::<LcsState>().await,
+            Res::Modem => $cards.$meth::<Modem>().await,
+            Res::MonitorStyle => $cards.$meth::<MonitorStyle>().await,
+            Res::MsgPattern => $cards.$meth::<MsgPattern>().await,
+            Res::Permission => $cards.$meth::<Permission>().await,
+            Res::RampMeter => $cards.$meth::<RampMeter>().await,
+            Res::Role => $cards.$meth::<Role>().await,
+            Res::SignConfig => $cards.$meth::<SignConfig>().await,
+            Res::SystemAttribute => $cards.$meth::<SystemAttr>().await,
+            Res::TagReader => $cards.$meth::<TagReader>().await,
+            Res::User => $cards.$meth::<User>().await,
+            Res::VideoMonitor => $cards.$meth::<VideoMonitor>().await,
+            Res::WeatherSensor => $cards.$meth::<WeatherSensor>().await,
+            Res::Word => $cards.$meth::<Word>().await,
+            _ => unreachable!(),
+        }
+    };
+
+    ($cards:ident, $meth:ident, $param:expr) => {
+        match $cards.res {
+            Res::ActionPlan => $cards.$meth::<ActionPlan>($param).await,
+            Res::Alarm => $cards.$meth::<Alarm>($param).await,
+            Res::Beacon => $cards.$meth::<Beacon>($param).await,
+            Res::CabinetStyle => $cards.$meth::<CabinetStyle>($param).await,
+            Res::Camera => $cards.$meth::<Camera>($param).await,
+            Res::CommConfig => $cards.$meth::<CommConfig>($param).await,
+            Res::CommLink => $cards.$meth::<CommLink>($param).await,
+            Res::Controller => $cards.$meth::<Controller>($param).await,
+            Res::Detector => $cards.$meth::<Detector>($param).await,
+            Res::Dms => $cards.$meth::<Dms>($param).await,
+            Res::Domain => $cards.$meth::<Domain>($param).await,
+            Res::FlowStream => $cards.$meth::<FlowStream>($param).await,
+            Res::GateArm => $cards.$meth::<GateArm>($param).await,
+            Res::Gps => $cards.$meth::<Gps>($param).await,
+            Res::Incident => $cards.$meth::<Incident>($param).await,
+            Res::Lcs => $cards.$meth::<Lcs>($param).await,
+            Res::LcsState => $cards.$meth::<LcsState>($param).await,
+            Res::Modem => $cards.$meth::<Modem>($param).await,
+            Res::MonitorStyle => $cards.$meth::<MonitorStyle>($param).await,
+            Res::MsgPattern => $cards.$meth::<MsgPattern>($param).await,
+            Res::Permission => $cards.$meth::<Permission>($param).await,
+            Res::RampMeter => $cards.$meth::<RampMeter>($param).await,
+            Res::Role => $cards.$meth::<Role>($param).await,
+            Res::SignConfig => $cards.$meth::<SignConfig>($param).await,
+            Res::SystemAttribute => $cards.$meth::<SystemAttr>($param).await,
+            Res::TagReader => $cards.$meth::<TagReader>($param).await,
+            Res::User => $cards.$meth::<User>($param).await,
+            Res::VideoMonitor => $cards.$meth::<VideoMonitor>($param).await,
+            Res::WeatherSensor => $cards.$meth::<WeatherSensor>($param).await,
+            Res::Word => $cards.$meth::<Word>($param).await,
+            _ => unreachable!(),
+        }
+    };
+}
+
 /// Card state
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CardState {
@@ -203,6 +278,159 @@ impl CardView {
     pub fn view(mut self, v: View) -> Self {
         self.view = v;
         self
+    }
+
+    /// Fetch a card for a given view
+    pub async fn fetch_one(&self) -> Result<String> {
+        let html = match self.view {
+            View::CreateCompact => {
+                let mut page = Page::new();
+                let mut span = page.frag::<html::Span>();
+                span.class("create").cdata("Create 🆕");
+                String::from(page)
+            }
+            View::Create => {
+                let html = self.fetch_one_res().await?;
+                html_card_create(self.res, &html)
+            }
+            _ => self.fetch_one_res().await?,
+        };
+        Ok(html)
+    }
+
+    /// Fetch a card view
+    async fn fetch_one_res(&self) -> Result<String> {
+        cards_meth!(self, fetch_one_x)
+    }
+
+    /// Fetch a card view
+    async fn fetch_one_x<C: Card>(&self) -> Result<String> {
+        let pri = if self.view == View::Create {
+            C::default().with_name(&self.name)
+        } else {
+            self.fetch_primary::<C>().await?
+        };
+        let anc = fetch_ancillary(&pri, self.view).await?;
+        Ok(pri.to_html(self.view, &anc))
+    }
+
+    /// Fetch primary JSON resource
+    async fn fetch_primary<C: Card>(&self) -> Result<C> {
+        let uri = uri_one(C::res(), &self.name);
+        let json = uri.get().await?;
+        C::new(json)
+    }
+
+    /// Patch changed fields on Setup / Location view
+    pub async fn patch_changed(&self) -> Result<()> {
+        match self.view {
+            View::Setup => self.patch_setup().await,
+            View::Location => self.patch_loc().await,
+            _ => unreachable!(),
+        }
+    }
+
+    /// Patch changed fields from a Setup view
+    async fn patch_setup(&self) -> Result<()> {
+        cards_meth!(self, patch_setup_x)
+    }
+
+    /// Patch changed fields from a Setup view
+    async fn patch_setup_x<C: Card>(&self) -> Result<()> {
+        let pri = self.fetch_primary::<C>().await?;
+        let changed = pri.changed_setup();
+        if !changed.is_empty() {
+            uri_one(C::res(), &self.name).patch(&changed.into()).await?;
+        }
+        Ok(())
+    }
+
+    /// Patch changed fields from a Location view
+    async fn patch_loc(&self) -> Result<()> {
+        match self.res {
+            Res::Beacon => self.patch_loc_x::<Beacon>().await,
+            Res::Camera => self.patch_loc_x::<Camera>().await,
+            Res::Controller => self.patch_loc_x::<Controller>().await,
+            Res::Dms => self.patch_loc_x::<Dms>().await,
+            Res::GateArm => self.patch_loc_x::<GateArm>().await,
+            Res::RampMeter => self.patch_loc_x::<RampMeter>().await,
+            Res::TagReader => self.patch_loc_x::<TagReader>().await,
+            Res::WeatherSensor => self.patch_loc_x::<WeatherSensor>().await,
+            _ => unreachable!(),
+        }
+    }
+
+    /// Patch changed fields from a Location view
+    async fn patch_loc_x<C>(&self) -> Result<()>
+    where
+        C: Card + Loc,
+    {
+        let pri = self.fetch_primary::<C>().await?;
+        if let Some(geoloc) = pri.geoloc() {
+            let anc = fetch_ancillary(&pri, View::Location).await?;
+            let changed = pri.changed_location(anc);
+            if !changed.is_empty() {
+                let mut uri = uri_one(Res::GeoLoc, geoloc);
+                uri.query("res", self.res.as_str());
+                uri.patch(&changed.into()).await?;
+            }
+        }
+        Ok(())
+    }
+
+    /// Handle click event for a button owned by the resource
+    pub async fn handle_click(&self, id: String) -> Result<()> {
+        if self.view != View::Control && self.view != View::Request {
+            return Ok(());
+        }
+        match self.res {
+            Res::Beacon => self.handle_click_x::<Beacon>(id).await,
+            Res::Camera => self.handle_click_x::<Camera>(id).await,
+            Res::Dms => self.handle_click_x::<Dms>(id).await,
+            Res::RampMeter => self.handle_click_x::<RampMeter>(id).await,
+            _ => Ok(()),
+        }
+    }
+
+    /// Handle click event for a button on a card
+    async fn handle_click_x<C: Card>(&self, id: String) -> Result<()> {
+        let pri = self.fetch_primary::<C>().await?;
+        let anc = fetch_ancillary(&pri, self.view).await?;
+        for action in pri.handle_click(anc, id) {
+            action.perform().await?;
+        }
+        Ok(())
+    }
+
+    /// Handle input event for an element owned by the resource
+    pub async fn handle_input(&self, id: String) -> Result<()> {
+        match (self.res, self.view) {
+            (Res::ActionPlan, View::Control) => {
+                self.handle_input_x::<ActionPlan>(id).await
+            }
+            (Res::Dms, View::Control) => self.handle_input_x::<Dms>(id).await,
+            (Res::Domain, View::Control) => {
+                self.handle_input_x::<Domain>(id).await
+            }
+            (Res::Lcs, View::Control) => self.handle_input_x::<Lcs>(id).await,
+            (Res::MsgPattern, View::Setup) => {
+                self.handle_input_x::<MsgPattern>(id).await
+            }
+            (Res::RampMeter, View::Control) => {
+                self.handle_input_x::<RampMeter>(id).await
+            }
+            _ => Ok(()),
+        }
+    }
+
+    /// Handle input event for an element on a card
+    async fn handle_input_x<C: Card>(&self, id: String) -> Result<()> {
+        let pri = self.fetch_primary::<C>().await?;
+        let anc = fetch_ancillary(&pri, self.view).await?;
+        for action in pri.handle_input(anc, id) {
+            action.perform().await?;
+        }
+        Ok(())
     }
 }
 
@@ -602,39 +830,7 @@ impl CardList {
 
     /// Get main item states
     pub async fn states_main(&self) -> Result<Vec<CardState>> {
-        match self.res {
-            Res::ActionPlan => self.states_main_x::<ActionPlan>().await,
-            Res::Alarm => self.states_main_x::<Alarm>().await,
-            Res::Beacon => self.states_main_x::<Beacon>().await,
-            Res::CabinetStyle => self.states_main_x::<CabinetStyle>().await,
-            Res::Camera => self.states_main_x::<Camera>().await,
-            Res::CommConfig => self.states_main_x::<CommConfig>().await,
-            Res::CommLink => self.states_main_x::<CommLink>().await,
-            Res::Controller => self.states_main_x::<Controller>().await,
-            Res::Detector => self.states_main_x::<Detector>().await,
-            Res::Dms => self.states_main_x::<Dms>().await,
-            Res::Domain => self.states_main_x::<Domain>().await,
-            Res::FlowStream => self.states_main_x::<FlowStream>().await,
-            Res::GateArm => self.states_main_x::<GateArm>().await,
-            Res::Gps => self.states_main_x::<Gps>().await,
-            Res::Incident => self.states_main_x::<Incident>().await,
-            Res::Lcs => self.states_main_x::<Lcs>().await,
-            Res::LcsState => self.states_main_x::<LcsState>().await,
-            Res::Modem => self.states_main_x::<Modem>().await,
-            Res::MonitorStyle => self.states_main_x::<MonitorStyle>().await,
-            Res::MsgPattern => self.states_main_x::<MsgPattern>().await,
-            Res::Permission => self.states_main_x::<Permission>().await,
-            Res::RampMeter => self.states_main_x::<RampMeter>().await,
-            Res::Role => self.states_main_x::<Role>().await,
-            Res::SignConfig => self.states_main_x::<SignConfig>().await,
-            Res::SystemAttribute => self.states_main_x::<SystemAttr>().await,
-            Res::TagReader => self.states_main_x::<TagReader>().await,
-            Res::User => self.states_main_x::<User>().await,
-            Res::VideoMonitor => self.states_main_x::<VideoMonitor>().await,
-            Res::WeatherSensor => self.states_main_x::<WeatherSensor>().await,
-            Res::Word => self.states_main_x::<Word>().await,
-            _ => unreachable!(),
-        }
+        cards_meth!(self, states_main_x)
     }
 
     /// Get main item states
@@ -678,39 +874,7 @@ impl CardList {
 
     /// Make HTML view of card list
     pub async fn make_html(&mut self) -> Result<String> {
-        match self.res {
-            Res::ActionPlan => self.make_html_x::<ActionPlan>().await,
-            Res::Alarm => self.make_html_x::<Alarm>().await,
-            Res::Beacon => self.make_html_x::<Beacon>().await,
-            Res::CabinetStyle => self.make_html_x::<CabinetStyle>().await,
-            Res::Camera => self.make_html_x::<Camera>().await,
-            Res::CommConfig => self.make_html_x::<CommConfig>().await,
-            Res::CommLink => self.make_html_x::<CommLink>().await,
-            Res::Controller => self.make_html_x::<Controller>().await,
-            Res::Detector => self.make_html_x::<Detector>().await,
-            Res::Dms => self.make_html_x::<Dms>().await,
-            Res::Domain => self.make_html_x::<Domain>().await,
-            Res::FlowStream => self.make_html_x::<FlowStream>().await,
-            Res::GateArm => self.make_html_x::<GateArm>().await,
-            Res::Gps => self.make_html_x::<Gps>().await,
-            Res::Incident => self.make_html_x::<Incident>().await,
-            Res::Lcs => self.make_html_x::<Lcs>().await,
-            Res::LcsState => self.make_html_x::<LcsState>().await,
-            Res::Modem => self.make_html_x::<Modem>().await,
-            Res::MonitorStyle => self.make_html_x::<MonitorStyle>().await,
-            Res::MsgPattern => self.make_html_x::<MsgPattern>().await,
-            Res::Permission => self.make_html_x::<Permission>().await,
-            Res::RampMeter => self.make_html_x::<RampMeter>().await,
-            Res::Role => self.make_html_x::<Role>().await,
-            Res::SignConfig => self.make_html_x::<SignConfig>().await,
-            Res::SystemAttribute => self.make_html_x::<SystemAttr>().await,
-            Res::TagReader => self.make_html_x::<TagReader>().await,
-            Res::User => self.make_html_x::<User>().await,
-            Res::VideoMonitor => self.make_html_x::<VideoMonitor>().await,
-            Res::WeatherSensor => self.make_html_x::<WeatherSensor>().await,
-            Res::Word => self.make_html_x::<Word>().await,
-            _ => unreachable!(),
-        }
+        cards_meth!(self, make_html_x)
     }
 
     /// Make HTML view of card list
@@ -776,39 +940,7 @@ impl CardList {
 
     /// Get a list of cards whose view has changed
     pub async fn view_change(&mut self) -> Result<Vec<CardView>> {
-        match self.res {
-            Res::ActionPlan => self.view_change_x::<ActionPlan>().await,
-            Res::Alarm => self.view_change_x::<Alarm>().await,
-            Res::Beacon => self.view_change_x::<Beacon>().await,
-            Res::CabinetStyle => self.view_change_x::<CabinetStyle>().await,
-            Res::Camera => self.view_change_x::<Camera>().await,
-            Res::CommConfig => self.view_change_x::<CommConfig>().await,
-            Res::CommLink => self.view_change_x::<CommLink>().await,
-            Res::Controller => self.view_change_x::<Controller>().await,
-            Res::Detector => self.view_change_x::<Detector>().await,
-            Res::Dms => self.view_change_x::<Dms>().await,
-            Res::Domain => self.view_change_x::<Domain>().await,
-            Res::FlowStream => self.view_change_x::<FlowStream>().await,
-            Res::GateArm => self.view_change_x::<GateArm>().await,
-            Res::Gps => self.view_change_x::<Gps>().await,
-            Res::Incident => self.view_change_x::<Incident>().await,
-            Res::Lcs => self.view_change_x::<Lcs>().await,
-            Res::LcsState => self.view_change_x::<LcsState>().await,
-            Res::Modem => self.view_change_x::<Modem>().await,
-            Res::MonitorStyle => self.view_change_x::<MonitorStyle>().await,
-            Res::MsgPattern => self.view_change_x::<MsgPattern>().await,
-            Res::Permission => self.view_change_x::<Permission>().await,
-            Res::RampMeter => self.view_change_x::<RampMeter>().await,
-            Res::Role => self.view_change_x::<Role>().await,
-            Res::SignConfig => self.view_change_x::<SignConfig>().await,
-            Res::SystemAttribute => self.view_change_x::<SystemAttr>().await,
-            Res::TagReader => self.view_change_x::<TagReader>().await,
-            Res::User => self.view_change_x::<User>().await,
-            Res::VideoMonitor => self.view_change_x::<VideoMonitor>().await,
-            Res::WeatherSensor => self.view_change_x::<WeatherSensor>().await,
-            Res::Word => self.view_change_x::<Word>().await,
-            _ => unreachable!(),
-        }
+        cards_meth!(self, view_change_x)
     }
 
     /// Get a list of cards whose view has changed
@@ -860,43 +992,11 @@ impl CardList {
         &self,
         json: String,
     ) -> Result<Vec<(CardView, String)>> {
-        match self.res {
-            Res::ActionPlan => self.changed::<ActionPlan>(json).await,
-            Res::Alarm => self.changed::<Alarm>(json).await,
-            Res::Beacon => self.changed::<Beacon>(json).await,
-            Res::CabinetStyle => self.changed::<CabinetStyle>(json).await,
-            Res::Camera => self.changed::<Camera>(json).await,
-            Res::CommConfig => self.changed::<CommConfig>(json).await,
-            Res::CommLink => self.changed::<CommLink>(json).await,
-            Res::Controller => self.changed::<Controller>(json).await,
-            Res::Detector => self.changed::<Detector>(json).await,
-            Res::Dms => self.changed::<Dms>(json).await,
-            Res::Domain => self.changed::<Domain>(json).await,
-            Res::FlowStream => self.changed::<FlowStream>(json).await,
-            Res::GateArm => self.changed::<GateArm>(json).await,
-            Res::Gps => self.changed::<Gps>(json).await,
-            Res::Incident => self.changed::<Incident>(json).await,
-            Res::Lcs => self.changed::<Lcs>(json).await,
-            Res::LcsState => self.changed::<LcsState>(json).await,
-            Res::Modem => self.changed::<Modem>(json).await,
-            Res::MonitorStyle => self.changed::<MonitorStyle>(json).await,
-            Res::MsgPattern => self.changed::<MsgPattern>(json).await,
-            Res::Permission => self.changed::<Permission>(json).await,
-            Res::RampMeter => self.changed::<RampMeter>(json).await,
-            Res::Role => self.changed::<Role>(json).await,
-            Res::SignConfig => self.changed::<SignConfig>(json).await,
-            Res::SystemAttribute => self.changed::<SystemAttr>(json).await,
-            Res::TagReader => self.changed::<TagReader>(json).await,
-            Res::User => self.changed::<User>(json).await,
-            Res::VideoMonitor => self.changed::<VideoMonitor>(json).await,
-            Res::WeatherSensor => self.changed::<WeatherSensor>(json).await,
-            Res::Word => self.changed::<Word>(json).await,
-            _ => unreachable!(),
-        }
+        cards_meth!(self, changed_vec_x, json)
     }
 
     /// Make a Vec of changed cards
-    async fn changed<C: Card>(
+    async fn changed_vec_x<C: Card>(
         &self,
         old_json: String,
     ) -> Result<Vec<(CardView, String)>> {
@@ -950,221 +1050,6 @@ async fn fetch_ancillary<C: Card>(pri: &C, view: View) -> Result<C::Ancillary> {
         }
     }
     Ok(anc)
-}
-
-/// Fetch a card for a given view
-pub async fn fetch_one(cv: &CardView) -> Result<String> {
-    let html = match cv.view {
-        View::CreateCompact => {
-            let mut page = Page::new();
-            let mut span = page.frag::<html::Span>();
-            span.class("create").cdata("Create 🆕");
-            String::from(page)
-        }
-        View::Create => {
-            let html = fetch_one_res(cv).await?;
-            html_card_create(cv.res, &html)
-        }
-        _ => fetch_one_res(cv).await?,
-    };
-    Ok(html)
-}
-
-/// Fetch a card view
-async fn fetch_one_res(cv: &CardView) -> Result<String> {
-    match cv.res {
-        Res::ActionPlan => fetch_one_x::<ActionPlan>(cv).await,
-        Res::Alarm => fetch_one_x::<Alarm>(cv).await,
-        Res::Beacon => fetch_one_x::<Beacon>(cv).await,
-        Res::CabinetStyle => fetch_one_x::<CabinetStyle>(cv).await,
-        Res::Camera => fetch_one_x::<Camera>(cv).await,
-        Res::CommConfig => fetch_one_x::<CommConfig>(cv).await,
-        Res::CommLink => fetch_one_x::<CommLink>(cv).await,
-        Res::Controller => fetch_one_x::<Controller>(cv).await,
-        Res::Detector => fetch_one_x::<Detector>(cv).await,
-        Res::Dms => fetch_one_x::<Dms>(cv).await,
-        Res::Domain => fetch_one_x::<Domain>(cv).await,
-        Res::FlowStream => fetch_one_x::<FlowStream>(cv).await,
-        Res::GateArm => fetch_one_x::<GateArm>(cv).await,
-        Res::Gps => fetch_one_x::<Gps>(cv).await,
-        Res::Incident => fetch_one_x::<Incident>(cv).await,
-        Res::Lcs => fetch_one_x::<Lcs>(cv).await,
-        Res::LcsState => fetch_one_x::<LcsState>(cv).await,
-        Res::Modem => fetch_one_x::<Modem>(cv).await,
-        Res::MonitorStyle => fetch_one_x::<MonitorStyle>(cv).await,
-        Res::MsgPattern => fetch_one_x::<MsgPattern>(cv).await,
-        Res::Permission => fetch_one_x::<Permission>(cv).await,
-        Res::RampMeter => fetch_one_x::<RampMeter>(cv).await,
-        Res::Role => fetch_one_x::<Role>(cv).await,
-        Res::SignConfig => fetch_one_x::<SignConfig>(cv).await,
-        Res::SystemAttribute => fetch_one_x::<SystemAttr>(cv).await,
-        Res::TagReader => fetch_one_x::<TagReader>(cv).await,
-        Res::User => fetch_one_x::<User>(cv).await,
-        Res::VideoMonitor => fetch_one_x::<VideoMonitor>(cv).await,
-        Res::WeatherSensor => fetch_one_x::<WeatherSensor>(cv).await,
-        Res::Word => fetch_one_x::<Word>(cv).await,
-        _ => unreachable!(),
-    }
-}
-
-/// Fetch a card view
-async fn fetch_one_x<C: Card>(cv: &CardView) -> Result<String> {
-    let pri = if cv.view == View::Create {
-        C::default().with_name(&cv.name)
-    } else {
-        fetch_primary::<C>(cv).await?
-    };
-    let anc = fetch_ancillary(&pri, cv.view).await?;
-    Ok(pri.to_html(cv.view, &anc))
-}
-
-/// Fetch primary JSON resource
-async fn fetch_primary<C: Card>(cv: &CardView) -> Result<C> {
-    let uri = uri_one(C::res(), &cv.name);
-    let json = uri.get().await?;
-    C::new(json)
-}
-
-/// Patch changed fields on Setup / Location view
-pub async fn patch_changed(cv: &CardView) -> Result<()> {
-    match cv.view {
-        View::Setup => patch_setup(cv).await,
-        View::Location => patch_loc(cv).await,
-        _ => unreachable!(),
-    }
-}
-
-/// Patch changed fields from a Setup view
-async fn patch_setup(cv: &CardView) -> Result<()> {
-    match cv.res {
-        Res::ActionPlan => patch_setup_x::<ActionPlan>(cv).await,
-        Res::Alarm => patch_setup_x::<Alarm>(cv).await,
-        Res::Beacon => patch_setup_x::<Beacon>(cv).await,
-        Res::CabinetStyle => patch_setup_x::<CabinetStyle>(cv).await,
-        Res::Camera => patch_setup_x::<Camera>(cv).await,
-        Res::CommConfig => patch_setup_x::<CommConfig>(cv).await,
-        Res::CommLink => patch_setup_x::<CommLink>(cv).await,
-        Res::Controller => patch_setup_x::<Controller>(cv).await,
-        Res::Detector => patch_setup_x::<Detector>(cv).await,
-        Res::Dms => patch_setup_x::<Dms>(cv).await,
-        Res::Domain => patch_setup_x::<Domain>(cv).await,
-        Res::FlowStream => patch_setup_x::<FlowStream>(cv).await,
-        Res::GateArm => patch_setup_x::<GateArm>(cv).await,
-        Res::Gps => patch_setup_x::<Gps>(cv).await,
-        Res::Incident => patch_setup_x::<Incident>(cv).await,
-        Res::Lcs => patch_setup_x::<Lcs>(cv).await,
-        Res::LcsState => patch_setup_x::<LcsState>(cv).await,
-        Res::Modem => patch_setup_x::<Modem>(cv).await,
-        Res::MonitorStyle => patch_setup_x::<MonitorStyle>(cv).await,
-        Res::MsgPattern => patch_setup_x::<MsgPattern>(cv).await,
-        Res::Permission => patch_setup_x::<Permission>(cv).await,
-        Res::RampMeter => patch_setup_x::<RampMeter>(cv).await,
-        Res::Role => patch_setup_x::<Role>(cv).await,
-        Res::SignConfig => patch_setup_x::<SignConfig>(cv).await,
-        Res::SystemAttribute => patch_setup_x::<SystemAttr>(cv).await,
-        Res::TagReader => patch_setup_x::<TagReader>(cv).await,
-        Res::User => patch_setup_x::<User>(cv).await,
-        Res::VideoMonitor => patch_setup_x::<VideoMonitor>(cv).await,
-        Res::WeatherSensor => patch_setup_x::<WeatherSensor>(cv).await,
-        Res::Word => patch_setup_x::<Word>(cv).await,
-        _ => unreachable!(),
-    }
-}
-
-/// Patch changed fields from a Setup view
-async fn patch_setup_x<C: Card>(cv: &CardView) -> Result<()> {
-    let pri = fetch_primary::<C>(cv).await?;
-    let changed = pri.changed_setup();
-    if !changed.is_empty() {
-        uri_one(C::res(), &cv.name).patch(&changed.into()).await?;
-    }
-    Ok(())
-}
-
-/// Patch changed fields from a Location view
-async fn patch_loc(cv: &CardView) -> Result<()> {
-    match cv.res {
-        Res::Beacon => patch_loc_x::<Beacon>(cv).await,
-        Res::Camera => patch_loc_x::<Camera>(cv).await,
-        Res::Controller => patch_loc_x::<Controller>(cv).await,
-        Res::Dms => patch_loc_x::<Dms>(cv).await,
-        Res::GateArm => patch_loc_x::<GateArm>(cv).await,
-        Res::RampMeter => patch_loc_x::<RampMeter>(cv).await,
-        Res::TagReader => patch_loc_x::<TagReader>(cv).await,
-        Res::WeatherSensor => patch_loc_x::<WeatherSensor>(cv).await,
-        _ => unreachable!(),
-    }
-}
-
-/// Patch changed fields from a Location view
-async fn patch_loc_x<C>(cv: &CardView) -> Result<()>
-where
-    C: Card + Loc,
-{
-    let pri = fetch_primary::<C>(cv).await?;
-    if let Some(geoloc) = pri.geoloc() {
-        let anc = fetch_ancillary(&pri, View::Location).await?;
-        let changed = pri.changed_location(anc);
-        if !changed.is_empty() {
-            let mut uri = uri_one(Res::GeoLoc, geoloc);
-            uri.query("res", cv.res.as_str());
-            uri.patch(&changed.into()).await?;
-        }
-    }
-    Ok(())
-}
-
-/// Handle click event for a button owned by the resource
-pub async fn handle_click(cv: &CardView, id: String) -> Result<()> {
-    if cv.view != View::Control && cv.view != View::Request {
-        return Ok(());
-    }
-    match cv.res {
-        Res::Beacon => handle_click_x::<Beacon>(cv, id).await,
-        Res::Camera => handle_click_x::<Camera>(cv, id).await,
-        Res::Dms => handle_click_x::<Dms>(cv, id).await,
-        Res::RampMeter => handle_click_x::<RampMeter>(cv, id).await,
-        _ => Ok(()),
-    }
-}
-
-/// Handle click event for a button on a card
-async fn handle_click_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
-    let pri = fetch_primary::<C>(cv).await?;
-    let anc = fetch_ancillary(&pri, cv.view).await?;
-    for action in pri.handle_click(anc, id) {
-        action.perform().await?;
-    }
-    Ok(())
-}
-
-/// Handle input event for an element owned by the resource
-pub async fn handle_input(cv: &CardView, id: String) -> Result<()> {
-    match (cv.res, cv.view) {
-        (Res::ActionPlan, View::Control) => {
-            handle_input_x::<ActionPlan>(cv, id).await
-        }
-        (Res::Dms, View::Control) => handle_input_x::<Dms>(cv, id).await,
-        (Res::Domain, View::Control) => handle_input_x::<Domain>(cv, id).await,
-        (Res::Lcs, View::Control) => handle_input_x::<Lcs>(cv, id).await,
-        (Res::MsgPattern, View::Setup) => {
-            handle_input_x::<MsgPattern>(cv, id).await
-        }
-        (Res::RampMeter, View::Control) => {
-            handle_input_x::<RampMeter>(cv, id).await
-        }
-        _ => Ok(()),
-    }
-}
-
-/// Handle input event for an element on a card
-async fn handle_input_x<C: Card>(cv: &CardView, id: String) -> Result<()> {
-    let pri = fetch_primary::<C>(cv).await?;
-    let anc = fetch_ancillary(&pri, cv.view).await?;
-    for action in pri.handle_input(anc, id) {
-        action.perform().await?;
-    }
-    Ok(())
 }
 
 /// Build a create card

@@ -563,7 +563,7 @@ fn ob_view_value() -> Option<View> {
 /// Handle an input event on a form card
 async fn handle_input(id: String) -> Result<()> {
     if let Some(cv) = app::form() {
-        card::handle_input(&cv, id).await?;
+        cv.handle_input(id).await?;
     }
     Ok(())
 }
@@ -624,7 +624,7 @@ async fn handle_button_card(attrs: ButtonAttrs) {
 
 /// Replace a card view element with another view
 async fn replace_card(cv: CardView) -> Result<()> {
-    let html = card::fetch_one(&cv).await?;
+    let html = cv.fetch_one().await?;
     replace_card_html(cv, &html);
     Ok(())
 }
@@ -671,13 +671,13 @@ async fn save_create(cv: CardView) -> Result<()> {
 
 /// Save changed values on Setup / Location card
 async fn save_changed(cv: CardView) -> Result<()> {
-    card::patch_changed(&cv).await?;
+    cv.patch_changed().await?;
     replace_card(cv.view(View::Compact)).await
 }
 
 /// Handle a button click on a form card
 async fn handle_button_cv(cv: CardView, id: String) {
-    match card::handle_click(&cv, id).await {
+    match cv.handle_click(id).await {
         Ok(_) => (),
         Err(e) => show_toast(&format!("click failed: {e}")),
     }
