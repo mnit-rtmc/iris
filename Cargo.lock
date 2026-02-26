@@ -252,6 +252,7 @@ dependencies = [
  "hatmil",
  "humantime",
  "js-sys",
+ "log",
  "mag",
  "ntcip",
  "percent-encoding",
@@ -264,6 +265,7 @@ dependencies = [
  "thiserror 2.0.18",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "wasm-log",
  "web-sys",
 ]
 
@@ -2418,6 +2420,17 @@ checksum = "990065f2fe63003fe337b932cfb5e3b80e0b4d0f5ff650e6985b1048f62c8319"
 dependencies = [
  "leb128fmt",
  "wasmparser",
+]
+
+[[package]]
+name = "wasm-log"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "def95b2a762924804037f77e3de791f1c177d6ecbe0385a64e519bd7902a5f81"
+dependencies = [
+ "log",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]

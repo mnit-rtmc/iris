@@ -44,7 +44,7 @@ use std::fmt;
 use std::iter::repeat;
 use std::time::Duration;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement, console};
+use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement};
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
@@ -329,7 +329,7 @@ impl AncillaryData for DmsAnc {
                         *g = graphic;
                     }
                 } else {
-                    console::log_1(&format!("invalid graphic: {nm}").into());
+                    log::warn!("invalid graphic: {nm}");
                 }
             }
             Asset::DeviceActions => {
@@ -750,9 +750,7 @@ impl Dms {
         div: &'p mut html::Div<'p>,
     ) {
         if anc.compose_patterns.is_empty() {
-            console::log_1(
-                &format!("{}: No compose patterns", self.name).into(),
-            );
+            log::warn!("{}: No compose patterns", self.name);
             return;
         }
         let Some(dms) = self.make_dms(anc) else {
@@ -892,7 +890,7 @@ impl Dms {
         let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
         let pat = anc.compose_patterns.iter().find(|p| p.name == pat_name);
         if pat.is_none() {
-            console::log_1(&format!("pattern not found: {pat_name}").into());
+            log::warn!("pattern not found: {pat_name}");
         }
         pat
     }

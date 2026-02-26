@@ -27,7 +27,6 @@ use web_sys::{
     CustomEvent, Element, Event, EventSource, HtmlButtonElement, HtmlElement,
     HtmlInputElement, HtmlSelectElement, MessageEvent, ScrollBehavior,
     ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
-    console,
 };
 
 /// JavaScript result
@@ -73,7 +72,7 @@ fn hide_login() {
 
 /// Show a toast message
 fn show_toast(msg: &str) {
-    console::log_1(&format!("toast: {msg}").into());
+    log::warn!("toast: {msg}");
     let t = Doc::get().elem::<HtmlElement>("sb_toast");
     t.set_inner_html(msg);
     t.set_class_name("show");
@@ -100,6 +99,8 @@ pub fn fly_map_item(fid: &str, lat: f64, lon: f64) {
 pub async fn start() -> core::result::Result<(), JsError> {
     // this should be debug only
     console_error_panic_hook::set_once();
+    wasm_log::init(wasm_log::Config::default().module_prefix("bulb"));
+    log::info!("Started");
     add_sidebar().await.unwrap_throw();
     Ok(())
 }
@@ -138,7 +139,7 @@ async fn finish_init() -> Result<()> {
                 app::set_initialized();
             }
         }
-        None => console::log_1(&format!("invalid user: {user:?}").into()),
+        None => log::warn!("invalid user: {user:?}"),
     }
     Ok(())
 }
@@ -263,7 +264,7 @@ async fn do_future(future: impl Future<Output = Result<()>>) {
         }
         Err(e) => {
             if let Some(se) = e.source() {
-                console::log_1(&format!("{se}").into());
+                log::warn!("source: {se}");
             }
             show_toast(&format!("Error: {e}"));
         }
@@ -322,7 +323,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
     let uri = Uri::from("/iris/api/notify");
     let json = notify_list(res);
     if let Err(e) = uri.post(&json.into()).await {
-        console::log_1(&format!("/iris/api/notify POST: {e}").into());
+        log::warn!("/iris/api/notify POST: {e}");
     }
     sidebar.set_class_name("");
 }
@@ -536,7 +537,7 @@ async fn search_card_list() -> Result<()> {
             }
             app::card_list(Some(cards));
         }
-        None => console::log_1(&"search failed - no card list".into()),
+        None => log::warn!("search failed - no card list"),
     }
     Ok(())
 }
@@ -630,9 +631,7 @@ async fn replace_card(cv: CardView) -> Result<()> {
 /// Replace a card with provided HTML
 fn replace_card_html(cv: CardView, html: &str) {
     let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id()) else {
-        console::log_1(
-            &format!("replace_card_html: {} not found", cv.id()).into(),
-        );
+        log::warn!("element {} not found", cv.id());
         return;
     };
     elem.set_inner_html(html);
@@ -832,7 +831,7 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
         .dyn_into::<JsString>()
     {
         Ok(name) => spawn_local(do_future(select_card_map(name.into()))),
-        Err(e) => console::log_1(&format!("tmsevent: {e:?}").into()),
+        Err(e) => log::warn!("tmsevent: {e:?}"),
     });
     elem.add_event_listener_with_callback(
         "tmsevent",
@@ -871,7 +870,7 @@ fn add_eventsource_listener() {
         Ok(es) => es,
         Err(e) => {
             set_notify_state(NotifyState::Starting);
-            console::log_1(&format!("SSE /iris/api/notify: {e:?}").into());
+            log::warn!("SSE /iris/api/notify: {e:?}");
             app::defer_action(DeferredAction::MakeEventSource, 5000);
             return;
         }
@@ -953,7 +952,7 @@ fn item_states_json(states: &[CardState]) -> JsValue {
 /// Update `sb_list` with changed result
 async fn update_card_list() -> Result<()> {
     let Some(mut cards) = app::card_list(None) else {
-        console::log_1(&JsValue::from("update_card_list: None"));
+        log::warn!("update_card_list: None");
         return Ok(());
     };
     let old_json = cards.swap_json(String::new());

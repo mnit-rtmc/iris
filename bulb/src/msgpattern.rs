@@ -29,7 +29,6 @@ use std::cmp::Ordering;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     HtmlElement, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
-    console,
 };
 
 /// NTCIP sign
@@ -155,7 +154,7 @@ impl AncillaryData for MsgPatternAnc {
                         *g = graphic;
                     }
                 } else {
-                    console::log_1(&format!("invalid graphic: {nm}").into());
+                    log::warn!("invalid graphic: {nm}");
                 }
             }
             Asset::MsgLines => {
