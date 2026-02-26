@@ -45,25 +45,25 @@ To simplify administration, some permissions grant access to related resources.
 In other words, permissions on the base resource also applies to any dependent
 resource, at the same access level.
 
-| Base Resource      | Dependent Resources                                   |
-|--------------------|-------------------------------------------------------|
+| Base Resource      | Dependent Resources                               |
+|--------------------|---------------------------------------------------|
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action], hashtag |
-| [alert config]     | alert info, [alert message]                           |
-| [beacon]           |                                                       |
-| [camera]           | [camera preset], camera template, cam vid src ord, [encoder stream], [encoder type], vid source template |
-| [controller]       | [alarm], [comm link], [gps], [modem]                  |
-| [detector]         | [r_node], [road], station                             |
+| [alert config]     | alert info, [alert message]                       |
+| [beacon]           |                                                   |
+| [camera]           | [camera preset], [encoder stream], [encoder type] |
+| [controller]       | [alarm], [comm link], [gps], [modem]              |
+| [detector]         | [r_node], [road], station                         |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
-| [gate arm]         |                                                       |
+| [gate arm]         |                                                   |
 | [incident]         | inc\_advice, inc\_descriptor, inc\_detail, inc\_locator, road\_affix |
-| [lcs]              | [lcs state]                                           |
-| [parking area]     |                                                       |
-| permission         | [domain], [role], [user id], connection               |
-| [ramp meter]       |                                                       |
+| [lcs]              | [lcs state]                                       |
+| [parking area]     |                                                   |
+| permission         | [domain], [role], [user id], connection           |
+| [ramp meter]       |                                                   |
 | [system attribute] | [cabinet style], [comm config], [event config], map extent, rpt conduit |
-| [toll zone]        | [tag reader]                                          |
-| [video monitor]    | [flow stream], [monitor style], [play list]           |
-| [weather sensor]   |                                                       |
+| [toll zone]        | [tag reader]                                      |
+| [video monitor]    | [flow stream], [monitor style], [play list]       |
+| [weather sensor]   |                                                   |
 
 ## Associated Resources
 

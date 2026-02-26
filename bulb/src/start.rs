@@ -187,7 +187,7 @@ async fn update_sb_resource() -> Result<()> {
     if let Some(elem) = doc.try_elem::<Element>("opt_permission") {
         elem.set_class_name(opt_class(&access, Res::Permission));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_system_attr") {
+    if let Some(elem) = doc.try_elem::<Element>("opt_system") {
         elem.set_class_name(opt_class(&access, Res::SystemAttribute));
     }
     if let Some(elem) = doc.try_elem::<Element>("opt_toll_zone") {
