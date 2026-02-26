@@ -12,7 +12,7 @@
 //
 use crate::actionplan::{ActionPlan, DeviceAction};
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View, uri_one};
+use crate::card::{AncillaryData, Card, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
@@ -27,6 +27,7 @@ use crate::rle::Table;
 use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
+use crate::view::View;
 use crate::word::Word;
 use chrono::{DateTime, Local, format::SecondsFormat};
 use hatmil::{Page, html};

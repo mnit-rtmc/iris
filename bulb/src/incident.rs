@@ -11,12 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card};
 use crate::error::Result;
 use crate::geoloc::Direction;
 use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields};
+use crate::view::View;
 use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;

@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View, uri_one};
+use crate::card::{AncillaryData, Card, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
@@ -23,6 +23,7 @@ use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
+use crate::view::View;
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use chrono::DateTime;
 use gift::block::DisposalMethod;

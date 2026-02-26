@@ -12,13 +12,14 @@
 //
 use crate::asset::Asset;
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, Select, TextArea, opt_ref};
+use crate::view::View;
 use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;

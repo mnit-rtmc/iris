@@ -11,9 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card};
 use crate::error::Result;
 use crate::util::{Fields, Input, Select, opt_ref, opt_str};
+use crate::view::View;
 use hatmil::{Page, html};
 use serde::Deserialize;
 use std::marker::PhantomData;

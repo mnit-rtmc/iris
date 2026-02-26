@@ -10,7 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{CardList, CardState, CardView};
+use crate::card::{CardList, CardState};
+use crate::view::CardView;
 use foldhash::HashMap;
 use hatmil::{Page, html};
 use resources::Res;

@@ -11,11 +11,12 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card};
 use crate::controller::Controller;
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::util::opt_str;
+use crate::view::View;
 use hatmil::html;
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;

@@ -11,12 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card};
 use crate::error::{Error, Result};
 use crate::item::ItemState;
 use crate::notes::contains_hashtag;
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, Input, Select, opt_ref};
+use crate::view::View;
 use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;

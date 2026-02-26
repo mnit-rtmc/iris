@@ -11,6 +11,10 @@
 // GNU General Public License for more details.
 //
 #![allow(clippy::match_like_matches_macro)]
+
+#[macro_use]
+mod macros;
+
 mod actionplan;
 mod alarm;
 mod app;
@@ -56,5 +60,6 @@ mod tagreader;
 mod user;
 mod util;
 mod videomonitor;
+mod view;
 mod weathersensor;
 mod word;

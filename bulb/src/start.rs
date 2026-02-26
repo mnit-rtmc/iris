@@ -11,12 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction, NotifyState};
-use crate::card::{self, CardList, CardState, CardView, View};
+use crate::card::{self, CardList, CardState};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::permission::Permission;
 use crate::util::Doc;
+use crate::view::{CardView, View};
 use js_sys::JsString;
 use resources::Res;
 use std::error::Error as _;
@@ -649,7 +650,7 @@ fn replace_card_html(cv: CardView, html: &str) {
 /// Handle delete button click
 async fn handle_delete(cv: CardView) -> Result<()> {
     if app::delete_enabled() {
-        card::delete_one(&cv).await?;
+        cv.delete_one().await?;
     }
     Ok(())
 }
@@ -665,7 +666,7 @@ async fn handle_save(cv: CardView) -> Result<()> {
 
 /// Save a create view card
 async fn save_create(cv: CardView) -> Result<()> {
-    card::create_and_post(cv.res).await?;
+    cv.create_and_post().await?;
     replace_card(cv.view(View::CreateCompact)).await
 }
 

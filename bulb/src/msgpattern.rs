@@ -11,12 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::rend::Renderer;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
+use crate::view::View;
 use hatmil::{Page, html};
 use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::split as multi_split;
