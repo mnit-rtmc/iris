@@ -12,6 +12,7 @@
 //
 use crate::error::{Error, Result};
 use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
+use serde::de::DeserializeOwned;
 use std::borrow::{Borrow, Cow};
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
@@ -126,6 +127,12 @@ impl Uri {
                 wait_promise(Ok(blob.array_buffer())).await
             }
         }
+    }
+
+    /// Fetch using "GET" method
+    pub async fn get_val<D: DeserializeOwned>(&self) -> Result<D> {
+        let value = self.get().await?;
+        Ok(serde_wasm_bindgen::from_value(value)?)
     }
 
     /// Fetch using "PATCH" method

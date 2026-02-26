@@ -146,8 +146,8 @@ async fn finish_init() -> Result<()> {
 
 /// Update resource select options
 async fn update_sb_resource() -> Result<()> {
-    let json = Uri::from("/iris/api/access").get().await?;
-    let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
+    let access: Vec<Permission> =
+        Uri::from("/iris/api/access").get_val().await?;
     let doc = Doc::get();
     if let Some(elem) = doc.try_elem::<Element>("opt_action_plan") {
         elem.set_class_name(opt_class(&access, Res::ActionPlan));
@@ -325,6 +325,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
     if let Err(e) = uri.post(&json.into()).await {
         log::warn!("/iris/api/notify POST: {e}");
     }
+    // Turn off "wait" style
     sidebar.set_class_name("");
 }
 
