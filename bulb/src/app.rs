@@ -127,9 +127,14 @@ pub fn set_view(cv: CardView) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         let cards = state.cards.take();
-        if let Some(mut cards) = cards {
-            cards.set_view(cv);
-            state.cards = Some(cards);
+        match cards {
+            Some(mut cards) => {
+                cards.set_view(cv);
+                state.cards = Some(cards);
+            }
+            None => {
+                log::warn!("set_view: no cards for {}", cv.name);
+            }
         }
         // purge all deferred refresh list actions
         state

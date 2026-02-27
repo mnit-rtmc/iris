@@ -137,6 +137,7 @@ async fn finish_init() -> Result<()> {
             if !app::initialized() {
                 update_sb_resource().await?;
                 set_resource(None, "").await;
+                post_notify_req(None).await;
                 app::set_initialized();
             }
         }
@@ -321,13 +322,17 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
     app::card_list(None);
     do_future(fetch_card_list()).await;
     do_future(populate_card_list()).await;
+    // Turn off "wait" style
+    sidebar.set_class_name("");
+}
+
+/// POST a resource notify request
+async fn post_notify_req(res: Option<Res>) {
     let uri = Uri::from("/iris/api/notify");
     let json = notify_list(res);
     if let Err(e) = uri.post(&json.into()).await {
         log::warn!("/iris/api/notify POST: {e}");
     }
-    // Turn off "wait" style
-    sidebar.set_class_name("");
 }
 
 /// Build resource list for notifications
@@ -515,6 +520,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 fn handle_res_change() {
     let res = selected_resource();
     spawn_local(handle_resource_change(res, ""));
+    spawn_local(post_notify_req(res));
 }
 
 /// Handle search input
@@ -627,12 +633,13 @@ async fn handle_button_card(attrs: ButtonAttrs) {
 /// Replace a card view element with another view
 async fn replace_card(cv: CardView) -> Result<()> {
     let html = cv.fetch_one().await?;
-    replace_card_html(cv, &html);
+    replace_card_html(&cv, &html);
+    app::set_view(cv);
     Ok(())
 }
 
 /// Replace a card with provided HTML
-fn replace_card_html(cv: CardView, html: &str) {
+fn replace_card_html(cv: &CardView, html: &str) {
     let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id()) else {
         log::warn!("element {} not found", cv.id());
         return;
@@ -645,7 +652,6 @@ fn replace_card_html(cv: CardView, html: &str) {
         opt.set_block(ScrollLogicalPosition::Nearest);
         elem.scroll_into_view_with_scroll_into_view_options(&opt);
     }
-    app::set_view(cv);
 }
 
 /// Handle delete button click
@@ -739,6 +745,7 @@ async fn go_resource(attrs: ButtonAttrs) {
         && let Ok(res) = Res::try_from(rname.as_str())
     {
         set_resource(Some(res), &link).await;
+        post_notify_req(Some(res)).await;
     }
 }
 
@@ -854,14 +861,18 @@ async fn select_card_map(name: String) -> Result<()> {
         return Ok(());
     }
     let res = app::name_res(&name);
+    let changed = res != selected_resource();
     if let Some(res) = res {
-        if selected_resource() != Some(res) {
+        if changed {
             set_resource(Some(res), "").await;
         }
         let id = format!("{res}_{name}");
         js_fly_enable(JsValue::FALSE);
         click_card(res, name, id).await?;
         js_fly_enable(JsValue::TRUE);
+    }
+    if changed {
+        post_notify_req(res).await;
     }
     Ok(())
 }
@@ -961,9 +972,14 @@ async fn update_card_list() -> Result<()> {
     let old_json = cards.swap_json(String::new());
     app::card_list(Some(cards));
     fetch_card_list().await?;
-    let cards = app::card_list(None).unwrap();
+    let mut cards = app::card_list(None).unwrap();
+    let mut views = Vec::new();
     for (cv, html) in cards.changed_vec(old_json).await? {
-        replace_card_html(cv, &html);
+        replace_card_html(&cv, &html);
+        views.push(cv);
+    }
+    for cv in views {
+        cards.set_view(cv);
     }
     let items = cards.states_main().await?;
     let json = item_states_json(&items);
