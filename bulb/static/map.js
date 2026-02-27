@@ -371,6 +371,17 @@ function select_tms_feature(fid, name, sid) {
     }
 }
 
+// Dispatch a custom TMS event (map click)
+function dispatch_tms_event(fid) {
+    const ev = new CustomEvent("tmsevent", {
+        detail: fid || "",
+        bubbles: true,
+        cancelable: true,
+        composed: false,
+    });
+    document.querySelector('#mapid').dispatchEvent(ev);
+}
+
 // Initialize leaflet map
 function init_map() {
     map = L.map('mapid', {
@@ -413,13 +424,7 @@ function init_map() {
             let name = e.propagatedFrom.properties.name;
             let sid = e.propagatedFrom.properties.station_id;
             let tms_fid = select_tms_feature(tms_select, name, sid);
-            const ev = new CustomEvent("tmsevent", {
-                detail: tms_fid,
-                bubbles: true,
-                cancelable: true,
-                composed: false,
-            });
-            document.querySelector('#mapid').dispatchEvent(ev);
+            dispatch_tms_event(tms_fid);
             osm_select = fid;
             osm_layers.setFeatureStyle(osm_select, {
                 fill: true,
@@ -448,26 +453,18 @@ function init_map() {
         let fid = tms_layer_id(e.propagatedFrom);
         let name = e.propagatedFrom.properties.name;
         let sid = e.propagatedFrom.properties.station_id;
-        let new_fid = select_tms_feature(fid, name, sid);
-        if (!(new_fid === null)) {
-            if (new_fid) {
-                let label = tms_layer_label(e.propagatedFrom);
-                if (label) {
-                    tooltip = L.tooltip()
-                               .setContent(label)
-                               .setLatLng(e.latlng)
-                               .openOn(map);
-                };
-            }
-            const ev = new CustomEvent("tmsevent", {
-                detail: new_fid,
-                bubbles: true,
-                cancelable: true,
-                composed: false,
-            });
-            document.querySelector('#mapid').dispatchEvent(ev);
-            L.DomEvent.stop(e);
+        let tms_fid = select_tms_feature(fid, name, sid);
+        if (tms_fid) {
+            let label = tms_layer_label(e.propagatedFrom);
+            if (label) {
+                tooltip = L.tooltip()
+                           .setContent(label)
+                           .setLatLng(e.latlng)
+                           .openOn(map);
+            };
         }
+        dispatch_tms_event(tms_fid);
+        L.DomEvent.stop(e);
     }
     tms_layers.on('click', tms_on_click);
     osm_layers.addTo(map);
