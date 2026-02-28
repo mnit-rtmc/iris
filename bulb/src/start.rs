@@ -10,12 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::app::{self, DeferredAction, NotifyState};
+use crate::app::{self, DeferredAction};
 use crate::card::{self, CardList, CardState};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::permission::Permission;
+use crate::sse;
 use crate::util::Doc;
 use crate::view::{CardView, View};
 use js_sys::JsString;
@@ -25,9 +26,9 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    CustomEvent, Element, Event, EventSource, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, MessageEvent, ScrollBehavior,
-    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
+    CustomEvent, Element, Event, HtmlButtonElement, HtmlElement,
+    HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
+    ScrollLogicalPosition, TransitionEvent, Window,
 };
 
 /// JavaScript result
@@ -119,7 +120,7 @@ async fn add_sidebar() -> JsResult<()> {
     add_interval_callback(&window)?;
     let mapid: HtmlElement = doc.elem("mapid");
     add_map_click_listener(&mapid)?;
-    add_eventsource_listener();
+    sse::add_listener();
     do_future(finish_init()).await;
     fetch_station_sample();
     if let Some(doc_elem) = doc.doc_elem() {
@@ -137,7 +138,7 @@ async fn finish_init() -> Result<()> {
             if !app::initialized() {
                 update_sb_resource().await?;
                 set_resource(None, "").await;
-                post_notify_req(None).await;
+                sse::post_req(None).await;
                 app::set_initialized();
             }
         }
@@ -326,35 +327,6 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
     sidebar.set_class_name("");
 }
 
-/// POST a resource notify request
-async fn post_notify_req(res: Option<Res>) {
-    let uri = Uri::from("/iris/api/notify");
-    let json = notify_list(res);
-    if let Err(e) = uri.post(&json.into()).await {
-        log::warn!("/iris/api/notify POST: {e}");
-    }
-}
-
-/// Build resource list for notifications
-fn notify_list(res: Option<Res>) -> String {
-    // Always listen for resources with map markers
-    let mut resources = vec![
-        Res::Beacon.as_str(),
-        Res::Camera.as_str(),
-        Res::Dms.as_str(),
-        Res::Lcs.as_str(),
-        Res::RampMeter.as_str(),
-        Res::WeatherSensor.as_str(),
-    ];
-    if let Some(r) = res {
-        // Ensure selected `res` is last, since the map will redraw after
-        // receiving that notification (js_set_selected)
-        resources.retain(|rs| *rs != r.as_str());
-        resources.push(r.as_str());
-    }
-    format!("[\"{}\"]", &resources.join("\",\""))
-}
-
 /// Fetch card list for selected resource type
 async fn fetch_card_list() -> Result<()> {
     let mut cards = app::card_list(None);
@@ -520,7 +492,7 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
 fn handle_res_change() {
     let res = selected_resource();
     spawn_local(handle_resource_change(res, ""));
-    spawn_local(post_notify_req(res));
+    spawn_local(sse::post_req(res));
 }
 
 /// Handle search input
@@ -745,7 +717,7 @@ async fn go_resource(attrs: ButtonAttrs) {
         && let Ok(res) = Res::try_from(rname.as_str())
     {
         set_resource(Some(res), &link).await;
-        post_notify_req(Some(res)).await;
+        sse::post_req(Some(res)).await;
     }
 }
 
@@ -814,9 +786,9 @@ fn tick_interval() {
         match action {
             DeferredAction::FetchStationData => fetch_station_sample(),
             DeferredAction::HideToast => hide_toast(),
-            DeferredAction::MakeEventSource => add_eventsource_listener(),
             DeferredAction::RefreshList => spawn_local(handle_refresh()),
-            DeferredAction::SetNotifyState(ns) => set_notify_state(ns),
+            DeferredAction::MakeEventSource => sse::add_listener(),
+            DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
         }
     }
 }
@@ -872,71 +844,29 @@ async fn select_card_map(name: String) -> Result<()> {
         js_fly_enable(JsValue::TRUE);
     }
     if changed {
-        post_notify_req(res).await;
+        sse::post_req(res).await;
     }
     Ok(())
 }
 
-/// Add event source listener for notifications
-fn add_eventsource_listener() {
-    set_notify_state(NotifyState::Disconnected);
-    let es = match EventSource::new("/iris/api/notify") {
-        Ok(es) => es,
-        Err(e) => {
-            set_notify_state(NotifyState::Starting);
-            log::warn!("SSE /iris/api/notify: {e:?}");
-            app::defer_action(DeferredAction::MakeEventSource, 5000);
-            return;
-        }
-    };
-    let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_notify_state(NotifyState::Connecting);
-    });
-    es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
-    onopen.forget();
-    let onerror: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_notify_state(NotifyState::Disconnected);
-    });
-    es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
-    onerror.forget();
-    let onmessage: Closure<dyn Fn(_)> = Closure::new(|e: MessageEvent| {
-        set_notify_state(NotifyState::Good);
-        if let Ok(payload) = e.data().dyn_into::<JsString>() {
-            spawn_local(do_future(handle_notify(String::from(payload))));
-        }
-    });
-    es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
-    // can't drop closure, just forget it to make JS happy
-    onmessage.forget();
+/// Handle SSE notification
+pub fn handle_notification(chan: String, name: Option<String>) {
+    spawn_local(do_future(do_handle_notification(chan, name)));
 }
 
-/// Set refresh button text
-fn set_notify_state(ns: NotifyState) {
-    let sb_refresh = Doc::get().elem::<HtmlButtonElement>("sb_refresh");
-    sb_refresh.set_inner_html(&ns.build_html());
-    sb_refresh.set_disabled(ns.disabled());
-}
-
-/// Handle SSE notify from server
-async fn handle_notify(payload: String) -> Result<()> {
+/// Handle SSE notification
+async fn do_handle_notification(
+    chan: String,
+    _name: Option<String>,
+) -> Result<()> {
     let rname = selected_resource().map_or("", |res| res.as_str());
-    let (chan, _name) = match payload.split_once('$') {
-        Some((a, b)) => (a, Some(b)),
-        None => (payload.as_str(), None),
-    };
     if chan == rname {
-        set_notify_state(NotifyState::Updating);
-        app::defer_action(
-            DeferredAction::SetNotifyState(NotifyState::Good),
-            600,
-        );
-        do_future(update_card_list()).await;
-    } else if let Ok(res) = Res::try_from(chan) {
+        update_card_list().await?;
+    } else if let Ok(res) = Res::try_from(chan.as_str()) {
+        // FIXME: only needed for resources with map markers
         let mut cards = CardList::new(res);
         let json = cards.fetch_all().await?;
         cards.swap_json(json);
-        // FIXME: only needed for resources with map markers
-        let _html = cards.make_html().await?;
         let items = cards.states_main().await?;
         let json = item_states_json(&items);
         app::set_resources(items);

@@ -54,6 +54,7 @@ mod rle;
 mod role;
 mod signconfig;
 mod signmessage;
+mod sse;
 mod start;
 mod systemattr;
 mod tagreader;

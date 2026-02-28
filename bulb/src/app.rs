@@ -11,66 +11,14 @@
 // GNU General Public License for more details.
 //
 use crate::card::{CardList, CardState};
+use crate::sse::NotifyState;
 use crate::view::CardView;
 use foldhash::HashMap;
-use hatmil::{Page, html};
 use resources::Res;
 use std::cell::RefCell;
 
 /// Interval (ms) between ticks for deferred actions
 pub const TICK_INTERVAL: i32 = 500;
-
-/// Notification button state
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum NotifyState {
-    Starting,
-    Disconnected,
-    Connecting,
-    Updating,
-    Good,
-}
-
-impl NotifyState {
-    /// Get symbol for a state
-    pub const fn symbol(self) -> &'static str {
-        match self {
-            Self::Starting => "⬜",
-            Self::Disconnected => "⬛",
-            Self::Connecting => "🟧",
-            Self::Updating => "🟨",
-            Self::Good => "🟩",
-        }
-    }
-
-    /// Get description of a state
-    pub const fn description(self) -> &'static str {
-        match self {
-            Self::Starting => "Starting",
-            Self::Disconnected => "Disconnected",
-            Self::Connecting => "Connecting",
-            Self::Updating => "Updating",
-            Self::Good => "Good",
-        }
-    }
-
-    /// Build state HTML
-    pub fn build_html(self) -> String {
-        // NOTE: these have &nbsp; to keep from splitting lines
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
-        div.class("tooltip").cdata("⭮ ").cdata(self.symbol());
-        div.span().class("right").cdata(self.description());
-        String::from(page)
-    }
-
-    /// Get button disabled value for a state
-    pub const fn disabled(self) -> bool {
-        match self {
-            Self::Updating | Self::Good => true,
-            _ => false,
-        }
-    }
-}
 
 /// Deferred actions (called on set_interval)
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -79,10 +27,10 @@ pub enum DeferredAction {
     FetchStationData,
     /// Hide the toast popup
     HideToast,
-    /// Make SSE event source
-    MakeEventSource,
     /// Refresh resource list
     RefreshList,
+    /// Make SSE event source
+    MakeEventSource,
     /// Set notify state
     SetNotifyState(NotifyState),
 }
