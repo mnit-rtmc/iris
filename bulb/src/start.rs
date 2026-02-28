@@ -863,14 +863,15 @@ async fn do_handle_notification(
     if chan == rname {
         update_card_list().await?;
     } else if let Ok(res) = Res::try_from(chan.as_str()) {
-        // FIXME: only needed for resources with map markers
-        let mut cards = CardList::new(res);
-        let json = cards.fetch_all().await?;
-        cards.swap_json(json);
-        let items = cards.states_main().await?;
-        let json = item_states_json(&items);
-        app::set_resources(items);
-        js_update_item_states(&json);
+        if res.has_location() {
+            let mut cards = CardList::new(res);
+            let json = cards.fetch_all().await?;
+            cards.swap_json(json);
+            let items = cards.states_main().await?;
+            let json = item_states_json(&items);
+            app::set_resources(items);
+            js_update_item_states(&json);
+        }
     }
     Ok(())
 }

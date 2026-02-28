@@ -374,6 +374,22 @@ impl Res {
         }
     }
 
+    /// Check if resource has a location
+    pub const fn has_location(self) -> bool {
+        use Res::*;
+        matches!(
+            self,
+            Beacon
+                | Camera
+                | Controller
+                | Dms
+                | GateArm
+                | RampMeter
+                | TagReader
+                | WeatherSensor
+        )
+    }
+
     /// Get base resource for permission checks
     pub const fn base(self) -> Self {
         use Res::*;
