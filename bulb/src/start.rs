@@ -325,7 +325,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
 }
 
 /// Fetch card list for selected resource type
-async fn fetch_card_list(res: Res) -> Result<()> {
+async fn fetch_card_list(res: Res) -> Result<CardList> {
     let mut cards = CardList::new(res);
     let json = cards.fetch_all().await?;
     if let Some(old_cards) = app::card_list(None)
@@ -334,8 +334,7 @@ async fn fetch_card_list(res: Res) -> Result<()> {
         cards = old_cards;
     }
     cards.swap_json(json);
-    app::card_list(Some(cards));
-    Ok(())
+    Ok(cards)
 }
 
 /// Get the selected resource value
@@ -420,16 +419,6 @@ fn selected_resource() -> Option<Res> {
     }
 }
 
-/// Populate `sb_list` with selected resource type
-async fn populate_card_list() -> Result<()> {
-    let doc = Doc::get();
-    let search = search_value();
-    let html = build_card_list(&search).await?;
-    let sb_list = doc.elem::<Element>("sb_list");
-    sb_list.set_inner_html(&html);
-    Ok(())
-}
-
 /// Get value to search
 fn search_value() -> String {
     let doc = Doc::get();
@@ -442,19 +431,6 @@ fn search_value() -> String {
         search.push_str(&istate);
     }
     search
-}
-
-/// Build a filtered list of cards for a resource
-async fn build_card_list(search: &str) -> Result<String> {
-    match app::card_list(None) {
-        Some(mut cards) => {
-            cards.search(search);
-            let html = cards.make_html().await?;
-            app::card_list(Some(cards));
-            Ok(html)
-        }
-        None => Ok(String::new()),
-    }
 }
 
 /// Add an "input" event listener to an element
@@ -736,13 +712,25 @@ async fn handle_refresh() {
 async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
     match res {
         Some(res) => {
-            fetch_card_list(res).await?;
-            populate_card_list().await?;
+            let mut cards = fetch_card_list(res).await?;
+            populate_card_list(&mut cards).await?;
+            app::card_list(Some(cards));
         }
         None => {
             app::card_list(None);
         }
     }
+    Ok(())
+}
+
+/// Populate `sb_list` with selected resource type
+async fn populate_card_list(cards: &mut CardList) -> Result<()> {
+    let doc = Doc::get();
+    let search = search_value();
+    cards.search(&search);
+    let html = cards.make_html().await?;
+    let sb_list = doc.elem::<Element>("sb_list");
+    sb_list.set_inner_html(&html);
     Ok(())
 }
 
@@ -913,8 +901,7 @@ async fn update_card_list() -> Result<()> {
     let res = cards.res();
     let old_json = cards.swap_json(String::new());
     app::card_list(Some(cards));
-    fetch_card_list(res).await?;
-    let mut cards = app::card_list(None).unwrap();
+    let mut cards = fetch_card_list(res).await?;
     let mut views = Vec::new();
     for (cv, html) in cards.changed_vec(old_json).await? {
         replace_card_html(&cv, &html);
