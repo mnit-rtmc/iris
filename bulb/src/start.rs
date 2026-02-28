@@ -328,10 +328,10 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
 async fn fetch_card_list(res: Res) -> Result<()> {
     let mut cards = CardList::new(res);
     let json = cards.fetch_all().await?;
-    if let Some(old_cards) = app::card_list(None) {
-        if old_cards.res() == res {
-            cards = old_cards;
-        }
+    if let Some(old_cards) = app::card_list(None)
+        && old_cards.res() == res
+    {
+        cards = old_cards;
     }
     cards.swap_json(json);
     app::card_list(Some(cards));
@@ -872,16 +872,16 @@ async fn do_handle_notification(
     let rname = selected_resource().map_or("", |res| res.as_str());
     if chan == rname {
         update_card_list().await?;
-    } else if let Ok(res) = Res::try_from(chan.as_str()) {
-        if res.has_location() {
-            let mut cards = CardList::new(res);
-            let json = cards.fetch_all().await?;
-            cards.swap_json(json);
-            let items = cards.states_main().await?;
-            let json = item_states_json(&items);
-            app::set_resources(items);
-            js_update_item_states(&json);
-        }
+    } else if let Ok(res) = Res::try_from(chan.as_str())
+        && res.has_location()
+    {
+        let mut cards = CardList::new(res);
+        let json = cards.fetch_all().await?;
+        cards.swap_json(json);
+        let items = cards.states_main().await?;
+        let json = item_states_json(&items);
+        app::set_resources(items);
+        js_update_item_states(&json);
     }
     Ok(())
 }
