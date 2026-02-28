@@ -319,26 +319,22 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
-    // FIXME: rework card_list API
-    app::card_list(None);
-    do_future(fetch_card_list()).await;
-    do_future(populate_card_list()).await;
+    do_future(fetch_and_populate_cards(res)).await;
     // Turn off "wait" style
     sidebar.set_class_name("");
 }
 
 /// Fetch card list for selected resource type
-async fn fetch_card_list() -> Result<()> {
-    let mut cards = app::card_list(None);
-    if cards.is_none() {
-        let res = selected_resource();
-        cards = res.map(CardList::new);
+async fn fetch_card_list(res: Res) -> Result<()> {
+    let mut cards = CardList::new(res);
+    let json = cards.fetch_all().await?;
+    if let Some(old_cards) = app::card_list(None) {
+        if old_cards.res() == res {
+            cards = old_cards;
+        }
     }
-    if let Some(cards) = &mut cards {
-        let json = cards.fetch_all().await?;
-        cards.swap_json(json);
-    }
-    app::card_list(cards);
+    cards.swap_json(json);
+    app::card_list(Some(cards));
     Ok(())
 }
 
@@ -732,8 +728,22 @@ async fn set_resource(res: Option<Res>, search: &str) {
 
 /// Handle refresh button click
 async fn handle_refresh() {
-    do_future(fetch_card_list()).await;
-    do_future(populate_card_list()).await;
+    let res = selected_resource();
+    do_future(fetch_and_populate_cards(res)).await;
+}
+
+/// Fetch and populate card list
+async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
+    match res {
+        Some(res) => {
+            fetch_card_list(res).await?;
+            populate_card_list().await?;
+        }
+        None => {
+            app::card_list(None);
+        }
+    }
+    Ok(())
 }
 
 /// Add transition event listener to an element
@@ -900,9 +910,10 @@ async fn update_card_list() -> Result<()> {
         log::warn!("update_card_list: None");
         return Ok(());
     };
+    let res = cards.res();
     let old_json = cards.swap_json(String::new());
     app::card_list(Some(cards));
-    fetch_card_list().await?;
+    fetch_card_list(res).await?;
     let mut cards = app::card_list(None).unwrap();
     let mut views = Vec::new();
     for (cv, html) in cards.changed_vec(old_json).await? {
