@@ -92,9 +92,14 @@ pub fn set_view(cv: CardView) {
     })
 }
 
-/// Get form card from global app state
-pub fn form() -> Option<CardView> {
-    STATE.with(|rc| rc.borrow().cards.as_ref().and_then(|cards| cards.form()))
+/// Get expanded view card from global app state
+pub fn expanded_view() -> Option<CardView> {
+    STATE.with(|rc| {
+        rc.borrow()
+            .cards
+            .as_ref()
+            .and_then(|cards| cards.expanded_view())
+    })
 }
 
 /// Set delete enabled/disabled in global app state

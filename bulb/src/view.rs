@@ -80,12 +80,12 @@ impl View {
         match self {
             View::Hidden | View::Search => "no-display",
             View::CreateCompact | View::Compact => "card-compact",
-            _ => "card-form",
+            _ => "card-expanded",
         }
     }
 
-    /// Is the view a form?
-    pub fn is_form(self) -> bool {
+    /// Is the view expanded?
+    pub fn is_expanded(self) -> bool {
         match self {
             View::Hidden
             | View::Search

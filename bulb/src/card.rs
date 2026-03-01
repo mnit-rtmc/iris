@@ -427,7 +427,7 @@ impl CardList {
 
     /// Get selected name
     pub fn selected_name(&self) -> String {
-        match self.form() {
+        match self.expanded_view() {
             Some(cv) => cv.name,
             None => String::new(),
         }
@@ -455,9 +455,9 @@ impl CardList {
         Ok(states)
     }
 
-    /// Get form card (if any)
-    pub fn form(&self) -> Option<CardView> {
-        self.views.iter().find(|cv| cv.view.is_form()).cloned()
+    /// Get expanded view (if any)
+    pub fn expanded_view(&self) -> Option<CardView> {
+        self.views.iter().find(|cv| cv.view.is_expanded()).cloned()
     }
 
     /// Set card view
@@ -574,7 +574,7 @@ impl CardList {
                 pri.name(),
                 View::Compact,
             ));
-            let view = if vv.view.is_form() {
+            let view = if vv.view.is_expanded() {
                 vv.view
             } else if self.search.is_match(&pri, &anc) {
                 View::Compact
@@ -623,7 +623,7 @@ impl CardList {
                     Some(cv) => cv.clone(),
                     None => CardView::new(C::res(), c1.name(), View::Compact),
                 };
-                if cv.view.is_form() {
+                if cv.view.is_expanded() {
                     // FIXME: this messes up current message selection
                     //
                     // let html = fetch_one(&cv).await?;

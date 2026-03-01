@@ -469,7 +469,7 @@ fn handle_res_change() {
 
 /// Handle search input
 async fn handle_search() -> Result<()> {
-    if let Some(cv) = app::form() {
+    if let Some(cv) = app::expanded_view() {
         replace_card(cv.compact()).await?
     }
     search_card_list().await
@@ -497,7 +497,7 @@ async fn search_card_list() -> Result<()> {
 
 /// Handle an event from `ob_view` select element
 fn handle_ob_view_ev() {
-    if let Some(cv) = app::form()
+    if let Some(cv) = app::expanded_view()
         && let Some(view) = ob_view_value()
     {
         spawn_local(do_future(replace_card(cv.view(view))));
@@ -512,9 +512,9 @@ fn ob_view_value() -> Option<View> {
     }
 }
 
-/// Handle an input event on a form card
+/// Handle an input event on an expanded card
 async fn handle_input(id: String) -> Result<()> {
-    if let Some(cv) = app::form() {
+    if let Some(cv) = app::expanded_view() {
         cv.handle_input(id).await?;
     }
     Ok(())
@@ -557,9 +557,9 @@ fn handle_button_click_ev(target: &Element) {
     }
 }
 
-/// Handle button click event on a form card
+/// Handle button click event on an epanded card
 async fn handle_button_card(attrs: ButtonAttrs) {
-    if let Some(cv) = app::form() {
+    if let Some(cv) = app::expanded_view() {
         match attrs.id.as_str() {
             "ob_delete" => do_future(handle_delete(cv)).await,
             "ob_save" => do_future(handle_save(cv)).await,
@@ -590,7 +590,7 @@ fn replace_card_html(cv: &CardView, html: &str) {
     };
     elem.set_inner_html(html);
     elem.set_class_name(cv.view.class_name());
-    if cv.view.is_form() {
+    if cv.view.is_expanded() {
         let opt = ScrollIntoViewOptions::new();
         opt.set_behavior(ScrollBehavior::Smooth);
         opt.set_block(ScrollLogicalPosition::Nearest);
@@ -627,7 +627,7 @@ async fn save_changed(cv: CardView) -> Result<()> {
     replace_card(cv.view(View::Compact)).await
 }
 
-/// Handle a button click on a form card
+/// Handle a button click on an expanded card
 async fn handle_button_cv(cv: CardView, id: String) {
     match cv.handle_click(id).await {
         Ok(_) => (),
@@ -647,7 +647,7 @@ fn handle_card_click_ev(elem: &Element) {
 
 /// Handle a card click event
 async fn click_card(res: Res, name: String, id: String) -> Result<()> {
-    if let Some(cv) = app::form() {
+    if let Some(cv) = app::expanded_view() {
         replace_card(cv.compact()).await?;
     }
     // FIXME: check if id are the same for old/new cards
@@ -825,7 +825,7 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
 /// Select a card from a map marker click
 async fn select_card_map(name: String) -> Result<()> {
     if name.is_empty() {
-        if let Some(cv) = app::form() {
+        if let Some(cv) = app::expanded_view() {
             replace_card(cv.compact()).await?;
         }
         return Ok(());
