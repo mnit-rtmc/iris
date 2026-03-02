@@ -324,19 +324,6 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
     sidebar.set_class_name("");
 }
 
-/// Fetch card list for selected resource type
-async fn fetch_card_list(res: Res) -> Result<CardList> {
-    let mut cards = CardList::new(res);
-    let json = cards.fetch_all().await?;
-    if let Some(old_cards) = app::card_list(None)
-        && old_cards.res() == res
-    {
-        cards = old_cards;
-    }
-    cards.swap_json(json);
-    Ok(cards)
-}
-
 /// Get the selected resource value
 fn selected_resource() -> Option<Res> {
     let doc = Doc::get();
@@ -467,22 +454,16 @@ fn handle_res_change() {
     spawn_local(sse::post_req(res));
 }
 
-/// Handle search input
-async fn handle_search() -> Result<()> {
-    if let Some(cv) = app::expanded_view() {
-        replace_card(cv.compact()).await?
-    }
-    search_card_list().await
-}
-
 /// Search card list for matching cards
-async fn search_card_list() -> Result<()> {
+async fn handle_search() -> Result<()> {
     match app::card_list(None) {
         Some(mut cards) => {
+            if let Some(cv) = cards.expanded_view() {
+                replace_card(cv.compact()).await?
+            }
             let search = search_value();
-            cards.search(&search);
             let doc = Doc::get();
-            for cv in cards.view_change().await? {
+            for cv in cards.search_views(&search).await? {
                 let id = cv.id();
                 if let Some(elem) = doc.try_elem::<Element>(&id) {
                     elem.set_class_name(cv.view.class_name());
@@ -602,6 +583,7 @@ fn replace_card_html(cv: &CardView, html: &str) {
 async fn handle_delete(cv: CardView) -> Result<()> {
     if app::delete_enabled() {
         cv.delete_one().await?;
+        // FIXME: hide card view
     }
     Ok(())
 }
@@ -702,7 +684,7 @@ async fn set_resource(res: Option<Res>, search: &str) {
     handle_resource_change(res, search).await;
 }
 
-/// Handle refresh button click
+/// Handle refresh full card list
 async fn handle_refresh() {
     let res = selected_resource();
     do_future(fetch_and_populate_cards(res)).await;
@@ -712,25 +694,19 @@ async fn handle_refresh() {
 async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
     match res {
         Some(res) => {
-            let mut cards = fetch_card_list(res).await?;
-            populate_card_list(&mut cards).await?;
+            let search = search_value();
+            let mut cards = CardList::new(res);
+            cards.fetch_all().await?;
+            let html = cards.build_html(&search).await?;
+            let doc = Doc::get();
+            let sb_list = doc.elem::<Element>("sb_list");
+            sb_list.set_inner_html(&html);
             app::card_list(Some(cards));
         }
         None => {
             app::card_list(None);
         }
     }
-    Ok(())
-}
-
-/// Populate `sb_list` with selected resource type
-async fn populate_card_list(cards: &mut CardList) -> Result<()> {
-    let doc = Doc::get();
-    let search = search_value();
-    cards.search(&search);
-    let html = cards.make_html().await?;
-    let sb_list = doc.elem::<Element>("sb_list");
-    sb_list.set_inner_html(&html);
     Ok(())
 }
 
@@ -857,20 +833,67 @@ async fn do_handle_notification(
     chan: String,
     _name: Option<String>,
 ) -> Result<()> {
-    let rname = selected_resource().map_or("", |res| res.as_str());
-    if chan == rname {
-        update_card_list().await?;
-    } else if let Ok(res) = Res::try_from(chan.as_str())
+    if let Some(res) = selected_resource()
+        && res.as_str() == chan
+    {
+        update_card_list(res).await?;
+    }
+    if let Ok(res) = Res::try_from(chan.as_str())
         && res.has_location()
     {
         let mut cards = CardList::new(res);
-        let json = cards.fetch_all().await?;
-        cards.swap_json(json);
-        let items = cards.states_main().await?;
-        let json = item_states_json(&items);
-        app::set_resources(items);
-        js_update_item_states(&json);
+        cards.fetch_all().await?;
+        update_map_states(&cards).await?;
     }
+    Ok(())
+}
+
+/// Update `sb_list` with changed result
+async fn update_card_list(res: Res) -> Result<()> {
+    let Some(old_cards) = app::card_list(None) else {
+        log::warn!("update_card_list: None");
+        return Ok(());
+    };
+    if old_cards.res() != res {
+        js_set_selected(
+            &JsValue::from_str(res.as_str()),
+            &JsValue::from_str(""),
+        );
+        return Ok(());
+    }
+    let old_json = old_cards.json().to_string();
+    let expanded = old_cards.expanded_view();
+    app::card_list(Some(old_cards));
+    let search = search_value();
+    let mut cards = CardList::new(res).with_json(old_json);
+    cards.fetch_all().await?;
+    for (cv, html) in cards.changed_html(&search).await? {
+        if let Some(ev) = &expanded
+            && cv.name == ev.name
+        {
+            // FIXME: is user editing the form?
+        } else {
+            replace_card_html(&cv, &html);
+        }
+    }
+    update_map_states(&cards).await?;
+    js_set_selected(
+        &JsValue::from_str(res.as_str()),
+        &JsValue::from_str(&cards.selected_name()),
+    );
+    if let Some(cv) = expanded {
+        cards.set_view(cv);
+    }
+    app::card_list(Some(cards));
+    Ok(())
+}
+
+/// Update map item states
+async fn update_map_states(cards: &CardList) -> Result<()> {
+    let items = cards.states_main().await?;
+    let json = item_states_json(&items);
+    app::set_resources(items);
+    js_update_item_states(&json);
     Ok(())
 }
 
@@ -890,34 +913,4 @@ fn item_states_json(states: &[CardState]) -> JsValue {
     }
     json.push('}');
     JsValue::from_str(&json)
-}
-
-/// Update `sb_list` with changed result
-async fn update_card_list() -> Result<()> {
-    let Some(mut cards) = app::card_list(None) else {
-        log::warn!("update_card_list: None");
-        return Ok(());
-    };
-    let res = cards.res();
-    let old_json = cards.swap_json(String::new());
-    app::card_list(Some(cards));
-    let mut cards = fetch_card_list(res).await?;
-    let mut views = Vec::new();
-    for (cv, html) in cards.changed_vec(old_json).await? {
-        replace_card_html(&cv, &html);
-        views.push(cv);
-    }
-    for cv in views {
-        cards.set_view(cv);
-    }
-    let items = cards.states_main().await?;
-    let json = item_states_json(&items);
-    app::set_resources(items);
-    js_update_item_states(&json);
-    js_set_selected(
-        &JsValue::from_str(cards.res().as_str()),
-        &JsValue::from_str(&cards.selected_name()),
-    );
-    app::card_list(Some(cards));
-    search_card_list().await
 }

@@ -386,8 +386,8 @@ pub fn uri_one(res: Res, name: &str) -> Uri {
 pub struct CardList {
     /// Resource type
     res: Res,
-    /// Search term
-    search: Search,
+    /// Old JSON list
+    old_json: String,
     /// JSON list of cards
     json: String,
     /// Views in order of JSON list
@@ -397,32 +397,38 @@ pub struct CardList {
 impl CardList {
     /// Create a new card list
     pub fn new(res: Res) -> Self {
-        let search = Search::Empty();
+        let old_json = String::new();
         let json = String::new();
         let views = Vec::new();
         CardList {
             res,
-            search,
+            old_json,
             json,
             views,
         }
     }
 
-    /// Set search term
-    pub fn search(&mut self, search: &str) {
-        self.search = Search::new(search);
-    }
-
-    /// Swap current JSON value
-    pub fn swap_json(&mut self, json: String) -> String {
-        let js = std::mem::take(&mut self.json);
-        self.json = json;
-        js
-    }
-
     /// Get selected resource type
     pub fn res(&self) -> Res {
         self.res
+    }
+
+    /// Set JSON of all cards
+    pub fn with_json(mut self, json: String) -> Self {
+        self.old_json = json;
+        self
+    }
+
+    /// Get JSON of all cards
+    pub fn json(&self) -> &str {
+        &self.json
+    }
+
+    /// Get a `Vec` of all cards
+    fn cards<C: Card>(&self, old: bool) -> Result<Vec<C>> {
+        let json = if old { &self.old_json } else { &self.json };
+        let cards: Vec<C> = serde_json::from_str(json)?;
+        Ok(cards)
     }
 
     /// Get selected name
@@ -431,28 +437,6 @@ impl CardList {
             Some(cv) => cv.name,
             None => String::new(),
         }
-    }
-
-    /// Get main item states
-    pub async fn states_main(&self) -> Result<Vec<CardState>> {
-        cards_meth!(self, states_main_x)
-    }
-
-    /// Get main item states
-    async fn states_main_x<C: Card>(&self) -> Result<Vec<CardState>> {
-        let cards: Vec<C> = serde_json::from_str(&self.json)?;
-        // Use default value for ancillary data lookup
-        let anc = fetch_ancillary(&C::default(), View::Search).await?;
-        let res = C::res();
-        let mut states = Vec::new();
-        for pri in &cards {
-            states.push(CardState {
-                res,
-                name: pri.name().to_string(),
-                state: pri.item_state_main(&anc),
-            });
-        }
-        Ok(states)
     }
 
     /// Get expanded view (if any)
@@ -471,57 +455,104 @@ impl CardList {
     }
 
     /// Fetch card list
-    pub async fn fetch_all(&mut self) -> Result<String> {
+    pub async fn fetch_all(&mut self) -> Result<()> {
         let json = uri_all(self.res).get().await?;
         let json: Value = serde_wasm_bindgen::from_value(json)?;
-        Ok(json.to_string())
+        self.json = json.to_string();
+        Ok(())
     }
 
-    /// Make HTML view of card list
-    pub async fn make_html(&mut self) -> Result<String> {
-        cards_meth!(self, make_html_x)
+    /// Get main item states
+    pub async fn states_main(&self) -> Result<Vec<CardState>> {
+        cards_meth!(self, states_main_x)
     }
 
-    /// Make HTML view of card list
-    async fn make_html_x<C: Card>(&mut self) -> Result<String> {
-        let cards: Vec<C> = serde_json::from_str(&self.json)?;
+    /// Get main item states
+    async fn states_main_x<C: Card>(&self) -> Result<Vec<CardState>> {
+        let cards = self.cards::<C>(false)?;
         // Use default value for ancillary data lookup
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
+        let res = C::res();
+        let mut states = Vec::new();
+        for pri in &cards {
+            states.push(CardState {
+                res,
+                name: pri.name().to_string(),
+                state: pri.item_state_main(&anc),
+            });
+        }
+        Ok(states)
+    }
+
+    /// Search card views
+    async fn search_card_views<C: Card>(
+        &mut self,
+        search: &str,
+        anc: &C::Ancillary,
+    ) -> Result<()> {
+        let cards = self.cards::<C>(false)?;
+        let res = C::res();
+        let search = Search::new(search);
         let mut views = Vec::with_capacity(cards.len());
-        let mut page = Page::new();
-        let mut ul = page.frag::<html::Ul>();
-        ul.class("cards");
-        // "Create" card (not valid for SignConfig)
-        let view = if self.search.is_all() {
+        // "Create" card
+        let view = if search.is_all()
+            && res != Res::SignConfig
+            && res != Res::SystemAttribute
+        {
             View::CreateCompact
         } else {
             View::Hidden
         };
-        let cv = CardView::new(C::res(), Self::next_name(&cards), view);
-        let mut li = ul.li();
-        li.id(cv.id())
-            .data_("name", &cv.name)
-            .class(cv.view.class_name());
-        li.span().class("create").cdata("Create 🆕").close();
-        li.close();
+        let cv = CardView::new(res, Self::next_name(&cards), view);
         views.push(cv);
         for pri in &cards {
-            let view = if self.search.is_match(pri, &anc) {
+            let view = if search.is_match(pri, &anc) {
                 View::Compact
             } else {
                 View::Hidden
             };
-            let cv = CardView::new(C::res(), pri.name(), view);
+            let cv = CardView::new(res, pri.name(), view);
+            views.push(cv);
+        }
+        self.views = views;
+        Ok(())
+    }
+
+    /// Build HTML of full card list
+    pub async fn build_html(&mut self, search: &str) -> Result<String> {
+        cards_meth!(self, build_html_x, search)
+    }
+
+    /// Build HTML of full card list
+    async fn build_html_x<C: Card>(&mut self, search: &str) -> Result<String> {
+        let cards = self.cards::<C>(false)?;
+        // Use default value for ancillary data lookup
+        let anc = fetch_ancillary(&C::default(), View::Search).await?;
+        self.search_card_views::<C>(search, &anc).await?;
+        let mut views = self.views.iter();
+        let mut page = Page::new();
+        let mut ul = page.frag::<html::Ul>();
+        ul.class("cards");
+        if let Some(cv) = views.next() {
             let mut li = ul.li();
             li.id(cv.id())
                 .data_("name", &cv.name)
                 .class(cv.view.class_name());
-            li.raw(pri.to_html(view, &anc));
+            li.span().class("create").cdata("Create 🆕").close();
             li.close();
-            views.push(cv);
+        }
+        for (cv, pri) in views.zip(cards) {
+            if cv.name != pri.name() {
+                return Err(Error::CardMismatch());
+            }
+            let mut li = ul.li();
+            li.id(cv.id())
+                .data_("name", &cv.name)
+                .class(cv.view.class_name());
+            li.raw(pri.to_html(cv.view, &anc));
+            li.close();
         }
         ul.close();
-        self.views = views;
         Ok(String::from(page))
     }
 
@@ -543,95 +574,58 @@ impl CardList {
         format!("{prefix}_{num}")
     }
 
-    /// Get a list of cards whose view has changed
-    pub async fn view_change(&mut self) -> Result<Vec<CardView>> {
-        cards_meth!(self, view_change_x)
+    /// Search for all card views
+    pub async fn search_views(
+        &mut self,
+        search: &str,
+    ) -> Result<Vec<CardView>> {
+        cards_meth!(self, search_views_x, search)
     }
 
-    /// Get a list of cards whose view has changed
-    async fn view_change_x<C: Card>(&mut self) -> Result<Vec<CardView>> {
+    /// Search for all card views
+    async fn search_views_x<C: Card>(
+        &mut self,
+        search: &str,
+    ) -> Result<Vec<CardView>> {
         // Use default value for ancillary data lookup
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
-        let mut changes = Vec::new();
-        let mut views = Vec::with_capacity(self.views.len());
-        let mut old_views = self.views.drain(..);
-        if let Some(mut cv) = old_views.next() {
-            // "Create" card view
-            let view = if self.search.is_all() {
-                View::CreateCompact
-            } else {
-                View::Hidden
-            };
-            if view != cv.view {
-                cv.view = view;
-                changes.push(cv.clone());
-            }
-            views.push(cv);
-        }
-        for pri in serde_json::from_str::<Vec<C>>(&self.json)? {
-            let vv = old_views.next().unwrap_or(CardView::new(
-                C::res(),
-                pri.name(),
-                View::Compact,
-            ));
-            let view = if vv.view.is_expanded() {
-                vv.view
-            } else if self.search.is_match(&pri, &anc) {
-                View::Compact
-            } else {
-                View::Hidden
-            };
-            let cv = CardView::new(C::res(), pri.name(), view);
-            if vv != cv {
-                changes.push(cv.clone());
-            }
-            views.push(cv);
-        }
-        drop(old_views);
-        self.views = views;
-        Ok(changes)
+        self.search_card_views::<C>(search, &anc).await?;
+        Ok(self.views.clone())
     }
 
-    /// Get a Vec of changed cards
-    pub async fn changed_vec(
-        &self,
-        json: String,
+    /// Get HTML of changed cards
+    pub async fn changed_html(
+        &mut self,
+        search: &str,
     ) -> Result<Vec<(CardView, String)>> {
-        cards_meth!(self, changed_vec_x, json)
+        cards_meth!(self, changed_html_x, search)
     }
 
-    /// Make a Vec of changed cards
-    async fn changed_vec_x<C: Card>(
-        &self,
-        old_json: String,
+    /// Get HTML of changed cards
+    async fn changed_html_x<C: Card>(
+        &mut self,
+        search: &str,
     ) -> Result<Vec<(CardView, String)>> {
-        let cards0 = serde_json::from_str::<Vec<C>>(&old_json)?.into_iter();
-        let cards1 = serde_json::from_str::<Vec<C>>(&self.json)?;
         // Use default value for ancillary data lookup
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
+        self.search_card_views::<C>(search, &anc).await?;
+        let cards0 = self.cards::<C>(true)?.into_iter();
+        let cards1 = self.cards::<C>(false)?;
         let mut values = Vec::new();
         let mut views = self.views.iter();
         // skip "Create" card view
         let _cv = views.next();
         for (c0, c1) in cards0.zip(&cards1) {
-            let cv = views.next();
             if c0.name() != c1.name() {
                 return Err(Error::CardMismatch());
             }
+            let Some(cv) = views.next() else {
+                return Err(Error::CardMismatch());
+            };
             if c0 != *c1 {
-                let cv = match cv {
-                    Some(cv) => cv.clone(),
-                    None => CardView::new(C::res(), c1.name(), View::Compact),
-                };
-                if cv.view.is_expanded() {
-                    // FIXME: this messes up current message selection
-                    //
-                    // let html = fetch_one(&cv).await?;
-                    // values.push((cv, html));
-                } else {
-                    let html = c1.to_html(cv.view, &anc);
-                    values.push((cv, html));
-                }
+                let cv = cv.clone();
+                let html = c1.to_html(cv.view, &anc);
+                values.push((cv, html));
             }
         }
         Ok(values)
