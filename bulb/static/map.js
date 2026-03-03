@@ -391,12 +391,12 @@ function dispatch_tms_event(fid) {
         cancelable: true,
         composed: false,
     });
-    document.querySelector('#mapid').dispatchEvent(ev);
+    document.querySelector('#map_pane').dispatchEvent(ev);
 }
 
 // Initialize leaflet map
 function init_map() {
-    map = L.map('mapid', {
+    map = L.map('map_pane', {
         center: [45, -93],
         zoom: 12,
         zoomControl: false,

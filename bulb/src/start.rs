@@ -118,8 +118,8 @@ async fn add_sidebar() -> JsResult<()> {
     add_input_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    let mapid: HtmlElement = doc.elem("mapid");
-    add_map_click_listener(&mapid)?;
+    let map_pane: HtmlElement = doc.elem("map_pane");
+    add_map_click_listener(&map_pane)?;
     sse::add_listener();
     do_future(finish_init()).await;
     fetch_station_sample();
