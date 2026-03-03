@@ -431,14 +431,6 @@ impl CardList {
         Ok(cards)
     }
 
-    /// Get selected name
-    pub fn selected_name(&self) -> String {
-        match self.expanded_view() {
-            Some(cv) => cv.name,
-            None => String::new(),
-        }
-    }
-
     /// Get expanded view (if any)
     pub fn expanded_view(&self) -> Option<CardView> {
         self.views.iter().find(|cv| cv.view.is_expanded()).cloned()
@@ -506,7 +498,7 @@ impl CardList {
         let cv = CardView::new(res, Self::next_name(&cards), view);
         views.push(cv);
         for pri in &cards {
-            let view = if search.is_match(pri, &anc) {
+            let view = if search.is_match(pri, anc) {
                 View::Compact
             } else {
                 View::Hidden

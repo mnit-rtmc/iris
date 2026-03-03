@@ -639,6 +639,10 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     }
     let cv = CardView::new(res, &name, view);
     replace_card(cv).await?;
+    js_set_selected(
+        &JsValue::from_str(res.as_str()),
+        &JsValue::from_str(&name),
+    );
     Ok(())
 }
 
@@ -851,7 +855,6 @@ async fn do_handle_notification(
 /// Update `sb_list` with changed result
 async fn update_card_list(res: Res) -> Result<()> {
     let Some(old_cards) = app::card_list(None) else {
-        log::warn!("update_card_list: None");
         return Ok(());
     };
     if old_cards.res() != res {
@@ -877,10 +880,6 @@ async fn update_card_list(res: Res) -> Result<()> {
         }
     }
     update_map_states(&cards).await?;
-    js_set_selected(
-        &JsValue::from_str(res.as_str()),
-        &JsValue::from_str(&cards.selected_name()),
-    );
     if let Some(cv) = expanded {
         cards.set_view(cv);
     }

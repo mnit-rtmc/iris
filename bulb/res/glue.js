@@ -2,6 +2,9 @@
 export function js_set_selected(res, name) {
   selected_resource = res;
   selected_name = name;
+  if (!name) {
+    select_tms_feature(null, res, name);
+  }
   tms_layers.redraw();
 }
 
