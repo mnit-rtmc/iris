@@ -301,17 +301,23 @@ label:has(+ #sb_resource) {
 .item_available {
   background-color: #004;
 }
-.item_incident {
-  background-color: #600;
+.item_dark {
+  background-color: #002;
+}
+.item_operator {
+  background-color: #440;
 }
 .item_deployed {
-  background-color: #440;
+  background-color: #530;
 }
 .item_planned {
   background-color: #044;
 }
 .item_external {
   background-color: #040;
+}
+.item_incident {
+  background-color: #600;
 }
 .item_dedicated {
   background-color: #404;

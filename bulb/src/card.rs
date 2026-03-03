@@ -270,7 +270,9 @@ pub fn item_states_html(res: Res) -> String {
 
 /// Get the default item state for a resource
 fn default_state(res: Res) -> Option<ItemState> {
-    if item_states_all(res).contains(&ItemState::Deployed) {
+    if item_states_all(res).contains(&ItemState::Operator) {
+        Some(ItemState::Operator)
+    } else if item_states_all(res).contains(&ItemState::Deployed) {
         Some(ItemState::Deployed)
     } else if item_states_all(res).contains(&ItemState::Available) {
         Some(ItemState::Available)

@@ -1263,7 +1263,7 @@ impl Card for Dms {
     fn item_states_all() -> &'static [ItemState] {
         &[
             ItemState::Available,
-            ItemState::Deployed,
+            ItemState::Operator,
             ItemState::Planned,
             ItemState::Incident,
             ItemState::External,
@@ -1294,8 +1294,8 @@ impl Card for Dms {
             ItemState::Dedicated
         } else if states.contains(ItemState::Offline) {
             ItemState::Offline
-        } else if states.contains(ItemState::Deployed) {
-            ItemState::Deployed
+        } else if states.contains(ItemState::Operator) {
+            ItemState::Operator
         } else if states.contains(ItemState::Planned) {
             ItemState::Planned
         } else if states.contains(ItemState::External) {

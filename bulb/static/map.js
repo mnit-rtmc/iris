@@ -278,8 +278,14 @@ function item_style(state, visible) {
         case '🚨':
             style.fillColor = "#55acee";
             return style;
+        case '◼️':
+            style.fillColor = "#000088";
+            return style;
         case '🔶':
-            style.fillColor = "#e8900b";
+            style.fillColor = "#ff9800";
+            return style;
+        case '🟨':
+            style.fillColor = "#ffff00";
             return style;
         case '💥':
             style.fillColor = "#ff8080";
