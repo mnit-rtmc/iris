@@ -226,9 +226,9 @@ fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
 /// Add a "change" event listener to an element
 fn add_change_listener(elem: &Element) -> JsResult<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        let id = target.id();
-        if id.as_str() == "sb_fullscreen" {
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>())
+            && target.id().as_str() == "sb_fullscreen"
+        {
             set_fullscreen();
         }
     });
@@ -420,19 +420,8 @@ fn search_value() -> String {
 /// Add an "input" event listener to an element
 fn add_input_listener(elem: &Element) -> JsResult<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        let id = target.id();
-        match id.as_str() {
-            "res_dms" | "res_msg_pattern" | "res_sign_config" | "res_word"
-            | "res_lcs" | "res_lcs_state" | "res_video_monitor"
-            | "res_monitor_style" | "res_flow_stream" | "res_controller"
-            | "res_comm_link" | "res_alarm" | "res_gps" | "res_modem"
-            | "res_system_attr" | "res_comm_config" | "res_cabinet_style"
-            | "res_permission" | "res_user" | "res_role" | "res_domain"
-            | "sb_resource" => handle_res_change(),
-            "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
-            "ob_view" => handle_ob_view_ev(),
-            _ => spawn_local(do_future(handle_input(id))),
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
+            handle_input(target.id());
         }
     });
     elem.add_event_listener_with_callback(
@@ -442,6 +431,22 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
+}
+
+/// Handle an input event
+fn handle_input(id: String) {
+    match id.as_str() {
+        "res_dms" | "res_msg_pattern" | "res_sign_config" | "res_word"
+        | "res_lcs" | "res_lcs_state" | "res_video_monitor"
+        | "res_monitor_style" | "res_flow_stream" | "res_controller"
+        | "res_comm_link" | "res_alarm" | "res_gps" | "res_modem"
+        | "res_system_attr" | "res_comm_config" | "res_cabinet_style"
+        | "res_permission" | "res_user" | "res_role" | "res_domain"
+        | "sb_resource" => handle_res_change(),
+        "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
+        "ob_view" => handle_ob_view_ev(),
+        _ => spawn_local(do_future(handle_input_other(id))),
+    }
 }
 
 /// Handle resource change
@@ -491,7 +496,7 @@ fn ob_view_value() -> Option<View> {
 }
 
 /// Handle an input event on an expanded card
-async fn handle_input(id: String) -> Result<()> {
+async fn handle_input_other(id: String) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
         cv.handle_input(id).await?;
     }
@@ -535,7 +540,7 @@ async fn handle_focus_events(
                     && let Some(ms) = input.get_attribute("data-cur")
                 {
                     input.set_value(&ms);
-                    handle_input(id).await?;
+                    handle_input_other(id).await?;
                 }
             }
             _ => (),
@@ -547,11 +552,12 @@ async fn handle_focus_events(
 /// Add a `click` event listener to an element
 fn add_click_listener(elem: &Element) -> JsResult<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        if target.is_instance_of::<HtmlButtonElement>() {
-            handle_button_click_ev(&target);
-        } else if let Ok(Some(cc)) = target.closest(".card-compact") {
-            handle_card_click_ev(&cc);
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
+            if target.is_instance_of::<HtmlButtonElement>() {
+                handle_button_click_ev(&target);
+            } else if let Ok(Some(cc)) = target.closest(".card-compact") {
+                handle_card_click_ev(&cc);
+            }
         }
     });
     elem.add_event_listener_with_callback(
@@ -585,6 +591,13 @@ fn handle_button_click_ev(target: &Element) {
 
 /// Handle a show/hide sidebar button click
 async fn handle_show_sidebar(show: bool) {
+    let doc = Doc::get();
+    if let Some(btn) = doc.try_elem::<HtmlButtonElement>("show_sidebar") {
+        btn.set_disabled(show);
+    }
+    if let Some(btn) = doc.try_elem::<HtmlButtonElement>("hide_sidebar") {
+        btn.set_disabled(!show);
+    }
     if show {
         show_elem("sidebar");
     } else {
