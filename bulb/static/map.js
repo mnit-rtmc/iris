@@ -145,7 +145,7 @@ function tms_styles() {
     let camera_style = tms_style("camera", 13);
     let dms_style = tms_style("dms", 12);
     let incident_style = tms_style("incident", 14);
-    let lcs_style = tms_style("lcs", 16);
+    let lcs_style = tms_style("lcs", 15);
     let meter_style = tms_style("ramp_meter", 15);
     let weather_style = tms_style("weather_sensor", 16);
     return {

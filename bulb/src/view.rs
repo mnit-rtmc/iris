@@ -294,6 +294,7 @@ impl CardView {
             Res::Beacon => self.handle_click_x::<Beacon>(id).await,
             Res::Camera => self.handle_click_x::<Camera>(id).await,
             Res::Dms => self.handle_click_x::<Dms>(id).await,
+            Res::Lcs => self.handle_click_x::<Lcs>(id).await,
             Res::RampMeter => self.handle_click_x::<RampMeter>(id).await,
             _ => Ok(()),
         }

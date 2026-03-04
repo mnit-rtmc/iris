@@ -462,7 +462,9 @@ impl Lcs {
                 .with(ItemState::Operator, "operator")
                 .with(ItemState::Locked, reason.as_str()),
             (false, LockReason::Unlocked) => ItemState::Dark.into(),
-            (false, _) => states.with(ItemState::Locked, reason.as_str()),
+            (false, _) => states
+                .with(ItemState::Dark, "dark")
+                .with(ItemState::Locked, reason.as_str()),
         }
     }
 
