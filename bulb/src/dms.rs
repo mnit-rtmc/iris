@@ -413,8 +413,8 @@ impl DmsAnc {
             let mc_choice = format!("mc_choice{ln}");
             // NOTE: these labels are a workaround for a Firefox 147 bug:
             //       if "Save and autofill addresses" is enabled,
-            //       setting onfocus on a second consecutive input !?!
-            //       triggers autocomplete with saved street addresses
+            //       having a second consecutive input !?! triggers
+            //       autocomplete with saved street addresses
             div.label().hidden("hidden").close();
             let mut input = div.input();
             if rn != rect_num {
@@ -425,7 +425,7 @@ impl DmsAnc {
                 .id(mc_line)
                 .value(cur_line)
                 .list(&mc_choice)
-                .onfocus("this.value=''");
+                .data_("cur", cur_line);
             let mut datalist = div.datalist();
             datalist.id(mc_choice);
             if let Some(font) = dms.font_definition().font(font_num) {

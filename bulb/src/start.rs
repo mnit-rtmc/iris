@@ -112,6 +112,7 @@ async fn add_listeners() -> JsResult<()> {
     add_change_listener(&sidebar)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
+    add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
     let map_pane: HtmlElement = doc.elem("map_pane");
@@ -493,6 +494,52 @@ fn ob_view_value() -> Option<View> {
 async fn handle_input(id: String) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
         cv.handle_input(id).await?;
+    }
+    Ok(())
+}
+
+/// Add "focusin" / "focusout" event listeners to an element
+fn add_focus_listener(elem: &Element) -> JsResult<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Some(Ok(input)) =
+            e.target().map(|e| e.dyn_into::<HtmlInputElement>())
+        {
+            spawn_local(do_future(handle_focus_events(input, e.type_())));
+        }
+    });
+    elem.add_event_listener_with_callback(
+        "focusin",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    elem.add_event_listener_with_callback(
+        "focusout",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Handle focusin / focusout events
+async fn handle_focus_events(
+    input: HtmlInputElement,
+    tp: String,
+) -> Result<()> {
+    let id = input.id();
+    // DMS message composer line input
+    if id.as_str().starts_with("mc_line") {
+        match tp.as_str() {
+            "focusin" => input.set_value(""),
+            "focusout" => {
+                if input.value().is_empty()
+                    && let Some(ms) = input.get_attribute("data-cur")
+                {
+                    input.set_value(&ms);
+                    handle_input(id).await?;
+                }
+            }
+            _ => (),
+        }
     }
     Ok(())
 }
