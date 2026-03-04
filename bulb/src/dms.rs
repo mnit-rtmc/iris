@@ -591,6 +591,16 @@ const DEDICATED: &[&str] = &[
 ];
 
 impl Dms {
+    /// Get multi of lock message
+    fn lock_multi(&self) -> &str {
+        if let Some(lock) = &self.lock
+            && let Some(multi) = &lock.multi
+        {
+            return multi;
+        }
+        ""
+    }
+
     /// Get multi of current message
     fn current_multi<'a>(&'a self, anc: &'a DmsAnc) -> &'a str {
         anc.sign_message(self.msg_current.as_deref())
@@ -785,12 +795,7 @@ impl Dms {
         }
         select.close();
         if let Some(pat) = pat_def {
-            anc.make_lines_html(
-                &dms,
-                pat,
-                self.current_multi(anc),
-                &mut div.div(),
-            );
+            anc.make_lines_html(&dms, pat, self.lock_multi(), &mut div.div());
         }
         make_expire_select(&mut div.select());
         div.button()

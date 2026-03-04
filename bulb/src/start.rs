@@ -65,16 +65,12 @@ fn show_login() {
 
 /// Show an element
 fn show_elem(id: &str) {
-    Doc::get()
-        .elem::<HtmlElement>(id)
-        .set_class_name("show");
+    Doc::get().elem::<HtmlElement>(id).set_class_name("show");
 }
 
 /// Hide an element
 fn hide_elem(id: &str) {
-    Doc::get()
-        .elem::<HtmlElement>(id)
-        .set_class_name("hidden");
+    Doc::get().elem::<HtmlElement>(id).set_class_name("hidden");
 }
 
 /// Show a toast message
