@@ -590,7 +590,7 @@ fn replace_card_html(cv: &CardView, html: &str) {
 async fn handle_delete(cv: CardView) -> Result<()> {
     if app::delete_enabled() {
         cv.delete_one().await?;
-        // FIXME: hide card view
+        replace_card(cv.view(View::Hidden)).await?;
     }
     Ok(())
 }
