@@ -426,9 +426,12 @@ impl DmsAnc {
                 .value(cur_line)
                 .list(&mc_choice)
                 .data_("cur", cur_line);
-            let mut datalist = div.datalist();
-            datalist.id(mc_choice);
             if let Some(font) = dms.font_definition().font(font_num) {
+                if ('a'..='z').any(|c| font.character(c).is_none()) {
+                    input.autocapitalize("characters");
+                }
+                let mut datalist = div.datalist();
+                datalist.id(mc_choice);
                 for ml in self.pat_lines(pat) {
                     if ml.line == ln
                         && let Some(ms) =
@@ -438,8 +441,8 @@ impl DmsAnc {
                         option.value(&ms).cdata(join_text(&ms, " ")).close();
                     }
                 }
+                datalist.close();
             }
-            datalist.close();
         }
         div.close();
     }
@@ -909,7 +912,17 @@ impl Dms {
             "mc_line{}",
             lines.len() + 1
         )) {
-            lines.push(line.value());
+            let mut val = line.value();
+            if let Some(autocapitalize) = line.get_attribute("autocapitalize")
+                && "characters" == autocapitalize
+            {
+                let v = val.to_uppercase();
+                if v != val {
+                    line.set_value(&v);
+                    val = v;
+                }
+            }
+            lines.push(val);
         }
         lines
     }
