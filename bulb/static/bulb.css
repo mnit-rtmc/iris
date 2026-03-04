@@ -148,18 +148,22 @@ th, td {
 }
 #map_pane {
   display: none;
-  width: 60%;
+  min-width: 58%;
+  flex: 1;
 }
 #divider {
   display: none;
   height: 100%;
-  width: 6px;
-  background: black;
-  opacity: 0.2;
+  max-width: min-content;
+  background-color: #566;
+}
+#divider * {
+  margin: 0;
+  padding: 0;
 }
 #sidebar {
-  min-width: 30%;
-  max-width: 50%;
+  overflow: hidden;
+  width: 40%;
   display: flex;
   flex-direction: column;
   user-select: none;
@@ -168,9 +172,11 @@ th, td {
   background-image: url(iris.svg);
   background-repeat: no-repeat;
   background-position: center;
-  resize: horizontal;
-  overflow: hidden;
 }
+#sidebar.hidden {
+  max-width: 0;
+}
+
 .sb_row {
   flex: 0 1;
   display: flex;

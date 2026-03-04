@@ -60,16 +60,21 @@ struct ButtonAttrs {
 /// Show login form shade
 fn show_login() {
     app::set_user(None);
+    show_elem("sb_login");
+}
+
+/// Show an element
+fn show_elem(id: &str) {
     Doc::get()
-        .elem::<HtmlElement>("sb_login")
+        .elem::<HtmlElement>(id)
         .set_class_name("show");
 }
 
-/// Hide login form shade
-fn hide_login() {
+/// Hide an element
+fn hide_elem(id: &str) {
     Doc::get()
-        .elem::<HtmlElement>("sb_login")
-        .set_class_name("");
+        .elem::<HtmlElement>(id)
+        .set_class_name("hidden");
 }
 
 /// Show a toast message
@@ -79,13 +84,6 @@ fn show_toast(msg: &str) {
     t.set_inner_html(msg);
     t.set_class_name("show");
     app::defer_action(DeferredAction::HideToast, 3000);
-}
-
-/// Hide toast
-fn hide_toast() {
-    Doc::get()
-        .elem::<HtmlElement>("sb_toast")
-        .set_class_name("");
 }
 
 /// Fly map to specified item
@@ -103,15 +101,17 @@ pub async fn start() -> core::result::Result<(), JsError> {
     console_error_panic_hook::set_once();
     wasm_log::init(wasm_log::Config::default().module_prefix("bulb"));
     log::info!("Started");
-    add_sidebar().await.unwrap_throw();
+    add_listeners().await.unwrap_throw();
     Ok(())
 }
 
-/// Add sidebar HTML and event listeners
-async fn add_sidebar() -> JsResult<()> {
+/// Add event listeners
+async fn add_listeners() -> JsResult<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
+    let divider: HtmlElement = doc.elem("divider");
+    add_click_listener(&divider)?;
     let sidebar: HtmlElement = doc.elem("sidebar");
     add_change_listener(&sidebar)?;
     add_click_listener(&sidebar)?;
@@ -526,6 +526,8 @@ fn handle_button_click_ev(target: &Element) {
     match id.as_str() {
         "ob_login" => spawn_local(handle_login()),
         "sb_refresh" => spawn_local(handle_refresh()),
+        "show_sidebar" => spawn_local(handle_show_sidebar(true)),
+        "hide_sidebar" => spawn_local(handle_show_sidebar(false)),
         _ => {
             let attrs = ButtonAttrs {
                 id,
@@ -535,6 +537,15 @@ fn handle_button_click_ev(target: &Element) {
             };
             spawn_local(handle_button_card(attrs));
         }
+    }
+}
+
+/// Handle a show/hide sidebar button click
+async fn handle_show_sidebar(show: bool) {
+    if show {
+        show_elem("sidebar");
+    } else {
+        hide_elem("sidebar");
     }
 }
 
@@ -661,7 +672,7 @@ async fn handle_login() {
             Ok(_) => {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");
-                hide_login();
+                hide_elem("sb_login");
                 do_future(finish_init()).await;
             }
             Err(e) => show_toast(&format!("Login failed: {e}")),
@@ -763,7 +774,7 @@ fn tick_interval() {
     while let Some(action) = app::next_action() {
         match action {
             DeferredAction::FetchStationData => fetch_station_sample(),
-            DeferredAction::HideToast => hide_toast(),
+            DeferredAction::HideToast => hide_elem("sb_toast"),
             DeferredAction::RefreshList => spawn_local(handle_refresh()),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),

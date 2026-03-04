@@ -27,6 +27,11 @@
   </head>
   <body>
     <div class="root">
+      <div id="map_pane"></div>
+      <div id="divider">
+          <button id="hide_sidebar" type="button">🞂</button>
+          <button id="show_sidebar" type="button">🞀</button>
+      </div>
       <div id="sidebar">
         <div class="sb_row">
           <label for="sb_resource">Resource</label>
@@ -113,8 +118,8 @@
           <button id="sb_refresh" type="button">⭮ ⚪</button>
         </div>
         <div id="sb_list"></div>
-        <div id="sb_toast"></div>
-        <div id="sb_login" class="hide">
+        <div id="sb_toast" class="hidden"></div>
+        <div id="sb_login" class="hidden">
           <div class="form">
             <div class="row center">
               <img src="bulb/iris.svg">
@@ -137,8 +142,6 @@
           <div id="sb_shade"></div>
         </div>
       </div>
-      <div id="divider"></div>
-      <div id="map_pane"></div>
     </div>
   </body>
 </html>
