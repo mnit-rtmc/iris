@@ -152,7 +152,7 @@ impl VideoMonitor {
     fn set_selected(&self) {
         app::set_mon_num(Some(self.mon_num));
         let mon_num = match app::mon_num() {
-            Some(num) => format!("📺 #{num} "),
+            Some(num) => format!("📺 #{num}"),
             None => "📺".to_string(),
         };
         let t = Doc::get().elem::<HtmlElement>("sb_monitor");

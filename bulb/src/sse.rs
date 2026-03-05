@@ -14,7 +14,6 @@ use crate::app::{self, DeferredAction};
 use crate::fetch::Uri;
 use crate::start::handle_notification;
 use crate::util::Doc;
-use hatmil::{Page, html};
 use js_sys::JsString;
 use resources::Res;
 use std::cell::RefCell;
@@ -33,8 +32,8 @@ pub enum NotifyState {
     Connecting,
     /// Updating after event receipt
     Updating,
-    /// Good / connected
-    Good,
+    /// Connected to SSE server
+    Connected,
 }
 
 impl NotifyState {
@@ -45,29 +44,8 @@ impl NotifyState {
             Self::Disconnected => "⚫",
             Self::Connecting => "🟠",
             Self::Updating => "🟡",
-            Self::Good => "🟢",
+            Self::Connected => "🟢",
         }
-    }
-
-    /// Get description of a state
-    pub const fn description(self) -> &'static str {
-        match self {
-            Self::Starting => "Starting",
-            Self::Disconnected => "Disconnected",
-            Self::Connecting => "Connecting",
-            Self::Updating => "Updating",
-            Self::Good => "Good",
-        }
-    }
-
-    /// Build state HTML
-    pub fn build_html(self) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
-        div.class("tooltip").cdata(self.symbol());
-        div.span().class("right").cdata(self.description()).close();
-        div.cdata(" ");
-        String::from(page)
     }
 }
 
@@ -178,7 +156,7 @@ fn build_list(res: Option<Res>) -> String {
 /// Set refresh button text
 pub fn set_notify_state(ns: NotifyState) {
     let sb_notify = Doc::get().elem::<HtmlElement>("sb_notify");
-    sb_notify.set_inner_html(&ns.build_html());
+    sb_notify.set_inner_html(&ns.symbol());
     if NotifyState::Disconnected == ns {
         app::defer_action(DeferredAction::MakeEventSource, 5000);
     }
@@ -194,5 +172,8 @@ fn handle_notify(payload: JsString) {
         let name = chan.find('$').map(|i| chan.split_off(i));
         handle_notification(chan, name);
     }
-    app::defer_action(DeferredAction::SetNotifyState(NotifyState::Good), 600);
+    app::defer_action(
+        DeferredAction::SetNotifyState(NotifyState::Connected),
+        600,
+    );
 }

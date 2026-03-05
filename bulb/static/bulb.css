@@ -122,7 +122,7 @@ th, td {
   border: 1px solid #888;
   border-radius: 0.2rem;
   padding: 0.3rem;
-  text-indent: 0;
+  text-indent: unset;
   color: black;
   cursor: pointer;
 }
@@ -203,9 +203,12 @@ label:has(+ #sb_resource) {
   margin-left: 0.1rem;
 }
 .sb_label {
+  text-indent: unset;
   color: black;
   background-color: #888;
   align-content: center;
+  margin: 0.1rem;
+  padding: 0.2rem;
   border-radius: 0.5rem;
 }
 #sb_search {
@@ -603,7 +606,7 @@ label:has(+ #sb_resource) {
 .signal-housing {
   align-self: start;
   background-color: black;
-  text-indent: 0;
+  text-indent: unset;
   padding: 0.2rem 0.2rem 0 0.2rem;
   border-radius: 0.2rem;
   border: 1px solid black;
