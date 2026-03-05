@@ -384,6 +384,7 @@ impl Res {
                 | Controller
                 | Dms
                 | GateArm
+                | Lcs
                 | RampMeter
                 | TagReader
                 | WeatherSensor

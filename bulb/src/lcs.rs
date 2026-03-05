@@ -625,6 +625,11 @@ impl Card for Lcs {
         fields.into_value().to_string()
     }
 
+    /// Get changed fields on Location view
+    fn changed_location(&self, anc: LcsAnc) -> String {
+        anc.loc.changed_location()
+    }
+
     /// Handle click event for a button on the card
     fn handle_click(&self, _anc: LcsAnc, id: String) -> Vec<Action> {
         match id.as_str() {
