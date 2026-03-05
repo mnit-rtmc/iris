@@ -164,13 +164,14 @@ dependencies = [
 
 [[package]]
 name = "axum-extra"
-version = "0.10.3"
+version = "0.12.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9963ff19f40c6102c76756ef0a46004c0d58957d87259fc9208ff8441c12ab96"
+checksum = "fef252edff26ddba56bbcdf2ee3307b8129acb86f5749b68990c168a6fcc9c76"
 dependencies = [
  "axum",
  "axum-core",
  "bytes",
+ "futures-core",
  "futures-util",
  "headers",
  "http",
@@ -178,8 +179,6 @@ dependencies = [
  "http-body-util",
  "mime",
  "pin-project-lite",
- "rustversion",
- "serde_core",
  "tower-layer",
  "tower-service",
  "tracing",
@@ -1070,9 +1069,9 @@ dependencies = [
 
 [[package]]
 name = "loam"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "069617d81d5c3efe0f8f73bdbb43144f62fcfcc537cb230101223a1270b33c3c"
+checksum = "2940dd0f7de9a0efadbe80c330a64001ff3bc1ddab4d18c7ab4d2a0dae4dfd1d"
 dependencies = [
  "bincode",
  "memmap2",
@@ -1616,9 +1615,9 @@ dependencies = [
 
 [[package]]
 name = "rosewood"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34e0dfd391e8ac27e6f1fa2171fe39cf789cf408e70d7cdf434c6326cdcef138"
+checksum = "c86d60f6cc9bd937fc068209af4c99356b8292267723be956362bb9076784343"
 dependencies = [
  "loam",
  "log",
