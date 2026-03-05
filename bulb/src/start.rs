@@ -695,7 +695,7 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
         replace_card(cv.compact()).await?;
     }
-    // FIXME: check if id are the same for old/new cards
+    // Expand to the second view (1) for this resource
     let mut view = *card::res_views(res).get(1).unwrap_or(&View::Compact);
     if id.ends_with('_') {
         view = View::Create;
