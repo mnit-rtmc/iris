@@ -202,7 +202,7 @@ label:has(+ #sb_resource) {
 #sb_resource {
   margin-left: 0.1rem;
 }
-#sb_monitor {
+.sb_label {
   color: black;
   background-color: #888;
   align-content: center;

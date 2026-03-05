@@ -117,7 +117,6 @@ async fn add_listeners() -> JsResult<()> {
     add_interval_callback(&window)?;
     let map_pane: HtmlElement = doc.elem("map_pane");
     add_map_click_listener(&map_pane)?;
-    sse::add_listener();
     do_future(finish_init()).await;
     fetch_station_sample();
     if let Some(doc_elem) = doc.doc_elem() {
@@ -128,6 +127,7 @@ async fn add_listeners() -> JsResult<()> {
 
 /// Finish initialization
 async fn finish_init() -> Result<()> {
+    app::defer_action(DeferredAction::MakeEventSource, 1000);
     let user = Uri::from("/iris/api/login").get().await?;
     match user.as_string() {
         Some(user) => {
@@ -574,7 +574,6 @@ fn handle_button_click_ev(target: &Element) {
     let id = target.id();
     match id.as_str() {
         "ob_login" => spawn_local(handle_login()),
-        "sb_refresh" => spawn_local(handle_refresh()),
         "show_sidebar" => spawn_local(handle_show_sidebar(true)),
         "hide_sidebar" => spawn_local(handle_show_sidebar(false)),
         _ => {

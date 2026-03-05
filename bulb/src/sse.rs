@@ -20,15 +20,20 @@ use resources::Res;
 use std::cell::RefCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
-use web_sys::{Event, EventSource, HtmlButtonElement, MessageEvent};
+use web_sys::{Event, EventSource, HtmlElement, MessageEvent};
 
 /// Notification button state
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum NotifyState {
+    /// Initial starting state
     Starting,
+    /// Disconnected from SSE server
     Disconnected,
+    /// Connecting to SSE server
     Connecting,
+    /// Updating after event receipt
     Updating,
+    /// Good / connected
     Good,
 }
 
@@ -57,73 +62,87 @@ impl NotifyState {
 
     /// Build state HTML
     pub fn build_html(self) -> String {
-        // NOTE: these have &nbsp; to keep from splitting lines
         let mut page = Page::new();
         let mut div = page.frag::<html::Div>();
-        div.class("tooltip").cdata("⭮ ").cdata(self.symbol());
-        div.span().class("right").cdata(self.description());
+        div.class("tooltip").cdata(self.symbol());
+        div.span().class("right").cdata(self.description()).close();
+        div.cdata(" ");
         String::from(page)
-    }
-
-    /// Get button disabled value for a state
-    pub const fn disabled(self) -> bool {
-        match self {
-            Self::Updating | Self::Good => true,
-            _ => false,
-        }
     }
 }
 
-/// SSE event callbacks
-struct Callbacks {
+/// SSE event listener
+///
+/// Closures stored here to prevent untimely dropping
+#[allow(unused)]
+struct Listener {
+    /// EventSource
+    source: EventSource,
+    /// EventSource onopen callback
     onopen: Closure<dyn Fn(Event)>,
+    /// EventSource onerror callback
     onerror: Closure<dyn Fn(Event)>,
+    /// EventSource onmessage callback
     onmessage: Closure<dyn Fn(MessageEvent)>,
 }
 
-impl Callbacks {
-    /// Create SSE callbacks
-    fn new() -> Self {
-        let onopen = Closure::new(|_e: Event| {
+impl Listener {
+    /// Create SSE listener
+    fn new(path: &str) -> Option<Self> {
+        let source = match EventSource::new(path) {
+            Ok(es) => {
+                log::info!("SSE EventSource: {path}");
+                es
+            }
+            Err(e) => {
+                log::warn!("SSE /iris/api/notify: {e:?}");
+                set_notify_state(NotifyState::Starting);
+                return None;
+            }
+        };
+        let onopen = Closure::new(|e: Event| {
+            log::info!("SSE event: {}", e.type_());
             set_notify_state(NotifyState::Connecting);
         });
-        let onerror = Closure::new(|_e: Event| {
+        let onerror = Closure::new(|e: Event| {
+            log::error!("SSE event: {}", e.type_());
             set_notify_state(NotifyState::Disconnected);
         });
         let onmessage = Closure::new(|e: MessageEvent| {
             match e.data().dyn_into::<JsString>() {
                 Ok(payload) => handle_notify(payload),
-                Err(err) => handle_err(err),
+                Err(err) => {
+                    log::warn!("SSE payload: {err:?}");
+                    set_notify_state(NotifyState::Disconnected);
+                }
             }
         });
-        Callbacks {
+        source.set_onopen(Some(onopen.as_ref().unchecked_ref()));
+        source.set_onerror(Some(onerror.as_ref().unchecked_ref()));
+        source.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
+        Some(Listener {
+            source,
             onopen,
             onerror,
             onmessage,
-        }
+        })
     }
 }
 
 thread_local! {
-    static CALLBACKS: RefCell<Callbacks> = RefCell::new(Callbacks::new());
+    /// Static listener to prevent dropping
+    static LISTENER: RefCell<Option<Listener>> = const { RefCell::new(None) };
 }
 
 /// Add SSE event source listener for notifications
 pub fn add_listener() {
-    let es = match EventSource::new("/iris/api/notify") {
-        Ok(es) => es,
-        Err(e) => {
-            set_notify_state(NotifyState::Starting);
-            log::warn!("SSE /iris/api/notify: {e:?}");
-            app::defer_action(DeferredAction::MakeEventSource, 5000);
-            return;
+    LISTENER.with(|rc| {
+        let mut listener = rc.borrow_mut();
+        if let Some(ref listener) = *listener {
+            log::info!("SSE closing EventSource");
+            listener.source.close();
         }
-    };
-    CALLBACKS.with(|rc| {
-        let callbacks = rc.borrow();
-        es.set_onopen(Some(callbacks.onopen.as_ref().unchecked_ref()));
-        es.set_onerror(Some(callbacks.onerror.as_ref().unchecked_ref()));
-        es.set_onmessage(Some(callbacks.onmessage.as_ref().unchecked_ref()));
+        *listener = Listener::new("/iris/api/notify");
     });
 }
 
@@ -158,22 +177,22 @@ fn build_list(res: Option<Res>) -> String {
 
 /// Set refresh button text
 pub fn set_notify_state(ns: NotifyState) {
-    let sb_refresh = Doc::get().elem::<HtmlButtonElement>("sb_refresh");
-    sb_refresh.set_inner_html(&ns.build_html());
-    sb_refresh.set_disabled(ns.disabled());
+    let sb_notify = Doc::get().elem::<HtmlElement>("sb_notify");
+    sb_notify.set_inner_html(&ns.build_html());
+    if NotifyState::Disconnected == ns {
+        app::defer_action(DeferredAction::MakeEventSource, 5000);
+    }
 }
 
 /// Handle SSE notify from server
 fn handle_notify(payload: JsString) {
     set_notify_state(NotifyState::Updating);
+    let data = String::from(payload);
+    for chan in data.split('\n') {
+        log::debug!("SSE message: {chan}");
+        let mut chan = chan.to_string();
+        let name = chan.find('$').map(|i| chan.split_off(i));
+        handle_notification(chan, name);
+    }
     app::defer_action(DeferredAction::SetNotifyState(NotifyState::Good), 600);
-    let mut chan: String = payload.into();
-    let name = chan.find('$').map(|i| chan.split_off(i));
-    handle_notification(chan, name);
-}
-
-/// Handle SSE notify error
-fn handle_err(err: JsValue) {
-    log::warn!("SSE payload: {err:?}");
-    set_notify_state(NotifyState::Disconnected);
 }
