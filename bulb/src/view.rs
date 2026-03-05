@@ -15,7 +15,7 @@ use crate::alarm::Alarm;
 use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
 use crate::camera::Camera;
-use crate::card::{Card, fetch_ancillary, uri_all, uri_one};
+use crate::card::{Card, Search, fetch_ancillary, uri_all, uri_one};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
@@ -188,7 +188,7 @@ impl CardView {
     }
 
     /// Fetch a card for a given view
-    pub async fn fetch_one(&self) -> Result<String> {
+    pub async fn fetch_one(&mut self, search: &str) -> Result<String> {
         let html = match self.view {
             View::CreateCompact => {
                 let mut page = Page::new();
@@ -197,27 +197,30 @@ impl CardView {
                 String::from(page)
             }
             View::Create => {
-                let html = self.fetch_one_res().await?;
+                let html = self.fetch_one_res(search).await?;
                 html_card_create(self.res, &html)
             }
-            _ => self.fetch_one_res().await?,
+            _ => self.fetch_one_res(search).await?,
         };
         Ok(html)
     }
 
     /// Fetch a card view
-    async fn fetch_one_res(&self) -> Result<String> {
-        cards_meth!(self, fetch_one_x)
+    async fn fetch_one_res(&mut self, search: &str) -> Result<String> {
+        cards_meth!(self, fetch_one_x, search)
     }
 
     /// Fetch a card view
-    async fn fetch_one_x<C: Card>(&self) -> Result<String> {
+    async fn fetch_one_x<C: Card>(&mut self, search: &str) -> Result<String> {
         let pri = if self.view == View::Create {
             C::default().with_name(&self.name)
         } else {
             self.fetch_primary::<C>().await?
         };
         let anc = fetch_ancillary(&pri, self.view).await?;
+        if !search.is_empty() && !Search::new(search).is_match(&pri, &anc) {
+            self.view = View::Hidden;
+        }
         Ok(pri.to_html(self.view, &anc))
     }
 

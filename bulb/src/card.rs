@@ -67,7 +67,7 @@ pub struct CardState {
 
 /// Search term
 #[derive(Clone)]
-enum Search {
+pub enum Search {
     /// Empty search (matches anything)
     Empty(),
     /// Normal search
@@ -78,7 +78,7 @@ enum Search {
 
 impl Search {
     /// Create a new search term
-    fn new(se: &str) -> Self {
+    pub fn new(se: &str) -> Self {
         let se = se.to_lowercase();
         if se.is_empty() {
             Search::Empty()
@@ -98,7 +98,7 @@ impl Search {
     }
 
     /// Test if a card matches the search
-    fn is_match<C: Card>(&self, pri: &C, anc: &C::Ancillary) -> bool {
+    pub fn is_match<C: Card>(&self, pri: &C, anc: &C::Ancillary) -> bool {
         match self {
             Search::Empty() => true,
             Search::Normal(se) => se.split(' ').all(|s| pri.is_match(s, anc)),

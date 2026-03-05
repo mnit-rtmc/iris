@@ -457,10 +457,10 @@ fn handle_res_change() {
 async fn handle_search() -> Result<()> {
     match app::card_list(None) {
         Some(mut cards) => {
-            if let Some(cv) = cards.expanded_view() {
-                replace_card(cv.compact()).await?
-            }
             let search = search_value();
+            if let Some(cv) = cards.expanded_view() {
+                replace_card(cv.compact(), &search).await?
+            }
             let doc = Doc::get();
             for cv in cards.search_views(&search).await? {
                 let id = cv.id();
@@ -480,7 +480,7 @@ fn handle_ob_view_ev() {
     if let Some(cv) = app::expanded_view()
         && let Some(view) = ob_view_value()
     {
-        spawn_local(do_future(replace_card(cv.view(view))));
+        spawn_local(do_future(replace_card(cv.view(view), "")));
     }
 }
 
@@ -619,8 +619,8 @@ async fn handle_button_card(attrs: ButtonAttrs) {
 }
 
 /// Replace a card view element with another view
-async fn replace_card(cv: CardView) -> Result<()> {
-    let html = cv.fetch_one().await?;
+async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
+    let html = cv.fetch_one(search).await?;
     replace_card_html(&cv, &html);
     app::set_view(cv);
     Ok(())
@@ -646,7 +646,7 @@ fn replace_card_html(cv: &CardView, html: &str) {
 async fn handle_delete(cv: CardView) -> Result<()> {
     if app::delete_enabled() {
         cv.delete_one().await?;
-        replace_card(cv.view(View::Hidden)).await?;
+        replace_card(cv.view(View::Hidden), "").await?;
     }
     Ok(())
 }
@@ -663,13 +663,13 @@ async fn handle_save(cv: CardView) -> Result<()> {
 /// Save a create view card
 async fn save_create(cv: CardView) -> Result<()> {
     cv.create_and_post().await?;
-    replace_card(cv.view(View::CreateCompact)).await
+    replace_card(cv.view(View::CreateCompact), "").await
 }
 
 /// Save changed values on Setup / Location card
 async fn save_changed(cv: CardView) -> Result<()> {
     cv.patch_changed().await?;
-    replace_card(cv.view(View::Compact)).await
+    replace_card(cv.view(View::Compact), "").await
 }
 
 /// Handle a button click on an expanded card
@@ -693,7 +693,8 @@ fn handle_card_click_ev(elem: &Element) {
 /// Handle a card click event
 async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
-        replace_card(cv.compact()).await?;
+        let search = search_value();
+        replace_card(cv.compact(), &search).await?;
     }
     // Expand to the second view (1) for this resource
     let mut view = *card::res_views(res).get(1).unwrap_or(&View::Compact);
@@ -701,7 +702,7 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
         view = View::Create;
     }
     let cv = CardView::new(res, &name, view);
-    replace_card(cv).await?;
+    replace_card(cv, "").await?;
     js_set_selected(
         &JsValue::from_str(res.as_str()),
         &JsValue::from_str(&name),
@@ -863,7 +864,8 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
 async fn select_card_map(name: String) -> Result<()> {
     if name.is_empty() {
         if let Some(cv) = app::expanded_view() {
-            replace_card(cv.compact()).await?;
+            let search = search_value();
+            replace_card(cv.compact(), &search).await?;
         }
         return Ok(());
     }
