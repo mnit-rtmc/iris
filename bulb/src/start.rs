@@ -127,17 +127,14 @@ async fn add_listeners() -> JsResult<()> {
 
 /// Finish initialization
 async fn finish_init() -> Result<()> {
-    app::defer_action(DeferredAction::MakeEventSource, 1000);
+    sse::add_listener();
     let user = Uri::from("/iris/api/login").get().await?;
     match user.as_string() {
         Some(user) => {
             app::set_user(Some(user));
-            if !app::initialized() {
-                update_sb_resource().await?;
-                set_resource(None, "").await;
-                sse::post_req(None).await;
-                app::set_initialized();
-            }
+            update_sb_resource().await?;
+            set_resource(None, "").await;
+            sse::post_req(None).await;
         }
         None => log::warn!("invalid user: {user:?}"),
     }
@@ -754,12 +751,6 @@ async fn set_resource(res: Option<Res>, search: &str) {
     handle_resource_change(res, search).await;
 }
 
-/// Handle refresh full card list
-async fn handle_refresh() {
-    let res = selected_resource();
-    do_future(fetch_and_populate_cards(res)).await;
-}
-
 /// Fetch and populate card list
 async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
     match res {
@@ -830,7 +821,7 @@ fn tick_interval() {
         match action {
             DeferredAction::FetchStationData => fetch_station_sample(),
             DeferredAction::HideToast => hide_elem("sb_toast"),
-            DeferredAction::RefreshList => spawn_local(handle_refresh()),
+            DeferredAction::RefreshList => handle_res_change(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
         }

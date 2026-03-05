@@ -38,8 +38,6 @@ pub enum DeferredAction {
 /// Global app state
 #[derive(Default)]
 struct AppState {
-    /// Have permissions been initialized?
-    initialized: bool,
     /// Delete action enabled (slider transition finished)
     delete_enabled: bool,
     /// Logged-in user name
@@ -58,16 +56,6 @@ struct AppState {
 
 thread_local! {
     static STATE: RefCell<AppState> = RefCell::new(AppState::default());
-}
-
-/// Set initialized app state
-pub fn set_initialized() {
-    STATE.with(|rc| rc.borrow_mut().initialized = true);
-}
-
-/// Get initialized app state
-pub fn initialized() -> bool {
-    STATE.with(|rc| rc.borrow().initialized)
 }
 
 /// Set card view to global app state
