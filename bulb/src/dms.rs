@@ -720,8 +720,20 @@ impl Dms {
         }
         let mut page = Page::new();
         self.title(View::Control, &mut page.frag::<html::Div>());
+        self.render_state_row(anc, &mut page.frag::<html::Div>());
+        self.render_current_msg(anc, &mut page.frag::<html::Div>());
         let mut div = page.frag::<html::Div>();
-        div.class("row fill");
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
+        self.message_composer_html(anc, &mut page.frag::<html::Div>());
+        self.action_plans_html(anc, &mut page.frag::<html::Details>());
+        String::from(page)
+    }
+
+    /// Render item state row as an HTML div element
+    fn render_state_row<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
+        div.id("state_row").class("row fill");
         self.item_states(anc).tooltips(&mut div.span());
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
@@ -729,14 +741,6 @@ impl Dms {
             div.span().cdata(expires);
         }
         div.close();
-        self.render_current_msg(anc, &mut page.frag::<html::Div>());
-        div = page.frag::<html::Div>();
-        div.class("info fill")
-            .cdata_len(opt_ref(&self.location), 64)
-            .close();
-        self.message_composer_html(anc, &mut page.frag::<html::Div>());
-        self.action_plans_html(anc, &mut page.frag::<html::Details>());
-        String::from(page)
     }
 
     /// Render current message as an HTML div element
@@ -1421,6 +1425,12 @@ impl Card for Dms {
 
     /// Handle updating a card in response to an SSE notification
     fn handle_update(&self, anc: DmsAnc) {
+        if let Some(state_row) = Doc::get().try_elem::<HtmlElement>("state_row")
+        {
+            let mut page = Page::new();
+            self.render_state_row(&anc, &mut page.frag::<html::Div>());
+            state_row.set_outer_html(&String::from(page));
+        }
         if let Some(sign_msg) = Doc::get().try_elem::<HtmlElement>("sign_msg") {
             let mut page = Page::new();
             self.render_current_msg(&anc, &mut page.frag::<html::Div>());
