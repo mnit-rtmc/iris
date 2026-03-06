@@ -544,6 +544,7 @@ impl CardList {
         }
         for (cv, pri) in views.zip(cards) {
             if cv.name != pri.name() {
+                log::warn!("card mismatch: {} != {}", cv.name, pri.name());
                 return Err(Error::CardMismatch());
             }
             let mut li = ul.li();
@@ -618,9 +619,11 @@ impl CardList {
         let _cv = views.next();
         for (c0, c1) in cards0.zip(&cards1) {
             if c0.name() != c1.name() {
+                log::warn!("card mismatch: {} != {}", c0.name(), c1.name());
                 return Err(Error::CardMismatch());
             }
             let Some(cv) = views.next() else {
+                log::warn!("view mismatch: {}", c0.name());
                 return Err(Error::CardMismatch());
             };
             if c0 != *c1 {

@@ -937,6 +937,7 @@ async fn update_card_list(res: Res) -> Result<()> {
             && cv.name == ev.name
         {
             // FIXME: is user editing the form?
+            log::info!("FIXME: replace expanded card");
         } else {
             replace_card_html(&cv, &html);
         }
