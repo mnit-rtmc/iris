@@ -634,14 +634,14 @@ pub async fn fetch_ancillary<C: Card>(
     let mut anc = C::Ancillary::new(pri, view);
     let mut futures = FuturesUnordered::new();
     while let Some(asset) = anc.asset() {
-        futures.push(asset.fetch());
+        futures.push(asset.try_fetch());
     }
     while let Some(res) = futures.next().await {
         if let Some((asset, value)) = res? {
             anc.set_asset(pri, asset, value)?;
             // check for more new assets
             while let Some(asset) = anc.asset() {
-                futures.push(asset.fetch());
+                futures.push(asset.try_fetch());
             }
         }
     }

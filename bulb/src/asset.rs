@@ -63,7 +63,7 @@ pub enum Asset {
 
 impl Asset {
     /// Get asset Uri
-    fn uri(&self) -> Uri {
+    pub fn uri(&self) -> Uri {
         use Asset::*;
         match self {
             Access => "/iris/api/access".into(),
@@ -130,8 +130,8 @@ impl Asset {
         }
     }
 
-    /// Fetch the asset value
-    pub async fn fetch(self) -> Result<Option<(Self, JsValue)>> {
+    /// Try to fetch the asset value
+    pub async fn try_fetch(self) -> Result<Option<(Self, JsValue)>> {
         match self.uri().get().await {
             Ok(value) => Ok(Some((self, value))),
             Err(Error::FetchResponseNotFound())

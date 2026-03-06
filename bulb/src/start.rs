@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction};
+use crate::asset::Asset;
 use crate::card::{self, CardList, CardState};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
@@ -143,8 +144,7 @@ async fn finish_init() -> Result<()> {
 
 /// Update resource select options
 async fn update_sb_resource() -> Result<()> {
-    let access: Vec<Permission> =
-        Uri::from("/iris/api/access").get_val().await?;
+    let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
     let doc = Doc::get();
     if let Some(elem) = doc.try_elem::<Element>("opt_action_plan") {
         elem.set_class_name(opt_class(&access, Res::ActionPlan));
