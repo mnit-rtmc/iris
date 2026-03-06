@@ -905,7 +905,6 @@ async fn do_handle_notification(
         && res.as_str() == chan
         && update_card_list(res).await?
     {
-        app::defer_action(DeferredAction::RedrawMap, 400);
         return Ok(());
     }
     if let Ok(res) = Res::try_from(chan.as_str())
@@ -915,8 +914,8 @@ async fn do_handle_notification(
         let mut cards = CardList::new(res, &access);
         cards.fetch_all().await?;
         update_map_states(&cards).await?;
+        app::defer_action(DeferredAction::RedrawMap, 500);
     }
-    app::defer_action(DeferredAction::RedrawMap, 400);
     Ok(())
 }
 
@@ -949,7 +948,10 @@ async fn update_card_list(res: Res) -> Result<bool> {
             replace_card_html(&cv, &html);
         }
     }
-    update_map_states(&cards).await?;
+    if res.has_location() {
+        update_map_states(&cards).await?;
+        app::defer_action(DeferredAction::RedrawMap, 500);
+    }
     if let Some(cv) = expanded {
         cards.set_view(cv);
     }
