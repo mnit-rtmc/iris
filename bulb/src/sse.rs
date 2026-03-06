@@ -156,7 +156,7 @@ fn build_list(res: Option<Res>) -> String {
 /// Set refresh button text
 pub fn set_notify_state(ns: NotifyState) {
     let sb_notify = Doc::get().elem::<HtmlElement>("sb_notify");
-    sb_notify.set_inner_html(&ns.symbol());
+    sb_notify.set_inner_html(ns.symbol());
     if NotifyState::Disconnected == ns {
         app::defer_action(DeferredAction::MakeEventSource, 5000);
     }
