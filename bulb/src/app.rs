@@ -29,6 +29,8 @@ pub enum DeferredAction {
     HideToast,
     /// Refresh resource list
     RefreshList,
+    /// Redraw map markers
+    RedrawMap,
     /// Make SSE event source
     MakeEventSource,
     /// Set notify state
@@ -139,10 +141,8 @@ pub fn user() -> Option<String> {
 pub fn defer_action(action: DeferredAction, timeout_ms: i32) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        // don't defer more than one refresh list action
-        state
-            .deferred
-            .retain(|(_, a)| *a != DeferredAction::RefreshList);
+        // don't defer more than one of any action
+        state.deferred.retain(|(_, a)| *a != action);
         let delay = (timeout_ms + TICK_INTERVAL - 1) / TICK_INTERVAL;
         let tick = state.tick.saturating_add(delay);
         state.deferred.push((tick, action));

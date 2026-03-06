@@ -42,7 +42,9 @@ extern "C" {
     fn js_set_selected(res: &JsValue, name: &JsValue);
     // Update TMS main item states
     fn js_update_item_states(data: &JsValue);
-    /// Update station data
+    // Redraw the map
+    fn js_redraw_map();
+    /// Update station data JSON and redraw the map
     fn js_update_stat_sample(data: &JsValue);
     // Fly map to given item
     fn js_fly_map_to(fid: &JsValue, lat: &JsValue, lng: &JsValue);
@@ -824,6 +826,7 @@ fn tick_interval() {
             DeferredAction::FetchStationData => fetch_station_sample(),
             DeferredAction::HideToast => hide_elem("sb_toast"),
             DeferredAction::RefreshList => handle_res_change(),
+            DeferredAction::RedrawMap => js_redraw_map(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
         }
@@ -897,10 +900,13 @@ async fn do_handle_notification(
     chan: String,
     _name: Option<String>,
 ) -> Result<()> {
+    // Has the selected resource list updated?
     if let Some(res) = selected_resource()
         && res.as_str() == chan
+        && update_card_list(res).await?
     {
-        update_card_list(res).await?;
+        app::defer_action(DeferredAction::RedrawMap, 400);
+        return Ok(());
     }
     if let Ok(res) = Res::try_from(chan.as_str())
         && res.has_location()
@@ -910,20 +916,21 @@ async fn do_handle_notification(
         cards.fetch_all().await?;
         update_map_states(&cards).await?;
     }
+    app::defer_action(DeferredAction::RedrawMap, 400);
     Ok(())
 }
 
 /// Update `sb_list` with changed result
-async fn update_card_list(res: Res) -> Result<()> {
+async fn update_card_list(res: Res) -> Result<bool> {
     let Some(old_cards) = app::card_list(None) else {
-        return Ok(());
+        return Ok(false);
     };
     if old_cards.res() != res {
         js_set_selected(
             &JsValue::from_str(res.as_str()),
             &JsValue::from_str(""),
         );
-        return Ok(());
+        return Ok(false);
     }
     let old_json = old_cards.json().to_string();
     let expanded = old_cards.expanded_view();
@@ -947,7 +954,7 @@ async fn update_card_list(res: Res) -> Result<()> {
         cards.set_view(cv);
     }
     app::card_list(Some(cards));
-    Ok(())
+    Ok(true)
 }
 
 /// Update map item states

@@ -5,7 +5,6 @@ export function js_set_selected(res, name) {
   if (!name) {
     select_tms_feature(null, res, name);
   }
-  tms_layers.redraw();
 }
 
 // Update TMS main item states
@@ -17,7 +16,12 @@ export function js_update_item_states(data) {
   }
 }
 
-// Update station data JSON
+// Redraw the map
+export function js_redraw_map() {
+  tms_layers.redraw();
+}
+
+// Update station data JSON and redraw the map
 export function js_update_stat_sample(data) {
   stat_sample = data;
   tms_layers.redraw();

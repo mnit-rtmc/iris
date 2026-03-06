@@ -145,8 +145,6 @@ fn build_list(res: Option<Res>) -> String {
         Res::WeatherSensor.as_str(),
     ];
     if let Some(r) = res {
-        // Ensure selected `res` is last, since the map will redraw after
-        // receiving that notification (js_set_selected)
         resources.retain(|rs| *rs != r.as_str());
         resources.push(r.as_str());
     }
