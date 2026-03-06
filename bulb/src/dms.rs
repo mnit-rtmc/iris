@@ -729,7 +729,18 @@ impl Dms {
             div.span().cdata(expires);
         }
         div.close();
+        self.render_current_msg(anc, &mut page.frag::<html::Div>());
         div = page.frag::<html::Div>();
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
+        self.message_composer_html(anc, &mut page.frag::<html::Div>());
+        self.action_plans_html(anc, &mut page.frag::<html::Details>());
+        String::from(page)
+    }
+
+    /// Render current message as an HTML div element
+    fn render_current_msg<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
         div.id("sign_msg");
         let mut rend = Renderer::new()
             .with_class("sign_message")
@@ -748,13 +759,6 @@ impl Dms {
             rend.render_pixels(&pix[..], &mut div.img());
         }
         div.close();
-        div = page.frag::<html::Div>();
-        div.class("info fill")
-            .cdata_len(opt_ref(&self.location), 64)
-            .close();
-        self.message_composer_html(anc, &mut page.frag::<html::Div>());
-        self.action_plans_html(anc, &mut page.frag::<html::Details>());
-        String::from(page)
     }
 
     /// Build message composer HTML
@@ -1413,5 +1417,14 @@ impl Card for Dms {
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&String::from(page));
         Vec::new()
+    }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: DmsAnc) {
+        if let Some(sign_msg) = Doc::get().try_elem::<HtmlElement>("sign_msg") {
+            let mut page = Page::new();
+            self.render_current_msg(&anc, &mut page.frag::<html::Div>());
+            sign_msg.set_outer_html(&String::from(page));
+        }
     }
 }

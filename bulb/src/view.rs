@@ -344,6 +344,25 @@ impl CardView {
         Ok(())
     }
 
+    /// Handle updating a card in response to an SSE notification
+    pub async fn handle_update(&self) -> Result<()> {
+        if self.view != View::Control {
+            return Ok(());
+        }
+        match self.res {
+            Res::Dms => self.handle_update_x::<Dms>().await,
+            _ => Ok(()),
+        }
+    }
+
+    /// Handle updating a card in response to an SSE notification
+    async fn handle_update_x<C: Card>(&self) -> Result<()> {
+        let pri = self.fetch_primary::<C>().await?;
+        let anc = fetch_ancillary(&pri, self.view).await?;
+        pri.handle_update(anc);
+        Ok(())
+    }
+
     /// Create a new object
     pub async fn create_and_post(&self) -> Result<()> {
         let doc = Doc::get();

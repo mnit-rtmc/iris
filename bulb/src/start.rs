@@ -943,8 +943,8 @@ async fn update_card_list(res: Res) -> Result<bool> {
         if let Some(ev) = &expanded
             && cv.name == ev.name
         {
-            log::info!("FIXME: replace expanded card");
-            // FIXME: update item state
+            // update expanded card (Control cards only)
+            ev.handle_update().await?;
         } else {
             replace_card_html(&cv, &html);
         }
