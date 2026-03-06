@@ -835,6 +835,7 @@ fn tick_interval() {
 
 /// Fetch station sample data
 fn fetch_station_sample() {
+    log::debug!("fetch_station_sample");
     app::defer_action(DeferredAction::FetchStationData, 30_000);
     spawn_local(do_future(do_fetch_station_sample()));
 }
