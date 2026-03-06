@@ -2,8 +2,10 @@
 export function js_set_selected(res, name) {
   selected_resource = res;
   selected_name = name;
-  if (!name) {
-    select_tms_feature(null, res, name);
+  if (name) {
+    select_tms_feature(name, name);
+  } else {
+    select_tms_feature(null, null);
   }
 }
 

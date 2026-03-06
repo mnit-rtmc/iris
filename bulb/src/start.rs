@@ -943,8 +943,8 @@ async fn update_card_list(res: Res) -> Result<bool> {
         if let Some(ev) = &expanded
             && cv.name == ev.name
         {
-            // FIXME: is user editing the form?
             log::info!("FIXME: replace expanded card");
+            // FIXME: update item state
         } else {
             replace_card_html(&cv, &html);
         }
@@ -954,6 +954,11 @@ async fn update_card_list(res: Res) -> Result<bool> {
         app::defer_action(DeferredAction::RedrawMap, 500);
     }
     if let Some(cv) = expanded {
+        // Re-select the map marker, in case item state changed
+        js_set_selected(
+            &JsValue::from_str(res.as_str()),
+            &JsValue::from_str(&cv.name),
+        );
         cards.set_view(cv);
     }
     app::card_list(Some(cards));

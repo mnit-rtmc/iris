@@ -16,17 +16,17 @@ var tms_layers = null;
 // Current TMS selection
 var tms_select = null;
 
-// Fly map enabled
-var fly_enabled = true;
-
-// Current station sample data
-var stat_sample = null;
-
 // Current selected resource type
 var selected_resource = null;
 
 // Current selected name
 var selected_name = null;
+
+// Fly map enabled
+var fly_enabled = true;
+
+// Current station sample data
+var stat_sample = null;
 
 // Current TMS main item states
 var item_states = null;
@@ -241,6 +241,7 @@ function tms_style(res, lzoom) {
             visible = 1;
         }
         if (properties.name == selected_name) {
+            /* fill marker even for unknown item styles */
             visible = 2;
         }
         var style = tms_style_feature(
@@ -358,26 +359,25 @@ function density_color(density) {
 
 // Select feature on TMS layers
 function select_tms_feature(fid, name, sid) {
-    let old_fid = tms_select;
-    let change = (typeof fid != "undefined") && (fid != old_fid);
-    if (tooltip) {
-        tooltip.close();
-        tooltip = null;
-    }
+    let change = (fid != tms_select);
     if (tms_select) {
         tms_layers.resetFeatureStyle(tms_select);
         tms_select = null;
     }
-    if (change) {
+    if (fid) {
         let style = tms_style_feature(name, sid, 2);
         style.weight = 2;
         style.color = 'white';
         style.opacity = 1,
         tms_layers.setFeatureStyle(fid, style);
         tms_select = fid;
+    }
+    if (change) {
+        if (tooltip) {
+            tooltip.close();
+            tooltip = null;
+        }
         return fid;
-    } else if (old_fid) {
-        return "";
     } else {
         return null;
     }
@@ -500,8 +500,8 @@ function tms_on_click(e) {
                        .setLatLng(e.latlng)
                        .openOn(map);
         };
+        dispatch_tms_event(tms_fid);
     }
-    dispatch_tms_event(tms_fid);
     L.DomEvent.stop(e);
 }
 
