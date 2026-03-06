@@ -388,6 +388,8 @@ pub fn uri_one(res: Res, name: &str) -> Uri {
 pub struct CardList {
     /// Resource type
     res: Res,
+    /// Access level for resource
+    access_level: u32,
     /// Old JSON list
     old_json: String,
     /// JSON list of cards
@@ -398,12 +400,16 @@ pub struct CardList {
 
 impl CardList {
     /// Create a new card list
-    pub fn new(res: Res) -> Self {
+    pub fn new(res: Res, access: &[Permission]) -> Self {
+        let access_level = access
+            .iter()
+            .fold(0, |acc, perm| acc.max(perm.access_level_for(res)));
         let old_json = String::new();
         let json = String::new();
         let views = Vec::new();
         CardList {
             res,
+            access_level,
             old_json,
             json,
             views,
@@ -489,7 +495,8 @@ impl CardList {
         let search = Search::new(search);
         let mut views = Vec::with_capacity(cards.len());
         // "Create" card
-        let view = if search.is_all()
+        let view = if self.access_level == 4
+            && search.is_all()
             && res != Res::SignConfig
             && res != Res::SystemAttribute
         {

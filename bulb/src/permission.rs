@@ -165,6 +165,15 @@ fn access_level_html<'p>(selected: u32, select: &'p mut html::Select<'p>) {
 }
 
 impl Permission {
+    /// Get access level for a given resource type
+    pub fn access_level_for(&self, res: Res) -> u32 {
+        if res.base().as_str() == self.base_resource {
+            self.access_level
+        } else {
+            0
+        }
+    }
+
     /// Check access for a resource with notes containing hashtags
     pub fn check_access(&self, res: Res, notes: Option<&str>) -> bool {
         res.base().as_str() == self.base_resource

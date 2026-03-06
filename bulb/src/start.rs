@@ -756,9 +756,10 @@ async fn set_resource(res: Option<Res>, search: &str) {
 async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
     match res {
         Some(res) => {
-            let search = search_value();
-            let mut cards = CardList::new(res);
+            let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
+            let mut cards = CardList::new(res, &access);
             cards.fetch_all().await?;
+            let search = search_value();
             let html = cards.build_html(&search).await?;
             let doc = Doc::get();
             let sb_list = doc.elem::<Element>("sb_list");
@@ -904,7 +905,8 @@ async fn do_handle_notification(
     if let Ok(res) = Res::try_from(chan.as_str())
         && res.has_location()
     {
-        let mut cards = CardList::new(res);
+        let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
+        let mut cards = CardList::new(res, &access);
         cards.fetch_all().await?;
         update_map_states(&cards).await?;
     }
@@ -926,9 +928,10 @@ async fn update_card_list(res: Res) -> Result<()> {
     let old_json = old_cards.json().to_string();
     let expanded = old_cards.expanded_view();
     app::card_list(Some(old_cards));
-    let search = search_value();
-    let mut cards = CardList::new(res).with_json(old_json);
+    let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
+    let mut cards = CardList::new(res, &access).with_json(old_json);
     cards.fetch_all().await?;
+    let search = search_value();
     for (cv, html) in cards.changed_html(&search).await? {
         if let Some(ev) = &expanded
             && cv.name == ev.name
