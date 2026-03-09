@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.82.0 (9 Mar 2026)
+ - Fixed gate arm dependency init on server restart
+ - Added `prototype` to MsgPattern (removed `restrict_hashtag` from MsgLine)
+ - Honeybee/bulb: improved SSE robustness
+ - Improved many web UI annoyances (style/feedback/etc.)
+ - Reworked resource selection on web UI
+ - Add cards for more resources to web UI (MsgPattern, Word, etc.)
+ - Fixed pollinator gap detection logic
+ - Fixed several operator-requested issues in web UI
+
 5.81.0 (26 Jan 2026)
  - Enabled live sensor data from `pollinator` => `IRIS server`
  - Add `device` column to beacon table (removed DMS/meter `beacon`)
