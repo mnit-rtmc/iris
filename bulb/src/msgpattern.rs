@@ -28,9 +28,7 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{
-    HtmlElement, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
-};
+use web_sys::{HtmlElement, HtmlSelectElement, HtmlTextAreaElement};
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
