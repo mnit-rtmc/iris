@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.81.0', '5.82.0');
+
 -- Add prototype to msg_pattern
 DROP VIEW msg_pattern_view;
 DROP VIEW msg_line_view;
