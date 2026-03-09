@@ -489,6 +489,7 @@ where
             }
         }
         let events = self.lookup_zipped_events(&mut traffic)?;
+        log::debug!("binning events for {} on {}", self.detector, self.date);
         let bi = BinIter::new(30, &events, self.filter());
         Ok(bi.collect())
     }
@@ -549,6 +550,7 @@ where
             }
         }
         let events = self.lookup_unzipped_events().await?;
+        log::debug!("binning events for {} on {}", self.detector, self.date);
         let bi = BinIter::new(30, &events, self.filter());
         Ok(bi.collect())
     }

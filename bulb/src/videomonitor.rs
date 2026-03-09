@@ -12,7 +12,7 @@
 //
 use crate::app;
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
@@ -21,6 +21,7 @@ use crate::permission::Permission;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
 };
+use crate::view::View;
 use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;
@@ -151,7 +152,7 @@ impl VideoMonitor {
     fn set_selected(&self) {
         app::set_mon_num(Some(self.mon_num));
         let mon_num = match app::mon_num() {
-            Some(num) => format!("📺 #{num} "),
+            Some(num) => format!("📺 #{num}"),
             None => "📺".to_string(),
         };
         let t = Doc::get().elem::<HtmlElement>("sb_monitor");
@@ -257,6 +258,7 @@ impl Card for VideoMonitor {
         &[
             ItemState::Available,
             ItemState::Prohibited,
+            ItemState::Offline,
             ItemState::Inactive,
         ]
     }
@@ -270,6 +272,20 @@ impl Card for VideoMonitor {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let states = anc.cio.item_states(self);
+        if states.contains(ItemState::Inactive) {
+            ItemState::Inactive
+        } else if states.contains(ItemState::Prohibited) {
+            ItemState::Prohibited
+        } else if states.contains(ItemState::Offline) {
+            ItemState::Offline
+        } else {
+            ItemState::Available
+        }
     }
 
     /// Check if a search string matches

@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View, uri_one};
+use crate::card::{AncillaryData, Card, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::fetch::Action;
@@ -23,6 +23,7 @@ use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
+use crate::view::View;
 use chrono::DateTime;
 use hatmil::{Page, html};
 use resources::Res;
@@ -242,7 +243,7 @@ impl Lcs {
         if states.contains(ItemState::Inactive) {
             return states;
         }
-        if states.contains(ItemState::Available) {
+        if !states.contains(ItemState::Offline) {
             states = self.item_states_lock();
         }
         if let Some(faults) = self.faults() {
@@ -455,13 +456,15 @@ impl Lcs {
         let states = ItemStates::default();
         match (deployed, reason) {
             (true, LockReason::Unlocked) => {
-                states.with(ItemState::Deployed, "deployed")
+                states.with(ItemState::Operator, "operator")
             }
             (true, _) => states
-                .with(ItemState::Deployed, "deployed")
+                .with(ItemState::Operator, "operator")
                 .with(ItemState::Locked, reason.as_str()),
-            (false, LockReason::Unlocked) => ItemState::Available.into(),
-            (false, _) => states.with(ItemState::Locked, reason.as_str()),
+            (false, LockReason::Unlocked) => ItemState::Dark.into(),
+            (false, _) => states
+                .with(ItemState::Dark, "dark")
+                .with(ItemState::Locked, reason.as_str()),
         }
     }
 
@@ -556,8 +559,8 @@ impl Card for Lcs {
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
         &[
-            ItemState::Available,
-            ItemState::Deployed,
+            ItemState::Dark,
+            ItemState::Operator,
             ItemState::Locked,
             ItemState::Fault,
             ItemState::Offline,
@@ -583,12 +586,12 @@ impl Card for Lcs {
             ItemState::Inactive
         } else if states.contains(ItemState::Offline) {
             ItemState::Offline
-        } else if states.contains(ItemState::Deployed) {
-            ItemState::Deployed
+        } else if states.contains(ItemState::Operator) {
+            ItemState::Operator
         } else if states.contains(ItemState::Locked) {
             ItemState::Locked
         } else {
-            ItemState::Available
+            ItemState::Dark
         }
     }
 
@@ -620,6 +623,11 @@ impl Card for Lcs {
         fields.changed_select("lcs_type", self.lcs_type);
         fields.changed_input("shift", self.shift);
         fields.into_value().to_string()
+    }
+
+    /// Get changed fields on Location view
+    fn changed_location(&self, anc: LcsAnc) -> String {
+        anc.loc.changed_location()
     }
 
     /// Handle click event for a button on the card

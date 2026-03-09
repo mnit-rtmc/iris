@@ -10,66 +10,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{CardList, CardState, CardView};
+use crate::card::{CardList, CardState};
+use crate::sse::NotifyState;
+use crate::view::CardView;
 use foldhash::HashMap;
-use hatmil::{Page, html};
 use resources::Res;
 use std::cell::RefCell;
 
 /// Interval (ms) between ticks for deferred actions
 pub const TICK_INTERVAL: i32 = 500;
-
-/// Notification button state
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum NotifyState {
-    Starting,
-    Disconnected,
-    Connecting,
-    Updating,
-    Good,
-}
-
-impl NotifyState {
-    /// Get symbol for a state
-    pub const fn symbol(self) -> &'static str {
-        match self {
-            Self::Starting => "⬜",
-            Self::Disconnected => "⬛",
-            Self::Connecting => "🟧",
-            Self::Updating => "🟨",
-            Self::Good => "🟩",
-        }
-    }
-
-    /// Get description of a state
-    pub const fn description(self) -> &'static str {
-        match self {
-            Self::Starting => "Starting",
-            Self::Disconnected => "Disconnected",
-            Self::Connecting => "Connecting",
-            Self::Updating => "Updating",
-            Self::Good => "Good",
-        }
-    }
-
-    /// Build state HTML
-    pub fn build_html(self) -> String {
-        // NOTE: these have &nbsp; to keep from splitting lines
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
-        div.class("tooltip").cdata("⭮ ").cdata(self.symbol());
-        div.span().class("right").cdata(self.description());
-        String::from(page)
-    }
-
-    /// Get button disabled value for a state
-    pub const fn disabled(self) -> bool {
-        match self {
-            Self::Updating | Self::Good => true,
-            _ => false,
-        }
-    }
-}
 
 /// Deferred actions (called on set_interval)
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -78,10 +27,12 @@ pub enum DeferredAction {
     FetchStationData,
     /// Hide the toast popup
     HideToast,
-    /// Make SSE event source
-    MakeEventSource,
     /// Refresh resource list
     RefreshList,
+    /// Redraw map markers
+    RedrawMap,
+    /// Make SSE event source
+    MakeEventSource,
     /// Set notify state
     SetNotifyState(NotifyState),
 }
@@ -89,8 +40,6 @@ pub enum DeferredAction {
 /// Global app state
 #[derive(Default)]
 struct AppState {
-    /// Have permissions been initialized?
-    initialized: bool,
     /// Delete action enabled (slider transition finished)
     delete_enabled: bool,
     /// Logged-in user name
@@ -111,24 +60,19 @@ thread_local! {
     static STATE: RefCell<AppState> = RefCell::new(AppState::default());
 }
 
-/// Set initialized app state
-pub fn set_initialized() {
-    STATE.with(|rc| rc.borrow_mut().initialized = true);
-}
-
-/// Get initialized app state
-pub fn initialized() -> bool {
-    STATE.with(|rc| rc.borrow().initialized)
-}
-
 /// Set card view to global app state
 pub fn set_view(cv: CardView) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
         let cards = state.cards.take();
-        if let Some(mut cards) = cards {
-            cards.set_view(cv);
-            state.cards = Some(cards);
+        match cards {
+            Some(mut cards) => {
+                cards.set_view(cv);
+                state.cards = Some(cards);
+            }
+            None => {
+                log::warn!("set_view: no cards for {}", cv.name);
+            }
         }
         // purge all deferred refresh list actions
         state
@@ -138,9 +82,14 @@ pub fn set_view(cv: CardView) {
     })
 }
 
-/// Get form card from global app state
-pub fn form() -> Option<CardView> {
-    STATE.with(|rc| rc.borrow().cards.as_ref().and_then(|cards| cards.form()))
+/// Get expanded view card from global app state
+pub fn expanded_view() -> Option<CardView> {
+    STATE.with(|rc| {
+        rc.borrow()
+            .cards
+            .as_ref()
+            .and_then(|cards| cards.expanded_view())
+    })
 }
 
 /// Set delete enabled/disabled in global app state
@@ -192,10 +141,8 @@ pub fn user() -> Option<String> {
 pub fn defer_action(action: DeferredAction, timeout_ms: i32) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        // don't defer more than one refresh list action
-        state
-            .deferred
-            .retain(|(_, a)| *a != DeferredAction::RefreshList);
+        // don't defer more than one of any action
+        state.deferred.retain(|(_, a)| *a != action);
         let delay = (timeout_ms + TICK_INTERVAL - 1) / TICK_INTERVAL;
         let tick = state.tick.saturating_add(delay);
         state.deferred.push((tick, action));

@@ -11,12 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::rend::Renderer;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
+use crate::view::View;
 use hatmil::{Page, html};
 use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::split as multi_split;
@@ -27,7 +28,9 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{HtmlElement, HtmlSelectElement, HtmlTextAreaElement, console};
+use web_sys::{
+    HtmlElement, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
+};
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
@@ -180,7 +183,7 @@ impl AncillaryData for MsgPatternAnc {
                         *g = graphic;
                     }
                 } else {
-                    console::log_1(&format!("invalid graphic: {nm}").into());
+                    log::warn!("invalid graphic: {nm}");
                 }
             }
             Asset::MsgLines => {
@@ -262,6 +265,7 @@ impl MsgPattern {
     }
 
     /// Get MULTI string with action tags replaced with a filler character
+    #[allow(clippy::if_same_then_else)]
     fn multi(&self) -> String {
         let mut multi = String::new();
         for val in multi_split(&self.multi_string()) {
@@ -608,6 +612,8 @@ impl Card for MsgPattern {
     fn is_match(&self, search: &str, anc: &MsgPatternAnc) -> bool {
         self.name.contains_lower(search)
             || self.item_states(anc).is_match(search)
+            || self.compose_hashtag.contains_lower(search)
+            || self.multi.contains_lower(search)
     }
 
     /// Convert to HTML view

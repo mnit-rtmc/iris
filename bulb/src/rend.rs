@@ -13,7 +13,6 @@
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use hatmil::html;
 use ntcip::dms::multi::join_text;
-use web_sys::console;
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
@@ -129,12 +128,10 @@ impl<'r> Renderer<'r> {
                     Ok(()) => {
                         img.src(encode_gif(&buf[..]));
                     }
-                    Err(e) => {
-                        console::log_1(&format!("render_multi: {e:?}").into())
-                    }
+                    Err(e) => log::warn!("render_multi: {e:?}"),
                 }
             }
-            _ => console::log_1(&"render_multi: no image".into()),
+            _ => log::warn!("render_multi: no image"),
         }
         img.close();
     }
@@ -167,9 +164,7 @@ impl<'r> Renderer<'r> {
                 Ok(()) => {
                     img.src(encode_gif(&buf[..]));
                 }
-                Err(e) => {
-                    console::log_1(&format!("render_pixels: {e:?}").into())
-                }
+                Err(e) => log::warn!("render_pixels: {e:?}"),
             }
         }
         img.close();

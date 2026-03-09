@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,11 +12,12 @@
 //
 use crate::error::{Error, Result};
 use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
+use serde::de::DeserializeOwned;
 use std::borrow::{Borrow, Cow};
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{Blob, Headers, Request, RequestInit, Response, console};
+use web_sys::{Blob, Headers, Request, RequestInit, Response};
 
 /// Fetchable content types
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -113,7 +114,7 @@ impl Uri {
     /// Fetch using "GET" method
     pub async fn get(&self) -> Result<JsValue> {
         let resp = get_response(self).await.map_err(|e| {
-            console::log_1(&e);
+            log::error!("{e:?}");
             Error::FetchRequest()
         })?;
         resp_status(resp.status())?;
@@ -126,6 +127,12 @@ impl Uri {
                 wait_promise(Ok(blob.array_buffer())).await
             }
         }
+    }
+
+    /// Fetch using "GET" method
+    pub async fn get_val<D: DeserializeOwned>(&self) -> Result<D> {
+        let value = self.get().await?;
+        Ok(serde_wasm_bindgen::from_value(value)?)
     }
 
     /// Fetch using "PATCH" method
@@ -161,11 +168,11 @@ async fn wait_promise(
     data: std::result::Result<js_sys::Promise, JsValue>,
 ) -> Result<JsValue> {
     let data = data.map_err(|e| {
-        console::log_1(&e);
+        log::error!("{e:?}");
         Error::FetchRequest()
     })?;
     JsFuture::from(data).await.map_err(|e| {
-        console::log_1(&e);
+        log::error!("{e:?}");
         Error::FetchRequest()
     })
 }
@@ -192,13 +199,13 @@ async fn perform_fetch(
         ri.set_headers(&headers);
     }
     let req = Request::new_with_str_and_init(uri, &ri).map_err(|e| {
-        console::log_1(&e);
+        log::error!("{e:?}");
         Error::FetchRequest()
     })?;
     let resp = JsFuture::from(window.fetch_with_request(&req))
         .await
         .map_err(|e| {
-            console::log_1(&e);
+            log::error!("{e:?}");
             Error::FetchRequest()
         })?;
     Ok(resp.dyn_into().unwrap_throw())

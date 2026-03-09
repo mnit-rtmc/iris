@@ -12,7 +12,7 @@
 //
 use crate::actionplan::{ActionPlan, DeviceAction};
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View, uri_one};
+use crate::card::{AncillaryData, Card, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
@@ -27,6 +27,8 @@ use crate::rle::Table;
 use crate::signmessage::SignMessage;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
+use crate::view::View;
+use crate::word::Word;
 use chrono::{DateTime, Local, format::SecondsFormat};
 use hatmil::{Page, html};
 use js_sys::{ArrayBuffer, Uint8Array};
@@ -43,7 +45,7 @@ use std::fmt;
 use std::iter::repeat;
 use std::time::Duration;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement, console};
+use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement};
 
 /// NTCIP sign
 type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
@@ -189,14 +191,6 @@ pub struct Dms {
     pub pixel_failures: Option<String>,
 }
 
-/// Word (for messages)
-#[derive(Clone, Debug, Default, Deserialize)]
-pub struct Word {
-    pub name: String,
-    pub abbr: Option<String>,
-    pub allowed: bool,
-}
-
 /// DMS ancillary data
 #[derive(Default)]
 pub struct DmsAnc {
@@ -330,7 +324,7 @@ impl AncillaryData for DmsAnc {
                         *g = graphic;
                     }
                 } else {
-                    console::log_1(&format!("invalid graphic: {nm}").into());
+                    log::warn!("invalid graphic: {nm}");
                 }
             }
             Asset::DeviceActions => {
@@ -404,8 +398,8 @@ impl DmsAnc {
             let mc_choice = format!("mc_choice{ln}");
             // NOTE: these labels are a workaround for a Firefox 147 bug:
             //       if "Save and autofill addresses" is enabled,
-            //       setting onfocus on a second consecutive input !?!
-            //       triggers autocomplete with saved street addresses
+            //       having a second consecutive input !?! triggers
+            //       autocomplete with saved street addresses
             div.label().hidden("hidden").close();
             let mut input = div.input();
             if rn != rect_num {
@@ -416,10 +410,13 @@ impl DmsAnc {
                 .id(mc_line)
                 .value(cur_line)
                 .list(&mc_choice)
-                .onfocus("this.value=''");
-            let mut datalist = div.datalist();
-            datalist.id(mc_choice);
+                .data_("cur", cur_line);
             if let Some(font) = dms.font_definition().font(font_num) {
+                if ('a'..='z').any(|c| font.character(c).is_none()) {
+                    input.autocapitalize("characters");
+                }
+                let mut datalist = div.datalist();
+                datalist.id(mc_choice);
                 for ml in self.pat_lines(pat) {
                     if ml.line == ln
                         && let Some(ms) =
@@ -429,8 +426,8 @@ impl DmsAnc {
                         option.value(&ms).cdata(join_text(&ms, " ")).close();
                     }
                 }
+                datalist.close();
             }
-            datalist.close();
         }
         div.close();
     }
@@ -482,8 +479,9 @@ impl DmsAnc {
                 for word in &self.words {
                     if word.allowed
                         && word.name == w
-                        && let Some(ab) = &word.abbr
-                        && ab != w
+                        && let Some(abbr) = &word.abbr
+                        && !abbr.is_empty()
+                        && abbr != w
                     {
                         abbrev = word.clone();
                     }
@@ -565,6 +563,16 @@ const DEDICATED: &[&str] = &[
 ];
 
 impl Dms {
+    /// Get multi of lock message
+    fn lock_multi(&self) -> &str {
+        if let Some(lock) = &self.lock
+            && let Some(multi) = &lock.multi
+        {
+            return multi;
+        }
+        ""
+    }
+
     /// Get multi of current message
     fn current_multi<'a>(&'a self, anc: &'a DmsAnc) -> &'a str {
         anc.sign_message(self.msg_current.as_deref())
@@ -681,8 +689,20 @@ impl Dms {
         }
         let mut page = Page::new();
         self.title(View::Control, &mut page.frag::<html::Div>());
+        self.render_state_row(anc, &mut page.frag::<html::Div>());
+        self.render_current_msg(anc, &mut page.frag::<html::Div>());
         let mut div = page.frag::<html::Div>();
-        div.class("row fill");
+        div.class("info fill")
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
+        self.message_composer_html(anc, &mut page.frag::<html::Div>());
+        self.action_plans_html(anc, &mut page.frag::<html::Details>());
+        String::from(page)
+    }
+
+    /// Render item state row as an HTML div element
+    fn render_state_row<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
+        div.id("state_row").class("row fill");
         self.item_states(anc).tooltips(&mut div.span());
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
@@ -690,7 +710,10 @@ impl Dms {
             div.span().cdata(expires);
         }
         div.close();
-        div = page.frag::<html::Div>();
+    }
+
+    /// Render current message as an HTML div element
+    fn render_current_msg<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
         div.id("sign_msg");
         let mut rend = Renderer::new()
             .with_class("sign_message")
@@ -709,13 +732,6 @@ impl Dms {
             rend.render_pixels(&pix[..], &mut div.img());
         }
         div.close();
-        div = page.frag::<html::Div>();
-        div.class("info fill")
-            .cdata_len(opt_ref(&self.location), 64)
-            .close();
-        self.message_composer_html(anc, &mut page.frag::<html::Div>());
-        self.action_plans_html(anc, &mut page.frag::<html::Details>());
-        String::from(page)
     }
 
     /// Build message composer HTML
@@ -725,9 +741,7 @@ impl Dms {
         div: &'p mut html::Div<'p>,
     ) {
         if anc.compose_patterns.is_empty() {
-            console::log_1(
-                &format!("{}: No compose patterns", self.name).into(),
-            );
+            log::warn!("{}: No compose patterns", self.name);
             return;
         }
         let Some(dms) = self.make_dms(anc) else {
@@ -761,12 +775,7 @@ impl Dms {
         }
         select.close();
         if let Some(pat) = pat_def {
-            anc.make_lines_html(
-                &dms,
-                pat,
-                self.current_multi(anc),
-                &mut div.div(),
-            );
+            anc.make_lines_html(&dms, pat, self.lock_multi(), &mut div.div());
         }
         make_expire_select(&mut div.select());
         div.button()
@@ -867,7 +876,7 @@ impl Dms {
         let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
         let pat = anc.compose_patterns.iter().find(|p| p.name == pat_name);
         if pat.is_none() {
-            console::log_1(&format!("pattern not found: {pat_name}").into());
+            log::warn!("pattern not found: {pat_name}");
         }
         pat
     }
@@ -880,7 +889,17 @@ impl Dms {
             "mc_line{}",
             lines.len() + 1
         )) {
-            lines.push(line.value());
+            let mut val = line.value();
+            if let Some(autocapitalize) = line.get_attribute("autocapitalize")
+                && "characters" == autocapitalize
+            {
+                let v = val.to_uppercase();
+                if v != val {
+                    line.set_value(&v);
+                    val = v;
+                }
+            }
+            lines.push(val);
         }
         lines
     }
@@ -1239,7 +1258,7 @@ impl Card for Dms {
     fn item_states_all() -> &'static [ItemState] {
         &[
             ItemState::Available,
-            ItemState::Deployed,
+            ItemState::Operator,
             ItemState::Planned,
             ItemState::Incident,
             ItemState::External,
@@ -1270,8 +1289,8 @@ impl Card for Dms {
             ItemState::Dedicated
         } else if states.contains(ItemState::Offline) {
             ItemState::Offline
-        } else if states.contains(ItemState::Deployed) {
-            ItemState::Deployed
+        } else if states.contains(ItemState::Operator) {
+            ItemState::Operator
         } else if states.contains(ItemState::Planned) {
             ItemState::Planned
         } else if states.contains(ItemState::External) {
@@ -1371,5 +1390,20 @@ impl Card for Dms {
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
         preview.set_outer_html(&String::from(page));
         Vec::new()
+    }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: DmsAnc) {
+        if let Some(state_row) = Doc::get().try_elem::<HtmlElement>("state_row")
+        {
+            let mut page = Page::new();
+            self.render_state_row(&anc, &mut page.frag::<html::Div>());
+            state_row.set_outer_html(&String::from(page));
+        }
+        if let Some(sign_msg) = Doc::get().try_elem::<HtmlElement>("sign_msg") {
+            let mut page = Page::new();
+            self.render_current_msg(&anc, &mut page.frag::<html::Div>());
+            sign_msg.set_outer_html(&String::from(page));
+        }
     }
 }

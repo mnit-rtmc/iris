@@ -10,9 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, View};
+use crate::card::{AncillaryData, Card};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
+use crate::view::View;
 use hatmil::{Page, html};
 use resources::Res;
 use serde::Deserialize;

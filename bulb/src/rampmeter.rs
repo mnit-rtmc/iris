@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, View, uri_one};
+use crate::card::{AncillaryData, Card, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
@@ -23,6 +23,7 @@ use crate::start::fly_map_item;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
+use crate::view::View;
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use chrono::DateTime;
 use gift::block::DisposalMethod;
@@ -39,7 +40,7 @@ use std::borrow::Cow;
 use std::fmt;
 use std::io::Write;
 use wasm_bindgen::JsValue;
-use web_sys::{HtmlSelectElement, console};
+use web_sys::HtmlSelectElement;
 
 /// Meter signal state for rendering GIF
 #[derive(Clone, Copy, Debug)]
@@ -503,18 +504,14 @@ impl RampMeter {
                         meter_html(buf, img);
                         return;
                     }
-                    Err(e) => {
-                        console::log_1(&format!("encode_meter: {e:?}").into())
-                    }
+                    Err(e) => log::warn!("encode_meter: {e:?}"),
                 }
             }
         }
         let mut buf = Vec::with_capacity(4096);
         match encode_meter_off(Encoder::new(&mut buf)) {
             Ok(()) => meter_html(buf, img),
-            Err(e) => {
-                console::log_1(&format!("encode_meter_off: {e:?}").into())
-            }
+            Err(e) => log::warn!("encode_meter_off: {e:?}"),
         }
     }
 

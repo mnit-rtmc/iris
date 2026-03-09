@@ -27,7 +27,11 @@
   </head>
   <body>
     <div class="root">
-      <div id="mapid"></div>
+      <div id="map_pane"></div>
+      <div id="divider">
+          <button id="hide_sidebar" type="button">🞂</button>
+          <button id="show_sidebar" type="button" disabled>🞀</button>
+      </div>
       <div id="sidebar">
         <div class="sb_row">
           <label for="sb_resource">Resource</label>
@@ -47,10 +51,11 @@
             <option id="opt_controller" class="no-display" value="controller">🎛️ Controller</option>
             <option id="opt_detector" class="no-display" value="detector">🚗⬚ Detector</option>
             <option id="opt_permission" class="no-display" value="permission">🗝️ Permission</option>
-            <option id="opt_system_attribute" class="no-display" value="comm_config">📡 Comm Config</option>
+            <option id="opt_system" class="no-display" value="system_attribute">📃 System</option>
             <option id="opt_toll_zone" class="no-display" value="tag_reader">🏷️ Tag Reader</option>
           </select>
-          <label id="sb_monitor">📺 </label>
+          <label id="sb_monitor" class="sb_label">📺</label>
+          <label id="sb_notify" class="sb_label">⚪</label>
           <input id="sb_fullscreen" class="toggle" type="checkbox" aria-label="Toggle fullscreen">
           <label for="sb_fullscreen"> ⛶ </label>
         </div>
@@ -61,6 +66,8 @@
           <label for="res_msg_pattern">📑 Pattern</label>
           <input id="res_sign_config" class="toggle" type="radio" name="res_dms">
           <label for="res_sign_config">📐 Config</label>
+          <input id="res_word" class="toggle" type="radio" name="res_dms">
+          <label for="res_word">🔠 Word</label>
         </div>
         <div id="res_lcs_row" class="no-display">
           <input id="res_lcs" class="toggle" type="radio" name="res_lcs" checked>
@@ -73,8 +80,8 @@
           <label for="res_video_monitor">📺 Monitor</label>
           <input id="res_monitor_style" class="toggle" type="radio" name="res_video">
           <label for="res_monitor_style">🖵 Style</label>
-          <input id="res_flow_stream" class="toggle" type="radio" name="res_video">
-          <label for="res_flow_stream">🎞️ Stream</label>
+<!--      <input id="res_flow_stream" class="toggle" type="radio" name="res_video">
+          <label for="res_flow_stream">🎞️ Stream</label> -->
         </div>
         <div id="res_controller_row" class="no-display">
           <input id="res_controller" class="toggle" type="radio" name="res_cont" checked>
@@ -89,12 +96,12 @@
           <label for="res_modem">🖀 Modem</label>
         </div>
         <div id="res_system_row" class="no-display">
-<!--      <input id="res_system_attr" class="toggle" type="radio" name="res_system" checked>
-          <label for="res_system_attr">📃 Attribute</label> -->
+          <input id="res_system_attr" class="toggle" type="radio" name="res_system" checked>
+          <label for="res_system_attr">📃 Attribute</label>
           <input id="res_comm_config" class="toggle" type="radio" name="res_system">
-          <label for="res_comm_config">📡 Comm Config</label>
+          <label for="res_comm_config">📡 Comm</label>
           <input id="res_cabinet_style" class="toggle" type="radio" name="res_system">
-          <label for="res_cabinet_style">🗄️ Cabinet Style</label>
+          <label for="res_cabinet_style">🗄️ Cabinet</label>
         </div>
         <div id="res_permission_row" class="no-display">
           <input id="res_permission" class="toggle" type="radio" name="res_perm" checked>
@@ -109,11 +116,10 @@
         <div class="sb_row">
           <input id="sb_search" type="search" placeholder="🔍" size="16">
           <select id="sb_state" aria-label="State"></select>
-          <button id="sb_refresh" type="button">⭮ ⚪</button>
         </div>
         <div id="sb_list"></div>
-        <div id="sb_toast"></div>
-        <div id="sb_login" class="hide">
+        <div id="sb_toast" class="hidden"></div>
+        <div id="sb_login" class="hidden">
           <div class="form">
             <div class="row center">
               <img src="bulb/iris.svg">

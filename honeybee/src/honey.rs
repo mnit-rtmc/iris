@@ -943,6 +943,7 @@ const fn one_sql(res: Res) -> Option<&'static str> {
         SignConfig => query::SIGN_CONFIG_ONE,
         SignDetail => query::SIGN_DETAIL_ONE,
         SignMessage => query::SIGN_MSG_ONE,
+        SystemAttribute => query::SYSTEM_ATTRIBUTE_ONE,
         TagReader => query::TAG_READER_ONE,
         TimeAction => query::TIME_ACTION_ONE,
         TollZone => query::TOLL_ZONE_ONE,

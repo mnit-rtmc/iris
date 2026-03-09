@@ -140,8 +140,8 @@ impl Zone {
 
     /// Make a vehicle event from vehicle data
     fn make_event(&mut self, veh: &VehicleData) -> VehEvent {
-        let gap = self.direction.is_none();
-        if gap {
+        if self.direction.is_none() {
+            self.check_direction(veh);
             veh.with_gap()
         } else {
             let dir = self.check_direction(veh);

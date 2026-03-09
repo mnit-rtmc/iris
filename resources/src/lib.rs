@@ -334,6 +334,7 @@ impl Res {
             User => "👤",
             VideoMonitor => "📺",
             WeatherSensor => "🌦️ ",
+            Word => "🔠",
             _ => "❓",
         }
     }
@@ -371,6 +372,23 @@ impl Res {
             | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
+    }
+
+    /// Check if resource has a location
+    pub const fn has_location(self) -> bool {
+        use Res::*;
+        matches!(
+            self,
+            Beacon
+                | Camera
+                | Controller
+                | Dms
+                | GateArm
+                | Lcs
+                | RampMeter
+                | TagReader
+                | WeatherSensor
+        )
     }
 
     /// Get base resource for permission checks

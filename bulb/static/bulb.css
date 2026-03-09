@@ -1,6 +1,11 @@
 body {
   background-color: #677;
   font-family: "Overpass";
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 label {
   text-indent: 0.4rem;
@@ -31,6 +36,29 @@ textarea {
   font-size: 100%;
   margin: 0.1rem;
 }
+button {
+  appearance: none;
+  display: inline-block;
+  border: 1px solid #888;
+  border-radius: 0.2rem;
+  padding: 0.1rem 0.2rem;
+  background-color: #eee;
+  color: black;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #ccc;
+}
+button:active {
+  background-color: #bbb;
+}
+button:disabled {
+  background-color: #888;
+}
+button.go_link {
+  font-size: smaller;
+  padding: 0 0.2rem;
+}
 table {
   table-layout: fixed;
   border-collapse: collapse;
@@ -59,50 +87,25 @@ th, td {
   width: 100%;
 }
 
-#sign_msg {
-  display: grid;
-  grid-template-areas: "ms";
-  justify-items: center;
+/* Generic CSS classes */
+.no-display {
+  display: none;
 }
-.sign_message {
-  grid-area: ms;
+.hidden {
+  visibility: hidden;
 }
-.card-compact img.sign_message {
-  max-height: 3rem;
+.wait {
+  filter: opacity(50%);
+  cursor: wait !important;
 }
-.card-form img.sign_message {
-  max-height: 6rem;
+.wait * {
+  cursor: wait !important;
 }
-
 .fault {
   background-color: rgba(128, 32, 0, 0.25);
 }
 .invalid {
   border-color: red;
-}
-
-button {
-  appearance: none;
-  display: inline-block;
-  border: 1px solid #888;
-  border-radius: 0.2rem;
-  padding: 0.1rem 0.2rem;
-  background-color: #eee;
-  color: black;
-  cursor: pointer;
-}
-button:hover {
-  background-color: #ccc;
-}
-button:active {
-  background-color: #bbb;
-}
-button:disabled {
-  background-color: #888;
-}
-button.go_link {
-  font-size: smaller;
-  padding: 0 0.2rem;
 }
 
 /* Checkbox toggle buttons:
@@ -119,7 +122,7 @@ button.go_link {
   border: 1px solid #888;
   border-radius: 0.2rem;
   padding: 0.3rem;
-  text-indent: 0;
+  text-indent: unset;
   color: black;
   cursor: pointer;
 }
@@ -137,29 +140,43 @@ button.go_link {
 }
 
 .root {
-  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   display: flex;
 }
-
-#mapid {
+#map_pane {
   display: none;
+  min-width: 58%;
+  flex: 1;
+}
+#divider {
+  display: none;
+  height: 100%;
+  max-width: min-content;
+  background-color: #566;
+}
+#divider * {
+  margin: 0;
+  padding: 0;
 }
 #sidebar {
-  position: relative;
+  overflow: hidden;
+  width: 40%;
   display: flex;
   flex-direction: column;
   user-select: none;
-  flex: 0 1 100%;
   justify-content: start;
   margin: 0.2rem;
   background-image: url(iris.svg);
   background-repeat: no-repeat;
   background-position: center;
 }
+#sidebar.hidden {
+  max-width: 0;
+}
+
 .sb_row {
   flex: 0 1;
   display: flex;
@@ -185,10 +202,13 @@ label:has(+ #sb_resource) {
 #sb_resource {
   margin-left: 0.1rem;
 }
-#sb_monitor {
+.sb_label {
+  text-indent: unset;
   color: black;
   background-color: #888;
   align-content: center;
+  margin: 0.1rem;
+  padding: 0.2rem;
   border-radius: 0.5rem;
 }
 #sb_search {
@@ -202,12 +222,11 @@ label:has(+ #sb_resource) {
 }
 
 @media screen and (min-width: 36rem) {
-  #mapid {
+  #divider {
     display: block;
-    flex: 3 1 60%;
   }
-  #sidebar {
-    flex: 2 0 40%;
+  #map_pane {
+    display: block;
   }
 }
 
@@ -228,7 +247,7 @@ label:has(+ #sb_resource) {
   left: -100%;
   top: 0;
   content: "";
-  background-color: #bbb;
+  background-color: #5bd;
 }
 #ob_delete:active::before {
   transition: left 1s;
@@ -283,7 +302,6 @@ label:has(+ #sb_resource) {
   position: relative;
   display: inline-block;
 }
-
 .tooltip * {
   position: absolute;
   z-index: 4;
@@ -296,12 +314,6 @@ label:has(+ #sb_resource) {
   color: #fff;
   background-color: #000;
 }
-
-.right {
-  left: unset;
-  right: 0;
-}
-
 .tooltip:hover * {
   visibility: visible;
 }
@@ -310,17 +322,23 @@ label:has(+ #sb_resource) {
 .item_available {
   background-color: #004;
 }
-.item_incident {
-  background-color: #600;
+.item_dark {
+  background-color: #002;
+}
+.item_operator {
+  background-color: #440;
 }
 .item_deployed {
-  background-color: #440;
+  background-color: #530;
 }
 .item_planned {
   background-color: #044;
 }
 .item_external {
   background-color: #040;
+}
+.item_incident {
+  background-color: #600;
 }
 .item_dedicated {
   background-color: #404;
@@ -367,7 +385,7 @@ label:has(+ #sb_resource) {
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.5);
   background-color: #ccc;
 }
-.card-form {
+.card-expanded {
   flex: 0 1 100%;
   display: flex;
   flex-direction: column;
@@ -406,7 +424,50 @@ label:has(+ #sb_resource) {
   flex-direction: column;
   padding: 0.2rem;
 }
+.start {
+  align-self: start;
+  justify-content: start;
+}
+.center {
+  align-self: center;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+}
+.end {
+  align-self: end;
+  justify-content: end;
+}
+.right {
+  left: unset;
+  right: 0;
+}
+.fill {
+  /* Setting width: 0 and min-width: 100% ignores element size */
+  width: 0;
+  min-width: 100%;
+}
+.tiny {
+  font-size: xx-small;
+}
 
+/* Sign messages */
+#sign_msg {
+  display: grid;
+  grid-template-areas: "ms";
+  justify-items: center;
+}
+.sign_message {
+  grid-area: ms;
+}
+.card-compact img.sign_message {
+  max-height: 3rem;
+}
+.card-expanded img.sign_message {
+  max-height: 6rem;
+}
+
+/* Message composer */
 .mc_line_gap {
   margin-top: 3px;
 }
@@ -464,25 +525,6 @@ label:has(+ #sb_resource) {
   min-width: 25%;
 }
 
-.start {
-  align-self: start;
-  justify-content: start;
-}
-.center {
-  align-self: center;
-  align-content: center;
-  align-items: center;
-  justify-content: center;
-}
-.end {
-  align-self: end;
-  justify-content: end;
-}
-.fill {
-  /* Setting width: 0 and min-width: 100% ignores element size */
-  width: 0;
-  min-width: 100%;
-}
 .pins {
   column-count: 2;
   list-style: none;
@@ -490,25 +532,9 @@ label:has(+ #sb_resource) {
   margin: 0;
 }
 
-.no-display {
-  display: none;
-}
-.hidden {
-  visibility: hidden;
-}
-
-/* ---------------
- * Signal Housings
- * --------------- */
-.signal-housing {
-  align-self: start;
-  background-color: black;
-  text-indent: 0;
-  padding: 0.2rem 0.2rem 0 0.2rem;
-  border-radius: 0.2rem;
-  border: 1px solid black;
-}
-
+/* --------------------
+ * Lane Control Signals
+ * -------------------- */
 .lcs {
   background-color: black;
   font-size: x-large;
@@ -518,27 +544,21 @@ label:has(+ #sb_resource) {
   width: 2rem;
   padding: 0.2rem 0.3rem 0;
 }
-
 .lcs_dark {
   color: black;
 }
-
 .lcs_lane_open {
   color: lawngreen;
 }
-
 .lcs_use_caution {
   color: yellow;
 }
-
 .lcs_lane_closed_ahead {
   color: yellow;
 }
-
 .lcs_lane_closed {
   color: red;
 }
-
 .lcs_unknown {
   color: gray;
 }
@@ -583,6 +603,11 @@ label:has(+ #sb_resource) {
   border: 1px solid black;
   border-radius: 0.2rem;
 }
-.tiny {
-  font-size: xx-small;
+.signal-housing {
+  align-self: start;
+  background-color: black;
+  text-indent: unset;
+  padding: 0.2rem 0.2rem 0 0.2rem;
+  border-radius: 0.2rem;
+  border: 1px solid black;
 }

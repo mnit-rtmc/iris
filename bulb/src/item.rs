@@ -18,8 +18,12 @@ use std::fmt;
 pub enum ItemState {
     /// Available for use
     Available,
-    /// Deployed by operator
+    /// Dark (available LCS)
+    Dark,
+    /// Deployed (in use)
     Deployed,
+    /// Operator deployed
+    Operator,
     /// Deployed by plan / schedule
     Planned,
     /// Prohibited from use
@@ -91,7 +95,9 @@ impl ItemState {
     pub fn from_code(code: &str) -> Option<Self> {
         match code {
             "🔹" => Some(Self::Available),
+            "◼️" => Some(Self::Dark),
             "🔶" => Some(Self::Deployed),
+            "🟨" => Some(Self::Operator),
             "📋" => Some(Self::Planned),
             "🚫" => Some(Self::Prohibited),
             "🚨" => Some(Self::Incident),
@@ -126,7 +132,9 @@ impl ItemState {
     pub fn code(self) -> &'static str {
         match self {
             Self::Available => "🔹",
+            Self::Dark => "◼️",
             Self::Deployed => "🔶",
+            Self::Operator => "🟨",
             Self::Planned => "📋",
             Self::Prohibited => "🚫",
             Self::Incident => "🚨",
@@ -160,7 +168,9 @@ impl ItemState {
     pub fn description(self) -> &'static str {
         match self {
             Self::Available => "available",
+            Self::Dark => "dark",
             Self::Deployed => "deployed",
+            Self::Operator => "operator",
             Self::Planned => "planned",
             Self::Prohibited => "prohibited",
             Self::Incident => "incident",

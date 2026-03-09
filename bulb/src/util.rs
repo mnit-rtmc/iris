@@ -158,7 +158,7 @@ impl Doc {
                 .dyn_into::<E>()
                 .inspect_err(|_| {
                     let e = "Invalid element type";
-                    web_sys::console::log_1(&format!("{e}: {id}").into());
+                    log::error!("{e}: {id}");
                 })
                 .unwrap_throw(),
         )
@@ -169,7 +169,7 @@ impl Doc {
         self.try_elem(id)
             .ok_or_else(|| {
                 let e = "Invalid element ID";
-                web_sys::console::log_1(&format!("{e}: {id}").into());
+                log::error!("{e}: {id}");
                 e
             })
             .unwrap_throw()

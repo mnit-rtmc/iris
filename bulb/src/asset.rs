@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ pub enum Asset {
     MonitorStyles,
     MsgLines,
     MsgPatterns,
+    Permissions,
     PlanPhases,
     ResourceTypes,
     RoadModifiers,
@@ -62,7 +63,7 @@ pub enum Asset {
 
 impl Asset {
     /// Get asset Uri
-    fn uri(&self) -> Uri {
+    pub fn uri(&self) -> Uri {
         use Asset::*;
         match self {
             Access => "/iris/api/access".into(),
@@ -116,6 +117,7 @@ impl Asset {
             MonitorStyles => "/iris/api/monitor_style".into(),
             MsgLines => "/iris/api/msg_line".into(),
             MsgPatterns => "/iris/api/msg_pattern".into(),
+            Permissions => "/iris/api/permission".into(),
             PlanPhases => "/iris/api/plan_phase".into(),
             ResourceTypes => "/iris/lut/resource_type".into(),
             RoadModifiers => "/iris/lut/road_modifier".into(),
@@ -128,8 +130,8 @@ impl Asset {
         }
     }
 
-    /// Fetch the asset value
-    pub async fn fetch(self) -> Result<Option<(Self, JsValue)>> {
+    /// Try to fetch the asset value
+    pub async fn try_fetch(self) -> Result<Option<(Self, JsValue)>> {
         match self.uri().get().await {
             Ok(value) => Ok(Some((self, value))),
             Err(Error::FetchResponseNotFound())

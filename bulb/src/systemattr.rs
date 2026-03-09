@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2026  Minnesota Department of Transportation
+// Copyright (C) 2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -10,8 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::Card;
-use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::card::{AncillaryData, Card};
+use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
 use crate::view::View;
 use hatmil::{Page, html};
@@ -19,53 +19,61 @@ use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 
-/// Flow Stream
+/// System Attribute
 #[derive(Debug, Default, Deserialize, PartialEq)]
-pub struct FlowStream {
+pub struct SystemAttr {
     pub name: String,
-    pub controller: Option<String>,
-    // secondary attributes
-    pub pin: Option<u32>,
+    pub value: String,
 }
 
-type FlowStreamAnc = ControllerIoAnc<FlowStream>;
+/// Ancillary system attribute data
+#[derive(Debug, Default)]
+pub struct SystemAttrAnc;
 
-impl FlowStream {
+impl AncillaryData for SystemAttrAnc {
+    type Primary = SystemAttr;
+
+    /// Construct ancillary system attribute data
+    fn new(_pri: &SystemAttr, _view: View) -> Self {
+        SystemAttrAnc
+    }
+}
+
+impl SystemAttr {
     /// Convert to Compact HTML
-    fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
+    fn to_html_compact(&self) -> String {
         let mut page = Page::new();
         let mut div = page.frag::<html::Div>();
-        div.class("title row")
-            .cdata(self.name())
-            .cdata(" ")
-            .cdata(anc.item_states(self).to_string());
+        div.cdata(self.name());
         String::from(page)
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &FlowStreamAnc) -> String {
+    fn to_html_setup(&self) -> String {
         let mut page = Page::new();
         self.title(View::Setup, &mut page.frag::<html::Div>());
-        anc.controller_html(self, &mut page.frag::<html::Div>());
-        anc.pin_html(self.pin, &mut page.frag::<html::Div>());
+        let mut div = page.frag::<html::Div>();
+        div.class("row");
+        div.label().r#for("value").cdata("Value").close();
+        let mut input = div.input();
+        input.id("value").maxlength(64).size(24).value(&self.value);
+        div.close();
         self.footer_html(true, &mut page.frag::<html::Div>());
         String::from(page)
     }
 }
 
-impl ControllerIo for FlowStream {
-    /// Get controller name
-    fn controller(&self) -> Option<&str> {
-        self.controller.as_deref()
-    }
-}
-
-impl Card for FlowStream {
-    type Ancillary = FlowStreamAnc;
+impl Card for SystemAttr {
+    type Ancillary = SystemAttrAnc;
 
     /// Get the resource
     fn res() -> Res {
-        Res::FlowStream
+        Res::SystemAttribute
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[]
     }
 
     /// Get the name
@@ -80,24 +88,23 @@ impl Card for FlowStream {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &FlowStreamAnc) -> bool {
-        self.name.contains_lower(search)
+    fn is_match(&self, search: &str, _anc: &SystemAttrAnc) -> bool {
+        self.name.contains_lower(search) || self.value.contains_lower(search)
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &FlowStreamAnc) -> String {
+    fn to_html(&self, view: View, anc: &SystemAttrAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Setup => self.to_html_setup(anc),
-            _ => self.to_html_compact(anc),
+            View::Setup => self.to_html_setup(),
+            _ => self.to_html_compact(),
         }
     }
 
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
-        fields.changed_input("controller", &self.controller);
-        fields.changed_input("pin", self.pin);
+        fields.changed_input("value", &self.value);
         fields.into_value().to_string()
     }
 }

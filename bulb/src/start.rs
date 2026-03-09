@@ -10,13 +10,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::app::{self, DeferredAction, NotifyState};
-use crate::card::{self, CardList, CardState, CardView, View};
+use crate::app::{self, DeferredAction};
+use crate::asset::Asset;
+use crate::card::{self, CardList, CardState};
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::item::ItemState;
 use crate::permission::Permission;
+use crate::sse;
 use crate::util::Doc;
+use crate::view::{CardView, View};
 use js_sys::JsString;
 use resources::Res;
 use std::error::Error as _;
@@ -24,10 +27,9 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    CustomEvent, Element, Event, EventSource, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, MessageEvent, ScrollBehavior,
-    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
-    console,
+    CustomEvent, Element, Event, HtmlButtonElement, HtmlElement,
+    HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
+    ScrollLogicalPosition, TransitionEvent, Window,
 };
 
 /// JavaScript result
@@ -40,7 +42,9 @@ extern "C" {
     fn js_set_selected(res: &JsValue, name: &JsValue);
     // Update TMS main item states
     fn js_update_item_states(data: &JsValue);
-    /// Update station data
+    // Redraw the map
+    fn js_redraw_map();
+    /// Update station data JSON and redraw the map
     fn js_update_stat_sample(data: &JsValue);
     // Fly map to given item
     fn js_fly_map_to(fid: &JsValue, lat: &JsValue, lng: &JsValue);
@@ -59,32 +63,26 @@ struct ButtonAttrs {
 /// Show login form shade
 fn show_login() {
     app::set_user(None);
-    Doc::get()
-        .elem::<HtmlElement>("sb_login")
-        .set_class_name("show");
+    show_elem("sb_login");
 }
 
-/// Hide login form shade
-fn hide_login() {
-    Doc::get()
-        .elem::<HtmlElement>("sb_login")
-        .set_class_name("");
+/// Show an element
+fn show_elem(id: &str) {
+    Doc::get().elem::<HtmlElement>(id).set_class_name("show");
+}
+
+/// Hide an element
+fn hide_elem(id: &str) {
+    Doc::get().elem::<HtmlElement>(id).set_class_name("hidden");
 }
 
 /// Show a toast message
 fn show_toast(msg: &str) {
-    console::log_1(&format!("toast: {msg}").into());
+    log::warn!("toast: {msg}");
     let t = Doc::get().elem::<HtmlElement>("sb_toast");
     t.set_inner_html(msg);
     t.set_class_name("show");
     app::defer_action(DeferredAction::HideToast, 3000);
-}
-
-/// Hide toast
-fn hide_toast() {
-    Doc::get()
-        .elem::<HtmlElement>("sb_toast")
-        .set_class_name("");
 }
 
 /// Fly map to specified item
@@ -100,24 +98,28 @@ pub fn fly_map_item(fid: &str, lat: f64, lon: f64) {
 pub async fn start() -> core::result::Result<(), JsError> {
     // this should be debug only
     console_error_panic_hook::set_once();
-    add_sidebar().await.unwrap_throw();
+    wasm_log::init(wasm_log::Config::default().module_prefix("bulb"));
+    log::info!("Started");
+    add_listeners().await.unwrap_throw();
     Ok(())
 }
 
-/// Add sidebar HTML and event listeners
-async fn add_sidebar() -> JsResult<()> {
+/// Add event listeners
+async fn add_listeners() -> JsResult<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
+    let divider: HtmlElement = doc.elem("divider");
+    add_click_listener(&divider)?;
     let sidebar: HtmlElement = doc.elem("sidebar");
     add_change_listener(&sidebar)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
+    add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    let mapid: HtmlElement = doc.elem("mapid");
-    add_map_click_listener(&mapid)?;
-    add_eventsource_listener();
+    let map_pane: HtmlElement = doc.elem("map_pane");
+    add_map_click_listener(&map_pane)?;
     do_future(finish_init()).await;
     fetch_station_sample();
     if let Some(doc_elem) = doc.doc_elem() {
@@ -128,25 +130,23 @@ async fn add_sidebar() -> JsResult<()> {
 
 /// Finish initialization
 async fn finish_init() -> Result<()> {
+    sse::add_listener();
     let user = Uri::from("/iris/api/login").get().await?;
     match user.as_string() {
         Some(user) => {
             app::set_user(Some(user));
-            if !app::initialized() {
-                update_sb_resource().await?;
-                set_resource(None, "").await;
-                app::set_initialized();
-            }
+            update_sb_resource().await?;
+            set_resource(None, "").await;
+            sse::post_req(None).await;
         }
-        None => console::log_1(&format!("invalid user: {user:?}").into()),
+        None => log::warn!("invalid user: {user:?}"),
     }
     Ok(())
 }
 
 /// Update resource select options
 async fn update_sb_resource() -> Result<()> {
-    let json = Uri::from("/iris/api/access").get().await?;
-    let access: Vec<Permission> = serde_wasm_bindgen::from_value(json)?;
+    let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
     let doc = Doc::get();
     if let Some(elem) = doc.try_elem::<Element>("opt_action_plan") {
         elem.set_class_name(opt_class(&access, Res::ActionPlan));
@@ -187,7 +187,7 @@ async fn update_sb_resource() -> Result<()> {
     if let Some(elem) = doc.try_elem::<Element>("opt_permission") {
         elem.set_class_name(opt_class(&access, Res::Permission));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_system_attribute") {
+    if let Some(elem) = doc.try_elem::<Element>("opt_system") {
         elem.set_class_name(opt_class(&access, Res::SystemAttribute));
     }
     if let Some(elem) = doc.try_elem::<Element>("opt_toll_zone") {
@@ -225,9 +225,9 @@ fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
 /// Add a "change" event listener to an element
 fn add_change_listener(elem: &Element) -> JsResult<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        let id = target.id();
-        if id.as_str() == "sb_fullscreen" {
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>())
+            && target.id().as_str() == "sb_fullscreen"
+        {
             set_fullscreen();
         }
     });
@@ -263,7 +263,7 @@ async fn do_future(future: impl Future<Output = Result<()>>) {
         }
         Err(e) => {
             if let Some(se) = e.source() {
-                console::log_1(&format!("{se}").into());
+                log::warn!("source: {se}");
             }
             show_toast(&format!("Error: {e}"));
         }
@@ -278,26 +278,30 @@ fn row_class(show: bool) -> &'static str {
 /// Handle change to selected resource type
 async fn handle_resource_change(res: Option<Res>, search: &str) {
     let doc = Doc::get();
+    let sidebar = doc.elem::<HtmlElement>("sidebar");
+    sidebar.set_class_name("wait");
+    let sb_list = doc.elem::<Element>("sb_list");
+    sb_list.set_inner_html("");
+    let base = res.map(|r| r.base());
+    if let Some(elem) = doc.try_elem::<Element>("res_dms_row") {
+        elem.set_class_name(row_class(base == Some(Res::Dms)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_lcs_row") {
+        elem.set_class_name(row_class(base == Some(Res::Lcs)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_video_monitor_row") {
+        elem.set_class_name(row_class(base == Some(Res::VideoMonitor)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_controller_row") {
+        elem.set_class_name(row_class(base == Some(Res::Controller)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_permission_row") {
+        elem.set_class_name(row_class(base == Some(Res::Permission)));
+    }
+    if let Some(elem) = doc.try_elem::<Element>("res_system_row") {
+        elem.set_class_name(row_class(base == Some(Res::SystemAttribute)));
+    }
     if let Some(res) = res {
-        let base = res.base();
-        if let Some(elem) = doc.try_elem::<Element>("res_dms_row") {
-            elem.set_class_name(row_class(base == Res::Dms));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_lcs_row") {
-            elem.set_class_name(row_class(base == Res::Lcs));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_video_monitor_row") {
-            elem.set_class_name(row_class(base == Res::VideoMonitor));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_controller_row") {
-            elem.set_class_name(row_class(base == Res::Controller));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_system_row") {
-            elem.set_class_name(row_class(base == Res::SystemAttribute));
-        }
-        if let Some(elem) = doc.try_elem::<Element>("res_permission_row") {
-            elem.set_class_name(row_class(base == Res::Permission));
-        }
         let id = format!("res_{}", res.as_str());
         if let Some(elem) = doc.try_elem::<HtmlInputElement>(&id) {
             elem.set_checked(true);
@@ -311,50 +315,9 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
-    // FIXME: rework card_list API
-    app::card_list(None);
-    do_future(fetch_card_list()).await;
-    do_future(populate_card_list()).await;
-    let uri = Uri::from("/iris/api/notify");
-    let json = notify_list(res);
-    if let Err(e) = uri.post(&json.into()).await {
-        console::log_1(&format!("/iris/api/notify POST: {e}").into());
-    }
-}
-
-/// Build resource list for notifications
-fn notify_list(res: Option<Res>) -> String {
-    // Always listen for resources with map markers
-    let mut resources = vec![
-        Res::Beacon.as_str(),
-        Res::Camera.as_str(),
-        Res::Dms.as_str(),
-        Res::Lcs.as_str(),
-        Res::RampMeter.as_str(),
-        Res::WeatherSensor.as_str(),
-    ];
-    if let Some(r) = res {
-        // Ensure selected `res` is last, since the map will redraw after
-        // receiving that notification (js_set_selected)
-        resources.retain(|rs| *rs != r.as_str());
-        resources.push(r.as_str());
-    }
-    format!("[\"{}\"]", &resources.join("\",\""))
-}
-
-/// Fetch card list for selected resource type
-async fn fetch_card_list() -> Result<()> {
-    let mut cards = app::card_list(None);
-    if cards.is_none() {
-        let res = selected_resource();
-        cards = res.map(CardList::new);
-    }
-    if let Some(cards) = &mut cards {
-        let json = cards.fetch_all().await?;
-        cards.swap_json(json);
-    }
-    app::card_list(cards);
-    Ok(())
+    do_future(fetch_and_populate_cards(res)).await;
+    // Turn off "wait" style
+    sidebar.set_class_name("");
 }
 
 /// Get the selected resource value
@@ -373,6 +336,9 @@ fn selected_resource() -> Option<Res> {
         {
             Some(Res::SignConfig)
         }
+        Res::Dms if doc.elem::<HtmlInputElement>("res_word").checked() => {
+            Some(Res::Word)
+        }
         Res::Lcs if doc.elem::<HtmlInputElement>("res_lcs_state").checked() => {
             Some(Res::LcsState)
         }
@@ -381,10 +347,11 @@ fn selected_resource() -> Option<Res> {
         {
             Some(Res::MonitorStyle)
         }
-        Res::VideoMonitor
-            if doc.elem::<HtmlInputElement>("res_flow_stream").checked() =>
-        {
-            Some(Res::FlowStream)
+        Res::VideoMonitor => {
+            match doc.try_elem::<HtmlInputElement>("res_flow_stream") {
+                Some(input) => input.checked().then_some(Res::FlowStream),
+                None => Some(res),
+            }
         }
         Res::Controller
             if doc.elem::<HtmlInputElement>("res_comm_link").checked() =>
@@ -435,16 +402,6 @@ fn selected_resource() -> Option<Res> {
     }
 }
 
-/// Populate `sb_list` with selected resource type
-async fn populate_card_list() -> Result<()> {
-    let doc = Doc::get();
-    let search = search_value();
-    let html = build_card_list(&search).await?;
-    let sb_list = doc.elem::<Element>("sb_list");
-    sb_list.set_inner_html(&html);
-    Ok(())
-}
-
 /// Get value to search
 fn search_value() -> String {
     let doc = Doc::get();
@@ -459,34 +416,11 @@ fn search_value() -> String {
     search
 }
 
-/// Build a filtered list of cards for a resource
-async fn build_card_list(search: &str) -> Result<String> {
-    match app::card_list(None) {
-        Some(mut cards) => {
-            cards.search(search);
-            let html = cards.make_html().await?;
-            app::card_list(Some(cards));
-            Ok(html)
-        }
-        None => Ok(String::new()),
-    }
-}
-
 /// Add an "input" event listener to an element
 fn add_input_listener(elem: &Element) -> JsResult<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        let id = target.id();
-        match id.as_str() {
-            "res_dms" | "res_msg_pattern" | "res_sign_config" | "res_lcs"
-            | "res_lcs_state" | "res_video_monitor" | "res_monitor_style"
-            | "res_flow_stream" | "res_controller" | "res_comm_link"
-            | "res_alarm" | "res_gps" | "res_modem" | "res_comm_config"
-            | "res_cabinet_style" | "res_permission" | "res_user"
-            | "res_role" | "res_domain" | "sb_resource" => handle_res_change(),
-            "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
-            "ob_view" => handle_ob_view_ev(),
-            _ => spawn_local(do_future(handle_input(id))),
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
+            handle_input(target.id());
         }
     });
     elem.add_event_listener_with_callback(
@@ -498,28 +432,39 @@ fn add_input_listener(elem: &Element) -> JsResult<()> {
     Ok(())
 }
 
+/// Handle an input event
+fn handle_input(id: String) {
+    match id.as_str() {
+        "res_dms" | "res_msg_pattern" | "res_sign_config" | "res_word"
+        | "res_lcs" | "res_lcs_state" | "res_video_monitor"
+        | "res_monitor_style" | "res_flow_stream" | "res_controller"
+        | "res_comm_link" | "res_alarm" | "res_gps" | "res_modem"
+        | "res_system_attr" | "res_comm_config" | "res_cabinet_style"
+        | "res_permission" | "res_user" | "res_role" | "res_domain"
+        | "sb_resource" => handle_res_change(),
+        "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
+        "ob_view" => handle_ob_view_ev(),
+        _ => spawn_local(do_future(handle_input_other(id))),
+    }
+}
+
 /// Handle resource change
 fn handle_res_change() {
     let res = selected_resource();
     spawn_local(handle_resource_change(res, ""));
-}
-
-/// Handle search input
-async fn handle_search() -> Result<()> {
-    if let Some(cv) = app::form() {
-        replace_card(cv.compact()).await?
-    }
-    search_card_list().await
+    spawn_local(sse::post_req(res));
 }
 
 /// Search card list for matching cards
-async fn search_card_list() -> Result<()> {
+async fn handle_search() -> Result<()> {
     match app::card_list(None) {
         Some(mut cards) => {
             let search = search_value();
-            cards.search(&search);
+            if let Some(cv) = cards.expanded_view() {
+                replace_card(cv.compact(), &search).await?
+            }
             let doc = Doc::get();
-            for cv in cards.view_change().await? {
+            for cv in cards.search_views(&search).await? {
                 let id = cv.id();
                 if let Some(elem) = doc.try_elem::<Element>(&id) {
                     elem.set_class_name(cv.view.class_name());
@@ -527,17 +472,17 @@ async fn search_card_list() -> Result<()> {
             }
             app::card_list(Some(cards));
         }
-        None => console::log_1(&"search failed - no card list".into()),
+        None => log::warn!("search failed - no card list"),
     }
     Ok(())
 }
 
 /// Handle an event from `ob_view` select element
 fn handle_ob_view_ev() {
-    if let Some(cv) = app::form()
+    if let Some(cv) = app::expanded_view()
         && let Some(view) = ob_view_value()
     {
-        spawn_local(do_future(replace_card(cv.view(view))));
+        spawn_local(do_future(replace_card(cv.view(view), "")));
     }
 }
 
@@ -549,10 +494,56 @@ fn ob_view_value() -> Option<View> {
     }
 }
 
-/// Handle an input event on a form card
-async fn handle_input(id: String) -> Result<()> {
-    if let Some(cv) = app::form() {
-        card::handle_input(&cv, id).await?;
+/// Handle an input event on an expanded card
+async fn handle_input_other(id: String) -> Result<()> {
+    if let Some(cv) = app::expanded_view() {
+        cv.handle_input(id).await?;
+    }
+    Ok(())
+}
+
+/// Add "focusin" / "focusout" event listeners to an element
+fn add_focus_listener(elem: &Element) -> JsResult<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Some(Ok(input)) =
+            e.target().map(|e| e.dyn_into::<HtmlInputElement>())
+        {
+            spawn_local(do_future(handle_focus_events(input, e.type_())));
+        }
+    });
+    elem.add_event_listener_with_callback(
+        "focusin",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    elem.add_event_listener_with_callback(
+        "focusout",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Handle focusin / focusout events
+async fn handle_focus_events(
+    input: HtmlInputElement,
+    tp: String,
+) -> Result<()> {
+    let id = input.id();
+    // DMS message composer line input
+    if id.as_str().starts_with("mc_line") {
+        match tp.as_str() {
+            "focusin" => input.set_value(""),
+            "focusout" => {
+                if input.value().is_empty()
+                    && let Some(ms) = input.get_attribute("data-cur")
+                {
+                    input.set_value(&ms);
+                    handle_input_other(id).await?;
+                }
+            }
+            _ => (),
+        }
     }
     Ok(())
 }
@@ -560,11 +551,12 @@ async fn handle_input(id: String) -> Result<()> {
 /// Add a `click` event listener to an element
 fn add_click_listener(elem: &Element) -> JsResult<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        let target = e.target().unwrap().dyn_into::<Element>().unwrap();
-        if target.is_instance_of::<HtmlButtonElement>() {
-            handle_button_click_ev(&target);
-        } else if let Ok(Some(cc)) = target.closest(".card-compact") {
-            handle_card_click_ev(&cc);
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
+            if target.is_instance_of::<HtmlButtonElement>() {
+                handle_button_click_ev(&target);
+            } else if let Ok(Some(cc)) = target.closest(".card-compact") {
+                handle_card_click_ev(&cc);
+            }
         }
     });
     elem.add_event_listener_with_callback(
@@ -581,7 +573,8 @@ fn handle_button_click_ev(target: &Element) {
     let id = target.id();
     match id.as_str() {
         "ob_login" => spawn_local(handle_login()),
-        "sb_refresh" => spawn_local(handle_refresh()),
+        "show_sidebar" => spawn_local(handle_show_sidebar(true)),
+        "hide_sidebar" => spawn_local(handle_show_sidebar(false)),
         _ => {
             let attrs = ButtonAttrs {
                 id,
@@ -594,9 +587,25 @@ fn handle_button_click_ev(target: &Element) {
     }
 }
 
-/// Handle button click event on a form card
+/// Handle a show/hide sidebar button click
+async fn handle_show_sidebar(show: bool) {
+    let doc = Doc::get();
+    if let Some(btn) = doc.try_elem::<HtmlButtonElement>("show_sidebar") {
+        btn.set_disabled(show);
+    }
+    if let Some(btn) = doc.try_elem::<HtmlButtonElement>("hide_sidebar") {
+        btn.set_disabled(!show);
+    }
+    if show {
+        show_elem("sidebar");
+    } else {
+        hide_elem("sidebar");
+    }
+}
+
+/// Handle button click event on an epanded card
 async fn handle_button_card(attrs: ButtonAttrs) {
-    if let Some(cv) = app::form() {
+    if let Some(cv) = app::expanded_view() {
         match attrs.id.as_str() {
             "ob_delete" => do_future(handle_delete(cv)).await,
             "ob_save" => do_future(handle_save(cv)).await,
@@ -612,35 +621,34 @@ async fn handle_button_card(attrs: ButtonAttrs) {
 }
 
 /// Replace a card view element with another view
-async fn replace_card(cv: CardView) -> Result<()> {
-    let html = card::fetch_one(&cv).await?;
-    replace_card_html(cv, &html);
+async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
+    let html = cv.fetch_one(search).await?;
+    replace_card_html(&cv, &html);
+    app::set_view(cv);
     Ok(())
 }
 
 /// Replace a card with provided HTML
-fn replace_card_html(cv: CardView, html: &str) {
+fn replace_card_html(cv: &CardView, html: &str) {
     let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id()) else {
-        console::log_1(
-            &format!("replace_card_html: {} not found", cv.id()).into(),
-        );
+        log::warn!("element {} not found", cv.id());
         return;
     };
     elem.set_inner_html(html);
     elem.set_class_name(cv.view.class_name());
-    if cv.view.is_form() {
+    if cv.view.is_expanded() {
         let opt = ScrollIntoViewOptions::new();
         opt.set_behavior(ScrollBehavior::Smooth);
         opt.set_block(ScrollLogicalPosition::Nearest);
         elem.scroll_into_view_with_scroll_into_view_options(&opt);
     }
-    app::set_view(cv);
 }
 
 /// Handle delete button click
 async fn handle_delete(cv: CardView) -> Result<()> {
     if app::delete_enabled() {
-        card::delete_one(&cv).await?;
+        cv.delete_one().await?;
+        replace_card(cv.view(View::Hidden), "").await?;
     }
     Ok(())
 }
@@ -656,19 +664,19 @@ async fn handle_save(cv: CardView) -> Result<()> {
 
 /// Save a create view card
 async fn save_create(cv: CardView) -> Result<()> {
-    card::create_and_post(cv.res).await?;
-    replace_card(cv.view(View::CreateCompact)).await
+    cv.create_and_post().await?;
+    replace_card(cv.view(View::CreateCompact), "").await
 }
 
 /// Save changed values on Setup / Location card
 async fn save_changed(cv: CardView) -> Result<()> {
-    card::patch_changed(&cv).await?;
-    replace_card(cv.view(View::Compact)).await
+    cv.patch_changed().await?;
+    replace_card(cv.view(View::Compact), "").await
 }
 
-/// Handle a button click on a form card
+/// Handle a button click on an expanded card
 async fn handle_button_cv(cv: CardView, id: String) {
-    match card::handle_click(&cv, id).await {
+    match cv.handle_click(id).await {
         Ok(_) => (),
         Err(e) => show_toast(&format!("click failed: {e}")),
     }
@@ -686,16 +694,21 @@ fn handle_card_click_ev(elem: &Element) {
 
 /// Handle a card click event
 async fn click_card(res: Res, name: String, id: String) -> Result<()> {
-    if let Some(cv) = app::form() {
-        replace_card(cv.compact()).await?;
+    if let Some(cv) = app::expanded_view() {
+        let search = search_value();
+        replace_card(cv.compact(), &search).await?;
     }
-    // FIXME: check if id are the same for old/new cards
+    // Expand to the second view (1) for this resource
     let mut view = *card::res_views(res).get(1).unwrap_or(&View::Compact);
     if id.ends_with('_') {
         view = View::Create;
     }
     let cv = CardView::new(res, &name, view);
-    replace_card(cv).await?;
+    replace_card(cv, "").await?;
+    js_set_selected(
+        &JsValue::from_str(res.as_str()),
+        &JsValue::from_str(&name),
+    );
     Ok(())
 }
 
@@ -714,7 +727,7 @@ async fn handle_login() {
             Ok(_) => {
                 let pass = doc.elem::<HtmlInputElement>("login_pass");
                 pass.set_value("");
-                hide_login();
+                hide_elem("sb_login");
                 do_future(finish_init()).await;
             }
             Err(e) => show_toast(&format!("Login failed: {e}")),
@@ -728,6 +741,7 @@ async fn go_resource(attrs: ButtonAttrs) {
         && let Ok(res) = Res::try_from(rname.as_str())
     {
         set_resource(Some(res), &link).await;
+        sse::post_req(Some(res)).await;
     }
 }
 
@@ -740,10 +754,25 @@ async fn set_resource(res: Option<Res>, search: &str) {
     handle_resource_change(res, search).await;
 }
 
-/// Handle refresh button click
-async fn handle_refresh() {
-    do_future(fetch_card_list()).await;
-    do_future(populate_card_list()).await;
+/// Fetch and populate card list
+async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
+    match res {
+        Some(res) => {
+            let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
+            let mut cards = CardList::new(res, &access);
+            cards.fetch_all().await?;
+            let search = search_value();
+            let html = cards.build_html(&search).await?;
+            let doc = Doc::get();
+            let sb_list = doc.elem::<Element>("sb_list");
+            sb_list.set_inner_html(&html);
+            app::card_list(Some(cards));
+        }
+        None => {
+            app::card_list(None);
+        }
+    }
+    Ok(())
 }
 
 /// Add transition event listener to an element
@@ -795,16 +824,18 @@ fn tick_interval() {
     while let Some(action) = app::next_action() {
         match action {
             DeferredAction::FetchStationData => fetch_station_sample(),
-            DeferredAction::HideToast => hide_toast(),
-            DeferredAction::MakeEventSource => add_eventsource_listener(),
-            DeferredAction::RefreshList => spawn_local(handle_refresh()),
-            DeferredAction::SetNotifyState(ns) => set_notify_state(ns),
+            DeferredAction::HideToast => hide_elem("sb_toast"),
+            DeferredAction::RefreshList => handle_res_change(),
+            DeferredAction::RedrawMap => js_redraw_map(),
+            DeferredAction::MakeEventSource => sse::add_listener(),
+            DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
         }
     }
 }
 
 /// Fetch station sample data
 fn fetch_station_sample() {
+    log::debug!("fetch_station_sample");
     app::defer_action(DeferredAction::FetchStationData, 30_000);
     spawn_local(do_future(do_fetch_station_sample()));
 }
@@ -823,7 +854,7 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
         .dyn_into::<JsString>()
     {
         Ok(name) => spawn_local(do_future(select_card_map(name.into()))),
-        Err(e) => console::log_1(&format!("tmsevent: {e:?}").into()),
+        Err(e) => log::warn!("tmsevent: {e:?}"),
     });
     elem.add_event_listener_with_callback(
         "tmsevent",
@@ -837,14 +868,16 @@ fn add_map_click_listener(elem: &Element) -> JsResult<()> {
 /// Select a card from a map marker click
 async fn select_card_map(name: String) -> Result<()> {
     if name.is_empty() {
-        if let Some(cv) = app::form() {
-            replace_card(cv.compact()).await?;
+        if let Some(cv) = app::expanded_view() {
+            let search = search_value();
+            replace_card(cv.compact(), &search).await?;
         }
         return Ok(());
     }
     let res = app::name_res(&name);
+    let changed = res != selected_resource();
     if let Some(res) = res {
-        if selected_resource() != Some(res) {
+        if changed {
             set_resource(Some(res), "").await;
         }
         let id = format!("{res}_{name}");
@@ -852,74 +885,92 @@ async fn select_card_map(name: String) -> Result<()> {
         click_card(res, name, id).await?;
         js_fly_enable(JsValue::TRUE);
     }
+    if changed {
+        sse::post_req(res).await;
+    }
     Ok(())
 }
 
-/// Add event source listener for notifications
-fn add_eventsource_listener() {
-    set_notify_state(NotifyState::Disconnected);
-    let es = match EventSource::new("/iris/api/notify") {
-        Ok(es) => es,
-        Err(e) => {
-            set_notify_state(NotifyState::Starting);
-            console::log_1(&format!("SSE /iris/api/notify: {e:?}").into());
-            app::defer_action(DeferredAction::MakeEventSource, 5000);
-            return;
-        }
-    };
-    let onopen: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_notify_state(NotifyState::Connecting);
-    });
-    es.set_onopen(Some(onopen.as_ref().unchecked_ref()));
-    onopen.forget();
-    let onerror: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        set_notify_state(NotifyState::Disconnected);
-    });
-    es.set_onerror(Some(onerror.as_ref().unchecked_ref()));
-    onerror.forget();
-    let onmessage: Closure<dyn Fn(_)> = Closure::new(|e: MessageEvent| {
-        set_notify_state(NotifyState::Good);
-        if let Ok(payload) = e.data().dyn_into::<JsString>() {
-            spawn_local(do_future(handle_notify(String::from(payload))));
-        }
-    });
-    es.set_onmessage(Some(onmessage.as_ref().unchecked_ref()));
-    // can't drop closure, just forget it to make JS happy
-    onmessage.forget();
+/// Handle SSE notification
+pub fn handle_notification(chan: String, name: Option<String>) {
+    spawn_local(do_future(do_handle_notification(chan, name)));
 }
 
-/// Set refresh button text
-fn set_notify_state(ns: NotifyState) {
-    let sb_refresh = Doc::get().elem::<HtmlButtonElement>("sb_refresh");
-    sb_refresh.set_inner_html(&ns.build_html());
-    sb_refresh.set_disabled(ns.disabled());
-}
-
-/// Handle SSE notify from server
-async fn handle_notify(payload: String) -> Result<()> {
-    let rname = selected_resource().map_or("", |res| res.as_str());
-    let (chan, _name) = match payload.split_once('$') {
-        Some((a, b)) => (a, Some(b)),
-        None => (payload.as_str(), None),
-    };
-    if chan == rname {
-        set_notify_state(NotifyState::Updating);
-        app::defer_action(
-            DeferredAction::SetNotifyState(NotifyState::Good),
-            600,
-        );
-        do_future(update_card_list()).await;
-    } else if let Ok(res) = Res::try_from(chan) {
-        let mut cards = CardList::new(res);
-        let json = cards.fetch_all().await?;
-        cards.swap_json(json);
-        // FIXME: only needed for resources with map markers
-        let _html = cards.make_html().await?;
-        let items = cards.states_main().await?;
-        let json = item_states_json(&items);
-        app::set_resources(items);
-        js_update_item_states(&json);
+/// Handle SSE notification
+async fn do_handle_notification(
+    chan: String,
+    _name: Option<String>,
+) -> Result<()> {
+    // Has the selected resource list updated?
+    if let Some(res) = selected_resource()
+        && res.as_str() == chan
+        && update_card_list(res).await?
+    {
+        return Ok(());
     }
+    if let Ok(res) = Res::try_from(chan.as_str())
+        && res.has_location()
+    {
+        let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
+        let mut cards = CardList::new(res, &access);
+        cards.fetch_all().await?;
+        update_map_states(&cards).await?;
+        app::defer_action(DeferredAction::RedrawMap, 500);
+    }
+    Ok(())
+}
+
+/// Update `sb_list` with changed result
+async fn update_card_list(res: Res) -> Result<bool> {
+    let Some(old_cards) = app::card_list(None) else {
+        return Ok(false);
+    };
+    if old_cards.res() != res {
+        js_set_selected(
+            &JsValue::from_str(res.as_str()),
+            &JsValue::from_str(""),
+        );
+        return Ok(false);
+    }
+    let old_json = old_cards.json().to_string();
+    let expanded = old_cards.expanded_view();
+    app::card_list(Some(old_cards));
+    let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
+    let mut cards = CardList::new(res, &access).with_json(old_json);
+    cards.fetch_all().await?;
+    let search = search_value();
+    for (cv, html) in cards.changed_html(&search).await? {
+        if let Some(ev) = &expanded
+            && cv.name == ev.name
+        {
+            // update expanded card (Control cards only)
+            ev.handle_update().await?;
+        } else {
+            replace_card_html(&cv, &html);
+        }
+    }
+    if res.has_location() {
+        update_map_states(&cards).await?;
+        app::defer_action(DeferredAction::RedrawMap, 500);
+    }
+    if let Some(cv) = expanded {
+        // Re-select the map marker, in case item state changed
+        js_set_selected(
+            &JsValue::from_str(res.as_str()),
+            &JsValue::from_str(&cv.name),
+        );
+        cards.set_view(cv);
+    }
+    app::card_list(Some(cards));
+    Ok(true)
+}
+
+/// Update map item states
+async fn update_map_states(cards: &CardList) -> Result<()> {
+    let items = cards.states_main().await?;
+    let json = item_states_json(&items);
+    app::set_resources(items);
+    js_update_item_states(&json);
     Ok(())
 }
 
@@ -939,29 +990,4 @@ fn item_states_json(states: &[CardState]) -> JsValue {
     }
     json.push('}');
     JsValue::from_str(&json)
-}
-
-/// Update `sb_list` with changed result
-async fn update_card_list() -> Result<()> {
-    let Some(mut cards) = app::card_list(None) else {
-        console::log_1(&JsValue::from("update_card_list: None"));
-        return Ok(());
-    };
-    let old_json = cards.swap_json(String::new());
-    app::card_list(Some(cards));
-    fetch_card_list().await?;
-    let cards = app::card_list(None).unwrap();
-    for (cv, html) in cards.changed_vec(old_json).await? {
-        replace_card_html(cv, &html);
-    }
-    let items = cards.states_main().await?;
-    let json = item_states_json(&items);
-    app::set_resources(items);
-    js_update_item_states(&json);
-    js_set_selected(
-        &JsValue::from_str(cards.res().as_str()),
-        &JsValue::from_str(&cards.selected_name()),
-    );
-    app::card_list(Some(cards));
-    search_card_list().await
 }

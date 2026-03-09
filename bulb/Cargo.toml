@@ -17,6 +17,7 @@ gift.workspace = true
 hatmil = "1.1.0"
 humantime = "2.1"
 js-sys = "0.3"
+log.workspace = true
 mag.workspace = true
 ntcip.workspace = true
 percent-encoding = "2"
@@ -29,6 +30,7 @@ serde-wasm-bindgen = "0.6"
 thiserror.workspace = true
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
+wasm-log = "0.3.1"
 
 [dependencies.futures]
 version = "0.3"
