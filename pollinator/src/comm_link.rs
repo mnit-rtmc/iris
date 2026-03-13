@@ -12,6 +12,7 @@
 //
 use crate::binner::DetEvent;
 use crate::rtms_echo;
+use crate::rwis_api;
 use futures_util::{TryStreamExt, pin_mut};
 use resin::event::VehEvent;
 use resin::{Database, Error, Result};
@@ -23,33 +24,51 @@ use tokio::time::{Duration, MissedTickBehavior, interval};
 /// SQL query for comm links
 const QUERY: &str = r#"
 SELECT row_to_json(row)::text FROM (
-       SELECT l.name, protocol, uri, poll_period_sec AS per_s,
-              long_poll_period_sec AS long_per_s, controller,
-              split_part(c.password, ':', 1) AS user,
-              split_part(c.password, ':', 2) AS password, pins, detectors
-       FROM iris.comm_link l
-       JOIN iris.comm_config cc ON cc.name = l.comm_config
-       JOIN iris.controller c ON c.comm_link = l.name
-       INNER JOIN (
-              SELECT controller,
-                     json_agg(pin ORDER BY pin) AS pins,
-                     json_agg(name ORDER BY pin) AS detectors
-              FROM iris.detector
-              GROUP BY controller
-       ) d ON d.controller = c.name
-       WHERE pollinator = true AND poll_enabled = true AND condition = 1
+    SELECT l.name, protocol, uri, poll_period_sec AS per_s,
+       long_poll_period_sec AS long_per_s, controller,
+       split_part(c.password, ':', 1) AS user,
+       split_part(c.password, ':', 2) AS password, pins,
+       detectors, weather_sensors, alt_ids
+    FROM iris.comm_link l
+    JOIN iris.comm_config cc
+      ON cc.name = l.comm_config
+    JOIN iris.controller c
+      ON c.comm_link = l.name
+    INNER JOIN (
+           SELECT controller,
+                  json_agg(pin ORDER BY pin)  AS pins,
+                  json_agg(COALESCE(detector_name, '') ORDER BY pin) AS detectors,
+                  json_agg(COALESCE(weather_sensor_name, '') ORDER BY pin) AS weather_sensors,
+                  json_agg(alt_id ORDER BY pin) AS alt_ids
+           FROM (
+                  SELECT controller, pin, name AS detector_name, NULL::text AS weather_sensor_name, NULL::text AS alt_id
+                  FROM iris.detector
+
+                  UNION ALL
+
+                  SELECT controller, pin, name AS weather_sensor_name, NULL::text AS detector_name, alt_id
+                  FROM iris.weather_sensor
+           ) io
+           GROUP BY controller
+    ) d
+      ON d.controller = c.name
+    WHERE pollinator = true
+      AND poll_enabled = true
+      AND condition = 1
 ) row"#;
 
 /// Comm protocol
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum CommProtocol {
     RtmsEcho,
+    CampbellCloud,
 }
 
 impl CommProtocol {
     /// Get protocol from ID
     fn from_id(id: u32) -> Option<Self> {
         match id {
+            26 => Some(Self::CampbellCloud),
             31 => Some(Self::RtmsEcho),
             _ => None,
         }
@@ -186,6 +205,14 @@ impl CommLink {
         &self.cfg
     }
 
+    /// Should log_disconnect be called if it disconnects?
+    pub fn disconnect_is_error(&self) -> bool {
+        match CommProtocol::from_id(self.cfg.protocol) {
+            Some(CommProtocol::CampbellCloud) => false,
+            _ => true
+        }
+    }
+
     /// Get comm link name
     pub fn name(&self) -> &str {
         &self.cfg.name
@@ -262,7 +289,9 @@ impl CommLink {
                 }
                 _ => (),
             }
-            self.log_disconnect(&db).await?;
+            if self.disconnect_is_error() {
+                self.log_disconnect(&db).await?;
+            }
             match res {
                 Err(Error::StreamDisconnected) => (),
                 Err(err) => log::warn!("{}: {err}", self.name()),
@@ -299,6 +328,12 @@ async fn try_run_link(link: &CommLink, db: Option<Database>) -> Result<()> {
             let sensor = rtms_echo::Sensor::new(link.clone());
             sensor.run(db).await
         }
-        _ => Err(Error::InvalidConfig("protocol")),
+        Some(CommProtocol::CampbellCloud) => {
+            tokio::task::spawn_blocking(|| {
+                rwis_api::run().expect("rwis_api run failed");
+            }).await?;
+            Ok(())
+        }
+        _ => Err(Error::InvalidConfig("protocol"))
     }
 }
