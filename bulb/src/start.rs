@@ -69,11 +69,13 @@ fn show_toast(msg: &str) {
 }
 
 /// Fly map to specified item
-pub fn fly_map_item(fid: &str, lat: f64, lon: f64) {
-    let fid = JsValue::from_str(fid);
-    let lat = JsValue::from_f64(lat);
-    let lon = JsValue::from_f64(lon);
-    // FIXME: js_fly_map_to(&fid, &lat, &lon);
+pub fn fly_map_item(_fid: &str, lat: f64, lon: f64) {
+    // FIXME: add fly animation?
+    spawn_local(async move {
+        // FIXME: select fid
+        let map_pane = earthwyrm::Map::new("map_pane").unwrap_throw();
+        let _ = map_pane.set_view(12, lon, lat).await;
+    });
 }
 
 /// Application starting function
@@ -100,7 +102,8 @@ async fn add_listeners() -> JsResult<()> {
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    let mut map_pane = earthwyrm::Map::new("map_pane").unwrap_throw();
+    let map_pane = earthwyrm::Map::new("map_pane").unwrap_throw();
+    map_pane.add_style().unwrap_throw();
     map_pane.set_view(11, -93.0, 45.0).await.unwrap_throw();
     let map_pane: HtmlElement = doc.elem("map_pane");
     add_map_click_listener(&map_pane)?;
