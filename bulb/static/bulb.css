@@ -149,7 +149,8 @@ th, td {
 #map_pane {
   display: none;
   min-width: 58%;
-  flex: 1;
+  /* lower z-order to prevent overlapping sidebar */
+  z-index: -1;
 }
 #divider {
   display: none;
@@ -168,7 +169,8 @@ th, td {
   flex-direction: column;
   user-select: none;
   justify-content: start;
-  margin: 0.2rem;
+  padding: 0.2rem;
+  background-color: #677;
   background-image: url(iris.svg);
   background-repeat: no-repeat;
   background-position: center;

@@ -35,23 +35,6 @@ use web_sys::{
 /// JavaScript result
 pub type JsResult<T> = std::result::Result<T, JsValue>;
 
-/// JavaScript imports
-#[wasm_bindgen(module = "/res/glue.js")]
-extern "C" {
-    // Set the selected resource
-    fn js_set_selected(res: &JsValue, name: &JsValue);
-    // Update TMS main item states
-    fn js_update_item_states(data: &JsValue);
-    // Redraw the map
-    fn js_redraw_map();
-    /// Update station data JSON and redraw the map
-    fn js_update_stat_sample(data: &JsValue);
-    // Fly map to given item
-    fn js_fly_map_to(fid: &JsValue, lat: &JsValue, lng: &JsValue);
-    // Enable/disable flying map
-    fn js_fly_enable(enable: JsValue);
-}
-
 /// Button attributes
 struct ButtonAttrs {
     id: String,
@@ -90,14 +73,14 @@ pub fn fly_map_item(fid: &str, lat: f64, lon: f64) {
     let fid = JsValue::from_str(fid);
     let lat = JsValue::from_f64(lat);
     let lon = JsValue::from_f64(lon);
-    js_fly_map_to(&fid, &lat, &lon);
+    // FIXME: js_fly_map_to(&fid, &lat, &lon);
 }
 
 /// Application starting function
 #[wasm_bindgen(start)]
 pub async fn start() -> core::result::Result<(), JsError> {
     crate::panic::set_hook_once();
-    wasm_log::init(wasm_log::Config::default().module_prefix("bulb"));
+    wasm_log::init(wasm_log::Config::default());
     log::info!("Started");
     add_listeners().await.unwrap_throw();
     Ok(())
@@ -117,6 +100,8 @@ async fn add_listeners() -> JsResult<()> {
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
+    let mut map_pane = earthwyrm::Map::new("map_pane").unwrap_throw();
+    map_pane.set_view(11, -93.0, 45.0).await.unwrap_throw();
     let map_pane: HtmlElement = doc.elem("map_pane");
     add_map_click_listener(&map_pane)?;
     do_future(finish_init()).await;
@@ -704,10 +689,11 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     }
     let cv = CardView::new(res, &name, view);
     replace_card(cv, "").await?;
-    js_set_selected(
-        &JsValue::from_str(res.as_str()),
-        &JsValue::from_str(&name),
-    );
+    // FIXME: update selected style on earthwyrm map
+    // js_set_selected(
+    //     &JsValue::from_str(res.as_str()),
+    //     &JsValue::from_str(&name),
+    // );
     Ok(())
 }
 
@@ -825,7 +811,7 @@ fn tick_interval() {
             DeferredAction::FetchStationData => fetch_station_sample(),
             DeferredAction::HideToast => hide_elem("sb_toast"),
             DeferredAction::RefreshList => handle_res_change(),
-            DeferredAction::RedrawMap => js_redraw_map(),
+            DeferredAction::RedrawMap => (), // FIXME: js_redraw_map(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
         }
@@ -842,7 +828,7 @@ fn fetch_station_sample() {
 /// Actually fetch station sample data
 async fn do_fetch_station_sample() -> Result<()> {
     let stat = Uri::from("/iris/station_sample").get().await?;
-    js_update_stat_sample(&stat);
+    // FIXME: js_update_stat_sample(&stat);
     Ok(())
 }
 
@@ -880,9 +866,9 @@ async fn select_card_map(name: String) -> Result<()> {
             set_resource(Some(res), "").await;
         }
         let id = format!("{res}_{name}");
-        js_fly_enable(JsValue::FALSE);
+        // FIXME: js_fly_enable(JsValue::FALSE);
         click_card(res, name, id).await?;
-        js_fly_enable(JsValue::TRUE);
+        // FIXME: js_fly_enable(JsValue::TRUE);
     }
     if changed {
         sse::post_req(res).await;
@@ -925,10 +911,11 @@ async fn update_card_list(res: Res) -> Result<bool> {
         return Ok(false);
     };
     if old_cards.res() != res {
-        js_set_selected(
-            &JsValue::from_str(res.as_str()),
-            &JsValue::from_str(""),
-        );
+        // FIXME: update selected style on earthwyrm map
+        // js_set_selected(
+        //     &JsValue::from_str(res.as_str()),
+        //     &JsValue::from_str(""),
+        // );
         return Ok(false);
     }
     let old_json = old_cards.json().to_string();
@@ -954,10 +941,11 @@ async fn update_card_list(res: Res) -> Result<bool> {
     }
     if let Some(cv) = expanded {
         // Re-select the map marker, in case item state changed
-        js_set_selected(
-            &JsValue::from_str(res.as_str()),
-            &JsValue::from_str(&cv.name),
-        );
+        // FIXME: update selected style on earthwyrm map
+        // js_set_selected(
+        //     &JsValue::from_str(res.as_str()),
+        //     &JsValue::from_str(&cv.name),
+        // );
         cards.set_view(cv);
     }
     app::card_list(Some(cards));
@@ -969,7 +957,7 @@ async fn update_map_states(cards: &CardList) -> Result<()> {
     let items = cards.states_main().await?;
     let json = item_states_json(&items);
     app::set_resources(items);
-    js_update_item_states(&json);
+    // FIXME: js_update_item_states(&json);
     Ok(())
 }
 
