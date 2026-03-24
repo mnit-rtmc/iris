@@ -118,6 +118,10 @@
   stroke: #adb0b0;
   stroke-width: 1;
 }
+.wyrm-beacon {
+  fill: #55acee;
+  stroke-width: 0.5;
+}
 .wyrm-camera {
   fill: #55acee;
   stroke-width: 0.5;

@@ -991,7 +991,6 @@ fn zoom_levels(res: Res) -> RangeInclusive<u32> {
 /// Make a resource location marker
 fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     match res {
-        Res::Beacon => beacon_marker(pt, norm, sz),
         Res::Dms => dms_marker(pt, norm, sz),
         Res::Incident => incident_marker(pt, norm, sz),
         Res::Lcs => lcs_marker(pt, norm, sz),
@@ -999,37 +998,6 @@ fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
         Res::WeatherSensor => weather_sensor_marker(pt, sz),
         _ => unimplemented!(),
     }
-}
-
-/// Make beacon marker
-fn beacon_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    const S2: f64 = std::f64::consts::SQRT_2;
-    const S1: f64 = 2.0 - S2;
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        // base
-        Pt::from((0.0, -2.0)) * t,
-        Pt::from((S1, -S2)) * t,
-        Pt::from((S2, -S2)) * t,
-        Pt::from((S2, -S1)) * t,
-        Pt::from((2.0, 0.0)) * t,
-        Pt::from((S2, S1)) * t,
-        Pt::from((S2, S2)) * t,
-        Pt::from((S1, S2)) * t,
-        // point
-        Pt::from((0.0, 3.0)) * t,
-        Pt::from((-S1, S2)) * t,
-        Pt::from((-S2, S2)) * t,
-        Pt::from((-S2, S1)) * t,
-        Pt::from((-2.0, 0.0)) * t,
-        Pt::from((-S2, -S1)) * t,
-        Pt::from((-S2, -S2)) * t,
-        Pt::from((-S1, -S2)) * t,
-        // close
-        Pt::from((0.0, -2.0)) * t,
-    ]
 }
 
 /// Make DMS marker
