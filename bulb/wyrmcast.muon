@@ -188,34 +188,10 @@ layer_group: tms
     geom_type: point
     zoom: 10+
     tags: ?name ?rotate
-  layer: lcs_12
-    geom_type: polygon
-    zoom: 12
-    tags: ?name
-  layer: lcs_13
-    geom_type: polygon
-    zoom: 13
-    tags: ?name
-  layer: lcs_14
-    geom_type: polygon
-    zoom: 14
-    tags: ?name
-  layer: lcs_15
-    geom_type: polygon
-    zoom: 15
-    tags: ?name
-  layer: lcs_16
-    geom_type: polygon
-    zoom: 16
-    tags: ?name
-  layer: lcs_17
-    geom_type: polygon
-    zoom: 17
-    tags: ?name
-  layer: lcs_18
-    geom_type: polygon
-    zoom: 18
-    tags: ?name
+  layer: lcs
+    geom_type: point
+    zoom: 12+
+    tags: ?name ?rotate
   layer: ramp_meter_11
     geom_type: polygon
     zoom: 11

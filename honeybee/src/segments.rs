@@ -991,47 +991,10 @@ fn zoom_levels(res: Res) -> RangeInclusive<u32> {
 /// Make a resource location marker
 fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     match res {
-        Res::Lcs => lcs_marker(pt, norm, sz),
         Res::RampMeter => ramp_meter_marker(pt, norm, sz),
         Res::WeatherSensor => weather_sensor_marker(pt, sz),
         _ => unimplemented!(),
     }
-}
-
-/// Make incident marker
-fn incident_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((2.0, -1.0)) * t,
-        Pt::from((0.0, 5.0)) * t,
-        Pt::from((-2.0, -1.0)) * t,
-        Pt::from((0.0, 0.0)) * t,
-    ]
-}
-
-/// Make LCS marker
-fn lcs_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((1.4, 0.0)) * t,
-        Pt::from((1.4, 0.4)) * t,
-        Pt::from((2.6, 0.4)) * t,
-        Pt::from((2.6, 0.0)) * t,
-        Pt::from((4.0, 0.0)) * t,
-        Pt::from((4.0, 3.0)) * t,
-        Pt::from((2.6, 3.0)) * t,
-        Pt::from((2.6, 2.6)) * t,
-        Pt::from((1.4, 2.6)) * t,
-        Pt::from((1.4, 3.0)) * t,
-        Pt::from((0.0, 3.0)) * t,
-        Pt::from((0.0, 0.0)) * t,
-    ]
 }
 
 /// Make ramp meter marker
