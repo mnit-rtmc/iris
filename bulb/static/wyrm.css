@@ -18,13 +18,11 @@
 }
 .wyrm-county {
   fill: #677;
-  fill-opacity: 1.0;
   stroke-width: 0.2;
   stroke-dasharray: 1 2;
 }
 .wyrm-city {
   fill: #677;
-  fill-opacity: 1;
   stroke-width: 0.2;
 }
 .wyrm-water {
@@ -119,4 +117,8 @@
   /* #cccccc, 60% opacity over #667777 => #adb0b0 */
   stroke: #adb0b0;
   stroke-width: 1;
+}
+.wyrm-camera {
+  fill: #55acee;
+  stroke-width: 0.5;
 }

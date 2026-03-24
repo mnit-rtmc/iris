@@ -944,8 +944,10 @@ impl SegmentState {
             let mut writer = BulkWriter::new(loam)?;
             for loc in locs {
                 if let Some(pt) = loc.point() {
+                    let mut values = loc.values();
                     let norm = self.loc_normal(loc);
-                    let values = loc.values();
+                    let rotate = -norm.to_degrees().round() as i16;
+                    values.push(Some(rotate.to_string()));
                     let mut points = Points::new(values);
                     points.push(pt);
                     writer.push(&points)?;
@@ -990,7 +992,6 @@ fn zoom_levels(res: Res) -> RangeInclusive<u32> {
 fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     match res {
         Res::Beacon => beacon_marker(pt, norm, sz),
-        Res::Camera => camera_marker(pt, norm, sz),
         Res::Dms => dms_marker(pt, norm, sz),
         Res::Incident => incident_marker(pt, norm, sz),
         Res::Lcs => lcs_marker(pt, norm, sz),
@@ -1028,26 +1029,6 @@ fn beacon_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
         Pt::from((-S1, -S2)) * t,
         // close
         Pt::from((0.0, -2.0)) * t,
-    ]
-}
-
-/// Make camera marker
-fn camera_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 1.2)) * t,
-        Pt::from((1.5, 0.4)) * t,
-        Pt::from((2.0, 0.4)) * t,
-        Pt::from((2.0, 1.2)) * t,
-        Pt::from((6.0, 1.2)) * t,
-        Pt::from((6.0, -1.2)) * t,
-        Pt::from((2.0, -1.2)) * t,
-        Pt::from((2.0, -0.4)) * t,
-        Pt::from((1.5, -0.4)) * t,
-        Pt::from((0.0, -1.2)) * t,
-        Pt::from((0.0, 1.2)) * t,
     ]
 }
 
