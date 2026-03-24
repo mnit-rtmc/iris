@@ -32,6 +32,9 @@ use web_sys::{
     ScrollLogicalPosition, TransitionEvent, Window,
 };
 
+/// Layer groups
+const GROUPS: &[&str] = &["tile", "tms"];
+
 /// JavaScript result
 pub type JsResult<T> = std::result::Result<T, JsValue>;
 
@@ -73,7 +76,7 @@ pub fn fly_map_item(_fid: &str, lat: f64, lon: f64) {
     // FIXME: add fly animation?
     spawn_local(async move {
         // FIXME: select fid
-        let map_pane = earthwyrm::Map::new("map_pane").unwrap_throw();
+        let map_pane = earthwyrm::Map::new("map-pane", GROUPS);
         let _ = map_pane.set_view(12, lon, lat).await;
     });
 }
@@ -102,10 +105,10 @@ async fn add_listeners() -> JsResult<()> {
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    let map_pane = earthwyrm::Map::new("map_pane").unwrap_throw();
+    let map_pane = earthwyrm::Map::new("map-pane", GROUPS);
     map_pane.add_style().unwrap_throw();
     map_pane.set_view(11, -93.0, 45.0).await.unwrap_throw();
-    let map_pane: HtmlElement = doc.elem("map_pane");
+    let map_pane: HtmlElement = doc.elem("map-pane");
     add_map_click_listener(&map_pane)?;
     do_future(finish_init()).await;
     fetch_station_sample();
