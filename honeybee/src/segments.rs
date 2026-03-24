@@ -991,7 +991,6 @@ fn zoom_levels(res: Res) -> RangeInclusive<u32> {
 /// Make a resource location marker
 fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     match res {
-        Res::Incident => incident_marker(pt, norm, sz),
         Res::Lcs => lcs_marker(pt, norm, sz),
         Res::RampMeter => ramp_meter_marker(pt, norm, sz),
         Res::WeatherSensor => weather_sensor_marker(pt, sz),
