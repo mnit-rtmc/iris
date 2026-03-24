@@ -17,7 +17,7 @@ use crate::files::AtomicFile;
 use pointy::{Pt, Transform};
 use resources::Res;
 use rosewood::BulkWriter;
-use rosewood::gis::Polygons;
+use rosewood::gis::{Points, Polygons};
 use serde::{Deserialize, Serialize, Serializer};
 use squarepeg::{WebMercatorPos, Wgs84Pos};
 use std::cmp::Ordering;
@@ -306,7 +306,7 @@ impl RNode {
     /// Get the node position
     fn pos(&self) -> Option<Wgs84Pos> {
         if self.active {
-            self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
+            self.latlon().map(|(lat, lon)| Wgs84Pos::new(lon, lat))
         } else {
             None
         }
@@ -355,7 +355,7 @@ impl GeoLoc {
 
     /// Get the location
     fn pos(&self) -> Option<Wgs84Pos> {
-        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
+        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lon, lat))
     }
 
     /// Get the location point
@@ -939,22 +939,19 @@ impl SegmentState {
                 log::info!("write_loc_markers: no {res} markers");
                 continue;
             }
-            for zoom in zoom_levels(*res) {
-                let sz = 800_000.0 * zoom_scale(zoom);
-                let mut loam = PathBuf::from(dir);
-                loam.push(format!("{}_{zoom}.loam", res.as_str()));
-                let mut writer = BulkWriter::new(loam)?;
-                for loc in locs {
-                    if let Some(pt) = loc.point() {
-                        let norm = self.loc_normal(loc);
-                        let values = loc.values();
-                        let mut polygon = Polygons::new(values);
-                        polygon.push_outer(loc_marker(*res, pt, norm, sz));
-                        writer.push(&polygon)?;
-                    }
+            let mut loam = PathBuf::from(dir);
+            loam.push(format!("{}.loam", res.as_str()));
+            let mut writer = BulkWriter::new(loam)?;
+            for loc in locs {
+                if let Some(pt) = loc.point() {
+                    let norm = self.loc_normal(loc);
+                    let values = loc.values();
+                    let mut points = Points::new(values);
+                    points.push(pt);
+                    writer.push(&points)?;
                 }
-                writer.finish()?;
             }
+            writer.finish()?;
         }
         Ok(())
     }
