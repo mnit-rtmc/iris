@@ -180,38 +180,10 @@ layer_group: tms
     geom_type: point
     zoom: 11+
     tags: ?name ?rotate
-  layer: dms_11
-    geom_type: polygon
-    zoom: 11
-    tags: ?name
-  layer: dms_12
-    geom_type: polygon
-    zoom: 12
-    tags: ?name
-  layer: dms_13
-    geom_type: polygon
-    zoom: 13
-    tags: ?name
-  layer: dms_14
-    geom_type: polygon
-    zoom: 14
-    tags: ?name
-  layer: dms_15
-    geom_type: polygon
-    zoom: 15
-    tags: ?name
-  layer: dms_16
-    geom_type: polygon
-    zoom: 16
-    tags: ?name
-  layer: dms_17
-    geom_type: polygon
-    zoom: 17
-    tags: ?name
-  layer: dms_18
-    geom_type: polygon
-    zoom: 18
-    tags: ?name
+  layer: dms
+    geom_type: point
+    zoom: 11+
+    tags: ?name ?rotate
   layer: incident_10
     geom_type: polygon
     zoom: 10
