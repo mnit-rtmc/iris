@@ -25,7 +25,6 @@ use std::collections::HashMap;
 use std::collections::hash_map::DefaultHasher;
 use std::fmt;
 use std::hash::{Hash, Hasher};
-use std::ops::RangeInclusive;
 use std::path::{Path, PathBuf};
 use tokio_postgres::Row;
 
@@ -991,27 +990,9 @@ fn zoom_levels(res: Res) -> RangeInclusive<u32> {
 /// Make a resource location marker
 fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
     match res {
-        Res::RampMeter => ramp_meter_marker(pt, norm, sz),
         Res::WeatherSensor => weather_sensor_marker(pt, sz),
         _ => unimplemented!(),
     }
-}
-
-/// Make ramp meter marker
-fn ramp_meter_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((1.8, 0.0)) * t,
-        Pt::from((2.4, -1.0)) * t,
-        Pt::from((2.0, -2.0)) * t,
-        Pt::from((1.0, -2.4)) * t,
-        Pt::from((0.0, -1.8)) * t,
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((1.0, -1.0)) * t,
-    ]
 }
 
 /// Make weather sensor marker
