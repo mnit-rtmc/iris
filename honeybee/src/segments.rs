@@ -14,7 +14,7 @@
 //
 use crate::error::Result;
 use crate::files::AtomicFile;
-use pointy::{Pt, Transform};
+use pointy::Pt;
 use resources::Res;
 use rosewood::BulkWriter;
 use rosewood::gis::{Points, Polygons};
