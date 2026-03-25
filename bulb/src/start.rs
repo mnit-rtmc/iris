@@ -22,6 +22,8 @@ use crate::util::Doc;
 use crate::view::{CardView, View};
 use js_sys::JsString;
 use resources::Res;
+use serde::Deserialize;
+use std::collections::HashMap;
 use std::error::Error as _;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
@@ -34,6 +36,17 @@ use web_sys::{
 
 /// Layer groups
 const GROUPS: &[&str] = &["tile", "tms"];
+
+/// Binned station data
+#[derive(Deserialize)]
+struct StationData {
+    /// Data collection time
+    time_stamp: String,
+    /// Binning period (s)
+    period: u32,
+    /// Data samples
+    samples: HashMap<String, [Option<u32>; 2]>,
+}
 
 /// Button attributes
 struct ButtonAttrs {
@@ -103,12 +116,11 @@ async fn add_listeners() -> Result<()> {
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
     let map_pane = earthwyrm::Map::new("map-pane", GROUPS);
-    map_pane.add_style()?;
     map_pane.set_view(11, -93.0, 45.0).await?;
     let map_pane: HtmlElement = doc.elem("map-pane");
     add_map_click_listener(&map_pane)?;
     do_future(finish_init()).await;
-    fetch_station_sample();
+    fetch_station_data();
     if let Some(doc_elem) = doc.doc_elem() {
         add_fullscreenchange_listener(&doc_elem)?;
     }
@@ -811,7 +823,7 @@ fn tick_interval() {
     app::tick_tock();
     while let Some(action) = app::next_action() {
         match action {
-            DeferredAction::FetchStationData => fetch_station_sample(),
+            DeferredAction::FetchStationData => fetch_station_data(),
             DeferredAction::HideToast => hide_elem("sb_toast"),
             DeferredAction::RefreshList => handle_res_change(),
             DeferredAction::RedrawMap => (), // FIXME: js_redraw_map(),
@@ -821,18 +833,37 @@ fn tick_interval() {
     }
 }
 
-/// Fetch station sample data
-fn fetch_station_sample() {
-    log::debug!("fetch_station_sample");
+/// Fetch binned station data
+fn fetch_station_data() {
+    log::debug!("fetch_station_data");
     app::defer_action(DeferredAction::FetchStationData, 30_000);
-    spawn_local(do_future(do_fetch_station_sample()));
+    spawn_local(do_future(do_fetch_station_data()));
 }
 
-/// Actually fetch station sample data
-async fn do_fetch_station_sample() -> Result<()> {
-    let stat = Uri::from("/iris/station_sample").get().await?;
-    // FIXME: js_update_stat_sample(&stat);
+/// Actually fetch binned station data
+async fn do_fetch_station_data() -> Result<()> {
+    let data = StationData::fetch().await?;
+    let css = data.make_style();
+    let map_pane = earthwyrm::Map::new("map-pane", GROUPS);
+    map_pane.set_style(&css)?;
     Ok(())
+}
+
+impl StationData {
+    /// Fetch current station data
+    async fn fetch() -> Result<Self> {
+        let stat = Uri::from("/iris/station_sample").get().await?;
+        Ok(serde_wasm_bindgen::from_value(stat)?)
+    }
+
+    /// Make station CSS style
+    fn make_style(&self) -> String {
+        // FIXME: check timestamp
+        let mut style = String::new();
+        style.push_str(".segment-wyrm { fill: #888; }\n");
+        style.push_str(".segment-S1854 { fill: #00ff00; }");
+        style
+    }
 }
 
 /// Add a `click` event listener to the map element
