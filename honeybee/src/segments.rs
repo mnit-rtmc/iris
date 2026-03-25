@@ -22,9 +22,8 @@ use serde::{Deserialize, Serialize, Serializer};
 use squarepeg::{WebMercatorPos, Wgs84Pos};
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::collections::hash_map::DefaultHasher;
 use std::fmt;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
 use std::path::{Path, PathBuf};
 use tokio_postgres::Row;
 
@@ -139,8 +138,6 @@ pub struct CorridorId {
 struct Corridor {
     /// Corridor ID
     cor_id: CorridorId,
-    /// Base TMS ID
-    base_tms_id: i64,
     /// Road class ordinal
     r_class: i16,
     /// Road class scale
@@ -157,8 +154,6 @@ struct Corridor {
 
 /// Segment outline builder
 struct Segment {
-    /// Traffic management system ID (for leaflet)
-    tms_id: i64,
     /// Station ID
     station_id: Option<String>,
     /// Meter point on corridor
@@ -378,15 +373,8 @@ impl Corridor {
     /// Create a new corridor
     fn new(cor_id: CorridorId, r_class: i16, scale: f64) -> Self {
         log::trace!("Corridor::new {cor_id}");
-        // Leaflet doesn't like it when we use the high bits...
-        let base_tms_id = 0xFFFF_FFFF_FFFF & {
-            let mut hasher = DefaultHasher::new();
-            cor_id.hash(&mut hasher);
-            hasher.finish()
-        } as i64;
         Corridor {
             cor_id,
-            base_tms_id,
             r_class,
             scale,
             nodes: Vec::new(),
@@ -623,7 +611,7 @@ impl Corridor {
     ) -> Result<()> {
         let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
         let i_scale = self.scale_zoom(BASE_SCALE, zoom);
-        let mut seg = Segment::new(self.base_tms_id);
+        let mut seg = Segment::new();
         let mut p_meter = 0.0; // meter point for the previous point
         let nodes = &self.nodes[..];
         for (node, (pt, (norm, meter))) in nodes.iter().zip(
@@ -683,12 +671,11 @@ impl Corridor {
 
 impl Segment {
     /// Create a new segment
-    fn new(tms_id: i64) -> Self {
+    fn new() -> Self {
         let station_id = None;
         let meter = 0.0;
         let points = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
         Segment {
-            tms_id,
             station_id,
             meter,
             points,
@@ -697,7 +684,6 @@ impl Segment {
 
     /// Advance to next segment
     fn advance(&mut self, station_id: Option<String>, meter: f64) {
-        self.tms_id += 1;
         self.station_id = station_id;
         self.meter = meter;
         self.points.clear();
@@ -715,8 +701,7 @@ impl Segment {
         if let Some((vtx, _)) = self.points.first() {
             pts.push(Pt::from(vtx));
         }
-        let values =
-            vec![Some(self.tms_id.to_string()), self.station_id.clone()];
+        let values = vec![self.station_id.clone()];
         let mut polygon = Polygons::new(values);
         polygon.push_outer(pts);
         polygon
