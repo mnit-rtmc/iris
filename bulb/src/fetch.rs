@@ -155,12 +155,12 @@ impl Uri {
 }
 
 /// Fetch a GET response
-async fn get_response(uri: &Uri) -> std::result::Result<Response, JsValue> {
+async fn get_response(uri: &Uri) -> Result<Response> {
     let window = web_sys::window().unwrap_throw();
     let req = Request::new_with_str(uri.as_str())?;
     req.headers().set("Accept", uri.content_type.as_str())?;
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
-    Ok(resp.dyn_into::<Response>().unwrap_throw())
+    Ok(resp.dyn_into::<Response>()?)
 }
 
 /// Wait for a JS promise
@@ -187,15 +187,13 @@ async fn perform_fetch(
     let ri = RequestInit::new();
     ri.set_method(method);
     if let Some(json) = &json {
-        let headers = Headers::new().unwrap_throw();
-        headers
-            .set("Content-Type", "application/json")
-            .unwrap_throw();
+        let headers = Headers::new()?;
+        headers.set("Content-Type", "application/json")?;
         ri.set_headers(&headers);
         ri.set_body(json);
     } else {
-        let headers = Headers::new().unwrap_throw();
-        headers.set("Content-Type", "text/plain").unwrap_throw();
+        let headers = Headers::new()?;
+        headers.set("Content-Type", "text/plain")?;
         ri.set_headers(&headers);
     }
     let req = Request::new_with_str_and_init(uri, &ri).map_err(|e| {
@@ -208,7 +206,7 @@ async fn perform_fetch(
             log::error!("{e:?}");
             Error::FetchRequest()
         })?;
-    Ok(resp.dyn_into().unwrap_throw())
+    Ok(resp.dyn_into()?)
 }
 
 /// Check for errors in response status code

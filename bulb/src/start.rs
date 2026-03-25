@@ -35,9 +35,6 @@ use web_sys::{
 /// Layer groups
 const GROUPS: &[&str] = &["tile", "tms"];
 
-/// JavaScript result
-pub type JsResult<T> = std::result::Result<T, JsValue>;
-
 /// Button attributes
 struct ButtonAttrs {
     id: String,
@@ -92,7 +89,7 @@ pub async fn start() -> core::result::Result<(), JsError> {
 }
 
 /// Add event listeners
-async fn add_listeners() -> JsResult<()> {
+async fn add_listeners() -> Result<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
@@ -106,8 +103,8 @@ async fn add_listeners() -> JsResult<()> {
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
     let map_pane = earthwyrm::Map::new("map-pane", GROUPS);
-    map_pane.add_style().unwrap_throw();
-    map_pane.set_view(11, -93.0, 45.0).await.unwrap_throw();
+    map_pane.add_style()?;
+    map_pane.set_view(11, -93.0, 45.0).await?;
     let map_pane: HtmlElement = doc.elem("map-pane");
     add_map_click_listener(&map_pane)?;
     do_future(finish_init()).await;
@@ -197,7 +194,7 @@ fn opt_class(access: &[Permission], res: Res) -> &'static str {
 }
 
 /// Add a "fullscreenchange" event listener to an element
-fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
+fn add_fullscreenchange_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
         let doc = Doc::get();
         let btn = doc.elem::<HtmlInputElement>("sb_fullscreen");
@@ -213,7 +210,7 @@ fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
 }
 
 /// Add a "change" event listener to an element
-fn add_change_listener(elem: &Element) -> JsResult<()> {
+fn add_change_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>())
             && target.id().as_str() == "sb_fullscreen"
@@ -407,7 +404,7 @@ fn search_value() -> String {
 }
 
 /// Add an "input" event listener to an element
-fn add_input_listener(elem: &Element) -> JsResult<()> {
+fn add_input_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             handle_input(target.id());
@@ -493,7 +490,7 @@ async fn handle_input_other(id: String) -> Result<()> {
 }
 
 /// Add "focusin" / "focusout" event listeners to an element
-fn add_focus_listener(elem: &Element) -> JsResult<()> {
+fn add_focus_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(input)) =
             e.target().map(|e| e.dyn_into::<HtmlInputElement>())
@@ -539,7 +536,7 @@ async fn handle_focus_events(
 }
 
 /// Add a `click` event listener to an element
-fn add_click_listener(elem: &Element) -> JsResult<()> {
+fn add_click_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             if target.is_instance_of::<HtmlButtonElement>() {
@@ -767,7 +764,7 @@ async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
 }
 
 /// Add transition event listener to an element
-fn add_transition_listener(elem: &Element) -> JsResult<()> {
+fn add_transition_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(handle_transition_ev);
     elem.add_event_listener_with_callback(
         "transitionstart",
@@ -799,7 +796,7 @@ fn handle_transition_ev(ev: Event) {
 }
 
 /// Add callback for regular interval checks
-fn add_interval_callback(window: &Window) -> JsResult<()> {
+fn add_interval_callback(window: &Window) -> Result<()> {
     let closure: Closure<dyn Fn()> = Closure::new(tick_interval);
     window.set_interval_with_callback_and_timeout_and_arguments_0(
         closure.as_ref().unchecked_ref(),
@@ -839,7 +836,7 @@ async fn do_fetch_station_sample() -> Result<()> {
 }
 
 /// Add a `click` event listener to the map element
-fn add_map_click_listener(elem: &Element) -> JsResult<()> {
+fn add_map_click_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|ce: CustomEvent| match ce
         .detail()
         .dyn_into::<JsString>()
