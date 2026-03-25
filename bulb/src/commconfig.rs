@@ -15,7 +15,7 @@ use crate::card::{AncillaryData, Card};
 use crate::error::Result;
 use crate::util::{ContainsLower, Fields, Input, Select, opt_str};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -202,19 +202,19 @@ impl CommConfigAnc {
 impl CommConfig {
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row").cdata(self.name()).close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill").cdata(&self.description);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CommConfigAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("description")
@@ -226,7 +226,7 @@ impl CommConfig {
             .size(20)
             .value(&self.description);
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("pollinator").cdata("Pollinator").close();
         let mut input = div.input();
@@ -235,12 +235,12 @@ impl CommConfig {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("protocol").cdata("Protocol").close();
         anc.protocols_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("timeout_ms")
@@ -255,7 +255,7 @@ impl CommConfig {
             .step("50")
             .value(opt_str(self.timeout_ms));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("retry_threshold")
@@ -269,7 +269,7 @@ impl CommConfig {
             .size(2)
             .value(opt_str(self.retry_threshold));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("poll_period_sec")
@@ -282,7 +282,7 @@ impl CommConfig {
             &mut div.select(),
         );
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("long_poll_period_sec")
@@ -295,7 +295,7 @@ impl CommConfig {
             &mut div.select(),
         );
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("idle_disconnect_sec")
@@ -308,7 +308,7 @@ impl CommConfig {
             &mut div.select(),
         );
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("no_response_disconnect_sec")
@@ -321,8 +321,8 @@ impl CommConfig {
             &mut div.select(),
         );
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

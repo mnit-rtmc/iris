@@ -30,7 +30,7 @@ use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use crate::word::Word;
 use chrono::{DateTime, Local, format::SecondsFormat};
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use js_sys::{ArrayBuffer, Uint8Array};
 use mag::temp::DegC;
 use ntcip::dms::multi::{join_text, normalize as multi_normalize};
@@ -642,8 +642,8 @@ impl Dms {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &DmsAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row");
         div.span()
             .cdata(self.name())
@@ -659,12 +659,12 @@ impl Dms {
                 .with_gif(&gif)
                 .with_max_width(240)
                 .with_max_height(80);
-            rend.render_multi(multi, &mut page.frag::<html::Img>());
+            rend.render_multi(multi, &mut tree.root::<html::Img>());
         }
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill");
         div.cdata_len(opt_ref(&self.location), 64);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Get user to display
@@ -687,17 +687,17 @@ impl Dms {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut page = Page::new();
-        self.title(View::Control, &mut page.frag::<html::Div>());
-        self.render_state_row(anc, &mut page.frag::<html::Div>());
-        self.render_current_msg(anc, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Control, &mut tree.root::<html::Div>());
+        self.render_state_row(anc, &mut tree.root::<html::Div>());
+        self.render_current_msg(anc, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("info fill")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
-        self.message_composer_html(anc, &mut page.frag::<html::Div>());
-        self.action_plans_html(anc, &mut page.frag::<html::Details>());
-        String::from(page)
+        self.message_composer_html(anc, &mut tree.root::<html::Div>());
+        self.action_plans_html(anc, &mut tree.root::<html::Details>());
+        String::from(tree)
     }
 
     /// Render item state row as an HTML div element
@@ -948,9 +948,9 @@ impl Dms {
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &DmsAnc) -> String {
         let work = "http://example.com"; // FIXME
-        let mut page = Page::new();
-        self.title(View::Request, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Request, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Current Message").close();
         div.button()
@@ -959,7 +959,7 @@ impl Dms {
             .cdata("Query")
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Current Status").close();
         div.button()
@@ -968,7 +968,7 @@ impl Dms {
             .cdata("Query")
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Pixel Errors").close();
         let mut span = div.span();
@@ -988,7 +988,7 @@ impl Dms {
             .cdata("Query")
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Settings").close();
         span = div.span();
@@ -1003,7 +1003,7 @@ impl Dms {
             .cdata("Query")
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Configuration").close();
         span = div.span();
@@ -1018,7 +1018,7 @@ impl Dms {
             .cdata("Query")
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Work Request").close();
         div.a()
@@ -1027,14 +1027,14 @@ impl Dms {
             .rel("noopener noreferrer")
             .cdata("🔗 ")
             .cdata(self.name());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &DmsAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -1045,12 +1045,12 @@ impl Dms {
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
-        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
-        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
-        self.sign_config_html(anc, &mut page.frag::<html::Div>());
+        anc.cio.controller_html(self, &mut tree.root::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
+        self.sign_config_html(anc, &mut tree.root::<html::Div>());
         // FIXME: add sign_detail button
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 
     /// Make sign config row as HTML
@@ -1076,22 +1076,22 @@ impl Dms {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &DmsAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Status, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Status, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         self.item_states(anc).tooltips(&mut div.span());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
         div.close();
-        self.temp_html(&mut page.frag::<html::Div>());
-        self.light_html(&mut page.frag::<html::Div>());
-        self.power_html(&mut page.frag::<html::Div>());
-        String::from(page)
+        self.temp_html(&mut tree.root::<html::Div>());
+        self.light_html(&mut tree.root::<html::Div>());
+        self.power_html(&mut tree.root::<html::Div>());
+        String::from(tree)
     }
 
     /// Build temperature status HTML
@@ -1366,10 +1366,10 @@ impl Card for Dms {
         };
         let lines = if &id == "mc_pattern" {
             // update mc_lines element
-            let mut page = Page::new();
-            anc.make_lines_html(&dms, pat, "", &mut page.frag::<html::Div>());
+            let mut tree = Tree::new();
+            anc.make_lines_html(&dms, pat, "", &mut tree.root::<html::Div>());
             let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");
-            mc_lines.set_outer_html(&String::from(page));
+            mc_lines.set_outer_html(&String::from(tree));
             Vec::new()
         } else {
             self.selected_lines()
@@ -1378,17 +1378,17 @@ impl Card for Dms {
             .fill(lines.iter().map(|l| &l[..]));
         let multi = multi_normalize(&multi);
         // update mc_preview image element
-        let mut page = Page::new();
+        let mut tree = Tree::new();
         let mut rend = Renderer::new()
             .with_dms(&dms)
             .with_id("mc_preview")
             .with_class("preview")
             .with_max_width(240)
             .with_max_height(80);
-        let mut img = page.frag::<html::Img>();
+        let mut img = tree.root::<html::Img>();
         rend.render_multi(&multi, &mut img);
         let preview = Doc::get().elem::<HtmlElement>("mc_preview");
-        preview.set_outer_html(&String::from(page));
+        preview.set_outer_html(&String::from(tree));
         Vec::new()
     }
 
@@ -1396,14 +1396,14 @@ impl Card for Dms {
     fn handle_update(&self, anc: DmsAnc) {
         if let Some(state_row) = Doc::get().try_elem::<HtmlElement>("state_row")
         {
-            let mut page = Page::new();
-            self.render_state_row(&anc, &mut page.frag::<html::Div>());
-            state_row.set_outer_html(&String::from(page));
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            state_row.set_outer_html(&String::from(tree));
         }
         if let Some(sign_msg) = Doc::get().try_elem::<HtmlElement>("sign_msg") {
-            let mut page = Page::new();
-            self.render_current_msg(&anc, &mut page.frag::<html::Div>());
-            sign_msg.set_outer_html(&String::from(page));
+            let mut tree = Tree::new();
+            self.render_current_msg(&anc, &mut tree.root::<html::Div>());
+            sign_msg.set_outer_html(&String::from(tree));
         }
     }
 }

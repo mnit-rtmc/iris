@@ -13,7 +13,7 @@
 use crate::card::{AncillaryData, Card};
 use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -48,17 +48,17 @@ impl AncillaryData for MonitorStyleAnc {
 impl MonitorStyle {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.cdata(self.name());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("force_aspect")
@@ -70,7 +70,7 @@ impl MonitorStyle {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("accent").cdata("Accent").close();
         let mut input = div.input();
@@ -80,7 +80,7 @@ impl MonitorStyle {
             .size(6)
             .value(opt_ref(&self.accent));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("font_sz").cdata("Font Size").close();
         div.input()
@@ -91,7 +91,7 @@ impl MonitorStyle {
             .size(4)
             .value(opt_str(self.font_sz));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("title_bar").cdata("Title Bar").close();
         let mut input = div.input();
@@ -100,7 +100,7 @@ impl MonitorStyle {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("auto_expand")
@@ -112,7 +112,7 @@ impl MonitorStyle {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("hgap").cdata("Horizontal Gap").close();
         div.input()
@@ -123,7 +123,7 @@ impl MonitorStyle {
             .size(3)
             .value(opt_str(self.hgap));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("vgap").cdata("Vertical Gap").close();
         div.input()
@@ -134,8 +134,8 @@ impl MonitorStyle {
             .size(3)
             .value(opt_str(self.vgap));
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

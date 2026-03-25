@@ -13,7 +13,7 @@
 use crate::card::{AncillaryData, Card};
 use crate::util::{ContainsLower, Fields, Input, opt_str};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -64,41 +64,41 @@ fn pin_row_html<'p>(
 impl CabinetStyle {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.cdata(self.name());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
         pin_row_html(
             "police_panel_pin_1",
             "Police Panel Pin 1",
             self.police_panel_pin_1,
-            &mut page.frag::<html::Div>(),
+            &mut tree.root::<html::Div>(),
         );
         pin_row_html(
             "police_panel_pin_2",
             "Police Panel Pin 2",
             self.police_panel_pin_2,
-            &mut page.frag::<html::Div>(),
+            &mut tree.root::<html::Div>(),
         );
         pin_row_html(
             "watchdog_reset_pin_1",
             "Watchdog Reset Pin 1",
             self.watchdog_reset_pin_1,
-            &mut page.frag::<html::Div>(),
+            &mut tree.root::<html::Div>(),
         );
         pin_row_html(
             "watchdog_reset_pin_2",
             "Watchdog Reset Pin 2",
             self.watchdog_reset_pin_2,
-            &mut page.frag::<html::Div>(),
+            &mut tree.root::<html::Div>(),
         );
-        let mut div = page.frag::<html::Div>();
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("dip").cdata("Dip").close();
         div.input()
@@ -109,8 +109,8 @@ impl CabinetStyle {
             .size(8)
             .value(opt_str(self.dip));
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

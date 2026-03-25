@@ -14,7 +14,7 @@ use crate::card::Card;
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::util::{ContainsLower, Fields, Input};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -33,23 +33,23 @@ type FlowStreamAnc = ControllerIoAnc<FlowStream>;
 impl FlowStream {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &FlowStreamAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(anc.item_states(self).to_string());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &FlowStreamAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        anc.controller_html(self, &mut page.frag::<html::Div>());
-        anc.pin_html(self.pin, &mut page.frag::<html::Div>());
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        anc.controller_html(self, &mut tree.root::<html::Div>());
+        anc.pin_html(self.pin, &mut tree.root::<html::Div>());
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

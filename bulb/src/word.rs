@@ -14,7 +14,7 @@ use crate::card::{AncillaryData, Card};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -43,8 +43,8 @@ impl AncillaryData for WordAnc {
 impl Word {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.cdata(self.name());
         if self.allowed {
             if let Some(abbr) = &self.abbr
@@ -56,14 +56,14 @@ impl Word {
         } else {
             div.cdata(" 🚫");
         }
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("allowed").cdata("Allowed").close();
         let mut input = div.input();
@@ -72,7 +72,7 @@ impl Word {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("abbr").cdata("Abbreviation").close();
         let mut input = div.input();
@@ -82,8 +82,8 @@ impl Word {
             .size(12)
             .value(opt_ref(&self.abbr));
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

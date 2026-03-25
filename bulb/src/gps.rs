@@ -15,7 +15,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -36,20 +36,20 @@ type GpsAnc = ControllerIoAnc<Gps>;
 impl Gps {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GpsAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("end")
             .cdata(self.name())
             .cdata(" ")
             .cdata(anc.item_states(self).to_string());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GpsAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -60,7 +60,7 @@ impl Gps {
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("geo_loc").cdata("Device Loc").close();
         div.input()
@@ -70,10 +70,10 @@ impl Gps {
             .value(opt_ref(&self.geo_loc))
             .close();
         div.close();
-        anc.controller_html(self, &mut page.frag::<html::Div>());
-        anc.pin_html(self.pin, &mut page.frag::<html::Div>());
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        anc.controller_html(self, &mut tree.root::<html::Div>());
+        anc.pin_html(self.pin, &mut tree.root::<html::Div>());
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

@@ -18,7 +18,7 @@ use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, Select};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -139,40 +139,40 @@ impl CommLink {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_states().to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill").cdata(&self.description);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &CommLinkAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Status, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Status, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         self.item_states().tooltips(&mut div.span());
         div.span().class("info end").cdata(&self.description);
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata(anc.comm_config_desc(self)).close();
         div.close();
-        anc.controllers_html(&mut page.frag::<html::Div>());
-        String::from(page)
+        anc.controllers_html(&mut tree.root::<html::Div>());
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CommLinkAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("description")
@@ -184,7 +184,7 @@ impl CommLink {
             .size(24)
             .value(&self.description);
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("uri").cdata("URI").close();
         div.input()
@@ -193,7 +193,7 @@ impl CommLink {
             .size(28)
             .value(&self.uri);
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("comm_config")
@@ -201,7 +201,7 @@ impl CommLink {
             .close();
         anc.comm_configs_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("poll_enabled")
@@ -213,8 +213,8 @@ impl CommLink {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

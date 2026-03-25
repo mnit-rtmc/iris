@@ -19,7 +19,7 @@ use crate::msgpattern::FontName;
 use crate::rend::Renderer;
 use crate::util::{ContainsLower, Fields, Select, opt_str};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use mag::length::mm;
 use ntcip::dms::{FontTable, tfon};
 pub use rendzina::SignConfig;
@@ -158,37 +158,37 @@ fn item_states(sc: &SignConfig, anc: &SignConfigAnc) -> ItemStates<'static> {
 
 /// Convert to compact HTML
 fn to_html_compact(sc: &SignConfig, anc: &SignConfigAnc) -> String {
-    let mut page = Page::new();
-    let mut div = page.frag::<html::Div>();
+    let mut tree = Tree::new();
+    let mut div = tree.root::<html::Div>();
     div.class("title row")
         .cdata(&sc.name)
         .cdata(" ")
         .cdata(item_states(sc, anc).to_string());
-    String::from(page)
+    String::from(tree)
 }
 
 /// Convert to setup HTML
 fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
-    let mut page = Page::new();
-    sc.title(View::Setup, &mut page.frag::<html::Div>());
-    let mut div = page.frag::<html::Div>();
+    let mut tree = Tree::new();
+    sc.title(View::Setup, &mut tree.root::<html::Div>());
+    let mut div = tree.root::<html::Div>();
     div.class("row");
     div.label().cdata("Color Scheme").close();
     div.span().class("info").cdata(&sc.color_scheme).close();
     div.close();
-    monochrome_html(sc, &mut page.frag::<html::Div>());
-    div = page.frag::<html::Div>();
+    monochrome_html(sc, &mut tree.root::<html::Div>());
+    div = tree.root::<html::Div>();
     div.class("center info")
         .cdata(sc.pixel_width)
         .cdata(" x ")
         .cdata(sc.pixel_height)
         .cdata(" px")
         .close();
-    div = page.frag::<html::Div>();
+    div = tree.root::<html::Div>();
     div.class("center");
     render_sign(sc, anc, &mut div.table());
     div.close();
-    div = page.frag::<html::Div>();
+    div = tree.root::<html::Div>();
     div.class("row").label().cdata("Pitch").close();
     div.span()
         .class("info")
@@ -197,7 +197,7 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
         .cdata(format_len_sm(sc.pitch_vert))
         .close();
     div.close();
-    div = page.frag::<html::Div>();
+    div = tree.root::<html::Div>();
     div.class("row").label().cdata("Character Width").close();
     div.span()
         .class("info")
@@ -209,7 +209,7 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
         .cdata(format_px(sc.char_height))
         .close();
     div.close();
-    div = page.frag::<html::Div>();
+    div = tree.root::<html::Div>();
     div.class("row")
         .label()
         .r#for("module_width")
@@ -232,7 +232,7 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
         &mut div.select(),
     );
     div.close();
-    div = page.frag::<html::Div>();
+    div = tree.root::<html::Div>();
     div.class("row")
         .label()
         .r#for("default_font")
@@ -240,8 +240,8 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
         .close();
     anc.select_fonts_html(sc.default_font, &mut div.select());
     div.close();
-    sc.footer_html(true, &mut page.frag::<html::Div>());
-    String::from(page)
+    sc.footer_html(true, &mut tree.root::<html::Div>());
+    String::from(tree)
 }
 
 /// Build monochrome color HTML

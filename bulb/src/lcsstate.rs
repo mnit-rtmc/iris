@@ -16,7 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::util::{ContainsLower, Fields, Input, Select, opt_ref, opt_str};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -137,32 +137,32 @@ impl ControllerIo for LcsState {
 impl LcsState {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsStateAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(anc.cio.item_states(self).to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info row").cdata(&self.lcs);
         div.span().cdata(self.lane).close();
         div.span().cdata(anc.indication(self).symbol).close();
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsStateAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().cdata("LCS").close();
         div.span().cdata(&self.lcs).close();
         div.close();
-        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
-        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
-        div = page.frag::<html::Div>();
+        anc.cio.controller_html(self, &mut tree.root::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("lane").cdata("Lane").close();
         div.input()
@@ -173,12 +173,12 @@ impl LcsState {
             .size(2)
             .value(self.lane);
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("indication").cdata("Indication").close();
         anc.indications_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("msg_pattern")
@@ -190,7 +190,7 @@ impl LcsState {
             .size(20)
             .value(opt_ref(&self.msg_pattern));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("msg_num").cdata("Msg #").close();
         div.input()
@@ -201,8 +201,8 @@ impl LcsState {
             .size(5)
             .value(opt_str(self.msg_num));
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

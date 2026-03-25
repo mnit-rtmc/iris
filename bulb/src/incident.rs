@@ -18,7 +18,7 @@ use crate::item::{ItemState, ItemStates};
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -154,10 +154,10 @@ impl Incident {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &IncidentAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row").cdata(self.description(anc));
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Control HTML
@@ -165,26 +165,26 @@ impl Incident {
         if let Some((lat, lon)) = self.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row").cdata(self.description(anc));
         self.views_html(View::Control, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row info").cdata(self.detail(anc));
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, _anc: &IncidentAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row").close(); // empty
-        let mut div = page.frag::<html::Div>();
+        let mut div = tree.root::<html::Div>();
         div.class("row").close(); // empty
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

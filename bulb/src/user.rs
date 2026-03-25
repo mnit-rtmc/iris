@@ -17,7 +17,7 @@ use crate::item::ItemState;
 use crate::role::Role;
 use crate::util::{ContainsLower, Fields, Input, Select, opt_ref};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -111,20 +111,20 @@ impl User {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &UserAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_state(anc).to_string());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &UserAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("full_name").cdata("Full Name").close();
         div.input()
@@ -133,7 +133,7 @@ impl User {
             .size(20)
             .value(&self.full_name);
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("dn").cdata("Dn").close();
         div.input()
@@ -142,12 +142,12 @@ impl User {
             .size(32)
             .value(opt_ref(&self.dn));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("role").cdata("Role").close();
         anc.roles_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("enabled").cdata("Enabled").close();
         let mut input = div.input();
@@ -156,8 +156,8 @@ impl User {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

@@ -18,7 +18,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -136,50 +136,50 @@ impl GateArm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &GateArmAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_states(anc).to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill")
             .cdata_len(opt_ref(&self.location), 32);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Control HTML
     fn to_html_control(&self) -> String {
-        let mut page = Page::new();
-        self.title(View::Control, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Control, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         item_states(self.arm_state).tooltips(&mut div.span());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info").cdata_len(opt_ref(&self.location), 64);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &GateArmAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Status, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Status, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         self.item_states(anc).tooltips(&mut div.span());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info").cdata_len(opt_ref(&self.location), 64);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &GateArmAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -190,9 +190,9 @@ impl GateArm {
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
-        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
-        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
-        div = page.frag::<html::Div>();
+        anc.cio.controller_html(self, &mut tree.root::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("opposing").cdata("Opposing").close();
         let mut input = div.input();
@@ -201,7 +201,7 @@ impl GateArm {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("downstream")
@@ -213,8 +213,8 @@ impl GateArm {
             .size(16)
             .value(opt_ref(&self.downstream_hashtag));
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

@@ -19,7 +19,7 @@ use crate::item::ItemState;
 use crate::start::fly_map_item;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use humantime::format_duration;
 use mag::length::{m, mm};
 use mag::temp::DegC;
@@ -756,17 +756,17 @@ fn sub_surface_html<'p>(
 impl WeatherSensor {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(anc.cio.item_states(self).to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill")
             .cdata_len(opt_ref(&self.location), 32);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Status HTML
@@ -774,20 +774,20 @@ impl WeatherSensor {
         if let Some((lat, lon)) = anc.loc.latlon() {
             fly_map_item(&self.name, lat, lon);
         }
-        let mut page = Page::new();
-        self.title(View::Status, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Status, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         anc.cio.item_states(self).tooltips(&mut div.span());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span()
             .class("info")
@@ -799,7 +799,7 @@ impl WeatherSensor {
             .close();
         div.close();
         if let Some(sample_time) = &self.sample_time {
-            div = page.frag::<html::Div>();
+            div = tree.root::<html::Div>();
             div.class("row");
             div.span().cdata("Obs").close();
             div.span().class("info").cdata(sample_time).close();
@@ -808,18 +808,18 @@ impl WeatherSensor {
         if let Some(data) = &self.sample {
             data.build_html(
                 self.settings.as_ref(),
-                &mut page.frag::<html::Div>(),
+                &mut tree.root::<html::Div>(),
             );
         }
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &WeatherSensorAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         self.title(View::Setup, &mut div);
-        let mut div = page.frag::<html::Div>();
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("site_id").cdata("Site ID").close();
         div.input()
@@ -828,7 +828,7 @@ impl WeatherSensor {
             .size(20)
             .value(opt_ref(&self.site_id));
         div.close();
-        let mut div = page.frag::<html::Div>();
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("alt_id").cdata("Alt ID").close();
         div.input()
@@ -837,7 +837,7 @@ impl WeatherSensor {
             .size(20)
             .value(opt_ref(&self.alt_id));
         div.close();
-        let mut div = page.frag::<html::Div>();
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -848,10 +848,10 @@ impl WeatherSensor {
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
-        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
-        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        anc.cio.controller_html(self, &mut tree.root::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

@@ -19,7 +19,7 @@ use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
 };
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -68,8 +68,8 @@ pub struct TimeAction {
 
 impl TimeAction {
     fn to_html(&self) -> String {
-        let mut page = Page::new();
-        let mut tr = page.frag::<html::Tr>();
+        let mut tree = Tree::new();
+        let mut tr = tree.root::<html::Tr>();
         if let Some(day_plan) = &self.day_plan {
             tr.td().cdata(day_plan).close();
         }
@@ -78,7 +78,7 @@ impl TimeAction {
         }
         tr.td().cdata(&self.time_of_day).close();
         tr.td().cdata("⇨ ").cdata(&self.phase).close();
-        String::from(page)
+        String::from(tree)
     }
 }
 
@@ -241,24 +241,24 @@ impl ActionPlan {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &ActionPlanAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_states(anc).to_string());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &ActionPlanAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Control, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Control, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row fill");
         self.item_states(anc).tooltips(&mut div.span());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         let tags = anc.hashtags(self).collect::<Vec<_>>().join(" ");
         div.span().class("info").cdata(tags).close();
@@ -275,22 +275,22 @@ impl ActionPlan {
         }
         div.close();
         if !anc.time_actions.is_empty() {
-            div = page.frag::<html::Div>();
+            div = tree.root::<html::Div>();
             div.class("row").cdata("Schedule 🗓️").close();
-            let mut table = page.frag::<html::Table>();
+            let mut table = tree.root::<html::Table>();
             for ta in &anc.time_actions {
                 table.raw(ta.to_html());
             }
             table.close();
         }
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &ActionPlanAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -301,7 +301,7 @@ impl ActionPlan {
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("active").cdata("Active").close();
         let mut input = div.input();
@@ -310,7 +310,7 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("default_phase")
@@ -326,7 +326,7 @@ impl ActionPlan {
             option.cdata(&p.name).close();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("sync_actions")
@@ -338,7 +338,7 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("sticky").cdata("Sticky").close();
         input = div.input();
@@ -347,7 +347,7 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("ignore_auto_fail")
@@ -359,8 +359,8 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

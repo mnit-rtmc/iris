@@ -15,7 +15,7 @@ use crate::card::{AncillaryData, Card};
 use crate::error::Result;
 use crate::util::{Fields, Input, Select, opt_ref, opt_str};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use serde::Deserialize;
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
@@ -215,28 +215,28 @@ impl<L> LocAnc<L> {
     where
         C: Card,
     {
-        let mut page = Page::new();
-        card.title(View::Location, &mut page.frag::<html::Div>());
+        let mut tree = Tree::new();
+        card.title(View::Location, &mut tree.root::<html::Div>());
         match &self.geoloc {
-            Some(geoloc) => self.location_html(geoloc, &mut page),
+            Some(geoloc) => self.location_html(geoloc, &mut tree),
             None => {
-                let mut span = page.frag::<html::Span>();
+                let mut span = tree.root::<html::Span>();
                 span.cdata("Error: missing geo_loc!").close();
             }
         };
-        card.footer_html(false, &mut page.frag::<html::Div>());
-        String::from(page)
+        card.footer_html(false, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 
     /// Build Location HTML
-    fn location_html(&self, loc: &GeoLoc, page: &mut Page) {
-        let mut div = page.frag::<html::Div>();
+    fn location_html(&self, loc: &GeoLoc, tree: &mut Tree) {
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("roadway").cdata("Roadway").close();
         self.roads_html("roadway", loc.roadway.as_deref(), &mut div.select());
         self.directions_html("road_dir", loc.road_dir, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("cross_street").cdata(" ").close();
         self.modifiers_html(loc.cross_mod, &mut div.select());
@@ -247,7 +247,7 @@ impl<L> LocAnc<L> {
         );
         self.directions_html("cross_dir", loc.cross_dir, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("landmark").cdata("Landmark").close();
         div.input()
@@ -256,7 +256,7 @@ impl<L> LocAnc<L> {
             .size(24)
             .value(opt_ref(&loc.landmark));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("lat").cdata("Latitude").close();
         div.input()
@@ -266,7 +266,7 @@ impl<L> LocAnc<L> {
             .inputmode("decimal")
             .value(opt_str(loc.lat));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("lon").cdata("Longitude").close();
         div.input()
