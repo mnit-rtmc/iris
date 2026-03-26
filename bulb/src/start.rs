@@ -1024,26 +1024,41 @@ async fn update_card_list(res: Res) -> Result<bool> {
 /// Update map item states
 async fn update_map_states(cards: &CardList) -> Result<()> {
     let items = cards.states_main().await?;
-    let json = item_states_json(&items);
+    let res = cards.res();
+    if res.has_location() {
+        let states_all = card::item_states_all(res);
+        let css = item_states_css(states_all, &items);
+        Doc::get()
+            .elem::<Element>(&format!("{res}-style"))
+            .set_inner_html(&css);
+    }
     app::set_resources(items);
-    // FIXME: js_update_item_states(&json);
     Ok(())
 }
 
-/// Build item states JSON object
-fn item_states_json(states: &[CardState]) -> JsValue {
-    let mut json = String::new();
-    json.push('{');
-    for st in states {
-        if json.len() > 1 {
-            json.push(',');
+/// Build resource item states style
+fn item_states_css(states_all: &'static [ItemState], card_states: &[CardState]) -> String {
+    let mut css = String::new();
+    for st in states_all {
+        let mut first = true;
+        for cs in card_states {
+            if cs.state == *st {
+                if first {
+                    first = false;
+                } else {
+                    css.push(',');
+                }
+                css.push('.');
+                css.push_str(cs.res.as_str());
+                css.push('-');
+                css.push_str(&cs.name);
+            }
         }
-        json.push('"');
-        json.push_str(&st.name);
-        json.push_str("\":\"");
-        json.push_str(st.state.code());
-        json.push('"');
+        if !first {
+            css.push_str(" { fill: ");
+            css.push_str(st.fill_css());
+            css.push_str("; }\n");
+        }
     }
-    json.push('}');
-    JsValue::from_str(&json)
+    css
 }

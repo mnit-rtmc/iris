@@ -287,7 +287,7 @@ fn default_state(res: Res) -> Option<ItemState> {
 }
 
 /// Get slice of all item states for a resource
-fn item_states_all(res: Res) -> &'static [ItemState] {
+pub fn item_states_all(res: Res) -> &'static [ItemState] {
     match res {
         Res::ActionPlan => ActionPlan::item_states_all(),
         Res::Alarm => Alarm::item_states_all(),
