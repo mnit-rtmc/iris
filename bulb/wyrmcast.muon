@@ -172,31 +172,31 @@ layer_group: tms
     geom_type: polygon
     zoom: 18
     tags: ?station_id
+  layer: weather_sensor
+    geom_type: point
+    zoom: 10+
+    tags: ?name ?rotate
   layer: beacon
     geom_type: point
     zoom: 10+
     tags: ?name ?rotate
+  layer: ramp_meter
+    geom_type: point
+    zoom: 11+
+    tags: ?name ?rotate
   layer: camera
     geom_type: point
     zoom: 11+
+    tags: ?name ?rotate
+  layer: lcs
+    geom_type: point
+    zoom: 12+
     tags: ?name ?rotate
   layer: dms
     geom_type: point
     zoom: 11+
     tags: ?name ?rotate
   layer: incident
-    geom_type: point
-    zoom: 10+
-    tags: ?name ?rotate
-  layer: lcs
-    geom_type: point
-    zoom: 12+
-    tags: ?name ?rotate
-  layer: ramp_meter
-    geom_type: point
-    zoom: 11+
-    tags: ?name ?rotate
-  layer: weather_sensor
     geom_type: point
     zoom: 10+
     tags: ?name ?rotate
