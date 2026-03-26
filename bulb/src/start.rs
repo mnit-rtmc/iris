@@ -877,7 +877,7 @@ impl StationData {
         let mut style = String::new();
         style.push_str(".segment-wyrm { fill: #aaa; }\n");
         for (sid, data) in &self.samples {
-            let flow = data.get(0);
+            let flow = data.first();
             let speed = data.get(1);
             if let (Some(Some(fl)), Some(Some(sp))) = (flow, speed) {
                 let density = ((*fl as f32) / (*sp as f32)).round() as u32;
@@ -1037,7 +1037,10 @@ async fn update_map_states(cards: &CardList) -> Result<()> {
 }
 
 /// Build resource item states style
-fn item_states_css(states_all: &'static [ItemState], card_states: &[CardState]) -> String {
+fn item_states_css(
+    states_all: &'static [ItemState],
+    card_states: &[CardState],
+) -> String {
     let mut css = String::new();
     for st in states_all {
         let mut first = true;
