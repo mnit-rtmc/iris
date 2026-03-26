@@ -826,7 +826,6 @@ fn tick_interval() {
             DeferredAction::FetchStationData => fetch_station_data(),
             DeferredAction::HideToast => hide_elem("sb_toast"),
             DeferredAction::RefreshList => handle_res_change(),
-            DeferredAction::RedrawMap => (), // FIXME: js_redraw_map(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
         }
@@ -934,7 +933,6 @@ async fn do_handle_notification(
         let mut cards = CardList::new(res, &access);
         cards.fetch_all().await?;
         update_map_states(&cards).await?;
-        app::defer_action(DeferredAction::RedrawMap, 500);
     }
     Ok(())
 }
@@ -971,7 +969,6 @@ async fn update_card_list(res: Res) -> Result<bool> {
     }
     if res.has_location() {
         update_map_states(&cards).await?;
-        app::defer_action(DeferredAction::RedrawMap, 500);
     }
     if let Some(cv) = expanded {
         // Re-select the map marker, in case item state changed

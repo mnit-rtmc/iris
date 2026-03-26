@@ -29,8 +29,6 @@ pub enum DeferredAction {
     HideToast,
     /// Refresh resource list
     RefreshList,
-    /// Redraw map markers
-    RedrawMap,
     /// Make SSE event source
     MakeEventSource,
     /// Set notify state
