@@ -21,7 +21,6 @@ use crate::sse;
 use crate::util::Doc;
 use crate::view::{CardView, View};
 use chrono::{DateTime, Local};
-use js_sys::JsString;
 use resources::Res;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -31,8 +30,8 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    CustomEvent, Element, Event, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
+    Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
+    HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
     ScrollLogicalPosition, TransitionEvent, Window,
 };
 
@@ -905,15 +904,15 @@ fn density_color(density: u32) -> &'static str {
 
 /// Add a `click` event listener to the map element
 fn add_map_click_listener(elem: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|ce: CustomEvent| match ce
-        .detail()
-        .dyn_into::<JsString>()
-    {
-        Ok(name) => spawn_local(do_future(select_card_map(name.into()))),
-        Err(e) => log::warn!("tmsevent: {e:?}"),
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>())
+            && let Ok(Some(gm)) = target.closest("g,path")
+        {
+            handle_map_click_ev(&gm);
+        }
     });
     elem.add_event_listener_with_callback(
-        "tmsevent",
+        "click",
         closure.as_ref().unchecked_ref(),
     )?;
     // can't drop closure, just forget it to make JS happy
@@ -921,16 +920,25 @@ fn add_map_click_listener(elem: &Element) -> Result<()> {
     Ok(())
 }
 
+/// Handle a `click` event within a map `g` or `path` element
+fn handle_map_click_ev(elem: &Element) {
+    if let Some(cls) = elem.get_attribute("class")
+        && let Some((rname, nm)) = cls.split_once('-')
+    {
+        let res = Res::try_from(rname).ok();
+        spawn_local(do_future(select_card_map(res, nm.to_string())));
+    }
+}
+
 /// Select a card from a map marker click
-async fn select_card_map(name: String) -> Result<()> {
-    if name.is_empty() {
+async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
+    if res.is_none() || name.is_empty() {
         if let Some(cv) = app::expanded_view() {
             let search = search_value();
             replace_card(cv.compact(), &search).await?;
         }
         return Ok(());
     }
-    let res = app::name_res(&name);
     let changed = res != selected_resource();
     if let Some(res) = res {
         if changed {
@@ -1023,16 +1031,14 @@ async fn update_card_list(res: Res) -> Result<bool> {
 
 /// Update map item states
 async fn update_map_states(cards: &CardList) -> Result<()> {
-    let items = cards.states_main().await?;
+    // NOTE: resource must have locations
     let res = cards.res();
-    if res.has_location() {
-        let states_all = card::item_states_all(res);
-        let css = item_states_css(states_all, &items);
-        Doc::get()
-            .elem::<Element>(&format!("{res}-style"))
-            .set_inner_html(&css);
-    }
-    app::set_resources(items);
+    let states_all = card::item_states_all(res);
+    let items = cards.states_main().await?;
+    let css = item_states_css(states_all, &items);
+    Doc::get()
+        .elem::<Element>(&format!("{res}-style"))
+        .set_inner_html(&css);
     Ok(())
 }
 

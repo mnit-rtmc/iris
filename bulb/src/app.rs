@@ -10,11 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{CardList, CardState};
+use crate::card::CardList;
 use crate::sse::NotifyState;
 use crate::view::CardView;
-use foldhash::HashMap;
-use resources::Res;
 use std::cell::RefCell;
 
 /// Interval (ms) between ticks for deferred actions
@@ -46,8 +44,6 @@ struct AppState {
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
     tick: i32,
-    /// Resource names
-    res_names: HashMap<String, Res>,
     /// Card list
     cards: Option<CardList>,
     /// Selected video monitor number
@@ -98,21 +94,6 @@ pub fn set_delete_enabled(enabled: bool) {
 /// Get delete enabled from global app state
 pub fn delete_enabled() -> bool {
     STATE.with(|rc| rc.borrow().delete_enabled)
-}
-
-/// Set resource names
-pub fn set_resources(items: Vec<CardState>) {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        for item in items {
-            state.res_names.insert(item.name, item.res);
-        }
-    })
-}
-
-/// Get resource type for a name from global app state
-pub fn name_res(name: &str) -> Option<Res> {
-    STATE.with(|rc| rc.borrow().res_names.get(name).cloned())
 }
 
 /// Get/set card list in global app state
