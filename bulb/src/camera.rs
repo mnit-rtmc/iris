@@ -18,7 +18,7 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -172,8 +172,8 @@ impl Camera {
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &CameraAnc) -> String {
-        if let Some((lat, lon)) = anc.loc.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::Camera, &self.name, lon, lat);
         }
         // FIXME: set selected video monitor to this camera
         let mut tree = Tree::new();

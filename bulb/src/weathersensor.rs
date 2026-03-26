@@ -16,7 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -771,8 +771,8 @@ impl WeatherSensor {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &WeatherSensorAnc) -> String {
-        if let Some((lat, lon)) = anc.loc.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::WeatherSensor, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Status, &mut tree.root::<html::Div>());

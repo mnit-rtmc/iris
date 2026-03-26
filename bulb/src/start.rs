@@ -83,14 +83,34 @@ fn show_toast(msg: &str) {
     app::defer_action(DeferredAction::HideToast, 3000);
 }
 
-/// Fly map to specified item
-pub fn fly_map_item(_fid: &str, lat: f64, lon: f64) {
-    // FIXME: add fly animation?
+/// Select item on map
+pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
+    if app::is_selected_item(res, name) {
+        return;
+    }
+    set_selected_item(res, name);
     spawn_local(async move {
-        // FIXME: select fid
+        // FIXME: add fly animation?
         let map_pane = earthwyrm::Map::new("map-pane", GROUPS);
         let _ = map_pane.set_view(12, lon, lat).await;
     });
+}
+
+/// Set selected item
+fn set_selected_item(res: Res, name: &str) {
+    app::set_selected_item(res, name);
+    let css = format!(".{res}-{name} {{ stroke: white; stroke-width: 2; }}");
+    Doc::get()
+        .elem::<Element>("selected-style")
+        .set_inner_html(&css);
+}
+
+/// Clear selected item
+fn clear_selected_item() {
+    app::clear_selected_item();
+    Doc::get()
+        .elem::<Element>("selected-style")
+        .set_inner_html("");
 }
 
 /// Application starting function
@@ -706,11 +726,6 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     }
     let cv = CardView::new(res, &name, view);
     replace_card(cv, "").await?;
-    // FIXME: update selected style on earthwyrm map
-    // js_set_selected(
-    //     &JsValue::from_str(res.as_str()),
-    //     &JsValue::from_str(&name),
-    // );
     Ok(())
 }
 
@@ -933,6 +948,7 @@ fn handle_map_click_ev(elem: &Element) {
 /// Select a card from a map marker click
 async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     if res.is_none() || name.is_empty() {
+        clear_selected_item();
         if let Some(cv) = app::expanded_view() {
             let search = search_value();
             replace_card(cv.compact(), &search).await?;
@@ -941,13 +957,12 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     }
     let changed = res != selected_resource();
     if let Some(res) = res {
+        set_selected_item(res, &name);
         if changed {
             set_resource(Some(res), "").await;
         }
         let id = format!("{res}_{name}");
-        // FIXME: js_fly_enable(JsValue::FALSE);
         click_card(res, name, id).await?;
-        // FIXME: js_fly_enable(JsValue::TRUE);
     }
     if changed {
         sse::post_req(res).await;
@@ -989,11 +1004,6 @@ async fn update_card_list(res: Res) -> Result<bool> {
         return Ok(false);
     };
     if old_cards.res() != res {
-        // FIXME: update selected style on earthwyrm map
-        // js_set_selected(
-        //     &JsValue::from_str(res.as_str()),
-        //     &JsValue::from_str(""),
-        // );
         return Ok(false);
     }
     let old_json = old_cards.json().to_string();
@@ -1017,12 +1027,6 @@ async fn update_card_list(res: Res) -> Result<bool> {
         update_map_states(&cards).await?;
     }
     if let Some(cv) = expanded {
-        // Re-select the map marker, in case item state changed
-        // FIXME: update selected style on earthwyrm map
-        // js_set_selected(
-        //     &JsValue::from_str(res.as_str()),
-        //     &JsValue::from_str(&cv.name),
-        // );
         cards.set_view(cv);
     }
     app::card_list(Some(cards));

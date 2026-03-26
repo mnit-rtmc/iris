@@ -13,6 +13,7 @@
 use crate::card::CardList;
 use crate::sse::NotifyState;
 use crate::view::CardView;
+use resources::Res;
 use std::cell::RefCell;
 
 /// Interval (ms) between ticks for deferred actions
@@ -40,6 +41,8 @@ struct AppState {
     delete_enabled: bool,
     /// Logged-in user name
     user: Option<String>,
+    /// Selected item (resource / name)
+    selected_item: Option<(Res, String)>,
     /// Deferred actions (with tick number)
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
@@ -114,6 +117,26 @@ pub fn set_user(user: Option<String>) {
 /// Get logged-in user name from global app state
 pub fn user() -> Option<String> {
     STATE.with(|rc| rc.borrow().user.clone())
+}
+
+/// Set selected item in global app state
+pub fn set_selected_item(res: Res, name: &str) {
+    STATE.with(|rc| {
+        rc.borrow_mut().selected_item = Some((res, name.to_string()))
+    });
+}
+
+/// Clear selected item in global app state
+pub fn clear_selected_item() {
+    STATE.with(|rc| rc.borrow_mut().selected_item = None);
+}
+
+/// Check if an item is selected
+pub fn is_selected_item(res: Res, name: &str) -> bool {
+    STATE.with(|rc| match &rc.borrow().selected_item {
+        Some((r, n)) => (r, n.as_str()) == (&res, name),
+        _ => false,
+    })
 }
 
 /// Defer action to a future time

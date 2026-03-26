@@ -19,7 +19,7 @@ use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -609,8 +609,8 @@ impl RampMeter {
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &RampMeterAnc) -> String {
-        if let Some((lat, lon)) = anc.loc.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::RampMeter, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());

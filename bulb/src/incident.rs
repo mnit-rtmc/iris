@@ -15,7 +15,7 @@ use crate::card::{AncillaryData, Card};
 use crate::error::Result;
 use crate::geoloc::Direction;
 use crate::item::{ItemState, ItemStates};
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -113,10 +113,10 @@ impl Incident {
         ItemStates::default().with(self.item_state_main(anc), "")
     }
 
-    /// Get lat/lon of incident
-    fn latlon(&self) -> Option<(f64, f64)> {
-        match (self.lat, self.lon) {
-            (Some(lat), Some(lon)) => Some((lat, lon)),
+    /// Get lon/lat of incident
+    fn lonlat(&self) -> Option<(f64, f64)> {
+        match (self.lon, self.lat) {
+            (Some(lon), Some(lat)) => Some((lon, lat)),
             _ => None,
         }
     }
@@ -162,8 +162,8 @@ impl Incident {
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &IncidentAnc) -> String {
-        if let Some((lat, lon)) = self.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = self.lonlat() {
+            select_item_map(Res::Incident, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();

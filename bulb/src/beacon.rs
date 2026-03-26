@@ -17,7 +17,7 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -178,8 +178,8 @@ impl Beacon {
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &BeaconAnc) -> String {
-        if let Some((lat, lon)) = anc.loc.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::Beacon, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());

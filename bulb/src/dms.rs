@@ -25,7 +25,7 @@ use crate::notes::contains_hashtag;
 use crate::rend::Renderer;
 use crate::rle::Table;
 use crate::signmessage::SignMessage;
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use crate::word::Word;
@@ -684,8 +684,8 @@ impl Dms {
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &DmsAnc) -> String {
-        if let Some((lat, lon)) = anc.loc.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::Dms, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
