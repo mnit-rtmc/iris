@@ -20,11 +20,13 @@ use crate::permission::Permission;
 use crate::sse;
 use crate::util::Doc;
 use crate::view::{CardView, View};
+use chrono::{DateTime, Local};
 use js_sys::JsString;
 use resources::Res;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::error::Error as _;
+use std::time::Duration;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
@@ -43,6 +45,7 @@ struct StationData {
     /// Data collection time
     time_stamp: String,
     /// Binning period (s)
+    #[allow(unused)]
     period: u32,
     /// Data samples
     samples: HashMap<String, [Option<u32>; 2]>,
@@ -843,8 +846,9 @@ fn fetch_station_data() {
 async fn do_fetch_station_data() -> Result<()> {
     let data = StationData::fetch().await?;
     let css = data.make_style();
-    let map_pane = earthwyrm::Map::new("map-pane", GROUPS);
-    map_pane.set_style(&css)?;
+    Doc::get()
+        .elem::<Element>("segment-style")
+        .set_inner_html(&css);
     Ok(())
 }
 
@@ -855,13 +859,47 @@ impl StationData {
         Ok(serde_wasm_bindgen::from_value(stat)?)
     }
 
-    /// Make station CSS style
+    /// Make station segment style
     fn make_style(&self) -> String {
-        // FIXME: check timestamp
+        let now: DateTime<Local> = Local::now();
+        let oldest = now - Duration::from_secs(300);
+        match DateTime::parse_from_rfc3339(&self.time_stamp) {
+            Ok(dt) if dt > oldest && dt < now => self.do_make_style(),
+            _ => {
+                log::warn!("bad station_sample timestamp: {}", self.time_stamp);
+                String::new()
+            }
+        }
+    }
+
+    /// Make station segment style
+    fn do_make_style(&self) -> String {
         let mut style = String::new();
-        style.push_str(".segment-wyrm { fill: #888; }\n");
-        style.push_str(".segment-S1854 { fill: #00ff00; }");
+        style.push_str(".segment-wyrm { fill: #aaa; }\n");
+        for (sid, data) in &self.samples {
+            let flow = data.get(0);
+            let speed = data.get(1);
+            if let (Some(Some(fl)), Some(Some(sp))) = (flow, speed) {
+                let density = ((*fl as f32) / (*sp as f32)).round() as u32;
+                style.push_str(".segment-");
+                style.push_str(sid);
+                style.push_str(" { fill: ");
+                style.push_str(density_color(density));
+                style.push_str("; }\n");
+            }
+        }
         style
+    }
+}
+
+/// Get color based on density (veh/mi)
+fn density_color(density: u32) -> &'static str {
+    match density {
+        0 => "#aaa",
+        1..30 => "#2c2",
+        30..50 => "#fc0",
+        50..200 => "#d00",
+        200.. => "#c0f",
     }
 }
 

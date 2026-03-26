@@ -118,6 +118,10 @@
   stroke: #adb0b0;
   stroke-width: 1;
 }
+.segment-wyrm {
+  fill: #aaa;
+  stroke-width: 0.2;
+}
 .beacon-wyrm {
   fill: #55acee;
   stroke-width: 0.5;
