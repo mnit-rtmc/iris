@@ -29,6 +29,10 @@ struct MapState {
     mousemove: Closure<dyn Fn(MouseEvent)>,
     /// Panning flag
     panning: bool,
+    /// Pan X
+    pan_x: i32,
+    /// Pan Y
+    pan_y: i32,
 }
 
 thread_local! {
@@ -47,6 +51,8 @@ pub fn init(id: &str, groups: &'static [&'static str]) {
             mouseup: Closure::new(handle_map_mouseup),
             mousemove: Closure::new(handle_map_mousemove),
             panning: false,
+            pan_x: 0,
+            pan_y: 0,
         };
         mp.add_event_listener_with_callback(
             "mousedown",
@@ -72,6 +78,16 @@ pub fn pane() -> Option<earthwyrm::Map> {
     MAP_STATE.with(|rc| rc.borrow().as_ref().map(|ms| ms.map.clone()))
 }
 
+/// Reset pan point
+pub fn reset_pan() {
+    MAP_STATE.with(|rc| {
+        if let Some(ref mut state) = *rc.borrow_mut() {
+            state.pan_x = 0;
+            state.pan_y = 0;
+        }
+    });
+}
+
 /// Set map panning flag
 fn set_map_panning(panning: bool) {
     MAP_STATE.with(|rc| {
@@ -85,6 +101,19 @@ fn set_map_panning(panning: bool) {
 fn is_map_panning() -> bool {
     MAP_STATE
         .with(|rc| rc.borrow().as_ref().map(|ms| ms.panning).unwrap_or(false))
+}
+
+/// Translate map position
+fn translate(x: i32, y: i32) -> (i32, i32) {
+    MAP_STATE.with(|rc| {
+        if let Some(ref mut state) = *rc.borrow_mut() {
+            state.pan_x += x;
+            state.pan_y += y;
+            (state.pan_x, state.pan_y)
+        } else {
+            (x, y)
+        }
+    })
 }
 
 /// Handle a `mousedown` event
@@ -104,7 +133,10 @@ fn handle_map_mouseup(me: MouseEvent) {
 /// Handle a `mousemove` event
 fn handle_map_mousemove(me: MouseEvent) {
     if is_map_panning() {
-        // FIXME: set map transform
-        log::warn!("mousemove: {} {}", me.movement_x(), me.movement_y());
+        let (x, y) = translate(me.movement_x(), me.movement_y());
+        if let Some(map_pane) = pane() {
+            let _ = map_pane
+                .set_style(&format!("transform: translate({x}px, {y}px);"));
+        }
     }
 }

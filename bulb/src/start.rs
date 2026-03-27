@@ -93,6 +93,7 @@ pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
         if let Some(map_pane) = crate::map::pane() {
             // FIXME: add fly animation?
             let _ = map_pane.set_view(12, lon, lat).await;
+            crate::map::reset_pan();
         }
     });
 }
