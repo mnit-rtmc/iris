@@ -80,7 +80,14 @@ pub fn init(id: &str, groups: &'static [&'static str]) {
 
 /// Get map pane
 pub fn pane() -> Option<earthwyrm::Map> {
-    MAP_STATE.with(|rc| rc.borrow().as_ref().map(|ms| ms.map.clone()))
+    MAP_STATE.with(|rc| {
+        if let Some(ref mut state) = *rc.borrow_mut() {
+            state.map.next_cycle();
+            Some(state.map.clone())
+        } else {
+            None
+        }
+    })
 }
 
 /// Reset pan point
@@ -102,10 +109,19 @@ fn set_map_panning(panning: bool) {
     });
 }
 
-/// Check if map is being panned
-fn is_map_panning() -> bool {
-    MAP_STATE
-        .with(|rc| rc.borrow().as_ref().map(|ms| ms.panning).unwrap_or(false))
+/// Get map pane if it's being panned
+fn panning_pane() -> Option<earthwyrm::Map> {
+    MAP_STATE.with(|rc| {
+        if let Some(ref state) = *rc.borrow() {
+            if state.panning {
+                Some(state.map.clone())
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    })
 }
 
 /// Translate map position
@@ -137,11 +153,9 @@ fn handle_map_mouseup(me: MouseEvent) {
 
 /// Handle a `mousemove` event
 fn handle_map_mousemove(me: MouseEvent) {
-    if is_map_panning() {
+    if let Some(map_pane) = panning_pane() {
         let (x, y) = translate(me.movement_x(), me.movement_y());
-        if let Some(map_pane) = pane() {
-            let _ = map_pane
-                .set_style(&format!("transform: translate({x}px, {y}px);"));
-        }
+        let _ =
+            map_pane.set_style(&format!("transform: translate({x}px, {y}px);"));
     }
 }
