@@ -23,7 +23,7 @@ struct MapState {
     map: earthwyrm::Map,
     /// Mousedown callback
     mousedown: Closure<dyn Fn(MouseEvent)>,
-    /// Mouseup callback
+    /// Mouseup (and mouseleave) callback
     mouseup: Closure<dyn Fn(MouseEvent)>,
     /// Mousemove callback
     mousemove: Closure<dyn Fn(MouseEvent)>,
@@ -61,6 +61,11 @@ pub fn init(id: &str, groups: &'static [&'static str]) {
         .unwrap_throw();
         mp.add_event_listener_with_callback(
             "mouseup",
+            ms.mouseup.as_ref().unchecked_ref(),
+        )
+        .unwrap_throw();
+        mp.add_event_listener_with_callback(
+            "mouseleave",
             ms.mouseup.as_ref().unchecked_ref(),
         )
         .unwrap_throw();
@@ -123,7 +128,7 @@ fn handle_map_mousedown(me: MouseEvent) {
     }
 }
 
-/// Handle a `mouseup` event
+/// Handle a `mouseup` or `mouseleave` event
 fn handle_map_mouseup(me: MouseEvent) {
     if me.button() == 0 {
         set_map_panning(false);
