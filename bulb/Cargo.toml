@@ -55,6 +55,7 @@ features = [
   'HtmlSelectElement',
   'HtmlTextAreaElement',
   'MessageEvent',
+  'MouseEvent',
   'Request',
   'RequestInit',
   'RequestMode',

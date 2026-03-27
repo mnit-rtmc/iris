@@ -90,9 +90,10 @@ pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
     }
     set_selected_item(res, name);
     spawn_local(async move {
-        // FIXME: add fly animation?
-        let map_pane = earthwyrm::Map::new("map-pane", GROUPS);
-        let _ = map_pane.set_view(12, lon, lat).await;
+        if let Some(map_pane) = crate::map::pane() {
+            // FIXME: add fly animation?
+            let _ = map_pane.set_view(12, lon, lat).await;
+        }
     });
 }
 
@@ -137,10 +138,12 @@ async fn add_listeners() -> Result<()> {
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    let map_pane = earthwyrm::Map::new("map-pane", GROUPS);
-    map_pane.set_view(11, -93.0, 45.0).await?;
-    let map_pane: HtmlElement = doc.elem("map-pane");
-    add_map_click_listener(&map_pane)?;
+    crate::map::init("map-pane", GROUPS);
+    if let Some(map_pane) = crate::map::pane() {
+        map_pane.set_view(11, -93.0, 45.0).await?;
+    }
+    let mp: HtmlElement = doc.elem("map-pane");
+    add_map_click_listener(&mp)?;
     do_future(finish_init()).await;
     fetch_station_data();
     if let Some(doc_elem) = doc.doc_elem() {
