@@ -947,7 +947,12 @@ fn handle_map_click_ev(elem: &Element) {
 
 /// Select a card from a map marker click
 async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
-    if res.is_none() || name.is_empty() {
+    let clear = name.is_empty()
+        || match (res, &name) {
+            (Some(res), name) => app::is_selected_item(res, name),
+            (None, _name) => true,
+        };
+    if clear {
         clear_selected_item();
         if let Some(cv) = app::expanded_view() {
             let search = search_value();

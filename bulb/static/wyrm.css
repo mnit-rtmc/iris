@@ -15,6 +15,10 @@
   stroke-width: 0.5;
   stroke-linecap: round;
   stroke-linejoin: round;
+  pointer-events: none;
+}
+.wyrm-tile * {
+  pointer-events: painted;
 }
 .wyrm-county {
   fill: #677;
