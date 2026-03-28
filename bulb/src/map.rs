@@ -27,16 +27,70 @@ struct MapState {
     mouseup: Closure<dyn Fn(MouseEvent)>,
     /// Mousemove callback
     mousemove: Closure<dyn Fn(MouseEvent)>,
-    /// Panning flag
-    panning: bool,
-    /// Pan X
-    pan_x: i32,
-    /// Pan Y
-    pan_y: i32,
+    /// Pan point
+    pan_point: (i32, i32),
+    /// Is panning flag
+    is_panning: bool,
 }
 
 thread_local! {
     static MAP_STATE: RefCell<Option<MapState>> = const { RefCell::new(None) };
+}
+
+impl MapState {
+    /// Make a new map state
+    fn new(map: earthwyrm::Map) -> Self {
+        MapState {
+            map,
+            mousedown: Closure::new(handle_map_mousedown),
+            mouseup: Closure::new(handle_map_mouseup),
+            mousemove: Closure::new(handle_map_mousemove),
+            pan_point: (0, 0),
+            is_panning: false,
+        }
+    }
+
+    /// Set map pan point
+    fn set_pan_point(&mut self, start: bool, x: i32, y: i32) {
+        self.pan_point = if start {
+            (self.pan_point.0 + x, self.pan_point.1 + y)
+        } else {
+            (self.pan_point.0 - x, self.pan_point.1 - y)
+        };
+        self.is_panning = start;
+    }
+
+    /// Translate a point
+    fn translate(&self, x: i32, y: i32) -> (i32, i32) {
+        if self.is_panning {
+            (x - self.pan_point.0, y - self.pan_point.1)
+        } else {
+            (0, 0)
+        }
+    }
+}
+
+/// Handle a `mousedown` event
+fn handle_map_mousedown(me: MouseEvent) {
+    if me.button() == 0 {
+        set_pan_point(true, me.client_x(), me.client_y());
+    }
+}
+
+/// Handle a `mouseup` or `mouseleave` event
+fn handle_map_mouseup(me: MouseEvent) {
+    if me.button() == 0 {
+        set_pan_point(false, me.client_x(), me.client_y());
+    }
+}
+
+/// Handle a `mousemove` event
+fn handle_map_mousemove(me: MouseEvent) {
+    if let Some(map_pane) = panning_pane() {
+        let (x, y) = translate(me.client_x(), me.client_y());
+        let _ =
+            map_pane.set_style(&format!("transform: translate({x}px, {y}px);"));
+    }
 }
 
 /// Initialize map state
@@ -45,15 +99,7 @@ pub fn init(id: &str, groups: &'static [&'static str]) {
     let map = earthwyrm::Map::new(id, groups);
     MAP_STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        let ms = MapState {
-            map,
-            mousedown: Closure::new(handle_map_mousedown),
-            mouseup: Closure::new(handle_map_mouseup),
-            mousemove: Closure::new(handle_map_mousemove),
-            panning: false,
-            pan_x: 0,
-            pan_y: 0,
-        };
+        let ms = MapState::new(map);
         mp.add_event_listener_with_callback(
             "mousedown",
             ms.mousedown.as_ref().unchecked_ref(),
@@ -94,17 +140,17 @@ pub fn pane() -> Option<earthwyrm::Map> {
 pub fn reset_pan() {
     MAP_STATE.with(|rc| {
         if let Some(ref mut state) = *rc.borrow_mut() {
-            state.pan_x = 0;
-            state.pan_y = 0;
+            state.pan_point = (0, 0);
+            state.is_panning = false;
         }
     });
 }
 
-/// Set map panning flag
-fn set_map_panning(panning: bool) {
+/// Set map pan point
+fn set_pan_point(start: bool, x: i32, y: i32) {
     MAP_STATE.with(|rc| {
         if let Some(ref mut state) = *rc.borrow_mut() {
-            state.panning = panning;
+            state.set_pan_point(start, x, y);
         }
     });
 }
@@ -113,7 +159,7 @@ fn set_map_panning(panning: bool) {
 fn panning_pane() -> Option<earthwyrm::Map> {
     MAP_STATE.with(|rc| {
         if let Some(ref state) = *rc.borrow() {
-            if state.panning {
+            if state.is_panning {
                 Some(state.map.clone())
             } else {
                 None
@@ -128,34 +174,9 @@ fn panning_pane() -> Option<earthwyrm::Map> {
 fn translate(x: i32, y: i32) -> (i32, i32) {
     MAP_STATE.with(|rc| {
         if let Some(ref mut state) = *rc.borrow_mut() {
-            state.pan_x += x;
-            state.pan_y += y;
-            (state.pan_x, state.pan_y)
+            state.translate(x, y)
         } else {
-            (x, y)
+            (0, 0)
         }
     })
-}
-
-/// Handle a `mousedown` event
-fn handle_map_mousedown(me: MouseEvent) {
-    if me.button() == 0 {
-        set_map_panning(true);
-    }
-}
-
-/// Handle a `mouseup` or `mouseleave` event
-fn handle_map_mouseup(me: MouseEvent) {
-    if me.button() == 0 {
-        set_map_panning(false);
-    }
-}
-
-/// Handle a `mousemove` event
-fn handle_map_mousemove(me: MouseEvent) {
-    if let Some(map_pane) = panning_pane() {
-        let (x, y) = translate(me.movement_x(), me.movement_y());
-        let _ =
-            map_pane.set_style(&format!("transform: translate({x}px, {y}px);"));
-    }
 }
