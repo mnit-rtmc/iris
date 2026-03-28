@@ -78,6 +78,14 @@ impl MapState {
             self.point.1 - self.pan_point.1,
         )
     }
+
+    /// Reset the map state
+    fn reset(&mut self) {
+        self.map.next_cycle();
+        self.pan_point = (0, 0);
+        self.is_panning = false;
+        self.point = (0, 0);
+    }
 }
 
 /// Handle a `mousedown` event
@@ -135,25 +143,15 @@ pub fn init(id: &str, groups: &'static [&'static str]) {
 }
 
 /// Get map pane
-pub fn pane() -> Option<earthwyrm::Map> {
+pub fn get_pane() -> Option<earthwyrm::Map> {
     MAP_STATE.with(|rc| {
         if let Some(ref mut state) = *rc.borrow_mut() {
-            state.map.next_cycle();
+            state.reset();
             Some(state.map.clone())
         } else {
             None
         }
     })
-}
-
-/// Reset pan point
-pub fn reset_pan() {
-    MAP_STATE.with(|rc| {
-        if let Some(ref mut state) = *rc.borrow_mut() {
-            state.pan_point = (0, 0);
-            state.is_panning = false;
-        }
-    });
 }
 
 /// Set map pan point

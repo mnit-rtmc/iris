@@ -90,10 +90,9 @@ pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
     }
     set_selected_item(res, name);
     spawn_local(async move {
-        if let Some(map_pane) = crate::map::pane() {
+        if let Some(map_pane) = crate::map::get_pane() {
             // FIXME: add fly animation?
             let _ = map_pane.set_view(12, lon, lat).await;
-            crate::map::reset_pan();
         }
     });
 }
@@ -140,7 +139,7 @@ async fn add_listeners() -> Result<()> {
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
     crate::map::init("map-pane", GROUPS);
-    if let Some(map_pane) = crate::map::pane() {
+    if let Some(map_pane) = crate::map::get_pane() {
         map_pane.set_view(11, -93.0, 45.0).await?;
     }
     let mp: HtmlElement = doc.elem("map-pane");
