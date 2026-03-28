@@ -31,6 +31,8 @@ struct MapState {
     pan_point: (i32, i32),
     /// Is panning flag
     is_panning: bool,
+    /// Most recent point
+    point: (i32, i32),
 }
 
 thread_local! {
@@ -47,26 +49,34 @@ impl MapState {
             mousemove: Closure::new(handle_map_mousemove),
             pan_point: (0, 0),
             is_panning: false,
+            point: (0, 0),
         }
     }
 
-    /// Set map pan point
-    fn set_pan_point(&mut self, start: bool, x: i32, y: i32) {
-        self.pan_point = if start {
-            (self.pan_point.0 + x, self.pan_point.1 + y)
-        } else {
-            (self.pan_point.0 - x, self.pan_point.1 - y)
-        };
-        self.is_panning = start;
+    /// Start or stop panning
+    fn set_panning(&mut self, panning: bool) {
+        if panning != self.is_panning {
+            let (x, y) = self.point;
+            self.pan_point = if panning {
+                (self.pan_point.0 + x, self.pan_point.1 + y)
+            } else {
+                (self.pan_point.0 - x, self.pan_point.1 - y)
+            };
+            self.is_panning = panning;
+        }
     }
 
-    /// Translate a point
-    fn translate(&self, x: i32, y: i32) -> (i32, i32) {
-        if self.is_panning {
-            (x - self.pan_point.0, y - self.pan_point.1)
-        } else {
-            (0, 0)
-        }
+    /// Set pointer position
+    fn set_point(&mut self, x: i32, y: i32) {
+        self.point = (x, y);
+    }
+
+    /// Get translated pointer position
+    fn point(&self) -> (i32, i32) {
+        (
+            self.point.0 - self.pan_point.0,
+            self.point.1 - self.pan_point.1,
+        )
     }
 }
 
@@ -150,7 +160,10 @@ pub fn reset_pan() {
 fn set_pan_point(start: bool, x: i32, y: i32) {
     MAP_STATE.with(|rc| {
         if let Some(ref mut state) = *rc.borrow_mut() {
-            state.set_pan_point(start, x, y);
+            if start {
+                state.set_point(x, y);
+            }
+            state.set_panning(start);
         }
     });
 }
@@ -174,7 +187,8 @@ fn panning_pane() -> Option<earthwyrm::Map> {
 fn translate(x: i32, y: i32) -> (i32, i32) {
     MAP_STATE.with(|rc| {
         if let Some(ref mut state) = *rc.borrow_mut() {
-            state.translate(x, y)
+            state.set_point(x, y);
+            state.point()
         } else {
             (0, 0)
         }
