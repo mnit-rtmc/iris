@@ -102,11 +102,11 @@ th, td {
   visibility: hidden;
 }
 .wait {
-  filter: opacity(50%);
   cursor: wait !important;
 }
 .wait * {
   cursor: wait !important;
+  filter: opacity(50%);
 }
 .fault {
   background-color: rgba(128, 32, 0, 0.25);
