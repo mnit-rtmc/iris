@@ -44,7 +44,6 @@ version = "0.3"
 features = [
   'Blob',
   'Document',
-  'HtmlCollection',
   'HtmlElement',
   'Window',
   'Event',
@@ -55,7 +54,6 @@ features = [
   'HtmlSelectElement',
   'HtmlTextAreaElement',
   'MessageEvent',
-  'PointerEvent',
   'Request',
   'RequestInit',
   'RequestMode',
