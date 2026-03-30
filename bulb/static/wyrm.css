@@ -5,6 +5,7 @@
   margin: 0;
   padding: 0;
   background-color: #677;
+  touch-action: none;
 }
 .wyrm-tile {
   position: absolute;

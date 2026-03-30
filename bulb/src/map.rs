@@ -15,18 +15,18 @@ use std::cell::RefCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::UnwrapThrowExt;
-use web_sys::{HtmlElement, MouseEvent};
+use web_sys::{Element, HtmlElement, PointerEvent};
 
 /// Global map state
 struct MapState {
     /// Map pane
     map: earthwyrm::Map,
-    /// Mousedown callback
-    mousedown: Closure<dyn Fn(MouseEvent)>,
-    /// Mouseup (and mouseleave) callback
-    mouseup: Closure<dyn Fn(MouseEvent)>,
-    /// Mousemove callback
-    mousemove: Closure<dyn Fn(MouseEvent)>,
+    /// Pointerdown callback
+    pointerdown: Closure<dyn Fn(PointerEvent)>,
+    /// Pointerup (and pointercancel) callback
+    pointerup: Closure<dyn Fn(PointerEvent)>,
+    /// Pointermove callback
+    pointermove: Closure<dyn Fn(PointerEvent)>,
     /// Pan point
     pan_point: (i32, i32),
     /// Is panning flag
@@ -44,9 +44,9 @@ impl MapState {
     fn new(map: earthwyrm::Map) -> Self {
         MapState {
             map,
-            mousedown: Closure::new(handle_map_mousedown),
-            mouseup: Closure::new(handle_map_mouseup),
-            mousemove: Closure::new(handle_map_mousemove),
+            pointerdown: Closure::new(handle_map_pointerdown),
+            pointerup: Closure::new(handle_map_pointerup),
+            pointermove: Closure::new(handle_map_pointermove),
             pan_point: (0, 0),
             is_panning: false,
             point: (0, 0),
@@ -88,24 +88,30 @@ impl MapState {
     }
 }
 
-/// Handle a `mousedown` event
-fn handle_map_mousedown(me: MouseEvent) {
-    if me.button() == 0 {
-        set_pan_point(true, me.client_x(), me.client_y());
+/// Handle a `pointerdown` event
+fn handle_map_pointerdown(pe: PointerEvent) {
+    if pe.button() == 0 {
+        set_pan_point(true, pe.client_x(), pe.client_y());
+        if let Some(target) = pe.target()
+            && let Ok(elem) = target.dyn_into::<Element>()
+            && let Err(e) = elem.set_pointer_capture(0)
+        {
+            log::warn!("set_pointer_capture: {e:?}");
+        }
     }
 }
 
-/// Handle a `mouseup` or `mouseleave` event
-fn handle_map_mouseup(me: MouseEvent) {
-    if me.button() == 0 {
-        set_pan_point(false, me.client_x(), me.client_y());
+/// Handle a `pointerup` or `pointercancel` event
+fn handle_map_pointerup(pe: PointerEvent) {
+    if pe.button() == 0 {
+        set_pan_point(false, pe.client_x(), pe.client_y());
     }
 }
 
-/// Handle a `mousemove` event
-fn handle_map_mousemove(me: MouseEvent) {
+/// Handle a `pointermove` event
+fn handle_map_pointermove(pe: PointerEvent) {
     if let Some(map_pane) = panning_pane() {
-        let (x, y) = translate(me.client_x(), me.client_y());
+        let (x, y) = translate(pe.client_x(), pe.client_y());
         let _ =
             map_pane.set_style(&format!("transform: translate({x}px, {y}px);"));
     }
@@ -119,23 +125,23 @@ pub fn init(id: &str, groups: &'static [&'static str]) {
         let mut state = rc.borrow_mut();
         let ms = MapState::new(map);
         mp.add_event_listener_with_callback(
-            "mousedown",
-            ms.mousedown.as_ref().unchecked_ref(),
+            "pointerdown",
+            ms.pointerdown.as_ref().unchecked_ref(),
         )
         .unwrap_throw();
         mp.add_event_listener_with_callback(
-            "mouseup",
-            ms.mouseup.as_ref().unchecked_ref(),
+            "pointerup",
+            ms.pointerup.as_ref().unchecked_ref(),
         )
         .unwrap_throw();
         mp.add_event_listener_with_callback(
-            "mouseleave",
-            ms.mouseup.as_ref().unchecked_ref(),
+            "pointercancel",
+            ms.pointerup.as_ref().unchecked_ref(),
         )
         .unwrap_throw();
         mp.add_event_listener_with_callback(
-            "mousemove",
-            ms.mousemove.as_ref().unchecked_ref(),
+            "pointermove",
+            ms.pointermove.as_ref().unchecked_ref(),
         )
         .unwrap_throw();
         *state = Some(ms);
