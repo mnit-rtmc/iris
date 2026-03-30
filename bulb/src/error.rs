@@ -24,10 +24,6 @@ pub enum Error {
     #[error("Fetch request error")]
     FetchRequest(),
 
-    /// EarthWyrm error
-    #[error("EarthWyrm {0}")]
-    EarthWyrm(#[from] earthwyrm::error::Error),
-
     /// Invalid font error
     #[error("Invalid font {0}")]
     InvalidFont(#[from] tfon::Error),
