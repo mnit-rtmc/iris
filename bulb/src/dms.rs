@@ -376,7 +376,7 @@ impl DmsAnc {
         self.compose_patterns.iter().any(|p| p.name == pat)
     }
 
-    /// Make line select elements
+    /// Make line input elements
     fn make_lines_html<'p>(
         &self,
         dms: &NtcipDms,

@@ -149,7 +149,6 @@ th, td {
 #map-pane {
   display: none;
   position: fixed;
-  overflow: clip;
   inset: 0;
   margin: 0;
   padding: 0;
