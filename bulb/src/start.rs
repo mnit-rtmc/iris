@@ -135,11 +135,11 @@ async fn add_listeners() -> Result<()> {
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    if let Some(map_pane) = earthwyrm::MapPane::init("map-pane", GROUPS) {
+    if let Some(map_pane) =
+        earthwyrm::MapPane::init("map-pane", GROUPS, handle_map_click_ev)
+    {
         map_pane.center(10, -93.2, 44.95);
     }
-    let mp: HtmlElement = doc.elem("map-pane");
-    add_map_click_listener(&mp)?;
     do_future(finish_init()).await;
     fetch_station_data();
     if let Some(doc_elem) = doc.doc_elem() {
@@ -916,27 +916,12 @@ fn density_color(density: u32) -> &'static str {
     }
 }
 
-/// Add a `click` event listener to the map element
-fn add_map_click_listener(elem: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>())
-            && let Ok(Some(gm)) = target.closest("g,path")
-        {
-            handle_map_click_ev(&gm);
-        }
-    });
-    elem.add_event_listener_with_callback(
-        "click",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    // can't drop closure, just forget it to make JS happy
-    closure.forget();
-    Ok(())
-}
-
-/// Handle a `click` event within a map `g` or `path` element
-fn handle_map_click_ev(elem: &Element) {
-    if let Some(cls) = elem.get_attribute("class")
+/// Handle a `click` event
+fn handle_map_click_ev(ev: Event) {
+    // Is it within a map `g` or `path` element
+    if let Some(Ok(target)) = ev.target().map(|e| e.dyn_into::<Element>())
+        && let Ok(Some(gm)) = target.closest("g,path")
+        && let Some(cls) = gm.get_attribute("class")
         && let Some((rname, nm)) = cls.split_once('-')
     {
         let res = Res::try_from(rname).ok();
