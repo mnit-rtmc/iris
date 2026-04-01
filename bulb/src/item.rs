@@ -173,14 +173,16 @@ impl ItemState {
             Self::Operator => "#ffff00",
             Self::Planned => "#bb6655",
             Self::Incident => "#55acee",
+            Self::Locked => "#864",
             Self::External => "#bb6655",
-            Self::Dedicated => "#bb66bb",
+            Self::Dedicated => "#8866bb",
             Self::Fault => "#000000",
             Self::Offline => "#aaaaaa",
             Self::Crash => "#ff8080",
             Self::Stall => "#ff80ff",
             Self::Hazard => "#ffff80",
             Self::Roadwork => "#ffd080",
+            Self::Inactive => "#fff2",
             _ => "none",
         }
     }
