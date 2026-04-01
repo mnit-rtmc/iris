@@ -122,35 +122,35 @@
   stroke: #adb0b0;
   stroke-width: 1;
 }
-.segment-wyrm {
+.wyrm-segment {
   fill: #aaa;
   stroke-width: 0.2;
 }
-.beacon-wyrm {
+.wyrm-beacon {
   fill: #55acee;
   stroke-width: 0.5;
 }
-.camera-wyrm {
+.wyrm-camera {
   fill: #55acee;
   stroke-width: 0.5;
 }
-.dms-wyrm {
+.wyrm-dms {
   fill: #55acee;
   stroke-width: 0.5;
 }
-.incident-wyrm {
+.wyrm-incident {
   fill: #55acee;
   stroke-width: 0.5;
 }
-.lcs-wyrm {
+.wyrm-lcs {
   fill: #000088;
   stroke-width: 0.5;
 }
-.ramp_meter-wyrm {
+.wyrm-ramp_meter {
   fill: #55acee;
   stroke-width: 0.5;
 }
-.weather_sensor-wyrm {
+.wyrm-weather_sensor {
   fill: #55acee;
   stroke-width: 0.5;
 }

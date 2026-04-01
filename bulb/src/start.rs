@@ -888,7 +888,7 @@ impl StationData {
     /// Make station segment style
     fn do_make_style(&self) -> String {
         let mut style = String::new();
-        style.push_str(".segment-wyrm { fill: #aaa; }\n");
+        style.push_str(".wyrm-segment { fill: #aaa; }\n");
         for (sid, data) in &self.samples {
             let flow = data.first();
             let speed = data.get(1);
