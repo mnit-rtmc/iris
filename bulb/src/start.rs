@@ -91,6 +91,9 @@ pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
     set_selected_item(res, name);
     if let Some(map_pane) = earthwyrm::MapPane::get() {
         map_pane.center(12, lon, lat);
+        Doc::get()
+            .elem::<Element>("zoom-level")
+            .set_inner_html("12");
     }
 }
 
@@ -141,6 +144,9 @@ async fn add_listeners() -> Result<()> {
         earthwyrm::MapPane::init("map-pane", GROUPS, handle_map_click_ev)
     {
         map_pane.center(10, -93.2, 44.95);
+        Doc::get()
+            .elem::<Element>("zoom-level")
+            .set_inner_html("10");
     }
     do_future(finish_init()).await;
     fetch_station_data();
@@ -1065,12 +1071,13 @@ fn is_layer_displayed(res: Res) -> bool {
     if selected_resource() == Some(res) {
         return true;
     }
-    // FIXME: use current zoom level (not always 12)
-    let layer = format!("layer-{res}");
-    match Doc::get().input_parse::<u16>(&layer) {
-        Some(zoom) => zoom < 12,
-        None => true,
+    if let Some(map_pane) = earthwyrm::MapPane::get() {
+        let layer = format!("layer-{res}");
+        if let Some(zoom) = Doc::get().input_parse::<u32>(&layer) {
+            return zoom <= map_pane.zoom();
+        }
     }
+    false
 }
 
 /// Build resource item states style
