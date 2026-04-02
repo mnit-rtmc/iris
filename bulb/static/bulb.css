@@ -155,6 +155,35 @@ th, td {
   cursor: pointer;
 }
 
+#layer-menu {
+  display: none;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  background-color: #566;
+  color: white;
+  user-select: none;
+}
+#layer-zoom {
+  display: none;
+}
+#layer-zoom:has(+ #toggle-zoom:checked) {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+}
+#toggle-zoom + label {
+  background-color: #566;
+  color: white;
+}
+#toggle-zoom:hover + label {
+  background-color: #677;
+}
+#toggle-zoom:active + label {
+  background-color: #788;
+}
+
 #side-pane {
   position: fixed;
   overflow: hidden;
@@ -246,6 +275,9 @@ label:has(+ #sb_resource) {
 
 @media screen and (min-width: 36rem) {
   #map-pane {
+    display: block;
+  }
+  #layer-menu {
     display: block;
   }
   #divider {

@@ -130,6 +130,8 @@ async fn add_listeners() -> Result<()> {
     add_click_listener(&divider)?;
     let sidebar: HtmlElement = doc.elem("sidebar");
     add_change_listener(&sidebar)?;
+    let layer_menu: HtmlElement = doc.elem("layer-menu");
+    add_change_listener(&layer_menu)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
     add_focus_listener(&sidebar)?;
@@ -146,6 +148,28 @@ async fn add_listeners() -> Result<()> {
         add_fullscreenchange_listener(&doc_elem)?;
     }
     Ok(())
+}
+
+/// Handle a fallible future function
+async fn do_future(future: impl Future<Output = Result<()>>) {
+    match future.await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(Error::FetchResponseNotFound()) => {
+            // Card list may be out-of-date; refresh
+            app::defer_action(DeferredAction::RefreshList, 200);
+        }
+        Err(Error::CardMismatch()) => {
+            // Card list may be out-of-date; refresh
+            app::defer_action(DeferredAction::RefreshList, 200);
+        }
+        Err(e) => {
+            if let Some(se) = e.source() {
+                log::warn!("source: {se}");
+            }
+            show_toast(&format!("Error: {e}"));
+        }
+    }
 }
 
 /// Finish initialization
@@ -245,10 +269,13 @@ fn add_fullscreenchange_listener(elem: &Element) -> Result<()> {
 /// Add a "change" event listener to an element
 fn add_change_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>())
-            && target.id().as_str() == "sb_fullscreen"
-        {
-            set_fullscreen();
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
+            let id = target.id();
+            if id == "sb_fullscreen" {
+                set_fullscreen();
+            } else {
+                spawn_local(do_future(handle_layer_zoom(id)));
+            }
         }
     });
     elem.add_event_listener_with_callback(
@@ -268,26 +295,15 @@ fn set_fullscreen() {
     doc.request_fullscreen(checked);
 }
 
-/// Handle a fallible future function
-async fn do_future(future: impl Future<Output = Result<()>>) {
-    match future.await {
-        Ok(_) => (),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(Error::FetchResponseNotFound()) => {
-            // Card list may be out-of-date; refresh
-            app::defer_action(DeferredAction::RefreshList, 200);
-        }
-        Err(Error::CardMismatch()) => {
-            // Card list may be out-of-date; refresh
-            app::defer_action(DeferredAction::RefreshList, 200);
-        }
-        Err(e) => {
-            if let Some(se) = e.source() {
-                log::warn!("source: {se}");
-            }
-            show_toast(&format!("Error: {e}"));
-        }
+/// Handle layer zoom threshold change
+async fn handle_layer_zoom(id: String) -> Result<()> {
+    if let Some((layer, rname)) = id.split_once('-')
+        && layer == "layer"
+        && let Ok(res) = Res::try_from(rname)
+    {
+        update_map_states(res, None).await?;
     }
+    Ok(())
 }
 
 /// Get dependent resource row class name
@@ -979,10 +995,7 @@ async fn do_handle_notification(
     if let Ok(res) = Res::try_from(chan.as_str())
         && res.has_location()
     {
-        let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
-        let mut cards = CardList::new(res, &access);
-        cards.fetch_all().await?;
-        update_map_states(&cards).await?;
+        update_map_states(res, None).await?;
     }
     Ok(())
 }
@@ -1013,7 +1026,7 @@ async fn update_card_list(res: Res) -> Result<bool> {
         }
     }
     if res.has_location() {
-        update_map_states(&cards).await?;
+        update_map_states(res, Some(&cards)).await?;
     }
     if let Some(cv) = expanded {
         cards.set_view(cv);
@@ -1023,16 +1036,41 @@ async fn update_card_list(res: Res) -> Result<bool> {
 }
 
 /// Update map item states
-async fn update_map_states(cards: &CardList) -> Result<()> {
+async fn update_map_states(res: Res, cards: Option<&CardList>) -> Result<()> {
     // NOTE: resource must have locations
-    let res = cards.res();
-    let states_all = card::item_states_all(res);
-    let items = cards.states_main().await?;
-    let css = item_states_css(states_all, &items);
+    let css = if is_layer_displayed(res) {
+        let states_all = card::item_states_all(res);
+        let items = match cards {
+            Some(cards) => cards.states_main().await?,
+            None => {
+                let access: Vec<Permission> =
+                    Asset::Access.uri().get_val().await?;
+                let mut cards = CardList::new(res, &access);
+                cards.fetch_all().await?;
+                cards.states_main().await?
+            }
+        };
+        item_states_css(states_all, &items)
+    } else {
+        format!(".wyrm-{res} {{ display: none; }}")
+    };
     Doc::get()
         .elem::<Element>(&format!("{res}-style"))
         .set_inner_html(&css);
     Ok(())
+}
+
+/// Check if a resource layer is displayed
+fn is_layer_displayed(res: Res) -> bool {
+    if selected_resource() == Some(res) {
+        return true;
+    }
+    // FIXME: use current zoom level (not always 12)
+    let layer = format!("layer-{res}");
+    match Doc::get().input_parse::<u16>(&layer) {
+        Some(zoom) => zoom < 12,
+        None => true,
+    }
 }
 
 /// Build resource item states style
