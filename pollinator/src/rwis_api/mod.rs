@@ -1,12 +1,13 @@
 mod api_utility;
 
-use postgres::{Client, NoTls, Error};
+use resin::{Database, Error, Result};
+use tokio_postgres::Client;
 use serde_json::{json, Map, Value};
 use std::collections::HashMap;
 
 pub use api_utility::ApiUtility;
 
-pub fn run() -> Result<(), Error> {
+pub async fn run(db: Option<Database>) -> Result<()> {
     // Read IRIS server properties for API and database credentials
     let props = read_properties();
 
@@ -17,21 +18,18 @@ pub fn run() -> Result<(), Error> {
     // Credentials for account with access to the organization/API
     let username = props.get("campbellcloud.user").expect("campbellcloud.user not set in properties");
     let api_password = props.get("campbellcloud.pass").expect("campbellcloud.pass not set in properties");
-    let mut api_util = api_utility::ApiUtility::new(&host, &username, &api_password, &organization_id);
+    let mut api_util = api_utility::ApiUtility::new(&host, &username, &api_password, &organization_id).await;
 
     // Remove protocols and just use host/database name (user/pass must be inserted)
-    let db_url = props["db.url"].split("//").collect::<Vec<&str>>()[1];
-    let mut client = Client::connect(
-        format!("postgresql://{}:{}@{}", props["db.user"], props["db.password"], db_url).as_str(),
-        NoTls
-    ).unwrap();
+    let _db = db.ok_or(Error::InvalidConfig("Database is None"))?;
+    let client = _db.client().await?;
 
     // Get all the samples first
-    if let Ok(serials) = get_serial_numbers(&mut client) {
+    if let Ok(serials) = get_serial_numbers(&client).await {
         let mut samples = vec![];
         let mut fails = vec![];
         for s in serials {
-            if let Some(sample) = build_sample_json(&mut api_util, &s) {
+            if let Some(sample) = build_sample_json(&mut api_util, &s).await {
                 samples.push((s, sample));
             } else {
                 fails.push(s);
@@ -39,10 +37,10 @@ pub fn run() -> Result<(), Error> {
         }
 
         // Then push them at same time
-        if let Err(e) = insert_samples(&mut client, samples) {
+        if let Err(e) = insert_samples(&client, samples).await {
             panic!("{}", e);
         }
-        match insert_fails(&mut client, fails) {
+        match insert_fails(&client, fails).await {
             Ok(_) => return Ok(()),
             Err(e) => panic!("{}", e),
         }
@@ -71,10 +69,10 @@ fn read_properties() -> HashMap<String, String> {
     map
 }
 
-fn get_serial_numbers(client: &mut Client) -> Result<Vec<String>, Error> {
+async fn get_serial_numbers(client: &Client) -> Result<Vec<String>> {
     let mut serials = vec![];
 
-    for row in client.query("SELECT alt_id FROM iris._weather_sensor", &[])? {
+    for row in client.query("SELECT alt_id FROM iris._weather_sensor", &[]).await? {
         let alt_id: Option<String> = row.get(0);
 
         if let Some(id) = alt_id {
@@ -87,12 +85,12 @@ fn get_serial_numbers(client: &mut Client) -> Result<Vec<String>, Error> {
 }
 
 /** Build the sample JSON for one station designated by SN */
-fn build_sample_json(api: &mut ApiUtility, serial_number: &str) -> Option<Value> {
-    if let Some(id_val) = api.get_id_from_serial(serial_number) {
+async fn build_sample_json(api: &mut ApiUtility, serial_number: &str) -> Option<Value> {
+    if let Some(id_val) = api.get_id_from_serial(serial_number).await {
         let id = id_val.as_str().unwrap_or("");
         let mut s = Map::new();
         let mut changed : bool = false;
-        if let Ok(dpt) = api.get_asset_last_datapoint_value(id, "DewPointTemp") {
+        if let Ok(dpt) = api.get_asset_last_datapoint_value(id, "DewPointTemp").await {
             if dpt.is_f64() {
                 s.insert(String::from("dew_point_temp"), dpt);
                 changed = true;
@@ -100,7 +98,7 @@ fn build_sample_json(api: &mut ApiUtility, serial_number: &str) -> Option<Value>
                 eprintln!("DewPointTemp for asset {serial_number} is invalid");
             }
         }
-        if let Ok(st) = api.get_asset_last_datapoint_value(id, "SurfaceTemp") {
+        if let Ok(st) = api.get_asset_last_datapoint_value(id, "SurfaceTemp").await {
             if st.is_f64() {
                 let data = json!([{"surface_temp": st}]);
                 s.insert(String::from("pavement_sensor"), data);
@@ -109,7 +107,7 @@ fn build_sample_json(api: &mut ApiUtility, serial_number: &str) -> Option<Value>
                 eprintln!("SurfaceTemp for asset {serial_number} is invalid");
             }
         }
-        if let Ok(rh) = api.get_asset_last_datapoint_value(id, "RH") {
+        if let Ok(rh) = api.get_asset_last_datapoint_value(id, "RH").await {
             if rh.is_f64() {
                 s.insert(String::from("relative_humidity"), (rh.as_f64().unwrap() as i64).into());
                 changed = true;
@@ -117,7 +115,7 @@ fn build_sample_json(api: &mut ApiUtility, serial_number: &str) -> Option<Value>
                 eprintln!("RH for asset {serial_number} is invalid");
             }
         }
-        if let Ok(at) = api.get_asset_last_datapoint_value(id, "AirTemp") {
+        if let Ok(at) = api.get_asset_last_datapoint_value(id, "AirTemp").await {
             if at.is_f64() {
                 let data = json!([{"air_temp": at}]);
                 s.insert(String::from("temperature_sensor"), data);
@@ -135,7 +133,7 @@ fn build_sample_json(api: &mut ApiUtility, serial_number: &str) -> Option<Value>
     None
 }
 
-fn insert_samples(client: &mut Client, samples: Vec<(String, Value)>) -> Result<(), Error> {
+async fn insert_samples(client: &Client, samples: Vec<(String, Value)>) -> Result<()> {
     if samples.len() > 0 {
         // for updating _weather_sensor
         let mut values = String::new();
@@ -155,7 +153,7 @@ fn insert_samples(client: &mut Client, samples: Vec<(String, Value)>) -> Result<
             WHERE new.alt_id = ws.alt_id;",
             values
         );
-        let ws_updated = client.execute(&update_ws, &[])?;
+        let ws_updated = client.execute(&update_ws, &[]).await?;
 
         let update_failtimes = format!("
             UPDATE iris.controller AS c
@@ -167,14 +165,14 @@ fn insert_samples(client: &mut Client, samples: Vec<(String, Value)>) -> Result<
             WHERE cio.controller = c.name;",
             serial_values
         );
-        let fails_updated = client.execute(&update_failtimes, &[])?;
+        let fails_updated = client.execute(&update_failtimes, &[]).await?;
 
         println!("Updated sample, fail_time for {}, {} rows", ws_updated, fails_updated);
     }
     Ok(())
 }
 
-fn insert_fails(client: &mut Client, fails: Vec<String>) -> Result<(), Error> {
+async fn insert_fails(client: &Client, fails: Vec<String>) -> Result<()> {
     if fails.len() > 0 {
         let mut query: String = "
             UPDATE iris.controller as c
@@ -193,7 +191,7 @@ fn insert_fails(client: &mut Client, fails: Vec<String>) -> Result<(), Error> {
                     WHERE alt_id=new.alt_id
                 )
             )");
-        let rows_updated = client.execute(&query, &[])?;
+        let rows_updated = client.execute(&query, &[]).await?;
         println!("Updated fail_time for {} rows", rows_updated);
     }
     Ok(())

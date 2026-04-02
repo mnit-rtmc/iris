@@ -15,13 +15,23 @@ use http_body_util::{BodyExt, Empty};
 use hyper::body::Incoming;
 use hyper::header::{AUTHORIZATION, HeaderValue};
 use hyper::{Request, Response, Uri};
-use hyper_util::rt::TokioIo;
+use hyper_tls::HttpsConnector;
+use hyper_util::rt::{TokioExecutor, TokioIo};
 use resin::{Error, Result};
 use tokio::net::TcpStream;
 
 /// HTTP client requestor
 #[derive(Clone, Debug, Default)]
 pub struct Client {
+    /// URI address
+    uri: String,
+    /// Bearer token
+    bearer_token: Option<String>,
+}
+
+/// HTTP client requestor
+#[derive(Clone, Debug, Default)]
+pub struct HttpsClient {
     /// URI address
     uri: String,
     /// Bearer token
@@ -89,6 +99,69 @@ impl Client {
         let res = sender.send_request(req).await?;
         let body = parse_response(res).await?;
         conn_task.await??;
+        Ok(body)
+    }
+}
+
+impl HttpsClient {
+    /// Make a new HTTP client
+    pub fn new(uri: &str) -> Self {
+        let uri = uri.to_string();
+        HttpsClient {
+            uri,
+            bearer_token: None,
+        }
+    }
+
+    pub fn host(&self) -> Result<String> {
+        let uri = self.uri.parse::<Uri>()?;
+        Ok(uri.host().ok_or(Error::InvalidConfig("host"))?.to_string())
+    }
+
+    /// Set bearer token
+    pub fn set_bearer_token(&mut self, bearer_token: String) {
+        self.bearer_token = Some(bearer_token);
+    }
+
+    /// Make a `GET` request
+    pub async fn get(&self, path: &str) -> Result<Vec<u8>> {
+        let host = self.host()?;
+        let uri = format!("https://{host}/{path}").parse::<Uri>()?;
+        log::debug!("HTTPS GET to {uri}");
+
+        let https = HttpsConnector::new();
+        let client = hyper_util::client::legacy::Client
+            ::builder(TokioExecutor::new())
+            .build::<_, _>(https);
+
+        let mut req = Request::get(uri);
+        if let Some(token) = &self.bearer_token {
+            req = req.header(AUTHORIZATION, HeaderValue::from_str(&("Bearer ".to_owned() + token))?);
+        }
+        let req = req.body(Empty::<Bytes>::new())?;
+
+        let res = client.request(req).await?;
+        let body = parse_response(res).await?;
+        Ok(body)
+    }
+
+    /// Make an http `POST` request (JSON)
+    pub async fn post(&self, path: &str, body: &str) -> Result<Vec<u8>> {
+        let host = self.host()?;
+        let uri = format!("https://{host}/{path}").parse::<Uri>()?;
+        log::debug!("HTTPS POST to {uri}");
+
+        let https = HttpsConnector::new();
+        let client = hyper_util::client::legacy::Client
+            ::builder(TokioExecutor::new())
+            .build::<_, _>(https);
+
+        let req = Request::post(uri)
+            .header("content-type", "application/json")
+            .body(body.to_string())?;
+
+        let res = client.request(req).await?;
+        let body = parse_response(res).await?;
         Ok(body)
     }
 }

@@ -329,10 +329,7 @@ async fn try_run_link(link: &CommLink, db: Option<Database>) -> Result<()> {
             sensor.run(db).await
         }
         Some(CommProtocol::CampbellCloud) => {
-            tokio::task::spawn_blocking(|| {
-                rwis_api::run().expect("rwis_api run failed");
-            }).await?;
-            Ok(())
+            rwis_api::run(db).await
         }
         _ => Err(Error::InvalidConfig("protocol"))
     }
