@@ -1,8 +1,8 @@
-use serde::{Deserialize};
-use serde_json::{Value, json};
-use resin::{Error, Result};
-use std::time::{Duration, SystemTime};
 use crate::http;
+use resin::{Error, Result};
+use serde::Deserialize;
+use serde_json::{Value, json};
+use std::time::{Duration, SystemTime};
 
 #[derive(Deserialize, Debug)]
 struct Auth {
@@ -23,13 +23,19 @@ pub struct ApiUtility {
 
 impl ApiUtility {
     /** Request new authorization tokens from the API */
-    async fn get_auth(client: http::HttpsClient, u: &str, p: &str) -> Result<Auth> {
-        let body = format!("{{\
-            \"username\": \"{u}\", \
-            \"password\": \"{p}\", \
-            \"client_id\": \"cloud\", \
-            \"grant_type\": \"password\" \
-        }}");
+    async fn get_auth(
+        client: http::HttpsClient,
+        u: &str,
+        p: &str,
+    ) -> Result<Auth> {
+        let body = format!(
+            "{{ \
+                \"username\": \"{u}\", \
+                \"password\": \"{p}\", \
+                \"client_id\": \"cloud\", \
+                \"grant_type\": \"password\" \
+            }}"
+        );
         let resp = client.post("api/v1/tokens", &body).await?;
         Ok(serde_json::from_slice(&resp)?)
     }
@@ -38,15 +44,20 @@ impl ApiUtility {
      * Create a new ApiUtility class.
      * Used to access API programmatically and update the auth if needed.
      */
-    pub async fn new(base_url: &str, username: &str, password: &str, organization_id: &str) -> Self {
+    pub async fn new(
+        base_url: &str,
+        username: &str,
+        password: &str,
+        organization_id: &str,
+    ) -> Self {
         let mut c = http::HttpsClient::new(base_url);
         let a_res = Self::get_auth(c.clone(), username, password).await;
         let a_opt = match a_res {
             Ok(a) => {
                 c.set_bearer_token(a.access_token.clone());
                 Some(a)
-            },
-            Err(_) => None
+            }
+            Err(_) => None,
         };
         ApiUtility {
             client: c,
@@ -64,14 +75,18 @@ impl ApiUtility {
     async fn update_auth(&mut self) -> Result<()> {
         if let Some(auth) = &self.auth {
             let now = SystemTime::now();
-            if now.duration_since(self.auth_time).unwrap_or_default() < Duration::from_secs(auth.expires_in) {
+            if now.duration_since(self.auth_time).unwrap_or_default()
+                < Duration::from_secs(auth.expires_in)
+            {
                 return Ok(());
             }
             self.auth_time = SystemTime::now();
         } else {
             log::error!("Couldn't authenticate with CampbellCloud API.");
         }
-        let a = Self::get_auth(self.client.clone(), &self.username, &self.password).await?;
+        let a =
+            Self::get_auth(self.client.clone(), &self.username, &self.password)
+                .await?;
         self.client.set_bearer_token(a.access_token.clone());
         self.auth = Some(a);
         Ok(())
@@ -83,12 +98,8 @@ impl ApiUtility {
 
         let response = self.client.get(endpoint).await?;
         match serde_json::from_slice(&response) {
-            Ok(val) => {
-                Ok(val)
-            },
-            Err(e) => {
-                return Err(Error::SerdeJson(e))
-            }
+            Ok(val) => Ok(val),
+            Err(e) => return Err(Error::SerdeJson(e)),
         }
     }
 
@@ -99,7 +110,8 @@ impl ApiUtility {
         }
         let endpoint = format!(
             "api/v1/organizations/{}/datastreams?limit={}",
-            self.organization_id, i32::MAX
+            self.organization_id,
+            i32::MAX
         );
         let ds = self.get_request(&endpoint).await?;
         self.datastreams = Some(ds.clone());
@@ -120,10 +132,8 @@ impl ApiUtility {
         if let Some(a) = &self.assets {
             return Ok(a.to_owned());
         }
-        let endpoint = format!(
-            "api/v1/organizations/{}/assets",
-            self.organization_id
-        );
+        let endpoint =
+            format!("api/v1/organizations/{}/assets", self.organization_id);
         let a = self.get_request(&endpoint).await?;
         self.assets = Some(a.clone());
         Ok(a)
@@ -145,12 +155,18 @@ impl ApiUtility {
      * Return the value of the last datapoint of datastream for an asset.
      * Wraps last_datapoint, finding the ID by measurement name ("field") and asset.
      */
-    pub async fn get_asset_last_datapoint_value(&mut self, asset_id: &str, datastream_name: &str) -> Result<Value> {
+    pub async fn get_asset_last_datapoint_value(
+        &mut self,
+        asset_id: &str,
+        datastream_name: &str,
+    ) -> Result<Value> {
         let datastreams = self.list_datastreams().await;
         let mut res = Ok(json!({}));
         if let Ok(ds) = datastreams {
             for d in ds.as_array().unwrap() {
-                if d["asset_id"] == json!(asset_id) && d["metadata"]["field"] == json!(datastream_name) {
+                if d["asset_id"] == json!(asset_id)
+                    && d["metadata"]["field"] == json!(datastream_name)
+                {
                     let id = d["id"].as_str().unwrap();
                     if let Ok(data) = self.last_datapoint(id).await {
                         res = Ok(data["data"][0]["value"].clone());

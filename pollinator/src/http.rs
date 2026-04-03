@@ -130,13 +130,16 @@ impl HttpsClient {
         log::debug!("HTTPS GET to {uri}");
 
         let https = HttpsConnector::new();
-        let client = hyper_util::client::legacy::Client
-            ::builder(TokioExecutor::new())
-            .build::<_, _>(https);
+        let client =
+            hyper_util::client::legacy::Client::builder(TokioExecutor::new())
+                .build::<_, _>(https);
 
         let mut req = Request::get(uri);
         if let Some(token) = &self.bearer_token {
-            req = req.header(AUTHORIZATION, HeaderValue::from_str(&("Bearer ".to_owned() + token))?);
+            req = req.header(
+                AUTHORIZATION,
+                HeaderValue::from_str(&("Bearer ".to_owned() + token))?,
+            );
         }
         let req = req.body(Empty::<Bytes>::new())?;
 
@@ -152,9 +155,9 @@ impl HttpsClient {
         log::debug!("HTTPS POST to {uri}");
 
         let https = HttpsConnector::new();
-        let client = hyper_util::client::legacy::Client
-            ::builder(TokioExecutor::new())
-            .build::<_, _>(https);
+        let client =
+            hyper_util::client::legacy::Client::builder(TokioExecutor::new())
+                .build::<_, _>(https);
 
         let req = Request::post(uri)
             .header("content-type", "application/json")

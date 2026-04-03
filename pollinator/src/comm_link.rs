@@ -209,7 +209,7 @@ impl CommLink {
     pub fn disconnect_is_error(&self) -> bool {
         match CommProtocol::from_id(self.cfg.protocol) {
             Some(CommProtocol::CampbellCloud) => false,
-            _ => true
+            _ => true,
         }
     }
 
@@ -328,9 +328,7 @@ async fn try_run_link(link: &CommLink, db: Option<Database>) -> Result<()> {
             let sensor = rtms_echo::Sensor::new(link.clone());
             sensor.run(db).await
         }
-        Some(CommProtocol::CampbellCloud) => {
-            rwis_api::run(db).await
-        }
-        _ => Err(Error::InvalidConfig("protocol"))
+        Some(CommProtocol::CampbellCloud) => rwis_api::run(db).await,
+        _ => Err(Error::InvalidConfig("protocol")),
     }
 }
