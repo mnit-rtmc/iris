@@ -207,10 +207,10 @@ impl CommLink {
 
     /// Should log_disconnect be called if it disconnects?
     pub fn disconnect_is_error(&self) -> bool {
-        match CommProtocol::from_id(self.cfg.protocol) {
-            Some(CommProtocol::CampbellCloud) => false,
-            _ => true,
-        }
+        !matches!(
+            CommProtocol::from_id(self.cfg.protocol),
+            Some(CommProtocol::CampbellCloud)
+        )
     }
 
     /// Get comm link name

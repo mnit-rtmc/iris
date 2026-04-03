@@ -27,10 +27,10 @@ pub async fn run(db: Option<Database>) -> Result<()> {
         .get("campbellcloud.pass")
         .expect("campbellcloud.pass not set in properties");
     let mut api_util = api_utility::ApiUtility::new(
-        &host,
-        &username,
-        &api_password,
-        &organization_id,
+        host,
+        username,
+        api_password,
+        organization_id,
     )
     .await;
 
@@ -72,13 +72,10 @@ fn read_properties() -> HashMap<String, String> {
 
     let mut map = HashMap::<String, String>::new();
     for line in lines {
-        match line.split_once("=") {
-            Some((key, value)) => {
-                if !key.starts_with("#") {
-                    map.insert(key.into(), value.into());
-                }
-            }
-            None => (),
+        if let Some((key, value)) = line.split_once("=")
+            && !key.starts_with("#")
+        {
+            map.insert(key.into(), value.into());
         }
     }
     map
@@ -93,10 +90,10 @@ async fn get_serial_numbers(client: &Client) -> Result<Vec<String>> {
     {
         let alt_id: Option<String> = row.get(0);
 
-        if let Some(id) = alt_id {
-            if !id.is_empty() {
-                serials.push(id);
-            }
+        if let Some(id) = alt_id
+            && !id.is_empty()
+        {
+            serials.push(id);
         }
     }
     Ok(serials)
@@ -166,7 +163,7 @@ async fn insert_samples(
     client: &Client,
     samples: Vec<(String, Value)>,
 ) -> Result<()> {
-    if samples.len() > 0 {
+    if !samples.is_empty() {
         // for updating _weather_sensor
         let mut values = String::new();
         // for updating controller.fail_time
@@ -210,7 +207,7 @@ async fn insert_samples(
 }
 
 async fn insert_fails(client: &Client, fails: Vec<String>) -> Result<()> {
-    if fails.len() > 0 {
+    if !fails.is_empty() {
         let mut query: String = "\
             UPDATE iris.controller as c \
             SET fail_time=current_timestamp \

@@ -99,7 +99,7 @@ impl ApiUtility {
         let response = self.client.get(endpoint).await?;
         match serde_json::from_slice(&response) {
             Ok(val) => Ok(val),
-            Err(e) => return Err(Error::SerdeJson(e)),
+            Err(e) => Err(Error::SerdeJson(e)),
         }
     }
 
