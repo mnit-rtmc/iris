@@ -99,13 +99,13 @@ async fn do_select_item_map(res: Res, lon: f64, lat: f64) -> Result<()> {
         Doc::get()
             .elem::<Element>("zoom-level")
             .set_inner_html(&zoom.to_string());
-        update_map_states(Res::Incident, None).await?;
-        update_map_states(Res::Dms, None).await?;
-        update_map_states(Res::Lcs, None).await?;
-        update_map_states(Res::Camera, None).await?;
-        update_map_states(Res::RampMeter, None).await?;
-        update_map_states(Res::Beacon, None).await?;
-        update_map_states(Res::WeatherSensor, None).await?;
+        update_map_states(Res::Incident, zoom, None).await?;
+        update_map_states(Res::Dms, zoom, None).await?;
+        update_map_states(Res::Lcs, zoom, None).await?;
+        update_map_states(Res::Camera, zoom, None).await?;
+        update_map_states(Res::RampMeter, zoom, None).await?;
+        update_map_states(Res::Beacon, zoom, None).await?;
+        update_map_states(Res::WeatherSensor, zoom, None).await?;
     }
     Ok(())
 }
@@ -148,6 +148,8 @@ async fn add_listeners() -> Result<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
+    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+    sb_resource.set_value("");
     let divider: HtmlElement = doc.elem("divider");
     add_click_listener(&divider)?;
     let sidebar: HtmlElement = doc.elem("sidebar");
@@ -326,9 +328,15 @@ async fn handle_layer_zoom(id: String) -> Result<()> {
         && layer == "layer"
         && let Ok(res) = Res::try_from(rname)
     {
-        update_map_states(res, None).await?;
+        let zoom = current_zoom();
+        update_map_states(res, zoom, None).await?;
     }
     Ok(())
+}
+
+/// Get current map zoom level
+fn current_zoom() -> u32 {
+    earthwyrm::MapPane::get().map(|mp| mp.zoom()).unwrap_or(0)
 }
 
 /// Get dependent resource row class name
@@ -1020,7 +1028,8 @@ async fn do_handle_notification(
     if let Ok(res) = Res::try_from(chan.as_str())
         && res.has_location()
     {
-        update_map_states(res, None).await?;
+        let zoom = current_zoom();
+        update_map_states(res, zoom, None).await?;
     }
     Ok(())
 }
@@ -1051,7 +1060,8 @@ async fn update_card_list(res: Res) -> Result<bool> {
         }
     }
     if res.has_location() {
-        update_map_states(res, Some(&cards)).await?;
+        let zoom = current_zoom();
+        update_map_states(res, zoom, Some(&cards)).await?;
     }
     if let Some(cv) = expanded {
         cards.set_view(cv);
@@ -1061,9 +1071,14 @@ async fn update_card_list(res: Res) -> Result<bool> {
 }
 
 /// Update map item states
-async fn update_map_states(res: Res, cards: Option<&CardList>) -> Result<()> {
+async fn update_map_states(
+    res: Res,
+    zoom: u32,
+    cards: Option<&CardList>,
+) -> Result<()> {
     // NOTE: resource must have locations
-    let css = if is_layer_displayed(res) {
+    let displayed = is_layer_displayed(res, zoom);
+    let css = if displayed {
         let states_all = card::item_states_all(res);
         let items = match cards {
             Some(cards) => cards.states_main().await?,
@@ -1082,18 +1097,20 @@ async fn update_map_states(res: Res, cards: Option<&CardList>) -> Result<()> {
     Doc::get()
         .elem::<Element>(&format!("{res}-style"))
         .set_inner_html(&css);
+    let css = if zoom >= selected_zoom(res) {
+        ""
+    } else {
+        "background: #aaa;"
+    };
+    Doc::get()
+        .elem::<Element>(&format!("layer-{res}"))
+        .set_attribute("style", css)?;
     Ok(())
 }
 
 /// Check if a resource layer is displayed
-fn is_layer_displayed(res: Res) -> bool {
-    if selected_resource() == Some(res) {
-        return true;
-    }
-    if let Some(map_pane) = earthwyrm::MapPane::get() {
-        return map_pane.zoom() >= selected_zoom(res);
-    }
-    false
+fn is_layer_displayed(res: Res, zoom: u32) -> bool {
+    (selected_resource() == Some(res)) || zoom >= selected_zoom(res)
 }
 
 /// Build resource item states style

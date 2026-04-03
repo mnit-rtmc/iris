@@ -166,6 +166,10 @@ th, td {
   color: white;
   user-select: none;
 }
+#layer-menu input {
+  background: white;
+  color: black;
+}
 #layer-menu a {
   color: white;
 }
