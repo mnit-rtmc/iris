@@ -164,7 +164,12 @@ th, td {
   padding: 0;
   background-color: #566;
   color: white;
+  border-top: 1px solid white;
+  border-right: 1px solid white;
   user-select: none;
+}
+#zoom-level {
+  padding: 0.3rem;
 }
 #layer-menu input {
   background: white;
@@ -184,6 +189,11 @@ th, td {
   grid-template-columns: repeat(2, max-content);
 }
 #toggle-zoom + label {
+  border-left: none;
+  border-bottom: none;
+  border-top: 1px solid white;
+  border-right: 1px solid white;
+  border-radius: 0;
   background-color: #566;
   color: white;
 }
