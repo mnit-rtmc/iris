@@ -86,15 +86,15 @@ fn show_toast(msg: &str) {
 /// Select item on map
 pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
     if !app::is_selected_item(res, name) {
-        set_selected_item(res, name);
-        spawn_local(do_future(do_select_item_map(res, lon, lat)));
+        let zoom = selected_zoom(res).max(12);
+        set_selected_item(res, name, zoom);
+        spawn_local(do_future(do_select_item_map(zoom, lon, lat)));
     }
 }
 
 /// Select item on map
-async fn do_select_item_map(res: Res, lon: f64, lat: f64) -> Result<()> {
+async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = earthwyrm::MapPane::get() {
-        let zoom = selected_zoom(res).max(12);
         map_pane.center(zoom, lon, lat);
         Doc::get()
             .elem::<Element>("zoom-level")
@@ -117,20 +117,50 @@ fn selected_zoom(res: Res) -> u32 {
 }
 
 /// Set selected item
-fn set_selected_item(res: Res, name: &str) {
+fn set_selected_item(res: Res, name: &str, zoom: u32) {
     app::set_selected_item(res, name);
-    let css = format!(".{res}-{name} {{ stroke: white; stroke-width: 2; }}");
+    let mut css = String::with_capacity(100);
+    css.push('.');
+    css.push_str(res.as_str());
+    css.push('-');
+    css.push_str(name);
+    css.push_str(" { stroke: white; stroke-width: 2; }");
+    css.push_str("\n.wyrm-tile use { scale: ");
+    css.push_str(zoom_scale(zoom));
+    css.push_str("; }");
     Doc::get()
         .elem::<Element>("selected-style")
         .set_inner_html(&css);
 }
 
+/// Get marker scale for a zoom level
+fn zoom_scale(zoom: u32) -> &'static str {
+    match zoom {
+        1 => "0.006",
+        2 => "0.012",
+        3 => "0.025",
+        4 => "0.05",
+        5 => "0.1",
+        6 => "0.2",
+        7 => "0.3",
+        8 => "0.4",
+        9 => "0.5",
+        10 => "0.6",
+        11 => "0.8",
+        _ => "1.0",
+    }
+}
+
 /// Clear selected item
-fn clear_selected_item() {
+fn clear_selected_item(zoom: u32) {
     app::clear_selected_item();
+    let mut css = String::with_capacity(50);
+    css.push_str(".wyrm-tile use { scale: ");
+    css.push_str(zoom_scale(zoom));
+    css.push_str("; }");
     Doc::get()
         .elem::<Element>("selected-style")
-        .set_inner_html("");
+        .set_inner_html(&css);
 }
 
 /// Application starting function
@@ -168,6 +198,7 @@ async fn add_listeners() -> Result<()> {
         Doc::get()
             .elem::<Element>("zoom-level")
             .set_inner_html("10");
+        clear_selected_item(10);
     }
     do_future(finish_init()).await;
     fetch_station_data();
@@ -986,7 +1017,7 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
             (None, _name) => true,
         };
     if clear {
-        clear_selected_item();
+        clear_selected_item(current_zoom());
         if let Some(cv) = app::expanded_view() {
             let search = search_value();
             replace_card(cv.compact(), &search).await?;
@@ -995,7 +1026,8 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     }
     let changed = res != selected_resource();
     if let Some(res) = res {
-        set_selected_item(res, &name);
+        let zoom = current_zoom();
+        set_selected_item(res, &name, zoom);
         if changed {
             set_resource(Some(res), "").await;
         }
