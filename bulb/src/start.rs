@@ -85,16 +85,35 @@ fn show_toast(msg: &str) {
 
 /// Select item on map
 pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
-    if app::is_selected_item(res, name) {
-        return;
+    if !app::is_selected_item(res, name) {
+        set_selected_item(res, name);
+        spawn_local(do_future(do_select_item_map(res, lon, lat)));
     }
-    set_selected_item(res, name);
+}
+
+/// Select item on map
+async fn do_select_item_map(res: Res, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = earthwyrm::MapPane::get() {
-        map_pane.center(12, lon, lat);
+        let zoom = selected_zoom(res);
+        map_pane.center(zoom, lon, lat);
         Doc::get()
             .elem::<Element>("zoom-level")
-            .set_inner_html("12");
+            .set_inner_html(&zoom.to_string());
+        update_map_states(Res::Beacon, None).await?;
+        update_map_states(Res::Camera, None).await?;
+        update_map_states(Res::Dms, None).await?;
+        update_map_states(Res::Incident, None).await?;
+        update_map_states(Res::Lcs, None).await?;
+        update_map_states(Res::RampMeter, None).await?;
+        update_map_states(Res::WeatherSensor, None).await?;
     }
+    Ok(())
+}
+
+/// Get zoom level for selected resource
+fn selected_zoom(res: Res) -> u32 {
+    let layer = format!("layer-{res}");
+    Doc::get().input_parse::<u32>(&layer).unwrap_or(32)
 }
 
 /// Set selected item
@@ -1072,10 +1091,7 @@ fn is_layer_displayed(res: Res) -> bool {
         return true;
     }
     if let Some(map_pane) = earthwyrm::MapPane::get() {
-        let layer = format!("layer-{res}");
-        if let Some(zoom) = Doc::get().input_parse::<u32>(&layer) {
-            return zoom <= map_pane.zoom();
-        }
+        return map_pane.zoom() >= selected_zoom(res);
     }
     false
 }
