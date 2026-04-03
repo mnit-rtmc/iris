@@ -94,17 +94,17 @@ pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
 /// Select item on map
 async fn do_select_item_map(res: Res, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = earthwyrm::MapPane::get() {
-        let zoom = selected_zoom(res);
+        let zoom = selected_zoom(res).max(12);
         map_pane.center(zoom, lon, lat);
         Doc::get()
             .elem::<Element>("zoom-level")
             .set_inner_html(&zoom.to_string());
-        update_map_states(Res::Beacon, None).await?;
-        update_map_states(Res::Camera, None).await?;
-        update_map_states(Res::Dms, None).await?;
         update_map_states(Res::Incident, None).await?;
+        update_map_states(Res::Dms, None).await?;
         update_map_states(Res::Lcs, None).await?;
+        update_map_states(Res::Camera, None).await?;
         update_map_states(Res::RampMeter, None).await?;
+        update_map_states(Res::Beacon, None).await?;
         update_map_states(Res::WeatherSensor, None).await?;
     }
     Ok(())

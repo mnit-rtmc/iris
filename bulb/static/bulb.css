@@ -166,6 +166,12 @@ th, td {
   color: white;
   user-select: none;
 }
+#layer-menu a {
+  color: white;
+}
+#layer-menu a:visited {
+  color: #bbf;
+}
 #layer-zoom {
   display: none;
 }
