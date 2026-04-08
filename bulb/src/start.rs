@@ -38,6 +38,12 @@ use web_sys::{
 /// Layer groups
 const GROUPS: &[&str] = &["tile", "tms"];
 
+/// Rectangle X position
+const RECT_X: f64 = 0.32;
+
+/// Rectangle Y position
+const RECT_Y: f64 = 0.5;
+
 /// Binned station data
 #[derive(Deserialize)]
 struct StationData {
@@ -95,7 +101,7 @@ pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
 /// Select item on map
 async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = earthwyrm::MapPane::get() {
-        map_pane.center(zoom, lon, lat);
+        map_pane.position(zoom, lon, lat, RECT_X, RECT_Y);
         Doc::get()
             .elem::<Element>("zoom-level")
             .set_inner_html(&zoom.to_string());
@@ -194,7 +200,7 @@ async fn add_listeners() -> Result<()> {
     if let Some(map_pane) =
         earthwyrm::MapPane::init("map-pane", GROUPS, handle_map_click_ev)
     {
-        map_pane.center(10, -93.2, 44.95);
+        map_pane.position(10, -93.2, 44.95, RECT_X, RECT_Y);
         Doc::get()
             .elem::<Element>("zoom-level")
             .set_inner_html("10");
