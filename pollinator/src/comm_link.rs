@@ -207,10 +207,10 @@ impl CommLink {
 
     /// Should log_disconnect be called if it disconnects?
     pub fn disconnect_is_error(&self) -> bool {
-        match CommProtocol::from_id(self.cfg.protocol) {
-            Some(CommProtocol::CampbellCloud) => false,
-            _ => true
-        }
+        !matches!(
+            CommProtocol::from_id(self.cfg.protocol),
+            Some(CommProtocol::CampbellCloud)
+        )
     }
 
     /// Get comm link name
@@ -328,12 +328,7 @@ async fn try_run_link(link: &CommLink, db: Option<Database>) -> Result<()> {
             let sensor = rtms_echo::Sensor::new(link.clone());
             sensor.run(db).await
         }
-        Some(CommProtocol::CampbellCloud) => {
-            tokio::task::spawn_blocking(|| {
-                rwis_api::run().expect("rwis_api run failed");
-            }).await?;
-            Ok(())
-        }
-        _ => Err(Error::InvalidConfig("protocol"))
+        Some(CommProtocol::CampbellCloud) => rwis_api::run(db).await,
+        _ => Err(Error::InvalidConfig("protocol")),
     }
 }

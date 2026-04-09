@@ -33,6 +33,9 @@ pub enum Error {
     #[error("HTTP status {0}")]
     HttpStatus(StatusCode),
 
+    #[error("HTTPS {0}")]
+    Https(#[from] hyper_util::client::legacy::Error),
+
     /// Authentication failed error
     #[error("Authentication failed")]
     AuthFailed(),
