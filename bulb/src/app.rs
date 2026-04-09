@@ -87,6 +87,16 @@ pub fn is_selected_item(res: Res, name: &str) -> bool {
     })
 }
 
+/// Get selected item
+pub fn selected_item() -> Option<(Res, String)> {
+    STATE.with(|rc| {
+        rc.borrow()
+            .selected_item
+            .as_ref()
+            .map(|(r, n)| (*r, n.clone()))
+    })
+}
+
 /// Get/set card list in global app state
 pub fn card_list(cards: Option<CardList>) -> Option<CardList> {
     STATE.with(|rc| {

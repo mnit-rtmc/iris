@@ -105,6 +105,7 @@ async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
         Doc::get()
             .elem::<Element>("zoom-level")
             .set_inner_html(&zoom.to_string());
+        // FIXME: only call these when crossing zoom threshold
         update_map_states(Res::Incident, zoom, None).await?;
         update_map_states(Res::Dms, zoom, None).await?;
         update_map_states(Res::Lcs, zoom, None).await?;
@@ -125,6 +126,11 @@ fn selected_zoom(res: Res) -> u32 {
 /// Set selected item
 fn set_selected_item(res: Res, name: &str, zoom: u32) {
     app::set_selected_item(res, name);
+    set_selected_style(res, name, zoom);
+}
+
+/// Set selected item style
+fn set_selected_style(res: Res, name: &str, zoom: u32) {
     let mut css = String::with_capacity(100);
     css.push('.');
     css.push_str(res.as_str());
@@ -197,9 +203,12 @@ async fn add_listeners() -> Result<()> {
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    if let Some(map_pane) =
-        earthwyrm::MapPane::init("map-pane", GROUPS, handle_map_click_ev)
-    {
+    if let Some(map_pane) = earthwyrm::MapPane::init(
+        "map-pane",
+        GROUPS,
+        handle_map_click_ev,
+        handle_map_zoom,
+    ) {
         map_pane.position(10, -93.2, 44.95, RECT_X, RECT_Y);
         Doc::get()
             .elem::<Element>("zoom-level")
@@ -366,6 +375,7 @@ async fn handle_layer_zoom(id: String) -> Result<()> {
         && let Ok(res) = Res::try_from(rname)
     {
         let zoom = current_zoom();
+        // FIXME: only call these when crossing zoom threshold
         update_map_states(res, zoom, None).await?;
     }
     Ok(())
@@ -1043,6 +1053,30 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     if changed {
         sse::post_req(res).await;
     }
+    Ok(())
+}
+
+/// Handle map zoom
+fn handle_map_zoom(zoom: u32) {
+    spawn_local(do_future(do_handle_map_zoom(zoom)));
+}
+
+/// Handle map zoom
+async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
+    Doc::get()
+        .elem::<Element>("zoom-level")
+        .set_inner_html(&zoom.to_string());
+    if let Some((res, name)) = app::selected_item() {
+        set_selected_style(res, &name, zoom);
+    }
+    // FIXME: only call these when crossing zoom threshold
+    update_map_states(Res::Incident, zoom, None).await?;
+    update_map_states(Res::Dms, zoom, None).await?;
+    update_map_states(Res::Lcs, zoom, None).await?;
+    update_map_states(Res::Camera, zoom, None).await?;
+    update_map_states(Res::RampMeter, zoom, None).await?;
+    update_map_states(Res::Beacon, zoom, None).await?;
+    update_map_states(Res::WeatherSensor, zoom, None).await?;
     Ok(())
 }
 
