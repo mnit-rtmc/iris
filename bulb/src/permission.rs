@@ -18,7 +18,7 @@ use crate::notes::contains_hashtag;
 use crate::role::Role;
 use crate::util::{ContainsLower, Doc, Fields, Input, Select, opt_ref};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use serde_json::{Map, Value};
@@ -203,8 +203,8 @@ impl Permission {
 
     /// Convert to HTML table row
     pub fn to_html_row(&self) -> String {
-        let mut page = Page::new();
-        let mut tr = page.frag::<html::Tr>();
+        let mut tree = Tree::new();
+        let mut tr = tree.root::<html::Tr>();
         tr.td().cdata(&self.base_resource).close();
         tr.td().cdata(opt_ref(&self.hashtag)).close();
         let st = item_state(self.access_level);
@@ -213,40 +213,40 @@ impl Permission {
             .cdata(' ')
             .cdata(st.description())
             .close();
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(&self.role)
             .cdata(" ")
             .cdata(item_state(self.access_level).to_string())
             .cdata(&self.name)
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill").cdata(&self.base_resource);
         div.span().cdata(opt_ref(&self.hashtag));
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &PermissionAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("role").cdata("Role").close();
         anc.roles_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("base_resource").cdata("Resource").close();
         anc.resource_types_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("hashtag").cdata("Hashtag").close();
         div.input()
@@ -255,13 +255,13 @@ impl Permission {
             .size(16)
             .value(opt_ref(&self.hashtag));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("access_level").cdata("Access").close();
         access_level_html(self.access_level, &mut div.select());
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 
@@ -307,8 +307,8 @@ impl Card for Permission {
 
     /// Get row for Create card
     fn to_html_create(&self, anc: &PermissionAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("create_name").cdata("Name").close();
         div.input()
@@ -317,16 +317,16 @@ impl Card for Permission {
             .size(24)
             .value(self.name());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("role").cdata("Role").close();
         anc.roles_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("base_resource").cdata("Resource").close();
         anc.resource_types_html(self, &mut div.select());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to HTML view

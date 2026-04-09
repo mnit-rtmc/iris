@@ -19,7 +19,7 @@ use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -28,7 +28,7 @@ use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use chrono::DateTime;
 use gift::block::DisposalMethod;
 use gift::{Encoder, Step};
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use pix::matte::Matte8;
 use pix::ops::SrcOver;
 use pix::rgb::{Rgba8p, SRgb8};
@@ -594,27 +594,27 @@ impl RampMeter {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &RampMeterAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_states(anc).to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill")
             .cdata_len(opt_ref(&self.location), 32);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &RampMeterAnc) -> String {
-        if let Some((lat, lon)) = anc.loc.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::RampMeter, &self.name, lon, lat);
         }
-        let mut page = Page::new();
-        self.title(View::Control, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Control, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row fill");
         self.item_states(anc).tooltips(&mut div.span());
         let mut span = div.span();
@@ -624,14 +624,14 @@ impl RampMeter {
             span.cdata(expires);
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row center");
         self.meter_image_html(1, &mut div.img());
         let mut div2 = div.div();
@@ -642,15 +642,15 @@ impl RampMeter {
         self.queue_html(&mut div2.span());
         div2.close();
         self.meter_image_html(2, &mut div.img());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &RampMeterAnc) -> String {
         let work = "http://example.com"; // FIXME
-        let mut page = Page::new();
-        self.title(View::Request, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Request, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Settings").close();
         div.button()
@@ -659,7 +659,7 @@ impl RampMeter {
             .cdata("Send")
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Work Request").close();
         div.a()
@@ -668,14 +668,14 @@ impl RampMeter {
             .rel("noopener noreferrer")
             .cdata("🔗 ")
             .cdata(self.name());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -686,19 +686,19 @@ impl RampMeter {
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
-        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
-        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
-        div = page.frag::<html::Div>();
+        anc.cio.controller_html(self, &mut tree.root::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("meter_type").cdata("Type").close();
         anc.meter_types_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("algorithm").cdata("Algorithm").close();
         anc.algorithms_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("storage").cdata("Storage (ft)").close();
         div.input()
@@ -709,7 +709,7 @@ impl RampMeter {
             .size(8)
             .value(opt_str(self.storage));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("max_wait").cdata("Max Wait (s)").close();
         div.input()
@@ -720,7 +720,7 @@ impl RampMeter {
             .size(8)
             .value(opt_str(self.max_wait));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("am_target").cdata("AM Target").close();
         div.input()
@@ -731,7 +731,7 @@ impl RampMeter {
             .size(8)
             .value(opt_str(self.am_target));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("pm_target").cdata("PM Target").close();
         div.input()
@@ -742,8 +742,8 @@ impl RampMeter {
             .size(8)
             .value(opt_str(self.pm_target));
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

@@ -44,7 +44,7 @@ use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
 use crate::word::Word;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde_json::Value;
 use serde_json::map::Map;
@@ -191,10 +191,10 @@ impl CardView {
     pub async fn fetch_one(&mut self, search: &str) -> Result<String> {
         let html = match self.view {
             View::CreateCompact => {
-                let mut page = Page::new();
-                let mut span = page.frag::<html::Span>();
+                let mut tree = Tree::new();
+                let mut span = tree.root::<html::Span>();
                 span.class("create").cdata("Create 🆕");
-                String::from(page)
+                String::from(tree)
             }
             View::Create => {
                 let html = self.fetch_one_res(search).await?;
@@ -382,8 +382,8 @@ impl CardView {
 
 /// Build a create card
 fn html_card_create(res: Res, create: &str) -> String {
-    let mut page = Page::new();
-    let mut div = page.frag::<html::Div>();
+    let mut tree = Tree::new();
+    let mut div = tree.root::<html::Div>();
     div.class("title row");
     div.span().cdata(res.symbol()).cdata(" 🆕").close();
     let mut select = div.select();
@@ -399,13 +399,13 @@ fn html_card_create(res: Res, create: &str) -> String {
         .cdata(View::Create.as_str())
         .close();
     div.close();
-    div = page.frag::<html::Div>();
+    div = tree.root::<html::Div>();
     div.raw(create);
     div.close();
-    div = page.frag::<html::Div>();
+    div = tree.root::<html::Div>();
     div.class("row end");
     div.button().id("ob_save").r#type("button").cdata("🖍️ Save");
-    String::from(page)
+    String::from(tree)
 }
 
 /// Create a name value

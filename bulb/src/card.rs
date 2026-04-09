@@ -47,7 +47,7 @@ use crate::weathersensor::WeatherSensor;
 use crate::word::Word;
 use futures::StreamExt;
 use futures::stream::FuturesUnordered;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
@@ -168,8 +168,8 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Convert to Create HTML
     fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("create_name").cdata("Name").close();
         div.input()
@@ -177,7 +177,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
             .maxlength(24)
             .size(24)
             .value(self.name());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to HTML view
@@ -255,11 +255,11 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
 /// Build all item states HTML
 pub fn item_states_html(res: Res) -> String {
-    let mut page = Page::new();
-    let mut option = page.frag::<html::Option>();
+    let mut tree = Tree::new();
+    let mut option = tree.root::<html::Option>();
     option.value("").cdata("all ↴").close();
     for st in item_states_all(res) {
-        let mut option = page.frag::<html::Option>();
+        let mut option = tree.root::<html::Option>();
         option.value(st.code());
         if Some(*st) == default_state(res) {
             option.selected();
@@ -270,7 +270,7 @@ pub fn item_states_html(res: Res) -> String {
             .cdata(st.description())
             .close();
     }
-    String::from(page)
+    String::from(tree)
 }
 
 /// Get the default item state for a resource
@@ -287,7 +287,7 @@ fn default_state(res: Res) -> Option<ItemState> {
 }
 
 /// Get slice of all item states for a resource
-fn item_states_all(res: Res) -> &'static [ItemState] {
+pub fn item_states_all(res: Res) -> &'static [ItemState] {
     match res {
         Res::ActionPlan => ActionPlan::item_states_all(),
         Res::Alarm => Alarm::item_states_all(),
@@ -536,8 +536,8 @@ impl CardList {
         let anc = fetch_ancillary(&C::default(), View::Search).await?;
         self.search_card_views::<C>(search, &anc).await?;
         let mut views = self.views.iter();
-        let mut page = Page::new();
-        let mut ul = page.frag::<html::Ul>();
+        let mut tree = Tree::new();
+        let mut ul = tree.root::<html::Ul>();
         ul.class("cards");
         if let Some(cv) = views.next() {
             let mut li = ul.li();
@@ -560,7 +560,7 @@ impl CardList {
             li.close();
         }
         ul.close();
-        Ok(String::from(page))
+        Ok(String::from(tree))
     }
 
     /// Get next suggested name

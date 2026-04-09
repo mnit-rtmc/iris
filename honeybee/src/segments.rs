@@ -14,18 +14,16 @@
 //
 use crate::error::Result;
 use crate::files::AtomicFile;
-use pointy::{Pt, Transform};
+use pointy::Pt;
 use resources::Res;
 use rosewood::BulkWriter;
-use rosewood::gis::Polygons;
+use rosewood::gis::{Points, Polygons};
 use serde::{Deserialize, Serialize, Serializer};
 use squarepeg::{WebMercatorPos, Wgs84Pos};
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::collections::hash_map::DefaultHasher;
 use std::fmt;
-use std::hash::{Hash, Hasher};
-use std::ops::RangeInclusive;
+use std::hash::Hash;
 use std::path::{Path, PathBuf};
 use tokio_postgres::Row;
 
@@ -140,8 +138,6 @@ pub struct CorridorId {
 struct Corridor {
     /// Corridor ID
     cor_id: CorridorId,
-    /// Base TMS ID
-    base_tms_id: i64,
     /// Road class ordinal
     r_class: i16,
     /// Road class scale
@@ -158,8 +154,6 @@ struct Corridor {
 
 /// Segment outline builder
 struct Segment {
-    /// Traffic management system ID (for leaflet)
-    tms_id: i64,
     /// Station ID
     station_id: Option<String>,
     /// Meter point on corridor
@@ -306,7 +300,7 @@ impl RNode {
     /// Get the node position
     fn pos(&self) -> Option<Wgs84Pos> {
         if self.active {
-            self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
+            self.latlon().map(|(lat, lon)| Wgs84Pos::new(lon, lat))
         } else {
             None
         }
@@ -355,7 +349,7 @@ impl GeoLoc {
 
     /// Get the location
     fn pos(&self) -> Option<Wgs84Pos> {
-        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lat, lon))
+        self.latlon().map(|(lat, lon)| Wgs84Pos::new(lon, lat))
     }
 
     /// Get the location point
@@ -379,15 +373,8 @@ impl Corridor {
     /// Create a new corridor
     fn new(cor_id: CorridorId, r_class: i16, scale: f64) -> Self {
         log::trace!("Corridor::new {cor_id}");
-        // Leaflet doesn't like it when we use the high bits...
-        let base_tms_id = 0xFFFF_FFFF_FFFF & {
-            let mut hasher = DefaultHasher::new();
-            cor_id.hash(&mut hasher);
-            hasher.finish()
-        } as i64;
         Corridor {
             cor_id,
-            base_tms_id,
             r_class,
             scale,
             nodes: Vec::new(),
@@ -624,7 +611,7 @@ impl Corridor {
     ) -> Result<()> {
         let o_scale = self.scale_zoom(OUTER_SCALE, zoom);
         let i_scale = self.scale_zoom(BASE_SCALE, zoom);
-        let mut seg = Segment::new(self.base_tms_id);
+        let mut seg = Segment::new();
         let mut p_meter = 0.0; // meter point for the previous point
         let nodes = &self.nodes[..];
         for (node, (pt, (norm, meter))) in nodes.iter().zip(
@@ -684,12 +671,11 @@ impl Corridor {
 
 impl Segment {
     /// Create a new segment
-    fn new(tms_id: i64) -> Self {
+    fn new() -> Self {
         let station_id = None;
         let meter = 0.0;
         let points = Vec::<(Pt<f64>, Pt<f64>)>::with_capacity(16);
         Segment {
-            tms_id,
             station_id,
             meter,
             points,
@@ -698,7 +684,6 @@ impl Segment {
 
     /// Advance to next segment
     fn advance(&mut self, station_id: Option<String>, meter: f64) {
-        self.tms_id += 1;
         self.station_id = station_id;
         self.meter = meter;
         self.points.clear();
@@ -716,8 +701,7 @@ impl Segment {
         if let Some((vtx, _)) = self.points.first() {
             pts.push(Pt::from(vtx));
         }
-        let values =
-            vec![Some(self.tms_id.to_string()), self.station_id.clone()];
+        let values = vec![self.station_id.clone()];
         let mut polygon = Polygons::new(values);
         polygon.push_outer(pts);
         polygon
@@ -939,22 +923,21 @@ impl SegmentState {
                 log::info!("write_loc_markers: no {res} markers");
                 continue;
             }
-            for zoom in zoom_levels(*res) {
-                let sz = 800_000.0 * zoom_scale(zoom);
-                let mut loam = PathBuf::from(dir);
-                loam.push(format!("{}_{zoom}.loam", res.as_str()));
-                let mut writer = BulkWriter::new(loam)?;
-                for loc in locs {
-                    if let Some(pt) = loc.point() {
-                        let norm = self.loc_normal(loc);
-                        let values = loc.values();
-                        let mut polygon = Polygons::new(values);
-                        polygon.push_outer(loc_marker(*res, pt, norm, sz));
-                        writer.push(&polygon)?;
-                    }
+            let mut loam = PathBuf::from(dir);
+            loam.push(format!("{}.loam", res.as_str()));
+            let mut writer = BulkWriter::new(loam)?;
+            for loc in locs {
+                if let Some(pt) = loc.point() {
+                    let mut values = loc.values();
+                    let norm = self.loc_normal(loc);
+                    let rotate = -norm.to_degrees().round() as i16;
+                    values.push(Some(rotate.to_string()));
+                    let mut points = Points::new(values);
+                    points.push(pt);
+                    writer.push(&points)?;
                 }
-                writer.finish()?;
             }
+            writer.finish()?;
         }
         Ok(())
     }
@@ -968,176 +951,4 @@ impl SegmentState {
         };
         loc.normal()
     }
-}
-
-/// Calculate scale at one zoom level
-fn zoom_scale(zoom: u32) -> f64 {
-    1.0 / f64::from(1 << zoom)
-}
-
-/// Get range of zoom levels for a resource
-fn zoom_levels(res: Res) -> RangeInclusive<u32> {
-    match res {
-        Res::Beacon => 10..=18,
-        Res::Camera => 10..=18,
-        Res::Dms => 11..=18,
-        Res::Incident => 10..=18,
-        Res::Lcs => 12..=18,
-        Res::RampMeter => 11..=18,
-        Res::WeatherSensor => 10..=18,
-        _ => unimplemented!(),
-    }
-}
-
-/// Make a resource location marker
-fn loc_marker(res: Res, pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    match res {
-        Res::Beacon => beacon_marker(pt, norm, sz),
-        Res::Camera => camera_marker(pt, norm, sz),
-        Res::Dms => dms_marker(pt, norm, sz),
-        Res::Incident => incident_marker(pt, norm, sz),
-        Res::Lcs => lcs_marker(pt, norm, sz),
-        Res::RampMeter => ramp_meter_marker(pt, norm, sz),
-        Res::WeatherSensor => weather_sensor_marker(pt, sz),
-        _ => unimplemented!(),
-    }
-}
-
-/// Make beacon marker
-fn beacon_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    const S2: f64 = std::f64::consts::SQRT_2;
-    const S1: f64 = 2.0 - S2;
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        // base
-        Pt::from((0.0, -2.0)) * t,
-        Pt::from((S1, -S2)) * t,
-        Pt::from((S2, -S2)) * t,
-        Pt::from((S2, -S1)) * t,
-        Pt::from((2.0, 0.0)) * t,
-        Pt::from((S2, S1)) * t,
-        Pt::from((S2, S2)) * t,
-        Pt::from((S1, S2)) * t,
-        // point
-        Pt::from((0.0, 3.0)) * t,
-        Pt::from((-S1, S2)) * t,
-        Pt::from((-S2, S2)) * t,
-        Pt::from((-S2, S1)) * t,
-        Pt::from((-2.0, 0.0)) * t,
-        Pt::from((-S2, -S1)) * t,
-        Pt::from((-S2, -S2)) * t,
-        Pt::from((-S1, -S2)) * t,
-        // close
-        Pt::from((0.0, -2.0)) * t,
-    ]
-}
-
-/// Make camera marker
-fn camera_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 1.2)) * t,
-        Pt::from((1.5, 0.4)) * t,
-        Pt::from((2.0, 0.4)) * t,
-        Pt::from((2.0, 1.2)) * t,
-        Pt::from((6.0, 1.2)) * t,
-        Pt::from((6.0, -1.2)) * t,
-        Pt::from((2.0, -1.2)) * t,
-        Pt::from((2.0, -0.4)) * t,
-        Pt::from((1.5, -0.4)) * t,
-        Pt::from((0.0, -1.2)) * t,
-        Pt::from((0.0, 1.2)) * t,
-    ]
-}
-
-/// Make DMS marker
-fn dms_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((5.0, 0.0)) * t,
-        Pt::from((5.0, 1.0)) * t,
-        Pt::from((4.0, 1.0)) * t,
-        Pt::from((4.0, 3.0)) * t,
-        Pt::from((3.0, 3.0)) * t,
-        Pt::from((3.0, 1.0)) * t,
-        Pt::from((2.0, 1.0)) * t,
-        Pt::from((2.0, 3.0)) * t,
-        Pt::from((1.0, 3.0)) * t,
-        Pt::from((1.0, 1.0)) * t,
-        Pt::from((0.0, 1.0)) * t,
-        Pt::from((0.0, 0.0)) * t,
-    ]
-}
-
-/// Make incident marker
-fn incident_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((2.0, -1.0)) * t,
-        Pt::from((0.0, 5.0)) * t,
-        Pt::from((-2.0, -1.0)) * t,
-        Pt::from((0.0, 0.0)) * t,
-    ]
-}
-
-/// Make LCS marker
-fn lcs_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((1.4, 0.0)) * t,
-        Pt::from((1.4, 0.4)) * t,
-        Pt::from((2.6, 0.4)) * t,
-        Pt::from((2.6, 0.0)) * t,
-        Pt::from((4.0, 0.0)) * t,
-        Pt::from((4.0, 3.0)) * t,
-        Pt::from((2.6, 3.0)) * t,
-        Pt::from((2.6, 2.6)) * t,
-        Pt::from((1.4, 2.6)) * t,
-        Pt::from((1.4, 3.0)) * t,
-        Pt::from((0.0, 3.0)) * t,
-        Pt::from((0.0, 0.0)) * t,
-    ]
-}
-
-/// Make ramp meter marker
-fn ramp_meter_marker(pt: Pt<f64>, norm: f64, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz)
-        .rotate(norm)
-        .translate(pt.x, pt.y);
-    vec![
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((1.8, 0.0)) * t,
-        Pt::from((2.4, -1.0)) * t,
-        Pt::from((2.0, -2.0)) * t,
-        Pt::from((1.0, -2.4)) * t,
-        Pt::from((0.0, -1.8)) * t,
-        Pt::from((0.0, 0.0)) * t,
-        Pt::from((1.0, -1.0)) * t,
-    ]
-}
-
-/// Make weather sensor marker
-fn weather_sensor_marker(pt: Pt<f64>, sz: f64) -> Vec<Pt<f64>> {
-    let t = Transform::with_scale(sz, sz).translate(pt.x, pt.y);
-    vec![
-        Pt::from((-3.0, -2.0)) * t,
-        Pt::from((-3.0, 2.0)) * t,
-        Pt::from((3.0, 1.0)) * t,
-        Pt::from((2.0, 0.0)) * t,
-        Pt::from((3.0, -1.0)) * t,
-        Pt::from((-3.0, -2.0)) * t,
-    ]
 }

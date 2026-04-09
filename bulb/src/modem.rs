@@ -14,7 +14,7 @@ use crate::card::{AncillaryData, Card};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -54,20 +54,20 @@ impl Modem {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_states().to_string());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("uri").cdata("URI").close();
         div.input()
@@ -76,7 +76,7 @@ impl Modem {
             .size(30)
             .value(opt_ref(&self.uri));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("config").cdata("Config").close();
         div.input()
@@ -85,7 +85,7 @@ impl Modem {
             .size(28)
             .value(opt_ref(&self.config));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("timeout_ms")
@@ -99,7 +99,7 @@ impl Modem {
             .size(8)
             .value(opt_str(self.timeout_ms));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("enabled").cdata("Enabled").close();
         let mut input = div.input();
@@ -107,7 +107,7 @@ impl Modem {
         if self.enabled {
             input.checked();
         }
-        String::from(page)
+        String::from(tree)
     }
 }
 

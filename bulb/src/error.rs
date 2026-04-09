@@ -16,6 +16,10 @@ use ntcip::dms::tfon;
 /// Bulb errors
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// JavaScript error
+    #[error("JS {0}")]
+    JsValue(String),
+
     /// Fetch request error
     #[error("Fetch request error")]
     FetchRequest(),
@@ -79,3 +83,9 @@ pub enum Error {
 
 /// Bulb result
 pub type Result<T> = std::result::Result<T, Error>;
+
+impl From<wasm_bindgen::JsValue> for Error {
+    fn from(err: wasm_bindgen::JsValue) -> Self {
+        Self::JsValue(err.as_string().unwrap_or(String::from("Unknown")))
+    }
+}

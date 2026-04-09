@@ -19,13 +19,13 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::lcsstate::LcsState;
 use crate::lock::LockReason;
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
 use crate::view::View;
 use chrono::DateTime;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
@@ -470,27 +470,27 @@ impl Lcs {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &LcsAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_states(anc).to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill")
             .cdata_len(opt_ref(&self.location), 32);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &LcsAnc) -> String {
-        if let Some((lat, lon)) = anc.loc.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::Lcs, &self.name, lon, lat);
         }
-        let mut page = Page::new();
-        self.title(View::Control, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Control, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row fill");
         self.item_states(anc).tooltips(&mut div.span());
         if let Some(lock) = &self.lock
@@ -499,22 +499,22 @@ impl Lcs {
             div.span().cdata(expires);
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
         div.close();
-        self.indications_html(anc, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.indications_html(anc, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &LcsAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -525,14 +525,14 @@ impl Lcs {
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
-        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
-        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
-        div = page.frag::<html::Div>();
+        anc.cio.controller_html(self, &mut tree.root::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("lcs_type").cdata("LCS Type").close();
         anc.lcs_types_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("shift").cdata("Lane Shift").close();
         div.input()
@@ -543,8 +543,8 @@ impl Lcs {
             .size(2)
             .value(opt_str(self.shift));
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

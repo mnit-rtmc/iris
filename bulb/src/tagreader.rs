@@ -17,7 +17,7 @@ use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -141,41 +141,41 @@ impl AncillaryData for TagReaderAnc {
 impl TagReader {
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &TagReaderAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(anc.cio.item_states(self).to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill")
             .cdata_len(opt_ref(&self.location), 32);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &TagReaderAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Status, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Status, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         anc.cio.item_states(self).tooltips(&mut div.span());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &TagReaderAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
-        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
-        String::from(page)
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        anc.cio.controller_html(self, &mut tree.root::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

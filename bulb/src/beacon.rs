@@ -17,10 +17,10 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref, opt_str};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -152,14 +152,14 @@ impl Beacon {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &BeaconAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_states(anc).to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("beacon-container row center");
         div.button().id("ob_flashing").disabled().close();
         let mut label = div.label();
@@ -173,28 +173,28 @@ impl Beacon {
         label = div.label();
         label.r#for("ob_flashing").class("signal-housing");
         label.span().class(self.class_delayed()).cdata("🔆");
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &BeaconAnc) -> String {
-        if let Some((lat, lon)) = anc.loc.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::Beacon, &self.name, lon, lat);
         }
-        let mut page = Page::new();
-        self.title(View::Control, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Control, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         self.item_states(anc).tooltips(&mut div.span());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("beacon-container row center");
         div.button().id("ob_flashing").close();
         let mut label = div.label();
@@ -206,17 +206,17 @@ impl Beacon {
         label.r#for("ob_flashing").class("beacon signal-housing");
         label.span().class(self.class_delayed()).cdata("🔆");
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row center");
         div.span().cdata(self.beacon_state(anc));
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &BeaconAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("message").cdata("Message").close();
         div.textarea()
@@ -226,7 +226,7 @@ impl Beacon {
             .cols(24)
             .cdata(&self.message);
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -236,9 +236,9 @@ impl Beacon {
             .cols(24)
             .cdata(opt_ref(&self.notes));
         div.close();
-        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
-        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
-        div = page.frag::<html::Div>();
+        anc.cio.controller_html(self, &mut tree.root::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("verify_pin").cdata("Verify Pin").close();
         div.input()
@@ -249,7 +249,7 @@ impl Beacon {
             .size(8)
             .value(opt_str(self.verify_pin));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("device").cdata("Device").close();
         div.input()
@@ -257,7 +257,7 @@ impl Beacon {
             .r#type("text")
             .value(opt_ref(&self.device));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("ext_mode").cdata("Ext Mode").close();
         let mut input = div.input();
@@ -266,8 +266,8 @@ impl Beacon {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

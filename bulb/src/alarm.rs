@@ -15,7 +15,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -47,47 +47,47 @@ impl Alarm {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &AlarmAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_states(anc).to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill").cdata(&self.description);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &AlarmAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Status, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Status, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         self.item_states(anc).tooltips(&mut div.span());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span()
             .class("info full")
             .cdata(&self.description)
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Triggered").close();
         div.span()
             .class("info")
             .cdata(self.trigger_time.as_deref().unwrap_or("-"));
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &AlarmAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("description")
@@ -99,10 +99,10 @@ impl Alarm {
             .size(24)
             .value(&self.description);
         div.close();
-        anc.controller_html(self, &mut page.frag::<html::Div>());
-        anc.pin_html(self.pin, &mut page.frag::<html::Div>());
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        anc.controller_html(self, &mut tree.root::<html::Div>());
+        anc.pin_html(self.pin, &mut tree.root::<html::Div>());
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

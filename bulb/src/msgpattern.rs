@@ -18,7 +18,7 @@ use crate::item::{ItemState, ItemStates};
 use crate::rend::Renderer;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use js_sys::{ArrayBuffer, Uint8Array};
 use ntcip::dms::multi::split as multi_split;
 use ntcip::dms::{FontTable, GraphicTable, tfon};
@@ -374,20 +374,20 @@ impl MsgPattern {
 
     /// Convert to compact HTML
     fn to_html_compact(&self, anc: &MsgPatternAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(&self.name)
             .cdata(" ")
             .cdata(self.item_states(anc).to_string());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to setup HTML
     fn to_html_setup(&self, anc: &MsgPatternAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("compose_hashtag")
@@ -399,7 +399,7 @@ impl MsgPattern {
             .size(16)
             .value(opt_ref(&self.compose_hashtag));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("mp_prototype").cdata("Prototype").close();
         div.input()
@@ -408,7 +408,7 @@ impl MsgPattern {
             .size(20)
             .value(opt_ref(&self.prototype));
         div.close();
-        let mut fs = page.frag::<html::FieldSet>();
+        let mut fs = tree.root::<html::FieldSet>();
         let mut legend = fs.legend();
         legend
             .input()
@@ -458,7 +458,7 @@ impl MsgPattern {
         self.render_lines(anc, &mut div.div());
         div.close();
         fs.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("flash_beacon")
@@ -470,7 +470,7 @@ impl MsgPattern {
             input.checked();
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("pixel_service")
@@ -482,8 +482,8 @@ impl MsgPattern {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 
     /// Make a select element for sign configs
@@ -544,11 +544,11 @@ impl MsgPattern {
 
     /// Replace preview image
     fn replace_preview(&self, anc: &MsgPatternAnc) {
-        let mut page = Page::new();
-        let mut img = page.frag::<html::Img>();
+        let mut tree = Tree::new();
+        let mut img = tree.root::<html::Img>();
         self.render_preview(anc, &mut img);
         let preview = Doc::get().elem::<HtmlElement>("mp_preview");
-        preview.set_outer_html(&String::from(page));
+        preview.set_outer_html(&String::from(tree));
     }
 
     /// Render the message lines table

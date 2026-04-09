@@ -152,16 +152,11 @@ impl Doc {
 
     /// Try to get an element by ID and cast it
     pub fn try_elem<E: JsCast>(&self, id: &str) -> Option<E> {
-        Some(
-            self.0
-                .get_element_by_id(id)?
-                .dyn_into::<E>()
-                .inspect_err(|_| {
-                    let e = "Invalid element type";
-                    log::error!("{e}: {id}");
-                })
-                .unwrap_throw(),
-        )
+        self.0
+            .get_element_by_id(id)?
+            .dyn_into::<E>()
+            .inspect_err(|_| log::error!("try_elem: {id}"))
+            .ok()
     }
 
     /// Get an element by ID and cast it
@@ -182,11 +177,8 @@ impl Doc {
 
     /// Get and parse an `input` element value
     pub fn input_parse<T: FromStr>(&self, id: &str) -> Option<T> {
-        self.elem::<HtmlInputElement>(id)
-            .value()
-            .trim()
-            .parse()
-            .ok()
+        self.try_elem::<HtmlInputElement>(id)
+            .and_then(|el| el.value().trim().parse().ok())
     }
 
     /// Get and parse an optional `input` element string

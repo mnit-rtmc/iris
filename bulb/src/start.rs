@@ -20,36 +20,40 @@ use crate::permission::Permission;
 use crate::sse;
 use crate::util::Doc;
 use crate::view::{CardView, View};
-use js_sys::JsString;
+use chrono::{DateTime, Local};
 use resources::Res;
+use serde::Deserialize;
+use std::collections::HashMap;
 use std::error::Error as _;
+use std::time::Duration;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{
-    CustomEvent, Element, Event, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
+    Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
+    HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
     ScrollLogicalPosition, TransitionEvent, Window,
 };
 
-/// JavaScript result
-pub type JsResult<T> = std::result::Result<T, JsValue>;
+/// Layer groups
+const GROUPS: &[&str] = &["tile", "tms"];
 
-/// JavaScript imports
-#[wasm_bindgen(module = "/res/glue.js")]
-extern "C" {
-    // Set the selected resource
-    fn js_set_selected(res: &JsValue, name: &JsValue);
-    // Update TMS main item states
-    fn js_update_item_states(data: &JsValue);
-    // Redraw the map
-    fn js_redraw_map();
-    /// Update station data JSON and redraw the map
-    fn js_update_stat_sample(data: &JsValue);
-    // Fly map to given item
-    fn js_fly_map_to(fid: &JsValue, lat: &JsValue, lng: &JsValue);
-    // Enable/disable flying map
-    fn js_fly_enable(enable: JsValue);
+/// Rectangle X position
+const RECT_X: f64 = 0.32;
+
+/// Rectangle Y position
+const RECT_Y: f64 = 0.5;
+
+/// Binned station data
+#[derive(Deserialize)]
+struct StationData {
+    /// Data collection time
+    time_stamp: String,
+    /// Binning period (s)
+    #[allow(unused)]
+    period: u32,
+    /// Data samples
+    samples: HashMap<String, [Option<u32>; 2]>,
 }
 
 /// Button attributes
@@ -85,46 +89,165 @@ fn show_toast(msg: &str) {
     app::defer_action(DeferredAction::HideToast, 3000);
 }
 
-/// Fly map to specified item
-pub fn fly_map_item(fid: &str, lat: f64, lon: f64) {
-    let fid = JsValue::from_str(fid);
-    let lat = JsValue::from_f64(lat);
-    let lon = JsValue::from_f64(lon);
-    js_fly_map_to(&fid, &lat, &lon);
+/// Select item on map
+pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
+    if !app::is_selected_item(res, name) {
+        let zoom = selected_zoom(res).max(12);
+        set_selected_item(res, name, zoom);
+        spawn_local(do_future(do_select_item_map(zoom, lon, lat)));
+    }
+}
+
+/// Select item on map
+async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
+    if let Some(map_pane) = earthwyrm::MapPane::get() {
+        map_pane.position(zoom, lon, lat, RECT_X, RECT_Y);
+        Doc::get()
+            .elem::<Element>("zoom-level")
+            .set_inner_html(&zoom.to_string());
+        // FIXME: only call these when crossing zoom threshold
+        update_map_states(Res::Incident, zoom, None).await?;
+        update_map_states(Res::Dms, zoom, None).await?;
+        update_map_states(Res::Lcs, zoom, None).await?;
+        update_map_states(Res::Camera, zoom, None).await?;
+        update_map_states(Res::RampMeter, zoom, None).await?;
+        update_map_states(Res::Beacon, zoom, None).await?;
+        update_map_states(Res::WeatherSensor, zoom, None).await?;
+    }
+    Ok(())
+}
+
+/// Get zoom level for selected resource
+fn selected_zoom(res: Res) -> u32 {
+    let layer = format!("layer-{res}");
+    Doc::get().input_parse::<u32>(&layer).unwrap_or(32)
+}
+
+/// Set selected item
+fn set_selected_item(res: Res, name: &str, zoom: u32) {
+    app::set_selected_item(res, name);
+    set_selected_style(res, name, zoom);
+}
+
+/// Set selected item style
+fn set_selected_style(res: Res, name: &str, zoom: u32) {
+    let mut css = String::with_capacity(100);
+    css.push('.');
+    css.push_str(res.as_str());
+    css.push('-');
+    css.push_str(name);
+    css.push_str(" { stroke: white; stroke-width: 2; }");
+    css.push_str("\n.wyrm-tile use { scale: ");
+    css.push_str(zoom_scale(zoom));
+    css.push_str("; }");
+    Doc::get()
+        .elem::<Element>("selected-style")
+        .set_inner_html(&css);
+}
+
+/// Clear selected item style
+fn clear_selected_style(zoom: u32) {
+    let mut css = String::with_capacity(50);
+    css.push_str(".wyrm-tile use { scale: ");
+    css.push_str(zoom_scale(zoom));
+    css.push_str("; }");
+    Doc::get()
+        .elem::<Element>("selected-style")
+        .set_inner_html(&css);
+}
+
+/// Get marker scale for a zoom level
+fn zoom_scale(zoom: u32) -> &'static str {
+    match zoom {
+        1 => "0.006",
+        2 => "0.012",
+        3 => "0.025",
+        4 => "0.05",
+        5 => "0.1",
+        6 => "0.2",
+        7 => "0.3",
+        8 => "0.4",
+        9 => "0.5",
+        10 => "0.6",
+        11 => "0.8",
+        _ => "1.0",
+    }
+}
+
+/// Clear selected item
+fn clear_selected_item(zoom: u32) {
+    app::clear_selected_item();
+    clear_selected_style(zoom);
 }
 
 /// Application starting function
 #[wasm_bindgen(start)]
 pub async fn start() -> core::result::Result<(), JsError> {
     crate::panic::set_hook_once();
-    wasm_log::init(wasm_log::Config::default().module_prefix("bulb"));
+    wasm_log::init(wasm_log::Config::default());
     log::info!("Started");
     add_listeners().await.unwrap_throw();
     Ok(())
 }
 
 /// Add event listeners
-async fn add_listeners() -> JsResult<()> {
+async fn add_listeners() -> Result<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
+    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+    sb_resource.set_value("");
     let divider: HtmlElement = doc.elem("divider");
     add_click_listener(&divider)?;
     let sidebar: HtmlElement = doc.elem("sidebar");
     add_change_listener(&sidebar)?;
+    let layer_menu: HtmlElement = doc.elem("layer-menu");
+    add_change_listener(&layer_menu)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list"))?;
     add_interval_callback(&window)?;
-    let map_pane: HtmlElement = doc.elem("map_pane");
-    add_map_click_listener(&map_pane)?;
+    if let Some(map_pane) = earthwyrm::MapPane::init(
+        "map-pane",
+        GROUPS,
+        handle_map_click_ev,
+        handle_map_zoom,
+    ) {
+        map_pane.position(10, -93.2, 44.95, RECT_X, RECT_Y);
+        Doc::get()
+            .elem::<Element>("zoom-level")
+            .set_inner_html("10");
+        clear_selected_item(10);
+    }
     do_future(finish_init()).await;
-    fetch_station_sample();
+    fetch_station_data();
     if let Some(doc_elem) = doc.doc_elem() {
         add_fullscreenchange_listener(&doc_elem)?;
     }
     Ok(())
+}
+
+/// Handle a fallible future function
+async fn do_future(future: impl Future<Output = Result<()>>) {
+    match future.await {
+        Ok(_) => (),
+        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(Error::FetchResponseNotFound()) => {
+            // Card list may be out-of-date; refresh
+            app::defer_action(DeferredAction::RefreshList, 200);
+        }
+        Err(Error::CardMismatch()) => {
+            // Card list may be out-of-date; refresh
+            app::defer_action(DeferredAction::RefreshList, 200);
+        }
+        Err(e) => {
+            if let Some(se) = e.source() {
+                log::warn!("source: {se}");
+            }
+            show_toast(&format!("Error: {e}"));
+        }
+    }
 }
 
 /// Finish initialization
@@ -206,7 +329,7 @@ fn opt_class(access: &[Permission], res: Res) -> &'static str {
 }
 
 /// Add a "fullscreenchange" event listener to an element
-fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
+fn add_fullscreenchange_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
         let doc = Doc::get();
         let btn = doc.elem::<HtmlInputElement>("sb_fullscreen");
@@ -222,12 +345,15 @@ fn add_fullscreenchange_listener(elem: &Element) -> JsResult<()> {
 }
 
 /// Add a "change" event listener to an element
-fn add_change_listener(elem: &Element) -> JsResult<()> {
+fn add_change_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>())
-            && target.id().as_str() == "sb_fullscreen"
-        {
-            set_fullscreen();
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
+            let id = target.id();
+            if id == "sb_fullscreen" {
+                set_fullscreen();
+            } else {
+                spawn_local(do_future(handle_layer_zoom(id)));
+            }
         }
     });
     elem.add_event_listener_with_callback(
@@ -247,26 +373,22 @@ fn set_fullscreen() {
     doc.request_fullscreen(checked);
 }
 
-/// Handle a fallible future function
-async fn do_future(future: impl Future<Output = Result<()>>) {
-    match future.await {
-        Ok(_) => (),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(Error::FetchResponseNotFound()) => {
-            // Card list may be out-of-date; refresh
-            app::defer_action(DeferredAction::RefreshList, 200);
-        }
-        Err(Error::CardMismatch()) => {
-            // Card list may be out-of-date; refresh
-            app::defer_action(DeferredAction::RefreshList, 200);
-        }
-        Err(e) => {
-            if let Some(se) = e.source() {
-                log::warn!("source: {se}");
-            }
-            show_toast(&format!("Error: {e}"));
-        }
+/// Handle layer zoom threshold change
+async fn handle_layer_zoom(id: String) -> Result<()> {
+    if let Some((layer, rname)) = id.split_once('-')
+        && layer == "layer"
+        && let Ok(res) = Res::try_from(rname)
+    {
+        let zoom = current_zoom();
+        // FIXME: only call these when crossing zoom threshold
+        update_map_states(res, zoom, None).await?;
     }
+    Ok(())
+}
+
+/// Get current map zoom level
+fn current_zoom() -> u32 {
+    earthwyrm::MapPane::get().map(|mp| mp.zoom()).unwrap_or(0)
 }
 
 /// Get dependent resource row class name
@@ -416,7 +538,7 @@ fn search_value() -> String {
 }
 
 /// Add an "input" event listener to an element
-fn add_input_listener(elem: &Element) -> JsResult<()> {
+fn add_input_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             handle_input(target.id());
@@ -502,7 +624,7 @@ async fn handle_input_other(id: String) -> Result<()> {
 }
 
 /// Add "focusin" / "focusout" event listeners to an element
-fn add_focus_listener(elem: &Element) -> JsResult<()> {
+fn add_focus_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(input)) =
             e.target().map(|e| e.dyn_into::<HtmlInputElement>())
@@ -548,7 +670,7 @@ async fn handle_focus_events(
 }
 
 /// Add a `click` event listener to an element
-fn add_click_listener(elem: &Element) -> JsResult<()> {
+fn add_click_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             if target.is_instance_of::<HtmlButtonElement>() {
@@ -704,10 +826,6 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     }
     let cv = CardView::new(res, &name, view);
     replace_card(cv, "").await?;
-    js_set_selected(
-        &JsValue::from_str(res.as_str()),
-        &JsValue::from_str(&name),
-    );
     Ok(())
 }
 
@@ -775,7 +893,7 @@ async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
 }
 
 /// Add transition event listener to an element
-fn add_transition_listener(elem: &Element) -> JsResult<()> {
+fn add_transition_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(handle_transition_ev);
     elem.add_event_listener_with_callback(
         "transitionstart",
@@ -807,7 +925,7 @@ fn handle_transition_ev(ev: Event) {
 }
 
 /// Add callback for regular interval checks
-fn add_interval_callback(window: &Window) -> JsResult<()> {
+fn add_interval_callback(window: &Window) -> Result<()> {
     let closure: Closure<dyn Fn()> = Closure::new(tick_interval);
     window.set_interval_with_callback_and_timeout_and_arguments_0(
         closure.as_ref().unchecked_ref(),
@@ -822,71 +940,149 @@ fn tick_interval() {
     app::tick_tock();
     while let Some(action) = app::next_action() {
         match action {
-            DeferredAction::FetchStationData => fetch_station_sample(),
+            DeferredAction::FetchStationData => fetch_station_data(),
             DeferredAction::HideToast => hide_elem("sb_toast"),
             DeferredAction::RefreshList => handle_res_change(),
-            DeferredAction::RedrawMap => js_redraw_map(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
         }
     }
 }
 
-/// Fetch station sample data
-fn fetch_station_sample() {
-    log::debug!("fetch_station_sample");
+/// Fetch binned station data
+fn fetch_station_data() {
+    log::debug!("fetch_station_data");
     app::defer_action(DeferredAction::FetchStationData, 30_000);
-    spawn_local(do_future(do_fetch_station_sample()));
+    spawn_local(do_future(do_fetch_station_data()));
 }
 
-/// Actually fetch station sample data
-async fn do_fetch_station_sample() -> Result<()> {
-    let stat = Uri::from("/iris/station_sample").get().await?;
-    js_update_stat_sample(&stat);
+/// Actually fetch binned station data
+async fn do_fetch_station_data() -> Result<()> {
+    let data = StationData::fetch().await?;
+    let css = data.make_style();
+    Doc::get()
+        .elem::<Element>("segment-style")
+        .set_inner_html(&css);
     Ok(())
 }
 
-/// Add a `click` event listener to the map element
-fn add_map_click_listener(elem: &Element) -> JsResult<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|ce: CustomEvent| match ce
-        .detail()
-        .dyn_into::<JsString>()
+impl StationData {
+    /// Fetch current station data
+    async fn fetch() -> Result<Self> {
+        let stat = Uri::from("/iris/station_sample").get().await?;
+        Ok(serde_wasm_bindgen::from_value(stat)?)
+    }
+
+    /// Make station segment style
+    fn make_style(&self) -> String {
+        let now: DateTime<Local> = Local::now();
+        let oldest = now - Duration::from_secs(300);
+        match DateTime::parse_from_rfc3339(&self.time_stamp) {
+            Ok(dt) if dt > oldest && dt < now => self.do_make_style(),
+            _ => {
+                log::warn!("bad station_sample timestamp: {}", self.time_stamp);
+                String::new()
+            }
+        }
+    }
+
+    /// Make station segment style
+    fn do_make_style(&self) -> String {
+        let mut style = String::new();
+        style.push_str(".wyrm-segment { fill: #aaa; }\n");
+        for (sid, data) in &self.samples {
+            let flow = data.first();
+            let speed = data.get(1);
+            if let (Some(Some(fl)), Some(Some(sp))) = (flow, speed) {
+                let density = ((*fl as f32) / (*sp as f32)).round() as u32;
+                style.push_str(".segment-");
+                style.push_str(sid);
+                style.push_str(" { fill: ");
+                style.push_str(density_color(density));
+                style.push_str("; }\n");
+            }
+        }
+        style
+    }
+}
+
+/// Get color based on density (veh/mi)
+fn density_color(density: u32) -> &'static str {
+    match density {
+        0 => "#aaa",
+        1..30 => "#2c2",
+        30..50 => "#fc0",
+        50..200 => "#d00",
+        200.. => "#c0f",
+    }
+}
+
+/// Handle a `click` event
+fn handle_map_click_ev(ev: Event) {
+    // Is it within a map `g` or `path` element
+    if let Some(Ok(target)) = ev.target().map(|e| e.dyn_into::<Element>())
+        && let Ok(Some(gm)) = target.closest("g,path")
+        && let Some(cls) = gm.get_attribute("class")
+        && let Some((rname, nm)) = cls.split_once('-')
     {
-        Ok(name) => spawn_local(do_future(select_card_map(name.into()))),
-        Err(e) => log::warn!("tmsevent: {e:?}"),
-    });
-    elem.add_event_listener_with_callback(
-        "tmsevent",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    // can't drop closure, just forget it to make JS happy
-    closure.forget();
-    Ok(())
+        let res = Res::try_from(rname).ok();
+        spawn_local(do_future(select_card_map(res, nm.to_string())));
+    }
 }
 
 /// Select a card from a map marker click
-async fn select_card_map(name: String) -> Result<()> {
-    if name.is_empty() {
+async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
+    let clear = name.is_empty()
+        || match (res, &name) {
+            (Some(res), name) => app::is_selected_item(res, name),
+            (None, _name) => true,
+        };
+    if clear {
+        clear_selected_item(current_zoom());
         if let Some(cv) = app::expanded_view() {
             let search = search_value();
             replace_card(cv.compact(), &search).await?;
         }
         return Ok(());
     }
-    let res = app::name_res(&name);
     let changed = res != selected_resource();
     if let Some(res) = res {
+        let zoom = current_zoom();
+        set_selected_item(res, &name, zoom);
         if changed {
             set_resource(Some(res), "").await;
         }
         let id = format!("{res}_{name}");
-        js_fly_enable(JsValue::FALSE);
         click_card(res, name, id).await?;
-        js_fly_enable(JsValue::TRUE);
     }
     if changed {
         sse::post_req(res).await;
     }
+    Ok(())
+}
+
+/// Handle map zoom
+fn handle_map_zoom(zoom: u32) {
+    spawn_local(do_future(do_handle_map_zoom(zoom)));
+}
+
+/// Handle map zoom
+async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
+    Doc::get()
+        .elem::<Element>("zoom-level")
+        .set_inner_html(&zoom.to_string());
+    match app::selected_item() {
+        Some((res, name)) => set_selected_style(res, &name, zoom),
+        None => clear_selected_style(zoom),
+    }
+    // FIXME: only call these when crossing zoom threshold
+    update_map_states(Res::Incident, zoom, None).await?;
+    update_map_states(Res::Dms, zoom, None).await?;
+    update_map_states(Res::Lcs, zoom, None).await?;
+    update_map_states(Res::Camera, zoom, None).await?;
+    update_map_states(Res::RampMeter, zoom, None).await?;
+    update_map_states(Res::Beacon, zoom, None).await?;
+    update_map_states(Res::WeatherSensor, zoom, None).await?;
     Ok(())
 }
 
@@ -910,11 +1106,8 @@ async fn do_handle_notification(
     if let Ok(res) = Res::try_from(chan.as_str())
         && res.has_location()
     {
-        let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
-        let mut cards = CardList::new(res, &access);
-        cards.fetch_all().await?;
-        update_map_states(&cards).await?;
-        app::defer_action(DeferredAction::RedrawMap, 500);
+        let zoom = current_zoom();
+        update_map_states(res, zoom, None).await?;
     }
     Ok(())
 }
@@ -925,10 +1118,6 @@ async fn update_card_list(res: Res) -> Result<bool> {
         return Ok(false);
     };
     if old_cards.res() != res {
-        js_set_selected(
-            &JsValue::from_str(res.as_str()),
-            &JsValue::from_str(""),
-        );
         return Ok(false);
     }
     let old_json = old_cards.json().to_string();
@@ -949,15 +1138,10 @@ async fn update_card_list(res: Res) -> Result<bool> {
         }
     }
     if res.has_location() {
-        update_map_states(&cards).await?;
-        app::defer_action(DeferredAction::RedrawMap, 500);
+        let zoom = current_zoom();
+        update_map_states(res, zoom, Some(&cards)).await?;
     }
     if let Some(cv) = expanded {
-        // Re-select the map marker, in case item state changed
-        js_set_selected(
-            &JsValue::from_str(res.as_str()),
-            &JsValue::from_str(&cv.name),
-        );
         cards.set_view(cv);
     }
     app::card_list(Some(cards));
@@ -965,28 +1149,74 @@ async fn update_card_list(res: Res) -> Result<bool> {
 }
 
 /// Update map item states
-async fn update_map_states(cards: &CardList) -> Result<()> {
-    let items = cards.states_main().await?;
-    let json = item_states_json(&items);
-    app::set_resources(items);
-    js_update_item_states(&json);
+async fn update_map_states(
+    res: Res,
+    zoom: u32,
+    cards: Option<&CardList>,
+) -> Result<()> {
+    // NOTE: resource must have locations
+    let displayed = is_layer_displayed(res, zoom);
+    let css = if displayed {
+        let states_all = card::item_states_all(res);
+        let items = match cards {
+            Some(cards) => cards.states_main().await?,
+            None => {
+                let access: Vec<Permission> =
+                    Asset::Access.uri().get_val().await?;
+                let mut cards = CardList::new(res, &access);
+                cards.fetch_all().await?;
+                cards.states_main().await?
+            }
+        };
+        item_states_css(states_all, &items)
+    } else {
+        format!(".wyrm-{res} {{ display: none; }}")
+    };
+    Doc::get()
+        .elem::<Element>(&format!("{res}-style"))
+        .set_inner_html(&css);
+    let css = if zoom >= selected_zoom(res) {
+        ""
+    } else {
+        "background: #aaa;"
+    };
+    Doc::get()
+        .elem::<Element>(&format!("layer-{res}"))
+        .set_attribute("style", css)?;
     Ok(())
 }
 
-/// Build item states JSON object
-fn item_states_json(states: &[CardState]) -> JsValue {
-    let mut json = String::new();
-    json.push('{');
-    for st in states {
-        if json.len() > 1 {
-            json.push(',');
+/// Check if a resource layer is displayed
+fn is_layer_displayed(res: Res, zoom: u32) -> bool {
+    (selected_resource() == Some(res)) || zoom >= selected_zoom(res)
+}
+
+/// Build resource item states style
+fn item_states_css(
+    states_all: &'static [ItemState],
+    card_states: &[CardState],
+) -> String {
+    let mut css = String::new();
+    for st in states_all {
+        let mut first = true;
+        for cs in card_states {
+            if cs.state == *st {
+                if first {
+                    first = false;
+                } else {
+                    css.push(',');
+                }
+                css.push('.');
+                css.push_str(cs.res.as_str());
+                css.push('-');
+                css.push_str(&cs.name);
+            }
         }
-        json.push('"');
-        json.push_str(&st.name);
-        json.push_str("\":\"");
-        json.push_str(st.state.code());
-        json.push('"');
+        if !first {
+            css.push_str(" { fill: ");
+            css.push_str(st.fill_css());
+            css.push_str("; }\n");
+        }
     }
-    json.push('}');
-    JsValue::from_str(&json)
+    css
 }

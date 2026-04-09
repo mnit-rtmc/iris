@@ -20,7 +20,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, Select, TextArea, opt_ref};
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -353,23 +353,23 @@ impl Controller {
 
     /// Convert to compact HTML
     fn to_html_compact(&self) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
             .cdata(self.item_states().to_string())
             .close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info fill").cdata(self.link_drop());
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Status, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Status, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         self.item_states().tooltips(&mut div.span());
         div.span().cdata(anc.condition(self)).close();
@@ -383,36 +383,36 @@ impl Controller {
             .close();
         span.cdata(":").cdata(self.drop_id);
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("info end").cdata(anc.comm_config(self)).close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata_len(opt_ref(&self.location), 64).close();
         div.span().class("into").cdata(opt_ref(&self.notes)).close();
         div.close();
         if let Some(model) = self.model() {
-            div = page.frag::<html::Div>();
+            div = tree.root::<html::Div>();
             div.class("row fill");
             div.span().cdata("Model").close();
             div.span().class("info").cdata_len(model, 32).close();
             div.close();
         }
         if let Some(version) = self.version() {
-            div = page.frag::<html::Div>();
+            div = tree.root::<html::Div>();
             div.class("row fill");
             div.span().cdata("Version").close();
             div.span().class("info").cdata_len(version, 32).close();
             div.close();
         }
         if let Some(serial_num) = self.serial_num() {
-            div = page.frag::<html::Div>();
+            div = tree.root::<html::Div>();
             div.class("row fill");
             div.span().cdata("S/N").close();
             div.span().class("info").cdata_len(serial_num, 32).close();
             div.close();
         }
         if let Some(fail_time) = &self.fail_time {
-            div = page.frag::<html::Div>();
+            div = tree.root::<html::Div>();
             div.class("row");
             div.span().cdata("Fail Time").close();
             div.span().class("info").cdata(fail_time).close();
@@ -420,21 +420,21 @@ impl Controller {
         }
         let state = anc.comm_state(self);
         if !state.is_empty() {
-            div = page.frag::<html::Div>();
+            div = tree.root::<html::Div>();
             div.class("row");
             div.span().cdata("Comm State").close();
             div.span().class("info").cdata(state).close();
             div.close();
         }
-        anc.io_pins_html(&mut page.frag::<html::Div>());
-        String::from(page)
+        anc.io_pins_html(&mut tree.root::<html::Div>());
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &ControllerAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("comm_link").cdata("Comm Link").close();
         div.input()
@@ -443,7 +443,7 @@ impl Controller {
             .size(20)
             .value(opt_ref(&self.comm_link));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("drop_id").cdata("Drop ID").close();
         div.input()
@@ -454,7 +454,7 @@ impl Controller {
             .size(6)
             .value(self.drop_id);
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("cabinet_style")
@@ -462,12 +462,12 @@ impl Controller {
             .close();
         anc.cabinet_styles_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("condition").cdata("Condition").close();
         anc.conditions_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -478,7 +478,7 @@ impl Controller {
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("password").cdata("Password").close();
         div.input()
@@ -487,8 +487,8 @@ impl Controller {
             .size(26)
             .value(opt_ref(&self.password));
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

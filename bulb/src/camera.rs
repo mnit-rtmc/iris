@@ -18,12 +18,12 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
-use crate::start::fly_map_item;
+use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
 use crate::view::View;
-use hatmil::{Page, html};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -158,8 +158,8 @@ impl Camera {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
-        let mut page = Page::new();
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
@@ -167,30 +167,30 @@ impl Camera {
         if let Some(num) = self.cam_num {
             div.span().class("info").cdata(format!("#{num}"));
         }
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &CameraAnc) -> String {
-        if let Some((lat, lon)) = anc.loc.latlon() {
-            fly_map_item(&self.name, lat, lon);
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::Camera, &self.name, lon, lat);
         }
         // FIXME: set selected video monitor to this camera
-        let mut page = Page::new();
-        self.title(View::Control, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Control, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         anc.cio.item_states(self).tooltips(&mut div.span());
         if let Some(num) = self.cam_num {
             div.span().class("info").cdata(format!("#{num}"));
         }
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64);
-        String::from(page)
+        String::from(tree)
     }
 
     /// Create action to handle click on a device request button
@@ -207,20 +207,20 @@ impl Camera {
 
     /// Convert to Request HTML
     fn to_html_request(&self, _anc: &CameraAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Request, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Request, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Reset/Reboot").close();
         div.button().id("rq_reset").r#type("button").cdata("Reboot");
-        String::from(page)
+        String::from(tree)
     }
 
     /// Convert to Setup HTML
     fn to_html_setup(&self, anc: &CameraAnc) -> String {
-        let mut page = Page::new();
-        self.title(View::Setup, &mut page.frag::<html::Div>());
-        let mut div = page.frag::<html::Div>();
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("cam_num").cdata("Cam Num").close();
         div.input()
@@ -231,7 +231,7 @@ impl Camera {
             .size(8)
             .value(opt_str(self.cam_num));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -242,9 +242,9 @@ impl Camera {
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
-        anc.cio.controller_html(self, &mut page.frag::<html::Div>());
-        anc.cio.pin_html(self.pin, &mut page.frag::<html::Div>());
-        div = page.frag::<html::Div>();
+        anc.cio.controller_html(self, &mut tree.root::<html::Div>());
+        anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("encoder_type")
@@ -252,7 +252,7 @@ impl Camera {
             .close();
         anc.encoder_type_html(self, &mut div.select());
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("enc_address")
@@ -263,7 +263,7 @@ impl Camera {
             .r#type("text")
             .value(opt_ref(&self.enc_address));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("enc_port")
@@ -276,7 +276,7 @@ impl Camera {
             .size(4)
             .value(opt_str(self.enc_port));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("enc_mcast")
@@ -287,7 +287,7 @@ impl Camera {
             .r#type("text")
             .value(opt_ref(&self.enc_mcast));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("enc_channel")
@@ -300,7 +300,7 @@ impl Camera {
             .size(8)
             .value(opt_str(self.enc_channel));
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label()
             .r#for("cam_template")
@@ -312,7 +312,7 @@ impl Camera {
             .cdata(opt_ref(&self.cam_template))
             .close();
         div.close();
-        div = page.frag::<html::Div>();
+        div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("publish").cdata("Publish").close();
         let mut input = div.input();
@@ -321,8 +321,8 @@ impl Camera {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut page.frag::<html::Div>());
-        String::from(page)
+        self.footer_html(true, &mut tree.root::<html::Div>());
+        String::from(tree)
     }
 }
 

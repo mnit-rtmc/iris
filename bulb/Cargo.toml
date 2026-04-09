@@ -12,9 +12,9 @@ base64 = "0.22"
 cfg-if = "1.0"
 chrono.workspace = true
 cidr.workspace = true
-foldhash = "0.2"
+earthwyrm = "0.12.0"
 gift.workspace = true
-hatmil = "1.2.0"
+hatmil = "1.3.0"
 humantime = "2.1"
 js-sys = "0.3"
 log.workspace = true
@@ -43,9 +43,7 @@ features = [
 version = "0.3"
 features = [
   'Blob',
-  'CustomEvent',
   'Document',
-  'HtmlCollection',
   'HtmlElement',
   'Window',
   'Event',

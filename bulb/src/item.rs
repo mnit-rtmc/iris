@@ -164,6 +164,29 @@ impl ItemState {
         }
     }
 
+    /// Get the item state fill CSS value
+    pub fn fill_css(self) -> &'static str {
+        match self {
+            Self::Available => "#55acee",
+            Self::Dark => "#000088",
+            Self::Deployed => "#ff9800",
+            Self::Operator => "#ffff00",
+            Self::Planned => "#bb6655",
+            Self::Incident => "#55acee",
+            Self::Locked => "#864",
+            Self::External => "#bb6655",
+            Self::Dedicated => "#8866bb",
+            Self::Fault => "#000000",
+            Self::Offline => "#aaaaaa",
+            Self::Crash => "#ff8080",
+            Self::Stall => "#ff80ff",
+            Self::Hazard => "#ffff80",
+            Self::Roadwork => "#ffd080",
+            Self::Inactive => "#fff2",
+            _ => "none",
+        }
+    }
+
     /// Get the item state description
     pub fn description(self) -> &'static str {
         match self {

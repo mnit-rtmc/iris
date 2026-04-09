@@ -10,10 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{CardList, CardState};
+use crate::card::CardList;
 use crate::sse::NotifyState;
 use crate::view::CardView;
-use foldhash::HashMap;
 use resources::Res;
 use std::cell::RefCell;
 
@@ -29,8 +28,6 @@ pub enum DeferredAction {
     HideToast,
     /// Refresh resource list
     RefreshList,
-    /// Redraw map markers
-    RedrawMap,
     /// Make SSE event source
     MakeEventSource,
     /// Set notify state
@@ -40,24 +37,74 @@ pub enum DeferredAction {
 /// Global app state
 #[derive(Default)]
 struct AppState {
-    /// Delete action enabled (slider transition finished)
-    delete_enabled: bool,
     /// Logged-in user name
     user: Option<String>,
-    /// Deferred actions (with tick number)
-    deferred: Vec<(i32, DeferredAction)>,
-    /// Timer tick count
-    tick: i32,
-    /// Resource names
-    res_names: HashMap<String, Res>,
+    /// Selected item (resource / name)
+    selected_item: Option<(Res, String)>,
     /// Card list
     cards: Option<CardList>,
     /// Selected video monitor number
     mon_num: Option<u32>,
+    /// Deferred actions (with tick number)
+    deferred: Vec<(i32, DeferredAction)>,
+    /// Timer tick count
+    tick: i32,
+    /// Delete action enabled (slider transition finished)
+    delete_enabled: bool,
 }
 
 thread_local! {
     static STATE: RefCell<AppState> = RefCell::new(AppState::default());
+}
+
+/// Set logged-in user name in global app state
+pub fn set_user(user: Option<String>) {
+    STATE.with(|rc| rc.borrow_mut().user = user);
+}
+
+/// Get logged-in user name from global app state
+pub fn user() -> Option<String> {
+    STATE.with(|rc| rc.borrow().user.clone())
+}
+
+/// Set selected item in global app state
+pub fn set_selected_item(res: Res, name: &str) {
+    STATE.with(|rc| {
+        rc.borrow_mut().selected_item = Some((res, name.to_string()))
+    });
+}
+
+/// Clear selected item in global app state
+pub fn clear_selected_item() {
+    STATE.with(|rc| rc.borrow_mut().selected_item = None);
+}
+
+/// Check if an item is selected
+pub fn is_selected_item(res: Res, name: &str) -> bool {
+    STATE.with(|rc| match &rc.borrow().selected_item {
+        Some((r, n)) => (r, n.as_str()) == (&res, name),
+        _ => false,
+    })
+}
+
+/// Get selected item
+pub fn selected_item() -> Option<(Res, String)> {
+    STATE.with(|rc| {
+        rc.borrow()
+            .selected_item
+            .as_ref()
+            .map(|(r, n)| (*r, n.clone()))
+    })
+}
+
+/// Get/set card list in global app state
+pub fn card_list(cards: Option<CardList>) -> Option<CardList> {
+    STATE.with(|rc| {
+        let mut state = rc.borrow_mut();
+        let old_cards = state.cards.take();
+        state.cards = cards;
+        old_cards
+    })
 }
 
 /// Set card view to global app state
@@ -92,49 +139,14 @@ pub fn expanded_view() -> Option<CardView> {
     })
 }
 
-/// Set delete enabled/disabled in global app state
-pub fn set_delete_enabled(enabled: bool) {
-    STATE.with(|rc| rc.borrow_mut().delete_enabled = enabled);
+/// Set video monitor number in global app state
+pub fn set_mon_num(num: Option<u32>) {
+    STATE.with(|rc| rc.borrow_mut().mon_num = num);
 }
 
-/// Get delete enabled from global app state
-pub fn delete_enabled() -> bool {
-    STATE.with(|rc| rc.borrow().delete_enabled)
-}
-
-/// Set resource names
-pub fn set_resources(items: Vec<CardState>) {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        for item in items {
-            state.res_names.insert(item.name, item.res);
-        }
-    })
-}
-
-/// Get resource type for a name from global app state
-pub fn name_res(name: &str) -> Option<Res> {
-    STATE.with(|rc| rc.borrow().res_names.get(name).cloned())
-}
-
-/// Get/set card list in global app state
-pub fn card_list(cards: Option<CardList>) -> Option<CardList> {
-    STATE.with(|rc| {
-        let mut state = rc.borrow_mut();
-        let old_cards = state.cards.take();
-        state.cards = cards;
-        old_cards
-    })
-}
-
-/// Set logged-in user name in global app state
-pub fn set_user(user: Option<String>) {
-    STATE.with(|rc| rc.borrow_mut().user = user);
-}
-
-/// Get logged-in user name from global app state
-pub fn user() -> Option<String> {
-    STATE.with(|rc| rc.borrow().user.clone())
+/// Get video monitor number from global app state
+pub fn mon_num() -> Option<u32> {
+    STATE.with(|rc| rc.borrow().mon_num)
 }
 
 /// Defer action to a future time
@@ -177,12 +189,12 @@ pub fn next_action() -> Option<DeferredAction> {
     })
 }
 
-/// Set video monitor number in global app state
-pub fn set_mon_num(num: Option<u32>) {
-    STATE.with(|rc| rc.borrow_mut().mon_num = num);
+/// Set delete enabled/disabled in global app state
+pub fn set_delete_enabled(enabled: bool) {
+    STATE.with(|rc| rc.borrow_mut().delete_enabled = enabled);
 }
 
-/// Get video monitor number from global app state
-pub fn mon_num() -> Option<u32> {
-    STATE.with(|rc| rc.borrow().mon_num)
+/// Get delete enabled from global app state
+pub fn delete_enabled() -> bool {
+    STATE.with(|rc| rc.borrow().delete_enabled)
 }

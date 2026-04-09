@@ -31,7 +31,7 @@ cfg_if::cfg_if! {
     } else {
         use std::io::Write;
 
-        fn hook(info: &panic::PanicHookInfo) {
+        fn hook(info: &std::panic::PanicHookInfo) {
             let _ = writeln!(std::io::stderr(), "{info}");
         }
     }
