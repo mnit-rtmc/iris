@@ -145,6 +145,17 @@ fn set_selected_style(res: Res, name: &str, zoom: u32) {
         .set_inner_html(&css);
 }
 
+/// Clear selected item style
+fn clear_selected_style(zoom: u32) {
+    let mut css = String::with_capacity(50);
+    css.push_str(".wyrm-tile use { scale: ");
+    css.push_str(zoom_scale(zoom));
+    css.push_str("; }");
+    Doc::get()
+        .elem::<Element>("selected-style")
+        .set_inner_html(&css);
+}
+
 /// Get marker scale for a zoom level
 fn zoom_scale(zoom: u32) -> &'static str {
     match zoom {
@@ -166,13 +177,7 @@ fn zoom_scale(zoom: u32) -> &'static str {
 /// Clear selected item
 fn clear_selected_item(zoom: u32) {
     app::clear_selected_item();
-    let mut css = String::with_capacity(50);
-    css.push_str(".wyrm-tile use { scale: ");
-    css.push_str(zoom_scale(zoom));
-    css.push_str("; }");
-    Doc::get()
-        .elem::<Element>("selected-style")
-        .set_inner_html(&css);
+    clear_selected_style(zoom);
 }
 
 /// Application starting function
@@ -1066,8 +1071,9 @@ async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
     Doc::get()
         .elem::<Element>("zoom-level")
         .set_inner_html(&zoom.to_string());
-    if let Some((res, name)) = app::selected_item() {
-        set_selected_style(res, &name, zoom);
+    match app::selected_item() {
+        Some((res, name)) => set_selected_style(res, &name, zoom),
+        None => clear_selected_style(zoom),
     }
     // FIXME: only call these when crossing zoom threshold
     update_map_states(Res::Incident, zoom, None).await?;
