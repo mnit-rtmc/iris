@@ -139,9 +139,12 @@ fn build_list(res: Option<Res>) -> String {
     let mut resources = vec![
         Res::Beacon.as_str(),
         Res::Camera.as_str(),
+        Res::Controller.as_str(),
         Res::Dms.as_str(),
+        Res::Incident.as_str(),
         Res::Lcs.as_str(),
         Res::RampMeter.as_str(),
+        Res::TagReader.as_str(),
         Res::WeatherSensor.as_str(),
     ];
     if let Some(r) = res {

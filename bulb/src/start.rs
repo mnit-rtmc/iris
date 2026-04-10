@@ -113,6 +113,8 @@ async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
         update_map_states(Res::RampMeter, zoom, None).await?;
         update_map_states(Res::Beacon, zoom, None).await?;
         update_map_states(Res::WeatherSensor, zoom, None).await?;
+        update_map_states(Res::TagReader, zoom, None).await?;
+        update_map_states(Res::Controller, zoom, None).await?;
     }
     Ok(())
 }
@@ -1083,6 +1085,8 @@ async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
     update_map_states(Res::RampMeter, zoom, None).await?;
     update_map_states(Res::Beacon, zoom, None).await?;
     update_map_states(Res::WeatherSensor, zoom, None).await?;
+    update_map_states(Res::TagReader, zoom, None).await?;
+    update_map_states(Res::Controller, zoom, None).await?;
     Ok(())
 }
 

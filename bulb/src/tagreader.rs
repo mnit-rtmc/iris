@@ -16,6 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
+use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -115,7 +116,11 @@ impl AncillaryData for TagReaderAnc {
     /// Construct ancillary tag reader data
     fn new(pri: &TagReader, view: View) -> Self {
         let cio = ControllerIoAnc::new(pri, view);
-        let loc = LocAnc::new(pri, view);
+        let mut loc = LocAnc::new(pri, view);
+        if let View::Status = view {
+            loc.assets
+                .push(Asset::GeoLoc(pri.name.to_string(), Res::TagReader));
+        }
         TagReaderAnc { cio, loc }
     }
 
@@ -157,6 +162,9 @@ impl TagReader {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &TagReaderAnc) -> String {
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::TagReader, &self.name, lon, lat);
+        }
         let mut tree = Tree::new();
         self.title(View::Status, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();

@@ -126,31 +126,39 @@
   fill: #aaa;
   stroke-width: 0.2;
 }
+.wyrm-controller {
+  fill: #88bbff;
+  stroke-width: 0.5;
+}
+.wyrm-tag_reader {
+  fill: #88bbff;
+  stroke-width: 0.5;
+}
+.wyrm-weather_sensor {
+  fill: #88bbff;
+  stroke-width: 0.5;
+}
 .wyrm-beacon {
-  fill: #55acee;
+  fill: #4488ee;
+  stroke-width: 0.5;
+}
+.wyrm-ramp_meter {
+  fill: #4488ee;
   stroke-width: 0.5;
 }
 .wyrm-camera {
-  fill: #55acee;
-  stroke-width: 0.5;
-}
-.wyrm-dms {
-  fill: #55acee;
-  stroke-width: 0.5;
-}
-.wyrm-incident {
-  fill: #55acee;
+  fill: #88bbff;
   stroke-width: 0.5;
 }
 .wyrm-lcs {
   fill: #000088;
   stroke-width: 0.5;
 }
-.wyrm-ramp_meter {
-  fill: #55acee;
+.wyrm-dms {
+  fill: #4488ee;
   stroke-width: 0.5;
 }
-.wyrm-weather_sensor {
-  fill: #55acee;
+.wyrm-incident {
+  fill: #ff4444;
   stroke-width: 0.5;
 }

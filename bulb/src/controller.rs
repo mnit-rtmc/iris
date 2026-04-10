@@ -18,6 +18,7 @@ use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
 use crate::item::{ItemState, ItemStates};
+use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields, Input, Select, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -113,6 +114,10 @@ impl AncillaryData for ControllerAnc {
                 loc.assets.push(Asset::CommLinks);
                 loc.assets.push(Asset::CommConfigs);
                 loc.assets.push(Asset::ControllerIo(pri.name.to_string()));
+                loc.assets.push(Asset::GeoLoc(
+                    pri.name.to_string(),
+                    Res::Controller,
+                ));
             }
             View::Setup => {
                 loc.assets.push(Asset::Conditions);
@@ -367,6 +372,9 @@ impl Controller {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::Controller, &self.name, lon, lat);
+        }
         let mut tree = Tree::new();
         self.title(View::Status, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();

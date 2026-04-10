@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="bulb/bulb.css">
     <link rel="stylesheet" href="bulb/wyrm.css">
     <style id="segment-style"></style>
+    <style id="controller-style"></style>
+    <style id="tag_reader-style"></style>
     <style id="weather_sensor-style"></style>
     <style id="beacon-style"></style>
     <style id="ramp_meter-style"></style>
@@ -28,6 +30,8 @@
     <div class="no-display">
       <svg>
         <defs>
+          <path id="controller-marker" d="M0 0 L24 0 24 14 0 14z M7 4 L17 4 17 2 7 2z M7 8 L9 8 9 6 7 6z M11 8 13 8 13 6 11 6z M15 8 L17 8 17 6 15 6z M7 12 L9 12 9 10 7 10z M11 12 13 12 13 10 11 10z M15 12 L17 12 17 10 15 10z" />
+          <path id="tag_reader-marker" d="M0 -6 L-6 0 A8,8 0 0 0 6 0z M-8 2 A10,10 0 0 0 8 2 L7 1 A9,9 0 0 1 -7 1z M-10 4 A12,12 0 0 0 10 4 L9 3 A11,11 0 0 1 -9 3z M-12 6 A14,14 0 0 0 12 6 L11 5 A13,13 0 0 1 -11 5z" />
           <path id="weather_sensor-marker" d="M-10 -10 L15 -5 10 0 15 5 -10 10z" />
           <path id="beacon-marker" d="M0 -16 L4 -9 12 -12 9 -4 16 0 9 4 12 12 4 9 0 20 -4 9 -12 12 -9 4 -16 0 -9 -4 -12 -12 -4 -9z" />
           <path id="ramp_meter-marker" d="M0 0 L0 8 A8 8 0 1 0 8 0 L0 0z L8 8" />
@@ -55,6 +59,10 @@
         <input id="layer-beacon" type="number" value="14" min="6" max="18">
         <label for="layer-weather_sensor">🌦️ Weather Sensor</label>
         <input id="layer-weather_sensor" type="number" value="12" min="6" max="18">
+        <label for="layer-tag_reader">🏷️ Tag Reader</label>
+        <input id="layer-tag_reader" type="number" value="15" min="6" max="18">
+        <label for="layer-controller">🎛️ Controller</label>
+        <input id="layer-controller" type="number" value="16" min="6" max="18">
         <label for="layer-osm">© <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener noreferrer">OpenStreetMap</a></label>
         <input id="layer-osm" type="number" value="6" min="6" max="18">
       </div>

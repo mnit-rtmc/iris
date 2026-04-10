@@ -172,6 +172,14 @@ layer_group: tms
     geom_type: polygon
     zoom: 18
     tags: ?station_id
+  layer: controller
+    geom_type: point
+    zoom: 6+
+    tags: ?name ?rotate
+  layer: tag_reader
+    geom_type: point
+    zoom: 6+
+    tags: ?name ?rotate
   layer: weather_sensor
     geom_type: point
     zoom: 6+

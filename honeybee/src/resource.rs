@@ -554,8 +554,10 @@ impl Resource {
             Rnode => query_all_nodes(client, segments).await,
             RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
-            Beacon | Camera | Dms | Incident | Lcs | RampMeter
-            | WeatherSensor => self.query_all_locs(client, segments).await,
+            Beacon | Camera | Controller | Dms | Incident | Lcs | RampMeter
+            | TagReader | WeatherSensor => {
+                self.query_all_locs(client, segments).await
+            }
             DayPlan => {
                 // there is no separate channel for DayMatcher
                 self.query_file(client, self.path()).await?;
