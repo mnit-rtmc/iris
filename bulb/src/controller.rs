@@ -114,10 +114,8 @@ impl AncillaryData for ControllerAnc {
                 loc.assets.push(Asset::CommLinks);
                 loc.assets.push(Asset::CommConfigs);
                 loc.assets.push(Asset::ControllerIo(pri.name.to_string()));
-                loc.assets.push(Asset::GeoLoc(
-                    pri.name.to_string(),
-                    Res::Controller,
-                ));
+                loc.assets
+                    .push(Asset::GeoLoc(pri.name.to_string(), Res::Controller));
             }
             View::Setup => {
                 loc.assets.push(Asset::Conditions);

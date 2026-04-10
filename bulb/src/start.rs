@@ -115,6 +115,7 @@ async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
         update_map_states(Res::WeatherSensor, zoom, None).await?;
         update_map_states(Res::TagReader, zoom, None).await?;
         update_map_states(Res::Controller, zoom, None).await?;
+        update_osm_style(zoom).await?;
     }
     Ok(())
 }
@@ -1087,6 +1088,7 @@ async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
     update_map_states(Res::WeatherSensor, zoom, None).await?;
     update_map_states(Res::TagReader, zoom, None).await?;
     update_map_states(Res::Controller, zoom, None).await?;
+    update_osm_style(zoom).await?;
     Ok(())
 }
 
@@ -1223,4 +1225,23 @@ fn item_states_css(
         }
     }
     css
+}
+
+/// Update map OSM style
+async fn update_osm_style(zoom: u32) -> Result<()> {
+    let displayed =
+        zoom >= Doc::get().input_parse::<u32>("layer-osm").unwrap_or(32);
+    let css = if displayed {
+        ""
+    } else {
+        ".wyrm-county,.wyrm-city,.wyrm-lake,.wyrm-river,.wyrm-pond,\
+         .wyrm-wetland,.wyrm-motorway,.wyrm-trunk,.wyrm-primary,\
+         .wyrm-secondary { display: none; }"
+    };
+    Doc::get().elem::<Element>("osm-style").set_inner_html(css);
+    let css = if displayed { "" } else { "background: #aaa;" };
+    Doc::get()
+        .elem::<Element>("layer-osm")
+        .set_attribute("style", css)?;
+    Ok(())
 }
