@@ -461,9 +461,9 @@ impl Lcs {
             (true, _) => states
                 .with(ItemState::Operator, "operator")
                 .with(ItemState::Locked, reason.as_str()),
-            (false, LockReason::Unlocked) => ItemState::Dark.into(),
+            (false, LockReason::Unlocked) => ItemState::Available.into(),
             (false, _) => states
-                .with(ItemState::Dark, "dark")
+                .with(ItemState::Available, "dark")
                 .with(ItemState::Locked, reason.as_str()),
         }
     }
@@ -559,7 +559,7 @@ impl Card for Lcs {
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
         &[
-            ItemState::Dark,
+            ItemState::Available,
             ItemState::Operator,
             ItemState::Locked,
             ItemState::Fault,
@@ -591,7 +591,7 @@ impl Card for Lcs {
         } else if states.contains(ItemState::Locked) {
             ItemState::Locked
         } else {
-            ItemState::Dark
+            ItemState::Available
         }
     }
 

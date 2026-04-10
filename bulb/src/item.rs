@@ -20,8 +20,6 @@ pub enum ItemState {
     Online,
     /// Available for use
     Available,
-    /// Dark (available LCS)
-    Dark,
     /// Deployed (in use)
     Deployed,
     /// Operator deployed
@@ -98,7 +96,6 @@ impl ItemState {
         match code {
             "🔹" => Some(Self::Online),
             "🔷" => Some(Self::Available),
-            "◼️" => Some(Self::Dark),
             "🔶" => Some(Self::Deployed),
             "🟨" => Some(Self::Operator),
             "📋" => Some(Self::Planned),
@@ -136,7 +133,6 @@ impl ItemState {
         match self {
             Self::Online => "🔹",
             Self::Available => "🔷",
-            Self::Dark => "◼️",
             Self::Deployed => "🔶",
             Self::Operator => "🟨",
             Self::Planned => "📋",
@@ -173,7 +169,6 @@ impl ItemState {
         match self {
             Self::Online => "#88bbff",
             Self::Available => "#4488ee",
-            Self::Dark => "#000088",
             Self::Deployed => "#ff9800",
             Self::Operator => "#ffff00",
             Self::Planned => "#bb6655",
@@ -197,7 +192,6 @@ impl ItemState {
         match self {
             Self::Online => "online",
             Self::Available => "available",
-            Self::Dark => "dark",
             Self::Deployed => "deployed",
             Self::Operator => "operator",
             Self::Planned => "planned",
