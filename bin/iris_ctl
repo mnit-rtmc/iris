@@ -2,7 +2,7 @@
 #
 # /usr/bin/iris_ctl -- Script for initializing and updating IRIS
 #
-# Copyright (C) 2012-2025  Minnesota Department of Transportation
+# Copyright (C) 2012-2026  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -94,10 +94,12 @@ function create_tms_database() {
 	su --login postgres -c "$create_db"
 }
 
-function configure_selinux() {
-	echo "Configuring SELinux for nginx"
+function configure_nginx() {
+	echo "Configuring nginx"
 	semanage port -a -t http_port_t -p tcp 3030
 	setsebool -P httpd_can_network_connect true
+	mkdir /var/cache/nginx/wyrmcast-iris
+	chown nginx:nginx /var/cache/nginx/wyrmcast-iris
 }
 
 function configure_firewall() {
@@ -144,7 +146,7 @@ case "$1" in
 		init_db
 		create_tms_user
 		create_tms_database
-		configure_selinux
+		configure_nginx
 		configure_firewall
 		configure_services
 		create_links
