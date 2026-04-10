@@ -872,6 +872,9 @@ impl Loc for WeatherSensor {
 impl Card for WeatherSensor {
     type Ancillary = WeatherSensorAnc;
 
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Online;
+
     /// Get the resource
     fn res() -> Res {
         Res::WeatherSensor
@@ -879,11 +882,7 @@ impl Card for WeatherSensor {
 
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
-        &[
-            ItemState::Available,
-            ItemState::Offline,
-            ItemState::Inactive,
-        ]
+        &[ItemState::Online, ItemState::Offline, ItemState::Inactive]
     }
 
     /// Get the name
@@ -905,7 +904,7 @@ impl Card for WeatherSensor {
         } else if states.contains(ItemState::Offline) {
             ItemState::Offline
         } else {
-            ItemState::Available
+            ItemState::Online
         }
     }
 

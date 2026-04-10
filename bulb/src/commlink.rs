@@ -131,7 +131,7 @@ impl CommLink {
     /// Get item states
     fn item_states(&self) -> ItemStates<'_> {
         match (self.poll_enabled, self.connected) {
-            (true, true) => ItemState::Available.into(),
+            (true, true) => ItemState::Online.into(),
             (true, false) => ItemState::Offline.into(),
             _ => ItemState::Inactive.into(),
         }
@@ -221,6 +221,9 @@ impl CommLink {
 impl Card for CommLink {
     type Ancillary = CommLinkAnc;
 
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Online;
+
     /// Get the resource
     fn res() -> Res {
         Res::CommLink
@@ -228,11 +231,7 @@ impl Card for CommLink {
 
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
-        &[
-            ItemState::Available,
-            ItemState::Offline,
-            ItemState::Inactive,
-        ]
+        &[ItemState::Online, ItemState::Offline, ItemState::Inactive]
     }
 
     /// Get the name

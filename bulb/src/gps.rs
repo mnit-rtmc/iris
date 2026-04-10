@@ -87,6 +87,9 @@ impl ControllerIo for Gps {
 impl Card for Gps {
     type Ancillary = GpsAnc;
 
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Online;
+
     /// Get the resource
     fn res() -> Res {
         Res::Gps
@@ -94,7 +97,7 @@ impl Card for Gps {
 
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
-        &[ItemState::Available, ItemState::Inactive]
+        &[ItemState::Online, ItemState::Inactive]
     }
 
     /// Get the name
@@ -114,7 +117,7 @@ impl Card for Gps {
         if states.contains(ItemState::Inactive) {
             ItemState::Inactive
         } else {
-            ItemState::Available
+            ItemState::Online
         }
     }
 

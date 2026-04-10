@@ -16,6 +16,8 @@ use std::fmt;
 /// Item state
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ItemState {
+    /// Communication online
+    Online,
     /// Available for use
     Available,
     /// Dark (available LCS)
@@ -94,7 +96,8 @@ impl ItemState {
     /// Lookup an item state by code
     pub fn from_code(code: &str) -> Option<Self> {
         match code {
-            "🔹" => Some(Self::Available),
+            "🔹" => Some(Self::Online),
+            "🔷" => Some(Self::Available),
             "◼️" => Some(Self::Dark),
             "🔶" => Some(Self::Deployed),
             "🟨" => Some(Self::Operator),
@@ -131,7 +134,8 @@ impl ItemState {
     /// Get the item state code
     pub fn code(self) -> &'static str {
         match self {
-            Self::Available => "🔹",
+            Self::Online => "🔹",
+            Self::Available => "🔷",
             Self::Dark => "◼️",
             Self::Deployed => "🔶",
             Self::Operator => "🟨",
@@ -167,7 +171,8 @@ impl ItemState {
     /// Get the item state fill CSS value
     pub fn fill_css(self) -> &'static str {
         match self {
-            Self::Available => "#55acee",
+            Self::Online => "#88bbff",
+            Self::Available => "#4488ee",
             Self::Dark => "#000088",
             Self::Deployed => "#ff9800",
             Self::Operator => "#ffff00",
@@ -190,6 +195,7 @@ impl ItemState {
     /// Get the item state description
     pub fn description(self) -> &'static str {
         match self {
+            Self::Online => "online",
             Self::Available => "available",
             Self::Dark => "dark",
             Self::Deployed => "deployed",

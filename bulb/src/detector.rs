@@ -93,6 +93,9 @@ impl ControllerIo for Detector {
 impl Card for Detector {
     type Ancillary = DetectorAnc;
 
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Online;
+
     /// Get the resource
     fn res() -> Res {
         Res::Detector
@@ -100,11 +103,7 @@ impl Card for Detector {
 
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
-        &[
-            ItemState::Available,
-            ItemState::Offline,
-            ItemState::Inactive,
-        ]
+        &[ItemState::Online, ItemState::Offline, ItemState::Inactive]
     }
 
     /// Get the name

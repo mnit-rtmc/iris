@@ -38,7 +38,7 @@ impl Alarm {
     /// Get the item states
     fn item_states<'a>(&'a self, anc: &'a AlarmAnc) -> ItemStates<'a> {
         let states = anc.item_states(self);
-        if states.contains(ItemState::Available) && self.state {
+        if states.contains(ItemState::Online) && self.state {
             ItemState::Fault.into()
         } else {
             states
@@ -115,6 +115,9 @@ impl ControllerIo for Alarm {
 
 impl Card for Alarm {
     type Ancillary = AlarmAnc;
+
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Online;
 
     /// Get the resource
     fn res() -> Res {

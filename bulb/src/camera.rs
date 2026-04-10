@@ -343,6 +343,9 @@ impl Loc for Camera {
 impl Card for Camera {
     type Ancillary = CameraAnc;
 
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Online;
+
     /// Get the resource
     fn res() -> Res {
         Res::Camera
@@ -351,7 +354,7 @@ impl Card for Camera {
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
         &[
-            ItemState::Available,
+            ItemState::Online,
             ItemState::Offline,
             ItemState::Fault,
             ItemState::Inactive,
@@ -377,7 +380,7 @@ impl Card for Camera {
         } else if states.contains(ItemState::Offline) {
             ItemState::Offline
         } else {
-            ItemState::Available
+            ItemState::Online
         }
     }
 

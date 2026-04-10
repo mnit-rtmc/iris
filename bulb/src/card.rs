@@ -137,6 +137,9 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Suggested name prefix
     const PREFIX: &'static str = "";
 
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Available;
+
     /// Get the resource
     fn res() -> Res;
 
@@ -281,6 +284,8 @@ fn default_state(res: Res) -> Option<ItemState> {
         Some(ItemState::Deployed)
     } else if item_states_all(res).contains(&ItemState::Available) {
         Some(ItemState::Available)
+    } else if item_states_all(res).contains(&ItemState::Online) {
+        Some(ItemState::Online)
     } else {
         None
     }

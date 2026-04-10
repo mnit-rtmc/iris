@@ -287,7 +287,7 @@ impl Controller {
     }
 
     /// Get item states
-    pub fn item_states(&self) -> ItemStates<'_> {
+    pub fn item_states(&self, dflt: ItemState) -> ItemStates<'_> {
         if !self.is_active() {
             return ItemState::Inactive.into();
         }
@@ -304,7 +304,7 @@ impl Controller {
         }
         match &self.fail_time {
             Some(fail_time) => states.with(ItemState::Offline, fail_time),
-            None => states.with(ItemState::Available, ""),
+            None => states.with(dflt, ""),
         }
     }
 
@@ -358,7 +358,7 @@ impl Controller {
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
-            .cdata(self.item_states().to_string())
+            .cdata(self.item_states(Self::DEF_STATE).to_string())
             .close();
         div = tree.root::<html::Div>();
         div.class("info fill").cdata(self.link_drop());
@@ -371,7 +371,7 @@ impl Controller {
         self.title(View::Status, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        self.item_states().tooltips(&mut div.span());
+        self.item_states(Self::DEF_STATE).tooltips(&mut div.span());
         div.span().cdata(anc.condition(self)).close();
         let mut span = div.span();
         span.button()
@@ -498,6 +498,9 @@ impl Card for Controller {
     /// Suggested name prefix
     const PREFIX: &'static str = "ctl";
 
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Online;
+
     /// Get the resource
     fn res() -> Res {
         Res::Controller
@@ -506,7 +509,7 @@ impl Card for Controller {
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
         &[
-            ItemState::Available,
+            ItemState::Online,
             ItemState::Offline,
             ItemState::Fault,
             ItemState::Inactive,
@@ -526,7 +529,7 @@ impl Card for Controller {
 
     /// Get the main item state
     fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
-        let states = self.item_states();
+        let states = self.item_states(Self::DEF_STATE);
         if states.contains(ItemState::Inactive) {
             ItemState::Inactive
         } else if states.contains(ItemState::Offline) {
@@ -534,7 +537,7 @@ impl Card for Controller {
         } else if states.contains(ItemState::Fault) {
             ItemState::Fault
         } else {
-            ItemState::Available
+            Self::DEF_STATE
         }
     }
 
@@ -542,7 +545,7 @@ impl Card for Controller {
     fn is_match(&self, search: &str, anc: &ControllerAnc) -> bool {
         self.name.contains_lower(search)
             || self.link_drop().contains_lower(search)
-            || self.item_states().is_match(search)
+            || self.item_states(Self::DEF_STATE).is_match(search)
             || anc.condition(self).contains_lower(search)
             || anc.comm_config(self).contains_lower(search)
             || self.location.contains_lower(search)

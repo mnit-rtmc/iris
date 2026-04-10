@@ -39,7 +39,7 @@ pub struct ControllerIoAnc<C> {
 
 impl<C> ControllerIoAnc<C>
 where
-    C: ControllerIo,
+    C: ControllerIo + Card,
 {
     /// Find controller
     fn controller(&self, pri: &C) -> Option<&Controller> {
@@ -88,7 +88,7 @@ where
     /// Get item states
     pub fn item_states<'a>(&'a self, pri: &'a C) -> ItemStates<'a> {
         self.controller(pri)
-            .map_or(ItemState::Inactive.into(), |c| c.item_states())
+            .map_or(ItemState::Inactive.into(), |c| c.item_states(C::DEF_STATE))
     }
 }
 

@@ -15,6 +15,7 @@ use crate::card::{AncillaryData, Card};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::{Loc, LocAnc};
+use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -196,9 +197,17 @@ impl Loc for TagReader {
 impl Card for TagReader {
     type Ancillary = TagReaderAnc;
 
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Online;
+
     /// Get the resource
     fn res() -> Res {
         Res::TagReader
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[ItemState::Online, ItemState::Offline, ItemState::Inactive]
     }
 
     /// Get the name

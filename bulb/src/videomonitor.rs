@@ -140,9 +140,8 @@ impl VideoMonitor {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a VideoMonitorAnc) -> ItemStates<'a> {
         let mut states = anc.cio.item_states(self);
-        if states.contains(ItemState::Available) && anc.access_level(self) <= 1
-        {
-            states.remove(ItemState::Available);
+        if states.contains(ItemState::Online) && anc.access_level(self) <= 1 {
+            states.remove(ItemState::Online);
             states = states.with(ItemState::Prohibited, "");
         }
         states
@@ -173,7 +172,7 @@ impl VideoMonitor {
 
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &VideoMonitorAnc) -> String {
-        if self.item_states(anc).contains(ItemState::Available) {
+        if self.item_states(anc).contains(ItemState::Online) {
             self.set_selected();
         }
         let mut tree = Tree::new();
@@ -248,6 +247,9 @@ impl ControllerIo for VideoMonitor {
 impl Card for VideoMonitor {
     type Ancillary = VideoMonitorAnc;
 
+    /// Default item state
+    const DEF_STATE: ItemState = ItemState::Online;
+
     /// Get the resource
     fn res() -> Res {
         Res::VideoMonitor
@@ -256,7 +258,7 @@ impl Card for VideoMonitor {
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
         &[
-            ItemState::Available,
+            ItemState::Online,
             ItemState::Prohibited,
             ItemState::Offline,
             ItemState::Inactive,
@@ -284,7 +286,7 @@ impl Card for VideoMonitor {
         } else if states.contains(ItemState::Offline) {
             ItemState::Offline
         } else {
-            ItemState::Available
+            ItemState::Online
         }
     }
 
