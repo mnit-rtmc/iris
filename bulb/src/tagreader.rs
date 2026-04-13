@@ -229,6 +229,18 @@ impl Card for TagReader {
         self
     }
 
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let states = anc.cio.item_states(self);
+        if states.contains(ItemState::Inactive) {
+            ItemState::Inactive
+        } else if states.contains(ItemState::Offline) {
+            ItemState::Offline
+        } else {
+            ItemState::Online
+        }
+    }
+
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &TagReaderAnc) -> bool {
         self.name.contains_lower(search)
