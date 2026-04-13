@@ -794,8 +794,8 @@ CREATE TRIGGER inc_detail_notify_trig
 
 CREATE TABLE event.incident (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(16) NOT NULL UNIQUE,
-    replaces VARCHAR(16) REFERENCES event.incident(name),
+    name VARCHAR NOT NULL UNIQUE CHECK (LENGTH(name) <= 32),
+    replaces VARCHAR REFERENCES event.incident(name),
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     event_desc INTEGER NOT NULL REFERENCES event.event_description,
     detail VARCHAR(8) REFERENCES iris.inc_detail,
@@ -866,7 +866,7 @@ GRANT SELECT ON incident_view TO PUBLIC;
 
 CREATE TABLE event.incident_update (
     id SERIAL PRIMARY KEY,
-    incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
+    incident VARCHAR NOT NULL REFERENCES event.incident(name),
     event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
     impact VARCHAR(20) NOT NULL,
     cleared BOOLEAN NOT NULL,
