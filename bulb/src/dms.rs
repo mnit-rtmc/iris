@@ -1285,8 +1285,6 @@ impl Card for Dms {
         let states = self.item_states(anc);
         if states.contains(ItemState::Inactive) {
             ItemState::Inactive
-        } else if states.contains(ItemState::Dedicated) {
-            ItemState::Dedicated
         } else if states.contains(ItemState::Offline) {
             ItemState::Offline
         } else if states.contains(ItemState::Operator) {
@@ -1295,6 +1293,8 @@ impl Card for Dms {
             ItemState::Planned
         } else if states.contains(ItemState::External) {
             ItemState::External
+        } else if states.contains(ItemState::Dedicated) {
+            ItemState::Dedicated
         } else {
             ItemState::Available
         }
