@@ -83,6 +83,13 @@ public class MsgPatternHelper extends BaseHelper {
 		return pats;
 	}
 
+	/** Check if a message pattern matches a prototype */
+	static public boolean checkPrototype(MsgPattern pat, String ptype) {
+		return ptype != null &&
+		      (ptype.equals(pat.getName()) ||
+		       ptype.equals(pat.getPrototype()));
+	}
+
 	/** Check if a message pattern contains only valid MULTI */
 	static private boolean isValidMulti(MsgPattern pat) {
 		MultiString ms = new MultiString(pat.getMulti());

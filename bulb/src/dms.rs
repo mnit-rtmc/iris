@@ -438,8 +438,10 @@ impl DmsAnc {
         pat: &'a MsgPattern,
     ) -> impl Iterator<Item = &'a MsgLine> {
         self.lines.iter().filter(|ml| {
-            ml.msg_pattern == pat.name
-                || Some(&ml.msg_pattern) == pat.prototype.as_ref()
+            pat.check_line(&ml.msg_pattern)
+                || self.compose_patterns.iter().any(|cp| {
+                    cp.prototype.as_ref().is_some_and(|p| pat.check_line(p))
+                })
         })
     }
 

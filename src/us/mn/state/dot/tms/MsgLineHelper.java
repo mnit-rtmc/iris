@@ -62,7 +62,9 @@ public class MsgLineHelper extends BaseHelper {
 		while (it.hasNext()) {
 			MsgLine ml = it.next();
 			MsgPattern mp = ml.getMsgPattern();
-			if (mp == pat || mp.getName().equals(prototype)) {
+			if (mp == pat ||
+			    MsgPatternHelper.checkPrototype(mp, prototype))
+			{
 				MsgLine aml = abbreviateLine(ml, line_rects);
 				if (aml != null)
 					lines.add(aml);

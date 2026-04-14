@@ -243,17 +243,22 @@ impl Ord for MsgPattern {
         if ms_ord != Ordering::Equal {
             return ms_ord;
         }
-        // prefer patterns with prototypes
+        // prefer patterns with no prototype value
         if self.prototype.is_some() && other.prototype.is_none() {
-            return Ordering::Less;
-        } else if self.prototype.is_none() && other.prototype.is_some() {
             return Ordering::Greater;
+        } else if self.prototype.is_none() && other.prototype.is_some() {
+            return Ordering::Less;
         }
         self.name.cmp(&other.name)
     }
 }
 
 impl MsgPattern {
+    /// Check a message line pattern name
+    pub fn check_line(&self, nm: &str) -> bool {
+        self.name == nm || self.prototype.as_deref() == Some(nm)
+    }
+
     /// Get entered MULTI string
     fn multi_string(&self) -> String {
         match Doc::get().try_elem::<HtmlTextAreaElement>("multi") {
