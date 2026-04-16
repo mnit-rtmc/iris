@@ -543,11 +543,13 @@ checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
 name = "earthwyrm"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55fd8c04f4d013a30bb9ec37946aa76d749b06c39ad83642039c1fb62bcfe330"
+checksum = "876ae6d8251c1d638cdb449b94846608d3b603fb1fcdcd577d9882bd9b6b7aa8"
 dependencies = [
+ "futures-util",
  "hatmil",
+ "jiff",
  "js-sys",
  "log",
  "percent-encoding",
@@ -1135,10 +1137,12 @@ checksum = "1a3546dc96b6d42c5f24902af9e2538e82e39ad350b0c766eb3fbf2d8f3d8359"
 dependencies = [
  "jiff-static",
  "jiff-tzdb-platform",
+ "js-sys",
  "log",
  "portable-atomic",
  "portable-atomic-util",
  "serde_core",
+ "wasm-bindgen",
  "windows-sys 0.61.2",
 ]
 
