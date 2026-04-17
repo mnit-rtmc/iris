@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2008-2025  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,6 +150,7 @@ public class Name {
 		{ "lcs", "deviceRequest" },
 		{ "lcs", "lock" },
 		{ "modem", "enabled" },
+		{ "parking_area", "open" },
 		{ "ramp_meter", "deviceRequest" },
 		{ "ramp_meter", "lock" },
 		{ "video_monitor", "camera" },

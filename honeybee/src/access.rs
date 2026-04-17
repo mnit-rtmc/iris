@@ -1,6 +1,6 @@
 // access.rs
 //
-// Copyright (C) 2021-2025  Minnesota Department of Transportation
+// Copyright (C) 2021-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -98,6 +98,7 @@ fn required_patch_operate(res: Res, att: &str) -> bool {
         | (Res::Incident, "cleared")
         | (Res::Lcs, "lock")
         | (Res::Modem, "enabled")
+        | (Res::ParkingArea, "open")
         | (Res::RampMeter, "device_request")
         | (Res::RampMeter, "lock")
         | (Res::VideoMonitor, "camera")
