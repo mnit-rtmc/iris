@@ -79,7 +79,7 @@ pub enum ItemState {
 }
 
 /// Item states
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
 pub struct ItemStates<'a> {
     all: Vec<(ItemState, &'a str)>,
 }
@@ -275,24 +275,22 @@ impl<'a> ItemStates<'a> {
         self.all.iter().any(|(s, _dtl)| s.is_match(search))
     }
 
-    /// Build item state tooltips HTML
-    pub fn tooltips<'p>(&self, span: &'p mut html::Span<'p>) {
+    /// Build item states as HTML spans
+    pub fn spans<'p>(&self, span: &'p mut html::Span<'p>) {
         for (state, dtl) in self.all.iter() {
             let mut span2 = span.span();
-            span2.class("tooltip");
-            span2
-                .cdata(state.code())
-                .cdata(" ")
-                .cdata(state.description());
-            if !dtl.is_empty() {
-                let mut cls = String::from("item_");
-                cls.push_str(state.description());
-                let mut span3 = span2.span();
-                span3.class(cls);
-                for d in dtl.split(';') {
-                    span3.cdata(d).cdata(" ");
+            span2.cdata(state.code());
+            let mut span3 = span2.span();
+            span3.class("info");
+            if dtl.is_empty() {
+                span3.cdata(state.description());
+            } else {
+                for (i, d) in dtl.split(';').enumerate() {
+                    if i > 0 {
+                        span3.cdata(" ");
+                    }
+                    span3.cdata(d);
                 }
-                span3.close();
             }
             span2.close();
         }

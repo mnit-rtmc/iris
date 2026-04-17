@@ -377,7 +377,7 @@ impl Controller {
         self.title(View::Status, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        self.item_states(Self::DEF_STATE).tooltips(&mut div.span());
+        self.item_states(Self::DEF_STATE).spans(&mut div.span());
         div.span().cdata(anc.condition(self)).close();
         let mut span = div.span();
         span.button()

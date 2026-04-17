@@ -61,7 +61,7 @@ impl Detector {
         self.title(View::Status, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        anc.item_states(self).tooltips(&mut div.span());
+        anc.item_states(self).spans(&mut div.span());
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");

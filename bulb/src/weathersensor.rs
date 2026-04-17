@@ -778,7 +778,7 @@ impl WeatherSensor {
         self.title(View::Status, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        anc.cio.item_states(self).tooltips(&mut div.span());
+        anc.cio.item_states(self).spans(&mut div.span());
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");

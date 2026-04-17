@@ -492,7 +492,7 @@ impl Lcs {
         self.title(View::Control, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row fill");
-        self.item_states(anc).tooltips(&mut div.span());
+        self.item_states(anc).spans(&mut div.span());
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
         {

@@ -136,10 +136,11 @@ impl DmsLock {
 
     /// Format lock expire time
     fn expires(&self) -> Option<String> {
-        if let Some(expires) = &self.expires
-            && let Ok(dt) = DateTime::parse_from_rfc3339(expires)
-        {
-            return Some(format!("⏲️ {}", &dt.format("%H:%M")));
+        if let Some(expires) = &self.expires {
+            match DateTime::parse_from_rfc3339(expires) {
+                Ok(dt) => return Some(format!("⏲️ {}", &dt.format("%H:%M"))),
+                Err(e) => log::warn!("expires: {e}, {expires}"),
+            }
         }
         None
     }
@@ -705,7 +706,7 @@ impl Dms {
     /// Render item state row as an HTML div element
     fn render_state_row<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
         div.id("state_row").class("row fill");
-        self.item_states(anc).tooltips(&mut div.span());
+        self.item_states(anc).spans(&mut div.span());
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
         {
@@ -1081,7 +1082,7 @@ impl Dms {
         let mut tree = Tree::new();
         self.title(View::Status, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
-        self.item_states(anc).tooltips(&mut div.span());
+        self.item_states(anc).spans(&mut div.span());
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");

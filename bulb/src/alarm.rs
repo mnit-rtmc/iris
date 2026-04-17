@@ -65,7 +65,7 @@ impl Alarm {
         self.title(View::Status, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        self.item_states(anc).tooltips(&mut div.span());
+        self.item_states(anc).spans(&mut div.span());
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
