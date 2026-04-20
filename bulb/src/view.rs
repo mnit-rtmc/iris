@@ -290,7 +290,7 @@ impl CardView {
 
     /// Handle click event for a button owned by the resource
     pub async fn handle_click(&self, id: String) -> Result<()> {
-        if self.view != View::Control && self.view != View::Request {
+        if let View::Control | View::Request = self.view {
             return Ok(());
         }
         match self.res {

@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction};
+use crate::error::Result;
 use crate::fetch::Uri;
 use crate::start::handle_notification;
 use crate::util::Doc;
@@ -125,11 +126,14 @@ pub fn add_listener() {
 }
 
 /// POST a request for SSE notifications
-pub async fn post_req(res: Option<Res>) {
+pub async fn post_req(res: Option<Res>) -> Result<()> {
     let uri = Uri::from("/iris/api/notify");
     let json = build_list(res);
     if let Err(e) = uri.post(&json.into()).await {
         log::warn!("/iris/api/notify POST: {e}");
+        Err(e)
+    } else {
+        Ok(())
     }
 }
 

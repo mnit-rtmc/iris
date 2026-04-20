@@ -16,7 +16,8 @@ use std::fmt;
 use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::{
-    Document, Element, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
+    Document, Element, HtmlElement, HtmlInputElement, HtmlSelectElement,
+    HtmlTextAreaElement,
 };
 
 /// Check for items containing a search string (lower case)
@@ -445,4 +446,14 @@ impl Select<Option<i32>> for Fields {
             self.insert(id, OptVal(parsed).into());
         }
     }
+}
+
+/// Show an element
+pub fn show_elem(id: &str) {
+    Doc::get().elem::<HtmlElement>(id).set_class_name("show");
+}
+
+/// Hide an element
+pub fn hide_elem(id: &str) {
+    Doc::get().elem::<HtmlElement>(id).set_class_name("hidden");
 }

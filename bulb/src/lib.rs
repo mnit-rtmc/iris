@@ -38,6 +38,7 @@ mod flowstream;
 mod gatearm;
 mod geoloc;
 mod gps;
+mod helper;
 mod incident;
 mod item;
 mod lcs;

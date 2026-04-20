@@ -13,22 +13,21 @@
 use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
 use crate::card::{self, CardList, CardState};
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::fetch::Uri;
+use crate::helper::spawn_future;
 use crate::item::ItemState;
 use crate::permission::Permission;
 use crate::sse;
-use crate::util::Doc;
+use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use chrono::{DateTime, Local};
 use resources::Res;
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::error::Error as _;
 use std::time::Duration;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::spawn_local;
 use web_sys::{
     Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
     HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
@@ -64,37 +63,12 @@ struct ButtonAttrs {
     data_type: Option<String>,
 }
 
-/// Show login form shade
-fn show_login() {
-    app::set_user(None);
-    show_elem("sb_login");
-}
-
-/// Show an element
-fn show_elem(id: &str) {
-    Doc::get().elem::<HtmlElement>(id).set_class_name("show");
-}
-
-/// Hide an element
-fn hide_elem(id: &str) {
-    Doc::get().elem::<HtmlElement>(id).set_class_name("hidden");
-}
-
-/// Show a toast message
-fn show_toast(msg: &str) {
-    log::warn!("toast: {msg}");
-    let t = Doc::get().elem::<HtmlElement>("sb_toast");
-    t.set_inner_html(msg);
-    t.set_class_name("show");
-    app::defer_action(DeferredAction::HideToast, 3000);
-}
-
 /// Select item on map
 pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
     if !app::is_selected_item(res, name) {
         let zoom = selected_zoom(res).max(12);
         set_selected_item(res, name, zoom);
-        spawn_local(do_future(do_select_item_map(zoom, lon, lat)));
+        spawn_future(do_select_item_map(zoom, lon, lat));
     }
 }
 
@@ -189,12 +163,12 @@ pub async fn start() -> core::result::Result<(), JsError> {
     crate::panic::set_hook_once();
     wasm_log::init(wasm_log::Config::default());
     log::info!("Started");
-    add_listeners().await.unwrap_throw();
+    add_listeners().unwrap_throw();
     Ok(())
 }
 
 /// Add event listeners
-async fn add_listeners() -> Result<()> {
+fn add_listeners() -> Result<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
@@ -223,34 +197,12 @@ async fn add_listeners() -> Result<()> {
             .set_inner_html("10");
         clear_selected_item(10);
     }
-    do_future(finish_init()).await;
+    spawn_future(finish_init());
     fetch_station_data();
     if let Some(doc_elem) = doc.doc_elem() {
         add_fullscreenchange_listener(&doc_elem)?;
     }
     Ok(())
-}
-
-/// Handle a fallible future function
-async fn do_future(future: impl Future<Output = Result<()>>) {
-    match future.await {
-        Ok(_) => (),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
-        Err(Error::FetchResponseNotFound()) => {
-            // Card list may be out-of-date; refresh
-            app::defer_action(DeferredAction::RefreshList, 200);
-        }
-        Err(Error::CardMismatch()) => {
-            // Card list may be out-of-date; refresh
-            app::defer_action(DeferredAction::RefreshList, 200);
-        }
-        Err(e) => {
-            if let Some(se) = e.source() {
-                log::warn!("source: {se}");
-            }
-            show_toast(&format!("Error: {e}"));
-        }
-    }
 }
 
 /// Finish initialization
@@ -261,12 +213,14 @@ async fn finish_init() -> Result<()> {
         Some(user) => {
             app::set_user(Some(user));
             update_sb_resource().await?;
-            set_resource(None, "").await;
-            sse::post_req(None).await;
+            set_resource(None, "").await?;
+            sse::post_req(None).await
         }
-        None => log::warn!("invalid user: {user:?}"),
+        None => {
+            log::warn!("invalid user: {user:?}");
+            Ok(())
+        }
     }
-    Ok(())
 }
 
 /// Update resource select options
@@ -355,7 +309,7 @@ fn add_change_listener(elem: &Element) -> Result<()> {
             if id == "sb_fullscreen" {
                 set_fullscreen();
             } else {
-                spawn_local(do_future(handle_layer_zoom(id)));
+                spawn_future(handle_layer_zoom(id));
             }
         }
     });
@@ -400,7 +354,7 @@ fn row_class(show: bool) -> &'static str {
 }
 
 /// Handle change to selected resource type
-async fn handle_resource_change(res: Option<Res>, search: &str) {
+async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     let doc = Doc::get();
     let sidebar = doc.elem::<HtmlElement>("sidebar");
     sidebar.set_class_name("wait");
@@ -439,9 +393,10 @@ async fn handle_resource_change(res: Option<Res>, search: &str) {
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
-    do_future(fetch_and_populate_cards(res)).await;
+    let res = fetch_and_populate_cards(res).await;
     // Turn off "wait" style
     sidebar.set_class_name("");
+    res
 }
 
 /// Get the selected resource value
@@ -566,17 +521,17 @@ fn handle_input(id: String) {
         | "res_system_attr" | "res_comm_config" | "res_cabinet_style"
         | "res_permission" | "res_user" | "res_role" | "res_domain"
         | "sb_resource" => handle_res_change(),
-        "sb_search" | "sb_state" => spawn_local(do_future(handle_search())),
+        "sb_search" | "sb_state" => spawn_future(handle_search()),
         "ob_view" => handle_ob_view_ev(),
-        _ => spawn_local(do_future(handle_input_other(id))),
+        _ => spawn_future(handle_input_other(id)),
     }
 }
 
 /// Handle resource change
 fn handle_res_change() {
     let res = selected_resource();
-    spawn_local(handle_resource_change(res, ""));
-    spawn_local(sse::post_req(res));
+    spawn_future(handle_resource_change(res, ""));
+    spawn_future(sse::post_req(res));
 }
 
 /// Search card list for matching cards
@@ -606,7 +561,7 @@ fn handle_ob_view_ev() {
     if let Some(cv) = app::expanded_view()
         && let Some(view) = ob_view_value()
     {
-        spawn_local(do_future(replace_card(cv.view(view), "")));
+        spawn_future(replace_card(cv.view(view), ""));
     }
 }
 
@@ -632,7 +587,7 @@ fn add_focus_listener(elem: &Element) -> Result<()> {
         if let Some(Ok(input)) =
             e.target().map(|e| e.dyn_into::<HtmlInputElement>())
         {
-            spawn_local(do_future(handle_focus_events(input, e.type_())));
+            spawn_future(handle_focus_events(input, e.type_()));
         }
     });
     elem.add_event_listener_with_callback(
@@ -696,9 +651,9 @@ fn add_click_listener(elem: &Element) -> Result<()> {
 fn handle_button_click_ev(target: &Element) {
     let id = target.id();
     match id.as_str() {
-        "ob_login" => spawn_local(handle_login()),
-        "show_sidebar" => spawn_local(handle_show_sidebar(true)),
-        "hide_sidebar" => spawn_local(handle_show_sidebar(false)),
+        "ob_login" => spawn_future(handle_login()),
+        "show_sidebar" => spawn_future(handle_show_sidebar(true)),
+        "hide_sidebar" => spawn_future(handle_show_sidebar(false)),
         _ => {
             let attrs = ButtonAttrs {
                 id,
@@ -706,13 +661,13 @@ fn handle_button_click_ev(target: &Element) {
                 data_link: target.get_attribute("data-link"),
                 data_type: target.get_attribute("data-type"),
             };
-            spawn_local(handle_button_card(attrs));
+            spawn_future(handle_button_card(attrs));
         }
     }
 }
 
 /// Handle a show/hide sidebar button click
-async fn handle_show_sidebar(show: bool) {
+async fn handle_show_sidebar(show: bool) -> Result<()> {
     let doc = Doc::get();
     if let Some(btn) = doc.try_elem::<HtmlButtonElement>("show_sidebar") {
         btn.set_disabled(show);
@@ -721,27 +676,29 @@ async fn handle_show_sidebar(show: bool) {
         btn.set_disabled(!show);
     }
     if show {
-        show_elem("sidebar");
+        util::show_elem("sidebar");
     } else {
-        hide_elem("sidebar");
+        util::hide_elem("sidebar");
     }
+    Ok(())
 }
 
 /// Handle button click event on an epanded card
-async fn handle_button_card(attrs: ButtonAttrs) {
+async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
         match attrs.id.as_str() {
-            "ob_delete" => do_future(handle_delete(cv)).await,
-            "ob_save" => do_future(handle_save(cv)).await,
+            "ob_delete" => handle_delete(cv).await?,
+            "ob_save" => handle_save(cv).await?,
             _ => {
                 if attrs.class_name == "go_link" {
-                    go_resource(attrs).await;
+                    go_resource(attrs).await?;
                 } else {
-                    handle_button_cv(cv, attrs.id).await;
+                    cv.handle_click(attrs.id).await?;
                 }
             }
         }
     }
+    Ok(())
 }
 
 /// Replace a card view element with another view
@@ -798,21 +755,13 @@ async fn save_changed(cv: CardView) -> Result<()> {
     replace_card(cv.view(View::Compact), "").await
 }
 
-/// Handle a button click on an expanded card
-async fn handle_button_cv(cv: CardView, id: String) {
-    match cv.handle_click(id).await {
-        Ok(_) => (),
-        Err(e) => show_toast(&format!("click failed: {e}")),
-    }
-}
-
 /// Handle a `click` event within a card element
 fn handle_card_click_ev(elem: &Element) {
     if let Some(id) = elem.get_attribute("id")
         && let Some(name) = elem.get_attribute("data-name")
         && let Some(res) = selected_resource()
     {
-        spawn_local(do_future(click_card(res, name, id)));
+        spawn_future(click_card(res, name, id));
     }
 }
 
@@ -833,7 +782,7 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
 }
 
 /// Handle login button press
-async fn handle_login() {
+async fn handle_login() -> Result<()> {
     let window = web_sys::window().unwrap_throw();
     let doc = window.document().unwrap_throw();
     let doc = Doc(doc);
@@ -843,35 +792,35 @@ async fn handle_login() {
     ) {
         let uri = Uri::from("/iris/api/login");
         let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
-        match uri.post(&js.into()).await {
-            Ok(_) => {
-                let pass = doc.elem::<HtmlInputElement>("login_pass");
-                pass.set_value("");
-                hide_elem("sb_login");
-                do_future(finish_init()).await;
-            }
-            Err(e) => show_toast(&format!("Login failed: {e}")),
-        }
+        let elem = doc.elem::<HtmlInputElement>("login_pass");
+        elem.set_value("");
+        util::hide_elem("sb_login");
+        uri.post(&js.into()).await?;
+        finish_init().await
+    } else {
+        Ok(())
     }
 }
 
 /// Go to resource from target's `data-link` attribute
-async fn go_resource(attrs: ButtonAttrs) {
+async fn go_resource(attrs: ButtonAttrs) -> Result<()> {
     if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type)
         && let Ok(res) = Res::try_from(rname.as_str())
     {
-        set_resource(Some(res), &link).await;
-        sse::post_req(Some(res)).await;
+        set_resource(Some(res), &link).await?;
+        sse::post_req(Some(res)).await
+    } else {
+        Ok(())
     }
 }
 
 /// Set selected resource
-async fn set_resource(res: Option<Res>, search: &str) {
+async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
     let doc = Doc::get();
     let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
     let base = res.map(|r| r.base().as_str()).unwrap_or("");
     sb_resource.set_value(base);
-    handle_resource_change(res, search).await;
+    handle_resource_change(res, search).await
 }
 
 /// Fetch and populate card list
@@ -944,7 +893,7 @@ fn tick_interval() {
     while let Some(action) = app::next_action() {
         match action {
             DeferredAction::FetchStationData => fetch_station_data(),
-            DeferredAction::HideToast => hide_elem("sb_toast"),
+            DeferredAction::HideToast => util::hide_elem("sb_toast"),
             DeferredAction::RefreshList => handle_res_change(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
@@ -956,7 +905,7 @@ fn tick_interval() {
 fn fetch_station_data() {
     log::debug!("fetch_station_data");
     app::defer_action(DeferredAction::FetchStationData, 30_000);
-    spawn_local(do_future(do_fetch_station_data()));
+    spawn_future(do_fetch_station_data());
 }
 
 /// Actually fetch binned station data
@@ -1029,7 +978,7 @@ fn handle_map_click_ev(ev: Event) {
         && let Some((rname, nm)) = cls.split_once('-')
     {
         let res = Res::try_from(rname).ok();
-        spawn_local(do_future(select_card_map(res, nm.to_string())));
+        spawn_future(select_card_map(res, nm.to_string()));
     }
 }
 
@@ -1053,20 +1002,21 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
         let zoom = current_zoom();
         set_selected_item(res, &name, zoom);
         if changed {
-            set_resource(Some(res), "").await;
+            set_resource(Some(res), "").await?;
         }
         let id = format!("{res}_{name}");
         click_card(res, name, id).await?;
     }
     if changed {
-        sse::post_req(res).await;
+        sse::post_req(res).await
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
 /// Handle map zoom
 fn handle_map_zoom(zoom: u32) {
-    spawn_local(do_future(do_handle_map_zoom(zoom)));
+    spawn_future(do_handle_map_zoom(zoom));
 }
 
 /// Handle map zoom
@@ -1094,7 +1044,7 @@ async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
 
 /// Handle SSE notification
 pub fn handle_notification(chan: String, name: Option<String>) {
-    spawn_local(do_future(do_handle_notification(chan, name)));
+    spawn_future(do_handle_notification(chan, name));
 }
 
 /// Handle SSE notification
