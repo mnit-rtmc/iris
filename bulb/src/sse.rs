@@ -129,12 +129,9 @@ pub fn add_listener() {
 pub async fn post_req(res: Option<Res>) -> Result<()> {
     let uri = Uri::from("/iris/api/notify");
     let json = build_list(res);
-    if let Err(e) = uri.post(&json.into()).await {
+    uri.post(&json.into()).await.inspect_err(|e| {
         log::warn!("/iris/api/notify POST: {e}");
-        Err(e)
-    } else {
-        Ok(())
-    }
+    })
 }
 
 /// Build resource list for notifications
