@@ -4,7 +4,7 @@ default-members = ["honeybee", "mayfly"]
 resolver = "2"
 
 [workspace.package]
-version = "5.82.2"
+version = "5.83.0"
 edition = "2024"
 
 [workspace.dependencies]

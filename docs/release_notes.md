@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.83.0 (20 Apr 2026)
+ - Web UI: Use earthwyrm web map client crate
+ - Web UI: add layer zoom threshold menu
+ - Switch map tile server from EarthWyrm to Wyrmcast
+ - Tweaked MsgPattern prototype matching logic
+ - Fix parking area permission issue
+ - Add CampbellCloud support to pollinator
+ - SQL: cleans up geo location names
+ - SQL: allow longer incident names
+
 5.82.0 (9 Mar 2026)
  - Fixed gate arm dependency init on server restart
  - Added `prototype` to MsgPattern (removed `restrict_hashtag` from MsgLine)
