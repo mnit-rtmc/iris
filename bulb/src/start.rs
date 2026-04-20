@@ -108,7 +108,7 @@ fn set_selected_item(res: Res, name: &str, zoom: u32) {
 
 /// Set selected item style
 fn set_selected_style(res: Res, name: &str, zoom: u32) {
-    let mut css = String::with_capacity(100);
+    let mut css = String::with_capacity(120);
     css.push('.');
     css.push_str(res.as_str());
     css.push('-');
@@ -124,7 +124,7 @@ fn set_selected_style(res: Res, name: &str, zoom: u32) {
 
 /// Clear selected item style
 fn clear_selected_style(zoom: u32) {
-    let mut css = String::with_capacity(50);
+    let mut css = String::with_capacity(40);
     css.push_str(".wyrm-tile use { scale: ");
     css.push_str(zoom_scale(zoom));
     css.push_str("; }");
@@ -940,7 +940,8 @@ impl StationData {
 
     /// Make station segment style
     fn do_make_style(&self) -> String {
-        let mut style = String::new();
+        let len = self.samples.len();
+        let mut style = String::with_capacity(32 * (len + 1));
         style.push_str(".wyrm-segment { fill: #aaa; }\n");
         for (sid, data) in &self.samples {
             let flow = data.first();
@@ -1152,7 +1153,7 @@ fn item_states_css(
     states_all: &'static [ItemState],
     card_states: &[CardState],
 ) -> String {
-    let mut css = String::new();
+    let mut css = String::with_capacity(32 * card_states.len());
     for st in states_all {
         let mut first = true;
         for cs in card_states {
