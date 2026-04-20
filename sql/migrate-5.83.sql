@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.82.0', '5.83.0');
+
 -- Increase incident name length to 32 characters max
 DROP VIEW incident_update_view;
 DROP VIEW incident_view;
@@ -39,5 +41,24 @@ CREATE VIEW incident_update_view AS
     LEFT JOIN iris.direction d ON i.dir = d.id
     LEFT JOIN iris.lane_code lc ON i.lane_code = lc.lcode;
 GRANT SELECT ON incident_update_view TO PUBLIC;
+
+-- Rename geo_locs which don't match controller names
+INSERT INTO iris.geo_loc (
+    name, resource_n, roadway, road_dir, cross_street, cross_dir, cross_mod,
+    lat, lon, landmark
+) (
+    SELECT c.name, resource_n, roadway, road_dir, cross_street, cross_dir,
+           cross_mod, lat, lon, landmark
+    FROM iris.controller c
+    JOIN iris.geo_loc g ON c.geo_loc = g.name
+    WHERE c.name != c.geo_loc
+);
+
+UPDATE iris.controller SET geo_loc = name WHERE name != geo_loc;
+
+DELETE FROM iris.geo_loc
+WHERE resource_n = 'controller' AND name NOT IN (
+    SELECT geo_loc FROM iris.controller
+);
 
 COMMIT;
