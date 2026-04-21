@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.TextRect;
 
@@ -52,6 +53,7 @@ public class MsgLineHelper extends BaseHelper {
 
 	/** Find all lines for a message pattern, including prototype */
 	static public List<MsgLine> findAllLines(MsgPattern pat, DMS dms) {
+		Set<MsgPattern> compose = MsgPatternHelper.findAllCompose(dms);
 		ArrayList<MsgLine> lines = new ArrayList<MsgLine>();
 		List<TextRect> line_rects =
 			MsgPatternHelper.lineTextRects(pat, dms);
@@ -62,7 +64,7 @@ public class MsgLineHelper extends BaseHelper {
 		while (it.hasNext()) {
 			MsgLine ml = it.next();
 			MsgPattern mp = ml.getMsgPattern();
-			if (mp == pat ||
+			if (compose.contains(mp) &&
 			    MsgPatternHelper.checkPrototype(mp, prototype))
 			{
 				MsgLine aml = abbreviateLine(ml, line_rects);
