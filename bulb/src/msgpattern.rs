@@ -261,7 +261,7 @@ impl MsgPattern {
 
     /// Get entered MULTI string
     fn multi_string(&self) -> String {
-        match Doc::get().try_elem::<HtmlTextAreaElement>("multi") {
+        match Doc::get().opt_elem::<HtmlTextAreaElement>("multi") {
             Some(elem) => elem.value(),
             None => self.multi.clone(),
         }
@@ -513,7 +513,7 @@ impl MsgPattern {
     /// Get selected sign configuration
     fn selected_config(&self) -> Option<String> {
         if let Some(elem) =
-            Doc::get().try_elem::<HtmlSelectElement>("mp_config")
+            Doc::get().opt_elem::<HtmlSelectElement>("mp_config")
         {
             return Some(elem.value());
         }

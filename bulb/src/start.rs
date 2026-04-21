@@ -227,49 +227,49 @@ async fn finish_init() -> Result<()> {
 async fn update_sb_resource() -> Result<()> {
     let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
     let doc = Doc::get();
-    if let Some(elem) = doc.try_elem::<Element>("opt_action_plan") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_action_plan") {
         elem.set_class_name(opt_class(&access, Res::ActionPlan));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_beacon") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_beacon") {
         elem.set_class_name(opt_class(&access, Res::Beacon));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_camera") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_camera") {
         elem.set_class_name(opt_class(&access, Res::Camera));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_dms") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_dms") {
         elem.set_class_name(opt_class(&access, Res::Dms));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_gate_arm") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_gate_arm") {
         elem.set_class_name(opt_class(&access, Res::GateArm));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_incident") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_incident") {
         elem.set_class_name(opt_class(&access, Res::Incident));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_lcs") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_lcs") {
         elem.set_class_name(opt_class(&access, Res::Lcs));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_ramp_meter") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_ramp_meter") {
         elem.set_class_name(opt_class(&access, Res::RampMeter));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_video_monitor") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_video_monitor") {
         elem.set_class_name(opt_class(&access, Res::VideoMonitor));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_weather_sensor") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_weather_sensor") {
         elem.set_class_name(opt_class(&access, Res::WeatherSensor));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_controller") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_controller") {
         elem.set_class_name(opt_class(&access, Res::Controller));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_detector") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_detector") {
         elem.set_class_name(opt_class(&access, Res::Detector));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_permission") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_permission") {
         elem.set_class_name(opt_class(&access, Res::Permission));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_system") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_system") {
         elem.set_class_name(opt_class(&access, Res::SystemAttribute));
     }
-    if let Some(elem) = doc.try_elem::<Element>("opt_toll_zone") {
+    if let Some(elem) = doc.opt_elem::<Element>("opt_toll_zone") {
         elem.set_class_name(opt_class(&access, Res::TollZone));
     }
     Ok(())
@@ -361,27 +361,27 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     let sb_list = doc.elem::<Element>("sb_list");
     sb_list.set_inner_html("");
     let base = res.map(|r| r.base());
-    if let Some(elem) = doc.try_elem::<Element>("res_dms_row") {
+    if let Some(elem) = doc.opt_elem::<Element>("res_dms_row") {
         elem.set_class_name(row_class(base == Some(Res::Dms)));
     }
-    if let Some(elem) = doc.try_elem::<Element>("res_lcs_row") {
+    if let Some(elem) = doc.opt_elem::<Element>("res_lcs_row") {
         elem.set_class_name(row_class(base == Some(Res::Lcs)));
     }
-    if let Some(elem) = doc.try_elem::<Element>("res_video_monitor_row") {
+    if let Some(elem) = doc.opt_elem::<Element>("res_video_monitor_row") {
         elem.set_class_name(row_class(base == Some(Res::VideoMonitor)));
     }
-    if let Some(elem) = doc.try_elem::<Element>("res_controller_row") {
+    if let Some(elem) = doc.opt_elem::<Element>("res_controller_row") {
         elem.set_class_name(row_class(base == Some(Res::Controller)));
     }
-    if let Some(elem) = doc.try_elem::<Element>("res_permission_row") {
+    if let Some(elem) = doc.opt_elem::<Element>("res_permission_row") {
         elem.set_class_name(row_class(base == Some(Res::Permission)));
     }
-    if let Some(elem) = doc.try_elem::<Element>("res_system_row") {
+    if let Some(elem) = doc.opt_elem::<Element>("res_system_row") {
         elem.set_class_name(row_class(base == Some(Res::SystemAttribute)));
     }
     if let Some(res) = res {
         let id = format!("res_{}", res.as_str());
-        if let Some(elem) = doc.try_elem::<HtmlInputElement>(&id) {
+        if let Some(elem) = doc.opt_elem::<HtmlInputElement>(&id) {
             elem.set_checked(true);
         }
     }
@@ -427,7 +427,7 @@ fn selected_resource() -> Option<Res> {
             Some(Res::MonitorStyle)
         }
         Res::VideoMonitor => {
-            match doc.try_elem::<HtmlInputElement>("res_flow_stream") {
+            match doc.opt_elem::<HtmlInputElement>("res_flow_stream") {
                 Some(input) => input.checked().then_some(Res::FlowStream),
                 None => Some(res),
             }
@@ -545,7 +545,7 @@ async fn handle_search() -> Result<()> {
             let doc = Doc::get();
             for cv in cards.search_views(&search).await? {
                 let id = cv.id();
-                if let Some(elem) = doc.try_elem::<Element>(&id) {
+                if let Some(elem) = doc.opt_elem::<Element>(&id) {
                     elem.set_class_name(cv.view.class_name());
                 }
             }
@@ -669,10 +669,10 @@ fn handle_button_click_ev(target: &Element) {
 /// Handle a show/hide sidebar button click
 async fn handle_show_sidebar(show: bool) -> Result<()> {
     let doc = Doc::get();
-    if let Some(btn) = doc.try_elem::<HtmlButtonElement>("show_sidebar") {
+    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>("show_sidebar") {
         btn.set_disabled(show);
     }
-    if let Some(btn) = doc.try_elem::<HtmlButtonElement>("hide_sidebar") {
+    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>("hide_sidebar") {
         btn.set_disabled(!show);
     }
     if show {
@@ -711,7 +711,7 @@ async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
 
 /// Replace a card with provided HTML
 fn replace_card_html(cv: &CardView, html: &str) {
-    let Some(elem) = Doc::get().try_elem::<HtmlElement>(&cv.id()) else {
+    let Some(elem) = Doc::get().opt_elem::<HtmlElement>(&cv.id()) else {
         log::warn!("element {} not found", cv.id());
         return;
     };

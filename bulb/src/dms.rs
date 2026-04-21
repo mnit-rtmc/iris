@@ -888,7 +888,7 @@ impl Dms {
     fn selected_lines(&self) -> Vec<String> {
         let doc = Doc::get();
         let mut lines = Vec::new();
-        while let Some(line) = doc.try_elem::<HtmlInputElement>(&format!(
+        while let Some(line) = doc.opt_elem::<HtmlInputElement>(&format!(
             "mc_line{}",
             lines.len() + 1
         )) {
@@ -1397,13 +1397,13 @@ impl Card for Dms {
 
     /// Handle updating a card in response to an SSE notification
     fn handle_update(&self, anc: DmsAnc) {
-        if let Some(state_row) = Doc::get().try_elem::<HtmlElement>("state_row")
-        {
+        let doc = Doc::get();
+        if let Some(state_row) = doc.opt_elem::<HtmlElement>("state_row") {
             let mut tree = Tree::new();
             self.render_state_row(&anc, &mut tree.root::<html::Div>());
             state_row.set_outer_html(&String::from(tree));
         }
-        if let Some(sign_msg) = Doc::get().try_elem::<HtmlElement>("sign_msg") {
+        if let Some(sign_msg) = doc.opt_elem::<HtmlElement>("sign_msg") {
             let mut tree = Tree::new();
             self.render_current_msg(&anc, &mut tree.root::<html::Div>());
             sign_msg.set_outer_html(&String::from(tree));

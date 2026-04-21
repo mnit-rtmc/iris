@@ -151,18 +151,18 @@ impl Doc {
         self.0.document_element()
     }
 
-    /// Try to get an element by ID and cast it
-    pub fn try_elem<E: JsCast>(&self, id: &str) -> Option<E> {
+    /// Get an element by ID and attempt to cast it
+    pub fn opt_elem<E: JsCast>(&self, id: &str) -> Option<E> {
         self.0
             .get_element_by_id(id)?
             .dyn_into::<E>()
-            .inspect_err(|_| log::error!("try_elem: {id}"))
+            .inspect_err(|_| log::error!("opt_elem: {id}"))
             .ok()
     }
 
     /// Get an element by ID and cast it
     pub fn elem<E: JsCast>(&self, id: &str) -> E {
-        self.try_elem(id)
+        self.opt_elem(id)
             .ok_or_else(|| {
                 let e = "Invalid element ID";
                 log::error!("{e}: {id}");
@@ -178,7 +178,7 @@ impl Doc {
 
     /// Get and parse an `input` element value
     pub fn input_parse<T: FromStr>(&self, id: &str) -> Option<T> {
-        self.try_elem::<HtmlInputElement>(id)
+        self.opt_elem::<HtmlInputElement>(id)
             .and_then(|el| el.value().trim().parse().ok())
     }
 
