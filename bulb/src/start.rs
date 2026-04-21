@@ -31,7 +31,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
     Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
-    HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
+    HtmlSelectElement, KeyboardEvent, ScrollBehavior, ScrollIntoViewOptions,
     ScrollLogicalPosition, TransitionEvent, Window,
 };
 
@@ -182,6 +182,7 @@ fn add_listeners() -> Result<()> {
     add_change_listener(&layer_menu)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
+    add_input_enter_listener(&doc.elem("login_pass"))?;
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem("sb_list")?)?;
     add_interval_callback(&window)?;
@@ -645,6 +646,34 @@ async fn handle_show_sidebar(show: bool) -> Result<()> {
     Ok(())
 }
 
+/// Add enter/submit event listener to an element
+fn add_input_enter_listener(elem: &Element) -> JsResult<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let (Some(Ok(target)), Ok(keydown_ev)) = (
+            e.target().map(|e| e.dyn_into::<Element>()),
+            e.dyn_into::<KeyboardEvent>(),
+        ) {
+            if keydown_ev.key().as_str() == "Enter" {
+                handle_input_enter(target.id());
+            }
+        }
+    });
+    elem.add_event_listener_with_callback(
+        "keydown",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Handle an input enter/submit event
+fn handle_input_enter(id: String) {
+    if id.as_str() == "login_pass" {
+        spawn_local(handle_login());
+    }
+}
+
 /// Handle button click event on an epanded card
 async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
@@ -748,16 +777,20 @@ async fn handle_login() -> Result<()> {
     let window = web_sys::window().ok_or(Error::NoWindow())?;
     let doc = window.document().ok_or(Error::NoDocument())?;
     let doc = Doc(doc);
-    if let (Some(user), Some(pass)) = (
+    if let (Some(user), Some(pass), Some(loading_bar)) = (
         doc.input_parse::<String>("login_user"),
         doc.input_parse::<String>("login_pass"),
     ) {
+        let loading_bar = doc.elem::<HtmlElement>("ob_login_loading_bar").unwrap_or(HtmlElement::default());
+        loading_bar.set_class_name("loading_bar active");
         let uri = Uri::from("/iris/api/login");
         let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
         let el = doc.elem::<HtmlInputElement>("login_pass")?;
         el.set_value("");
         util::hide_elem("sb_login");
         uri.post(&js.into()).await?;
+        // hide/deactivate loading bar
+        loading_bar.set_class_name("loading_bar");
         finish_init().await
     } else {
         Ok(())

@@ -170,6 +170,14 @@ impl Camera {
         String::from(tree)
     }
 
+    fn recall_preset(&self, preset_num: u32) -> Vec<Action> {
+        let uri = uri_one(Res::Camera, &self.name);
+        let mut fields = Fields::new();
+        fields.insert_num("recall_preset", preset_num);
+        let value = fields.into_value().to_string();
+        vec![Action::Patch(uri, value.into())]
+    }
+
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &CameraAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
@@ -190,6 +198,19 @@ impl Camera {
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64);
+        div.close();
+
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.span().cdata("Presets").close();
+        for preset_num in 1..=12 {
+            let btn_id = format!("preset_{}", preset_num);
+            div.button()
+                .id(&btn_id)
+                .r#type("button")
+                .cdata(preset_num.to_string());
+        }
+        div.close();
         String::from(tree)
     }
 
@@ -429,6 +450,13 @@ impl Card for Camera {
     /// Handle click event for a button on the card
     fn handle_click(&self, _anc: CameraAnc, id: String) -> Vec<Action> {
         match id.as_str() {
+            p if p.starts_with("preset_") => {
+                if let Some(n) = p.strip_prefix("preset_") {
+                    if let Ok(preset_num) = n.parse::<u32>() {
+                        self.recall_preset(n)
+                    }
+                }
+            }
             "rq_reset" => self.device_req(DeviceReq::ResetDevice),
             _ => Vec::new(),
         }

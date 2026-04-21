@@ -53,6 +53,7 @@ features = [
   'HtmlInputElement',
   'HtmlSelectElement',
   'HtmlTextAreaElement',
+  'KeyboardEvent',
   'MessageEvent',
   'Request',
   'RequestInit',

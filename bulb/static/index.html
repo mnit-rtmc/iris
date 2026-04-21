@@ -184,7 +184,10 @@
             </div>
             <div class="row end">
               <label for="login_pass">Password</label>
-              <input id="login_pass" type="password" name="password" autocomplete="current-password" required>
+              <div style="position: relative;">
+                <input id="login_pass" type="password" name="password" autocomplete="current-password" required>
+                <div id="ob_login_loading_bar" class="loading_bar"></div>
+              </div>
             </div>
             <div class="row end">
               <button id="ob_login" type="button">Login</button>

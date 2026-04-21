@@ -376,6 +376,30 @@ label:has(+ #sb_resource) {
   transition: left 100ms ease-in-out;
 }
 
+.loading_bar {
+  position: absolute;
+  height: 3px;
+}
+.loading_bar.active {
+  background-color: #6ce;
+  animation: loading_bar_animation 1.5s infinite;
+  animation-timing-function: ease-out;
+}
+@keyframes loading_bar_animation {
+  0% {
+    width: 0%;
+    left: 0%;
+  }
+  60% {
+    width: 70%;
+    left: 20%;
+  }
+  100% {
+    width: 0%;
+    left: 100%;
+  }
+}
+
 .tooltip {
   position: relative;
   display: inline-block;
