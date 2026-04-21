@@ -14,8 +14,7 @@ use crate::error::{Error, Result};
 use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
 use serde::de::DeserializeOwned;
 use std::borrow::{Borrow, Cow};
-use wasm_bindgen::JsCast;
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Blob, Headers, Request, RequestInit, Response};
 
@@ -156,7 +155,7 @@ impl Uri {
 
 /// Fetch a GET response
 async fn get_response(uri: &Uri) -> Result<Response> {
-    let window = web_sys::window().unwrap_throw();
+    let window = web_sys::window().ok_or(Error::NoWindow())?;
     let req = Request::new_with_str(uri.as_str())?;
     req.headers().set("Accept", uri.content_type.as_str())?;
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
@@ -183,7 +182,7 @@ async fn perform_fetch(
     uri: &str,
     json: Option<&JsValue>,
 ) -> Result<Response> {
-    let window = web_sys::window().unwrap_throw();
+    let window = web_sys::window().ok_or(Error::NoWindow())?;
     let ri = RequestInit::new();
     ri.set_method(method);
     if let Some(json) = &json {

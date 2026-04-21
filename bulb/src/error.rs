@@ -16,6 +16,14 @@ use ntcip::dms::tfon;
 /// Bulb errors
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// Unable to get DOM window
+    #[error("No DOM window")]
+    NoWindow(),
+
+    /// Unable to get document
+    #[error("No document")]
+    NoDocument(),
+
     /// JavaScript error
     #[error("JS {0}")]
     JsValue(String),

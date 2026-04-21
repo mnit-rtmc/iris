@@ -13,7 +13,7 @@
 use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
 use crate::card::{self, CardList, CardState};
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::item::ItemState;
@@ -26,8 +26,9 @@ use resources::Res;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::time::Duration;
-use wasm_bindgen::JsCast;
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
     Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
     HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
@@ -163,14 +164,13 @@ pub async fn start() -> core::result::Result<(), JsError> {
     crate::panic::set_hook_once();
     wasm_log::init(wasm_log::Config::default());
     log::info!("Started");
-    add_listeners().unwrap_throw();
-    Ok(())
+    Ok(add_listeners()?)
 }
 
 /// Add event listeners
 fn add_listeners() -> Result<()> {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
+    let window = web_sys::window().ok_or(Error::NoWindow())?;
+    let doc = window.document().ok_or(Error::NoDocument())?;
     let doc = Doc(doc);
     let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
     sb_resource.set_value("");
@@ -783,8 +783,8 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
 
 /// Handle login button press
 async fn handle_login() -> Result<()> {
-    let window = web_sys::window().unwrap_throw();
-    let doc = window.document().unwrap_throw();
+    let window = web_sys::window().ok_or(Error::NoWindow())?;
+    let doc = window.document().ok_or(Error::NoDocument())?;
     let doc = Doc(doc);
     if let (Some(user), Some(pass)) = (
         doc.input_parse::<String>("login_user"),

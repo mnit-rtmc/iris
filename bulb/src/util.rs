@@ -209,8 +209,7 @@ impl Doc {
     /// Request full screen mode
     pub fn request_fullscreen(&self, yes: bool) {
         if yes {
-            self.0
-                .document_element()
+            self.doc_elem()
                 .unwrap_throw()
                 .request_fullscreen()
                 .unwrap_throw();
