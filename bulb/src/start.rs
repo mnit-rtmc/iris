@@ -78,7 +78,7 @@ async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = earthwyrm::MapPane::get() {
         map_pane.position(zoom, lon, lat, RECT_X, RECT_Y);
         Doc::get()
-            .elem::<Element>("zoom-level")
+            .elem::<Element>("zoom-level")?
             .set_inner_html(&zoom.to_string());
         // FIXME: only call these when crossing zoom threshold
         update_map_states(Res::Incident, zoom, None).await?;
@@ -109,29 +109,29 @@ fn set_selected_item(res: Res, name: &str, zoom: u32) {
 
 /// Set selected item style
 fn set_selected_style(res: Res, name: &str, zoom: u32) {
-    let mut css = String::with_capacity(120);
-    css.push('.');
-    css.push_str(res.as_str());
-    css.push('-');
-    css.push_str(name);
-    css.push_str(" { stroke: white; stroke-width: 2; }");
-    css.push_str("\n.wyrm-tile use { scale: ");
-    css.push_str(zoom_scale(zoom));
-    css.push_str("; }");
-    Doc::get()
-        .elem::<Element>("selected-style")
-        .set_inner_html(&css);
+    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
+        let mut css = String::with_capacity(120);
+        css.push('.');
+        css.push_str(res.as_str());
+        css.push('-');
+        css.push_str(name);
+        css.push_str(" { stroke: white; stroke-width: 2; }");
+        css.push_str("\n.wyrm-tile use { scale: ");
+        css.push_str(zoom_scale(zoom));
+        css.push_str("; }");
+        el.set_inner_html(&css);
+    }
 }
 
 /// Clear selected item style
 fn clear_selected_style(zoom: u32) {
-    let mut css = String::with_capacity(40);
-    css.push_str(".wyrm-tile use { scale: ");
-    css.push_str(zoom_scale(zoom));
-    css.push_str("; }");
-    Doc::get()
-        .elem::<Element>("selected-style")
-        .set_inner_html(&css);
+    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
+        let mut css = String::with_capacity(40);
+        css.push_str(".wyrm-tile use { scale: ");
+        css.push_str(zoom_scale(zoom));
+        css.push_str("; }");
+        el.set_inner_html(&css);
+    }
 }
 
 /// Get marker scale for a zoom level
@@ -172,18 +172,18 @@ fn add_listeners() -> Result<()> {
     let window = web_sys::window().ok_or(Error::NoWindow())?;
     let doc = window.document().ok_or(Error::NoDocument())?;
     let doc = Doc(doc);
-    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource")?;
     sb_resource.set_value("");
-    let divider: HtmlElement = doc.elem("divider");
+    let divider: HtmlElement = doc.elem("divider")?;
     add_click_listener(&divider)?;
-    let sidebar: HtmlElement = doc.elem("sidebar");
+    let sidebar: HtmlElement = doc.elem("sidebar")?;
     add_change_listener(&sidebar)?;
-    let layer_menu: HtmlElement = doc.elem("layer-menu");
+    let layer_menu: HtmlElement = doc.elem("layer-menu")?;
     add_change_listener(&layer_menu)?;
     add_click_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
     add_focus_listener(&sidebar)?;
-    add_transition_listener(&doc.elem("sb_list"))?;
+    add_transition_listener(&doc.elem("sb_list")?)?;
     add_interval_callback(&window)?;
     if let Some(map_pane) = earthwyrm::MapPane::init(
         "map-pane",
@@ -192,9 +192,7 @@ fn add_listeners() -> Result<()> {
         handle_map_zoom,
     ) {
         map_pane.position(10, -93.2, 44.95, RECT_X, RECT_Y);
-        Doc::get()
-            .elem::<Element>("zoom-level")
-            .set_inner_html("10");
+        doc.elem::<Element>("zoom-level")?.set_inner_html("10");
         clear_selected_item(10);
     }
     spawn_future(finish_init());
@@ -289,8 +287,9 @@ fn opt_class(access: &[Permission], res: Res) -> &'static str {
 fn add_fullscreenchange_listener(elem: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
         let doc = Doc::get();
-        let btn = doc.elem::<HtmlInputElement>("sb_fullscreen");
-        btn.set_checked(doc.is_fullscreen());
+        if let Some(btn) = doc.opt_elem::<HtmlInputElement>("sb_fullscreen") {
+            btn.set_checked(doc.is_fullscreen());
+        }
     });
     elem.add_event_listener_with_callback(
         "fullscreenchange",
@@ -325,8 +324,7 @@ fn add_change_listener(elem: &Element) -> Result<()> {
 /// Set fullscreen mode
 fn set_fullscreen() {
     let doc = Doc::get();
-    let btn = doc.elem::<HtmlInputElement>("sb_fullscreen");
-    let checked = btn.checked();
+    let checked = doc.input_bool("sb_fullscreen");
     doc.request_fullscreen(checked);
 }
 
@@ -356,38 +354,38 @@ fn row_class(show: bool) -> &'static str {
 /// Handle change to selected resource type
 async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     let doc = Doc::get();
-    let sidebar = doc.elem::<HtmlElement>("sidebar");
+    let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
-    let sb_list = doc.elem::<Element>("sb_list");
+    let sb_list = doc.elem::<Element>("sb_list")?;
     sb_list.set_inner_html("");
     let base = res.map(|r| r.base());
-    if let Some(elem) = doc.opt_elem::<Element>("res_dms_row") {
-        elem.set_class_name(row_class(base == Some(Res::Dms)));
+    if let Some(el) = doc.opt_elem::<Element>("res_dms_row") {
+        el.set_class_name(row_class(base == Some(Res::Dms)));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("res_lcs_row") {
-        elem.set_class_name(row_class(base == Some(Res::Lcs)));
+    if let Some(el) = doc.opt_elem::<Element>("res_lcs_row") {
+        el.set_class_name(row_class(base == Some(Res::Lcs)));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("res_video_monitor_row") {
-        elem.set_class_name(row_class(base == Some(Res::VideoMonitor)));
+    if let Some(el) = doc.opt_elem::<Element>("res_video_monitor_row") {
+        el.set_class_name(row_class(base == Some(Res::VideoMonitor)));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("res_controller_row") {
-        elem.set_class_name(row_class(base == Some(Res::Controller)));
+    if let Some(el) = doc.opt_elem::<Element>("res_controller_row") {
+        el.set_class_name(row_class(base == Some(Res::Controller)));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("res_permission_row") {
-        elem.set_class_name(row_class(base == Some(Res::Permission)));
+    if let Some(el) = doc.opt_elem::<Element>("res_permission_row") {
+        el.set_class_name(row_class(base == Some(Res::Permission)));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("res_system_row") {
-        elem.set_class_name(row_class(base == Some(Res::SystemAttribute)));
+    if let Some(el) = doc.opt_elem::<Element>("res_system_row") {
+        el.set_class_name(row_class(base == Some(Res::SystemAttribute)));
     }
     if let Some(res) = res {
         let id = format!("res_{}", res.as_str());
-        if let Some(elem) = doc.opt_elem::<HtmlInputElement>(&id) {
-            elem.set_checked(true);
+        if let Some(el) = doc.opt_elem::<HtmlInputElement>(&id) {
+            el.set_checked(true);
         }
     }
-    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    let sb_search = doc.elem::<HtmlInputElement>("sb_search")?;
     sb_search.set_value(search);
-    let sb_state = doc.elem::<HtmlSelectElement>("sb_state");
+    let sb_state = doc.elem::<HtmlSelectElement>("sb_state")?;
     let html = match res {
         Some(res) => card::item_states_html(res),
         None => String::new(),
@@ -405,86 +403,39 @@ fn selected_resource() -> Option<Res> {
     let rname = doc.select_parse::<String>("sb_resource");
     let res = Res::try_from(rname?.as_str()).ok()?;
     match res.base() {
-        Res::Dms
-            if doc.elem::<HtmlInputElement>("res_msg_pattern").checked() =>
-        {
-            Some(Res::MsgPattern)
-        }
-        Res::Dms
-            if doc.elem::<HtmlInputElement>("res_sign_config").checked() =>
-        {
-            Some(Res::SignConfig)
-        }
-        Res::Dms if doc.elem::<HtmlInputElement>("res_word").checked() => {
-            Some(Res::Word)
-        }
-        Res::Lcs if doc.elem::<HtmlInputElement>("res_lcs_state").checked() => {
-            Some(Res::LcsState)
-        }
-        Res::VideoMonitor
-            if doc.elem::<HtmlInputElement>("res_monitor_style").checked() =>
-        {
+        Res::Dms if doc.input_bool("res_msg_pattern") => Some(Res::MsgPattern),
+        Res::Dms if doc.input_bool("res_sign_config") => Some(Res::SignConfig),
+        Res::Dms if doc.input_bool("res_word") => Some(Res::Word),
+        Res::Lcs if doc.input_bool("res_lcs_state") => Some(Res::LcsState),
+        Res::VideoMonitor if doc.input_bool("res_monitor_style") => {
             Some(Res::MonitorStyle)
         }
-        Res::VideoMonitor => {
-            match doc.opt_elem::<HtmlInputElement>("res_flow_stream") {
-                Some(input) => input.checked().then_some(Res::FlowStream),
-                None => Some(res),
-            }
+        Res::VideoMonitor if doc.input_bool("res_flow_stream") => {
+            Some(Res::FlowStream)
         }
-        Res::Controller
-            if doc.elem::<HtmlInputElement>("res_comm_link").checked() =>
-        {
+        Res::Controller if doc.input_bool("res_comm_link") => {
             Some(Res::CommLink)
         }
-        Res::Controller
-            if doc.elem::<HtmlInputElement>("res_alarm").checked() =>
-        {
-            Some(Res::Alarm)
-        }
-        Res::Controller
-            if doc.elem::<HtmlInputElement>("res_gps").checked() =>
-        {
-            Some(Res::Gps)
-        }
-        Res::Controller
-            if doc.elem::<HtmlInputElement>("res_modem").checked() =>
-        {
-            Some(Res::Modem)
-        }
-        Res::SystemAttribute
-            if doc.elem::<HtmlInputElement>("res_comm_config").checked() =>
-        {
+        Res::Controller if doc.input_bool("res_alarm") => Some(Res::Alarm),
+        Res::Controller if doc.input_bool("res_gps") => Some(Res::Gps),
+        Res::Controller if doc.input_bool("res_modem") => Some(Res::Modem),
+        Res::SystemAttribute if doc.input_bool("res_comm_config") => {
             Some(Res::CommConfig)
         }
-        Res::SystemAttribute
-            if doc.elem::<HtmlInputElement>("res_cabinet_style").checked() =>
-        {
+        Res::SystemAttribute if doc.input_bool("res_cabinet_style") => {
             Some(Res::CabinetStyle)
         }
-        Res::Permission
-            if doc.elem::<HtmlInputElement>("res_user").checked() =>
-        {
-            Some(Res::User)
-        }
-        Res::Permission
-            if doc.elem::<HtmlInputElement>("res_role").checked() =>
-        {
-            Some(Res::Role)
-        }
-        Res::Permission
-            if doc.elem::<HtmlInputElement>("res_domain").checked() =>
-        {
-            Some(Res::Domain)
-        }
+        Res::Permission if doc.input_bool("res_user") => Some(Res::User),
+        Res::Permission if doc.input_bool("res_role") => Some(Res::Role),
+        Res::Permission if doc.input_bool("res_domain") => Some(Res::Domain),
         _ => Some(res),
     }
 }
 
 /// Get value to search
-fn search_value() -> String {
+fn search_value() -> Result<String> {
     let doc = Doc::get();
-    let sb_search = doc.elem::<HtmlInputElement>("sb_search");
+    let sb_search = doc.elem::<HtmlInputElement>("sb_search")?;
     let mut search = sb_search.value();
     if let Some(istate) = doc.select_parse::<String>("sb_state")
         && ItemState::from_code(&istate).is_some()
@@ -492,7 +443,7 @@ fn search_value() -> String {
         search.push(' ');
         search.push_str(&istate);
     }
-    search
+    Ok(search)
 }
 
 /// Add an "input" event listener to an element
@@ -538,7 +489,7 @@ fn handle_res_change() {
 async fn handle_search() -> Result<()> {
     match app::card_list(None) {
         Some(mut cards) => {
-            let search = search_value();
+            let search = search_value()?;
             if let Some(cv) = cards.expanded_view() {
                 replace_card(cv.compact(), &search).await?
             }
@@ -768,7 +719,7 @@ fn handle_card_click_ev(elem: &Element) {
 /// Handle a card click event
 async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
-        let search = search_value();
+        let search = search_value()?;
         replace_card(cv.compact(), &search).await?;
     }
     // Expand to the second view (1) for this resource
@@ -792,8 +743,8 @@ async fn handle_login() -> Result<()> {
     ) {
         let uri = Uri::from("/iris/api/login");
         let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
-        let elem = doc.elem::<HtmlInputElement>("login_pass");
-        elem.set_value("");
+        let el = doc.elem::<HtmlInputElement>("login_pass")?;
+        el.set_value("");
         util::hide_elem("sb_login");
         uri.post(&js.into()).await?;
         finish_init().await
@@ -816,8 +767,7 @@ async fn go_resource(attrs: ButtonAttrs) -> Result<()> {
 
 /// Set selected resource
 async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
-    let doc = Doc::get();
-    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource");
+    let sb_resource = Doc::get().elem::<HtmlSelectElement>("sb_resource")?;
     let base = res.map(|r| r.base().as_str()).unwrap_or("");
     sb_resource.set_value(base);
     handle_resource_change(res, search).await
@@ -830,10 +780,10 @@ async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
             let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
             let mut cards = CardList::new(res, &access);
             cards.fetch_all().await?;
-            let search = search_value();
+            let search = search_value()?;
             let html = cards.build_html(&search).await?;
             let doc = Doc::get();
-            let sb_list = doc.elem::<Element>("sb_list");
+            let sb_list = doc.elem::<Element>("sb_list")?;
             sb_list.set_inner_html(&html);
             app::card_list(Some(cards));
         }
@@ -910,11 +860,11 @@ fn fetch_station_data() {
 
 /// Actually fetch binned station data
 async fn do_fetch_station_data() -> Result<()> {
-    let data = StationData::fetch().await?;
-    let css = data.make_style();
-    Doc::get()
-        .elem::<Element>("segment-style")
-        .set_inner_html(&css);
+    if let Some(el) = Doc::get().opt_elem::<Element>("segment-style") {
+        let data = StationData::fetch().await?;
+        let css = data.make_style();
+        el.set_inner_html(&css);
+    }
     Ok(())
 }
 
@@ -993,7 +943,7 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     if clear {
         clear_selected_item(current_zoom());
         if let Some(cv) = app::expanded_view() {
-            let search = search_value();
+            let search = search_value()?;
             replace_card(cv.compact(), &search).await?;
         }
         return Ok(());
@@ -1023,7 +973,7 @@ fn handle_map_zoom(zoom: u32) {
 /// Handle map zoom
 async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
     Doc::get()
-        .elem::<Element>("zoom-level")
+        .elem::<Element>("zoom-level")?
         .set_inner_html(&zoom.to_string());
     match app::selected_item() {
         Some((res, name)) => set_selected_style(res, &name, zoom),
@@ -1083,7 +1033,7 @@ async fn update_card_list(res: Res) -> Result<bool> {
     let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
     let mut cards = CardList::new(res, &access).with_json(old_json);
     cards.fetch_all().await?;
-    let search = search_value();
+    let search = search_value()?;
     for (cv, html) in cards.changed_html(&search).await? {
         if let Some(ev) = &expanded
             && cv.name == ev.name
@@ -1112,34 +1062,35 @@ async fn update_map_states(
     cards: Option<&CardList>,
 ) -> Result<()> {
     // NOTE: resource must have locations
-    let displayed = is_layer_displayed(res, zoom);
-    let css = if displayed {
-        let states_all = card::item_states_all(res);
-        let items = match cards {
-            Some(cards) => cards.states_main().await?,
-            None => {
-                let access: Vec<Permission> =
-                    Asset::Access.uri().get_val().await?;
-                let mut cards = CardList::new(res, &access);
-                cards.fetch_all().await?;
-                cards.states_main().await?
-            }
+    let doc = Doc::get();
+    if let Some(el) = doc.opt_elem::<Element>(&format!("{res}-style")) {
+        let displayed = is_layer_displayed(res, zoom);
+        let css = if displayed {
+            let states_all = card::item_states_all(res);
+            let items = match cards {
+                Some(cards) => cards.states_main().await?,
+                None => {
+                    let access: Vec<Permission> =
+                        Asset::Access.uri().get_val().await?;
+                    let mut cards = CardList::new(res, &access);
+                    cards.fetch_all().await?;
+                    cards.states_main().await?
+                }
+            };
+            item_states_css(states_all, &items)
+        } else {
+            format!(".wyrm-{res} {{ display: none; }}")
         };
-        item_states_css(states_all, &items)
-    } else {
-        format!(".wyrm-{res} {{ display: none; }}")
-    };
-    Doc::get()
-        .elem::<Element>(&format!("{res}-style"))
-        .set_inner_html(&css);
-    let css = if zoom >= selected_zoom(res) {
-        ""
-    } else {
-        "background: #aaa;"
-    };
-    Doc::get()
-        .elem::<Element>(&format!("layer-{res}"))
-        .set_attribute("style", css)?;
+        el.set_inner_html(&css);
+    }
+    if let Some(el) = doc.opt_elem::<Element>(&format!("layer-{res}")) {
+        let css = if zoom >= selected_zoom(res) {
+            ""
+        } else {
+            "background: #aaa;"
+        };
+        el.set_attribute("style", css)?;
+    }
     Ok(())
 }
 
@@ -1180,8 +1131,8 @@ fn item_states_css(
 
 /// Update map OSM style
 async fn update_osm_style(zoom: u32) -> Result<()> {
-    let displayed =
-        zoom >= Doc::get().input_parse::<u32>("layer-osm").unwrap_or(32);
+    let doc = Doc::get();
+    let displayed = zoom >= doc.input_parse::<u32>("layer-osm").unwrap_or(32);
     let css = if displayed {
         ""
     } else {
@@ -1189,10 +1140,9 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
          .wyrm-wetland,.wyrm-motorway,.wyrm-trunk,.wyrm-primary,\
          .wyrm-secondary { display: none; }"
     };
-    Doc::get().elem::<Element>("osm-style").set_inner_html(css);
+    doc.elem::<Element>("osm-style")?.set_inner_html(css);
     let css = if displayed { "" } else { "background: #aaa;" };
-    Doc::get()
-        .elem::<Element>("layer-osm")
+    doc.elem::<Element>("layer-osm")?
         .set_attribute("style", css)?;
     Ok(())
 }

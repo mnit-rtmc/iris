@@ -40,7 +40,6 @@ use std::borrow::Cow;
 use std::fmt;
 use std::io::Write;
 use wasm_bindgen::JsValue;
-use web_sys::HtmlSelectElement;
 
 /// Meter signal state for rendering GIF
 #[derive(Clone, Copy, Debug)]
@@ -344,8 +343,7 @@ impl MeterLock {
 
     /// Encode into JSON Value
     fn json(&self) -> Value {
-        let reason = LockReason::from(self.reason.as_str());
-        match reason {
+        match LockReason::from(self.reason.as_str()) {
             LockReason::Unlocked => Value::Null,
             _ => Value::String(self.to_string()),
         }
@@ -393,6 +391,13 @@ impl RampMeter {
         self.lock
             .as_ref()
             .map(|lk| LockReason::from(lk.reason.as_str()))
+            .unwrap_or(LockReason::Unlocked)
+    }
+
+    /// Get selected lock reason
+    fn selected_lock_reason(&self) -> LockReason {
+        Doc::get()
+            .select_parse::<LockReason>("lk_reason")
             .unwrap_or(LockReason::Unlocked)
     }
 
@@ -865,8 +870,7 @@ impl Card for RampMeter {
     /// Handle input event for an element on the card
     fn handle_input(&self, _anc: RampMeterAnc, id: String) -> Vec<Action> {
         if &id == "lk_reason" {
-            let r = Doc::get().elem::<HtmlSelectElement>("lk_reason").value();
-            let reason = LockReason::from(&r[..]);
+            let reason = self.selected_lock_reason();
             let rate = if reason.duration().is_some() {
                 self.lock_rate().or(self.status_rate()).or(Some(1714))
             } else {

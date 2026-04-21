@@ -147,8 +147,7 @@ impl DmsLock {
 
     /// Encode into JSON Value
     fn json(&self) -> Value {
-        let reason = LockReason::from(self.reason.as_str());
-        match reason {
+        match LockReason::from(self.reason.as_str()) {
             LockReason::Unlocked => Value::Null,
             _ => Value::String(self.to_string()),
         }
@@ -875,8 +874,8 @@ impl Dms {
 
     // Get selected message pattern
     fn selected_pattern<'a>(&self, anc: &'a DmsAnc) -> Option<&'a MsgPattern> {
-        let doc = Doc::get();
-        let pat_name = doc.elem::<HtmlSelectElement>("mc_pattern").value();
+        let el = Doc::get().opt_elem::<HtmlSelectElement>("mc_pattern")?;
+        let pat_name = el.value();
         let pat = anc.compose_patterns.iter().find(|p| p.name == pat_name);
         if pat.is_none() {
             log::warn!("pattern not found: {pat_name}");
@@ -1369,29 +1368,38 @@ impl Card for Dms {
         };
         let lines = if &id == "mc_pattern" {
             // update mc_lines element
-            let mut tree = Tree::new();
-            anc.make_lines_html(&dms, pat, "", &mut tree.root::<html::Div>());
-            let mc_lines = Doc::get().elem::<HtmlElement>("mc_lines");
-            mc_lines.set_outer_html(&String::from(tree));
+            if let Some(mc_lines) =
+                Doc::get().opt_elem::<HtmlElement>("mc_lines")
+            {
+                let mut tree = Tree::new();
+                anc.make_lines_html(
+                    &dms,
+                    pat,
+                    "",
+                    &mut tree.root::<html::Div>(),
+                );
+                mc_lines.set_outer_html(&String::from(tree));
+            }
             Vec::new()
         } else {
             self.selected_lines()
         };
-        let multi = MessagePattern::new(&dms, &pat.multi)
-            .fill(lines.iter().map(|l| &l[..]));
-        let multi = multi_normalize(&multi);
         // update mc_preview image element
-        let mut tree = Tree::new();
-        let mut rend = Renderer::new()
-            .with_dms(&dms)
-            .with_id("mc_preview")
-            .with_class("preview")
-            .with_max_width(240)
-            .with_max_height(80);
-        let mut img = tree.root::<html::Img>();
-        rend.render_multi(&multi, &mut img);
-        let preview = Doc::get().elem::<HtmlElement>("mc_preview");
-        preview.set_outer_html(&String::from(tree));
+        if let Some(el) = Doc::get().opt_elem::<HtmlElement>("mc_preview") {
+            let multi = MessagePattern::new(&dms, &pat.multi)
+                .fill(lines.iter().map(|l| &l[..]));
+            let multi = multi_normalize(&multi);
+            let mut tree = Tree::new();
+            let mut rend = Renderer::new()
+                .with_dms(&dms)
+                .with_id("mc_preview")
+                .with_class("preview")
+                .with_max_width(240)
+                .with_max_height(80);
+            let mut img = tree.root::<html::Img>();
+            rend.render_multi(&multi, &mut img);
+            el.set_outer_html(&String::from(tree));
+        }
         Vec::new()
     }
 

@@ -54,8 +54,9 @@ fn show_login() {
 /// Show a toast message
 fn show_toast(msg: &str) {
     log::warn!("toast: {msg}");
-    let t = Doc::get().elem::<HtmlElement>("sb_toast");
-    t.set_inner_html(msg);
-    t.set_class_name("show");
+    if let Some(el) = Doc::get().opt_elem::<HtmlElement>("sb_toast") {
+        el.set_inner_html(msg);
+        el.set_class_name("show");
+    }
     app::defer_action(DeferredAction::HideToast, 3000);
 }

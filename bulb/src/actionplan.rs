@@ -444,9 +444,10 @@ impl Card for ActionPlan {
 
     /// Handle input event for an element on the card
     fn handle_input(&self, _anc: ActionPlanAnc, id: String) -> Vec<Action> {
-        if &id == "phase" {
-            let doc = Doc::get();
-            let phase = doc.elem::<HtmlSelectElement>("phase").value();
+        if &id == "phase"
+            && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
+        {
+            let phase = el.value();
             let mut fields = Fields::new();
             fields.insert_str("phase", &phase.to_string());
             let uri = uri_one(Res::ActionPlan, &self.name);

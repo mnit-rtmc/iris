@@ -138,21 +138,24 @@ impl Card for Domain {
     fn handle_input(&self, _anc: DomainAnc, id: String) -> Vec<Action> {
         if &id == "block" {
             let doc = Doc::get();
-            let block = doc.elem::<HtmlInputElement>("block");
-            let ob_save = doc.elem::<HtmlButtonElement>("ob_save");
-            match IpCidr::from_str(&block.value()) {
-                Ok(_) => {
-                    block.set_custom_validity("");
-                    block.set_class_name("");
-                    ob_save.set_disabled(false);
+            if let (Some(block), Some(ob_save)) = (
+                doc.opt_elem::<HtmlInputElement>("block"),
+                doc.opt_elem::<HtmlButtonElement>("ob_save"),
+            ) {
+                match IpCidr::from_str(&block.value()) {
+                    Ok(_) => {
+                        block.set_custom_validity("");
+                        block.set_class_name("");
+                        ob_save.set_disabled(false);
+                    }
+                    Err(e) => {
+                        block.set_custom_validity(&e.to_string());
+                        block.set_class_name("invalid");
+                        ob_save.set_disabled(true);
+                    }
                 }
-                Err(e) => {
-                    block.set_custom_validity(&e.to_string());
-                    block.set_class_name("invalid");
-                    ob_save.set_disabled(true);
-                }
+                block.report_validity();
             }
-            block.report_validity();
         }
         Vec::new()
     }

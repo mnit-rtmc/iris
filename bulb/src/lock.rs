@@ -12,6 +12,7 @@
 //
 use chrono::{DateTime, Local, format::SecondsFormat};
 use std::fmt;
+use std::str::FromStr;
 use std::time::Duration;
 
 /// Device lock reason
@@ -41,6 +42,14 @@ impl From<&str> for LockReason {
             "reserve" => Self::Reserve,
             _ => Self::Unlocked,
         }
+    }
+}
+
+impl FromStr for LockReason {
+    type Err = ();
+
+    fn from_str(r: &str) -> Result<Self, ()> {
+        Ok(Self::from(r))
     }
 }
 

@@ -24,6 +24,10 @@ pub enum Error {
     #[error("No document")]
     NoDocument(),
 
+    /// Failed to cast element
+    #[error("Cast failed {0}")]
+    CastFail(String),
+
     /// JavaScript error
     #[error("JS {0}")]
     JsValue(String),

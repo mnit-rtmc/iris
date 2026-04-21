@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::{Error, Result};
 use serde_json::map::Map;
 use serde_json::{Number, Value};
 use std::fmt;
@@ -161,19 +162,14 @@ impl Doc {
     }
 
     /// Get an element by ID and cast it
-    pub fn elem<E: JsCast>(&self, id: &str) -> E {
-        self.opt_elem(id)
-            .ok_or_else(|| {
-                let e = "Invalid element ID";
-                log::error!("{e}: {id}");
-                e
-            })
-            .unwrap_throw()
+    pub fn elem<E: JsCast>(&self, id: &str) -> Result<E> {
+        self.opt_elem(id).ok_or(Error::CastFail(id.to_string()))
     }
 
     /// Get and parse a `select` element value
     pub fn select_parse<T: FromStr>(&self, id: &str) -> Option<T> {
-        self.elem::<HtmlSelectElement>(id).value().parse().ok()
+        self.opt_elem::<HtmlSelectElement>(id)
+            .and_then(|el| el.value().parse().ok())
     }
 
     /// Get and parse an `input` element value
@@ -189,16 +185,15 @@ impl Doc {
 
     /// Get a boolean `input` element value
     pub fn input_bool(&self, id: &str) -> bool {
-        self.elem::<HtmlInputElement>(id).checked()
+        self.opt_elem::<HtmlInputElement>(id)
+            .map(|el| el.checked())
+            .unwrap_or_default()
     }
 
     /// Get and parse a `textarea` element value
     pub fn text_area_parse<T: FromStr>(&self, id: &str) -> Option<T> {
-        self.elem::<HtmlTextAreaElement>(id)
-            .value()
-            .trim()
-            .parse()
-            .ok()
+        self.opt_elem::<HtmlTextAreaElement>(id)
+            .and_then(|el| el.value().trim().parse().ok())
     }
 
     /// Check if the document is full screen
@@ -449,10 +444,14 @@ impl Select<Option<i32>> for Fields {
 
 /// Show an element
 pub fn show_elem(id: &str) {
-    Doc::get().elem::<HtmlElement>(id).set_class_name("show");
+    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(id) {
+        el.set_class_name("show");
+    }
 }
 
 /// Hide an element
 pub fn hide_elem(id: &str) {
-    Doc::get().elem::<HtmlElement>(id).set_class_name("hidden");
+    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(id) {
+        el.set_class_name("hidden");
+    }
 }

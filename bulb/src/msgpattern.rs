@@ -549,11 +549,12 @@ impl MsgPattern {
 
     /// Replace preview image
     fn replace_preview(&self, anc: &MsgPatternAnc) {
-        let mut tree = Tree::new();
-        let mut img = tree.root::<html::Img>();
-        self.render_preview(anc, &mut img);
-        let preview = Doc::get().elem::<HtmlElement>("mp_preview");
-        preview.set_outer_html(&String::from(tree));
+        if let Some(el) = Doc::get().opt_elem::<HtmlElement>("mp_preview") {
+            let mut tree = Tree::new();
+            let mut img = tree.root::<html::Img>();
+            self.render_preview(anc, &mut img);
+            el.set_outer_html(&String::from(tree));
+        }
     }
 
     /// Render the message lines table
@@ -647,12 +648,15 @@ impl Card for MsgPattern {
             if let Tab::Preview = tab {
                 self.replace_preview(&anc);
             }
-            doc.elem::<HtmlElement>("mp_preview_div")
-                .set_class_name(tab.row_class(Tab::Preview));
-            doc.elem::<HtmlElement>("mp_multi_div")
-                .set_class_name(tab.row_class(Tab::Multi));
-            doc.elem::<HtmlElement>("mp_lines_div")
-                .set_class_name(tab.row_class(Tab::Lines));
+            if let Some(el) = doc.opt_elem::<HtmlElement>("mp_preview_div") {
+                el.set_class_name(tab.row_class(Tab::Preview));
+            }
+            if let Some(el) = doc.opt_elem::<HtmlElement>("mp_multi_div") {
+                el.set_class_name(tab.row_class(Tab::Multi));
+            }
+            if let Some(el) = doc.opt_elem::<HtmlElement>("mp_lines_div") {
+                el.set_class_name(tab.row_class(Tab::Lines));
+            }
         }
         Vec::new()
     }

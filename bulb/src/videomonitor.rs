@@ -154,8 +154,9 @@ impl VideoMonitor {
             Some(num) => format!("📺 #{num}"),
             None => "📺".to_string(),
         };
-        let t = Doc::get().elem::<HtmlElement>("sb_monitor");
-        t.set_inner_html(&mon_num);
+        if let Ok(t) = Doc::get().elem::<HtmlElement>("sb_monitor") {
+            t.set_inner_html(&mon_num);
+        }
     }
 
     /// Convert to Compact HTML
