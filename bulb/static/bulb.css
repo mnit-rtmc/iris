@@ -231,8 +231,7 @@ th, td {
 }
 #sidebar {
   flex: 1 0;
-  overflow-x: hidden;
-  overflow-y: scroll;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   user-select: none;
