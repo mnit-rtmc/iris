@@ -297,6 +297,7 @@ impl Honey {
     }
 
     // Remove sender for one session
+    #[allow(unused)]
     fn remove_sender(&self, sid: Id) {
         log::debug!("remove_sender: {sid}");
         let mut map = self.notifiers.lock().unwrap();
@@ -514,9 +515,9 @@ fn login_resource(honey: Honey) -> Router {
     async fn handle_delete(
         session: Session,
         ConnectInfo(addr): ConnectInfo<SocketAddr>,
-        State(honey): State<Honey>,
     ) -> impl IntoResponse {
-        log::info!("DELETE login from {addr}");
+        let id = session.id().unwrap_or_default();
+        log::info!("DELETE login from {addr} {id}");
         session
             .cycle_id()
             .await
@@ -524,8 +525,8 @@ fn login_resource(honey: Honey) -> Router {
         Credentials::remove(&session)
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
-        let id = session.id().unwrap_or_default();
-        honey.remove_sender(id);
+        // NOTE: removing notification sender seems to prevent clients
+        //       from being able to reconnect (looping failure)
         html_resp("<html>Logged out</html>")
     }
 
