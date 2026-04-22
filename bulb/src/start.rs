@@ -603,6 +603,7 @@ fn handle_button_click_ev(target: &Element) {
     let id = target.id();
     match id.as_str() {
         "ob_login" => spawn_future(handle_login()),
+        "ob_logout" => spawn_future(handle_logout()),
         "show_sidebar" => spawn_future(handle_show_sidebar(true)),
         "hide_sidebar" => spawn_future(handle_show_sidebar(false)),
         _ => {
@@ -751,6 +752,13 @@ async fn handle_login() -> Result<()> {
     } else {
         Ok(())
     }
+}
+
+/// Handle logout button press
+async fn handle_logout() -> Result<()> {
+    let uri = Uri::from("/iris/api/login");
+    uri.delete().await?;
+    Ok(())
 }
 
 /// Go to resource from target's `data-link` attribute
