@@ -27,7 +27,8 @@ A user must have base DMS **Configure** permission to edit the word list.
 ## Abbreviation
 
 _Allowed_ words are used for automatic abbreviation of [message lines] and
-[incident] messages, when necessary.
+[incident] messages, when necessary.  If **abbr** is not shorter than the
+word, it will be ignored.
 
 On lines which are too wide, a single word is chosen and replaced with its
 abbreviated form.  If it's still too wide, the process repeats.  If a message

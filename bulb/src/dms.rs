@@ -483,7 +483,7 @@ impl DmsAnc {
                         && word.name == w
                         && let Some(abbr) = &word.abbr
                         && !abbr.is_empty()
-                        && abbr != w
+                        && abbr.len() < w.len()
                     {
                         abbrev = word.clone();
                     }

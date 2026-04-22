@@ -50,7 +50,11 @@ impl Word {
             if let Some(abbr) = &self.abbr
                 && !abbr.is_empty()
             {
-                div.cdata(" ➡ ");
+                if abbr.len() < self.name().len() {
+                    div.cdata(" ➡ ");
+                } else {
+                    div.cdata(" ⇢ ");
+                }
                 div.cdata(opt_ref(&self.abbr));
             }
         } else {
