@@ -33,7 +33,8 @@ These are JSON arrays, fetched using http `GET` requests:
 - `login`  Authentication endpoint — `POST iris/api/login` with a JSON object
   containing `username` and `password` values.  A session cookie is created
   for subsequent restricted requests.  `GET iris/api/login` returns a JSON
-  string containing the authenticated user's name.
+  string containing the authenticated user's name.  `DELETE iris/api/login` to
+  end the session.
 - `access`  Access [permission]s — `GET iris/api/access` returns a JSON array
   of [permission] records associated with the authenticated user's role.
 - `notify`  Notification endpoint — `POST iris/api/notify` with a JSON array

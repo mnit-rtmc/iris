@@ -1,6 +1,6 @@
 // cred.rs
 //
-// Copyright (C) 2021-2024  Minnesota Department of Transportation
+// Copyright (C) 2021-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,6 +32,14 @@ impl Credentials {
     /// Load credentials from session
     pub async fn load(session: &Session) -> Result<Self> {
         session.get(CRED_KEY).await?.ok_or(Error::Unauthenticated)
+    }
+
+    /// Remove credentials from session
+    pub async fn remove(session: &Session) -> Result<Self> {
+        session
+            .remove(CRED_KEY)
+            .await?
+            .ok_or(Error::Unauthenticated)
     }
 
     /// Store credentials in session

@@ -296,6 +296,13 @@ impl Honey {
         }
     }
 
+    // Remove sender for one session
+    fn remove_sender(&self, sid: Id) {
+        log::debug!("remove_sender: {sid}");
+        let mut map = self.notifiers.lock().unwrap();
+        map.retain(|id, _notifier| *id != sid);
+    }
+
     /// Notify all SSE listeners
     pub async fn notify_sse(&self, nm: Name) {
         log::debug!("Notify SSE {nm}");
@@ -503,8 +510,30 @@ fn login_resource(honey: Honey) -> Router {
         html_resp("<html>Authenticated</html>")
     }
 
+    /// Handle `DELETE` request
+    async fn handle_delete(
+        session: Session,
+        ConnectInfo(addr): ConnectInfo<SocketAddr>,
+        State(honey): State<Honey>,
+    ) -> impl IntoResponse {
+        log::info!("DELETE login from {addr}");
+        session
+            .cycle_id()
+            .await
+            .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
+        Credentials::remove(&session)
+            .await
+            .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
+        let id = session.id().unwrap_or_default();
+        honey.remove_sender(id);
+        html_resp("<html>Logged out</html>")
+    }
+
     Router::new()
-        .route("/login", get(handle_get).post(handle_post))
+        .route(
+            "/login",
+            get(handle_get).post(handle_post).delete(handle_delete),
+        )
         .with_state(honey)
 }
 
