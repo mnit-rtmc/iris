@@ -48,7 +48,6 @@ resource, at the same access level.
 | Base Resource      | Dependent Resources                               |
 |--------------------|---------------------------------------------------|
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action], hashtag |
-| [alert config]     | alert info, [alert message]                       |
 | [beacon]           |                                                   |
 | [camera]           | [camera preset], [encoder stream], [encoder type] |
 | [controller]       | [alarm], [comm link], [gps], [modem]              |
@@ -63,7 +62,7 @@ resource, at the same access level.
 | [system attribute] | [cabinet style], [comm config], [event config], map extent, rpt conduit |
 | [toll zone]        | [tag reader]                                      |
 | [video monitor]    | [flow stream], [monitor style], [play list]       |
-| [weather sensor]   |                                                   |
+| [weather sensor]   | [alert config], alert info, [alert message]       |
 
 ## Associated Resources
 

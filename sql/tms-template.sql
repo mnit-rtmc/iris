@@ -89,11 +89,11 @@ help_trouble_ticket_url
 incident_clear_advice_multi	JUST CLEARED
 incident_clear_secs	300
 incident_max_sign_miles	0.0
-legacy_xml_config_enable	true
-legacy_xml_detector_enable	true
-legacy_xml_incident_enable	true
-legacy_xml_sign_message_enable	true
-legacy_xml_weather_sensor_enable	true
+legacy_xml_config_enable	false
+legacy_xml_detector_enable	false
+legacy_xml_incident_enable	false
+legacy_xml_sign_message_enable	false
+legacy_xml_weather_sensor_enable	false
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
 map_segment_max_meters	2000
@@ -178,9 +178,9 @@ day_plan	action_plan
 device_action	action_plan
 plan_phase	action_plan
 time_action	action_plan
-alert_config	\N
-alert_info	alert_config
-alert_message	alert_config
+alert_config	weather_sensor
+alert_info	weather_sensor
+alert_message	weather_sensor
 beacon	\N
 camera	\N
 camera_preset	camera
@@ -523,22 +523,21 @@ CREATE UNIQUE INDEX permission_role_base_resource_hashtag_idx
 INSERT INTO iris.permission (name, role, base_resource, access_level)
 VALUES
     ('prm_1', 'administrator', 'action_plan', 4),
-    ('prm_2', 'administrator', 'alert_config', 4),
-    ('prm_3', 'administrator', 'beacon', 4),
-    ('prm_4', 'administrator', 'camera', 4),
-    ('prm_5', 'administrator', 'controller', 4),
-    ('prm_6', 'administrator', 'detector', 4),
-    ('prm_7', 'administrator', 'dms', 4),
-    ('prm_8', 'administrator', 'gate_arm', 4),
-    ('prm_9', 'administrator', 'incident', 4),
-    ('prm_10', 'administrator', 'lcs', 4),
-    ('prm_11', 'administrator', 'parking_area', 4),
-    ('prm_12', 'administrator', 'permission', 4),
-    ('prm_13', 'administrator', 'ramp_meter', 4),
-    ('prm_14', 'administrator', 'system_attribute', 4),
-    ('prm_15', 'administrator', 'toll_zone', 4),
-    ('prm_16', 'administrator', 'video_monitor', 4),
-    ('prm_17', 'administrator', 'weather_sensor', 4);
+    ('prm_2', 'administrator', 'beacon', 4),
+    ('prm_3', 'administrator', 'camera', 4),
+    ('prm_4', 'administrator', 'controller', 4),
+    ('prm_5', 'administrator', 'detector', 4),
+    ('prm_6', 'administrator', 'dms', 4),
+    ('prm_7', 'administrator', 'gate_arm', 4),
+    ('prm_8', 'administrator', 'incident', 4),
+    ('prm_9', 'administrator', 'lcs', 4),
+    ('prm_10', 'administrator', 'parking_area', 4),
+    ('prm_11', 'administrator', 'permission', 4),
+    ('prm_12', 'administrator', 'ramp_meter', 4),
+    ('prm_13', 'administrator', 'system_attribute', 4),
+    ('prm_14', 'administrator', 'toll_zone', 4),
+    ('prm_15', 'administrator', 'video_monitor', 4),
+    ('prm_16', 'administrator', 'weather_sensor', 4);
 
 CREATE TRIGGER permission_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.permission
