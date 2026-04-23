@@ -27,14 +27,16 @@ use web_sys::{Event, EventSource, HtmlElement, MessageEvent};
 pub enum NotifyState {
     /// Initial starting state
     Starting,
-    /// Disconnected from SSE server
-    Disconnected,
     /// Connecting to SSE server
     Connecting,
-    /// Updating after event receipt
-    Updating,
     /// Connected to SSE server
     Connected,
+    /// Updating after event receipt
+    Updating,
+    /// Reconnecting to SSE server
+    Reconnecting,
+    /// Disconnected from SSE server
+    Disconnected,
 }
 
 impl NotifyState {
@@ -42,10 +44,11 @@ impl NotifyState {
     pub const fn symbol(self) -> &'static str {
         match self {
             Self::Starting => "⚪",
-            Self::Disconnected => "⚫",
             Self::Connecting => "🟠",
-            Self::Updating => "🟡",
             Self::Connected => "🟢",
+            Self::Updating => "🟡",
+            Self::Reconnecting => "🔴",
+            Self::Disconnected => "⚫",
         }
     }
 }
@@ -70,7 +73,7 @@ impl Listener {
     fn new(path: &str) -> Option<Self> {
         let source = match EventSource::new(path) {
             Ok(es) => {
-                log::info!("SSE EventSource: {path}");
+                log::info!("SSE new: {path}");
                 es
             }
             Err(e) => {
@@ -80,18 +83,18 @@ impl Listener {
             }
         };
         let onopen = Closure::new(|e: Event| {
-            log::info!("SSE event: {}", e.type_());
+            log::info!("SSE open: {}", e.type_());
             set_notify_state(NotifyState::Connecting);
         });
         let onerror = Closure::new(|e: Event| {
-            log::error!("SSE event: {}", e.type_());
+            log::error!("SSE error: {}", e.type_());
             set_notify_state(NotifyState::Disconnected);
         });
         let onmessage = Closure::new(|e: MessageEvent| {
             match e.data().dyn_into::<JsString>() {
                 Ok(payload) => handle_notify(payload),
                 Err(err) => {
-                    log::warn!("SSE payload: {err:?}");
+                    log::warn!("SSE message err: {err:?}");
                     set_notify_state(NotifyState::Disconnected);
                 }
             }
@@ -156,12 +159,23 @@ fn build_list(res: Option<Res>) -> String {
 }
 
 /// Set refresh button text
-pub fn set_notify_state(ns: NotifyState) {
+pub fn set_notify_state(mut ns: NotifyState) {
+    match ns {
+        NotifyState::Disconnected => {
+            let count = app::connect_count() + 1;
+            if count < 8 {
+                ns = NotifyState::Reconnecting;
+                app::defer_action(DeferredAction::MakeEventSource, 5000);
+                app::set_connect_count(count);
+            }
+        }
+        NotifyState::Connected => {
+            app::set_connect_count(0);
+        }
+        _ => (),
+    }
     if let Some(sb_notify) = Doc::get().opt_elem::<HtmlElement>("sb_notify") {
         sb_notify.set_inner_html(ns.symbol());
-    }
-    if NotifyState::Disconnected == ns {
-        app::defer_action(DeferredAction::MakeEventSource, 5000);
     }
 }
 

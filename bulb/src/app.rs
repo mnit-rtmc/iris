@@ -39,6 +39,8 @@ pub enum DeferredAction {
 struct AppState {
     /// Logged-in user name
     user: Option<String>,
+    /// SSE connection count
+    connect_count: u32,
     /// Selected item (resource / name)
     selected_item: Option<(Res, String)>,
     /// Card list
@@ -65,6 +67,16 @@ pub fn set_user(user: Option<String>) {
 /// Get logged-in user name from global app state
 pub fn user() -> Option<String> {
     STATE.with(|rc| rc.borrow().user.clone())
+}
+
+/// Set SSE connect count
+pub fn set_connect_count(count: u32) {
+    STATE.with(|rc| rc.borrow_mut().connect_count = count);
+}
+
+/// Get SSE connect count
+pub fn connect_count() -> u32 {
+    STATE.with(|rc| rc.borrow().connect_count)
 }
 
 /// Set selected item in global app state
