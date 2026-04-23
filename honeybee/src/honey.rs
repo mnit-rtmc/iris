@@ -947,6 +947,7 @@ const fn one_sql(res: Res) -> Option<&'static str> {
         Domain => query::DOMAIN_ONE,
         EncoderStream => query::ENCODER_STREAM_ONE,
         EncoderType => query::ENCODER_TYPE_ONE,
+        EventConfig => query::EVENT_CONFIG_ONE,
         FlowStream => query::FLOW_STREAM_ONE,
         Font => query::FONT_ONE,
         GateArm => query::GATE_ARM_ONE,

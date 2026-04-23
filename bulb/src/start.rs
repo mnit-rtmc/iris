@@ -419,6 +419,9 @@ fn selected_resource() -> Option<Res> {
         Res::Controller if doc.input_bool("res_alarm") => Some(Res::Alarm),
         Res::Controller if doc.input_bool("res_gps") => Some(Res::Gps),
         Res::Controller if doc.input_bool("res_modem") => Some(Res::Modem),
+        Res::SystemAttribute if doc.input_bool("res_event_config") => {
+            Some(Res::EventConfig)
+        }
         Res::SystemAttribute if doc.input_bool("res_comm_config") => {
             Some(Res::CommConfig)
         }
@@ -469,9 +472,9 @@ fn handle_input(id: String) {
         | "res_lcs" | "res_lcs_state" | "res_video_monitor"
         | "res_monitor_style" | "res_flow_stream" | "res_controller"
         | "res_comm_link" | "res_alarm" | "res_gps" | "res_modem"
-        | "res_system_attr" | "res_comm_config" | "res_cabinet_style"
-        | "res_permission" | "res_user" | "res_role" | "res_domain"
-        | "sb_resource" => handle_res_change(),
+        | "res_system_attr" | "res_event_config" | "res_comm_config"
+        | "res_cabinet_style" | "res_permission" | "res_user" | "res_role"
+        | "res_domain" | "sb_resource" => handle_res_change(),
         "sb_search" | "sb_state" => spawn_future(handle_search()),
         "ob_view" => handle_ob_view_ev(),
         _ => spawn_future(handle_input_other(id)),

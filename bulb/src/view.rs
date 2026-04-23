@@ -23,6 +23,7 @@ use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
 use crate::error::{Error, Result};
+use crate::eventcfg::EventConfig;
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::geoloc::Loc;

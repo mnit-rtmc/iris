@@ -32,6 +32,7 @@ mod device;
 mod dms;
 mod domain;
 mod error;
+mod eventcfg;
 mod factor;
 mod fetch;
 mod flowstream;

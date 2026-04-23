@@ -348,6 +348,12 @@ pub const EVENT_CONFIG_ALL: &str = "\
   FROM iris.event_config \
   ORDER BY name";
 
+/// SQL query for one event config
+pub const EVENT_CONFIG_ONE: &str = "\
+  SELECT name, enable_store, enable_purge, purge_days \
+  FROM iris.event_config \
+  WHERE name = $1";
+
 /// SQL query for event descriptions (LUT)
 pub const EVENT_DESCRIPTION_LUT: &str = "\
   SELECT event_desc_id AS id, description \

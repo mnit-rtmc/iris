@@ -19,27 +19,29 @@ use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 
-/// System Attribute
+/// Event configuration
 #[derive(Debug, Default, Deserialize, PartialEq)]
-pub struct SystemAttr {
+pub struct EventConfig {
     pub name: String,
-    pub value: String,
+    pub enable_store: bool,
+    pub enable_purge: bool,
+    pub purge_days: u32,
 }
 
-/// Ancillary system attribute data
+/// Ancillary event configuration data
 #[derive(Debug, Default)]
-pub struct SystemAttrAnc;
+pub struct EventConfigAnc;
 
-impl AncillaryData for SystemAttrAnc {
-    type Primary = SystemAttr;
+impl AncillaryData for EventConfigAnc {
+    type Primary = EventConfig;
 
-    /// Construct ancillary system attribute data
-    fn new(_pri: &SystemAttr, _view: View) -> Self {
-        SystemAttrAnc
+    /// Construct ancillary event configuration data
+    fn new(_pri: &EventConfig, _view: View) -> Self {
+        EventConfigAnc
     }
 }
 
-impl SystemAttr {
+impl EventConfig {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let mut tree = Tree::new();
@@ -54,21 +56,45 @@ impl SystemAttr {
         self.title(View::Setup, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("value").cdata("Value").close();
+        div.label().r#for("store").cdata("Enable Store").close();
         let mut input = div.input();
-        input.id("value").maxlength(64).size(24).value(&self.value);
+        input.id("store").r#type("checkbox");
+        if self.enable_store {
+            input.checked();
+        }
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("purge").cdata("Enable Purge").close();
+        let mut input = div.input();
+        input.id("purge").r#type("checkbox");
+        if self.enable_purge {
+            input.checked();
+        }
+        div.close();
+        // FIXME: add purge days
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("purge_days").cdata("Purge Days").close();
+        div.input()
+            .id("purge_days")
+            .r#type("number")
+            .min(0)
+            .max(9999)
+            .size(4)
+            .value(self.purge_days);
         div.close();
         self.footer_html(false, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
 
-impl Card for SystemAttr {
-    type Ancillary = SystemAttrAnc;
+impl Card for EventConfig {
+    type Ancillary = EventConfigAnc;
 
     /// Get the resource
     fn res() -> Res {
-        Res::SystemAttribute
+        Res::EventConfig
     }
 
     /// Get all item states
@@ -88,12 +114,12 @@ impl Card for SystemAttr {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &SystemAttrAnc) -> bool {
-        self.name.contains_lower(search) || self.value.contains_lower(search)
+    fn is_match(&self, search: &str, _anc: &EventConfigAnc) -> bool {
+        self.name.contains_lower(search)
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &SystemAttrAnc) -> String {
+    fn to_html(&self, view: View, anc: &EventConfigAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
             View::Setup => self.to_html_setup(),
@@ -104,7 +130,9 @@ impl Card for SystemAttr {
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
-        fields.changed_input("value", &self.value);
+        fields.changed_input("store", self.enable_store);
+        fields.changed_input("purge", self.enable_purge);
+        fields.changed_input("purge_days", self.purge_days);
         fields.into_value().to_string()
     }
 }

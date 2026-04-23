@@ -23,6 +23,7 @@ use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
 use crate::error::{Error, Result};
+use crate::eventcfg::EventConfig;
 use crate::fetch::{Action, Uri};
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
@@ -303,6 +304,7 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::Detector => Detector::item_states_all(),
         Res::Dms => Dms::item_states_all(),
         Res::Domain => Domain::item_states_all(),
+        Res::EventConfig => EventConfig::item_states_all(),
         Res::GateArm => GateArm::item_states_all(),
         Res::Gps => Gps::item_states_all(),
         Res::Incident => Incident::item_states_all(),
@@ -331,6 +333,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         Res::CabinetStyle
         | Res::CommConfig
         | Res::Domain
+        | Res::EventConfig
         | Res::FlowStream
         | Res::Gps
         | Res::LcsState
@@ -507,6 +510,7 @@ impl CardList {
         // "Create" card
         let view = if self.access_level == 4
             && search.is_all()
+            && res != Res::EventConfig
             && res != Res::SignConfig
             && res != Res::SystemAttribute
         {
