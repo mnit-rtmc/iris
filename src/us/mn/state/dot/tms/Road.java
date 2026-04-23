@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public interface Road extends SonarObject {
 	}
 
 	/** SONAR base type name */
-	String SONAR_BASE = Detector.SONAR_TYPE;
+	String SONAR_BASE = R_Node.SONAR_TYPE;
 
 	/** Set the abbreviated name */
 	void setAbbrev(String a);

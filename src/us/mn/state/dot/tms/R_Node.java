@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2024  Minnesota Department of Transportation
+ * Copyright (C) 2007-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,9 +31,6 @@ public interface R_Node extends SonarObject {
 	default String getTypeName() {
 		return SONAR_TYPE;
 	}
-
-	/** SONAR base type name */
-	String SONAR_BASE = Detector.SONAR_TYPE;
 
 	/** Minimum lane shift */
 	int MIN_SHIFT = 1;

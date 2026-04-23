@@ -195,10 +195,9 @@ comm_link	controller
 geo_loc	controller
 gps	controller
 modem	controller
-detector	\N
-r_node	detector
-road	detector
-station	detector
+r_node	\N
+detector	r_node
+road	r_node
 dms	\N
 font	dms
 glyph	dms
@@ -526,13 +525,13 @@ VALUES
     ('prm_2', 'administrator', 'beacon', 4),
     ('prm_3', 'administrator', 'camera', 4),
     ('prm_4', 'administrator', 'controller', 4),
-    ('prm_5', 'administrator', 'detector', 4),
-    ('prm_6', 'administrator', 'dms', 4),
-    ('prm_7', 'administrator', 'gate_arm', 4),
-    ('prm_8', 'administrator', 'incident', 4),
-    ('prm_9', 'administrator', 'lcs', 4),
-    ('prm_10', 'administrator', 'parking_area', 4),
-    ('prm_11', 'administrator', 'permission', 4),
+    ('prm_5', 'administrator', 'dms', 4),
+    ('prm_6', 'administrator', 'gate_arm', 4),
+    ('prm_7', 'administrator', 'incident', 4),
+    ('prm_8', 'administrator', 'lcs', 4),
+    ('prm_9', 'administrator', 'parking_area', 4),
+    ('prm_10', 'administrator', 'permission', 4),
+    ('prm_11', 'administrator', 'r_node', 4),
     ('prm_12', 'administrator', 'ramp_meter', 4),
     ('prm_13', 'administrator', 'system_attribute', 4),
     ('prm_14', 'administrator', 'toll_zone', 4),

@@ -51,15 +51,15 @@ resource, at the same access level.
 | [beacon]           |                                                   |
 | [camera]           | [camera preset], [encoder stream], [encoder type] |
 | [controller]       | [alarm], [comm link], [gps], [modem]              |
-| [detector]         | [r_node], [road], station                         |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         |                                                   |
 | [incident]         | inc\_advice, inc\_descriptor, inc\_detail, inc\_locator, road\_affix |
 | [lcs]              | [lcs state]                                       |
 | [parking area]     |                                                   |
 | permission         | [domain], [role], [user id], connection           |
+| [r_node]           | [detector], [map extent], [road]                  |
 | [ramp meter]       |                                                   |
-| [system attribute] | [cabinet style], [comm config], [event config], map extent, rpt conduit |
+| [system attribute] | [cabinet style], [comm config], [event config], rpt conduit |
 | [toll zone]        | [tag reader]                                      |
 | [video monitor]    | [flow stream], [monitor style], [play list]       |
 | [weather sensor]   | [alert config], alert info, [alert message]       |
@@ -105,6 +105,7 @@ resource.  These include:
 [incident]: incidents.html
 [lcs]: lcs.html
 [lcs state]: lcs.html#lcs-states
+[map extent]: mapping.html#map-extents
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
 [modem]: modem.html
