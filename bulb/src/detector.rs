@@ -48,27 +48,8 @@ impl Detector {
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
-            .cdata(anc.item_states(self).to_string())
-            .close();
-        div = tree.root::<html::Div>();
-        div.class("info fill").cdata(opt_ref(&self.label));
-        String::from(tree)
-    }
-
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &DetectorAnc) -> String {
-        let mut tree = Tree::new();
-        self.title(View::Status, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("row");
-        anc.item_states(self).spans(&mut div.span());
-        div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.span()
-            .class("info")
-            .cdata_len(opt_ref(&self.label), 20)
-            .close();
+            .cdata(anc.item_states(self).to_string());
+        div.span().class("info fill").cdata(opt_ref(&self.label));
         String::from(tree)
     }
 
@@ -103,7 +84,12 @@ impl Card for Detector {
 
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
-        &[ItemState::Online, ItemState::Offline, ItemState::Inactive]
+        &[
+            ItemState::Online,
+            ItemState::Fault,
+            ItemState::Offline,
+            ItemState::Inactive,
+        ]
     }
 
     /// Get the name
@@ -128,7 +114,6 @@ impl Card for Detector {
     fn to_html(&self, view: View, anc: &DetectorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }

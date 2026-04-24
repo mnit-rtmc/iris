@@ -334,6 +334,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         }
         Res::CabinetStyle
         | Res::CommConfig
+        | Res::Detector
         | Res::Domain
         | Res::EventConfig
         | Res::FlowStream
@@ -367,7 +368,7 @@ pub fn res_views(res: Res) -> &'static [View] {
             View::Setup,
             View::Status,
         ],
-        Res::Alarm | Res::CommLink | Res::Detector | Res::VideoMonitor => {
+        Res::Alarm | Res::CommLink | Res::VideoMonitor => {
             &[View::Compact, View::Status, View::Setup]
         }
         Res::Controller | Res::TagReader | Res::WeatherSensor => {
