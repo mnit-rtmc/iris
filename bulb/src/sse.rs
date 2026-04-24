@@ -82,12 +82,12 @@ impl Listener {
                 return None;
             }
         };
-        let onopen = Closure::new(|e: Event| {
-            log::info!("SSE open: {}", e.type_());
+        let onopen = Closure::new(|_e: Event| {
+            log::info!("SSE open");
             set_notify_state(NotifyState::Connecting);
         });
-        let onerror = Closure::new(|e: Event| {
-            log::error!("SSE error: {}", e.type_());
+        let onerror = Closure::new(|_e: Event| {
+            log::info!("SSE error");
             set_notify_state(NotifyState::Disconnected);
         });
         let onmessage = Closure::new(|e: MessageEvent| {

@@ -157,7 +157,7 @@ impl Doc {
         self.0
             .get_element_by_id(id)?
             .dyn_into::<E>()
-            .inspect_err(|_| log::error!("opt_elem: {id}"))
+            .inspect_err(|e| log::error!("opt_elem: {id} {e:?}"))
             .ok()
     }
 
