@@ -36,6 +36,7 @@ use crate::monitorstyle::MonitorStyle;
 use crate::msgpattern::MsgPattern;
 use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
+use crate::road::Road;
 use crate::role::Role;
 use crate::signconfig::SignConfig;
 use crate::systemattr::SystemAttr;

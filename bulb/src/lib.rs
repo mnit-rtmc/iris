@@ -54,6 +54,7 @@ mod permission;
 mod rampmeter;
 mod rend;
 mod rle;
+mod road;
 mod role;
 mod signconfig;
 mod signmessage;

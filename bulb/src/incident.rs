@@ -13,8 +13,8 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card};
 use crate::error::Result;
-use crate::geoloc::Direction;
 use crate::item::{ItemState, ItemStates};
+use crate::road::Direction;
 use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields};
 use crate::view::View;

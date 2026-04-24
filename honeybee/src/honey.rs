@@ -968,6 +968,7 @@ const fn one_sql(res: Res) -> Option<&'static str> {
         Permission => query::PERMISSION_ONE,
         PlanPhase => query::PLAN_PHASE_ONE,
         PlayList => query::PLAY_LIST_ONE,
+        Road => query::ROAD_ONE,
         RoadAffix => query::ROAD_AFFIX_ONE,
         RampMeter => query::RAMP_METER_ONE,
         Role => query::ROLE_ONE,

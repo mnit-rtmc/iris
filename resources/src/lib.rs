@@ -328,6 +328,7 @@ impl Res {
             PlayList => "FIXME",
             RampMeter => "🚦",
             Rnode => "⍿",
+            Road => "🛣️ ",
             RoadAffix => "🛣️ ",
             Role => "💪",
             SignConfig => "📐",

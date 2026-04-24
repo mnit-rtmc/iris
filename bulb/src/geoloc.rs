@@ -13,31 +13,13 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card};
 use crate::error::Result;
+use crate::road::{Direction, Road};
 use crate::util::{Fields, Input, Select, opt_ref, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
 use serde::Deserialize;
 use std::marker::PhantomData;
 use wasm_bindgen::JsValue;
-
-/// Road definitions
-#[derive(Debug, Deserialize)]
-#[allow(dead_code)]
-pub struct Road {
-    pub name: String,
-    pub abbrev: String,
-    pub r_class: u16,
-    pub direction: u16,
-}
-
-/// Roadway directions
-#[derive(Debug, Deserialize)]
-#[allow(dead_code)]
-pub struct Direction {
-    pub id: u16,
-    pub direction: String,
-    pub dir: String,
-}
 
 /// Roadway modifiers
 #[derive(Debug, Deserialize)]
@@ -177,25 +159,6 @@ impl<L> LocAnc<L> {
         select.close();
     }
 
-    /// Build road directions HTML
-    fn directions_html<'p>(
-        &self,
-        id: &str,
-        dir: u16,
-        select: &'p mut html::Select<'p>,
-    ) {
-        select.id(id);
-        for direction in &self.directions {
-            let mut option = select.option();
-            option.value(direction.id);
-            if dir == direction.id {
-                option.selected();
-            }
-            option.cdata(&direction.direction).close();
-        }
-        select.close();
-    }
-
     /// Build road modifiers HTML
     fn modifiers_html<'p>(&self, md: u16, select: &'p mut html::Select<'p>) {
         select.id("cross_mod");
@@ -234,7 +197,12 @@ impl<L> LocAnc<L> {
         div.class("row");
         div.label().r#for("roadway").cdata("Roadway").close();
         self.roads_html("roadway", loc.roadway.as_deref(), &mut div.select());
-        self.directions_html("road_dir", loc.road_dir, &mut div.select());
+        Direction::all_html(
+            &self.directions,
+            "road_dir",
+            loc.road_dir,
+            &mut div.select(),
+        );
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
@@ -245,7 +213,12 @@ impl<L> LocAnc<L> {
             loc.cross_street.as_deref(),
             &mut div.select(),
         );
-        self.directions_html("cross_dir", loc.cross_dir, &mut div.select());
+        Direction::all_html(
+            &self.directions,
+            "cross_dir",
+            loc.cross_dir,
+            &mut div.select(),
+        );
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");

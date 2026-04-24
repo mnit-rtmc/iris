@@ -757,7 +757,7 @@ async fn query_one_road(
     name: &str,
 ) -> Result<()> {
     log::trace!("query_one_road: {name}");
-    let rows = &client.query(query::ROAD_ONE, &[&name]).await?;
+    let rows = &client.query(query::ROAD_FULL_ONE, &[&name]).await?;
     if let Some(row) = rows.iter().next() {
         segments.update_road(Road::from_row(row));
     }

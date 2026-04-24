@@ -37,6 +37,7 @@ use crate::monitorstyle::MonitorStyle;
 use crate::msgpattern::MsgPattern;
 use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
+use crate::road::Road;
 use crate::role::Role;
 use crate::signconfig::SignConfig;
 use crate::systemattr::SystemAttr;
@@ -312,6 +313,7 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::MsgPattern => MsgPattern::item_states_all(),
         Res::Permission => Permission::item_states_all(),
         Res::RampMeter => RampMeter::item_states_all(),
+        Res::Road => Road::item_states_all(),
         Res::Role => Role::item_states_all(),
         Res::SignConfig => SignConfig::item_states_all(),
         Res::SystemAttribute => SystemAttr::item_states_all(),
@@ -341,6 +343,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::MonitorStyle
         | Res::MsgPattern
         | Res::Permission
+        | Res::Road
         | Res::Role
         | Res::SignConfig
         | Res::SystemAttribute

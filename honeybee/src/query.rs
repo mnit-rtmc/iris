@@ -806,14 +806,20 @@ pub const ROAD_ALL: &str = "\
   FROM iris.road \
   ORDER BY name";
 
-/// SQL query for all roads (secondary)
+/// SQL query for one road (secondary)
+pub const ROAD_ONE: &str = "\
+  SELECT name, abbrev, r_class, direction \
+  FROM iris.road \
+  WHERE name = $1";
+
+/// SQL query for all roads (full)
 pub const ROAD_FULL: &str = "\
   SELECT name, abbrev, r_class, direction, scale \
   FROM iris.road \
   JOIN iris.road_class ON r_class = id";
 
-/// SQL query for one road (secondary)
-pub const ROAD_ONE: &str = "\
+/// SQL query for one road (full)
+pub const ROAD_FULL_ONE: &str = "\
   SELECT name, abbrev, r_class, direction, scale \
   FROM iris.road \
   JOIN iris.road_class ON r_class = id \
