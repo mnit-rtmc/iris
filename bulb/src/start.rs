@@ -423,7 +423,7 @@ fn selected_resource() -> Option<Res> {
         Res::Controller if doc.input_bool("res_gps") => Some(Res::Gps),
         Res::Controller if doc.input_bool("res_modem") => Some(Res::Modem),
         Res::Road if doc.input_bool("res_detector") => Some(Res::Detector),
-        //Res::Road if doc.input_bool("res_map_extent") => Some(Res::MapExtent),
+        Res::Road if doc.input_bool("res_map_extent") => Some(Res::MapExtent),
         //Res::Road if doc.input_bool("res_r_node") => Some(Res::Rnode),
         Res::Permission if doc.input_bool("res_user") => Some(Res::User),
         Res::Permission if doc.input_bool("res_role") => Some(Res::Role),

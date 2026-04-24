@@ -961,6 +961,7 @@ const fn one_sql(res: Res) -> Option<&'static str> {
         IncLocator => query::INC_LOCATOR_ONE,
         Lcs => query::LCS_ONE,
         LcsState => query::LCS_STATE_ONE,
+        MapExtent => query::MAP_EXTENT_ONE,
         Modem => query::MODEM_ONE,
         MonitorStyle => query::MONITOR_STYLE_ONE,
         MsgLine => return None, /* NOTE: all request only */

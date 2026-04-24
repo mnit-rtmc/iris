@@ -590,6 +590,18 @@ pub const LCS_TYPE_LUT: &str = "\
   FROM iris.lcs_type \
   ORDER BY id";
 
+/// SQL query for all map extents (primary)
+pub const MAP_EXTENT_ALL: &str = "\
+  SELECT name, hashtag, lon, lat, zoom \
+  FROM iris.map_extent \
+  ORDER BY name";
+
+/// SQL query for one map extent (secondary)
+pub const MAP_EXTENT_ONE: &str = "\
+  SELECT name, hashtag, lon, lat, zoom \
+  FROM iris.map_extent \
+  WHERE name = $1";
+
 /// SQL query for ramp meter algorithms (LUT)
 pub const METER_ALGORITHM_LUT: &str = "\
   SELECT id, description \

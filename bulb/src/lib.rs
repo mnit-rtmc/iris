@@ -45,6 +45,7 @@ mod item;
 mod lcs;
 mod lcsstate;
 mod lock;
+mod mapextent;
 mod modem;
 mod monitorstyle;
 mod msgpattern;

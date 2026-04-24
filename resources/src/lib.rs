@@ -320,6 +320,7 @@ impl Res {
             IncLocator => "🚨🗺️",
             Lcs => "🠟✖🠟",
             LcsState => "🠟",
+            MapExtent => "🗺️",
             Modem => "🖀 ",
             MonitorStyle => "🖵 ",
             MsgPattern => "📑",

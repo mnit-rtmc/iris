@@ -35,6 +35,12 @@ public interface MapExtent extends SonarObject {
 	/** SONAR base type name */
 	String SONAR_BASE = Road.SONAR_TYPE;
 
+	/** Get the hashtag */
+	String getHashtag();
+
+	/** Set the hashtag */
+	void setHashtag(String ht);
+
 	/** Set the longitude */
 	void setLon(float ln);
 

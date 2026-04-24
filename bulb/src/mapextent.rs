@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2026  Minnesota Department of Transportation
+// Copyright (C) 2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -11,47 +11,37 @@
 // GNU General Public License for more details.
 //
 use crate::card::{AncillaryData, Card};
-use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
+use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 
-/// Modem
+/// Map extent
 #[derive(Debug, Default, Deserialize, PartialEq)]
-pub struct Modem {
+pub struct MapExtent {
     pub name: String,
-    pub uri: Option<String>,
-    pub config: Option<String>,
-    pub timeout_ms: Option<u32>,
-    pub enabled: bool,
+    pub hashtag: Option<String>,
+    pub lon: f64,
+    pub lat: f64,
+    pub zoom: u16,
 }
 
-/// Modem ancillary data
+/// MapExtent ancillary data
 #[derive(Debug, Default)]
-pub struct ModemAnc;
+pub struct MapExtentAnc;
 
-impl AncillaryData for ModemAnc {
-    type Primary = Modem;
+impl AncillaryData for MapExtentAnc {
+    type Primary = MapExtent;
 
-    /// Construct ancillary modem data
-    fn new(_pri: &Modem, _view: View) -> Self {
-        ModemAnc
+    /// Construct ancillary map extent data
+    fn new(_pri: &MapExtent, _view: View) -> Self {
+        MapExtentAnc
     }
 }
 
-impl Modem {
-    /// Get item states
-    fn item_states(&self) -> ItemStates<'_> {
-        if self.enabled {
-            ItemState::Available.into()
-        } else {
-            ItemState::Inactive.into()
-        }
-    }
-
+impl MapExtent {
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let mut tree = Tree::new();
@@ -59,7 +49,7 @@ impl Modem {
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
-            .cdata(self.item_states().to_string());
+            .cdata(opt_ref(&self.hashtag));
         String::from(tree)
     }
 
@@ -69,55 +59,57 @@ impl Modem {
         self.title(View::Setup, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("uri").cdata("URI").close();
+        div.label().r#for("hashtag").cdata("Hashtag").close();
         div.input()
-            .id("uri")
-            .maxlength(64)
-            .size(30)
-            .value(opt_ref(&self.uri));
+            .id("hashtag")
+            .maxlength(16)
+            .size(16)
+            .value(opt_ref(&self.hashtag));
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("config").cdata("Config").close();
+        div.label().r#for("lon").cdata("Longitude").close();
         div.input()
-            .id("config")
-            .maxlength(64)
-            .size(28)
-            .value(opt_ref(&self.config));
-        div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.label()
-            .r#for("timeout_ms")
-            .cdata("Timeout (ms)")
-            .close();
-        div.input()
-            .id("timeout_ms")
+            .id("lon")
             .r#type("number")
-            .min(0)
-            .max(90000)
-            .size(8)
-            .value(opt_str(self.timeout_ms));
+            .step("any")
+            .min("-180")
+            .min("180")
+            .value(self.lon);
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("enabled").cdata("Enabled").close();
-        let mut input = div.input();
-        input.id("enabled").r#type("checkbox");
-        if self.enabled {
-            input.checked();
-        }
+        div.label().r#for("lat").cdata("Latitude").close();
+        div.input()
+            .id("lat")
+            .r#type("number")
+            .step("any")
+            .min("-90")
+            .min("90")
+            .value(self.lat);
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("zoom").cdata("Zoom").close();
+        div.input()
+            .id("zoom")
+            .r#type("number")
+            .step("1")
+            .min("1")
+            .max("18")
+            .value(self.zoom);
+        div.close();
         self.footer_html(true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
 
-impl Card for Modem {
-    type Ancillary = ModemAnc;
+impl Card for MapExtent {
+    type Ancillary = MapExtentAnc;
 
     /// Get the resource
     fn res() -> Res {
-        Res::Modem
+        Res::MapExtent
     }
 
     /// Get the name
@@ -132,12 +124,12 @@ impl Card for Modem {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &ModemAnc) -> bool {
+    fn is_match(&self, search: &str, _anc: &MapExtentAnc) -> bool {
         self.name.contains_lower(search)
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &ModemAnc) -> String {
+    fn to_html(&self, view: View, anc: &MapExtentAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
             View::Setup => self.to_html_setup(),
@@ -148,10 +140,10 @@ impl Card for Modem {
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
-        fields.changed_input("uri", &self.uri);
-        fields.changed_input("config", &self.config);
-        fields.changed_input("timeout_ms", self.timeout_ms);
-        fields.changed_input("enabled", self.enabled);
+        fields.changed_input("hashtag", &self.hashtag);
+        fields.changed_input("lon", self.lon);
+        fields.changed_input("lat", self.lat);
+        fields.changed_input("zoom", self.zoom);
         fields.into_value().to_string()
     }
 }

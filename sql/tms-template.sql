@@ -678,9 +678,12 @@ GRANT SELECT ON road_view TO PUBLIC;
 
 CREATE TABLE iris.map_extent (
     name VARCHAR(20) PRIMARY KEY,
+    hashtag VARCHAR(16),
     lat real NOT NULL,
     lon real NOT NULL,
-    zoom INTEGER NOT NULL
+    zoom INTEGER NOT NULL,
+
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
 );
 
 CREATE TABLE iris.geo_loc (

@@ -32,6 +32,7 @@ use crate::incident::Incident;
 use crate::item::ItemState;
 use crate::lcs::Lcs;
 use crate::lcsstate::LcsState;
+use crate::mapextent::MapExtent;
 use crate::modem::Modem;
 use crate::monitorstyle::MonitorStyle;
 use crate::msgpattern::MsgPattern;
@@ -340,6 +341,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::FlowStream
         | Res::Gps
         | Res::LcsState
+        | Res::MapExtent
         | Res::Modem
         | Res::MonitorStyle
         | Res::MsgPattern

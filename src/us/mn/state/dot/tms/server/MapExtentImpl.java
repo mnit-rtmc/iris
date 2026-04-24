@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,15 +30,16 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 
 	/** Load all the map extents */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, lon, lat, zoom FROM iris." +
+		store.query("SELECT name, hashtag, lon, lat, zoom FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new MapExtentImpl(
-					row.getString(1),	// name
-					row.getFloat(2),	// lon
-					row.getFloat(3),	// lat
-					row.getInt(4)		// zoom
+					row.getString(1), // name
+					row.getString(2), // hashtag
+					row.getFloat(3),  // lon
+					row.getFloat(4),  // lat
+					row.getInt(5)     // zoom
 				));
 			}
 		});
@@ -49,6 +50,7 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("hashtag", hashtag);
 		map.put("lon", lon);
 		map.put("lat", lat);
 		map.put("zoom", zoom);
@@ -61,11 +63,29 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	}
 
 	/** Create a map extent */
-	protected MapExtentImpl(String n, float ln, float lt, int z) {
+	protected MapExtentImpl(String n, String ht, float ln, float lt,
+		int z)
+	{
 		super(n);
+		hashtag = ht;
 		lon = ln;
 		lat = lt;
 		zoom = z;
+	}
+
+	/** Hashtag */
+	private String hashtag;
+
+	/** Get the hashtag */
+	@Override
+	public String getHashtag() {
+		return hashtag;
+	}
+
+	/** Set the hashtag */
+	@Override
+	public void setHashtag(String ht) {
+		// FIXME: do the needful
 	}
 
 	/** Longitude */

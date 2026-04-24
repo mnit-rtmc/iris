@@ -311,6 +311,17 @@ impl Input<u32> for Fields {
     }
 }
 
+impl Input<f64> for Fields {
+    fn changed_input(&mut self, id: &str, val: f64) {
+        if let Some(parsed) = self.doc.input_parse::<f64>(id)
+            && parsed != val
+            && let Some(val) = Number::from_f64(parsed)
+        {
+            self.insert(id, Value::Number(val));
+        }
+    }
+}
+
 impl Input<bool> for Fields {
     fn changed_input(&mut self, id: &str, val: bool) {
         let parsed = self.doc.input_bool(id);
