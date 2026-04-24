@@ -225,50 +225,50 @@ async fn finish_init() -> Result<()> {
 async fn update_sb_resource() -> Result<()> {
     let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
     let doc = Doc::get();
-    if let Some(elem) = doc.opt_elem::<Element>("opt_action_plan") {
-        elem.set_class_name(opt_class(&access, Res::ActionPlan));
+    if let Some(el) = doc.opt_elem::<Element>("opt_action_plan") {
+        el.set_class_name(opt_class(&access, Res::ActionPlan));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_beacon") {
-        elem.set_class_name(opt_class(&access, Res::Beacon));
+    if let Some(el) = doc.opt_elem::<Element>("opt_beacon") {
+        el.set_class_name(opt_class(&access, Res::Beacon));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_camera") {
-        elem.set_class_name(opt_class(&access, Res::Camera));
+    if let Some(el) = doc.opt_elem::<Element>("opt_camera") {
+        el.set_class_name(opt_class(&access, Res::Camera));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_dms") {
-        elem.set_class_name(opt_class(&access, Res::Dms));
+    if let Some(el) = doc.opt_elem::<Element>("opt_dms") {
+        el.set_class_name(opt_class(&access, Res::Dms));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_gate_arm") {
-        elem.set_class_name(opt_class(&access, Res::GateArm));
+    if let Some(el) = doc.opt_elem::<Element>("opt_gate_arm") {
+        el.set_class_name(opt_class(&access, Res::GateArm));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_incident") {
-        elem.set_class_name(opt_class(&access, Res::Incident));
+    if let Some(el) = doc.opt_elem::<Element>("opt_incident") {
+        el.set_class_name(opt_class(&access, Res::Incident));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_lcs") {
-        elem.set_class_name(opt_class(&access, Res::Lcs));
+    if let Some(el) = doc.opt_elem::<Element>("opt_lcs") {
+        el.set_class_name(opt_class(&access, Res::Lcs));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_ramp_meter") {
-        elem.set_class_name(opt_class(&access, Res::RampMeter));
+    if let Some(el) = doc.opt_elem::<Element>("opt_ramp_meter") {
+        el.set_class_name(opt_class(&access, Res::RampMeter));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_video_monitor") {
-        elem.set_class_name(opt_class(&access, Res::VideoMonitor));
+    if let Some(el) = doc.opt_elem::<Element>("opt_video_monitor") {
+        el.set_class_name(opt_class(&access, Res::VideoMonitor));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_weather_sensor") {
-        elem.set_class_name(opt_class(&access, Res::WeatherSensor));
+    if let Some(el) = doc.opt_elem::<Element>("opt_weather_sensor") {
+        el.set_class_name(opt_class(&access, Res::WeatherSensor));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_controller") {
-        elem.set_class_name(opt_class(&access, Res::Controller));
+    if let Some(el) = doc.opt_elem::<Element>("opt_controller") {
+        el.set_class_name(opt_class(&access, Res::Controller));
     }
     if let Some(elem) = doc.opt_elem::<Element>("opt_detector") {
         elem.set_class_name(opt_class(&access, Res::Detector));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_permission") {
-        elem.set_class_name(opt_class(&access, Res::Permission));
+    if let Some(el) = doc.opt_elem::<Element>("opt_permission") {
+        el.set_class_name(opt_class(&access, Res::Permission));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_system") {
-        elem.set_class_name(opt_class(&access, Res::SystemAttribute));
+    if let Some(el) = doc.opt_elem::<Element>("opt_system") {
+        el.set_class_name(opt_class(&access, Res::SystemAttribute));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_toll_zone") {
-        elem.set_class_name(opt_class(&access, Res::TollZone));
+    if let Some(el) = doc.opt_elem::<Element>("opt_toll_zone") {
+        el.set_class_name(opt_class(&access, Res::TollZone));
     }
     Ok(())
 }
@@ -284,14 +284,14 @@ fn opt_class(access: &[Permission], res: Res) -> &'static str {
 }
 
 /// Add a "fullscreenchange" event listener to an element
-fn add_fullscreenchange_listener(elem: &Element) -> Result<()> {
+fn add_fullscreenchange_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
         let doc = Doc::get();
         if let Some(btn) = doc.opt_elem::<HtmlInputElement>("sb_fullscreen") {
             btn.set_checked(doc.is_fullscreen());
         }
     });
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "fullscreenchange",
         closure.as_ref().unchecked_ref(),
     )?;
@@ -301,7 +301,7 @@ fn add_fullscreenchange_listener(elem: &Element) -> Result<()> {
 }
 
 /// Add a "change" event listener to an element
-fn add_change_listener(elem: &Element) -> Result<()> {
+fn add_change_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             let id = target.id();
@@ -312,7 +312,7 @@ fn add_change_listener(elem: &Element) -> Result<()> {
             }
         }
     });
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "change",
         closure.as_ref().unchecked_ref(),
     )?;
@@ -450,13 +450,13 @@ fn search_value() -> Result<String> {
 }
 
 /// Add an "input" event listener to an element
-fn add_input_listener(elem: &Element) -> Result<()> {
+fn add_input_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             handle_input(target.id());
         }
     });
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "input",
         closure.as_ref().unchecked_ref(),
     )?;
@@ -499,8 +499,8 @@ async fn handle_search() -> Result<()> {
             let doc = Doc::get();
             for cv in cards.search_views(&search).await? {
                 let id = cv.id();
-                if let Some(elem) = doc.opt_elem::<Element>(&id) {
-                    elem.set_class_name(cv.view.class_name());
+                if let Some(el) = doc.opt_elem::<Element>(&id) {
+                    el.set_class_name(cv.view.class_name());
                 }
             }
             app::card_list(Some(cards));
@@ -536,7 +536,7 @@ async fn handle_input_other(id: String) -> Result<()> {
 }
 
 /// Add "focusin" / "focusout" event listeners to an element
-fn add_focus_listener(elem: &Element) -> Result<()> {
+fn add_focus_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(input)) =
             e.target().map(|e| e.dyn_into::<HtmlInputElement>())
@@ -544,11 +544,11 @@ fn add_focus_listener(elem: &Element) -> Result<()> {
             spawn_future(handle_focus_events(input, e.type_()));
         }
     });
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "focusin",
         closure.as_ref().unchecked_ref(),
     )?;
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "focusout",
         closure.as_ref().unchecked_ref(),
     )?;
@@ -582,7 +582,7 @@ async fn handle_focus_events(
 }
 
 /// Add a `click` event listener to an element
-fn add_click_listener(elem: &Element) -> Result<()> {
+fn add_click_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             if target.is_instance_of::<HtmlButtonElement>() {
@@ -592,7 +592,7 @@ fn add_click_listener(elem: &Element) -> Result<()> {
             }
         }
     });
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "click",
         closure.as_ref().unchecked_ref(),
     )?;
@@ -666,17 +666,17 @@ async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
 
 /// Replace a card with provided HTML
 fn replace_card_html(cv: &CardView, html: &str) {
-    let Some(elem) = Doc::get().opt_elem::<HtmlElement>(&cv.id()) else {
+    let Some(el) = Doc::get().opt_elem::<HtmlElement>(&cv.id()) else {
         log::warn!("element {} not found", cv.id());
         return;
     };
-    elem.set_inner_html(html);
-    elem.set_class_name(cv.view.class_name());
+    el.set_inner_html(html);
+    el.set_class_name(cv.view.class_name());
     if cv.view.is_expanded() {
         let opt = ScrollIntoViewOptions::new();
         opt.set_behavior(ScrollBehavior::Smooth);
         opt.set_block(ScrollLogicalPosition::Nearest);
-        elem.scroll_into_view_with_scroll_into_view_options(&opt);
+        el.scroll_into_view_with_scroll_into_view_options(&opt);
     }
 }
 
@@ -711,9 +711,9 @@ async fn save_changed(cv: CardView) -> Result<()> {
 }
 
 /// Handle a `click` event within a card element
-fn handle_card_click_ev(elem: &Element) {
-    if let Some(id) = elem.get_attribute("id")
-        && let Some(name) = elem.get_attribute("data-name")
+fn handle_card_click_ev(el: &Element) {
+    if let Some(id) = el.get_attribute("id")
+        && let Some(name) = el.get_attribute("data-name")
         && let Some(res) = selected_resource()
     {
         spawn_future(click_card(res, name, id));
@@ -806,17 +806,17 @@ async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
 }
 
 /// Add transition event listener to an element
-fn add_transition_listener(elem: &Element) -> Result<()> {
+fn add_transition_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(handle_transition_ev);
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "transitionstart",
         closure.as_ref().unchecked_ref(),
     )?;
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "transitioncancel",
         closure.as_ref().unchecked_ref(),
     )?;
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "transitionend",
         closure.as_ref().unchecked_ref(),
     )?;
