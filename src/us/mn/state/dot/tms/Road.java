@@ -32,9 +32,6 @@ public interface Road extends SonarObject {
 		return SONAR_TYPE;
 	}
 
-	/** SONAR base type name */
-	String SONAR_BASE = R_Node.SONAR_TYPE;
-
 	/** Set the abbreviated name */
 	void setAbbrev(String a);
 

@@ -64,6 +64,7 @@ pub enum Res {
     LcsIndication,
     LcsState,
     LcsType,
+    MapExtent,
     MeterAlgorithm,
     MeterType,
     Modem,
@@ -163,6 +164,7 @@ impl Res {
             LcsIndication,
             LcsState,
             LcsType,
+            MapExtent,
             MeterAlgorithm,
             MeterType,
             Modem,
@@ -250,6 +252,7 @@ impl Res {
             LcsIndication => "lcs_indication",
             LcsState => "lcs_state",
             LcsType => "lcs_type",
+            MapExtent => "map_extent",
             MeterAlgorithm => "meter_algorithm",
             MeterType => "meter_type",
             Modem => "modem",
@@ -308,7 +311,7 @@ impl Res {
             EventConfig => "📜",
             FlowStream => "🎞️ ",
             GateArm => "⫬",
-            GeoLoc => "🗺️ ",
+            GeoLoc => "🌎",
             Gps => "🌐",
             Incident => "🚨",
             IncAdvice => "🚨❗",
@@ -324,6 +327,7 @@ impl Res {
             PlanPhase => "🪜",
             PlayList => "FIXME",
             RampMeter => "🚦",
+            Rnode => "⍿",
             RoadAffix => "🛣️ ",
             Role => "💪",
             SignConfig => "📐",
@@ -365,11 +369,11 @@ impl Res {
             | EncoderStream | EncoderType | EventConfig | FlowStream
             | GateArm | Gps | Hashtag | Incident | IncAdvice
             | IncDescriptor | IncDetail | IncLocator | Lcs | LcsState
-            | Modem | MonitorStyle | MsgLine | MsgPattern | ParkingArea
-            | Permission | PlanPhase | PlayList | RampMeter | Rnode | Road
-            | RoadAffix | Role | SignConfig | SignDetail | SignMessage
-            | SystemAttribute | TagReader | TimeAction | TollZone | User
-            | VideoMonitor | WeatherSensor | Word => true,
+            | MapExtent | Modem | MonitorStyle | MsgLine | MsgPattern
+            | ParkingArea | Permission | PlanPhase | PlayList | RampMeter
+            | Rnode | Road | RoadAffix | Role | SignConfig | SignDetail
+            | SignMessage | SystemAttribute | TagReader | TimeAction
+            | TollZone | User | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -406,8 +410,6 @@ impl Res {
             Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => {
                 Controller
             }
-            // Detector resources
-            Rnode | Road => Detector,
             // DMS resources
             Font | Graphic | MsgLine | MsgPattern | SignConfig | SignDetail
             | SignMessage | Word => Dms,
@@ -419,6 +421,8 @@ impl Res {
             LcsState => Lcs,
             // Permission resources
             Domain | User | Role => Permission,
+            // Road resources
+            Detector | MapExtent | Rnode => Road,
             // System attribute resources
             CabinetStyle | CommConfig | EventConfig => SystemAttribute,
             // Toll zone resources

@@ -195,9 +195,6 @@ comm_link	controller
 geo_loc	controller
 gps	controller
 modem	controller
-r_node	\N
-detector	r_node
-road	r_node
 dms	\N
 font	dms
 glyph	dms
@@ -224,11 +221,14 @@ domain	permission
 role	permission
 user_id	permission
 ramp_meter	\N
+road	\N
+detector	road
+map_extent	road
+r_node	road
 system_attribute	\N
 cabinet_style	system_attribute
 comm_config	system_attribute
 event_config	system_attribute
-map_extent	system_attribute
 rpt_conduit	system_attribute
 toll_zone	\N
 tag_reader	toll_zone
@@ -531,8 +531,8 @@ VALUES
     ('prm_8', 'administrator', 'lcs', 4),
     ('prm_9', 'administrator', 'parking_area', 4),
     ('prm_10', 'administrator', 'permission', 4),
-    ('prm_11', 'administrator', 'r_node', 4),
-    ('prm_12', 'administrator', 'ramp_meter', 4),
+    ('prm_11', 'administrator', 'ramp_meter', 4),
+    ('prm_12', 'administrator', 'road', 4),
     ('prm_13', 'administrator', 'system_attribute', 4),
     ('prm_14', 'administrator', 'toll_zone', 4),
     ('prm_15', 'administrator', 'video_monitor', 4),

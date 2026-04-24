@@ -258,8 +258,8 @@ async fn update_sb_resource() -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("opt_controller") {
         el.set_class_name(opt_class(&access, Res::Controller));
     }
-    if let Some(elem) = doc.opt_elem::<Element>("opt_detector") {
-        elem.set_class_name(opt_class(&access, Res::Detector));
+    if let Some(el) = doc.opt_elem::<Element>("opt_road") {
+        el.set_class_name(opt_class(&access, Res::Road));
     }
     if let Some(el) = doc.opt_elem::<Element>("opt_permission") {
         el.set_class_name(opt_class(&access, Res::Permission));
@@ -371,6 +371,9 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("res_controller_row") {
         el.set_class_name(row_class(base == Some(Res::Controller)));
     }
+    if let Some(el) = doc.opt_elem::<Element>("res_road_row") {
+        el.set_class_name(row_class(base == Some(Res::Road)));
+    }
     if let Some(el) = doc.opt_elem::<Element>("res_permission_row") {
         el.set_class_name(row_class(base == Some(Res::Permission)));
     }
@@ -419,6 +422,12 @@ fn selected_resource() -> Option<Res> {
         Res::Controller if doc.input_bool("res_alarm") => Some(Res::Alarm),
         Res::Controller if doc.input_bool("res_gps") => Some(Res::Gps),
         Res::Controller if doc.input_bool("res_modem") => Some(Res::Modem),
+        //Res::Road if doc.input_bool("res_r_node") => Some(Res::Rnode),
+        Res::Road if doc.input_bool("res_detector") => Some(Res::Detector),
+        //Res::Road if doc.input_bool("res_map_extent") => Some(Res::MapExtent),
+        Res::Permission if doc.input_bool("res_user") => Some(Res::User),
+        Res::Permission if doc.input_bool("res_role") => Some(Res::Role),
+        Res::Permission if doc.input_bool("res_domain") => Some(Res::Domain),
         Res::SystemAttribute if doc.input_bool("res_event_config") => {
             Some(Res::EventConfig)
         }
@@ -428,9 +437,6 @@ fn selected_resource() -> Option<Res> {
         Res::SystemAttribute if doc.input_bool("res_cabinet_style") => {
             Some(Res::CabinetStyle)
         }
-        Res::Permission if doc.input_bool("res_user") => Some(Res::User),
-        Res::Permission if doc.input_bool("res_role") => Some(Res::Role),
-        Res::Permission if doc.input_bool("res_domain") => Some(Res::Domain),
         _ => Some(res),
     }
 }
@@ -472,9 +478,10 @@ fn handle_input(id: String) {
         | "res_lcs" | "res_lcs_state" | "res_video_monitor"
         | "res_monitor_style" | "res_flow_stream" | "res_controller"
         | "res_comm_link" | "res_alarm" | "res_gps" | "res_modem"
+        | "res_road" | "res_r_node" | "res_detector" | "res_map_extent"
+        | "res_permission" | "res_user" | "res_role" | "res_domain"
         | "res_system_attr" | "res_event_config" | "res_comm_config"
-        | "res_cabinet_style" | "res_permission" | "res_user" | "res_role"
-        | "res_domain" | "sb_resource" => handle_res_change(),
+        | "res_cabinet_style" | "sb_resource" => handle_res_change(),
         "sb_search" | "sb_state" => spawn_future(handle_search()),
         "ob_view" => handle_ob_view_ev(),
         _ => spawn_future(handle_input_other(id)),

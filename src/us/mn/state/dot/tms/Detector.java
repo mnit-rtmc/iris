@@ -31,7 +31,7 @@ public interface Detector extends Device {
 	}
 
 	/** SONAR base type name */
-	String SONAR_BASE = R_Node.SONAR_TYPE;
+	String SONAR_BASE = Road.SONAR_TYPE;
 
 	/** Set the r_node (roadway network node) */
 	void setR_Node(R_Node n);

@@ -57,7 +57,7 @@ resource, at the same access level.
 | [lcs]              | [lcs state]                                       |
 | [parking area]     |                                                   |
 | permission         | [domain], [role], [user id], connection           |
-| [r_node]           | [detector], [map extent], [road]                  |
+| [road]             | [detector], [map extent], [r_node]                |
 | [ramp meter]       |                                                   |
 | [system attribute] | [cabinet style], [comm config], [event config], rpt conduit |
 | [toll zone]        | [tag reader]                                      |

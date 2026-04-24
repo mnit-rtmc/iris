@@ -33,7 +33,7 @@ public interface Station extends SonarObject {
 	}
 
 	/** SONAR base type name */
-	String SONAR_BASE = R_Node.SONAR_TYPE;
+	String SONAR_BASE = Road.SONAR_TYPE;
 
 	/** Get the roadway node */
 	R_Node getR_Node();
