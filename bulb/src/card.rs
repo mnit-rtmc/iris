@@ -312,7 +312,6 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::Incident => Incident::item_states_all(),
         Res::Lcs => Lcs::item_states_all(),
         Res::MsgPattern => MsgPattern::item_states_all(),
-        Res::Permission => Permission::item_states_all(),
         Res::RampMeter => RampMeter::item_states_all(),
         Res::Road => Road::item_states_all(),
         Res::Role => Role::item_states_all(),
@@ -344,7 +343,6 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::Modem
         | Res::MonitorStyle
         | Res::MsgPattern
-        | Res::Permission
         | Res::Road
         | Res::Role
         | Res::SignConfig

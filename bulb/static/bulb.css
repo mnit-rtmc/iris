@@ -80,6 +80,10 @@ th, td {
   padding: 0;
   margin: 0;
 }
+td.member {
+  padding-left: 0.5rem;
+  font-style: italic;
+}
 .scroll_table {
   height: 8rem;
   overflow-y: auto;

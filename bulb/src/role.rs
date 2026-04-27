@@ -23,6 +23,13 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
+/// Resource Type
+#[derive(Debug, Default, Deserialize)]
+pub struct ResourceType {
+    pub name: String,
+    pub base: Option<String>,
+}
+
 /// Role
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct Role {
@@ -36,6 +43,7 @@ pub struct Role {
 #[derive(Debug, Default)]
 pub struct RoleAnc {
     assets: Vec<Asset>,
+    pub resource_types: Vec<ResourceType>,
     pub permissions: Vec<Permission>,
 }
 
@@ -45,12 +53,14 @@ impl AncillaryData for RoleAnc {
     /// Construct ancillary role data
     fn new(_pri: &Role, view: View) -> Self {
         let assets = match view {
-            View::Setup => vec![Asset::Permissions],
+            View::Setup => vec![Asset::ResourceTypes, Asset::Permissions],
             _ => Vec::new(),
         };
+        let resource_types = Vec::new();
         let permissions = Vec::new();
         RoleAnc {
             assets,
+            resource_types,
             permissions,
         }
     }
@@ -64,15 +74,53 @@ impl AncillaryData for RoleAnc {
     fn set_asset(
         &mut self,
         pri: &Role,
-        _asset: Asset,
+        asset: Asset,
         value: JsValue,
     ) -> Result<()> {
-        let mut permissions: Vec<Permission> =
-            serde_wasm_bindgen::from_value(value)?;
-        permissions.retain(|p| p.role == pri.name);
-        permissions.sort();
-        self.permissions = permissions;
+        match asset {
+            Asset::ResourceTypes => {
+                self.resource_types = serde_wasm_bindgen::from_value(value)?;
+            }
+            Asset::Permissions => {
+                let mut permissions: Vec<Permission> =
+                    serde_wasm_bindgen::from_value(value)?;
+                permissions.retain(|p| p.role == pri.name);
+                permissions.sort();
+                self.permissions = permissions;
+            }
+            _ => unreachable!(),
+        }
         Ok(())
+    }
+}
+
+impl RoleAnc {
+    /// Make permissions HTML table
+    fn permissions_html<'p>(&self, pri: &Role, div: &'p mut html::Div<'p>) {
+        div.div().class("row").cdata("🗝️ Permissions").close();
+        let mut table = div.table();
+        for res in &self.resource_types {
+            if res.base.is_some() {
+                continue;
+            }
+            let mut first = true;
+            for perm in &self.permissions {
+                if perm.base_resource != res.name {
+                    continue;
+                }
+                if first && perm.hashtag.is_some() {
+                    let p = Permission::new(&res.name, &pri.name);
+                    p.table_row(&mut table.tr());
+                }
+                perm.table_row(&mut table.tr());
+                first = false;
+            }
+            if first {
+                let p = Permission::new(&res.name, &pri.name);
+                p.table_row(&mut table.tr());
+            }
+        }
+        table.close();
     }
 }
 
@@ -113,15 +161,8 @@ impl Role {
             input.checked();
         }
         div.close();
-        if !anc.permissions.is_empty() {
-            div = tree.root::<html::Div>();
-            div.class("row").cdata("🗝️ Permissions").close();
-            let mut table = tree.root::<html::Table>();
-            for perm in &anc.permissions {
-                table.raw(perm.to_html_row());
-            }
-            table.close();
-        }
+        div = tree.root::<html::Div>();
+        anc.permissions_html(self, &mut div);
         self.footer_html(true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
