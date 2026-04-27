@@ -139,6 +139,16 @@ impl RoadClass {
 }
 
 impl Road {
+    /// Get road class description
+    fn road_class_desc<'a>(&self, anc: &'a RoadAnc) -> &'a str {
+        for rc in &anc.road_classes {
+            if self.r_class == rc.id {
+                return &rc.description;
+            }
+        }
+        ""
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let mut tree = Tree::new();
@@ -210,8 +220,10 @@ impl Card for Road {
     }
 
     /// Check if a search string matches
-    fn is_match(&self, search: &str, _anc: &RoadAnc) -> bool {
-        self.name.contains_lower(search) || self.abbrev.contains_lower(search)
+    fn is_match(&self, search: &str, anc: &RoadAnc) -> bool {
+        self.name.contains_lower(search)
+            || self.abbrev.contains_lower(search)
+            || self.road_class_desc(anc).contains_lower(search)
     }
 
     /// Convert to HTML view
