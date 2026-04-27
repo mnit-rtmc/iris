@@ -223,7 +223,10 @@ pub const DAY_PLAN_ONE: &str = "\
 
 /// SQL query for all detectors (primary)
 pub const DETECTOR_ALL: &str = "\
-  SELECT name, label, controller, notes \
+  SELECT name, label, controller, notes, \
+         NULLIF(abandoned, false) AS abandoned, \
+         NULLIF(force_fail, false) AS force_fail, \
+         NULLIF(auto_fail, false) AS auto_fail \
   FROM detector_view \
   ORDER BY regexp_replace(name, '[0-9]', '', 'g'), \
           (regexp_replace(name, '[^0-9]', '', 'g') || '0')::INTEGER";

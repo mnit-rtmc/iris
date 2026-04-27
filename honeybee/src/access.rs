@@ -123,6 +123,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::CommConfig, "no_response_disconnect_sec")
         | (Res::CommLink, "description")
         | (Res::Detector, "abandoned")
+        | (Res::Detector, "fake")
         | (Res::DeviceAction, _)
         | (Res::Dms, "preset")
         | (Res::Domain, "enabled")

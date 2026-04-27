@@ -455,10 +455,7 @@ impl DmsAnc {
         // FIXME: handle line-allowed MULTI tags
         let mut line = String::from(multi);
         let mut ms = &line[..];
-        loop {
-            let Ok(w) = font.text_width(ms, None) else {
-                break;
-            };
+        while let Ok(w) = font.text_width(ms, None) {
             if w <= width {
                 return Some(line);
             } else if let Some(abbrev) = self.abbreviate_text(ms) {

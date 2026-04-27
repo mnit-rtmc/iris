@@ -24,12 +24,12 @@ called `station_sample` are generated.
 * `iris/api/detector` (primary)
 * `iris/api/detector/{name}`
 
-| Access       | Primary           | Secondary                  |
-|--------------|-------------------|----------------------------|
-| 👁️  View      | name, label       | auto\_fail                 |
-| 👉 Operate   |                   | field\_length, force\_fail |
-| 💡 Manage    |                   | abandoned                  |
-| 🔧 Configure | controller, notes | pin, r\_node, lane\_code, lane\_number, fake |
+| Access       | Primary                 | Secondary     |
+|--------------|-------------------------|---------------|
+| 👁️  View      | name, label, auto\_fail |               |
+| 👉 Operate   | force\_fail             | field\_length |
+| 💡 Manage    | abandoned, fake         |               |
+| 🔧 Configure | controller, notes       | pin, r\_node, lane\_code, lane\_number |
 
 </details>
 

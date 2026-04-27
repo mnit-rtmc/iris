@@ -171,6 +171,7 @@ public class Name {
 		{ "comm_config", "noResponseDisconnectSec" },
 		{ "comm_link", "description" },
 		{ "detector", "abandoned" },
+		{ "detector", "fake" },
 		{ "dms", "preset" },
 		{ "domain", "enabled" },
 		{ "modem", "timeoutMs" },

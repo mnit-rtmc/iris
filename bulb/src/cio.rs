@@ -58,7 +58,7 @@ where
         div.class("row");
         div.label().r#for("controller").cdata("Controller").close();
         let mut input = div.input();
-        input.id("controller").maxlength(20).size(20);
+        input.id("controller").maxlength(20).size(16);
         match self.controller(pri) {
             Some(c) => {
                 input.value(c.name());
