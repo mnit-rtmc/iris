@@ -142,10 +142,10 @@ impl Detector {
         String::from(tree)
     }
 
-    /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &DetectorAnc) -> String {
+    /// Convert to Status HTML
+    fn to_html_status(&self, anc: &DetectorAnc) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Status, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.span().class("info fill").cdata(opt_ref(&self.label));
@@ -154,7 +154,14 @@ impl Detector {
         div.class("row");
         self.item_states(anc).spans(&mut div.span());
         div.close();
-        div = tree.root::<html::Div>();
+        String::from(tree)
+    }
+
+    /// Convert to Setup HTML
+    fn to_html_setup(&self, anc: &DetectorAnc) -> String {
+        let mut tree = Tree::new();
+        self.title(View::Setup, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
         div.textarea()
@@ -281,6 +288,7 @@ impl Card for Detector {
     fn to_html(&self, view: View, anc: &DetectorAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
+            View::Status => self.to_html_status(anc),
             View::Setup => self.to_html_setup(anc),
             _ => self.to_html_compact(anc),
         }
