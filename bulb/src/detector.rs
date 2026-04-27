@@ -276,6 +276,7 @@ impl Card for Detector {
         self.name.contains_lower(search)
             || self.label.contains_lower(search)
             || self.item_states(anc).is_match(search)
+            || self.notes.contains_lower(search)
             || self.abandoned.unwrap_or(false)
                 && "abandoned".contains_lower(search)
             || self.force_fail.unwrap_or(false)
