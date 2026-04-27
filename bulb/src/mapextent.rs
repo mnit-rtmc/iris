@@ -125,7 +125,7 @@ impl Card for MapExtent {
 
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &MapExtentAnc) -> bool {
-        self.name.contains_lower(search)
+        self.name.contains_lower(search) || self.hashtag.contains_lower(search)
     }
 
     /// Convert to HTML view
