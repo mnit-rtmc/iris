@@ -32,7 +32,6 @@ use crate::incident::Incident;
 use crate::lcs::Lcs;
 use crate::lcsstate::LcsState;
 use crate::mapextent::MapExtent;
-use crate::modem::Modem;
 use crate::monitorstyle::MonitorStyle;
 use crate::msgpattern::MsgPattern;
 use crate::rampmeter::RampMeter;

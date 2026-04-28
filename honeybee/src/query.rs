@@ -617,18 +617,6 @@ pub const METER_TYPE_LUT: &str = "\
   FROM iris.meter_type \
   ORDER BY id";
 
-/// SQL query for all modems (primary)
-pub const MODEM_ALL: &str = "\
-  SELECT name, enabled \
-  FROM iris.modem \
-  ORDER BY name";
-
-/// SQL query for one modem (secondary)
-pub const MODEM_ONE: &str = "\
-  SELECT name, uri, config, enabled, timeout_ms \
-  FROM iris.modem \
-  WHERE name = $1";
-
 /// SQL query for all monitor styles (primary)
 pub const MONITOR_STYLE_ALL: &str = "\
   SELECT name \

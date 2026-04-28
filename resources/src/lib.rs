@@ -67,7 +67,6 @@ pub enum Res {
     MapExtent,
     MeterAlgorithm,
     MeterType,
-    Modem,
     MonitorStyle,
     MsgLine,
     MsgPattern,
@@ -167,7 +166,6 @@ impl Res {
             MapExtent,
             MeterAlgorithm,
             MeterType,
-            Modem,
             MonitorStyle,
             MsgLine,
             MsgPattern,
@@ -255,7 +253,6 @@ impl Res {
             MapExtent => "map_extent",
             MeterAlgorithm => "meter_algorithm",
             MeterType => "meter_type",
-            Modem => "modem",
             MonitorStyle => "monitor_style",
             MsgLine => "msg_line",
             MsgPattern => "msg_pattern",
@@ -321,7 +318,6 @@ impl Res {
             Lcs => "🠟✖🠟",
             LcsState => "🠟",
             MapExtent => "🗺️",
-            Modem => "🖀 ",
             MonitorStyle => "🖵 ",
             MsgPattern => "📑",
             Permission => "🗝️ ",
@@ -371,11 +367,11 @@ impl Res {
             | EncoderStream | EncoderType | EventConfig | FlowStream
             | GateArm | Gps | Hashtag | Incident | IncAdvice
             | IncDescriptor | IncDetail | IncLocator | Lcs | LcsState
-            | MapExtent | Modem | MonitorStyle | MsgLine | MsgPattern
-            | ParkingArea | Permission | PlanPhase | PlayList | RampMeter
-            | Rnode | Road | RoadAffix | Role | SignConfig | SignDetail
-            | SignMessage | SystemAttribute | TagReader | TimeAction
-            | TollZone | User | VideoMonitor | WeatherSensor | Word => true,
+            | MapExtent | MonitorStyle | MsgLine | MsgPattern | ParkingArea
+            | Permission | PlanPhase | PlayList | RampMeter | Rnode | Road
+            | RoadAffix | Role | SignConfig | SignDetail | SignMessage
+            | SystemAttribute | TagReader | TimeAction | TollZone | User
+            | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -409,9 +405,7 @@ impl Res {
             // Comm resources
             // (ControllerIo is a special case
             // to GET request all pins for one controller).
-            CommLink | Controller | ControllerIo | GeoLoc | Gps | Modem => {
-                CommConfig
-            }
+            CommLink | Controller | ControllerIo | GeoLoc | Gps => CommConfig,
             // DMS resources
             Font | Graphic | MsgLine | MsgPattern | SignConfig | SignDetail
             | SignMessage | Word => Dms,
