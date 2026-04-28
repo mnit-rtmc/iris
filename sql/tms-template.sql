@@ -178,9 +178,6 @@ day_plan	action_plan
 device_action	action_plan
 plan_phase	action_plan
 time_action	action_plan
-alert_config	weather_sensor
-alert_info	weather_sensor
-alert_message	weather_sensor
 beacon	\N
 camera	\N
 camera_preset	camera
@@ -189,12 +186,12 @@ cam_vid_src_ord	camera
 encoder_stream	camera
 encoder_type	camera
 vid_src_template	camera
-controller	\N
-alarm	controller
-comm_link	controller
-geo_loc	controller
-gps	controller
-modem	controller
+comm_config	\N
+comm_link	comm_config
+controller	comm_config
+geo_loc	comm_config
+gps	comm_config
+modem	comm_config
 dms	\N
 font	dms
 glyph	dms
@@ -226,8 +223,8 @@ detector	road
 map_extent	road
 r_node	road
 system_attribute	\N
+alarm	system_attribute
 cabinet_style	system_attribute
-comm_config	system_attribute
 event_config	system_attribute
 rpt_conduit	system_attribute
 toll_zone	\N
@@ -237,6 +234,9 @@ flow_stream	video_monitor
 monitor_style	video_monitor
 play_list	video_monitor
 weather_sensor	\N
+alert_config	weather_sensor
+alert_info	weather_sensor
+alert_message	weather_sensor
 \.
 
 CREATE FUNCTION iris.resource_is_base(VARCHAR(16)) RETURNS BOOLEAN AS
@@ -524,7 +524,7 @@ VALUES
     ('prm_1', 'administrator', 'action_plan', 4),
     ('prm_2', 'administrator', 'beacon', 4),
     ('prm_3', 'administrator', 'camera', 4),
-    ('prm_4', 'administrator', 'controller', 4),
+    ('prm_4', 'administrator', 'comm_config', 4),
     ('prm_5', 'administrator', 'dms', 4),
     ('prm_6', 'administrator', 'gate_arm', 4),
     ('prm_7', 'administrator', 'incident', 4),

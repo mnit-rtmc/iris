@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2024  Minnesota Department of Transportation
+ * Copyright (C) 2005-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public interface Alarm extends ControllerIO {
 	}
 
 	/** SONAR base type name */
-	String SONAR_BASE = Controller.SONAR_TYPE;
+	String SONAR_BASE = SystemAttribute.SONAR_TYPE;
 
 	/** Set the description */
 	void setDescription(String d);

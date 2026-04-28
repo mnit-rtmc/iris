@@ -406,11 +406,11 @@ impl Res {
             | TimeAction => ActionPlan,
             // Camera resources
             CameraPreset | EncoderStream | EncoderType => Camera,
-            // Controller resources
+            // Comm resources
             // (ControllerIo is a special case
             // to GET request all pins for one controller).
-            Alarm | CommLink | ControllerIo | GeoLoc | Gps | Modem => {
-                Controller
+            CommLink | Controller | ControllerIo | GeoLoc | Gps | Modem => {
+                CommConfig
             }
             // DMS resources
             Font | Graphic | MsgLine | MsgPattern | SignConfig | SignDetail
@@ -426,7 +426,7 @@ impl Res {
             // Road resources
             Detector | MapExtent | Rnode => Road,
             // System attribute resources
-            CabinetStyle | CommConfig | EventConfig => SystemAttribute,
+            Alarm | CabinetStyle | EventConfig => SystemAttribute,
             // Toll zone resources
             TagReader => TollZone,
             // Video monitor resources

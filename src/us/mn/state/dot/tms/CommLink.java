@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@ public interface CommLink extends SonarObject {
 	}
 
 	/** SONAR base type name */
-	String SONAR_BASE = Controller.SONAR_TYPE;
+	String SONAR_BASE = CommConfig.SONAR_TYPE;
 
 	/** Set text description */
 	void setDescription(String d);

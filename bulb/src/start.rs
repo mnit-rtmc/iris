@@ -255,8 +255,8 @@ async fn update_sb_resource() -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("opt_weather_sensor") {
         el.set_class_name(opt_class(&access, Res::WeatherSensor));
     }
-    if let Some(el) = doc.opt_elem::<Element>("opt_controller") {
-        el.set_class_name(opt_class(&access, Res::Controller));
+    if let Some(el) = doc.opt_elem::<Element>("opt_comm") {
+        el.set_class_name(opt_class(&access, Res::CommConfig));
     }
     if let Some(el) = doc.opt_elem::<Element>("opt_road") {
         el.set_class_name(opt_class(&access, Res::Road));
@@ -368,8 +368,8 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("res_video_monitor_row") {
         el.set_class_name(row_class(base == Some(Res::VideoMonitor)));
     }
-    if let Some(el) = doc.opt_elem::<Element>("res_controller_row") {
-        el.set_class_name(row_class(base == Some(Res::Controller)));
+    if let Some(el) = doc.opt_elem::<Element>("res_comm_row") {
+        el.set_class_name(row_class(base == Some(Res::CommConfig)));
     }
     if let Some(el) = doc.opt_elem::<Element>("res_road_row") {
         el.set_class_name(row_class(base == Some(Res::Road)));
@@ -416,24 +416,24 @@ fn selected_resource() -> Option<Res> {
         Res::VideoMonitor if doc.input_bool("res_flow_stream") => {
             Some(Res::FlowStream)
         }
-        Res::Controller if doc.input_bool("res_comm_link") => {
+        Res::CommConfig if doc.input_bool("res_comm_link") => {
             Some(Res::CommLink)
         }
-        Res::Controller if doc.input_bool("res_alarm") => Some(Res::Alarm),
-        Res::Controller if doc.input_bool("res_gps") => Some(Res::Gps),
-        Res::Controller if doc.input_bool("res_modem") => Some(Res::Modem),
+        Res::CommConfig if doc.input_bool("res_controller") => {
+            Some(Res::Controller)
+        }
+        Res::CommConfig if doc.input_bool("res_gps") => Some(Res::Gps),
+        Res::CommConfig if doc.input_bool("res_modem") => Some(Res::Modem),
+        //Res::Road if doc.input_bool("res_r_node") => Some(Res::Rnode),
         Res::Road if doc.input_bool("res_detector") => Some(Res::Detector),
         Res::Road if doc.input_bool("res_map_extent") => Some(Res::MapExtent),
-        //Res::Road if doc.input_bool("res_r_node") => Some(Res::Rnode),
         Res::Permission if doc.input_bool("res_user") => Some(Res::User),
         Res::Permission if doc.input_bool("res_role") => Some(Res::Role),
         Res::Permission if doc.input_bool("res_domain") => Some(Res::Domain),
         Res::SystemAttribute if doc.input_bool("res_event_config") => {
             Some(Res::EventConfig)
         }
-        Res::SystemAttribute if doc.input_bool("res_comm_config") => {
-            Some(Res::CommConfig)
-        }
+        Res::SystemAttribute if doc.input_bool("res_alarm") => Some(Res::Alarm),
         Res::SystemAttribute if doc.input_bool("res_cabinet_style") => {
             Some(Res::CabinetStyle)
         }
@@ -476,11 +476,11 @@ fn handle_input(id: String) {
     match id.as_str() {
         "res_dms" | "res_msg_pattern" | "res_sign_config" | "res_word"
         | "res_lcs" | "res_lcs_state" | "res_video_monitor"
-        | "res_monitor_style" | "res_flow_stream" | "res_controller"
-        | "res_comm_link" | "res_alarm" | "res_gps" | "res_modem"
+        | "res_monitor_style" | "res_flow_stream" | "res_comm_config"
+        | "res_comm_link" | "res_controller" | "res_gps" | "res_modem"
         | "res_road" | "res_detector" | "res_map_extent" | "res_r_node"
         | "res_permission" | "res_user" | "res_role" | "res_domain"
-        | "res_system_attr" | "res_event_config" | "res_comm_config"
+        | "res_system_attr" | "res_event_config" | "res_alarm"
         | "res_cabinet_style" | "sb_resource" => handle_res_change(),
         "sb_search" | "sb_state" => spawn_future(handle_search()),
         "ob_view" => handle_ob_view_ev(),

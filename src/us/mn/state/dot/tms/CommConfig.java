@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,9 +34,6 @@ public interface CommConfig extends SonarObject {
 	default String getTypeName() {
 		return SONAR_TYPE;
 	}
-
-	/** SONAR base type name */
-	String SONAR_BASE = SystemAttribute.SONAR_TYPE;
 
 	/** Valid polling periods */
 	Interval[] VALID_PERIODS = {
