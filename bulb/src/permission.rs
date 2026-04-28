@@ -15,6 +15,8 @@ use crate::notes::contains_hashtag;
 use hatmil::html;
 use resources::Res;
 use serde::Deserialize;
+use serde_json::Value;
+use serde_json::map::Map;
 
 /// Permission
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -41,6 +43,7 @@ fn item_state(access_level: u32) -> ItemState {
 impl Permission {
     /// Create a new permission
     pub fn new(base_resource: &str, role: &str) -> Self {
+        // FIXME: name using "prm_" + number
         Permission {
             base_resource: base_resource.to_string(),
             hashtag: None,
@@ -48,6 +51,19 @@ impl Permission {
             name: "fake permission".to_string(),
             role: role.to_string(),
         }
+    }
+
+    /// Convert to JSON value (for POST)
+    #[allow(dead_code)]
+    pub fn into_value(self) -> Value {
+        let mut obj = Map::new();
+        obj.insert("name".to_string(), Value::String(self.name));
+        obj.insert("role".to_string(), Value::String(self.role));
+        obj.insert(
+            "base_resource".to_string(),
+            Value::String(self.base_resource),
+        );
+        Value::Object(obj)
     }
 
     /// Get access level for a given resource type
