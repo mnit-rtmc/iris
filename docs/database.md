@@ -59,7 +59,6 @@ update, and is caused by one of these conditions:
 `inc_locator`      |     |     |     |
 `lcs`              | ☑️   | ☑️   | ☑️   |
 `lcs_state`        |     | ☑️   |     |
-`modem`            |     |     |     |
 `monitor_style`    |     |     |     |
 `msg_pattern`      |     |     |     |
 `msg_line`         |     |     |     |

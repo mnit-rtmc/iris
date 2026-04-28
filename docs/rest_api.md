@@ -66,7 +66,7 @@ A `Content-Type: application/json` header is included where appropriate.
 | [permission]   | [comm link]     | [beacon]   | [lcs]            |
 | [role]         | [controller]    | [camera]   | [ramp meter]     |
 | [user]         | [cabinet style] | [detector] | [tag reader]     |
-|                | [modem]         | [dms]      | [video monitor]  |
+|                |                 | [dms]      | [video monitor]  |
 |                |                 | [gate arm] | [weather sensor] |
 
 Most devices also have an associated [geo loc] resource.
@@ -131,7 +131,6 @@ These are static [font]s which can be used in [sign message]s.
 [honeybee]: https://github.com/mnit-rtmc/iris/tree/master/honeybee
 [incident]: incidents.html
 [lcs]: lcs.html
-[modem]: modem.html
 [parking]: parking_areas.html
 [permission]: permissions.html
 [protocols]: protocols.html

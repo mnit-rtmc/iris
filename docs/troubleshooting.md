@@ -50,7 +50,6 @@ Filename               | Description
 `kadaptive`            | K Adaptive metering algorithm
 `manchester`           | [Manchester] protocol
 `mndot170`             | [MnDOT-170] protocol
-`modem`                | Modem error log
 `ntcip`                | [NTCIP] protocols
 `org815`               | [ORG-815] protocol
 `pelcod`               | [Pelco-D] protocol

@@ -50,7 +50,7 @@ resource, at the same access level.
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action], hashtag |
 | [beacon]           |                                                   |
 | [camera]           | [camera preset], [encoder stream], [encoder type] |
-| [comm config]      | [comm link], [controller], [gps], [modem]         |
+| [comm config]      | [comm link], [controller], [gps]                  |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         |                                                   |
 | [incident]         | inc\_advice, inc\_descriptor, inc\_detail, inc\_locator, road\_affix |
@@ -108,7 +108,6 @@ resource.  These include:
 [map extent]: mapping.html#map-extents
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
-[modem]: modem.html
 [monitor style]: video.html#style
 [parking area]: parking_areas.html
 [plan phase]: action_plans.html#plan-phases
