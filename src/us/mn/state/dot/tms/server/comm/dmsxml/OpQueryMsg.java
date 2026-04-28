@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -380,10 +380,6 @@ class OpQueryMsg extends OpDms {
 		protected Phase poll(CommMessage argmess)
 			throws IOException
 		{
-			// ignore startup operations for DMS on dial-up lines
-			if (m_startup && m_dms.isDialUpRequired())
-				return null;
-
 			LOG.log("OpQueryMsg.PhaseQueryMsg.poll(msg) " +
 				"called, dms=" + m_dms.getName());
 

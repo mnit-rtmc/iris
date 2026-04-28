@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -219,12 +219,6 @@ abstract public class DeviceImpl extends ControllerIoImpl implements Device {
 	protected int getPollPeriodSec() {
 		ControllerImpl c = controller;	// Avoid race
 		return (c != null) ? c.getPollPeriodSec() : 30;
-	}
-
-	/** Check if dial-up is required to communicate */
-	public boolean isDialUpRequired() {
-		ControllerImpl c = controller;
-		return (c != null) && c.isDialUpRequired();
 	}
 
 	/** Request a device operation */

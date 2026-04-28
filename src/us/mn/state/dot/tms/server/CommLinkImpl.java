@@ -223,16 +223,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return description;
 	}
 
-	/** Check if link is configured for a dial-up modem */
-	private boolean isDialUpModem() {
-		return uri.startsWith("modem:");
-	}
-
-	/** Check if dial-up is required to communicate */
-	public boolean isDialUpRequired() {
-		return isDialUpModem() && !getConnected();
-	}
-
 	/** Remote URI for link */
 	private String uri = "";
 

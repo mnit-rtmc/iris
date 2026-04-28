@@ -208,7 +208,6 @@ public class MainServer {
 		ns.registerType(IncDetailImpl.class);
 		ns.registerType(CommConfigImpl.class);
 		ns.registerType(CommLinkImpl.class);
-		ns.registerType(ModemImpl.class);
 		ns.registerType(CabinetStyleImpl.class);
 		ns.registerType(ControllerImpl.class);
 		ns.registerType(SignConfigImpl.class);

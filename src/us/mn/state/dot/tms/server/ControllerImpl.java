@@ -1109,12 +1109,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 		geo_loc.notifyRemove();
 	}
 
-	/** Check if dial-up is required to communicate */
-	public boolean isDialUpRequired() {
-		CommLinkImpl cl = comm_link;
-		return (cl != null) && cl.isDialUpRequired();
-	}
-
 	/** Write the controller as an XML element */
 	public void writeXml(Writer w) throws IOException {
 		w.write("<controller");

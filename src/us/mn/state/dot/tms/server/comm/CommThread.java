@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2017-2020  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -55,16 +55,14 @@ public class CommThread<T extends ControllerProperty> {
 	static private final ThreadGroup GROUP = new ThreadGroup("Comm");
 
 	/** Check if messenger needs reconnect after read timeout failure.
-	 * For a modem link, read timeout should be handled by reconnecting
-	 * the modem.  For a datagram messenger (UDP), a reconnect may be
-	 * required if a network error caused the information cached during
-	 * the connect call to become stale.  This condition was observed when
-	 * a router malfunctioned, causing all connected UDP sockets to always
-	 * throw SocketTimeoutException until the socket was torn down and
+	 * For a datagram messenger (UDP), a reconnect may be required if a
+	 * network error caused the information cached during the connect call
+	 * to become stale.  This condition was observed when a router
+	 * malfunctioned, causing all connected UDP sockets to always throw
+	 * SocketTimeoutException until the socket was torn down and
 	 * re-established.  Crazy.  2017-04-25. */
 	static private boolean needsReconnect(Messenger m) {
-		return (m instanceof ModemMessenger) ||
-		       (m instanceof DatagramMessenger);
+		return (m instanceof DatagramMessenger);
 	}
 
 	/** Write a message to the comm log */
@@ -203,11 +201,6 @@ public class CommThread<T extends ControllerProperty> {
 			catch (ReconnectException e) {
 				connected = false;
 				continue;
-			}
-			catch (NoModemException e) {
-				// Keep looping until modem is available
-				connected = false;
-				logException(e);
 			}
 			catch (ConnectException e) {
 				String msg = logException(e);
