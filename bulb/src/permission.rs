@@ -10,14 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::error::{Error, Result};
 use crate::item::ItemState;
 use crate::notes::contains_hashtag;
-use crate::util::Doc;
 use hatmil::html;
 use resources::Res;
 use serde::Deserialize;
-use serde_json::{Map, Value};
 
 /// Permission
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -39,30 +36,6 @@ fn item_state(access_level: u32) -> ItemState {
         4 => ItemState::Configure,
         _ => ItemState::Unknown,
     }
-}
-
-/// Create an HTML `select` element of access level
-fn access_level_html<'p>(selected: u32, select: &'p mut html::Select<'p>) {
-    select.id("access_level");
-    select
-        .option()
-        .value("0".to_string())
-        .cdata("🚫 none")
-        .close();
-    for access in 1..=4 {
-        let mut option = select.option();
-        option.value(access.to_string());
-        if selected == access {
-            option.selected();
-        }
-        let item = item_state(access);
-        option
-            .cdata(item.code())
-            .cdata(" ")
-            .cdata(item.description())
-            .close();
-    }
-    select.close();
 }
 
 impl Permission {
@@ -95,24 +68,6 @@ impl Permission {
                 .is_none_or(|ht| notes.is_some_and(|n| contains_hashtag(n, ht)))
     }
 
-    /// Get value to create a new object
-    pub fn create_value(doc: &Doc) -> Result<String> {
-        let name = doc
-            .input_option_string("create_name")
-            .ok_or(Error::ElemIdNotFound("create_name"))?;
-        let role = doc
-            .select_parse::<String>("role")
-            .ok_or(Error::ElemIdNotFound("role"))?;
-        let base_resource = doc
-            .select_parse::<String>("base_resource")
-            .ok_or(Error::ElemIdNotFound("base_resource"))?;
-        let mut obj = Map::new();
-        obj.insert("name".to_string(), Value::String(name));
-        obj.insert("role".to_string(), Value::String(role));
-        obj.insert("base_resource".to_string(), Value::String(base_resource));
-        Ok(Value::Object(obj).to_string())
-    }
-
     /// Convert to HTML table row
     pub fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
         match self.hashtag.as_ref() {
@@ -123,4 +78,28 @@ impl Permission {
         access_level_html(self.access_level, &mut td.select());
         tr.close();
     }
+}
+
+/// Create an HTML `select` element of access level
+fn access_level_html<'p>(selected: u32, select: &'p mut html::Select<'p>) {
+    select.id("access_level");
+    select
+        .option()
+        .value("0".to_string())
+        .cdata("🚫 none")
+        .close();
+    for access in 1..=4 {
+        let mut option = select.option();
+        option.value(access.to_string());
+        if selected == access {
+            option.selected();
+        }
+        let item = item_state(access);
+        option
+            .cdata(item.code())
+            .cdata(" ")
+            .cdata(item.description())
+            .close();
+    }
+    select.close();
 }

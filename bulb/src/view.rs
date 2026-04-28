@@ -35,7 +35,6 @@ use crate::mapextent::MapExtent;
 use crate::modem::Modem;
 use crate::monitorstyle::MonitorStyle;
 use crate::msgpattern::MsgPattern;
-use crate::permission::Permission;
 use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;
@@ -369,10 +368,12 @@ impl CardView {
     /// Create a new object
     pub async fn create_and_post(&self) -> Result<()> {
         let doc = Doc::get();
-        let value = match self.res {
-            Res::Permission => Permission::create_value(&doc)?,
-            _ => create_value(&doc)?,
-        };
+        let name = doc
+            .input_option_string("create_name")
+            .ok_or(Error::ElemIdNotFound("create_name"))?;
+        let mut obj = Map::new();
+        obj.insert("name".to_string(), Value::String(name));
+        let value = Value::Object(obj).to_string();
         uri_all(self.res).post(&value.into()).await?;
         Ok(())
     }
@@ -409,14 +410,4 @@ fn html_card_create(res: Res, create: &str) -> String {
     div.class("row end");
     div.button().id("ob_save").r#type("button").cdata("🖍️ Save");
     String::from(tree)
-}
-
-/// Create a name value
-fn create_value(doc: &Doc) -> Result<String> {
-    let name = doc
-        .input_option_string("create_name")
-        .ok_or(Error::ElemIdNotFound("create_name"))?;
-    let mut obj = Map::new();
-    obj.insert("name".to_string(), Value::String(name));
-    Ok(Value::Object(obj).to_string())
 }

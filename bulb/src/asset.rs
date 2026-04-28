@@ -32,6 +32,7 @@ pub enum Asset {
     Controllers,
     DeviceActions,
     Directions,
+    Domains,
     EncoderTypes,
     Font(String),
     Fonts,
@@ -85,6 +86,7 @@ impl Asset {
             Controllers => "/iris/api/controller".into(),
             DeviceActions => "/iris/api/device_action".into(),
             Directions => "/iris/lut/direction".into(),
+            Domains => "/iris/api/domain".into(),
             EncoderTypes => "/iris/api/encoder_type".into(),
             Font(nm) => {
                 let mut uri = Uri::from("/iris/tfon/")

@@ -12,6 +12,7 @@
 //
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card};
+use crate::domain::Domain;
 use crate::error::Result;
 use crate::item::ItemState;
 use crate::permission::Permission;
@@ -45,6 +46,7 @@ pub struct RoleAnc {
     assets: Vec<Asset>,
     pub resource_types: Vec<ResourceType>,
     pub permissions: Vec<Permission>,
+    pub domains: Vec<Domain>,
 }
 
 impl AncillaryData for RoleAnc {
@@ -53,15 +55,19 @@ impl AncillaryData for RoleAnc {
     /// Construct ancillary role data
     fn new(_pri: &Role, view: View) -> Self {
         let assets = match view {
-            View::Setup => vec![Asset::ResourceTypes, Asset::Permissions],
+            View::Setup => {
+                vec![Asset::ResourceTypes, Asset::Permissions, Asset::Domains]
+            }
             _ => Vec::new(),
         };
         let resource_types = Vec::new();
         let permissions = Vec::new();
+        let domains = Vec::new();
         RoleAnc {
             assets,
             resource_types,
             permissions,
+            domains,
         }
     }
 
@@ -88,6 +94,9 @@ impl AncillaryData for RoleAnc {
                 permissions.sort();
                 self.permissions = permissions;
             }
+            Asset::Domains => {
+                self.domains = serde_wasm_bindgen::from_value(value)?;
+            }
             _ => unreachable!(),
         }
         Ok(())
@@ -97,8 +106,9 @@ impl AncillaryData for RoleAnc {
 impl RoleAnc {
     /// Make permissions HTML table
     fn permissions_html<'p>(&self, pri: &Role, div: &'p mut html::Div<'p>) {
-        div.div().class("row").cdata("🗝️ Permissions").close();
-        let mut table = div.table();
+        let mut details = div.details();
+        details.summary().cdata("🗝️ Permissions").close();
+        let mut table = details.table();
         for res in &self.resource_types {
             if res.base.is_some() {
                 continue;
@@ -120,7 +130,20 @@ impl RoleAnc {
                 p.table_row(&mut table.tr());
             }
         }
-        table.close();
+        details.close();
+    }
+
+    /// Make domains HTML table
+    fn domains_html<'p>(&self, pri: &Role, div: &'p mut html::Div<'p>) {
+        let mut details = div.details();
+        details.summary().cdata("🖧 Domains").close();
+        if let Some(domains) = pri.domains.as_ref() {
+            for dom in &self.domains {
+                let assigned = domains.contains(&dom.name);
+                dom.input_html(assigned, &mut details.div());
+            }
+        }
+        details.close();
     }
 }
 
@@ -163,6 +186,8 @@ impl Role {
         div.close();
         div = tree.root::<html::Div>();
         anc.permissions_html(self, &mut div);
+        div = tree.root::<html::Div>();
+        anc.domains_html(self, &mut div);
         self.footer_html(true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
