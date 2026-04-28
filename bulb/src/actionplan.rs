@@ -67,9 +67,8 @@ pub struct TimeAction {
 }
 
 impl TimeAction {
-    fn to_html(&self) -> String {
-        let mut tree = Tree::new();
-        let mut tr = tree.root::<html::Tr>();
+    /// Make HTML table row
+    fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
         if let Some(day_plan) = &self.day_plan {
             tr.td().cdata(day_plan).close();
         }
@@ -78,7 +77,6 @@ impl TimeAction {
         }
         tr.td().cdata(&self.time_of_day).close();
         tr.td().cdata("⇨ ").cdata(&self.phase).close();
-        String::from(tree)
     }
 }
 
@@ -258,13 +256,16 @@ impl ActionPlan {
         div.class("row fill");
         self.item_states(anc).spans(&mut div.span());
         div.close();
+        if let Some(notes) = self.notes.as_ref() {
+            div = tree.root::<html::Div>();
+            div.class("row");
+            div.span().cdata(notes).close();
+            div.close();
+        }
         div = tree.root::<html::Div>();
         div.class("row");
-        let tags = anc.hashtags(self).collect::<Vec<_>>().join(" ");
-        div.span().class("info").cdata(tags).close();
-        let mut span = div.span();
-        span.label().r#for("phase").cdata("Phase").close();
-        let mut select = span.select();
+        div.label().r#for("phase").cdata("Phase").close();
+        let mut select = div.select();
         select.id("phase");
         for p in anc.phases(self) {
             let mut option = select.option();
@@ -274,14 +275,21 @@ impl ActionPlan {
             option.cdata(p).close();
         }
         div.close();
+        let tags = anc.hashtags(self).collect::<Vec<_>>().join(" ");
+        if !tags.is_empty() {
+            let mut details = tree.root::<html::Details>();
+            details.summary().cdata("Hashtags").close();
+            details.span().class("info").cdata(tags);
+            details.close();
+        }
         if !anc.time_actions.is_empty() {
-            div = tree.root::<html::Div>();
-            div.class("row").cdata("Schedule 🗓️").close();
-            let mut table = tree.root::<html::Table>();
+            let mut details = tree.root::<html::Details>();
+            details.summary().cdata("🗓️ Schedule").close();
+            let mut table = details.table();
             for ta in &anc.time_actions {
-                table.raw(ta.to_html());
+                ta.table_row(&mut table.tr());
             }
-            table.close();
+            details.close();
         }
         String::from(tree)
     }
