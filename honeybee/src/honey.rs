@@ -283,6 +283,8 @@ impl Honey {
         match map.get_mut(&id) {
             Some(notifier) => {
                 if notifier.tx.is_some() {
+                    // NOTE: this happens when multiple tabs
+                    //       are open on the same browser
                     log::info!("SSE sender exists {id}");
                 }
                 notifier.tx = Some(tx);
