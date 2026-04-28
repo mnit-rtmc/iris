@@ -191,7 +191,6 @@ comm_link	comm_config
 controller	comm_config
 geo_loc	comm_config
 gps	comm_config
-modem	comm_config
 dms	\N
 font	dms
 glyph	dms
@@ -1368,23 +1367,6 @@ CREATE VIEW comm_link_view AS
     JOIN iris.comm_config cc ON cl.comm_config = cc.name
     JOIN iris.comm_protocol cp ON cc.protocol = cp.id;
 GRANT SELECT ON comm_link_view TO PUBLIC;
-
-CREATE TABLE iris.modem (
-    name VARCHAR(20) PRIMARY KEY,
-    uri VARCHAR(64) NOT NULL,
-    config VARCHAR(64) NOT NULL,
-    timeout_ms INTEGER NOT NULL,
-    enabled BOOLEAN NOT NULL
-);
-
-CREATE TRIGGER modem_notify_trig
-    AFTER INSERT OR UPDATE OR DELETE ON iris.modem
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE VIEW modem_view AS
-    SELECT name, uri, config, timeout_ms, enabled
-    FROM iris.modem;
-GRANT SELECT ON modem_view TO PUBLIC;
 
 CREATE TABLE iris.cabinet_style (
     name VARCHAR(20) PRIMARY KEY,

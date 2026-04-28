@@ -38,7 +38,6 @@ DELETE FROM event.weather_sensor_sample;
 DELETE FROM event.weather_sensor_settings;
 
 UPDATE iris.comm_link SET uri = '';
-UPDATE iris.modem SET uri = '';
 UPDATE iris.controller SET password = NULL;
 UPDATE iris.video_monitor SET notes = NULL;
 UPDATE iris.camera SET enc_address = NULL;
