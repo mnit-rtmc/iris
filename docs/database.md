@@ -66,6 +66,7 @@ update, and is caused by one of these conditions:
 `permission`       |     |     |     |
 `plan_phase`       |     |     |     |
 `play_list`        |     |     |     |
+`phase_action`     |     |     |     |
 `ramp_meter`       | ☑️   | ☑️   | ☑️   |
 `r_node`           | ☑️   |     |     |
 `road`             |     |     |     |

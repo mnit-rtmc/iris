@@ -31,9 +31,9 @@ as [DMS]s and [ramp meter]s.
 ## Plan Phases
 
 The **phase** of an action plan represents its current state.  It can be
-changed manually by an operator or at specific dates/times using
-[time actions](#time-actions).  Advanced plans can have many phases, each with
-separate actions.
+changed manually by an operator or on specific conditions using
+[phase actions](#phase-actions).  Advanced plans can have many phases, each
+with separate actions.
 
 There are 8 built-in phases required for proper action plan operation:
 
@@ -51,9 +51,8 @@ There are 8 built-in phases required for proper action plan operation:
 Additional phases can be added on the **Plan Phases** tab.  Each phase must
 have a unique name, and names are case-sensitive.
 
-By specifying **Hold Time**, a plan will switch to the **Next Phase**
-automatically after the time passes.  Only **selectable** phases can be chosen
-by an operator; otherwise they must be automatic.
+Only **selectable** phases can be chosen by an operator; otherwise they must
+be automatic, with [phase actions](#phase-actions).
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -67,6 +66,101 @@ by an operator; otherwise they must be automatic.
 | 🔧 Configure | selectable, hold\_time, next\_phase |
 
 </details>
+
+## Phase Actions
+
+A *phase action* can automatically change the phase of an action plan.  When
+the specified condition occurs and the current phase is **from phase**, it will
+become **to phase**.
+
+<details>
+<summary>API Resources 🕵️ </summary>
+
+* `iris/api/phase_action` (primary)
+* `iris/api/phase_action/{name}`
+
+| Access       | Primary                          |
+|--------------|----------------------------------|
+| 👁️  View      | name, action\_plan               |
+| 💡 Manage    | day\_plan, condition, parameters |
+| 🔧 Configure | from\_phase, to\_phase           |
+
+</details>
+
+### Conditions
+
+These are conditions which can cause a phase change.
+
+<details>
+<summary>Hold Time</summary>
+
+Takes effect once the plan has been in `from_phase` for longer than the hold
+time.
+
+**Parameters**: `s`, `mm::ss` or `HH:mm:ss`
+
+</details>
+
+<details>
+<summary>Clock Time</summary>
+
+Takes effect at a specific time of day, optionally on a specific date.
+
+**Parameters**: `HH:mm` or `YYYY-MM-DD HH:mm`
+
+</details>
+
+<details>
+<summary>Slow Traffic</summary>
+
+Takes effect when mainline speed drops below a threshold value.
+
+**Parameters**: `speed,distance` (mph, miles downstream) FIXME
+
+</details>
+
+<details>
+<summary>High Occupancy</summary>
+
+Takes effect when a detector occupancy goes above a threshold value.
+
+**Parameters**: Detector ID, occupancy threshold (`det,occ`)
+
+</details>
+
+<details>
+<summary>Toll Mode</summary>
+
+Takes effect when a toll zone changes mode.
+
+**Parameters**: Toll zone ID, mode: `priced`, `open` or `closed`
+
+</details>
+
+<details>
+<summary>RWIS Reading</summary>
+
+Takes effect when an RWIS reading goes above or below a threshold value.
+
+**Parameters**: Sensor ID, field `<` value _or_ Sensor ID, field `>` value
+
+**Fields**: `friction`, `surface_temp`, `wind_gust`, `visibility`, `precip`
+
+</details>
+
+<details>
+<summary>Alert Period</summary>
+
+Takes effect in the period before an alert is active.
+
+**Parameters**: Alert ID, period: `before`, `during`, `after` or `expired`
+
+</details>
+
+These events are scheduled using either a [day plan](#day-plans) or a specific
+date (but not both).  A time of day must also be specified (HH:MM in 24-hour
+format).  Whenever the scheduled time occurs, the action plan will be changed to
+the specified phase.
 
 ## Device Actions
 
@@ -151,7 +245,7 @@ the specified phase.
 
 ## Time Action Tag
 
-The time of a scheduled **time action** can be displayed in DMS messages using
+The time of a scheduled **phase action** can be displayed in DMS messages using
 [device actions](#device-actions) within the same action plan.  A `[ta` *…* `]`
 [action tag](#action-tags) in the [message pattern] will be replaced with the
 appropriate value.  It has the following format:

@@ -176,6 +176,7 @@ action_plan	\N
 day_matcher	action_plan
 day_plan	action_plan
 device_action	action_plan
+phase_action	action_plan
 plan_phase	action_plan
 time_action	action_plan
 beacon	\N
@@ -2094,6 +2095,53 @@ CREATE VIEW time_action_view AS
     SELECT name, action_plan, day_plan, sched_date, time_of_day, phase
     FROM iris.time_action;
 GRANT SELECT ON time_action_view TO PUBLIC;
+
+CREATE TABLE iris.action_condition (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR NOT NULL
+);
+
+INSERT INTO iris.action_condition (id, description)
+VALUES
+    (0, 'hold time'),
+    (1, 'clock time'),
+    (2, 'slow traffic'),
+    (3, 'high occupancy'),
+    (4, 'toll mode'),
+    (5, 'RWIS reading'),
+    (6, 'alert period');
+
+CREATE TABLE iris.phase_action (
+    name VARCHAR(30) PRIMARY KEY,
+    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    from_phase VARCHAR(12) REFERENCES iris.plan_phase,
+    to_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+    day_plan VARCHAR(10) REFERENCES iris.day_plan,
+    condition INTEGER NOT NULL REFERENCES iris.action_condition,
+    parameters VARCHAR(16)
+);
+
+CREATE FUNCTION iris.phase_action_notify() RETURNS TRIGGER AS
+    $phase_action_notify$
+BEGIN
+    PERFORM pg_notify('phase_action', NEW.name);
+    RETURN NULL; -- AFTER trigger return is ignored
+END;
+$phase_action_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER phase_action_notify_trig
+    AFTER UPDATE ON iris.phase_action
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.phase_action_notify();
+
+CREATE TRIGGER phase_action_table_notify_trig
+    AFTER INSERT OR DELETE ON iris.phase_action
+    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
+
+CREATE VIEW phase_action_view AS
+    SELECT name, action_plan, from_phase, to_phase, day_plan, condition,
+           parameters
+    FROM iris.phase_action;
+GRANT SELECT ON phase_action_view TO PUBLIC;
 
 CREATE TABLE event.action_plan_event (
     id SERIAL PRIMARY KEY,
