@@ -70,8 +70,10 @@ be automatic, with [phase actions](#phase-actions).
 ## Phase Actions
 
 A *phase action* can automatically change the phase of an action plan.  When
-the specified condition occurs and the current phase is **from phase**, it will
-become **to phase**.
+the specified condition occurs and the current phase is `from_phase`, it will
+become `to_phase`.
+
+These actions can be limited to specific days using a [day plan](#day-plans).
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -156,11 +158,6 @@ Takes effect in the period before an alert is active.
 **Parameters**: Alert ID, period: `before`, `during`, `after` or `expired`
 
 </details>
-
-These events are scheduled using either a [day plan](#day-plans) or a specific
-date (but not both).  A time of day must also be specified (HH:MM in 24-hour
-format).  Whenever the scheduled time occurs, the action plan will be changed to
-the specified phase.
 
 ## Device Actions
 
