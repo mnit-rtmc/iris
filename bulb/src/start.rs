@@ -652,10 +652,9 @@ fn add_input_enter_listener(elem: &Element) -> Result<()> {
         if let (Some(Ok(target)), Ok(keydown_ev)) = (
             e.target().map(|e| e.dyn_into::<Element>()),
             e.dyn_into::<KeyboardEvent>(),
-        ) {
-            if keydown_ev.key().as_str() == "Enter" {
-                handle_input_enter(target.id());
-            }
+        ) && keydown_ev.key().as_str() == "Enter"
+        {
+            handle_input_enter(target.id());
         }
     });
     elem.add_event_listener_with_callback(
@@ -782,7 +781,9 @@ async fn handle_login() -> Result<()> {
         doc.input_parse::<String>("login_pass"),
     ) {
         let loading_bar = doc.opt_elem::<HtmlElement>("ob_login_loading_bar");
-        loading_bar.as_ref().map(|l| l.set_class_name("loading_bar active"));
+        if let Some(l) = &loading_bar {
+            l.set_class_name("loading_bar active")
+        }
         let uri = Uri::from("/iris/api/login");
         let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
         let el = doc.elem::<HtmlInputElement>("login_pass")?;
@@ -790,7 +791,9 @@ async fn handle_login() -> Result<()> {
         util::hide_elem("sb_login");
         uri.post(&js.into()).await?;
         // hide/deactivate loading bar
-        loading_bar.as_ref().map(|l| l.set_class_name("loading_bar"));
+        if let Some(l) = &loading_bar {
+            l.set_class_name("loading_bar")
+        }
         finish_init().await
     } else {
         Ok(())

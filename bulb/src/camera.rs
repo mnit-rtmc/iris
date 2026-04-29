@@ -20,7 +20,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::start::select_item_map;
 use crate::util::{
-    ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str, Doc,
+    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -175,12 +175,11 @@ impl Camera {
     fn recall_or_store_preset(&self, preset_num: u32) -> Vec<Action> {
         if let Some(toggle) =
             Doc::get().opt_elem::<HtmlElement>("preset-mode-toggle")
+            && toggle.class_name() == "active"
         {
-            if toggle.class_name() == "active" {
-                // switch back to recall before storing
-                self.toggle_preset_mode();
-                return self.store_preset(preset_num);
-            }
+            // switch back to recall before storing
+            self.toggle_preset_mode();
+            return self.store_preset(preset_num);
         }
         self.recall_preset(preset_num)
     }
@@ -244,7 +243,7 @@ impl Camera {
             .class("camera-presets")
             .button()
             .id("preset-mode-toggle")
-            .class("default")  // .active after click until store
+            .class("default") // .active after click until store
             .r#type("button")
             .cdata("Store preset...")
             .close();
