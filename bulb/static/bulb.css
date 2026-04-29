@@ -376,6 +376,30 @@ label:has(+ #sb_resource) {
   transition: left 100ms ease-in-out;
 }
 
+.loading_bar {
+  position: absolute;
+  height: 3px;
+}
+.loading_bar.active {
+  background-color: #6ce;
+  animation: loading_bar_animation 1.5s infinite;
+  animation-timing-function: ease-out;
+}
+@keyframes loading_bar_animation {
+  0% {
+    width: 0%;
+    left: 0%;
+  }
+  60% {
+    width: 70%;
+    left: 20%;
+  }
+  100% {
+    width: 0%;
+    left: 100%;
+  }
+}
+
 .tooltip {
   position: relative;
   display: inline-block;
@@ -690,4 +714,20 @@ label:has(+ #sb_resource) {
   padding: 0.2rem 0.2rem 0 0.2rem;
   border-radius: 0.2rem;
   border: 1px solid black;
+}
+
+/* -------
+ * Cameras
+ * ------- */
+.preset-buttons button {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+#preset-mode-toggle.default {
+  box-shadow: inherit;
+}
+#preset-mode-toggle.active {
+  box-shadow: inset 0 0 1em #448;
 }
