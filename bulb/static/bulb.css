@@ -60,7 +60,8 @@ button:active {
   background-color: #bbb;
 }
 button:disabled {
-  background-color: #888;
+  background-color: #ccc;
+  color: #888;
 }
 button.go_link {
   font-size: smaller;
