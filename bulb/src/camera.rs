@@ -20,7 +20,7 @@ use crate::geoloc::{Loc, LocAnc};
 use crate::item::ItemState;
 use crate::start::select_item_map;
 use crate::util::{
-    ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str,
+    ContainsLower, Fields, Input, Select, TextArea, opt_ref, opt_str, Doc,
 };
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -29,6 +29,7 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlElement;
 
 /// Encoder type
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -170,12 +171,48 @@ impl Camera {
         String::from(tree)
     }
 
+    /// store preset if button active, else recall
+    fn recall_or_store_preset(&self, preset_num: u32) -> Vec<Action> {
+        if let Some(toggle) =
+            Doc::get().opt_elem::<HtmlElement>("preset-mode-toggle")
+        {
+            if toggle.class_name() == "active" {
+                // switch back to recall before storing
+                self.toggle_preset_mode();
+                return self.store_preset(preset_num);
+            }
+        }
+        self.recall_preset(preset_num)
+    }
+
+    /// recall action
     fn recall_preset(&self, preset_num: u32) -> Vec<Action> {
         let uri = uri_one(Res::Camera, &self.name);
         let mut fields = Fields::new();
         fields.insert_num("recall_preset", preset_num);
         let value = fields.into_value().to_string();
         vec![Action::Patch(uri, value.into())]
+    }
+
+    /// store action
+    fn store_preset(&self, preset_num: u32) -> Vec<Action> {
+        let uri = uri_one(Res::Camera, &self.name);
+        let mut fields = Fields::new();
+        fields.insert_num("store_preset", preset_num);
+        let value = fields.into_value().to_string();
+        vec![Action::Patch(uri, value.into())]
+    }
+
+    /// toggle the class of the preset mode button
+    fn toggle_preset_mode(&self) {
+        if let Some(toggle) =
+            Doc::get().opt_elem::<HtmlElement>("preset-mode-toggle")
+        {
+            toggle.set_class_name(match toggle.class_name().as_str() {
+                "default" => "active",
+                _ => "default",
+            });
+        }
     }
 
     /// Convert to Control HTML
@@ -203,12 +240,36 @@ impl Camera {
         div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Presets").close();
-        for preset_num in 1..=12 {
-            let btn_id = format!("preset_{}", preset_num);
-            div.button()
-                .id(&btn_id)
+        div.span()
+            .class("camera-presets")
+            .button()
+            .id("preset-mode-toggle")
+            .class("default")  // .active after click until store
+            .r#type("button")
+            .cdata("Store preset...")
+            .close();
+        let mut btns = div.div();
+        btns.class("preset-buttons");
+        for r in 0..=3 {
+            let preset_num = r * 3 + 1;
+            let btn_1 = format!("preset-{}", preset_num);
+            let btn_2 = format!("preset-{}", preset_num + 1);
+            let btn_3 = format!("preset-{}", preset_num + 2);
+            let mut row = btns.div();
+            row.class("row");
+            row.button()
+                .id(&btn_1)
                 .r#type("button")
                 .cdata(preset_num.to_string());
+            row.button()
+                .id(&btn_2)
+                .r#type("button")
+                .cdata((preset_num + 1).to_string());
+            row.button()
+                .id(&btn_3)
+                .r#type("button")
+                .cdata((preset_num + 2).to_string());
+            row.close();
         }
         div.close();
         String::from(tree)
@@ -449,14 +510,16 @@ impl Card for Camera {
 
     /// Handle click event for a button on the card
     fn handle_click(&self, _anc: CameraAnc, id: String) -> Vec<Action> {
-        match id.as_str() {
-            p if p.starts_with("preset_") => {
-                if let Some(n) = p.strip_prefix("preset_") {
-                    if let Ok(preset_num) = n.parse::<u32>() {
-                        self.recall_preset(n)
-                    }
-                }
+        if let Some(preset_str) = id.strip_prefix("preset-") {
+            if let Ok(preset_num) = preset_str.parse::<u32>() {
+                return self.recall_or_store_preset(preset_num);
             }
+            if preset_str == "mode-toggle" {
+                // no Action
+                self.toggle_preset_mode();
+            }
+        }
+        match id.as_str() {
             "rq_reset" => self.device_req(DeviceReq::ResetDevice),
             _ => Vec::new(),
         }

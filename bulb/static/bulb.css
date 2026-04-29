@@ -715,3 +715,19 @@ label:has(+ #sb_resource) {
   border-radius: 0.2rem;
   border: 1px solid black;
 }
+
+/* -------
+ * Cameras
+ * ------- */
+.preset-buttons button {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+#preset-mode-toggle.default {
+  box-shadow: inherit;
+}
+#preset-mode-toggle.active {
+  box-shadow: inset 0 0 1em #448;
+}
