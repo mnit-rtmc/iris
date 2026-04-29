@@ -114,6 +114,7 @@ fn set_selected_style(res: Res, name: &str, zoom: u32) {
         css.push('.');
         css.push_str(res.as_str());
         css.push('-');
+        // FIXME: use CSS escape rules
         css.push_str(name);
         css.push_str(" { stroke: white; stroke-width: 2; }");
         css.push_str("\n.wyrm-tile use { scale: ");
@@ -1135,6 +1136,7 @@ fn item_states_css(
                 css.push('.');
                 css.push_str(cs.res.as_str());
                 css.push('-');
+                // FIXME: use CSS escape rules
                 css.push_str(&cs.name);
             }
         }
