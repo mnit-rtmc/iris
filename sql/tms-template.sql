@@ -2117,7 +2117,7 @@ CREATE TABLE iris.phase_action (
     to_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
     day_plan VARCHAR(10) REFERENCES iris.day_plan,
     condition INTEGER NOT NULL REFERENCES iris.action_condition,
-    parameters VARCHAR(16)
+    parameters VARCHAR(32)
 );
 
 CREATE FUNCTION iris.phase_action_notify() RETURNS TRIGGER AS

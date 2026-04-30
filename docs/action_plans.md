@@ -91,12 +91,16 @@ These actions can be limited to specific days using a [day plan](#day-plans).
 
 ### Conditions
 
-These are conditions which can trigger a phase change.
+There are several conditions which can trigger a phase change.  Each condition
+has parameters which may include keywords for **Field**, **Mode** or
+**Period**.  As parameters, these keywords may be abbreviated, as long as they
+match a unique prefix (_e.g._ `occupancy` could be shortened to `occ`).
 
 <details>
 <summary>Hold Time</summary>
 
-Triggers when the plan has been in `from_phase` for longer than the hold time.
+Condition triggers when the plan has been in `from_phase` for longer than the
+hold time.
 
 **Parameters**: `s`, `mm::ss` or `HH:mm:ss`
 
@@ -105,7 +109,7 @@ Triggers when the plan has been in `from_phase` for longer than the hold time.
 <details>
 <summary>Clock Time</summary>
 
-Triggers at a specific time of day, optionally on a specific date.
+Condition triggers at a specific time of day, optionally on a specific date.
 
 **Parameters**: `HH:mm` or `YYYY-MM-DD HH:mm`
 
@@ -114,10 +118,10 @@ Triggers at a specific time of day, optionally on a specific date.
 <details>
 <summary>Traffic Threshold</summary>
 
-Triggers when a detector or station field goes above or below a threshold
-value.
+Condition triggers when a detector or station field goes above or below a
+threshold value.
 
-**Parameters**: Detector or station ID, _field_ `<` / `>` value
+**Parameters**: Detector or station ID, _field_ `<` or `>` value
 
 **Field**: `speed`, `flow`, `density`, `occupancy`
 
@@ -126,9 +130,9 @@ value.
 <details>
 <summary>RWIS Threshold</summary>
 
-Triggers when an RWIS field goes above or below a threshold value.
+Condition triggers when an RWIS field goes above or below a threshold value.
 
-**Parameters**: Sensor ID, _field_ `<` / `>` value
+**Parameters**: Sensor ID, _field_ `<` or `>` value
 
 **Field**: `friction`, `surface_temp`, `wind_gust`, `visibility`, `precip`
 
@@ -137,7 +141,7 @@ Triggers when an RWIS field goes above or below a threshold value.
 <details>
 <summary>Toll Mode</summary>
 
-Triggers when a toll zone changes mode.
+Condition triggers when a toll zone changes mode.
 
 **Parameters**: Toll zone ID, _mode_
 
@@ -148,7 +152,7 @@ Triggers when a toll zone changes mode.
 <details>
 <summary>Alert Period</summary>
 
-Triggers in a specific alert period.
+Condition triggers in a specific alert period.
 
 **Parameters**: Alert ID, _period_
 
