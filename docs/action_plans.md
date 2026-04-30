@@ -70,10 +70,9 @@ be automatic, with [phase actions](#phase-actions).
 ## Phase Actions
 
 A *phase action* can automatically change the phase of an action plan.  When
-the specified condition occurs and the current phase is `from_phase`, it will
-become `to_phase`.
-
-These actions can be limited to specific days using a [day plan](#day-plans).
+the specified condition occurs, it will become `to_phase`.  This can be
+limited to specific days using a [day plan](#day-plans).  Also, if
+`from_phase` is set, it will only take effect if the current phase matches.
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -93,8 +92,8 @@ These actions can be limited to specific days using a [day plan](#day-plans).
 
 There are several conditions which can trigger a phase change.  Each condition
 has parameters which may include keywords for **Field**, **Mode** or
-**Period**.  As parameters, these keywords may be abbreviated, as long as they
-match a unique prefix (_e.g._ `occupancy` could be shortened to `occ`).
+**Period**.  These may be abbreviated, as long as they match a unique prefix
+(_e.g._ `occupancy` could be shortened to `occ`).
 
 <details>
 <summary>Hold Time</summary>
@@ -102,7 +101,7 @@ match a unique prefix (_e.g._ `occupancy` could be shortened to `occ`).
 Condition triggers when the plan has been in `from_phase` for longer than the
 hold time.
 
-**Parameters**: `s`, `mm::ss` or `HH:mm:ss`
+- **Parameters**: `s`, `mm:ss` or `HH:mm:ss`
 
 </details>
 
@@ -111,7 +110,7 @@ hold time.
 
 Condition triggers at a specific time of day, optionally on a specific date.
 
-**Parameters**: `HH:mm` or `YYYY-MM-DD HH:mm`
+- **Parameters**: `HH:mm` or `YYYY-MM-DD HH:mm`
 
 </details>
 
@@ -121,9 +120,9 @@ Condition triggers at a specific time of day, optionally on a specific date.
 Condition triggers when a detector or station field goes above or below a
 threshold value.
 
-**Parameters**: Detector or station ID, _field_ `<` or `>` value
+- **Parameters**: Detector or station ID, _field_ `<` or `>` value
 
-**Field**: `speed`, `flow`, `density`, `occupancy`
+- **Field** keywords: `speed`, `flow`, `density`, `occupancy`
 
 </details>
 
@@ -132,9 +131,10 @@ threshold value.
 
 Condition triggers when an RWIS field goes above or below a threshold value.
 
-**Parameters**: Sensor ID, _field_ `<` or `>` value
+- **Parameters**: Sensor ID, _field_ `<` or `>` value
 
-**Field**: `friction`, `surface_temp`, `wind_gust`, `visibility`, `precip`
+- **Field** keywords: `friction`, `surface_temp`, `wind_gust`, `visibility`,
+  `precip`
 
 </details>
 
@@ -143,9 +143,9 @@ Condition triggers when an RWIS field goes above or below a threshold value.
 
 Condition triggers when a toll zone changes mode.
 
-**Parameters**: Toll zone ID, _mode_
+- **Parameters**: Toll zone ID, _mode_
 
-**Mode**: `priced`, `open`, `closed`
+- **Mode** keywords: `priced`, `open`, `closed`
 
 </details>
 
@@ -154,9 +154,9 @@ Condition triggers when a toll zone changes mode.
 
 Condition triggers in a specific alert period.
 
-**Parameters**: Alert ID, _period_
+- **Parameters**: Alert ID, _period_
 
-**Period**: `before`, `during`, `after`, `expired`
+- **Period** keywords: `before`, `during`, `after`, `expired`
 
 </details>
 
