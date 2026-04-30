@@ -103,6 +103,8 @@ hold time.
 
 - **Params**: `s`, `mm:ss` or `HH:mm:ss`
 
+- **Example**: `15:00` (for 15 minutes)
+
 </details>
 
 <details>
@@ -111,6 +113,8 @@ hold time.
 Condition triggers at a specific time of day, optionally on a specific date.
 
 - **Params**: `HH:mm` or `yyyy-MM-dd'T'HH:mm`
+
+- **Example**: `2026-05-01T14:00` (at 2 PM on May 1, 2026)
 
 </details>
 
@@ -124,6 +128,8 @@ threshold value.
 
 - **Field** keywords: `speed`, `flow`, `density`, `occupancy`
 
+- **Example**: `1234,den>30` (when detector 1234 has density greater than 30)
+
 </details>
 
 <details>
@@ -136,6 +142,8 @@ Condition triggers when an RWIS field goes above or below a threshold value.
 - **Field** keywords: `friction`, `surface_temp`, `wind_gust`, `visibility`,
   `precip`
 
+- **Example**: `WS0123,fric<70` (station WS0123 friction less than 70)
+
 </details>
 
 <details>
@@ -147,6 +155,8 @@ Condition triggers when a toll zone changes mode.
 
 - **Mode** keywords: `priced`, `open`, `closed`
 
+- **Example**: `Z394W01,priced` (when zone Z394W01 is priced)
+
 </details>
 
 <details>
@@ -157,6 +167,8 @@ Condition triggers in a specific alert period.
 - **Params**: Alert ID, _period_
 
 - **Period** keywords: `before`, `during`, `after`, `expired`
+
+- **Example**: `ai_20260113183503938,during`
 
 </details>
 
