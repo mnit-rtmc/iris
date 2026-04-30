@@ -91,13 +91,12 @@ These actions can be limited to specific days using a [day plan](#day-plans).
 
 ### Conditions
 
-These are conditions which can cause a phase change.
+These are conditions which can trigger a phase change.
 
 <details>
 <summary>Hold Time</summary>
 
-Takes effect once the plan has been in `from_phase` for longer than the hold
-time.
+Triggers when the plan has been in `from_phase` for longer than the hold time.
 
 **Parameters**: `s`, `mm::ss` or `HH:mm:ss`
 
@@ -106,56 +105,54 @@ time.
 <details>
 <summary>Clock Time</summary>
 
-Takes effect at a specific time of day, optionally on a specific date.
+Triggers at a specific time of day, optionally on a specific date.
 
 **Parameters**: `HH:mm` or `YYYY-MM-DD HH:mm`
 
 </details>
 
 <details>
-<summary>Slow Traffic</summary>
+<summary>Traffic Threshold</summary>
 
-Takes effect when mainline speed drops below a threshold value.
+Triggers when a detector or station field goes above or below a threshold
+value.
 
-**Parameters**: `speed,distance` (mph, miles downstream) FIXME
+**Parameters**: Detector or station ID, _field_ `<` / `>` value
+
+**Field**: `speed`, `flow`, `density`, `occupancy`
 
 </details>
 
 <details>
-<summary>High Occupancy</summary>
+<summary>RWIS Threshold</summary>
 
-Takes effect when a detector occupancy goes above a threshold value.
+Triggers when an RWIS field goes above or below a threshold value.
 
-**Parameters**: Detector ID, occupancy threshold (`det,occ`)
+**Parameters**: Sensor ID, _field_ `<` / `>` value
+
+**Field**: `friction`, `surface_temp`, `wind_gust`, `visibility`, `precip`
 
 </details>
 
 <details>
 <summary>Toll Mode</summary>
 
-Takes effect when a toll zone changes mode.
+Triggers when a toll zone changes mode.
 
-**Parameters**: Toll zone ID, mode: `priced`, `open` or `closed`
+**Parameters**: Toll zone ID, _mode_
 
-</details>
-
-<details>
-<summary>RWIS Reading</summary>
-
-Takes effect when an RWIS reading goes above or below a threshold value.
-
-**Parameters**: Sensor ID, field `<` value _or_ Sensor ID, field `>` value
-
-**Fields**: `friction`, `surface_temp`, `wind_gust`, `visibility`, `precip`
+**Mode**: `priced`, `open`, `closed`
 
 </details>
 
 <details>
 <summary>Alert Period</summary>
 
-Takes effect in the period before an alert is active.
+Triggers in a specific alert period.
 
-**Parameters**: Alert ID, period: `before`, `during`, `after` or `expired`
+**Parameters**: Alert ID, _period_
+
+**Period**: `before`, `during`, `after`, `expired`
 
 </details>
 

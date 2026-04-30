@@ -2105,11 +2105,10 @@ INSERT INTO iris.action_condition (id, description)
 VALUES
     (0, 'hold time'),
     (1, 'clock time'),
-    (2, 'slow traffic'),
-    (3, 'high occupancy'),
+    (2, 'traffic threshold'),
+    (3, 'RWIS threshold'),
     (4, 'toll mode'),
-    (5, 'RWIS reading'),
-    (6, 'alert period');
+    (5, 'alert period');
 
 CREATE TABLE iris.phase_action (
     name VARCHAR(30) PRIMARY KEY,
