@@ -112,6 +112,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		IncLocatorImpl.loadAll();
 		IncAdviceImpl.loadAll();
 		TimeActionImpl.loadAll();
+		PhaseActionImpl.loadAll();
 		DeviceActionImpl.loadAll();
 		WordImpl.loadAll();
 		DMSImpl.updateAllStyles();
@@ -367,6 +368,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		SonarObject so = lookupObject(TimeActionImpl.SONAR_TYPE, name);
 		return (so instanceof TimeActionImpl)
 		      ? (TimeActionImpl) so
+		      : null;
+	}
+
+	/** Lookup a phase action */
+	static protected PhaseActionImpl lookupPhaseAction(String name) {
+		SonarObject so = lookupObject(PhaseActionImpl.SONAR_TYPE, name);
+		return (so instanceof PhaseActionImpl)
+		      ? (PhaseActionImpl) so
 		      : null;
 	}
 

@@ -80,11 +80,11 @@ limited to specific days using a [day plan](#day-plans).  Also, if
 * `iris/api/phase_action` (primary)
 * `iris/api/phase_action/{name}`
 
-| Access       | Primary                          |
-|--------------|----------------------------------|
-| 👁️  View      | name, action\_plan               |
-| 💡 Manage    | day\_plan, condition, parameters |
-| 🔧 Configure | from\_phase, to\_phase           |
+| Access       | Primary                      |
+|--------------|------------------------------|
+| 👁️  View      | name, action\_plan           |
+| 💡 Manage    | day\_plan, condition, params |
+| 🔧 Configure | from\_phase, to\_phase       |
 
 </details>
 
@@ -101,7 +101,7 @@ has parameters which may include keywords for **Field**, **Mode** or
 Condition triggers when the plan has been in `from_phase` for longer than the
 hold time.
 
-- **Parameters**: `s`, `mm:ss` or `HH:mm:ss`
+- **Params**: `s`, `mm:ss` or `HH:mm:ss`
 
 </details>
 
@@ -110,7 +110,7 @@ hold time.
 
 Condition triggers at a specific time of day, optionally on a specific date.
 
-- **Parameters**: `HH:mm` or `YYYY-MM-DD HH:mm`
+- **Params**: `HH:mm` or `yyyy-MM-dd'T'HH:mm`
 
 </details>
 
@@ -120,7 +120,7 @@ Condition triggers at a specific time of day, optionally on a specific date.
 Condition triggers when a detector or station field goes above or below a
 threshold value.
 
-- **Parameters**: Detector or station ID, _field_ `<` or `>` value
+- **Params**: Detector or station ID, _field_ `<` or `>` value
 
 - **Field** keywords: `speed`, `flow`, `density`, `occupancy`
 
@@ -131,7 +131,7 @@ threshold value.
 
 Condition triggers when an RWIS field goes above or below a threshold value.
 
-- **Parameters**: Sensor ID, _field_ `<` or `>` value
+- **Params**: Sensor ID, _field_ `<` or `>` value
 
 - **Field** keywords: `friction`, `surface_temp`, `wind_gust`, `visibility`,
   `precip`
@@ -143,7 +143,7 @@ Condition triggers when an RWIS field goes above or below a threshold value.
 
 Condition triggers when a toll zone changes mode.
 
-- **Parameters**: Toll zone ID, _mode_
+- **Params**: Toll zone ID, _mode_
 
 - **Mode** keywords: `priced`, `open`, `closed`
 
@@ -154,7 +154,7 @@ Condition triggers when a toll zone changes mode.
 
 Condition triggers in a specific alert period.
 
-- **Parameters**: Alert ID, _period_
+- **Params**: Alert ID, _period_
 
 - **Period** keywords: `before`, `during`, `after`, `expired`
 

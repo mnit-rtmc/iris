@@ -249,6 +249,7 @@ public class MainServer {
 		ns.registerType(IncLocatorImpl.class);
 		ns.registerType(IncAdviceImpl.class);
 		ns.registerType(TimeActionImpl.class);
+		ns.registerType(PhaseActionImpl.class);
 		ns.registerType(DeviceActionImpl.class);
 		ns.registerType(WordImpl.class);
 		ns.registerType(RptConduitImpl.class);
@@ -266,7 +267,7 @@ public class MainServer {
 		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new TollZoneJob());
 		TIMER.addJob(new ParkingAreaJob());
-		TIMER.addJob(new TimeActionJob());
+		TIMER.addJob(new PhaseActionJob());
 		TIMER.addJob(new ActionPlanPhaseJob());
 	}
 

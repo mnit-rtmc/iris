@@ -24,11 +24,11 @@ VALUES
 CREATE TABLE iris.phase_action (
     name VARCHAR(30) PRIMARY KEY,
     action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+    day_plan VARCHAR(10) REFERENCES iris.day_plan,
     from_phase VARCHAR(12) REFERENCES iris.plan_phase,
     to_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-    day_plan VARCHAR(10) REFERENCES iris.day_plan,
     condition INTEGER NOT NULL REFERENCES iris.action_condition,
-    parameters VARCHAR(32)
+    params VARCHAR(32)
 );
 
 CREATE FUNCTION iris.phase_action_notify() RETURNS TRIGGER AS
@@ -48,8 +48,8 @@ CREATE TRIGGER phase_action_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW phase_action_view AS
-    SELECT name, action_plan, from_phase, to_phase, day_plan, condition,
-           parameters
+    SELECT name, action_plan, day_plan, from_phase, to_phase, condition,
+           params
     FROM iris.phase_action;
 GRANT SELECT ON phase_action_view TO PUBLIC;
 
