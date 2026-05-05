@@ -1,5 +1,18 @@
 # IRIS 5.x Release Notes
 
+5.84.0 (5 May 2026)
+ - Rework resource permissions
+ - Check for logic loops in message word abbreviation
+ - SQL: add phase_action table (to replace time_action)
+ - Web UI: Add EventConfig, Road, MapExtent cards
+ - Web UI: Add presets to Camera control card
+ - Web UI: Improve Action Plan control card
+ - Weg UI: Improve Detector setup card
+ - Web UI: Improve Role permission setup
+ - Web UI: Improve SSE reconnect logic
+ - Web UI: Add logout button
+ - Remove POTS modem support
+
 5.83.0 (20 Apr 2026)
  - Web UI: Use earthwyrm web map client crate
  - Web UI: add layer zoom threshold menu
