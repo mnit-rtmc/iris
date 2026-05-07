@@ -254,6 +254,8 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 				return checkTollMode();
 			case ALERT_PERIOD:
 				return checkAlertPeriod();
+			case ALARM:
+				return checkAlarm();
 			default:
 				return false;
 		}
@@ -298,6 +300,12 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check ALERT_PERIOD condition */
 	private boolean checkAlertPeriod() {
+		// FIXME
+		return false;
+	}
+
+	/** Check ALARM condition */
+	private boolean checkAlarm() {
 		// FIXME
 		return false;
 	}

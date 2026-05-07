@@ -26,7 +26,8 @@ public enum ActCondition {
 	TRAFFIC_THRESHOLD, // 2
 	RWIS_THRESHOLD,    // 3
 	TOLL_MODE,         // 4
-	ALERT_PERIOD;      // 5
+	ALERT_PERIOD,      // 5
+	ALARM;             // 6
 
 	/** Get an action condition from an ordinal value */
 	static public ActCondition fromOrdinal(int o) {
@@ -46,6 +47,7 @@ public enum ActCondition {
 			RWIS_THRESHOLD,
 			TOLL_MODE,
 			ALERT_PERIOD,
+			ALARM,
 		};
 	}
 }

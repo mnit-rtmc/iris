@@ -2108,7 +2108,8 @@ VALUES
     (2, 'traffic threshold'),
     (3, 'RWIS threshold'),
     (4, 'toll mode'),
-    (5, 'alert period');
+    (5, 'alert period'),
+    (6, 'alarm');
 
 CREATE TABLE iris.phase_action (
     name VARCHAR(30) PRIMARY KEY,

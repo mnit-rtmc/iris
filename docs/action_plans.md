@@ -172,6 +172,19 @@ Condition triggers in a specific alert period.
 
 </details>
 
+<details>
+<summary>Alarm</summary>
+
+Condition triggers when an alarm triggers or clears.
+
+- **Params**: Alarm ID, _state_
+
+- **State** keywords: `trigger`, `clear`
+
+- **Example**: `A100,trigger`
+
+</details>
+
 ## Device Actions
 
 Device actions use [hashtag]s to associate devices with one phase of an action
