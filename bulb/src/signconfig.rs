@@ -19,7 +19,7 @@ use crate::msgpattern::FontName;
 use crate::rend::Renderer;
 use crate::util::{ContainsLower, Fields, Select, opt_str};
 use crate::view::View;
-use hatmil::{Tree, html};
+use hatmil::{Tree, css::Prop, html};
 use mag::length::mm;
 use ntcip::dms::{FontTable, tfon};
 pub use rendzina::SignConfig;
@@ -251,9 +251,11 @@ fn monochrome_html<'p>(sc: &SignConfig, div: &'p mut html::Div<'p>) {
     if fg > 0 || bg > 0 {
         div.class("row");
         div.label().cdata("FG / BG").close();
+        let fg = format!("#{fg:06X}");
+        let bg = format!("#{bg:06X}");
         div.span()
-            .style(format!("color: #{fg:06X}; background-color: #{bg:06X}"))
-            .cdata(format!("#{fg:06X} / #{bg:06X}"))
+            .style(Prop::new().color(&fg).background_color(&bg))
+            .cdata(format!("{fg} / {bg}"))
             .close();
     }
     div.close();
@@ -270,7 +272,7 @@ fn render_sign<'p>(
     let mut tr = table.tr();
     tr.td().close(); // empty cell
     tr.td()
-        .style("text-align: center;")
+        .style(Prop::new().text_align("center"))
         .cdata(format_len(sc.face_width))
         .close();
     if dms.is_none() {
@@ -281,7 +283,7 @@ fn render_sign<'p>(
     tr.close();
     tr = table.tr();
     tr.td()
-        .style("text-align: right;")
+        .style(Prop::new().text_align("right"))
         .cdata(format_len(sc.face_height))
         .close();
     let mod_size = match (sc.module_width, sc.module_height) {
@@ -307,7 +309,7 @@ fn render_sign<'p>(
     }
     td.close();
     tr.td()
-        .style("vertical-align: bottom;")
+        .style(Prop::new().vertical_align("bottom"))
         .cdata("↤")
         .cdata(format_len_sm(sc.border_horiz))
         .close();
@@ -315,12 +317,12 @@ fn render_sign<'p>(
     tr = table.tr();
     tr.td().close(); // empty cell
     tr.td()
-        .style("text-align: right;")
+        .style(Prop::new().text_align("right"))
         .cdata(format_len_sm(sc.border_vert))
         .cdata("↥")
         .close();
     tr.td()
-        .style("text-align: left; color:#116;")
+        .style(Prop::new().text_align("left").color("#116"))
         .cdata("(border)");
     table.close();
 }

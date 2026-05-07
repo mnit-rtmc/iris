@@ -22,6 +22,7 @@ use crate::sse;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use chrono::{DateTime, Local};
+use hatmil::css::{Prop, Rule, Sel};
 use resources::Res;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -110,16 +111,12 @@ fn set_selected_item(res: Res, name: &str, zoom: u32) {
 /// Set selected item style
 fn set_selected_style(res: Res, name: &str, zoom: u32) {
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        let mut css = String::with_capacity(120);
-        css.push('.');
-        css.push_str(res.as_str());
-        css.push('-');
-        // FIXME: use CSS escape rules
-        css.push_str(name);
-        css.push_str(" { stroke: white; stroke-width: 2; }");
-        css.push_str("\n.wyrm-tile use { scale: ");
-        css.push_str(zoom_scale(zoom));
-        css.push_str("; }");
+        let sel = Sel::cls(format!("{}-{name}", res.as_str()));
+        let prop = Prop::new().stroke("white").stroke_width(2);
+        let mut css = Rule::new(sel, prop).to_string();
+        let sel = Sel::cls("wyrm-tile").descendant(Sel::tp("use"));
+        let prop = Prop::new().scale(zoom_scale(zoom));
+        css.push_str(&Rule::new(sel, prop).to_string());
         el.set_inner_html(&css);
     }
 }
@@ -127,10 +124,9 @@ fn set_selected_style(res: Res, name: &str, zoom: u32) {
 /// Clear selected item style
 fn clear_selected_style(zoom: u32) {
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        let mut css = String::with_capacity(40);
-        css.push_str(".wyrm-tile use { scale: ");
-        css.push_str(zoom_scale(zoom));
-        css.push_str("; }");
+        let sel = Sel::cls("wyrm-tile").descendant(Sel::tp("use"));
+        let prop = Prop::new().scale(zoom_scale(zoom));
+        let css = Rule::new(sel, prop).to_string();
         el.set_inner_html(&css);
     }
 }
@@ -1140,17 +1136,18 @@ async fn update_map_states(
             };
             item_states_css(states_all, &items)
         } else {
-            format!(".wyrm-{res} {{ display: none; }}")
+            let sel = Sel::cls(format!("wyrm-{res}"));
+            let prop = Prop::new().display("none");
+            Rule::new(sel, prop).to_string()
         };
         el.set_inner_html(&css);
     }
     if let Some(el) = doc.opt_elem::<Element>(&format!("layer-{res}")) {
-        let css = if zoom >= selected_zoom(res) {
-            ""
-        } else {
-            "background: #aaa;"
-        };
-        el.set_attribute("style", css)?;
+        let mut prop = Prop::new();
+        if zoom < selected_zoom(res) {
+            prop = prop.background_color("#aaa");
+        }
+        el.set_attribute("style", &String::from(prop))?;
     }
     Ok(())
 }
@@ -1167,25 +1164,19 @@ fn item_states_css(
 ) -> String {
     let mut css = String::with_capacity(32 * card_states.len());
     for st in states_all {
-        let mut first = true;
+        let mut sel: Option<Sel> = None;
         for cs in card_states {
             if cs.state == *st {
-                if first {
-                    first = false;
-                } else {
-                    css.push(',');
-                }
-                css.push('.');
-                css.push_str(cs.res.as_str());
-                css.push('-');
-                // FIXME: use CSS escape rules
-                css.push_str(&cs.name);
+                let s = Sel::cls(&format!("{}-{}", cs.res.as_str(), &cs.name));
+                sel = Some(match sel {
+                    Some(sel) => sel.list(s),
+                    None => s,
+                });
             }
         }
-        if !first {
-            css.push_str(" { fill: ");
-            css.push_str(st.fill_css());
-            css.push_str("; }\n");
+        if let Some(sel) = sel {
+            let prop = Prop::new().fill(st.fill_css());
+            css.push_str(&Rule::new(sel, prop).to_string());
         }
     }
     css
@@ -1203,8 +1194,11 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
          .wyrm-secondary { display: none; }"
     };
     doc.elem::<Element>("osm-style")?.set_inner_html(css);
-    let css = if displayed { "" } else { "background: #aaa;" };
+    let mut prop = Prop::new();
+    if !displayed {
+        prop = prop.background_color("#aaa");
+    }
     doc.elem::<Element>("layer-osm")?
-        .set_attribute("style", css)?;
+        .set_attribute("style", &String::from(prop))?;
     Ok(())
 }
