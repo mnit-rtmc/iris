@@ -405,7 +405,9 @@ impl Res {
             // Comm resources
             // (ControllerIo is a special case
             // to GET request all pins for one controller).
-            CommLink | Controller | ControllerIo | GeoLoc | Gps => CommConfig,
+            Alarm | CommLink | Controller | ControllerIo | GeoLoc | Gps => {
+                CommConfig
+            }
             // DMS resources
             Font | Graphic | MsgLine | MsgPattern | SignConfig | SignDetail
             | SignMessage | Word => Dms,
@@ -420,7 +422,7 @@ impl Res {
             // Road resources
             Detector | MapExtent | Rnode => Road,
             // System attribute resources
-            Alarm | CabinetStyle | EventConfig => SystemAttribute,
+            CabinetStyle | EventConfig => SystemAttribute,
             // Toll zone resources
             TagReader => TollZone,
             // Video monitor resources

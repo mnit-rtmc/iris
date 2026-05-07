@@ -188,6 +188,7 @@ encoder_stream	camera
 encoder_type	camera
 vid_src_template	camera
 comm_config	\N
+alarm	comm_config
 comm_link	comm_config
 controller	comm_config
 geo_loc	comm_config
@@ -223,7 +224,6 @@ detector	road
 map_extent	road
 r_node	road
 system_attribute	\N
-alarm	system_attribute
 cabinet_style	system_attribute
 event_config	system_attribute
 rpt_conduit	system_attribute

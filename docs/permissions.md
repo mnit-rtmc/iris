@@ -50,7 +50,7 @@ resource, at the same access level.
 | [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action], hashtag |
 | [beacon]           |                                                   |
 | [camera]           | [camera preset], [encoder stream], [encoder type] |
-| [comm config]      | [comm link], [controller], [gps]                  |
+| [comm config]      | [comm link], [controller], [alarm], [gps]         |
 | [dms]              | [font], glyph, [graphic], [message line], [message pattern], [sign configuration], [sign detail], [sign message], [word] |
 | [gate arm]         |                                                   |
 | [incident]         | inc\_advice, inc\_descriptor, inc\_detail, inc\_locator, road\_affix |
@@ -59,7 +59,7 @@ resource, at the same access level.
 | permission         | [domain], [role], [user id], connection           |
 | [road]             | [detector], [map extent], [r_node]                |
 | [ramp meter]       |                                                   |
-| [system attribute] | [alarm], [cabinet style], [event config]          |
+| [system attribute] | [cabinet style], [event config]                   |
 | [toll zone]        | [tag reader]                                      |
 | [video monitor]    | [flow stream], [monitor style], [play list]       |
 | [weather sensor]   | [alert config], alert info, [alert message]       |
