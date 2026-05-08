@@ -769,7 +769,7 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     }
     // Expand to the second view (1) for this resource
     let mut view = *card::res_views(res).get(1).unwrap_or(&View::Compact);
-    if id.ends_with('_') {
+    if id.ends_with('_') && id.len() == res.as_str().len() + 1 {
         view = View::Create;
     }
     let cv = CardView::new(res, &name, view);
