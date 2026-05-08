@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2025  Minnesota Department of Transportation
+ * Copyright (C) 2011-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,12 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.util.ArrayList;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 
 /**
  * Table model for plan phases.
@@ -44,7 +40,7 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 	@Override
 	protected ArrayList<ProxyColumn<PlanPhase>> createColumns() {
 		ArrayList<ProxyColumn<PlanPhase>> cols =
-			new ArrayList<ProxyColumn<PlanPhase>>(4);
+			new ArrayList<ProxyColumn<PlanPhase>>(2);
 		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.name",
 			120)
 		{
@@ -64,45 +60,6 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 			public void setValueAt(PlanPhase p, Object value) {
 				if (value instanceof Boolean)
 					p.setSelectable((Boolean) value);
-			}
-		});
-		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.hold",
-			120, Integer.class)
-		{
-			public Object getValueAt(PlanPhase p) {
-				return p.getHoldTime();
-			}
-			public boolean isEditable(PlanPhase p) {
-				return canWrite(p);
-			}
-			public void setValueAt(PlanPhase p, Object value) {
-				if (value instanceof Integer)
-					p.setHoldTime((Integer) value);
-				else
-					p.setHoldTime(null);
-			}
-		});
-		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.next",
-			120)
-		{
-			public Object getValueAt(PlanPhase p) {
-				return p.getNextPhase();
-			}
-			public boolean isEditable(PlanPhase p) {
-				return canWrite(p);
-			}
-			public void setValueAt(PlanPhase p, Object value) {
-				if (value instanceof PlanPhase)
-					p.setNextPhase((PlanPhase) value);
-				else
-					p.setNextPhase(null);
-			}
-			protected TableCellEditor createCellEditor() {
-				JComboBox<PlanPhase> cbx = new JComboBox
-					<PlanPhase>();
-				cbx.setModel(new IComboBoxModel<PlanPhase>(
-					phase_mdl));
-				return new DefaultCellEditor(cbx);
 			}
 		});
 		return cols;

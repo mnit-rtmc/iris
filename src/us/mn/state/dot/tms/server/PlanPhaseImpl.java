@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2025  Minnesota Department of Transportation
+ * Copyright (C) 2011-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,15 +33,13 @@ public class PlanPhaseImpl extends BaseObjectImpl
 {
 	/** Load all the plan phases */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, selectable, hold_time, next_phase " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, selectable FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new PlanPhaseImpl(
 					row.getString(1),  // name
-					row.getBoolean(2), // selectable
-					row.getObject(3),  // hold_time
-					row.getString(4)   // next_phase
+					row.getBoolean(2)  // selectable
 				));
 			}
 		});
@@ -53,24 +51,18 @@ public class PlanPhaseImpl extends BaseObjectImpl
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("selectable", selectable);
-		map.put("hold_time", hold_time);
-		map.put("next_phase", next_phase);
 		return map;
 	}
 
 	/** Create a new plan phase */
 	public PlanPhaseImpl(String n) {
 		super(n);
-		hold_time = null;
-		next_phase = null;
 	}
 
 	/** Create a new plan phase */
-	protected PlanPhaseImpl(String n, boolean s, Object ht, String np) {
+	protected PlanPhaseImpl(String n, boolean s) {
 		this(n);
 		selectable = s;
-		hold_time = (Integer) ht;
-		next_phase = np;
 	}
 
 	/** Selectable flag */
@@ -94,51 +86,5 @@ public class PlanPhaseImpl extends BaseObjectImpl
 	@Override
 	public boolean getSelectable() {
 		return selectable;
-	}
-
-	/** Hold time */
-	private Integer hold_time;
-
-	/** Set hold time (s) before next phase */
-	@Override
-	public void setHoldTime(Integer ht) {
-		hold_time = ht;
-	}
-
-	/** Set hold time (s) before next phase */
-	public void doSetHoldTime(Integer ht) throws TMSException {
-		if (!objectEquals(ht, hold_time)) {
-			store.update(this, "hold_time", ht);
-			setHoldTime(ht);
-		}
-	}
-
-	/** Get hold time (s) before next phase */
-	@Override
-	public Integer getHoldTime() {
-		return hold_time;
-	}
-
-	/** Next phase */
-	protected String next_phase;
-
-	/** Set next phase after hold time expires */
-	@Override
-	public void setNextPhase(PlanPhase np) {
-		next_phase = (np != null) ? np.getName() : null;
-	}
-
-	/** Set next phase after hold time expires */
-	public void doSetNextPhase(PlanPhase np) throws TMSException {
-		if (!objectEquals(np, next_phase)) {
-			store.update(this, "next_phase", np);
-			setNextPhase(np);
-		}
-	}
-
-	/** Get next phase after hold time expires */
-	@Override
-	public PlanPhase getNextPhase() {
-		return PlanPhaseHelper.lookup(next_phase);
 	}
 }

@@ -60,10 +60,10 @@ be automatic, with [phase actions](#phase-actions).
 * `iris/api/plan_phase` (primary)
 * `iris/api/plan_phase/{name}`
 
-| Access       | Primary                             |
-|--------------|-------------------------------------|
-| 👁️  View      | name                                |
-| 🔧 Configure | selectable, hold\_time, next\_phase |
+| Access       | Primary    |
+|--------------|------------|
+| 👁️  View      | name       |
+| 🔧 Configure | selectable |
 
 </details>
 

@@ -33,8 +33,6 @@ use web_sys::HtmlSelectElement;
 pub struct PlanPhase {
     pub name: String,
     pub selectable: bool,
-    pub hold_time: Option<u32>,
-    pub next_phase: Option<String>,
 }
 
 /// Device action

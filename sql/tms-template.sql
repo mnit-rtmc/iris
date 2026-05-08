@@ -1921,9 +1921,7 @@ GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 --
 CREATE TABLE iris.plan_phase (
     name VARCHAR(12) PRIMARY KEY,
-    selectable BOOLEAN NOT NULL,
-    hold_time INTEGER CHECK (hold_time >= 1 AND hold_time <= 600),
-    next_phase VARCHAR(12) REFERENCES iris.plan_phase
+    selectable BOOLEAN NOT NULL
 );
 
 INSERT INTO iris.plan_phase (name, selectable)
