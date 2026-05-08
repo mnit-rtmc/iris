@@ -36,7 +36,7 @@ fn item_state(access_level: u32) -> ItemState {
         2 => ItemState::Operate,
         3 => ItemState::Manage,
         4 => ItemState::Configure,
-        _ => ItemState::Unknown,
+        _ => ItemState::Prohibited,
     }
 }
 
@@ -99,12 +99,7 @@ impl Permission {
 /// Create an HTML `select` element of access level
 fn access_level_html<'p>(selected: u32, select: &'p mut html::Select<'p>) {
     select.id("access_level");
-    select
-        .option()
-        .value("0".to_string())
-        .cdata("🚫 none")
-        .close();
-    for access in 1..=4 {
+    for access in 0..=4 {
         let mut option = select.option();
         option.value(access.to_string());
         if selected == access {
