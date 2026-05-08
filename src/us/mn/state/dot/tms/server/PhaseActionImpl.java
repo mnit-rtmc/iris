@@ -224,11 +224,26 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		return params;
 	}
 
+	/** Log a message to the debug log */
+	private void log(String msg) {
+		if (DeviceActionJob.PLAN_LOG.isOpen()) {
+			DeviceActionJob.PLAN_LOG.log("phase action: " +
+				action_plan + ", " + msg);
+		}
+	}
+
 	/** Perform action after checking condition */
-	public void perform(Calendar cal, int min) {
-		if (checkCondition(cal, min) && !isDayPlanHoliday(cal)) {
+	public void checkPerform(Calendar cal, int min) {
+		if (isDayPlanHoliday(cal))
+			return;
+		if (action_plan instanceof ActionPlanImpl) {
 			ActionPlanImpl ap = (ActionPlanImpl) action_plan;
-			if (ap.getActive())
+			if (!ap.getActive())
+				return;
+			PlanPhase fp = getFromPhase();
+			if (fp != null && fp != ap.getPhase())
+				return;
+			if (checkCondition(cal, min))
 				ap.setPhaseNotify(getToPhase(), null);
 		}
 	}
@@ -263,7 +278,15 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check HOLD_TIME condition */
 	private boolean checkHoldTime(Calendar cal) {
-		// FIXME
+		Integer hs = PhaseActionHelper.getHoldSecs(this);
+		if (action_plan instanceof ActionPlanImpl) {
+			ActionPlanImpl ap = (ActionPlanImpl) action_plan;
+			int ht = ap.phaseSecs(cal.getTimeInMillis());
+			boolean trigger = (hs != null) && (ht >= hs);
+			if (trigger)
+				log("HOLD_TIME " + hs);
+			return trigger;
+		}
 		return false;
 	}
 
@@ -277,7 +300,10 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 				return false;
 		}
 		Integer mn = PhaseActionHelper.getClockTime(this);
-		return mn != null && mn == min;
+		boolean trigger = (mn != null) && (mn == min);
+		if (trigger)
+			log("CLOCK_TIME at " + min);
+		return trigger;
 	}
 
 	/** Check TRAFFIC_THRESHOLD condition */

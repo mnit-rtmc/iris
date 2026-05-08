@@ -267,8 +267,8 @@ public class MainServer {
 		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new TollZoneJob());
 		TIMER.addJob(new ParkingAreaJob());
+		TIMER.addJob(new TimeActionJob());
 		TIMER.addJob(new PhaseActionJob());
-		TIMER.addJob(new ActionPlanPhaseJob());
 	}
 
 	/** Schedule jobs on FLUSH thread */

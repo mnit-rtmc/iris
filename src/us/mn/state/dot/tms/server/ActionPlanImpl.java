@@ -583,20 +583,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		}
 	}
 
-	/** Update the plan phase */
-	public void updatePhase() {
-		PlanPhase p = getPhase();
-		if (p != null && getActive()) {
-			Integer ht = p.getHoldTime();
-			PlanPhase np = p.getNextPhase();
-			if (ht != null && np != null && phaseSecs() >= ht)
-				setPhaseNotify(np, null);
-		}
-	}
-
-	/** Get the number of seconds in the current phase */
-	private int phaseSecs() {
-		long elapsed = TimeSteward.currentTimeMillis() - phase_time;
+	/** Get the number of seconds elapsed in the current phase */
+	public int phaseSecs(long now) {
+		long elapsed = now - phase_time;
 		return (int) (elapsed / 1000);
 	}
 }

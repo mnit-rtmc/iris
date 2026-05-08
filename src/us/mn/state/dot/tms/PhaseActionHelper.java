@@ -57,6 +57,37 @@ public class PhaseActionHelper extends BaseHelper {
 			PhaseAction.SONAR_TYPE));
 	}
 
+	/** Get HOLD_TIME seconds */
+	static public Integer getHoldSecs(PhaseAction pa) {
+		if (pa.getCondition() == ActCondition.HOLD_TIME.ordinal()) {
+			String[] v = pa.getParams().split(":", 3);
+			try {
+				int hr = 0;
+				int mn = 0;
+				int sc = 0;
+				switch (v.length) {
+				case 1:
+					sc = Integer.parseUnsignedInt(v[0]);
+					break;
+				case 2:
+					mn = Integer.parseUnsignedInt(v[0]);
+					sc = Integer.parseUnsignedInt(v[1]);
+					break;
+				case 3:
+					hr = Integer.parseUnsignedInt(v[0]);
+					mn = Integer.parseUnsignedInt(v[1]);
+					sc = Integer.parseUnsignedInt(v[2]);
+					break;
+				default:
+					return null;
+				}
+				return (hr * 3600) + (mn * 60) + sc;
+			}
+			catch (NumberFormatException e) { }
+		}
+		return null;
+	}
+
 	/** Get CLOCK_TIME minute-of-day (0-1440) */
 	static public Integer getClockTime(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.CLOCK_TIME.ordinal()) {

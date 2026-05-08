@@ -18,32 +18,44 @@ import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.PhaseAction;
-import us.mn.state.dot.tms.PhaseActionHelper;
+import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.tms.TimeAction;
+import us.mn.state.dot.tms.TimeActionHelper;
+import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.MainServer.TIMER;
 
 /**
- * Job to perform phase actions.
+ * Job to perform time actions.
  *
  * @author Douglas Lau
  */
-public class PhaseActionJob extends Job {
+public class TimeActionJob extends Job {
 
-	/** Create a new phase action job */
-	public PhaseActionJob() {
-		super(Calendar.SECOND, 5);
+	/** Seconds to offset each poll from start of interval */
+	static private final int OFFSET_SECS = 14;
+
+	/** Create a new time action job */
+	public TimeActionJob() {
+		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
 	}
 
 	/** Perform job */
 	@Override
-	public void perform() {
+	public void perform() throws TMSException {
 		Calendar cal = TimeSteward.getCalendarInstance();
 		int min = TimeSteward.currentMinuteOfDayInt();
-		Iterator<PhaseAction> it = PhaseActionHelper.iterator();
+		performTimeActions(cal, min);
+		TIMER.addJob(new DeviceActionJob());
+	}
+
+	/** Perform all time actions */
+	private void performTimeActions(Calendar cal, int min) {
+		Iterator<TimeAction> it = TimeActionHelper.iterator();
 		while (it.hasNext()) {
-			PhaseAction pa = it.next();
-			if (pa instanceof PhaseActionImpl) {
-				PhaseActionImpl pai = (PhaseActionImpl) pa;
-				pai.checkPerform(cal, min);
+			TimeAction ta = it.next();
+			if (ta instanceof TimeActionImpl) {
+				TimeActionImpl tai = (TimeActionImpl) ta;
+				tai.perform(cal, min);
 			}
 		}
 	}
