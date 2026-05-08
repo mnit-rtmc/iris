@@ -36,6 +36,7 @@ use crate::mapextent::MapExtent;
 use crate::monitorstyle::MonitorStyle;
 use crate::msgpattern::MsgPattern;
 use crate::permission::Permission;
+use crate::planphase::PlanPhase;
 use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;
@@ -311,6 +312,7 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::Incident => Incident::item_states_all(),
         Res::Lcs => Lcs::item_states_all(),
         Res::MsgPattern => MsgPattern::item_states_all(),
+        Res::PlanPhase => PlanPhase::item_states_all(),
         Res::RampMeter => RampMeter::item_states_all(),
         Res::Road => Road::item_states_all(),
         Res::Role => Role::item_states_all(),
@@ -341,6 +343,7 @@ pub fn res_views(res: Res) -> &'static [View] {
         | Res::MapExtent
         | Res::MonitorStyle
         | Res::MsgPattern
+        | Res::PlanPhase
         | Res::Road
         | Res::Role
         | Res::SignConfig

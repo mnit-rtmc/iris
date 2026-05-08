@@ -407,6 +407,9 @@ fn selected_resource() -> Option<Res> {
     let rname = doc.select_parse::<String>("sb_resource");
     let res = Res::try_from(rname?.as_str()).ok()?;
     match res.base() {
+        Res::ActionPlan if doc.input_bool("res_plan_phase") => {
+            Some(Res::PlanPhase)
+        }
         Res::Dms if doc.input_bool("res_msg_pattern") => Some(Res::MsgPattern),
         Res::Dms if doc.input_bool("res_sign_config") => Some(Res::SignConfig),
         Res::Dms if doc.input_bool("res_word") => Some(Res::Word),

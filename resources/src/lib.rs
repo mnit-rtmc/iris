@@ -321,7 +321,7 @@ impl Res {
             MonitorStyle => "🖵 ",
             MsgPattern => "📑",
             Permission => "🗝️ ",
-            PlanPhase => "🪜",
+            PlanPhase => "🌘",
             PlayList => "FIXME",
             RampMeter => "🚦",
             Rnode => "⍿",

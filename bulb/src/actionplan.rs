@@ -16,6 +16,7 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::notes::contains_hashtag;
+use crate::planphase::PlanPhase;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
 };
@@ -27,13 +28,6 @@ use std::borrow::Cow;
 use std::collections::BTreeSet;
 use wasm_bindgen::JsValue;
 use web_sys::HtmlSelectElement;
-
-/// Plan phase
-#[derive(Debug, Default, Deserialize, PartialEq)]
-pub struct PlanPhase {
-    pub name: String,
-    pub selectable: bool,
-}
 
 /// Device action
 #[derive(Debug, Default, Deserialize, PartialEq)]

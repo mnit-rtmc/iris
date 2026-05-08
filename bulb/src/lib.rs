@@ -51,6 +51,7 @@ mod msgpattern;
 mod notes;
 mod panic;
 mod permission;
+mod planphase;
 mod rampmeter;
 mod rend;
 mod rle;
