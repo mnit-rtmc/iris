@@ -78,7 +78,7 @@ impl UserAnc {
                 }
             }
         }
-        ItemState::Inactive
+        ItemState::Prohibited
     }
 
     /// Build roles HTML
@@ -106,7 +106,7 @@ impl User {
         {
             return anc.item_state(role);
         }
-        ItemState::Inactive
+        ItemState::Prohibited
     }
 
     /// Convert to Compact HTML
@@ -167,6 +167,11 @@ impl Card for User {
     /// Get the resource
     fn res() -> Res {
         Res::User
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[ItemState::Available, ItemState::Prohibited]
     }
 
     /// Get the name

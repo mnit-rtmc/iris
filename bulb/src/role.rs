@@ -153,7 +153,7 @@ impl Role {
         if self.enabled {
             ItemState::Available
         } else {
-            ItemState::Inactive
+            ItemState::Prohibited
         }
     }
 
@@ -199,6 +199,11 @@ impl Card for Role {
     /// Get the resource
     fn res() -> Res {
         Res::Role
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[ItemState::Available, ItemState::Prohibited]
     }
 
     /// Get the name
