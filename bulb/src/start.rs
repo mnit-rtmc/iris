@@ -683,8 +683,16 @@ fn handle_input_enter(id: String) {
 async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
         match attrs.id.as_str() {
-            "ob_delete" => handle_delete(cv).await?,
-            "ob_save" => handle_save(cv).await?,
+            "ob_delete" => {
+                if app::delete_enabled() {
+                    cv.handle_delete().await?;
+                    replace_card(cv.view(View::Hidden), "").await?;
+                }
+            }
+            "ob_save" => {
+                cv.handle_save().await?;
+                replace_card(cv.compact(), "").await?;
+            }
             _ => {
                 if attrs.class_name == "go_link" {
                     go_resource(attrs).await?;
@@ -719,36 +727,6 @@ fn replace_card_html(cv: &CardView, html: &str) {
         opt.set_block(ScrollLogicalPosition::Nearest);
         el.scroll_into_view_with_scroll_into_view_options(&opt);
     }
-}
-
-/// Handle delete button click
-async fn handle_delete(cv: CardView) -> Result<()> {
-    if app::delete_enabled() {
-        cv.delete_one().await?;
-        replace_card(cv.view(View::Hidden), "").await?;
-    }
-    Ok(())
-}
-
-/// Handle save button click
-async fn handle_save(cv: CardView) -> Result<()> {
-    match cv.view {
-        View::Create => save_create(cv).await,
-        View::Setup | View::Location => save_changed(cv).await,
-        _ => Ok(()),
-    }
-}
-
-/// Save a create view card
-async fn save_create(cv: CardView) -> Result<()> {
-    cv.create_and_post().await?;
-    replace_card(cv.view(View::CreateCompact), "").await
-}
-
-/// Save changed values on Setup / Location card
-async fn save_changed(cv: CardView) -> Result<()> {
-    cv.patch_changed().await?;
-    replace_card(cv.view(View::Compact), "").await
 }
 
 /// Handle a `click` event within a card element

@@ -233,13 +233,27 @@ impl CardView {
         C::new(json)
     }
 
-    /// Patch changed fields on Setup / Location view
-    pub async fn patch_changed(&self) -> Result<()> {
+    /// Handle a save button click event
+    pub async fn handle_save(&self) -> Result<()> {
         match self.view {
+            View::Create => self.create_and_post().await,
             View::Setup => self.patch_setup().await,
             View::Location => self.patch_loc().await,
             _ => unreachable!(),
         }
+    }
+
+    /// Create a new object
+    async fn create_and_post(&self) -> Result<()> {
+        let doc = Doc::get();
+        let name = doc
+            .input_option_string("create_name")
+            .ok_or(Error::ElemIdNotFound("create_name"))?;
+        let mut obj = Map::new();
+        obj.insert("name".to_string(), Value::String(name));
+        let value = Value::Object(obj).to_string();
+        uri_all(self.res).post(&value.into()).await?;
+        Ok(())
     }
 
     /// Patch changed fields from a Setup view
@@ -362,21 +376,8 @@ impl CardView {
         Ok(())
     }
 
-    /// Create a new object
-    pub async fn create_and_post(&self) -> Result<()> {
-        let doc = Doc::get();
-        let name = doc
-            .input_option_string("create_name")
-            .ok_or(Error::ElemIdNotFound("create_name"))?;
-        let mut obj = Map::new();
-        obj.insert("name".to_string(), Value::String(name));
-        let value = Value::Object(obj).to_string();
-        uri_all(self.res).post(&value.into()).await?;
-        Ok(())
-    }
-
     /// Delete a resource by name
-    pub async fn delete_one(&self) -> Result<()> {
+    pub async fn handle_delete(&self) -> Result<()> {
         uri_one(self.res, &self.name).delete().await
     }
 }
