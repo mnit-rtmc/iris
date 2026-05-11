@@ -85,32 +85,28 @@ impl Permission {
     }
 
     /// Convert to HTML table row
-    pub fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
+    pub fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>, num: u16) {
         match self.hashtag.as_ref() {
             Some(hashtag) => tr.td().class("member").cdata(hashtag).close(),
             None => tr.td().cdata(&self.base_resource).close(),
         };
         let mut td = tr.td();
-        access_level_html(self.access_level, &mut td.select());
+        let mut select = td.select();
+        select.id(&format!("perm_{}_{num}", &self.base_resource));
+        for access in 0..=4 {
+            let mut option = select.option();
+            option.value(access.to_string());
+            if access == self.access_level {
+                option.selected();
+            }
+            let item = item_state(access);
+            option
+                .cdata(item.code())
+                .cdata(" ")
+                .cdata(item.description())
+                .close();
+        }
+        select.close();
         tr.close();
     }
-}
-
-/// Create an HTML `select` element of access level
-fn access_level_html<'p>(selected: u32, select: &'p mut html::Select<'p>) {
-    select.id("access_level");
-    for access in 0..=4 {
-        let mut option = select.option();
-        option.value(access.to_string());
-        if selected == access {
-            option.selected();
-        }
-        let item = item_state(access);
-        option
-            .cdata(item.code())
-            .cdata(" ")
-            .cdata(item.description())
-            .close();
-    }
-    select.close();
 }

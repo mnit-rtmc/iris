@@ -113,21 +113,24 @@ impl RoleAnc {
             if res.base.is_some() {
                 continue;
             }
-            let mut first = true;
+            let mut num = 0;
             for perm in &self.permissions {
                 if perm.base_resource != res.name {
                     continue;
                 }
-                if first && perm.hashtag.is_some() {
+                // Is there a hashtag without base permission?
+                if num == 0 && perm.hashtag.is_some() {
                     let p = Permission::new(&res.name, &pri.name);
-                    p.table_row(&mut table.tr());
+                    p.table_row(&mut table.tr(), 0);
+                    num = 1;
                 }
-                perm.table_row(&mut table.tr());
-                first = false;
+                perm.table_row(&mut table.tr(), num);
+                num += 1;
             }
-            if first {
+            // No permissions; show Prohibited
+            if num == 0 {
                 let p = Permission::new(&res.name, &pri.name);
-                p.table_row(&mut table.tr());
+                p.table_row(&mut table.tr(), 0);
             }
         }
         details.close();
