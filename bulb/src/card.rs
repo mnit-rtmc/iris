@@ -488,7 +488,7 @@ impl CardList {
     async fn states_main_x<C: Card>(&self) -> Result<Vec<CardState>> {
         let cards = self.cards::<C>(false)?;
         // Use default value for ancillary data lookup
-        let anc = fetch_ancillary(&C::default(), View::Search).await?;
+        let anc = fetch_ancillary(&C::default(), View::SearchEv).await?;
         let res = C::res();
         let mut states = Vec::new();
         for pri in &cards {
@@ -546,7 +546,7 @@ impl CardList {
     async fn build_html_x<C: Card>(&mut self, search: &str) -> Result<String> {
         let cards = self.cards::<C>(false)?;
         // Use default value for ancillary data lookup
-        let anc = fetch_ancillary(&C::default(), View::Search).await?;
+        let anc = fetch_ancillary(&C::default(), View::SearchEv).await?;
         self.search_card_views::<C>(search, &anc).await?;
         let mut views = self.views.iter();
         let mut tree = Tree::new();
@@ -608,7 +608,7 @@ impl CardList {
         search: &str,
     ) -> Result<Vec<CardView>> {
         // Use default value for ancillary data lookup
-        let anc = fetch_ancillary(&C::default(), View::Search).await?;
+        let anc = fetch_ancillary(&C::default(), View::SearchEv).await?;
         self.search_card_views::<C>(search, &anc).await?;
         Ok(self.views.clone())
     }
@@ -627,7 +627,7 @@ impl CardList {
         search: &str,
     ) -> Result<Vec<(CardView, String)>> {
         // Use default value for ancillary data lookup
-        let anc = fetch_ancillary(&C::default(), View::Search).await?;
+        let anc = fetch_ancillary(&C::default(), View::SearchEv).await?;
         self.search_card_views::<C>(search, &anc).await?;
         let cards0 = self.cards::<C>(true)?.into_iter();
         let cards1 = self.cards::<C>(false)?;

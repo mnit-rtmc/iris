@@ -56,8 +56,8 @@ use serde_json::map::Map;
 pub enum View {
     /// Hidden view
     Hidden,
-    /// Search view
-    Search,
+    /// Search event "view"
+    SearchEv,
     /// Compact Create view
     CreateCompact,
     /// Create view
@@ -80,7 +80,7 @@ impl View {
     /// Get view class name
     pub const fn class_name(self) -> &'static str {
         match self {
-            View::Hidden | View::Search => "no-display",
+            View::Hidden | View::SearchEv => "no-display",
             View::CreateCompact | View::Compact => "card-compact",
             _ => "card-expanded",
         }
@@ -90,7 +90,7 @@ impl View {
     pub fn is_expanded(self) -> bool {
         match self {
             View::Hidden
-            | View::Search
+            | View::SearchEv
             | View::CreateCompact
             | View::Compact => false,
             View::Create
@@ -115,7 +115,7 @@ impl View {
         use View::*;
         match self {
             Hidden => "Hidden",
-            Search => "Search",
+            SearchEv => "Search",
             CreateCompact => "Create compact",
             Create => "🆕 Create",
             Compact => "⌄ Compact",
@@ -135,7 +135,7 @@ impl TryFrom<&str> for View {
         use View::*;
         match type_n {
             v if v == Hidden.as_str() => Ok(Hidden),
-            v if v == Search.as_str() => Ok(Search),
+            v if v == SearchEv.as_str() => Ok(SearchEv),
             v if v == CreateCompact.as_str() => Ok(CreateCompact),
             v if v == Create.as_str() => Ok(Create),
             v if v == Compact.as_str() => Ok(Compact),

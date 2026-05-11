@@ -102,20 +102,21 @@ impl AncillaryData for ActionPlanAnc {
 
     /// Construct ancillary action plan data
     fn new(_pri: &ActionPlan, view: View) -> Self {
-        let mut assets = Vec::new();
-        if let View::Control = view {
-            assets.push(Asset::TimeActions);
-        }
-        if let View::Search | View::Compact | View::Control = view {
-            assets.push(Asset::HashtagResources);
-        }
-        if let View::Search | View::Compact | View::Control | View::Setup = view
-        {
-            assets.push(Asset::DeviceActions);
-        }
-        if let View::Control | View::Setup = view {
-            assets.push(Asset::PlanPhases);
-        }
+        let assets = match view {
+            View::SearchEv | View::Compact => {
+                vec![Asset::HashtagResources, Asset::DeviceActions]
+            }
+            View::Control => {
+                vec![
+                    Asset::TimeActions,
+                    Asset::HashtagResources,
+                    Asset::DeviceActions,
+                    Asset::PlanPhases,
+                ]
+            }
+            View::Setup => vec![Asset::DeviceActions, Asset::PlanPhases],
+            _ => vec![],
+        };
         let phases = Vec::new();
         let device_actions = Vec::new();
         let hashtag_resources = Vec::new();

@@ -213,24 +213,23 @@ impl AncillaryData for DmsAnc {
     /// Construct ancillary DMS data
     fn new(pri: &Dms, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        if let View::Compact
-        | View::Control
-        | View::Hidden
-        | View::Search
-        | View::Status = view
-        {
-            cio.assets.push(Asset::SignMessages);
-        }
-        if let View::Control = view {
-            cio.assets.push(Asset::SignConfigs);
-            cio.assets.push(Asset::MsgPatterns);
-            cio.assets.push(Asset::Words);
-            cio.assets.push(Asset::Fonts);
-            cio.assets.push(Asset::Graphics);
-            cio.assets.push(Asset::DeviceActions);
-        }
-        if let View::Setup = view {
-            cio.assets.push(Asset::SignConfigs);
+        match view {
+            View::Compact | View::Hidden | View::SearchEv | View::Status => {
+                cio.assets.push(Asset::SignMessages);
+            }
+            View::Control => {
+                cio.assets.push(Asset::SignMessages);
+                cio.assets.push(Asset::SignConfigs);
+                cio.assets.push(Asset::MsgPatterns);
+                cio.assets.push(Asset::Words);
+                cio.assets.push(Asset::Fonts);
+                cio.assets.push(Asset::Graphics);
+                cio.assets.push(Asset::DeviceActions);
+            }
+            View::Setup => {
+                cio.assets.push(Asset::SignConfigs);
+            }
+            _ => (),
         }
         let loc = LocAnc::new(pri, view);
         DmsAnc {

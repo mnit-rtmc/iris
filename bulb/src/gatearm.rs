@@ -75,7 +75,7 @@ impl AncillaryData for GateArmAnc {
     /// Construct ancillary gate arm data
     fn new(pri: &GateArm, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        if let View::Search | View::Control = view {
+        if let View::SearchEv | View::Control = view {
             cio.assets.push(Asset::GateArmStates);
         }
         let loc = LocAnc::new(pri, view);

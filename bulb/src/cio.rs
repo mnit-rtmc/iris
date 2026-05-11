@@ -101,7 +101,7 @@ where
     /// Construct ancillary controller IO data
     fn new(pri: &C, view: View) -> Self {
         let assets = match (view, &pri.controller()) {
-            (View::Search, _) => vec![Asset::Controllers],
+            (View::SearchEv, _) => vec![Asset::Controllers],
             (
                 View::Hidden
                 | View::Compact

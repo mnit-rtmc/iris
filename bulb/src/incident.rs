@@ -66,7 +66,7 @@ impl AncillaryData for IncidentAnc {
     fn new(_pri: &Incident, view: View) -> Self {
         let mut assets = Vec::new();
         match view {
-            View::Search | View::Compact | View::Control => {
+            View::SearchEv | View::Compact | View::Control => {
                 assets.push(Asset::Directions);
                 assets.push(Asset::IncDetails);
                 //assets.push(Asset::Roads);

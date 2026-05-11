@@ -102,7 +102,7 @@ impl AncillaryData for ControllerAnc {
     fn new(pri: &Controller, view: View) -> Self {
         let mut loc = LocAnc::new(pri, view);
         match view {
-            View::Search => {
+            View::SearchEv => {
                 loc.assets.push(Asset::Conditions);
                 loc.assets.push(Asset::CommStates);
                 loc.assets.push(Asset::CommLinks);
