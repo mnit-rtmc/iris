@@ -292,9 +292,6 @@ impl CardView {
 
     /// Handle click event for a button owned by the resource
     pub async fn handle_click(&self, id: String) -> Result<()> {
-        if let View::Request = self.view {
-            return Ok(());
-        }
         match self.res {
             Res::Beacon => self.handle_click_x::<Beacon>(id).await,
             Res::Camera => self.handle_click_x::<Camera>(id).await,
