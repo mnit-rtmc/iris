@@ -856,8 +856,8 @@ impl Card for RampMeter {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, anc: RampMeterAnc, id: String) -> Vec<Action> {
-        match id.as_str() {
+    fn handle_click(&self, anc: RampMeterAnc, id: &str) -> Vec<Action> {
+        match id {
             "lk_shrink" => self.lock_shrink(),
             "lk_grow" => self.lock_grow(),
             "rq_settings" => self.device_req(DeviceReq::SendSettings),
@@ -866,8 +866,8 @@ impl Card for RampMeter {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: RampMeterAnc, id: String) -> Vec<Action> {
-        if &id == "lk_reason" {
+    fn handle_input(&self, _anc: RampMeterAnc, id: &str) -> Vec<Action> {
+        if "lk_reason" == id {
             let reason = self.selected_lock_reason();
             let rate = if reason.duration().is_some() {
                 self.lock_rate().or(self.status_rate()).or(Some(1714))

@@ -544,7 +544,7 @@ fn ob_view_value() -> Option<View> {
 /// Handle an input event on an expanded card
 async fn handle_input_other(id: String) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
-        cv.handle_input(id).await?;
+        cv.handle_input(&id).await?;
     }
     Ok(())
 }
@@ -690,14 +690,14 @@ async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
                 }
             }
             "ob_create" | "ob_save" => {
-                cv.handle_click(attrs.id).await?;
+                cv.handle_click(&attrs.id).await?;
                 replace_card(cv.compact(), "").await?;
             }
             _ => {
                 if attrs.class_name == "go_link" {
                     go_resource(attrs).await?;
                 } else {
-                    cv.handle_click(attrs.id).await?;
+                    cv.handle_click(&attrs.id).await?;
                 }
             }
         }

@@ -231,13 +231,13 @@ impl CardView {
     }
 
     /// Handle click event for a button owned by the resource
-    pub async fn handle_click(&self, id: String) -> Result<()> {
+    pub async fn handle_click(&self, id: &str) -> Result<()> {
         cards_meth!(self, handle_click_x, id)
     }
 
     /// Handle click event for a button on a card
-    async fn handle_click_x<C: Card>(&self, id: String) -> Result<()> {
-        let view = match id.as_str() {
+    async fn handle_click_x<C: Card>(&self, id: &str) -> Result<()> {
+        let view = match id {
             "ob_create" | "ob_save" => View::SaveEv,
             _ => self.view,
         };
@@ -250,7 +250,7 @@ impl CardView {
     }
 
     /// Handle input event for an element owned by the resource
-    pub async fn handle_input(&self, id: String) -> Result<()> {
+    pub async fn handle_input(&self, id: &str) -> Result<()> {
         match (self.res, self.view) {
             (Res::ActionPlan, View::Control) => {
                 self.handle_input_x::<ActionPlan>(id).await
@@ -271,7 +271,7 @@ impl CardView {
     }
 
     /// Handle input event for an element on a card
-    async fn handle_input_x<C: Card>(&self, id: String) -> Result<()> {
+    async fn handle_input_x<C: Card>(&self, id: &str) -> Result<()> {
         let pri = self.fetch_primary::<C>().await?;
         let anc = fetch_ancillary(&pri, self.view).await?;
         for action in pri.handle_input(anc, id) {

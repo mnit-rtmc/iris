@@ -506,7 +506,7 @@ impl Card for Camera {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, anc: CameraAnc, id: String) -> Vec<Action> {
+    fn handle_click(&self, anc: CameraAnc, id: &str) -> Vec<Action> {
         if let Some(preset_str) = id.strip_prefix("preset-") {
             if let Ok(preset_num) = preset_str.parse::<u32>() {
                 return self.recall_or_store_preset(preset_num);
@@ -516,7 +516,7 @@ impl Card for Camera {
                 self.toggle_preset_mode();
             }
         }
-        match id.as_str() {
+        match id {
             "rq_reset" => self.device_req(DeviceReq::ResetDevice),
             _ => self.handle_click_common(anc, id),
         }

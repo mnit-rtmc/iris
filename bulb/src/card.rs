@@ -197,7 +197,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     fn to_html(&self, view: View, _anc: &Self::Ancillary) -> String;
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, anc: Self::Ancillary, id: String) -> Vec<Action> {
+    fn handle_click(&self, anc: Self::Ancillary, id: &str) -> Vec<Action> {
         self.handle_click_common(anc, id)
     }
 
@@ -205,9 +205,9 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     fn handle_click_common(
         &self,
         anc: Self::Ancillary,
-        id: String,
+        id: &str,
     ) -> Vec<Action> {
-        match id.as_str() {
+        match id {
             "ob_create" => self.handle_create(anc),
             "ob_save" => self.handle_save(anc),
             "ob_geoloc" => self.handle_geoloc(anc),
@@ -264,7 +264,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: Self::Ancillary, _id: String) -> Vec<Action> {
+    fn handle_input(&self, _anc: Self::Ancillary, _id: &str) -> Vec<Action> {
         Vec::new()
     }
 

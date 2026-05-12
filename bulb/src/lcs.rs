@@ -634,8 +634,8 @@ impl Card for Lcs {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, anc: LcsAnc, id: String) -> Vec<Action> {
-        match id.as_str() {
+    fn handle_click(&self, anc: LcsAnc, id: &str) -> Vec<Action> {
+        match id {
             "lk_send" => self.lock_send(),
             "lk_blank" => self.lock_blank(),
             _ => self.handle_click_common(anc, id),
@@ -643,8 +643,8 @@ impl Card for Lcs {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: LcsAnc, id: String) -> Vec<Action> {
-        if &id == "lk_reason" {
+    fn handle_input(&self, _anc: LcsAnc, id: &str) -> Vec<Action> {
+        if "lk_reason" == id {
             let reason = self.selected_lock_reason();
             if reason.duration().is_some() {
                 if self.is_deployed() {

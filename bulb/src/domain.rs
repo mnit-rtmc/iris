@@ -152,8 +152,8 @@ impl Card for Domain {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: DomainAnc, id: String) -> Vec<Action> {
-        if &id == "block" {
+    fn handle_input(&self, _anc: DomainAnc, id: &str) -> Vec<Action> {
+        if "block" == id {
             let doc = Doc::get();
             if let (Some(block), Some(ob_save)) = (
                 doc.opt_elem::<HtmlInputElement>("block"),

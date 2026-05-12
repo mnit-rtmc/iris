@@ -1335,8 +1335,8 @@ impl Card for Dms {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, anc: DmsAnc, id: String) -> Vec<Action> {
-        match id.as_str() {
+    fn handle_click(&self, anc: DmsAnc, id: &str) -> Vec<Action> {
+        match id {
             "mc_send" => self.send_actions(anc),
             "mc_blank" => self.blank_actions(anc),
             "rq_msg_query" => self.device_req(DeviceReq::QueryMessage),
@@ -1353,14 +1353,14 @@ impl Card for Dms {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, anc: DmsAnc, id: String) -> Vec<Action> {
+    fn handle_input(&self, anc: DmsAnc, id: &str) -> Vec<Action> {
         let Some(pat) = self.selected_pattern(&anc) else {
             return Vec::new();
         };
         let Some(dms) = self.make_dms(&anc) else {
             return Vec::new();
         };
-        let lines = if &id == "mc_pattern" {
+        let lines = if "mc_pattern" == id {
             // update mc_lines element
             if let Some(mc_lines) =
                 Doc::get().opt_elem::<HtmlElement>("mc_lines")

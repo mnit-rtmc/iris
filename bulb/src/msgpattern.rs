@@ -640,11 +640,11 @@ impl Card for MsgPattern {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, anc: MsgPatternAnc, id: String) -> Vec<Action> {
+    fn handle_input(&self, anc: MsgPatternAnc, id: &str) -> Vec<Action> {
         let doc = Doc::get();
-        if id == "mp_config" {
+        if "mp_config" == id {
             self.replace_preview(&anc);
-        } else if let Ok(tab) = Tab::try_from(id.as_str()) {
+        } else if let Ok(tab) = Tab::try_from(id) {
             if let Tab::Preview = tab {
                 self.replace_preview(&anc);
             }

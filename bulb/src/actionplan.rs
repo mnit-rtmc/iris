@@ -477,8 +477,8 @@ impl Card for ActionPlan {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: ActionPlanAnc, id: String) -> Vec<Action> {
-        if &id == "phase"
+    fn handle_input(&self, _anc: ActionPlanAnc, id: &str) -> Vec<Action> {
+        if "phase" == id
             && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
         {
             let phase = el.value();
