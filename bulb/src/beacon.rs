@@ -163,9 +163,8 @@ impl Beacon {
             .close();
         div = tree.root::<html::Div>();
         div.class("beacon-container row center");
-        div.button().id("ob_flashing").disabled().close();
         let mut label = div.label();
-        label.r#for("ob_flashing").class("signal-housing");
+        label.class("signal-housing");
         label.span().class(self.class_flash()).cdata("🔆").close();
         label.close();
         div.span()
@@ -173,7 +172,7 @@ impl Beacon {
             .cdata(&self.message)
             .close();
         label = div.label();
-        label.r#for("ob_flashing").class("signal-housing");
+        label.class("signal-housing");
         label.span().class(self.class_delayed()).cdata("🔆");
         String::from(tree)
     }
