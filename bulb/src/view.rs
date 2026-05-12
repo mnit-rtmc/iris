@@ -231,12 +231,12 @@ impl CardView {
     }
 
     /// Handle click event for a button owned by the resource
-    pub async fn handle_click(&self, id: &str) -> Result<()> {
+    pub async fn handle_click(&self, id: &str) -> Result<Option<View>> {
         cards_meth!(self, handle_click_x, id)
     }
 
     /// Handle click event for a button on a card
-    async fn handle_click_x<C: Card>(&self, id: &str) -> Result<()> {
+    async fn handle_click_x<C: Card>(&self, id: &str) -> Result<Option<View>> {
         let view = match id {
             "ob_create" | "ob_save" => View::SaveEv,
             _ => self.view,
@@ -246,7 +246,11 @@ impl CardView {
         for action in pri.handle_click(anc, id) {
             action.perform().await?;
         }
-        Ok(())
+        if View::SaveEv == view {
+            Ok(Some(self.view.compact()))
+        } else {
+            Ok(None)
+        }
     }
 
     /// Handle input event for an element owned by the resource
