@@ -1148,7 +1148,7 @@ fn item_states_css(
         let mut sel: Option<Sel> = None;
         for cs in card_states {
             if cs.state == *st {
-                let s = Sel::cls(&format!("{}-{}", cs.res.as_str(), &cs.name));
+                let s = Sel::cls(format!("{}-{}", cs.res.as_str(), &cs.name));
                 sel = Some(match sel {
                     Some(sel) => sel.list(s),
                     None => s,

@@ -92,7 +92,7 @@ impl Permission {
         };
         let mut td = tr.td();
         let mut select = td.select();
-        select.id(&format!("perm_{}_{num}", &self.base_resource));
+        select.id(format!("perm_{}_{num}", &self.base_resource));
         for access in 0..=4 {
             let mut option = select.option();
             option.value(access.to_string());
