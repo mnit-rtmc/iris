@@ -11,12 +11,12 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
 use crate::fetch::Action;
-use crate::geoloc::{Loc, LocAnc};
+use crate::geoloc::LocAnc;
 use crate::item::ItemState;
 use crate::start::select_item_map;
 use crate::util::{
@@ -402,7 +402,7 @@ impl Camera {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -411,13 +411,6 @@ impl ControllerIo for Camera {
     /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
-    }
-}
-
-impl Loc for Camera {
-    /// Get geo location name
-    fn geoloc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
     }
 }
 
@@ -474,6 +467,11 @@ impl Card for Camera {
             || self.check_number(search)
     }
 
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
+    }
+
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &CameraAnc) -> String {
         match view {
@@ -508,7 +506,7 @@ impl Card for Camera {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, _anc: CameraAnc, id: String) -> Vec<Action> {
+    fn handle_click(&self, anc: CameraAnc, id: String) -> Vec<Action> {
         if let Some(preset_str) = id.strip_prefix("preset-") {
             if let Ok(preset_num) = preset_str.parse::<u32>() {
                 return self.recall_or_store_preset(preset_num);
@@ -520,7 +518,7 @@ impl Card for Camera {
         }
         match id.as_str() {
             "rq_reset" => self.device_req(DeviceReq::ResetDevice),
-            _ => Vec::new(),
+            _ => self.handle_click_common(anc, id),
         }
     }
 }

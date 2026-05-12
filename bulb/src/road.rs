@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::error::Result;
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
@@ -190,7 +190,7 @@ impl Road {
             &mut div.select(),
         );
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }

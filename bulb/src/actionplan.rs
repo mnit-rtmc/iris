@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
@@ -398,7 +398,7 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -474,11 +474,6 @@ impl Card for ActionPlan {
         fields.changed_input("sticky", self.sticky);
         fields.changed_input("ignore_auto_fail", self.ignore_auto_fail);
         fields.into_value().to_string()
-    }
-
-    /// Handle click event for a button on the card
-    fn handle_click(&self, _anc: ActionPlanAnc, _id: String) -> Vec<Action> {
-        Vec::new()
     }
 
     /// Handle input event for an element on the card

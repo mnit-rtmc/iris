@@ -14,7 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
-use crate::geoloc::{Loc, LocAnc};
+use crate::geoloc::LocAnc;
 use crate::item::ItemState;
 use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
@@ -195,13 +195,6 @@ impl ControllerIo for TagReader {
     }
 }
 
-impl Loc for TagReader {
-    /// Get geo location name
-    fn geoloc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-}
-
 impl Card for TagReader {
     type Ancillary = TagReaderAnc;
 
@@ -246,6 +239,11 @@ impl Card for TagReader {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
             || anc.cio.item_states(self).is_match(search)
+    }
+
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 
     /// Convert to HTML view

@@ -33,12 +33,14 @@ pub struct Uri {
     content_type: ContentType,
 }
 
-/// Fetch action
+/// HTTP Fetch action
 #[derive(Debug)]
 pub enum Action {
+    /// PATCH verb action
     Patch(Uri, JsValue),
-    #[allow(dead_code)]
+    /// POST verb action
     Post(Uri, JsValue),
+    /// DELETE verb action
     #[allow(dead_code)]
     Delete(Uri),
 }

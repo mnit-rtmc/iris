@@ -12,12 +12,12 @@
 //
 use crate::actionplan::{ActionPlan, DeviceAction};
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
-use crate::geoloc::{Loc, LocAnc};
+use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
 use crate::msgpattern::{FontName, GraphicName, MsgLine, MsgPattern};
@@ -1047,7 +1047,7 @@ impl Dms {
         anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
         self.sign_config_html(anc, &mut tree.root::<html::Div>());
         // FIXME: add sign_detail button
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 
@@ -1237,13 +1237,6 @@ impl ControllerIo for Dms {
     }
 }
 
-impl Loc for Dms {
-    /// Get geo location name
-    fn geoloc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-}
-
 impl Card for Dms {
     type Ancillary = DmsAnc;
 
@@ -1309,6 +1302,11 @@ impl Card for Dms {
                 .is_some_and(|m| m.is_match(search))
     }
 
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
+    }
+
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &DmsAnc) -> String {
         match view {
@@ -1350,7 +1348,7 @@ impl Card for Dms {
             "rq_settings_query" => self.device_req(DeviceReq::QuerySettings),
             "rq_config_reset" => self.device_req(DeviceReq::ResetDevice),
             "rq_config_query" => self.device_req(DeviceReq::QueryConfiguration),
-            _ => Vec::new(),
+            _ => self.handle_click_common(anc, id),
         }
     }
 

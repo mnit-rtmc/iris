@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::road::Direction;
@@ -183,7 +183,7 @@ impl Incident {
         div.class("row").close(); // empty
         let mut div = tree.root::<html::Div>();
         div.class("row").close(); // empty
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }

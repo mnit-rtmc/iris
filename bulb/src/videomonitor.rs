@@ -12,7 +12,7 @@
 //
 use crate::app;
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
@@ -233,7 +233,7 @@ impl VideoMonitor {
         div.close();
         anc.cio.controller_html(self, &mut tree.root::<html::Div>());
         anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }

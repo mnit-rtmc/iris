@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::error::Result;
 use crate::factor;
 use crate::item::{ItemState, ItemStates};
@@ -240,7 +240,7 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
         .close();
     anc.select_fonts_html(sc.default_font, &mut div.select());
     div.close();
-    sc.footer_html(true, &mut tree.root::<html::Div>());
+    footer_html(View::Setup, true, &mut tree.root::<html::Div>());
     String::from(tree)
 }
 

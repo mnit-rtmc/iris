@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::util::{ContainsLower, Fields, Input, Select, opt_ref, opt_str};
@@ -201,7 +201,7 @@ impl LcsState {
             .size(5)
             .value(opt_str(self.msg_num));
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }

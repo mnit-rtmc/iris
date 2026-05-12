@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::commconfig::CommConfig;
 use crate::controller::Controller;
 use crate::error::Result;
@@ -49,6 +49,7 @@ impl AncillaryData for CommLinkAnc {
     /// Construct ancillary comm link data
     fn new(_pri: &CommLink, view: View) -> Self {
         let assets = match view {
+            View::SaveEv => Vec::new(),
             View::Status => vec![Asset::Controllers, Asset::CommConfigs],
             _ => vec![Asset::CommConfigs],
         };
@@ -213,7 +214,7 @@ impl CommLink {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }

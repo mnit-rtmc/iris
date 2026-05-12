@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use crate::view::View;
@@ -86,7 +86,7 @@ impl Word {
             .size(12)
             .value(opt_ref(&self.abbr));
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }

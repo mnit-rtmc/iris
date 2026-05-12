@@ -15,18 +15,17 @@ use crate::alarm::Alarm;
 use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
 use crate::camera::Camera;
-use crate::card::{Card, Search, fetch_ancillary, uri_all, uri_one};
+use crate::card::{Card, Search, fetch_ancillary, footer_html, uri_one};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::eventcfg::EventConfig;
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
-use crate::geoloc::Loc;
 use crate::gps::Gps;
 use crate::incident::Incident;
 use crate::lcs::Lcs;
@@ -42,14 +41,11 @@ use crate::signconfig::SignConfig;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::user::User;
-use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
 use crate::word::Word;
 use hatmil::{Tree, html};
 use resources::Res;
-use serde_json::Value;
-use serde_json::map::Map;
 
 /// Card element view
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -58,6 +54,8 @@ pub enum View {
     Hidden,
     /// Search event "view"
     SearchEv,
+    /// Save event "view"
+    SaveEv,
     /// Compact Create view
     CreateCompact,
     /// Create view
@@ -80,7 +78,7 @@ impl View {
     /// Get view class name
     pub const fn class_name(self) -> &'static str {
         match self {
-            View::Hidden | View::SearchEv => "no-display",
+            View::Hidden | View::SearchEv | View::SaveEv => "no-display",
             View::CreateCompact | View::Compact => "card-compact",
             _ => "card-expanded",
         }
@@ -89,16 +87,13 @@ impl View {
     /// Is the view expanded?
     pub fn is_expanded(self) -> bool {
         match self {
-            View::Hidden
-            | View::SearchEv
-            | View::CreateCompact
-            | View::Compact => false,
             View::Create
             | View::Control
             | View::Setup
             | View::Status
             | View::Location
             | View::Request => true,
+            _ => false,
         }
     }
 
@@ -116,6 +111,7 @@ impl View {
         match self {
             Hidden => "Hidden",
             SearchEv => "Search",
+            SaveEv => "🖍️ Save",
             CreateCompact => "Create compact",
             Create => "🆕 Create",
             Compact => "⌄ Compact",
@@ -136,6 +132,7 @@ impl TryFrom<&str> for View {
         match type_n {
             v if v == Hidden.as_str() => Ok(Hidden),
             v if v == SearchEv.as_str() => Ok(SearchEv),
+            v if v == SaveEv.as_str() => Ok(SaveEv),
             v if v == CreateCompact.as_str() => Ok(CreateCompact),
             v if v == Create.as_str() => Ok(Create),
             v if v == Compact.as_str() => Ok(Compact),
@@ -233,93 +230,19 @@ impl CardView {
         C::new(json)
     }
 
-    /// Handle a save button click event
-    pub async fn handle_save(&self) -> Result<()> {
-        match self.view {
-            View::Create => self.create_and_post().await,
-            View::Setup => self.patch_setup().await,
-            View::Location => self.patch_loc().await,
-            _ => unreachable!(),
-        }
-    }
-
-    /// Create a new object
-    async fn create_and_post(&self) -> Result<()> {
-        let doc = Doc::get();
-        let name = doc
-            .input_option_string("create_name")
-            .ok_or(Error::ElemIdNotFound("create_name"))?;
-        let mut obj = Map::new();
-        obj.insert("name".to_string(), Value::String(name));
-        let value = Value::Object(obj).to_string();
-        uri_all(self.res).post(&value.into()).await?;
-        Ok(())
-    }
-
-    /// Patch changed fields from a Setup view
-    async fn patch_setup(&self) -> Result<()> {
-        cards_meth!(self, patch_setup_x)
-    }
-
-    /// Patch changed fields from a Setup view
-    async fn patch_setup_x<C: Card>(&self) -> Result<()> {
-        let pri = self.fetch_primary::<C>().await?;
-        let changed = pri.changed_setup();
-        if !changed.is_empty() {
-            uri_one(C::res(), &self.name).patch(&changed.into()).await?;
-        }
-        Ok(())
-    }
-
-    /// Patch changed fields from a Location view
-    async fn patch_loc(&self) -> Result<()> {
-        match self.res {
-            Res::Beacon => self.patch_loc_x::<Beacon>().await,
-            Res::Camera => self.patch_loc_x::<Camera>().await,
-            Res::Controller => self.patch_loc_x::<Controller>().await,
-            Res::Dms => self.patch_loc_x::<Dms>().await,
-            Res::GateArm => self.patch_loc_x::<GateArm>().await,
-            Res::RampMeter => self.patch_loc_x::<RampMeter>().await,
-            Res::TagReader => self.patch_loc_x::<TagReader>().await,
-            Res::WeatherSensor => self.patch_loc_x::<WeatherSensor>().await,
-            _ => unreachable!(),
-        }
-    }
-
-    /// Patch changed fields from a Location view
-    async fn patch_loc_x<C>(&self) -> Result<()>
-    where
-        C: Card + Loc,
-    {
-        let pri = self.fetch_primary::<C>().await?;
-        if let Some(geoloc) = pri.geoloc() {
-            let anc = fetch_ancillary(&pri, View::Location).await?;
-            let changed = pri.changed_location(anc);
-            if !changed.is_empty() {
-                let mut uri = uri_one(Res::GeoLoc, geoloc);
-                uri.query("res", self.res.as_str());
-                uri.patch(&changed.into()).await?;
-            }
-        }
-        Ok(())
-    }
-
     /// Handle click event for a button owned by the resource
     pub async fn handle_click(&self, id: String) -> Result<()> {
-        match self.res {
-            Res::Beacon => self.handle_click_x::<Beacon>(id).await,
-            Res::Camera => self.handle_click_x::<Camera>(id).await,
-            Res::Dms => self.handle_click_x::<Dms>(id).await,
-            Res::Lcs => self.handle_click_x::<Lcs>(id).await,
-            Res::RampMeter => self.handle_click_x::<RampMeter>(id).await,
-            _ => Ok(()),
-        }
+        cards_meth!(self, handle_click_x, id)
     }
 
     /// Handle click event for a button on a card
     async fn handle_click_x<C: Card>(&self, id: String) -> Result<()> {
+        let view = match id.as_str() {
+            "ob_create" | "ob_save" => View::SaveEv,
+            _ => self.view,
+        };
         let pri = self.fetch_primary::<C>().await?;
-        let anc = fetch_ancillary(&pri, self.view).await?;
+        let anc = fetch_ancillary(&pri, view).await?;
         for action in pri.handle_click(anc, id) {
             action.perform().await?;
         }
@@ -404,8 +327,6 @@ fn html_card_create(res: Res, create: &str) -> String {
     div = tree.root::<html::Div>();
     div.raw(create);
     div.close();
-    div = tree.root::<html::Div>();
-    div.class("row end");
-    div.button().id("ob_save").r#type("button").cdata("🖍️ Save");
+    footer_html(View::Create, false, &mut tree.root::<html::Div>());
     String::from(tree)
 }

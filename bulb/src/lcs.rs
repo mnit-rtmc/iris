@@ -11,11 +11,11 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::fetch::Action;
-use crate::geoloc::{Loc, LocAnc};
+use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lcsstate::LcsState;
 use crate::lock::LockReason;
@@ -220,13 +220,6 @@ impl ControllerIo for Lcs {
     /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
-    }
-}
-
-impl Loc for Lcs {
-    /// Get geo location name
-    fn geoloc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
     }
 }
 
@@ -548,7 +541,7 @@ impl Lcs {
             .size(2)
             .value(opt_str(self.shift));
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -608,6 +601,11 @@ impl Card for Lcs {
             || self.item_states(anc).is_match(search)
     }
 
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
+    }
+
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &LcsAnc) -> String {
         match view {
@@ -636,11 +634,11 @@ impl Card for Lcs {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, _anc: LcsAnc, id: String) -> Vec<Action> {
+    fn handle_click(&self, anc: LcsAnc, id: String) -> Vec<Action> {
         match id.as_str() {
             "lk_send" => self.lock_send(),
             "lk_blank" => self.lock_blank(),
-            _ => Vec::new(),
+            _ => self.handle_click_common(anc, id),
         }
     }
 

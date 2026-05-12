@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::Card;
+use crate::card::{Card, footer_html};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input};
@@ -101,7 +101,7 @@ impl Alarm {
         div.close();
         anc.controller_html(self, &mut tree.root::<html::Div>());
         anc.pin_html(self.pin, &mut tree.root::<html::Div>());
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }

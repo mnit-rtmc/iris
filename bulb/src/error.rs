@@ -72,10 +72,6 @@ pub enum Error {
     #[error("Status code {0}")]
     FetchResponseOther(u16),
 
-    /// Element ID not found
-    #[error("Elem id {0} not found")]
-    ElemIdNotFound(&'static str),
-
     /// Card mismatch (added / deleted)
     #[error("card mismatch")]
     CardMismatch(),

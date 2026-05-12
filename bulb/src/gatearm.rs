@@ -11,10 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
-use crate::geoloc::{Loc, LocAnc};
+use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
@@ -116,13 +116,6 @@ impl ControllerIo for GateArm {
     }
 }
 
-impl Loc for GateArm {
-    /// Get geo location name
-    fn geoloc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-}
-
 impl GateArm {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a GateArmAnc) -> ItemStates<'a> {
@@ -213,7 +206,7 @@ impl GateArm {
             .size(16)
             .value(opt_ref(&self.downstream_hashtag));
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -256,6 +249,11 @@ impl Card for GateArm {
             || self.location.contains_lower(search)
             || self.notes.contains_lower(search)
             || self.item_states(anc).is_match(search)
+    }
+
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 
     /// Convert to HTML view

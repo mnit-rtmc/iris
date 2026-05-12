@@ -12,11 +12,11 @@
 //
 use crate::asset::Asset;
 use crate::cabinetstyle::CabinetStyle;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::error::Result;
-use crate::geoloc::{Loc, LocAnc};
+use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields, Input, Select, TextArea, opt_ref};
@@ -275,13 +275,6 @@ impl Io {
     }
 }
 
-impl Loc for Controller {
-    /// Get geo location name
-    fn geoloc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
-    }
-}
-
 impl Controller {
     /// Is controller active?
     pub fn is_active(&self) -> bool {
@@ -493,7 +486,7 @@ impl Controller {
             .size(26)
             .value(opt_ref(&self.password));
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -558,6 +551,11 @@ impl Card for Controller {
             || self.notes.contains_lower(search)
             || self.cabinet_style.contains_lower(search)
             || anc.comm_state(self).contains_lower(search)
+    }
+
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 
     /// Convert to HTML view

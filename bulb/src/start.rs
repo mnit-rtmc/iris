@@ -689,8 +689,8 @@ async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
                     replace_card(cv.view(View::Hidden), "").await?;
                 }
             }
-            "ob_save" => {
-                cv.handle_save().await?;
+            "ob_create" | "ob_save" => {
+                cv.handle_click(attrs.id).await?;
                 replace_card(cv.compact(), "").await?;
             }
             _ => {

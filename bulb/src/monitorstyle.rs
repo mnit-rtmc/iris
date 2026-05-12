@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -134,7 +134,7 @@ impl MonitorStyle {
             .size(3)
             .value(opt_str(self.vgap));
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }

@@ -11,10 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
-use crate::geoloc::{Loc, LocAnc};
+use crate::geoloc::LocAnc;
 use crate::item::ItemState;
 use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
@@ -850,7 +850,7 @@ impl WeatherSensor {
         div.close();
         anc.cio.controller_html(self, &mut tree.root::<html::Div>());
         anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -859,13 +859,6 @@ impl ControllerIo for WeatherSensor {
     /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
-    }
-}
-
-impl Loc for WeatherSensor {
-    /// Get geo location name
-    fn geoloc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
     }
 }
 
@@ -916,6 +909,11 @@ impl Card for WeatherSensor {
             || self.alt_id.contains_lower(search)
             || anc.cio.item_states(self).is_match(search)
             || self.notes.contains_lower(search)
+    }
+
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
     }
 
     /// Convert to HTML view

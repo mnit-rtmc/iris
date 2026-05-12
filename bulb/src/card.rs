@@ -44,6 +44,7 @@ use crate::signconfig::SignConfig;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::user::User;
+use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
 use crate::view::{CardView, View};
 use crate::weathersensor::WeatherSensor;
@@ -54,6 +55,7 @@ use hatmil::{Tree, html};
 use resources::Res;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
+use serde_json::map::Map;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
@@ -172,6 +174,11 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         false
     }
 
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        None
+    }
+
     /// Convert to Create HTML
     fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
         let mut tree = Tree::new();
@@ -189,19 +196,71 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Convert to HTML view
     fn to_html(&self, view: View, _anc: &Self::Ancillary) -> String;
 
+    /// Handle click event for a button on the card
+    fn handle_click(&self, anc: Self::Ancillary, id: String) -> Vec<Action> {
+        self.handle_click_common(anc, id)
+    }
+
+    /// Handle click event for common buttons on the card
+    fn handle_click_common(
+        &self,
+        anc: Self::Ancillary,
+        id: String,
+    ) -> Vec<Action> {
+        match id.as_str() {
+            "ob_create" => self.handle_create(anc),
+            "ob_save" => self.handle_save(anc),
+            "ob_geoloc" => self.handle_geoloc(anc),
+            _ => Vec::new(),
+        }
+    }
+
+    /// Handle click event for the create button
+    fn handle_create(&self, _anc: Self::Ancillary) -> Vec<Action> {
+        let doc = Doc::get();
+        if let Some(name) = doc.input_option_string("create_name") {
+            let mut obj = Map::new();
+            obj.insert("name".to_string(), Value::String(name));
+            let value = Value::Object(obj).to_string();
+            let uri = uri_all(Self::res());
+            vec![Action::Post(uri, value.into())]
+        } else {
+            Vec::new()
+        }
+    }
+
+    /// Handle click event for the save button
+    fn handle_save(&self, _anc: Self::Ancillary) -> Vec<Action> {
+        let changed = self.changed_setup();
+        if !changed.is_empty() {
+            let uri = uri_one(Self::res(), &self.name());
+            vec![Action::Patch(uri, changed.into())]
+        } else {
+            Vec::new()
+        }
+    }
+
     /// Get changed fields from Setup view
     fn changed_setup(&self) -> String {
         String::new()
     }
 
+    /// Handle click event for the save button on Location card
+    fn handle_geoloc(&self, anc: Self::Ancillary) -> Vec<Action> {
+        if let Some(geoloc) = self.geoloc() {
+            let changed = self.changed_location(anc);
+            if !changed.is_empty() {
+                let mut uri = uri_one(Res::GeoLoc, geoloc);
+                uri.query("res", Self::res().as_str());
+                return vec![Action::Patch(uri, changed.into())];
+            }
+        }
+        Vec::new()
+    }
+
     /// Get changed fields on Location view
     fn changed_location(&self, _anc: Self::Ancillary) -> String {
         String::new()
-    }
-
-    /// Handle click event for a button on the card
-    fn handle_click(&self, _anc: Self::Ancillary, _id: String) -> Vec<Action> {
-        Vec::new()
     }
 
     /// Handle input event for an element on the card
@@ -237,25 +296,6 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
             option.cdata(v.as_str()).close();
         }
         select.close();
-    }
-
-    /// Build card footer HTML
-    fn footer_html<'p>(&self, delete: bool, div: &'p mut html::Div<'p>) {
-        div.class("row");
-        div.span().close(); /* empty */
-        if delete {
-            div.button()
-                .id("ob_delete")
-                .r#type("button")
-                .cdata("🗑️ Delete")
-                .close();
-        };
-        div.button()
-            .id("ob_save")
-            .r#type("button")
-            .cdata("🖍️ Save")
-            .close();
-        div.close();
     }
 }
 
@@ -379,7 +419,7 @@ pub fn res_views(res: Res) -> &'static [View] {
 }
 
 /// Get the URI of a resource (all)
-pub fn uri_all(res: Res) -> Uri {
+fn uri_all(res: Res) -> Uri {
     let mut uri = Uri::from("/iris/api/");
     uri.push(res.as_str());
     uri
@@ -674,4 +714,27 @@ pub async fn fetch_ancillary<C: Card>(
         }
     }
     Ok(anc)
+}
+
+/// Build card footer HTML
+pub fn footer_html<'p>(view: View, delete: bool, div: &'p mut html::Div<'p>) {
+    div.class("row");
+    div.span().close(); /* empty */
+    if delete {
+        div.button()
+            .id("ob_delete")
+            .r#type("button")
+            .cdata("🗑️ Delete")
+            .close();
+    };
+    let (id, lbl) = match view {
+        View::Location => ("ob_geoloc", "🖍️ Save"),
+        View::Create => ("ob_create", "🖍️ Create"),
+        View::Setup => ("ob_save", "🖍️ Save"),
+        _ => ("", ""),
+    };
+    if !id.is_empty() {
+        div.button().id(id).r#type("button").cdata(lbl).close();
+    }
+    div.close();
 }

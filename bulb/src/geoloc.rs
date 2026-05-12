@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::error::Result;
 use crate::road::{Direction, Road};
 use crate::util::{Fields, Input, Select, opt_ref, opt_str};
@@ -45,18 +45,10 @@ pub struct GeoLoc {
     pub lon: Option<f64>,
 }
 
-/// Location resource
-pub trait Loc {
-    /// Get geo location name
-    fn geoloc(&self) -> Option<&str> {
-        None
-    }
-}
-
 /// Ancillary location data
 #[derive(Debug, Default)]
-pub struct LocAnc<L> {
-    pri: PhantomData<L>,
+pub struct LocAnc<C> {
+    pri: PhantomData<C>,
     pub assets: Vec<Asset>,
     geoloc: Option<GeoLoc>,
     roads: Vec<Road>,
@@ -64,21 +56,21 @@ pub struct LocAnc<L> {
     modifiers: Vec<RoadModifier>,
 }
 
-impl<L> AncillaryData for LocAnc<L>
+impl<C> AncillaryData for LocAnc<C>
 where
-    L: Loc + Card,
+    C: Card,
 {
-    type Primary = L;
+    type Primary = C;
 
     /// Construct ancillary location data
-    fn new(pri: &L, view: View) -> Self {
+    fn new(pri: &C, view: View) -> Self {
         let mut assets = Vec::new();
         match (view, pri.geoloc()) {
             (View::Control, Some(nm)) => {
-                assets.push(Asset::GeoLoc(nm.to_string(), L::res()));
+                assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
             }
             (View::Location, Some(nm)) => {
-                assets.push(Asset::GeoLoc(nm.to_string(), L::res()));
+                assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
                 assets.push(Asset::Directions);
                 assets.push(Asset::Roads);
                 assets.push(Asset::RoadModifiers);
@@ -103,7 +95,7 @@ where
     /// Set asset value
     fn set_asset(
         &mut self,
-        _pri: &L,
+        _pri: &C,
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
@@ -126,7 +118,10 @@ where
     }
 }
 
-impl<L> LocAnc<L> {
+impl<C> LocAnc<C>
+where
+    C: Card,
+{
     /// Get lon/lat of location
     pub fn lonlat(&self) -> Option<(f64, f64)> {
         match &self.geoloc {
@@ -174,10 +169,7 @@ impl<L> LocAnc<L> {
     }
 
     /// Convert to Location HTML
-    pub fn to_html_loc<C>(&self, card: &C) -> String
-    where
-        C: Card,
-    {
+    pub fn to_html_loc(&self, card: &C) -> String {
         let mut tree = Tree::new();
         card.title(View::Location, &mut tree.root::<html::Div>());
         match &self.geoloc {
@@ -187,7 +179,7 @@ impl<L> LocAnc<L> {
                 span.cdata("Error: missing geo_loc!").close();
             }
         };
-        card.footer_html(false, &mut tree.root::<html::Div>());
+        footer_html(View::Location, false, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 

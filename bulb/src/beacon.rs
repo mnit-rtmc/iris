@@ -11,11 +11,11 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::fetch::Action;
-use crate::geoloc::{Loc, LocAnc};
+use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref, opt_str};
@@ -64,7 +64,9 @@ impl AncillaryData for BeaconAnc {
     /// Construct ancillary beacon data
     fn new(pri: &Beacon, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        cio.assets.push(Asset::BeaconStates);
+        if view != View::SaveEv {
+            cio.assets.push(Asset::BeaconStates);
+        }
         let loc = LocAnc::new(pri, view);
         let states = None;
         BeaconAnc { cio, loc, states }
@@ -266,7 +268,7 @@ impl Beacon {
             input.checked();
         }
         div.close();
-        self.footer_html(true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -275,13 +277,6 @@ impl ControllerIo for Beacon {
     /// Get controller name
     fn controller(&self) -> Option<&str> {
         self.controller.as_deref()
-    }
-}
-
-impl Loc for Beacon {
-    /// Get geo location name
-    fn geoloc(&self) -> Option<&str> {
-        self.geo_loc.as_deref()
     }
 }
 
@@ -342,6 +337,11 @@ impl Card for Beacon {
             || self.device.contains_lower(search)
     }
 
+    /// Get geo location name
+    fn geoloc(&self) -> Option<&str> {
+        self.geo_loc.as_deref()
+    }
+
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &BeaconAnc) -> String {
         match view {
@@ -372,7 +372,7 @@ impl Card for Beacon {
     }
 
     /// Handle click event for a button on the card
-    fn handle_click(&self, _anc: BeaconAnc, id: String) -> Vec<Action> {
+    fn handle_click(&self, anc: BeaconAnc, id: String) -> Vec<Action> {
         if &id == "ob_flashing" {
             let mut fields = Fields::new();
             match self.state {
@@ -386,7 +386,7 @@ impl Card for Beacon {
             let val = fields.into_value().to_string();
             vec![Action::Patch(uri, val.into())]
         } else {
-            Vec::new()
+            self.handle_click_common(anc, id)
         }
     }
 }

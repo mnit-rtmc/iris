@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card};
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
 use crate::view::View;
@@ -84,7 +84,7 @@ impl EventConfig {
             .size(4)
             .value(self.purge_days);
         div.close();
-        self.footer_html(false, &mut tree.root::<html::Div>());
+        footer_html(View::Setup, false, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
