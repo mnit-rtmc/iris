@@ -682,17 +682,15 @@ fn handle_input_enter(id: String) {
 /// Handle button click event on an expanded card
 async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
-        if "ob_delete" == attrs.id.as_str() {
+        if attrs.class_name == "go_link" {
+            go_resource(attrs).await?;
+        } else if "ob_delete" == &attrs.id {
             if app::delete_enabled() {
                 cv.handle_delete().await?;
                 replace_card(cv.view(View::Hidden), "").await?;
             }
-        } else {
-            if attrs.class_name == "go_link" {
-                go_resource(attrs).await?;
-            } else if let Some(v) = cv.handle_click(&attrs.id).await? {
-                replace_card(cv.view(v), "").await?;
-            }
+        } else if let Some(v) = cv.handle_click(&attrs.id).await? {
+            replace_card(cv.view(v), "").await?;
         }
     }
     Ok(())
