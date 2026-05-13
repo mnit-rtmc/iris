@@ -13,6 +13,7 @@
 use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
 use crate::card::{self, CardList, CardState};
+use crate::eid;
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
@@ -169,8 +170,8 @@ fn add_listeners() -> Result<()> {
     let window = web_sys::window().ok_or(Error::NoWindow())?;
     let doc = window.document().ok_or(Error::NoDocument())?;
     let doc = Doc(doc);
-    let sb_resource = doc.elem::<HtmlSelectElement>("sb_resource")?;
-    sb_resource.set_value("");
+    let resource = doc.elem::<HtmlSelectElement>(eid::RESOURCE)?;
+    resource.set_value("");
     let divider: HtmlElement = doc.elem("divider")?;
     add_click_listener(&divider)?;
     let sidebar: HtmlElement = doc.elem("sidebar")?;
@@ -181,7 +182,7 @@ fn add_listeners() -> Result<()> {
     add_input_listener(&sidebar)?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
     add_focus_listener(&sidebar)?;
-    add_transition_listener(&doc.elem("sb_list")?)?;
+    add_transition_listener(&doc.elem(eid::LIST)?)?;
     add_interval_callback(&window)?;
     if let Some(map_pane) = earthwyrm::MapPane::init(
         "map-pane",
@@ -208,7 +209,7 @@ async fn finish_init() -> Result<()> {
     match user.as_string() {
         Some(user) => {
             app::set_user(Some(user));
-            update_sb_resource().await?;
+            update_resource().await?;
             set_resource(None, "").await?;
             sse::post_req(None).await
         }
@@ -220,7 +221,7 @@ async fn finish_init() -> Result<()> {
 }
 
 /// Update resource select options
-async fn update_sb_resource() -> Result<()> {
+async fn update_resource() -> Result<()> {
     let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
     let doc = Doc::get();
     if let Some(el) = doc.opt_elem::<Element>("opt_action_plan") {
@@ -354,7 +355,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     let doc = Doc::get();
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
-    let sb_list = doc.elem::<Element>("sb_list")?;
+    let sb_list = doc.elem::<Element>(eid::LIST)?;
     sb_list.set_inner_html("");
     let base = res.map(|r| r.base());
     if let Some(el) = doc.opt_elem::<Element>("res_plan_row") {
@@ -387,9 +388,9 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
             el.set_checked(true);
         }
     }
-    let sb_search = doc.elem::<HtmlInputElement>("sb_search")?;
+    let sb_search = doc.elem::<HtmlInputElement>(eid::SEARCH)?;
     sb_search.set_value(search);
-    let sb_state = doc.elem::<HtmlSelectElement>("sb_state")?;
+    let sb_state = doc.elem::<HtmlSelectElement>(eid::STATE)?;
     let html = match res {
         Some(res) => card::item_states_html(res),
         None => String::new(),
@@ -404,7 +405,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
 /// Get the selected resource value
 fn selected_resource() -> Option<Res> {
     let doc = Doc::get();
-    let rname = doc.select_parse::<String>("sb_resource");
+    let rname = doc.select_parse::<String>(eid::RESOURCE);
     let res = Res::try_from(rname?.as_str()).ok()?;
     match res.base() {
         Res::ActionPlan if doc.input_bool("res_plan_phase") => {
@@ -448,9 +449,9 @@ fn selected_resource() -> Option<Res> {
 /// Get value to search
 fn search_value() -> Result<String> {
     let doc = Doc::get();
-    let sb_search = doc.elem::<HtmlInputElement>("sb_search")?;
+    let sb_search = doc.elem::<HtmlInputElement>(eid::SEARCH)?;
     let mut search = sb_search.value();
-    if let Some(istate) = doc.select_parse::<String>("sb_state")
+    if let Some(istate) = doc.select_parse::<String>(eid::STATE)
         && ItemState::from_code(&istate).is_some()
     {
         search.push(' ');
@@ -486,11 +487,11 @@ fn handle_input(id: String) {
         | "res_controller" | "res_gps" | "res_road" | "res_detector"
         | "res_map_extent" | "res_r_node" | "res_permission" | "res_user"
         | "res_role" | "res_domain" | "res_system_attr"
-        | "res_event_config" | "res_cabinet_style" | "sb_resource" => {
+        | "res_event_config" | "res_cabinet_style" | eid::RESOURCE => {
             handle_res_change()
         }
-        "sb_search" | "sb_state" => spawn_future(handle_search()),
-        "ob_view" => handle_ob_view_ev(),
+        eid::SEARCH | eid::STATE => spawn_future(handle_search()),
+        eid::VIEW => handle_card_view_ev(),
         _ => spawn_future(handle_input_other(id)),
     }
 }
@@ -524,18 +525,18 @@ async fn handle_search() -> Result<()> {
     Ok(())
 }
 
-/// Handle an event from `ob_view` select element
-fn handle_ob_view_ev() {
+/// Handle an event from card view select element
+fn handle_card_view_ev() {
     if let Some(cv) = app::expanded_view()
-        && let Some(view) = ob_view_value()
+        && let Some(view) = card_view_value()
     {
         spawn_future(replace_card(cv.view(view), ""));
     }
 }
 
 /// Get the selected view value
-fn ob_view_value() -> Option<View> {
-    match Doc::get().select_parse::<String>("ob_view") {
+fn card_view_value() -> Option<View> {
+    match Doc::get().select_parse::<String>(eid::VIEW) {
         Some(view) => View::try_from(view.as_str()).ok(),
         None => None,
     }
@@ -619,8 +620,8 @@ fn add_click_listener(el: &Element) -> Result<()> {
 fn handle_button_click_ev(target: &Element) {
     let id = target.id();
     match id.as_str() {
-        "ob_login" => spawn_future(handle_login()),
-        "ob_logout" => spawn_future(handle_logout()),
+        eid::LOGIN => spawn_future(handle_login()),
+        eid::LOGOUT => spawn_future(handle_logout()),
         "show_sidebar" => spawn_future(handle_show_sidebar(true)),
         "hide_sidebar" => spawn_future(handle_show_sidebar(false)),
         _ => {
@@ -684,7 +685,7 @@ async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
         if attrs.class_name == "go_link" {
             go_resource(attrs).await?;
-        } else if "ob_delete" == &attrs.id {
+        } else if eid::DELETE == &attrs.id {
             if app::delete_enabled() {
                 cv.handle_delete().await?;
                 replace_card(cv.view(View::Hidden), "").await?;
@@ -763,7 +764,7 @@ async fn handle_login() -> Result<()> {
         let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
         let el = doc.elem::<HtmlInputElement>("login_pass")?;
         el.set_value("");
-        util::hide_elem("sb_login");
+        util::hide_elem("sb_auth_panel");
         uri.post(&js.into()).await?;
         // hide/deactivate loading bar
         if let Some(l) = &loading_bar {
@@ -796,9 +797,9 @@ async fn go_resource(attrs: ButtonAttrs) -> Result<()> {
 
 /// Set selected resource
 async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
-    let sb_resource = Doc::get().elem::<HtmlSelectElement>("sb_resource")?;
+    let resource = Doc::get().elem::<HtmlSelectElement>(eid::RESOURCE)?;
     let base = res.map(|r| r.base().as_str()).unwrap_or("");
-    sb_resource.set_value(base);
+    resource.set_value(base);
     handle_resource_change(res, search).await
 }
 
@@ -812,7 +813,7 @@ async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
             let search = search_value()?;
             let html = cards.build_html(&search).await?;
             let doc = Doc::get();
-            let sb_list = doc.elem::<Element>("sb_list")?;
+            let sb_list = doc.elem::<Element>(eid::LIST)?;
             sb_list.set_inner_html(&html);
             app::card_list(Some(cards));
         }
@@ -842,14 +843,14 @@ fn add_transition_listener(el: &Element) -> Result<()> {
     Ok(())
 }
 
-/// Handle a `transition*` event from `sb_list` child element
+/// Handle a `transition*` event
 fn handle_transition_ev(ev: Event) {
     if let Some(target) = ev.target()
         && let Ok(target) = target.dyn_into::<Element>()
         && let Ok(ev) = ev.dyn_into::<TransitionEvent>()
     {
         // delete slider is a "left" property transition
-        if target.id() == "ob_delete" && ev.property_name() == "left" {
+        if target.id() == eid::DELETE && ev.property_name() == "left" {
             app::set_delete_enabled(&ev.type_() == "transitionend");
         }
     }
@@ -1048,7 +1049,7 @@ async fn do_handle_notification(
     Ok(())
 }
 
-/// Update `sb_list` with changed result
+/// Update card list with changed result
 async fn update_card_list(res: Res) -> Result<bool> {
     let Some(old_cards) = app::card_list(None) else {
         return Ok(false);

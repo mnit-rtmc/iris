@@ -361,7 +361,7 @@ label:has(+ #sb_resource) {
   to { bottom: 0; opacity: 0; }
 }
 
-#sb_login {
+#sb_auth_panel {
   visibility: hidden;
   position: absolute;
   z-index: 2;
@@ -371,7 +371,7 @@ label:has(+ #sb_resource) {
   left: 100%;
   background-color: rgba(238, 238, 238, 0.85);
 }
-#sb_login.show {
+#sb_auth_panel.show {
   visibility: visible;
   left: 0;
   transition: left 100ms ease-in-out;

@@ -31,6 +31,7 @@ mod detector;
 mod device;
 mod dms;
 mod domain;
+mod eid;
 mod error;
 mod eventcfg;
 mod factor;

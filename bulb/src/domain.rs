@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{AncillaryData, Card, footer_html};
+use crate::eid;
 use crate::fetch::Action;
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Doc, Fields, Input, opt_ref};
@@ -155,20 +156,20 @@ impl Card for Domain {
     fn handle_input(&self, _anc: DomainAnc, id: &str) -> Vec<Action> {
         if "block" == id {
             let doc = Doc::get();
-            if let (Some(block), Some(ob_save)) = (
+            if let (Some(block), Some(save)) = (
                 doc.opt_elem::<HtmlInputElement>("block"),
-                doc.opt_elem::<HtmlButtonElement>("ob_save"),
+                doc.opt_elem::<HtmlButtonElement>(eid::SAVE),
             ) {
                 match IpCidr::from_str(&block.value()) {
                     Ok(_) => {
                         block.set_custom_validity("");
                         block.set_class_name("");
-                        ob_save.set_disabled(false);
+                        save.set_disabled(false);
                     }
                     Err(e) => {
                         block.set_custom_validity(&e.to_string());
                         block.set_class_name("invalid");
-                        ob_save.set_disabled(true);
+                        save.set_disabled(true);
                     }
                 }
                 block.report_validity();

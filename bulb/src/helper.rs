@@ -26,7 +26,7 @@ pub fn spawn_future(future: impl Future<Output = Result<()>> + 'static) {
 async fn do_future(future: impl Future<Output = Result<()>>) {
     match future.await {
         Ok(_) => (),
-        Err(Error::FetchResponseUnauthorized()) => show_login(),
+        Err(Error::FetchResponseUnauthorized()) => show_auth(),
         Err(Error::FetchResponseNotFound()) => {
             // Card list may be out-of-date; refresh
             app::defer_action(DeferredAction::RefreshList, 200);
@@ -45,10 +45,10 @@ async fn do_future(future: impl Future<Output = Result<()>>) {
     }
 }
 
-/// Show login form shade
-fn show_login() {
+/// Show auth panel shade
+fn show_auth() {
     app::set_user(None);
-    util::show_elem("sb_login");
+    util::show_elem("sb_auth_panel");
 }
 
 /// Show a toast message

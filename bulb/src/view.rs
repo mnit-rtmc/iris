@@ -22,6 +22,7 @@ use crate::controller::Controller;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
+use crate::eid;
 use crate::error::Result;
 use crate::eventcfg::EventConfig;
 use crate::flowstream::FlowStream;
@@ -238,7 +239,7 @@ impl CardView {
     /// Handle click event for a button on a card
     async fn handle_click_x<C: Card>(&self, id: &str) -> Result<Option<View>> {
         let view = match id {
-            "ob_create" | "ob_save" => View::SaveEv,
+            eid::CREATE | eid::SAVE => View::SaveEv,
             _ => self.view,
         };
         let pri = self.fetch_primary::<C>().await?;
@@ -246,7 +247,7 @@ impl CardView {
         for action in pri.handle_click(anc, id) {
             action.perform().await?;
         }
-        if View::SaveEv == view {
+        if let View::SaveEv | View::Location = view {
             Ok(Some(self.view.compact()))
         } else {
             Ok(None)
@@ -316,7 +317,7 @@ fn html_card_create(res: Res, create: &str) -> String {
     div.class("title row");
     div.span().cdata(res.symbol()).cdata(" 🆕").close();
     let mut select = div.select();
-    select.id("ob_view");
+    select.id(eid::VIEW);
     select
         .option()
         .value(View::CreateCompact.as_str())

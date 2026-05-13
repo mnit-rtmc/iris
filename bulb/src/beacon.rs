@@ -13,6 +13,7 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::eid;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::LocAnc;
@@ -197,14 +198,14 @@ impl Beacon {
         div.close();
         div = tree.root::<html::Div>();
         div.class("beacon-container row center");
-        div.button().id("ob_flashing").close();
+        div.button().id(eid::BCN_FLASHING).close();
         let mut label = div.label();
-        label.r#for("ob_flashing").class("beacon signal-housing");
+        label.r#for(eid::BCN_FLASHING).class("beacon signal-housing");
         label.span().class(self.class_flash()).cdata("🔆").close();
         label.close();
         div.span().class("beacon-sign").cdata(&self.message).close();
         label = div.label();
-        label.r#for("ob_flashing").class("beacon signal-housing");
+        label.r#for(eid::BCN_FLASHING).class("beacon signal-housing");
         label.span().class(self.class_delayed()).cdata("🔆");
         div.close();
         div = tree.root::<html::Div>();
@@ -219,9 +220,9 @@ impl Beacon {
         self.title(View::Setup, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("message").cdata("Message").close();
+        div.label().r#for(eid::BCN_MESSAGE).cdata("Message").close();
         div.textarea()
-            .id("message")
+            .id(eid::BCN_MESSAGE)
             .maxlength(128)
             .rows(3)
             .cols(24)
@@ -229,9 +230,9 @@ impl Beacon {
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("notes").cdata("Notes").close();
+        div.label().r#for(eid::BCN_NOTES).cdata("Notes").close();
         div.textarea()
-            .id("notes")
+            .id(eid::BCN_NOTES)
             .maxlength(128)
             .rows(2)
             .cols(24)
@@ -355,8 +356,8 @@ impl Card for Beacon {
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
-        fields.changed_text_area("message", &self.message);
-        fields.changed_text_area("notes", &self.notes);
+        fields.changed_text_area(eid::BCN_MESSAGE, &self.message);
+        fields.changed_text_area(eid::BCN_NOTES, &self.notes);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.changed_input("verify_pin", self.verify_pin);
@@ -372,7 +373,7 @@ impl Card for Beacon {
 
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: BeaconAnc, id: &str) -> Vec<Action> {
-        if "ob_flashing" == id {
+        if eid::BCN_FLASHING == id {
             let mut fields = Fields::new();
             match self.state {
                 // DARK (2) => FLASHING_REQ (3)

@@ -22,6 +22,7 @@ use crate::controller::Controller;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
+use crate::eid;
 use crate::error::{Error, Result};
 use crate::eventcfg::EventConfig;
 use crate::fetch::{Action, Uri};
@@ -208,9 +209,9 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         id: &str,
     ) -> Vec<Action> {
         match id {
-            "ob_create" => self.handle_create(anc),
-            "ob_save" => self.handle_save(anc),
-            "ob_geoloc" => self.handle_geoloc(anc),
+            eid::CREATE => self.handle_create(anc),
+            eid::SAVE => self.handle_save(anc),
+            eid::GEOLOC => self.handle_geoloc(anc),
             _ => Vec::new(),
         }
     }
@@ -287,7 +288,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Build views select
     fn views_html<'p>(&self, view: View, select: &'p mut html::Select<'p>) {
-        select.id("ob_view");
+        select.id(eid::VIEW);
         for v in res_views(Self::res()) {
             let mut option = select.option();
             if *v == view {
@@ -722,15 +723,15 @@ pub fn footer_html<'p>(view: View, delete: bool, div: &'p mut html::Div<'p>) {
     div.span().close(); /* empty */
     if delete {
         div.button()
-            .id("ob_delete")
+            .id(eid::DELETE)
             .r#type("button")
             .cdata("🗑️ Delete")
             .close();
     };
     let (id, lbl) = match view {
-        View::Location => ("ob_geoloc", "🖍️ Save"),
-        View::Create => ("ob_create", "🖍️ Create"),
-        View::Setup => ("ob_save", "🖍️ Save"),
+        View::Location => (eid::GEOLOC, "🖍️ Save"),
+        View::Create => (eid::CREATE, "🖍️ Create"),
+        View::Setup => (eid::SAVE, "🖍️ Save"),
         _ => ("", ""),
     };
     if !id.is_empty() {
