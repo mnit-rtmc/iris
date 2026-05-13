@@ -747,8 +747,8 @@ async fn handle_mouse_card(id: String, mouse_down: bool) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
         match id.as_str() {
             // mouse on invalid target, so always release mouse
-            "" => cv.handle_mouse(id, false).await?,
-            _ => cv.handle_mouse(id, mouse_down).await?,
+            "" => cv.handle_mouse(id.as_str(), false).await?,
+            _ => cv.handle_mouse(id.as_str(), mouse_down).await?,
         }
     }
     Ok(())

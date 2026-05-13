@@ -256,7 +256,7 @@ impl CardView {
     }
 
     /// Handle mouse event for a card
-    pub async fn handle_mouse(&self, id: String, mouse_down: bool) -> Result<()> {
+    pub async fn handle_mouse(&self, id: &str, mouse_down: bool) -> Result<()> {
         match self.res {
             Res::Camera => {
                 let pri = self.fetch_primary::<Camera>().await?;

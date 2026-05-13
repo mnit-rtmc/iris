@@ -232,7 +232,6 @@ impl Camera {
             zoom * speed,
         ]);
         let value = fields.into_value().to_string();
-        log::debug!("PTZ value form fields: {}", value);
         vec![Action::Patch(uri, value.into())]
     }
 
@@ -284,7 +283,7 @@ impl Camera {
         }
 
         // Now append the actual action to do after clearing
-        actions.extend(match id.as_str() {
+        actions.extend(match id {
             "focus-near"    => self.device_req(DeviceReq::CameraFocusNear),
             "focus-far"     => self.device_req(DeviceReq::CameraFocusFar),
             "iris-open"     => self.device_req(DeviceReq::CameraIrisOpen),
@@ -297,7 +296,6 @@ impl Camera {
             "ptz-zoom-out"  => self.send_ptz( 0.0,  0.0, -1.0),
             _ => Vec::new(),
         });
-        log::debug!("actions: {:?}", actions);
         actions
     }
 
@@ -308,7 +306,7 @@ impl Camera {
         let handled_types = vec!["iris", "focus", "ptz"];
 
         // First handle a "click" if release is trigger
-        match id.as_str() {
+        match id {
             "publish" => actions.extend(self.set_publish()),
             _ => (),
         }
@@ -329,7 +327,6 @@ impl Camera {
                 });
             }
         }
-        log::debug!("actions: {:?}", actions);
         actions
     }
 
@@ -473,7 +470,6 @@ impl Camera {
         let mut fields = Fields::new();
         fields.changed_input("publish", self.publish);
         let value = fields.into_value().to_string();
-        log::debug!("publish fields: {}", value);
         vec![Action::Patch(uri, value.into())]
     }
 
