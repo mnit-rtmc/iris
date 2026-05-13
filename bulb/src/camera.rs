@@ -219,18 +219,13 @@ impl Camera {
         let mut speed = 1.0;
         if let Some(slider) =
             Doc::get().opt_elem::<HtmlInputElement>("ptz-speed")
+            && let Ok(s) = slider.value().parse::<f32>()
         {
-            if let Ok(s) = slider.value().parse::<f32>() {
-                speed = s;
-            }
+            speed = s;
         }
         let uri = uri_one(Res::Camera, &self.name);
         let mut fields = Fields::new();
-        fields.insert_arr("ptz", vec![
-            pan * speed,
-            tilt * speed,
-            zoom * speed,
-        ]);
+        fields.insert_arr("ptz", vec![pan * speed, tilt * speed, zoom * speed]);
         let value = fields.into_value().to_string();
         vec![Action::Patch(uri, value.into())]
     }
@@ -273,8 +268,8 @@ impl Camera {
                         controls.set_class_name("");
                         actions.extend(match t {
                             "focus" => self.stop_focus(),
-                            "iris"  => self.stop_iris(),
-                            "ptz"   => self.stop_ptz(),
+                            "iris" => self.stop_iris(),
+                            "ptz" => self.stop_ptz(),
                             _ => Vec::new(),
                         });
                     }
@@ -284,22 +279,23 @@ impl Camera {
 
         // Now append the actual action to do after clearing
         actions.extend(match id {
-            "focus-near"    => self.device_req(DeviceReq::CameraFocusNear),
-            "focus-far"     => self.device_req(DeviceReq::CameraFocusFar),
-            "iris-open"     => self.device_req(DeviceReq::CameraIrisOpen),
-            "iris-close"    => self.device_req(DeviceReq::CameraIrisClose),
-            "ptz-pan-right" => self.send_ptz( 1.0,  0.0,  0.0),
-            "ptz-pan-left"  => self.send_ptz(-1.0,  0.0,  0.0),
-            "ptz-tilt-up"   => self.send_ptz( 0.0,  1.0,  0.0),
-            "ptz-tilt-down" => self.send_ptz( 0.0, -1.0,  0.0),
-            "ptz-zoom-in"   => self.send_ptz( 0.0,  0.0,  1.0),
-            "ptz-zoom-out"  => self.send_ptz( 0.0,  0.0, -1.0),
+            "focus-near" => self.device_req(DeviceReq::CameraFocusNear),
+            "focus-far" => self.device_req(DeviceReq::CameraFocusFar),
+            "iris-open" => self.device_req(DeviceReq::CameraIrisOpen),
+            "iris-close" => self.device_req(DeviceReq::CameraIrisClose),
+            "ptz-pan-right" => self.send_ptz(1.0, 0.0, 0.0),
+            "ptz-pan-left" => self.send_ptz(-1.0, 0.0, 0.0),
+            "ptz-tilt-up" => self.send_ptz(0.0, 1.0, 0.0),
+            "ptz-tilt-down" => self.send_ptz(0.0, -1.0, 0.0),
+            "ptz-zoom-in" => self.send_ptz(0.0, 0.0, 1.0),
+            "ptz-zoom-out" => self.send_ptz(0.0, 0.0, -1.0),
             _ => Vec::new(),
         });
         actions
     }
 
     /// Handles a mouseup event on the expanded card
+    #[allow(clippy::single_match)]
     fn mouse_up(&self, id: &str) -> Vec<Action> {
         let mut actions = Vec::new();
         // Types of controls handled by MouseEvent
@@ -321,8 +317,8 @@ impl Camera {
                 controls.set_class_name("");
                 actions.extend(match t {
                     "focus" => self.stop_focus(),
-                    "iris"  => self.stop_iris(),
-                    "ptz"   => self.stop_ptz(),
+                    "iris" => self.stop_iris(),
+                    "ptz" => self.stop_ptz(),
                     _ => Vec::new(),
                 });
             }
@@ -330,27 +326,22 @@ impl Camera {
         actions
     }
 
-    fn to_html_ptz_controls(&self, _anc: &CameraAnc, parent_row: &mut html::Div) {
+    fn to_html_ptz_controls(
+        &self,
+        _anc: &CameraAnc,
+        parent_row: &mut html::Div,
+    ) {
         // Add PTZ controls
         let mut div = parent_row.div();
         div.id("ptz-controls");
         let mut row = div.div();
         row.class("row");
-        row.button()
-            .id("ptz-zoom-out")
-            .r#type("button")
-            .cdata("-");
-        row.button()
-            .id("ptz-zoom-in")
-            .r#type("button")
-            .cdata("+");
+        row.button().id("ptz-zoom-out").r#type("button").cdata("-");
+        row.button().id("ptz-zoom-in").r#type("button").cdata("+");
         row.close();
         row = div.div();
         row.class("row");
-        row.button()
-            .id("ptz-tilt-up")
-            .r#type("button")
-            .cdata("↑");
+        row.button().id("ptz-tilt-up").r#type("button").cdata("↑");
         row.close();
         row = div.div();
         row.class("row");
@@ -359,20 +350,12 @@ impl Camera {
             .r#type("button")
             .cdata("←")
             .close();
-        row.span()
-            .id("ptz-joystick")
-            .close();
-        row.button()
-            .id("ptz-pan-right")
-            .r#type("button")
-            .cdata("→");
+        row.span().id("ptz-joystick").close();
+        row.button().id("ptz-pan-right").r#type("button").cdata("→");
         row.close();
         row = div.div();
         row.class("row");
-        row.button()
-            .id("ptz-tilt-down")
-            .r#type("button")
-            .cdata("↓");
+        row.button().id("ptz-tilt-down").r#type("button").cdata("↓");
         row.close();
         div.input()
             .id("ptz-speed")
@@ -385,7 +368,11 @@ impl Camera {
     }
 
     /// Add lens controls to tree
-    fn to_html_lens_controls(&self, _anc: &CameraAnc, parent_row: &mut html::Div) {
+    fn to_html_lens_controls(
+        &self,
+        _anc: &CameraAnc,
+        parent_row: &mut html::Div,
+    ) {
         let mut div = parent_row.div();
         div.class("lens-controls");
 
@@ -394,15 +381,18 @@ impl Camera {
         row.span().cdata("Focus").close();
         let mut focus_div = row.div();
         focus_div.id("focus-controls");
-        focus_div.button()
+        focus_div
+            .button()
             .id("focus-near")
             .r#type("button")
             .cdata("Near");
-        focus_div.button()
+        focus_div
+            .button()
             .id("focus-far")
             .r#type("button")
             .cdata("Far");
-        focus_div.button()
+        focus_div
+            .button()
             .id("focus-auto")
             .r#type("button")
             .cdata("Auto");
@@ -413,15 +403,18 @@ impl Camera {
         row.span().cdata("Iris").close();
         let mut iris_div = row.div();
         iris_div.id("iris-controls");
-        iris_div.button()
+        iris_div
+            .button()
             .id("iris-open")
             .r#type("button")
             .cdata("Open");
-        iris_div.button()
+        iris_div
+            .button()
             .id("iris-close")
             .r#type("button")
             .cdata("Close");
-        iris_div.button()
+        iris_div
+            .button()
             .id("iris-auto")
             .r#type("button")
             .cdata("Auto");
@@ -429,7 +422,11 @@ impl Camera {
     }
 
     /// Add preset controls to tree
-    fn to_html_ptz_presets(&self, _anc: &CameraAnc, parent_row: &mut html::Div) {
+    fn to_html_ptz_presets(
+        &self,
+        _anc: &CameraAnc,
+        parent_row: &mut html::Div,
+    ) {
         let mut div = parent_row.div();
         div.class("camera-presets")
             .button()
@@ -750,14 +747,19 @@ impl Card for Camera {
         }
         match id {
             "focus-auto" => self.device_req(DeviceReq::CameraFocusAuto),
-            "iris-auto"  => self.device_req(DeviceReq::CameraIrisAuto),
-            "rq_reset"   => self.device_req(DeviceReq::ResetDevice),
+            "iris-auto" => self.device_req(DeviceReq::CameraIrisAuto),
+            "rq_reset" => self.device_req(DeviceReq::ResetDevice),
             _ => self.handle_click_common(anc, id),
         }
     }
 
     /// Handle mouse event for an element on the card
-    fn handle_mouse(&self, _anc: CameraAnc, id: &str, mouse_down: bool) -> Vec<Action> {
+    fn handle_mouse(
+        &self,
+        _anc: CameraAnc,
+        id: &str,
+        mouse_down: bool,
+    ) -> Vec<Action> {
         if mouse_down {
             self.mouse_down(id)
         } else {

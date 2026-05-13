@@ -645,11 +645,9 @@ fn handle_button_click_ev(target: &Element) {
         "show_sidebar" => spawn_future(handle_show_sidebar(true)),
         "hide_sidebar" => spawn_future(handle_show_sidebar(false)),
         // handled by mouse event listener, prevent click:
-        "ptz-pan-left"|"ptz-pan-right"
-            |"ptz-tilt-up"|"ptz-tilt-down"
-            |"ptz-zoom-in"|"ptz-zoom-out"
-            |"focus-near"|"focus-far"
-            |"iris-open"|"iris-close" => (),
+        "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up" | "ptz-tilt-down"
+        | "ptz-zoom-in" | "ptz-zoom-out" | "focus-near" | "focus-far"
+        | "iris-open" | "iris-close" => (),
         _ => {
             let attrs = ButtonAttrs {
                 id,
@@ -709,8 +707,10 @@ fn handle_input_enter(id: String) {
 fn add_mouse_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
-        && mouse_event.button() == 0
-        && let Some(Ok(target)) = mouse_event.target().map(|e| e.dyn_into::<Element>()) {
+            && mouse_event.button() == 0
+            && let Some(Ok(target)) =
+                mouse_event.target().map(|e| e.dyn_into::<Element>())
+        {
             handle_mouse_ev(&target, &mouse_event.type_() == "mousedown");
         }
     });
@@ -734,9 +734,9 @@ fn handle_mouse_ev(target: &Element, mouse_down: bool) {
         // focus/iris auto buttons are on click, not mousedown/up
         (_, Some("auto")) => String::new(),
         (Some("focus"), _)
-            |(Some("iris"), _)
-            |(Some("ptz"), _)
-            |(Some("publish"), _) => id,
+        | (Some("iris"), _)
+        | (Some("ptz"), _)
+        | (Some("publish"), _) => id,
         _ => String::new(),
     };
     spawn_future(handle_mouse_card(id, mouse_down));

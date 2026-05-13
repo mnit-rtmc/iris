@@ -171,7 +171,9 @@ fn attr_json(value: &Value) -> Result<String> {
         Value::Array(value) => {
             let mut s = String::new();
             for val in value {
-                if !s.is_empty() { s.push_str("\x1F") }
+                if !s.is_empty() {
+                    s.push_str("\x1F")
+                }
                 match attr_json(&val) {
                     Ok(v) => s.push_str(&v),
                     _ => return Err(Error::InvalidValue)?,

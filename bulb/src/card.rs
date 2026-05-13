@@ -203,7 +203,12 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     }
 
     /// Handle mouse event for a card
-    fn handle_mouse(&self, _anc: Self::Ancillary, _id: &str, _mouse_down: bool) -> Vec<Action> {
+    fn handle_mouse(
+        &self,
+        _anc: Self::Ancillary,
+        _id: &str,
+        _mouse_down: bool,
+    ) -> Vec<Action> {
         Vec::new()
     }
 
