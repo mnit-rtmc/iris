@@ -29,7 +29,7 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::HtmlElement;
+use web_sys::{Element, HtmlElement, HtmlInputElement};
 
 /// Encoder type
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -214,33 +214,227 @@ impl Camera {
         }
     }
 
-    /// Convert to Control HTML
-    fn to_html_control(&self, anc: &CameraAnc) -> String {
-        if let Some((lon, lat)) = anc.loc.lonlat() {
-            select_item_map(Res::Camera, &self.name, lon, lat);
+    /// send PTZ command action
+    fn send_ptz(&self, pan: f32, tilt: f32, zoom: f32) -> Vec<Action> {
+        let mut speed = 1.0;
+        if let Some(slider) =
+            Doc::get().opt_elem::<HtmlInputElement>("ptz-speed")
+        {
+            if let Ok(s) = slider.value().parse::<f32>() {
+                speed = s;
+            }
         }
-        // FIXME: set selected video monitor to this camera
-        let mut tree = Tree::new();
-        self.title(View::Control, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("row");
-        anc.cio.item_states(self).spans(&mut div.span());
-        if let Some(num) = self.cam_num {
-            div.span().class("info").cdata(format!("#{num}"));
-        }
-        div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.span()
-            .class("info")
-            .cdata_len(opt_ref(&self.location), 64);
-        div.close();
+        let uri = uri_one(Res::Camera, &self.name);
+        let mut fields = Fields::new();
+        fields.insert_arr("ptz", vec![
+            pan * speed,
+            tilt * speed,
+            zoom * speed,
+        ]);
+        let value = fields.into_value().to_string();
+        log::debug!("PTZ value form fields: {}", value);
+        vec![Action::Patch(uri, value.into())]
+    }
 
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.span().cdata("Presets").close();
-        div.span()
-            .class("camera-presets")
+    /// Send focus stop command action
+    fn stop_focus(&self) -> Vec<Action> {
+        self.device_req(DeviceReq::CameraFocusStop)
+    }
+
+    /// send iris stop command action
+    fn stop_iris(&self) -> Vec<Action> {
+        self.device_req(DeviceReq::CameraIrisStop)
+    }
+
+    /// send PTZ stop command action
+    fn stop_ptz(&self) -> Vec<Action> {
+        self.send_ptz(0.0, 0.0, 0.0)
+    }
+
+    /// Handles a mousedown event on the expanded card
+    fn mouse_down(&self, id: &str) -> Vec<Action> {
+        let mut actions = Vec::new();
+        // Types of controls handled by MouseEvent
+        let handled_types = vec!["iris", "focus", "ptz"];
+        // Type of control being input, match element id before first hyphen
+        let id_type = id.split("-").next();
+
+        // First, mark proper controls as active and stop other controls if needed
+        let doc = Doc::get();
+        for t in handled_types {
+            if let Some(controls) =
+                doc.opt_elem::<Element>(&format!("{}-controls", t))
+            {
+                if Some(t) == id_type && id != format!("{}-auto", t) {
+                    // Continuous input type, so mark active
+                    controls.set_class_name("active");
+                } else {
+                    // Not being input, stop if active
+                    if controls.class_name() == "active" {
+                        controls.set_class_name("");
+                        actions.extend(match t {
+                            "focus" => self.stop_focus(),
+                            "iris"  => self.stop_iris(),
+                            "ptz"   => self.stop_ptz(),
+                            _ => Vec::new(),
+                        });
+                    }
+                }
+            }
+        }
+
+        // Now append the actual action to do after clearing
+        actions.extend(match id.as_str() {
+            "focus-near"    => self.device_req(DeviceReq::CameraFocusNear),
+            "focus-far"     => self.device_req(DeviceReq::CameraFocusFar),
+            "iris-open"     => self.device_req(DeviceReq::CameraIrisOpen),
+            "iris-close"    => self.device_req(DeviceReq::CameraIrisClose),
+            "ptz-pan-right" => self.send_ptz( 1.0,  0.0,  0.0),
+            "ptz-pan-left"  => self.send_ptz(-1.0,  0.0,  0.0),
+            "ptz-tilt-up"   => self.send_ptz( 0.0,  1.0,  0.0),
+            "ptz-tilt-down" => self.send_ptz( 0.0, -1.0,  0.0),
+            "ptz-zoom-in"   => self.send_ptz( 0.0,  0.0,  1.0),
+            "ptz-zoom-out"  => self.send_ptz( 0.0,  0.0, -1.0),
+            _ => Vec::new(),
+        });
+        log::debug!("actions: {:?}", actions);
+        actions
+    }
+
+    /// Handles a mouseup event on the expanded card
+    fn mouse_up(&self, id: &str) -> Vec<Action> {
+        let mut actions = Vec::new();
+        // Types of controls handled by MouseEvent
+        let handled_types = vec!["iris", "focus", "ptz"];
+
+        // First handle a "click" if release is trigger
+        match id.as_str() {
+            "publish" => actions.extend(self.set_publish()),
+            _ => (),
+        }
+
+        // Then stop any active controls
+        let doc = Doc::get();
+        for t in handled_types {
+            if let Some(controls) =
+                doc.opt_elem::<Element>(&format!("{}-controls", t))
+                && controls.class_name() == "active"
+            {
+                controls.set_class_name("");
+                actions.extend(match t {
+                    "focus" => self.stop_focus(),
+                    "iris"  => self.stop_iris(),
+                    "ptz"   => self.stop_ptz(),
+                    _ => Vec::new(),
+                });
+            }
+        }
+        log::debug!("actions: {:?}", actions);
+        actions
+    }
+
+    fn to_html_ptz_controls(&self, _anc: &CameraAnc, parent_row: &mut html::Div) {
+        // Add PTZ controls
+        let mut div = parent_row.div();
+        div.id("ptz-controls");
+        let mut row = div.div();
+        row.class("row");
+        row.button()
+            .id("ptz-zoom-out")
+            .r#type("button")
+            .cdata("-");
+        row.button()
+            .id("ptz-zoom-in")
+            .r#type("button")
+            .cdata("+");
+        row.close();
+        row = div.div();
+        row.class("row");
+        row.button()
+            .id("ptz-tilt-up")
+            .r#type("button")
+            .cdata("↑");
+        row.close();
+        row = div.div();
+        row.class("row");
+        row.button()
+            .id("ptz-pan-left")
+            .r#type("button")
+            .cdata("←")
+            .close();
+        row.span()
+            .id("ptz-joystick")
+            .close();
+        row.button()
+            .id("ptz-pan-right")
+            .r#type("button")
+            .cdata("→");
+        row.close();
+        row = div.div();
+        row.class("row");
+        row.button()
+            .id("ptz-tilt-down")
+            .r#type("button")
+            .cdata("↓");
+        row.close();
+        div.input()
+            .id("ptz-speed")
+            .r#type("range")
+            .min("0.05")
+            .max("1.0")
+            .step("0.05")
+            .value("1.0");
+        div.close();
+    }
+
+    /// Add lens controls to tree
+    fn to_html_lens_controls(&self, _anc: &CameraAnc, parent_row: &mut html::Div) {
+        let mut div = parent_row.div();
+        div.class("lens-controls");
+
+        let mut row = div.div();
+        row.class("row");
+        row.span().cdata("Focus").close();
+        let mut focus_div = row.div();
+        focus_div.id("focus-controls");
+        focus_div.button()
+            .id("focus-near")
+            .r#type("button")
+            .cdata("Near");
+        focus_div.button()
+            .id("focus-far")
+            .r#type("button")
+            .cdata("Far");
+        focus_div.button()
+            .id("focus-auto")
+            .r#type("button")
+            .cdata("Auto");
+        row.close();
+
+        row = div.div();
+        row.class("row");
+        row.span().cdata("Iris").close();
+        let mut iris_div = row.div();
+        iris_div.id("iris-controls");
+        iris_div.button()
+            .id("iris-open")
+            .r#type("button")
+            .cdata("Open");
+        iris_div.button()
+            .id("iris-close")
+            .r#type("button")
+            .cdata("Close");
+        iris_div.button()
+            .id("iris-auto")
+            .r#type("button")
+            .cdata("Auto");
+        div.close();
+    }
+
+    /// Add preset controls to tree
+    fn to_html_ptz_presets(&self, _anc: &CameraAnc, parent_row: &mut html::Div) {
+        let mut div = parent_row.div();
+        div.class("camera-presets")
             .button()
             .id("preset-mode-toggle")
             .class("default") // .active after click until store
@@ -271,6 +465,58 @@ impl Camera {
             row.close();
         }
         div.close();
+    }
+
+    /// Set the published status if changed
+    fn set_publish(&self) -> Vec<Action> {
+        let uri = uri_one(Res::Camera, &self.name);
+        let mut fields = Fields::new();
+        fields.changed_input("publish", self.publish);
+        let value = fields.into_value().to_string();
+        log::debug!("publish fields: {}", value);
+        vec![Action::Patch(uri, value.into())]
+    }
+
+    /// Convert to Control HTML
+    fn to_html_control(&self, anc: &CameraAnc) -> String {
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            select_item_map(Res::Camera, &self.name, lon, lat);
+        }
+        // FIXME: set selected video monitor to this camera
+        let mut tree = Tree::new();
+        self.title(View::Control, &mut tree.root::<html::Div>());
+
+        let mut div = tree.root::<html::Div>();
+        div.class("row");
+        anc.cio.item_states(self).spans(&mut div.span());
+        if let Some(num) = self.cam_num {
+            div.span().class("info").cdata(format!("#{num}"));
+        }
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.span()
+            .class("info")
+            .cdata_len(opt_ref(&self.location), 64);
+        div.close();
+
+        div = tree.root::<html::Div>();
+        div.class("row");
+        self.to_html_ptz_controls(anc, &mut div);
+        self.to_html_lens_controls(anc, &mut div);
+        self.to_html_ptz_presets(anc, &mut div);
+        div.close();
+
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("publish").cdata("Publish").close();
+        let mut input = div.input();
+        input.id("publish").r#type("checkbox");
+        if self.publish {
+            input.checked();
+        }
+        div.close();
+
         String::from(tree)
     }
 
@@ -393,15 +639,6 @@ impl Camera {
             .cdata(opt_ref(&self.cam_template))
             .close();
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.label().r#for("publish").cdata("Publish").close();
-        let mut input = div.input();
-        input.id("publish").r#type("checkbox");
-        if self.publish {
-            input.checked();
-        }
-        div.close();
         footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
@@ -496,7 +733,6 @@ impl Card for Camera {
         fields.changed_input("enc_port", self.enc_port);
         fields.changed_input("enc_mcast", &self.enc_mcast);
         fields.changed_input("enc_channel", self.enc_channel);
-        fields.changed_input("publish", self.publish);
         fields.into_value().to_string()
     }
 
@@ -517,8 +753,19 @@ impl Card for Camera {
             }
         }
         match id {
-            "rq_reset" => self.device_req(DeviceReq::ResetDevice),
+            "focus-auto" => self.device_req(DeviceReq::CameraFocusAuto),
+            "iris-auto"  => self.device_req(DeviceReq::CameraIrisAuto),
+            "rq_reset"   => self.device_req(DeviceReq::ResetDevice),
             _ => self.handle_click_common(anc, id),
+        }
+    }
+
+    /// Handle mouse event for an element on the card
+    fn handle_mouse(&self, _anc: CameraAnc, id: &str, mouse_down: bool) -> Vec<Action> {
+        if mouse_down {
+            self.mouse_down(id)
+        } else {
+            self.mouse_up(id)
         }
     }
 }

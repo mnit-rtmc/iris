@@ -255,6 +255,21 @@ impl CardView {
         }
     }
 
+    /// Handle mouse event for a card
+    pub async fn handle_mouse(&self, id: String, mouse_down: bool) -> Result<()> {
+        match self.res {
+            Res::Camera => {
+                let pri = self.fetch_primary::<Camera>().await?;
+                let anc = fetch_ancillary(&pri, self.view).await?;
+                for action in pri.handle_mouse(anc, id, mouse_down) {
+                    action.perform().await?;
+                }
+                Ok(())
+            }
+            _ => Ok(()),
+        }
+    }
+
     /// Handle input event for an element owned by the resource
     pub async fn handle_input(&self, id: &str) -> Result<()> {
         match (self.res, self.view) {

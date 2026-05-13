@@ -202,6 +202,11 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         self.handle_click_common(anc, id)
     }
 
+    /// Handle mouse event for a card
+    fn handle_mouse(&self, _anc: Self::Ancillary, _id: String, _mouse_down: bool) -> Vec<Action> {
+        Vec::new()
+    }
+
     /// Handle click event for common buttons on the card
     fn handle_click_common(
         &self,

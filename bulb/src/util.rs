@@ -266,6 +266,11 @@ impl Fields {
         self.insert(id, Value::Bool(val));
     }
 
+    /// Insert an array value into mapping
+    pub fn insert_arr<T: Into<Value>>(&mut self, id: &str, val: Vec<T>) {
+        self.insert(id, val.into());
+    }
+
     /// Convert fields into a JSON value
     pub fn into_value(self) -> Value {
         Value::Object(self.obj)
