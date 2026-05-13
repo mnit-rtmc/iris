@@ -200,12 +200,16 @@ impl Beacon {
         div.class("beacon-container row center");
         div.button().id(eid::BCN_FLASHING).close();
         let mut label = div.label();
-        label.r#for(eid::BCN_FLASHING).class("beacon signal-housing");
+        label
+            .r#for(eid::BCN_FLASHING)
+            .class("beacon signal-housing");
         label.span().class(self.class_flash()).cdata("🔆").close();
         label.close();
         div.span().class("beacon-sign").cdata(&self.message).close();
         label = div.label();
-        label.r#for(eid::BCN_FLASHING).class("beacon signal-housing");
+        label
+            .r#for(eid::BCN_FLASHING)
+            .class("beacon signal-housing");
         label.span().class(self.class_delayed()).cdata("🔆");
         div.close();
         div = tree.root::<html::Div>();

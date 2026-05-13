@@ -479,17 +479,36 @@ fn add_input_listener(el: &Element) -> Result<()> {
 /// Handle an input event
 fn handle_input(id: String) {
     match id.as_str() {
-        "res_action_plan" | "res_plan_phase" | "res_day_plan"
-        | "res_device_action" | "res_dms" | "res_msg_pattern"
-        | "res_sign_config" | "res_word" | "res_lcs" | "res_lcs_state"
-        | "res_video_monitor" | "res_monitor_style" | "res_flow_stream"
-        | "res_comm_config" | "res_alarm" | "res_comm_link"
-        | "res_controller" | "res_gps" | "res_road" | "res_detector"
-        | "res_map_extent" | "res_r_node" | "res_permission" | "res_user"
-        | "res_role" | "res_domain" | "res_system_attr"
-        | "res_event_config" | "res_cabinet_style" | eid::RESOURCE => {
-            handle_res_change()
-        }
+        "res_action_plan"
+        | "res_plan_phase"
+        | "res_day_plan"
+        | "res_device_action"
+        | "res_dms"
+        | "res_msg_pattern"
+        | "res_sign_config"
+        | "res_word"
+        | "res_lcs"
+        | "res_lcs_state"
+        | "res_video_monitor"
+        | "res_monitor_style"
+        | "res_flow_stream"
+        | "res_comm_config"
+        | "res_alarm"
+        | "res_comm_link"
+        | "res_controller"
+        | "res_gps"
+        | "res_road"
+        | "res_detector"
+        | "res_map_extent"
+        | "res_r_node"
+        | "res_permission"
+        | "res_user"
+        | "res_role"
+        | "res_domain"
+        | "res_system_attr"
+        | "res_event_config"
+        | "res_cabinet_style"
+        | eid::RESOURCE => handle_res_change(),
         eid::SEARCH | eid::STATE => spawn_future(handle_search()),
         eid::VIEW => handle_card_view_ev(),
         _ => spawn_future(handle_input_other(id)),
