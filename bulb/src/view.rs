@@ -25,6 +25,7 @@ use crate::domain::Domain;
 use crate::eid;
 use crate::error::Result;
 use crate::eventcfg::EventConfig;
+use crate::fetch::Action;
 use crate::flowstream::FlowStream;
 use crate::gatearm::GateArm;
 use crate::gps::Gps;
@@ -306,7 +307,13 @@ impl CardView {
 
     /// Delete a resource by name
     pub async fn handle_delete(&self) -> Result<()> {
-        uri_one(self.res, &self.name).delete().await
+        // TODO: add Card::handle_delete?
+        let uri = uri_one(self.res, &self.name);
+        let actions = vec![Action::Delete(uri)];
+        for action in actions {
+            action.perform().await?;
+        }
+        Ok(())
     }
 }
 

@@ -685,7 +685,7 @@ async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
         if attrs.class_name == "go_link" {
             go_resource(attrs).await?;
-        } else if eid::DELETE == &attrs.id {
+        } else if eid::DELETE == attrs.id {
             if app::delete_enabled() {
                 cv.handle_delete().await?;
                 replace_card(cv.view(View::Hidden), "").await?;

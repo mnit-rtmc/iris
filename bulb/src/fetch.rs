@@ -41,7 +41,6 @@ pub enum Action {
     /// POST verb action
     Post(Uri, JsValue),
     /// DELETE verb action
-    #[allow(dead_code)]
     Delete(Uri),
 }
 
