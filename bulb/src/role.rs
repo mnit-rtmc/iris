@@ -11,18 +11,21 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, footer_html};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::domain::Domain;
 use crate::error::Result;
+use crate::fetch::Action;
 use crate::item::ItemState;
 use crate::permission::Permission;
-use crate::util::{ContainsLower, Fields, Input};
+use crate::util::{ContainsLower, Doc, Fields, Input};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
+use std::collections::HashSet;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlInputElement;
 
 /// Resource Type
 #[derive(Debug, Default, Deserialize)]
@@ -55,7 +58,7 @@ impl AncillaryData for RoleAnc {
     /// Construct ancillary role data
     fn new(_pri: &Role, view: View) -> Self {
         let assets = match view {
-            View::Setup => {
+            View::Setup | View::SaveEv => {
                 vec![Asset::ResourceTypes, Asset::Permissions, Asset::Domains]
             }
             _ => Vec::new(),
@@ -141,12 +144,53 @@ impl RoleAnc {
         let mut details = div.details();
         details.summary().cdata("🖧 Domains").close();
         if let Some(domains) = pri.domains.as_ref() {
-            for dom in &self.domains {
-                let assigned = domains.contains(&dom.name);
-                dom.input_html(assigned, &mut details.div());
+            for (i, dom) in self.domains.iter().enumerate() {
+                let mut label = details.label();
+                let mut input = label.input();
+                input.id(format!("dom_{i}")).r#type("checkbox");
+                if domains.contains(&dom.name) {
+                    input.checked();
+                }
+                label.cdata(&dom.name).close();
+                details.br().close();
             }
         }
         details.close();
+    }
+
+    /// Get selected domains
+    fn domains_selected(&self) -> Vec<String> {
+        let doc = Doc::get();
+        let mut domains = Vec::new();
+        for (i, dom) in self.domains.iter().enumerate() {
+            let id = format!("dom_{i}");
+            if let Some(input) = doc.opt_elem::<HtmlInputElement>(&id)
+                && input.checked()
+            {
+                domains.push(dom.name.to_string());
+            }
+        }
+        domains
+    }
+
+    /// Check if domains are different
+    fn compare_domains(&self, domains: &[String], sel: &[String]) -> bool {
+        if domains.len() != sel.len() {
+            return true;
+        }
+        for dom in sel {
+            if !domains.contains(dom) {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Get actions to update role domains
+    fn domains_changed(&self, pri: &Role) -> Option<Vec<String>> {
+        let domains = pri.domains.as_ref()?;
+        let sel = self.domains_selected();
+        self.compare_domains(&domains[..], &sel[..]).then_some(sel)
     }
 }
 
@@ -194,6 +238,16 @@ impl Role {
         footer_html(View::Setup, true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
+
+    /// Get changed fields from Setup form
+    fn changed_setup_x(&self, anc: RoleAnc) -> String {
+        let mut fields = Fields::new();
+        fields.changed_input("enabled", self.enabled);
+        if let Some(domains) = anc.domains_changed(self) {
+            fields.insert_arr("domains", domains);
+        }
+        fields.into_value().to_string()
+    }
 }
 
 impl Card for Role {
@@ -234,10 +288,15 @@ impl Card for Role {
         }
     }
 
-    /// Get changed fields from Setup form
-    fn changed_setup(&self) -> String {
-        let mut fields = Fields::new();
-        fields.changed_input("enabled", self.enabled);
-        fields.into_value().to_string()
+    /// Handle click event for the save button
+    fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
+        let mut actions = Vec::new();
+        let changed = self.changed_setup_x(anc);
+        if !changed.is_empty() {
+            let uri = uri_one(Self::res(), &self.name());
+            actions.push(Action::Patch(uri, changed.into()));
+        }
+        // FIXME: add actions to create/delete permissions
+        actions
     }
 }

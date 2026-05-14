@@ -47,18 +47,6 @@ impl AncillaryData for DomainAnc {
 }
 
 impl Domain {
-    /// Make HTML input
-    pub fn input_html<'p>(&self, assigned: bool, div: &'p mut html::Div<'p>) {
-        let id = format!("dom_{}", &self.name);
-        div.label().r#for(&id).cdata(&self.name).close();
-        let mut input = div.input();
-        input.id(&id).r#type("checkbox");
-        if assigned {
-            input.checked();
-        }
-        div.close();
-    }
-
     /// Get item state
     pub fn item_state(&self) -> ItemState {
         if self.enabled {
