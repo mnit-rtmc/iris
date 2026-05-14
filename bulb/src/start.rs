@@ -33,8 +33,8 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
     Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
-    HtmlSelectElement, KeyboardEvent, ScrollBehavior, ScrollIntoViewOptions,
-    ScrollLogicalPosition, TransitionEvent, Window,
+    HtmlSelectElement, KeyboardEvent, MouseEvent, ScrollBehavior,
+    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
 };
 
 /// Layer groups
@@ -179,6 +179,7 @@ fn add_listeners() -> Result<()> {
     let layer_menu: HtmlElement = doc.elem("layer-menu")?;
     add_change_listener(&layer_menu)?;
     add_click_listener(&sidebar)?;
+    add_mouse_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
     add_focus_listener(&sidebar)?;
@@ -643,6 +644,10 @@ fn handle_button_click_ev(target: &Element) {
         eid::LOGOUT => spawn_future(handle_logout()),
         "show_sidebar" => spawn_future(handle_show_sidebar(true)),
         "hide_sidebar" => spawn_future(handle_show_sidebar(false)),
+        // handled by mouse event listener, prevent click:
+        "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up" | "ptz-tilt-down"
+        | "ptz-zoom-in" | "ptz-zoom-out" | "focus-near" | "focus-far"
+        | "iris-open" | "iris-close" => (),
         _ => {
             let attrs = ButtonAttrs {
                 id,
@@ -687,7 +692,6 @@ fn add_input_enter_listener(elem: &Element) -> Result<()> {
         "keydown",
         closure.as_ref().unchecked_ref(),
     )?;
-    // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
 }
@@ -697,6 +701,57 @@ fn handle_input_enter(id: String) {
     if id.as_str() == "login_pass" {
         spawn_future(handle_login());
     }
+}
+
+/// Add a mouse event listener to an element
+fn add_mouse_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
+            && mouse_event.button() == 0
+            && let Some(Ok(target)) =
+                mouse_event.target().map(|e| e.dyn_into::<Element>())
+        {
+            handle_mouse_ev(&target, &mouse_event.type_() == "mousedown");
+        }
+    });
+    el.add_event_listener_with_callback(
+        "mousedown",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
+        "mouseup",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
+}
+
+/// Handle a mouse event
+fn handle_mouse_ev(target: &Element, mouse_down: bool) {
+    let mut id = target.id();
+    let mut parts = id.split("-");
+    id = match (parts.next(), parts.next()) {
+        // focus/iris auto buttons are on click, not mousedown/up
+        (_, Some("auto")) => String::new(),
+        (Some("focus"), _)
+        | (Some("iris"), _)
+        | (Some("ptz"), _)
+        | (Some("publish"), _) => id,
+        _ => String::new(),
+    };
+    spawn_future(handle_mouse_card(id, mouse_down));
+}
+
+/// Handle a mouse event on an expanded card
+async fn handle_mouse_card(id: String, mouse_down: bool) -> Result<()> {
+    if let Some(cv) = app::expanded_view() {
+        match id.as_str() {
+            // mouse on invalid target, so always release mouse
+            "" => cv.handle_mouse(id.as_str(), false).await?,
+            _ => cv.handle_mouse(id.as_str(), mouse_down).await?,
+        }
+    }
+    Ok(())
 }
 
 /// Handle button click event on an expanded card

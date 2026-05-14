@@ -168,6 +168,19 @@ fn attr_json(value: &Value) -> Result<String> {
         Value::Bool(value) => Ok(value.to_string()),
         Value::Number(value) => Ok(value.to_string()),
         Value::Null => Ok("\0".to_string()),
+        Value::Array(value) => {
+            let mut s = String::new();
+            for val in value {
+                if !s.is_empty() {
+                    s.push_str("\x1F")
+                }
+                match attr_json(&val) {
+                    Ok(v) => s.push_str(&v),
+                    _ => return Err(Error::InvalidValue)?,
+                }
+            }
+            Ok(s)
+        }
         _ => Err(Error::InvalidValue)?,
     }
 }
