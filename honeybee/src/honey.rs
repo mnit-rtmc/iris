@@ -128,10 +128,8 @@ impl SseNotifier {
         for chan in &self.channels {
             if nm.res_type == chan.res_type {
                 match (nm.object_n(), chan.object_n()) {
-                    (Some(nn), Some(cn)) => {
-                        if nn == cn {
-                            return true;
-                        }
+                    (Some(nn), Some(cn)) if nn == cn => {
+                        return true;
                     }
                     (None, _) => return true,
                     _ => (),

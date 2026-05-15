@@ -27,6 +27,12 @@ use tokio::net::TcpStream;
 use tokio::time::timeout;
 use tokio_rustls::client::TlsStream;
 
+/// Unit separator
+const UNIT_SEP: u8 = b'\x1F';
+
+/// Record separator
+const RECORD_SEP: u8 = b'\x1E';
+
 /// Parse a SHOW message received from server
 fn parse_show(msg: &str) -> Error {
     // gross, but no point in changing SHOW messages now!
@@ -60,12 +66,12 @@ fn parse_show(msg: &str) -> Error {
 
 /// Check if a character in a name is invalid
 fn name_invalid_char(c: char) -> bool {
-    ['\0', '/', '\u{001e}', '\u{001f}'].contains(&c)
+    ['\0', '/', RECORD_SEP as char, UNIT_SEP as char].contains(&c)
 }
 
 /// Check if a character in an attribute value is invalid
 fn attr_invalid_char(c: char) -> bool {
-    ['\0', '\u{001e}', '\u{001f}'].contains(&c)
+    ['\0', RECORD_SEP as char, UNIT_SEP as char].contains(&c)
 }
 
 /// Sonar type / object name
@@ -171,11 +177,13 @@ fn attr_json(value: &Value) -> Result<String> {
         Value::Array(value) => {
             let mut s = String::new();
             for val in value {
-                if !s.is_empty() {
-                    s.push_str("\x1F")
-                }
-                match attr_json(&val) {
-                    Ok(v) => s.push_str(&v),
+                match attr_json(val) {
+                    Ok(v) => {
+                        if !s.is_empty() {
+                            s.push(UNIT_SEP as char);
+                        }
+                        s.push_str(&v);
+                    }
                     _ => return Err(Error::InvalidValue)?,
                 }
             }
@@ -223,7 +231,7 @@ enum Message<'a> {
 impl<'a> Message<'a> {
     /// Decode message in a buffer
     fn decode(buf: &'a [u8]) -> Option<(Self, usize)> {
-        if let Some(rec_sep) = buf.iter().position(|b| *b == b'\x1E')
+        if let Some(rec_sep) = buf.iter().position(|b| *b == RECORD_SEP)
             && let Some(msg) = Self::decode_one(&buf[..rec_sep])
         {
             return Some((msg, rec_sep));
@@ -233,7 +241,7 @@ impl<'a> Message<'a> {
 
     /// Decode one message
     fn decode_one(buf: &'a [u8]) -> Option<Self> {
-        let msg: Vec<&[u8]> = buf.split(|b| *b == b'\x1F').collect();
+        let msg: Vec<&[u8]> = buf.split(|b| *b == UNIT_SEP).collect();
         if msg.is_empty() {
             return None;
         }
@@ -270,49 +278,49 @@ impl<'a> Message<'a> {
         match self {
             Message::Login(name, pword) => {
                 buf.push(b'l');
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(name.as_bytes());
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(pword.as_bytes());
             }
             Message::Password(old, new) => {
                 buf.push(b'p');
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(old.as_bytes());
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(new.as_bytes());
             }
             Message::Quit() => buf.push(b'q'),
             Message::Enumerate(nm) => {
                 buf.push(b'e');
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(nm.as_bytes());
             }
             Message::Ignore(nm) => {
                 buf.push(b'i');
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(nm.as_bytes());
             }
             Message::Object(nm) => {
                 buf.push(b'o');
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(nm.as_bytes());
             }
             Message::Attribute(nm, a) => {
                 buf.push(b'a');
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(nm.as_bytes());
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(a.as_bytes());
             }
             Message::Remove(nm) => {
                 buf.push(b'r');
-                buf.push(b'\x1F');
+                buf.push(UNIT_SEP);
                 buf.extend(nm.as_bytes());
             }
             _ => unimplemented!(),
         }
-        buf.push(b'\x1E');
+        buf.push(RECORD_SEP);
     }
 }
 
