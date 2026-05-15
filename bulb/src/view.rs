@@ -15,7 +15,9 @@ use crate::alarm::Alarm;
 use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
 use crate::camera::Camera;
-use crate::card::{Card, Search, fetch_ancillary, footer_html, uri_one};
+use crate::card::{
+    Card, Search, fetch_ancillary, footer_html, uri_all, uri_one,
+};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
@@ -43,11 +45,14 @@ use crate::signconfig::SignConfig;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::user::User;
+use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
 use crate::word::Word;
 use hatmil::{Tree, html};
 use resources::Res;
+use serde_json::Value;
+use serde_json::map::Map;
 
 /// Card element view
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -239,8 +244,14 @@ impl CardView {
 
     /// Handle click event for a button on a card
     async fn handle_click_x<C: Card>(&self, id: &str) -> Result<Option<View>> {
+        if eid::CREATE == id {
+            for action in self.handle_create(C::res()) {
+                action.perform().await?;
+            }
+            return Ok(Some(self.view.compact()));
+        }
         let view = match id {
-            eid::CREATE | eid::SAVE => View::SaveEv,
+            eid::SAVE => View::SaveEv,
             _ => self.view,
         };
         let pri = self.fetch_primary::<C>().await?;
@@ -252,6 +263,20 @@ impl CardView {
             Ok(Some(self.view.compact()))
         } else {
             Ok(None)
+        }
+    }
+
+    /// Handle click event for the create button
+    fn handle_create(&self, res: Res) -> Vec<Action> {
+        let doc = Doc::get();
+        if let Some(name) = doc.input_option_string("create_name") {
+            let mut obj = Map::new();
+            obj.insert("name".to_string(), Value::String(name));
+            let value = Value::Object(obj).to_string();
+            let uri = uri_all(res);
+            vec![Action::Post(uri, value.into())]
+        } else {
+            Vec::new()
         }
     }
 

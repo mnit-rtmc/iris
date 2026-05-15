@@ -45,7 +45,6 @@ use crate::signconfig::SignConfig;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::user::User;
-use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
 use crate::view::{CardView, View};
 use crate::weathersensor::WeatherSensor;
@@ -56,7 +55,6 @@ use hatmil::{Tree, html};
 use resources::Res;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
-use serde_json::map::Map;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
@@ -219,24 +217,9 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         id: &str,
     ) -> Vec<Action> {
         match id {
-            eid::CREATE => self.handle_create(anc),
             eid::SAVE => self.handle_save(anc),
             eid::GEOLOC => self.handle_geoloc(anc),
             _ => Vec::new(),
-        }
-    }
-
-    /// Handle click event for the create button
-    fn handle_create(&self, _anc: Self::Ancillary) -> Vec<Action> {
-        let doc = Doc::get();
-        if let Some(name) = doc.input_option_string("create_name") {
-            let mut obj = Map::new();
-            obj.insert("name".to_string(), Value::String(name));
-            let value = Value::Object(obj).to_string();
-            let uri = uri_all(Self::res());
-            vec![Action::Post(uri, value.into())]
-        } else {
-            Vec::new()
         }
     }
 
@@ -430,7 +413,7 @@ pub fn res_views(res: Res) -> &'static [View] {
 }
 
 /// Get the URI of a resource (all)
-fn uri_all(res: Res) -> Uri {
+pub fn uri_all(res: Res) -> Uri {
     let mut uri = Uri::from("/iris/api/");
     uri.push(res.as_str());
     uri
