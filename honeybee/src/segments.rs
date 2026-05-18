@@ -919,10 +919,6 @@ impl SegmentState {
     pub fn write_loc_markers(&self) -> Result<()> {
         let dir = Path::new(LOAM_PATH);
         for (res, locs) in self.markers.iter() {
-            if locs.is_empty() {
-                log::info!("write_loc_markers: no {res} markers");
-                continue;
-            }
             let mut loam = PathBuf::from(dir);
             loam.push(format!("{}.loam", res.as_str()));
             let mut writer = BulkWriter::new(loam)?;

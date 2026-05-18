@@ -1223,9 +1223,9 @@ checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 
 [[package]]
 name = "loam"
-version = "0.6.1"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2017454815404dbca6e890a6a27efffb33b770cd1d77e5719691a7dabc3e2bee"
+checksum = "34559139b3b47e9a602f9dd7b17daad7c05c5cc3321aa2eb85dd403d544233f9"
 dependencies = [
  "bincode",
  "memmap2",
@@ -1826,9 +1826,9 @@ dependencies = [
 
 [[package]]
 name = "rosewood"
-version = "0.6.1"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c5a0b828c3687ef53e0b3a0f358891ca74c854ebc324b48ee8fcb88f11ab3b11"
+checksum = "ab9e1a295114c20d0d807c69e99034a28edcbb0279553447c17b2c7dbb01da58"
 dependencies = [
  "loam",
  "log",
