@@ -1,5 +1,13 @@
 # IRIS 5.x Release Notes
 
+5.85.0 (18 May 2026)
+ - Web UI: rework DOM event handling on cards
+ - Web UI: use hatmil to build dynamic CSS
+ - Web UI: add camera PTZ, focus, iris controls
+ - Implement phase action `HOLD_TIME` condition
+ - Add `alarm` phase action condition
+ - Fix base permission for alarms
+
 5.84.0 (5 May 2026)
  - Rework resource permissions
  - Check for logic loops in message word abbreviation
