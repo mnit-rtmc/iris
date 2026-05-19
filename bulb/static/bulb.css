@@ -84,6 +84,8 @@ th, td {
 td.member {
   padding-left: 0.5rem;
   font-style: italic;
+  color: #448;
+  background-color: #dd0;
 }
 .scroll_table {
   height: 8rem;

@@ -17,16 +17,45 @@ use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
 use serde_json::map::Map;
+use std::cmp::Ordering;
 
 /// Permission
-#[derive(Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
 pub struct Permission {
-    // NOTE: field order affects derived PartialOrd / Ord
+    pub name: String,
+    pub role: String,
     pub base_resource: String,
     pub hashtag: Option<String>,
     pub access_level: u32,
-    pub name: String,
-    pub role: String,
+}
+
+impl PartialOrd for Permission {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Permission {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let ord = self.base_resource.cmp(&other.base_resource);
+        if let Ordering::Equal = ord {
+            match (&self.hashtag, &other.hashtag) {
+                (Some(_), None) => return Ordering::Less,
+                (None, Some(_)) => return Ordering::Greater,
+                (Some(a), Some(b)) => {
+                    let a = a.to_lowercase();
+                    let b = b.to_lowercase();
+                    let ord = a.cmp(&b);
+                    if Ordering::Equal != ord {
+                        return ord;
+                    }
+                }
+                _ => (),
+            }
+            return self.name.cmp(&other.name);
+        }
+        ord
+    }
 }
 
 /// Get item state for an access level
