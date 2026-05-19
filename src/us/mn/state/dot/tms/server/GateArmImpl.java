@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -45,6 +47,9 @@ import us.mn.state.dot.tms.server.event.GateArmEvent;
  * @author Douglas Lau
  */
 public class GateArmImpl extends DeviceImpl implements GateArm {
+
+	/** Time to request arm state since plan phase change (seconds) */
+	static private int PLAN_REQUEST_SECS = 90;
 
 	/** Timeout (ms) for a comm failure to result in UNKNOWN status */
 	static private final long failTimeoutMS() {
@@ -589,11 +594,18 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override
 	public PlannedAction choosePlannedAction() {
 		PlannedAction pa = super.choosePlannedAction();
-		GateArmInterlock gai = interlock;
-		if (pa != null && gai.isOpenAllowed())
-			requestArmOpen();
-		if (pa == null && gai.isCloseAllowed())
-			requestArmClose();
+		ActionPlan ap = pa.action.getActionPlan();
+		if (ap instanceof ActionPlanImpl) {
+			ActionPlanImpl api = (ActionPlanImpl) ap;
+			long now = TimeSteward.currentTimeMillis();
+			if (api.phaseSecs(now) < PLAN_REQUEST_SECS) {
+				GateArmInterlock gai = interlock;
+				if (pa != null && gai.isOpenAllowed())
+					requestArmOpen();
+				if (pa == null && gai.isCloseAllowed())
+					requestArmClose();
+			}
+		}
 		return pa;
 	}
 
