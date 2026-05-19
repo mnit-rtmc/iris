@@ -82,7 +82,6 @@ impl Permission {
     }
 
     /// Convert to JSON value (for POST)
-    #[allow(dead_code)]
     pub fn into_value(self) -> Value {
         let mut obj = Map::new();
         obj.insert("name".to_string(), Value::String(self.name));

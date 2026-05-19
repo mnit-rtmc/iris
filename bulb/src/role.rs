@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, footer_html, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_all, uri_one};
 use crate::domain::Domain;
 use crate::error::Result;
 use crate::fetch::Action;
@@ -123,7 +123,7 @@ impl RoleAnc {
                 return nm;
             }
         }
-        return String::from("perm_overrun");
+        String::from("perm_overrun")
     }
 
     /// Make permissions HTML table
@@ -161,22 +161,74 @@ impl RoleAnc {
         details.close();
     }
 
-    /// Get changed permission access levels
+    /// Get permissions with changed access levels
     fn permissions_changed(&self) -> Vec<Permission> {
-        let doc = Doc::get();
         let mut changed = Vec::new();
+        let doc = Doc::get();
         for perm in &self.permissions {
-            if let Some(select) = doc.opt_elem::<HtmlSelectElement>(&perm.name) {
-                if let Some(access) = select.value().parse::<u32>().ok() {
-                    if access != perm.access_level {
-                        let mut perm = perm.clone();
-                        perm.access_level = access;
-                        changed.push(perm);
-                    }
-                }
+            if let Some(select) = doc.opt_elem::<HtmlSelectElement>(&perm.name)
+                && let Some(access) = select.value().parse::<u32>().ok()
+                && access != perm.access_level
+            {
+                let mut perm = perm.clone();
+                perm.access_level = access;
+                changed.push(perm);
             }
         }
         changed
+    }
+
+    /// Get added permissions
+    fn permissions_added(&self, pri: &Role) -> Vec<Permission> {
+        let mut added = Vec::new();
+        let mut perm_num = 1;
+        for res in &self.resource_types {
+            if res.base.is_some() {
+                continue;
+            }
+            let mut num = 0;
+            for perm in &self.permissions {
+                if perm.base_resource != res.name {
+                    continue;
+                }
+                // Check base permission
+                if num == 0 && perm.hashtag.is_some() {
+                    if let Some(p) = self.make_perm(pri, res, &mut perm_num) {
+                        added.push(p);
+                    }
+                    num = 1;
+                }
+                if let Some(p) = self.make_perm(pri, res, &mut perm_num) {
+                    added.push(p);
+                }
+                num += 1;
+            }
+            if num == 0
+                && let Some(p) = self.make_perm(pri, res, &mut perm_num)
+            {
+                added.push(p);
+            }
+        }
+        added
+    }
+
+    /// Make a new permission
+    fn make_perm(
+        &self,
+        pri: &Role,
+        res: &ResourceType,
+        perm_num: &mut u32,
+    ) -> Option<Permission> {
+        let nm = self.perm_name(perm_num);
+        let select = Doc::get().opt_elem::<HtmlSelectElement>(&nm)?;
+        let access = select.value().parse::<u32>().ok()?;
+        if access > 0 {
+            let mut p = Permission::new(nm, &pri.name, &res.name);
+            p.access_level = access;
+            Some(p)
+        } else {
+            None
+        }
     }
 
     /// Make domains HTML table
@@ -347,7 +399,19 @@ impl Card for Role {
                 actions.push(Action::Delete(uri));
             }
         }
-        // FIXME: add actions to create permissions
+        for perm in anc.permissions_added(self) {
+            let uri = uri_all(Res::Permission);
+            let value = perm.clone().into_value().to_string();
+            actions.push(Action::Post(uri, value.into()));
+            let uri = uri_one(Res::Permission, &perm.name);
+            let mut fields = Fields::new();
+            if let Some(hashtag) = perm.hashtag {
+                fields.insert_str("hashtag", &hashtag);
+            }
+            fields.insert_num("access_level", perm.access_level);
+            let changed = fields.into_value().to_string();
+            actions.push(Action::Patch(uri, changed.into()));
+        }
         actions
     }
 }
