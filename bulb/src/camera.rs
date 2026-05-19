@@ -336,7 +336,11 @@ impl Camera {
         div.id("ptz-controls");
         let mut row = div.div();
         row.class("row");
-        row.button().id("ptz-zoom-out").r#type("button").cdata("-");
+        row.button()
+            .id("ptz-zoom-out")
+            .r#type("button")
+            .cdata("-")
+            .close();
         row.button().id("ptz-zoom-in").r#type("button").cdata("+");
         row.close();
         row = div.div();
@@ -385,12 +389,14 @@ impl Camera {
             .button()
             .id("focus-near")
             .r#type("button")
-            .cdata("Near");
+            .cdata("Near")
+            .close();
         focus_div
             .button()
             .id("focus-far")
             .r#type("button")
-            .cdata("Far");
+            .cdata("Far")
+            .close();
         focus_div
             .button()
             .id("focus-auto")
@@ -407,17 +413,28 @@ impl Camera {
             .button()
             .id("iris-open")
             .r#type("button")
-            .cdata("Open");
+            .cdata("Open")
+            .close();
         iris_div
             .button()
             .id("iris-close")
             .r#type("button")
-            .cdata("Close");
+            .cdata("Close")
+            .close();
         iris_div
             .button()
             .id("iris-auto")
             .r#type("button")
             .cdata("Auto");
+        row.close();
+
+        row = div.div();
+        row.class("row");
+        row.span().cdata("Wiper").close();
+        row.button()
+            .id("camera-wiper")
+            .r#type("button")
+            .cdata("Send");
         div.close();
     }
 
@@ -447,11 +464,13 @@ impl Camera {
             row.button()
                 .id(&btn_1)
                 .r#type("button")
-                .cdata(preset_num.to_string());
+                .cdata(preset_num.to_string())
+                .close();
             row.button()
                 .id(&btn_2)
                 .r#type("button")
-                .cdata((preset_num + 1).to_string());
+                .cdata((preset_num + 1).to_string())
+                .close();
             row.button()
                 .id(&btn_3)
                 .r#type("button")
@@ -748,6 +767,7 @@ impl Card for Camera {
         match id {
             "focus-auto" => self.device_req(DeviceReq::CameraFocusAuto),
             "iris-auto" => self.device_req(DeviceReq::CameraIrisAuto),
+            "camera-wiper" => self.device_req(DeviceReq::CameraWiperOneShot),
             "rq_reset" => self.device_req(DeviceReq::ResetDevice),
             _ => self.handle_click_common(anc, id),
         }
