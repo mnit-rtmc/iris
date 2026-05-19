@@ -346,7 +346,7 @@ label:has(+ #sb_resource) {
   padding: 0.5rem;
   text-align: center;
   background-color: #400;
-  color: #fff;
+  color: white;
 }
 #sb_toast.show {
   visibility: visible;
@@ -414,8 +414,8 @@ label:has(+ #sb_resource) {
   left: 0;
   padding: 0.5rem;
   border-radius: 0.2rem;
-  color: #fff;
-  background-color: #000;
+  color: white;
+  background-color: black;
 }
 .tooltip:hover * {
   visibility: visible;
