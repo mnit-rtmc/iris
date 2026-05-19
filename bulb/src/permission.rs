@@ -20,7 +20,7 @@ use serde_json::map::Map;
 use std::cmp::Ordering;
 
 /// Permission
-#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 pub struct Permission {
     pub name: String,
     pub role: String,
@@ -40,8 +40,8 @@ impl Ord for Permission {
         let ord = self.base_resource.cmp(&other.base_resource);
         if let Ordering::Equal = ord {
             match (&self.hashtag, &other.hashtag) {
-                (Some(_), None) => return Ordering::Less,
-                (None, Some(_)) => return Ordering::Greater,
+                (Some(_), None) => return Ordering::Greater,
+                (None, Some(_)) => return Ordering::Less,
                 (Some(a), Some(b)) => {
                     let a = a.to_lowercase();
                     let b = b.to_lowercase();
@@ -71,14 +71,13 @@ fn item_state(access_level: u32) -> ItemState {
 
 impl Permission {
     /// Create a new permission
-    pub fn new(base_resource: &str, role: &str) -> Self {
-        // FIXME: name using "prm_" + number
+    pub fn new(name: String, role: &str, base_resource: &str) -> Self {
         Permission {
+            name,
+            role: role.to_string(),
             base_resource: base_resource.to_string(),
             hashtag: None,
             access_level: 0,
-            name: "fake permission".to_string(),
-            role: role.to_string(),
         }
     }
 
@@ -114,14 +113,14 @@ impl Permission {
     }
 
     /// Convert to HTML table row
-    pub fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>, num: u16) {
+    pub fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
         match self.hashtag.as_ref() {
             Some(hashtag) => tr.td().class("member").cdata(hashtag).close(),
             None => tr.td().cdata(&self.base_resource).close(),
         };
         let mut td = tr.td();
         let mut select = td.select();
-        select.id(format!("perm_{}_{num}", &self.base_resource));
+        select.id(&self.name);
         for access in 0..=4 {
             let mut option = select.option();
             option.value(access.to_string());

@@ -25,7 +25,7 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::collections::HashSet;
 use wasm_bindgen::JsValue;
-use web_sys::HtmlInputElement;
+use web_sys::{HtmlInputElement, HtmlSelectElement};
 
 /// Resource Type
 #[derive(Debug, Default, Deserialize)]
@@ -49,6 +49,8 @@ pub struct RoleAnc {
     assets: Vec<Asset>,
     pub resource_types: Vec<ResourceType>,
     pub permissions: Vec<Permission>,
+    /// Existing permission names
+    pub perm_names: HashSet<String>,
     pub domains: Vec<Domain>,
 }
 
@@ -65,11 +67,13 @@ impl AncillaryData for RoleAnc {
         };
         let resource_types = Vec::new();
         let permissions = Vec::new();
+        let perm_names = HashSet::new();
         let domains = Vec::new();
         RoleAnc {
             assets,
             resource_types,
             permissions,
+            perm_names,
             domains,
         }
     }
@@ -93,6 +97,9 @@ impl AncillaryData for RoleAnc {
             Asset::Permissions => {
                 let mut permissions: Vec<Permission> =
                     serde_wasm_bindgen::from_value(value)?;
+                // NOTE: perm_names only needed for SaveEv view
+                self.perm_names =
+                    permissions.iter().map(|p| p.name.to_string()).collect();
                 permissions.retain(|p| p.role == pri.name);
                 permissions.sort();
                 self.permissions = permissions;
@@ -107,11 +114,24 @@ impl AncillaryData for RoleAnc {
 }
 
 impl RoleAnc {
+    /// Make next permission name
+    fn perm_name(&self, perm_num: &mut u32) -> String {
+        while *perm_num < u32::MAX {
+            let nm = format!("prm_{perm_num}");
+            *perm_num += 1;
+            if !self.perm_names.contains(&nm) {
+                return nm;
+            }
+        }
+        return String::from("perm_overrun");
+    }
+
     /// Make permissions HTML table
     fn permissions_html<'p>(&self, pri: &Role, div: &'p mut html::Div<'p>) {
         let mut details = div.details();
         details.summary().cdata("🗝️ Permissions").close();
         let mut table = details.table();
+        let mut perm_num = 1;
         for res in &self.resource_types {
             if res.base.is_some() {
                 continue;
@@ -123,20 +143,40 @@ impl RoleAnc {
                 }
                 // Is there a hashtag without base permission?
                 if num == 0 && perm.hashtag.is_some() {
-                    let p = Permission::new(&res.name, &pri.name);
-                    p.table_row(&mut table.tr(), 0);
+                    let nm = self.perm_name(&mut perm_num);
+                    let p = Permission::new(nm, &pri.name, &res.name);
+                    p.table_row(&mut table.tr());
                     num = 1;
                 }
-                perm.table_row(&mut table.tr(), num);
+                perm.table_row(&mut table.tr());
                 num += 1;
             }
             // No permissions; show Prohibited
             if num == 0 {
-                let p = Permission::new(&res.name, &pri.name);
-                p.table_row(&mut table.tr(), 0);
+                let nm = self.perm_name(&mut perm_num);
+                let p = Permission::new(nm, &pri.name, &res.name);
+                p.table_row(&mut table.tr());
             }
         }
         details.close();
+    }
+
+    /// Get changed permission access levels
+    fn permissions_changed(&self) -> Vec<Permission> {
+        let doc = Doc::get();
+        let mut changed = Vec::new();
+        for perm in &self.permissions {
+            if let Some(select) = doc.opt_elem::<HtmlSelectElement>(&perm.name) {
+                if let Some(access) = select.value().parse::<u32>().ok() {
+                    if access != perm.access_level {
+                        let mut perm = perm.clone();
+                        perm.access_level = access;
+                        changed.push(perm);
+                    }
+                }
+            }
+        }
+        changed
     }
 
     /// Make domains HTML table
@@ -240,7 +280,7 @@ impl Role {
     }
 
     /// Get changed fields from Setup form
-    fn changed_setup_x(&self, anc: RoleAnc) -> String {
+    fn changed_setup_x(&self, anc: &RoleAnc) -> String {
         let mut fields = Fields::new();
         fields.changed_input("enabled", self.enabled);
         if let Some(domains) = anc.domains_changed(self) {
@@ -291,12 +331,23 @@ impl Card for Role {
     /// Handle click event for the save button
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
         let mut actions = Vec::new();
-        let changed = self.changed_setup_x(anc);
+        let changed = self.changed_setup_x(&anc);
         if !changed.is_empty() {
             let uri = uri_one(Self::res(), &self.name());
             actions.push(Action::Patch(uri, changed.into()));
         }
-        // FIXME: add actions to create/delete permissions
+        for perm in anc.permissions_changed() {
+            let uri = uri_one(Res::Permission, &perm.name);
+            if perm.access_level > 0 {
+                let mut fields = Fields::new();
+                fields.insert_num("access_level", perm.access_level);
+                let changed = fields.into_value().to_string();
+                actions.push(Action::Patch(uri, changed.into()));
+            } else {
+                actions.push(Action::Delete(uri));
+            }
+        }
+        // FIXME: add actions to create permissions
         actions
     }
 }
