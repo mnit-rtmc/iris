@@ -764,6 +764,15 @@ label:has(+ #sb_resource) {
 #ptz-controls #ptz-joystick {
   width: 100%;
 }
+.joystick {
+  background-color: #788;
+  box-shadow: inset 0 0 1em #448;
+  border-radius: 100%;
+  cursor: pointer;
+  height: 100%;
+  width: 100%;
+  user-select: none;
+}
 #ptz-controls #ptz-tilt-up,
 #ptz-controls #ptz-tilt-down {
   width: 33%;

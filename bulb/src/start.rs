@@ -18,6 +18,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::item::ItemState;
+use crate::joystick;
 use crate::permission::Permission;
 use crate::sse;
 use crate::util::{self, Doc};
@@ -177,7 +178,8 @@ fn add_listeners() -> Result<()> {
     let layer_menu: HtmlElement = doc.elem("layer-menu")?;
     add_change_listener(&layer_menu)?;
     add_click_listener(&sidebar)?;
-    add_mouse_listener(&sidebar)?;
+    add_joystick_listener(&doc.0.body().unwrap().into())?;
+    add_mouse_listener(&doc.0.body().unwrap().into())?;
     add_input_listener(&sidebar)?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
     add_focus_listener(&sidebar)?;
@@ -728,6 +730,52 @@ fn handle_input_enter(id: String) {
     if id.as_str() == "login_pass" {
         spawn_future(handle_login());
     }
+}
+
+fn add_joystick_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
+            && mouse_event.button() == 0
+            && let Some(Ok(target)) =
+                mouse_event.target().map(|e| e.dyn_into::<HtmlElement>())
+        {
+            let type_ = mouse_event.type_();
+            if type_ == "mouseup" {
+                let sticks =
+                    Doc::get().0.get_elements_by_class_name("joystick");
+                for i in 0..sticks.length() {
+                    spawn_future(joystick::handle_mouse_event(
+                        sticks.get_with_index(i).unwrap().id(),
+                        "mouseup".to_string(),
+                        0,
+                        0,
+                    ));
+                }
+            } else if target.class_name() == "joystick" {
+                mouse_event.prevent_default();
+                spawn_future(joystick::handle_mouse_event(
+                    target.id(),
+                    type_,
+                    mouse_event.x(),
+                    mouse_event.y(),
+                ));
+            }
+        }
+    });
+    el.add_event_listener_with_callback(
+        "mousedown",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
+        "mouseup",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
+        "mousemove",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
 }
 
 /// Add a mouse event listener to an element

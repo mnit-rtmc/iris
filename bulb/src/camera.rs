@@ -19,6 +19,7 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::LocAnc;
 use crate::item::ItemState;
+use crate::joystick;
 use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
@@ -331,7 +332,13 @@ impl Camera {
             .r#type("button")
             .cdata("←")
             .close();
-        row.span().id("ptz-joystick").close();
+        joystick::create_joy(
+            &mut row.div(),
+            "ptz-joystick",
+            Res::Camera.as_str(),
+            &self.name,
+            "{\"ptz\":[{},{},0.0]}",
+        );
         row.button().id("ptz-pan-right").r#type("button").cdata("→");
         row.close();
         row = div.div();
