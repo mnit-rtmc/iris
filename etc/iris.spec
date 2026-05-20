@@ -96,7 +96,11 @@ ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 
 # %{_unitdir}
 %defattr(0644,root,root)
+%if %{defined _unitdir}
 %{_unitdir}/iris.service
+%else
+/usr/lib/systemd/system/iris.service
+%endif
 
 # /etc/nginx/
 %defattr(0644,root,root)
