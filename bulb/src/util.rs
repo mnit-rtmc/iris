@@ -275,6 +275,11 @@ impl Fields {
     pub fn into_value(self) -> Value {
         Value::Object(self.obj)
     }
+
+    /// Check if empty
+    pub fn is_empty(&self) -> bool {
+        self.obj.is_empty()
+    }
 }
 
 impl Input<&String> for Fields {

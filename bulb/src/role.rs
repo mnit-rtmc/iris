@@ -16,7 +16,7 @@ use crate::domain::Domain;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::ItemState;
-use crate::permission::Permission;
+use crate::permission::{Permission, access_item_state};
 use crate::util::{ContainsLower, Doc, Fields, Input};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -25,13 +25,175 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::collections::HashSet;
 use wasm_bindgen::JsValue;
-use web_sys::{HtmlInputElement, HtmlSelectElement};
+use web_sys::{
+    HtmlButtonElement, HtmlElement, HtmlInputElement, HtmlSelectElement,
+};
 
 /// Resource Type
 #[derive(Debug, Default, Deserialize)]
 pub struct ResourceType {
     pub name: String,
     pub base: Option<String>,
+}
+
+/// State for one role / permission
+#[derive(Clone, Copy, Debug)]
+enum PermState {
+    /// Existing permission (PATCH / DELETE)
+    Existing,
+    /// Missing resource permission (POST)
+    Missing,
+    /// New hashtag permission (POST)
+    Hashtag,
+}
+
+/// Role permission and state
+#[derive(Clone, Debug)]
+struct RolePerm {
+    perm: Permission,
+    state: PermState,
+}
+
+impl RolePerm {
+    /// Create an existing role permission
+    fn new(perm: Permission) -> Self {
+        RolePerm {
+            perm,
+            state: PermState::Existing,
+        }
+    }
+
+    /// Change state to missing
+    fn missing(mut self) -> Self {
+        self.state = PermState::Missing;
+        self
+    }
+
+    /// Change state to hashtag
+    fn hashtag(mut self) -> Self {
+        self.state = PermState::Hashtag;
+        self
+    }
+
+    /// Build HTML table row
+    fn table_row<'p>(self, tr: &'p mut html::Tr<'p>) {
+        let perm = self.perm;
+        let ht_res = format!("ht_{}", &perm.base_resource);
+        match self.state {
+            PermState::Existing => {
+                match perm.hashtag.as_deref() {
+                    Some(hashtag) => {
+                        tr.td().close();
+                        tr.td().class("member").cdata(hashtag).close();
+                    }
+                    None => {
+                        let mut td = tr.td();
+                        let bid = format!("{ht_res}_btn");
+                        td.button().id(bid).r#type("button").cdata("#");
+                        td.close();
+                        tr.td().cdata(&perm.base_resource).close();
+                    }
+                };
+            }
+            PermState::Missing => {
+                tr.td().close();
+                tr.td().cdata(&perm.base_resource).close();
+            }
+            PermState::Hashtag => {
+                tr.id(&ht_res).class("no-display");
+                tr.td().close();
+                let hid = format!("{ht_res}_inp");
+                let mut td = tr.td();
+                td.input().id(hid).size(12).value("#");
+                td.close();
+            }
+        }
+        let mut td = tr.td();
+        let mut select = td.select();
+        select.id(&perm.name);
+        for access in 0..=4 {
+            let mut option = select.option();
+            option.value(access.to_string());
+            if access == perm.access_level {
+                option.selected();
+            }
+            let item = access_item_state(access);
+            option
+                .cdata(item.code())
+                .cdata(" ")
+                .cdata(item.description())
+                .close();
+        }
+        select.close();
+        tr.close();
+    }
+
+    /// Update permission access level
+    fn update_access(&mut self) -> bool {
+        if let Some(select) =
+            Doc::get().opt_elem::<HtmlSelectElement>(&self.perm.name)
+            && let Ok(access) = select.value().parse::<u32>()
+            && access != self.perm.access_level
+        {
+            self.perm.access_level = access;
+            return true;
+        }
+        false
+    }
+
+    /// Make actions to update role permission
+    fn actions(&mut self) -> Vec<Action> {
+        let mut actions = Vec::new();
+        if !self.update_access() {
+            return actions;
+        }
+        let perm = &self.perm;
+        match self.state {
+            PermState::Existing => {
+                let uri = uri_one(Res::Permission, &perm.name);
+                if perm.access_level == 0 {
+                    actions.push(Action::Delete(uri));
+                } else {
+                    let mut fields = Fields::new();
+                    fields.insert_num("access_level", perm.access_level);
+                    let changed = fields.into_value().to_string();
+                    actions.push(Action::Patch(uri, changed.into()));
+                }
+            }
+            PermState::Missing => {
+                let post_uri = uri_all(Res::Permission);
+                let patch_uri = uri_one(Res::Permission, &perm.name);
+                let mut fields = Fields::new();
+                fields.insert_num("access_level", perm.access_level);
+                let value = perm.value().to_string();
+                actions.push(Action::Post(post_uri, value.into()));
+                let changed = fields.into_value().to_string();
+                actions.push(Action::Patch(patch_uri, changed.into()));
+            }
+            PermState::Hashtag => {
+                if let Some(hashtag) = self.input_hashtag() {
+                    let post_uri = uri_all(Res::Permission);
+                    let patch_uri = uri_one(Res::Permission, &perm.name);
+                    let mut fields = Fields::new();
+                    fields.insert_str("hashtag", &hashtag);
+                    fields.insert_num("access_level", perm.access_level);
+                    let value = perm.value().to_string();
+                    actions.push(Action::Post(post_uri, value.into()));
+                    let changed = fields.into_value().to_string();
+                    actions.push(Action::Patch(patch_uri, changed.into()));
+                }
+            }
+        }
+        actions
+    }
+
+    /// Get input hashtag
+    fn input_hashtag(&self) -> Option<String> {
+        let id = format!("ht_{}_inp", &self.perm.base_resource);
+        let input = Doc::get().opt_elem::<HtmlInputElement>(&id)?;
+        // FIXME: add sanity checking "# + alphanum"
+        Some(input.value())
+    }
 }
 
 /// Role
@@ -126,109 +288,66 @@ impl RoleAnc {
         String::from("perm_overrun")
     }
 
-    /// Make permissions HTML table
-    fn permissions_html<'p>(&self, pri: &Role, div: &'p mut html::Div<'p>) {
-        let mut details = div.details();
-        details.summary().cdata("🗝️ Permissions").close();
-        let mut table = details.table();
+    /// Build a `Vec` of all role permissions
+    fn role_permissions(&self, pri: &Role) -> Vec<RolePerm> {
+        let mut perms = Vec::new();
         let mut perm_num = 1;
         for res in &self.resource_types {
             if res.base.is_some() {
                 continue;
             }
-            let mut num = 0;
+            let mut first = true;
             for perm in &self.permissions {
                 if perm.base_resource != res.name {
                     continue;
                 }
                 // Is there a hashtag without base permission?
-                if num == 0 && perm.hashtag.is_some() {
+                if first && perm.hashtag.is_some() {
                     let nm = self.perm_name(&mut perm_num);
                     let p = Permission::new(nm, &pri.name, &res.name);
-                    p.table_row(&mut table.tr());
-                    num = 1;
+                    perms.push(RolePerm::new(p).hashtag());
+                    let nm = self.perm_name(&mut perm_num);
+                    let p = Permission::new(nm, &pri.name, &res.name);
+                    perms.push(RolePerm::new(p).missing());
                 }
-                perm.table_row(&mut table.tr());
-                num += 1;
+                perms.push(RolePerm::new(perm.clone()));
+                if first && perm.hashtag.is_none() {
+                    let nm = self.perm_name(&mut perm_num);
+                    let p = Permission::new(nm, &pri.name, &res.name);
+                    perms.push(RolePerm::new(p).hashtag());
+                }
+                first = false;
             }
-            // No permissions; show Prohibited
-            if num == 0 {
+            // Missing permissions for this resource
+            if first {
                 let nm = self.perm_name(&mut perm_num);
                 let p = Permission::new(nm, &pri.name, &res.name);
-                p.table_row(&mut table.tr());
+                perms.push(RolePerm::new(p).missing());
             }
+        }
+        perms
+    }
+
+    /// Make permissions HTML table
+    fn permissions_html<'p>(&self, pri: &Role, div: &'p mut html::Div<'p>) {
+        let mut details = div.details();
+        details.summary().cdata("🗝️ Permissions").close();
+        let mut table = details.table();
+        for rp in self.role_permissions(pri) {
+            rp.table_row(&mut table.tr());
         }
         details.close();
     }
 
-    /// Get permissions with changed access levels
-    fn permissions_changed(&self) -> Vec<Permission> {
-        let mut changed = Vec::new();
-        let doc = Doc::get();
-        for perm in &self.permissions {
-            if let Some(select) = doc.opt_elem::<HtmlSelectElement>(&perm.name)
-                && let Some(access) = select.value().parse::<u32>().ok()
-                && access != perm.access_level
-            {
-                let mut perm = perm.clone();
-                perm.access_level = access;
-                changed.push(perm);
+    /// Get actions for changed permissions
+    fn permissions_changed(&self, pri: &Role) -> Vec<Action> {
+        let mut actions = Vec::new();
+        for mut rp in self.role_permissions(pri) {
+            for act in rp.actions() {
+                actions.push(act);
             }
         }
-        changed
-    }
-
-    /// Get added permissions
-    fn permissions_added(&self, pri: &Role) -> Vec<Permission> {
-        let mut added = Vec::new();
-        let mut perm_num = 1;
-        for res in &self.resource_types {
-            if res.base.is_some() {
-                continue;
-            }
-            let mut num = 0;
-            for perm in &self.permissions {
-                if perm.base_resource != res.name {
-                    continue;
-                }
-                // Check base permission
-                if num == 0 && perm.hashtag.is_some() {
-                    if let Some(p) = self.make_perm(pri, res, &mut perm_num) {
-                        added.push(p);
-                    }
-                    num = 1;
-                }
-                if let Some(p) = self.make_perm(pri, res, &mut perm_num) {
-                    added.push(p);
-                }
-                num += 1;
-            }
-            if num == 0
-                && let Some(p) = self.make_perm(pri, res, &mut perm_num)
-            {
-                added.push(p);
-            }
-        }
-        added
-    }
-
-    /// Make a new permission
-    fn make_perm(
-        &self,
-        pri: &Role,
-        res: &ResourceType,
-        perm_num: &mut u32,
-    ) -> Option<Permission> {
-        let nm = self.perm_name(perm_num);
-        let select = Doc::get().opt_elem::<HtmlSelectElement>(&nm)?;
-        let access = select.value().parse::<u32>().ok()?;
-        if access > 0 {
-            let mut p = Permission::new(nm, &pri.name, &res.name);
-            p.access_level = access;
-            Some(p)
-        } else {
-            None
-        }
+        actions
     }
 
     /// Make domains HTML table
@@ -332,13 +451,17 @@ impl Role {
     }
 
     /// Get changed fields from Setup form
-    fn changed_setup_x(&self, anc: &RoleAnc) -> String {
+    fn changed_setup_x(&self, anc: &RoleAnc) -> Option<String> {
         let mut fields = Fields::new();
         fields.changed_input("enabled", self.enabled);
         if let Some(domains) = anc.domains_changed(self) {
             fields.insert_arr("domains", domains);
         }
-        fields.into_value().to_string()
+        if !fields.is_empty() {
+            Some(fields.into_value().to_string())
+        } else {
+            None
+        }
     }
 }
 
@@ -383,35 +506,31 @@ impl Card for Role {
     /// Handle click event for the save button
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
         let mut actions = Vec::new();
-        let changed = self.changed_setup_x(&anc);
-        if !changed.is_empty() {
+        if let Some(changed) = self.changed_setup_x(&anc) {
             let uri = uri_one(Self::res(), &self.name());
             actions.push(Action::Patch(uri, changed.into()));
         }
-        for perm in anc.permissions_changed() {
-            let uri = uri_one(Res::Permission, &perm.name);
-            if perm.access_level > 0 {
-                let mut fields = Fields::new();
-                fields.insert_num("access_level", perm.access_level);
-                let changed = fields.into_value().to_string();
-                actions.push(Action::Patch(uri, changed.into()));
-            } else {
-                actions.push(Action::Delete(uri));
-            }
-        }
-        for perm in anc.permissions_added(self) {
-            let uri = uri_all(Res::Permission);
-            let value = perm.clone().into_value().to_string();
-            actions.push(Action::Post(uri, value.into()));
-            let uri = uri_one(Res::Permission, &perm.name);
-            let mut fields = Fields::new();
-            if let Some(hashtag) = perm.hashtag {
-                fields.insert_str("hashtag", &hashtag);
-            }
-            fields.insert_num("access_level", perm.access_level);
-            let changed = fields.into_value().to_string();
-            actions.push(Action::Patch(uri, changed.into()));
+        for act in anc.permissions_changed(self) {
+            actions.push(act);
         }
         actions
+    }
+
+    /// Handle click event for a button on the card
+    fn handle_click(&self, anc: RoleAnc, id: &str) -> Vec<Action> {
+        if id.starts_with("ht_") && id.ends_with("_btn") {
+            if let Some(ht) = id.strip_suffix("_btn") {
+                if let Some(ht) = Doc::get().opt_elem::<HtmlElement>(ht) {
+                    ht.set_class_name("");
+                }
+                if let Some(btn) = Doc::get().opt_elem::<HtmlButtonElement>(id)
+                {
+                    btn.set_disabled(true);
+                }
+            }
+            Vec::new()
+        } else {
+            self.handle_click_common(anc, id)
+        }
     }
 }
