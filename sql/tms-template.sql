@@ -89,6 +89,7 @@ help_trouble_ticket_url
 incident_clear_advice_multi	JUST CLEARED
 incident_clear_secs	300
 incident_max_sign_miles	0.0
+legacy_ui_event_cfg_enable	true
 legacy_ui_sys_attr_enable	true
 legacy_ui_users_enable	true
 legacy_xml_config_enable	false

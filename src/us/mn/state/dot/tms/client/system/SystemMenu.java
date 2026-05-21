@@ -43,7 +43,8 @@ public class SystemMenu extends IMenu {
 		desktop = s.getDesktop();
 		if (SystemAttrEnum.LEGACY_UI_SYS_ATTR_ENABLE.getBoolean())
 			addItem(createSystemAttributesItem());
-		addItem(createEventConfigItem());
+		if (SystemAttrEnum.LEGACY_UI_EVENT_CFG_ENABLE.getBoolean())
+			addItem(createEventConfigItem());
 		if (SystemAttrEnum.LEGACY_UI_USERS_ENABLE.getBoolean())
 			addItem(createUsersAndRolesItem());
 		addItem(createMapExtentsItem());

@@ -56,6 +56,7 @@ System Attribute                 | Description
 `help_trouble_ticket_url`        | URL of Trac trouble ticket system
 `incident_clear_advice_multi`    | Advice for [DMS] messages when incidents are cleared
 `incident_clear_secs`            | Seconds to leave cleared incidents before removing them
+`legacy_ui_event_cfg_enable`     | Enable legacy UI for event configuration administration
 `legacy_ui_sys_attr_enable`      | Enable legacy UI for system attribute administration
 `legacy_ui_users_enable`         | Enable legacy UI for user administration
 `legacy_xml_config_enable`       | Enable saving system configuration as legacy XML
