@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  * Copyright (C) 2009-2015  AHMCT, University of California
  * Copyright (C) 2012-2021  Iteris Inc.
  * Copyright (C) 2015-2024  SRF Consulting Group
@@ -67,6 +67,7 @@ public enum SystemAttrEnum {
 	INCIDENT_CLEAR_ADVICE_MULTI(String.class),
 	INCIDENT_CLEAR_SECS(300, 0, 3600),
 	INCIDENT_MAX_SIGN_MILES(0.0f, 0.0f, 1000.0f),
+	LEGACY_UI_USERS_ENABLE(true),
 	LEGACY_XML_CONFIG_ENABLE(true),
 	LEGACY_XML_DETECTOR_ENABLE(true),
 	LEGACY_XML_INCIDENT_ENABLE(true),
