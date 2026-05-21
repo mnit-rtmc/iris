@@ -32,6 +32,7 @@ pub struct User {
     pub enabled: bool,
     // secondary attributes
     pub dn: Option<String>,
+    pub password: Option<String>,
 }
 
 /// Ancillary user data
@@ -149,6 +150,17 @@ impl User {
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
+        div.label().r#for("password").cdata("Password").close();
+        div.input()
+            .id("password")
+            .r#type("password")
+            .autocomplete("new-password")
+            .maxlength(64)
+            .size(20)
+            .value(opt_ref(&self.password));
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
         div.label().r#for("enabled").cdata("Enabled").close();
         let mut input = div.input();
         input.id("enabled").r#type("checkbox");
@@ -208,6 +220,7 @@ impl Card for User {
         fields.changed_input("full_name", &self.full_name);
         fields.changed_input("dn", &self.dn);
         fields.changed_select("role", &self.role);
+        fields.changed_input("password", &self.password);
         fields.changed_input("enabled", self.enabled);
         fields.into_value().to_string()
     }
