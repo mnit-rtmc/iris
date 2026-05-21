@@ -81,10 +81,14 @@ th, td {
   padding: 0;
   margin: 0;
 }
-td.member {
+.hashtag {
   font-style: italic;
   color: #448;
   background-color: #dda;
+}
+.hashtag:invalid {
+  text-decoration: line-through;
+  background-color: #daa;
 }
 .scroll_table {
   height: 8rem;

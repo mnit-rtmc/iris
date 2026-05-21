@@ -84,12 +84,16 @@ impl RolePerm {
                 match perm.hashtag.as_deref() {
                     Some(hashtag) => {
                         tr.td().close();
-                        tr.td().class("member").cdata(hashtag).close();
+                        tr.td().class("hashtag").cdata(hashtag).close();
                     }
                     None => {
                         let mut td = tr.td();
                         let bid = format!("{ht_res}_btn");
-                        td.button().id(bid).r#type("button").cdata("#");
+                        td.button()
+                            .id(bid)
+                            .r#type("button")
+                            .class("hashtag")
+                            .cdata("#");
                         td.close();
                         tr.td().cdata(&perm.base_resource).close();
                     }
@@ -104,7 +108,14 @@ impl RolePerm {
                 tr.td().close();
                 let hid = format!("{ht_res}_inp");
                 let mut td = tr.td();
-                td.input().id(hid).size(12).value("#");
+                td.input()
+                    .id(hid)
+                    .class("hashtag")
+                    .size(12)
+                    .minlength(2)
+                    .maxlength(16)
+                    .pattern("#[A-Za-z0-9]+")
+                    .value("#");
                 td.close();
             }
         }
@@ -191,8 +202,13 @@ impl RolePerm {
     fn input_hashtag(&self) -> Option<String> {
         let id = format!("ht_{}_inp", &self.perm.base_resource);
         let input = Doc::get().opt_elem::<HtmlInputElement>(&id)?;
-        // FIXME: add sanity checking "# + alphanum"
-        Some(input.value())
+        let ht = input.value();
+        if ht.starts_with("#")
+            && ht[1..].chars().all(|c| c.is_ascii_alphanumeric())
+        {
+            return Some(ht);
+        }
+        None
     }
 }
 
@@ -277,10 +293,10 @@ impl AncillaryData for RoleAnc {
 
 impl RoleAnc {
     /// Make next permission name
-    fn perm_name(&self, perm_num: &mut u32) -> String {
-        while *perm_num < u32::MAX {
-            let nm = format!("prm_{perm_num}");
-            *perm_num += 1;
+    fn perm_name(&self, num: &mut u32) -> String {
+        while *num < u32::MAX {
+            let nm = format!("prm_{num}");
+            *num += 1;
             if !self.perm_names.contains(&nm) {
                 return nm;
             }
@@ -288,10 +304,22 @@ impl RoleAnc {
         String::from("perm_overrun")
     }
 
+    /// Make a permission for role setup card
+    fn make_perm(
+        &self,
+        pri: &Role,
+        res: &ResourceType,
+        num: &mut u32,
+    ) -> RolePerm {
+        let nm = self.perm_name(num);
+        let p = Permission::new(nm, &pri.name, &res.name);
+        RolePerm::new(p)
+    }
+
     /// Build a `Vec` of all role permissions
     fn role_permissions(&self, pri: &Role) -> Vec<RolePerm> {
         let mut perms = Vec::new();
-        let mut perm_num = 1;
+        let mut num = 1;
         for res in &self.resource_types {
             if res.base.is_some() {
                 continue;
@@ -303,26 +331,22 @@ impl RoleAnc {
                 }
                 // Is there a hashtag without base permission?
                 if first && perm.hashtag.is_some() {
-                    let nm = self.perm_name(&mut perm_num);
-                    let p = Permission::new(nm, &pri.name, &res.name);
-                    perms.push(RolePerm::new(p).hashtag());
-                    let nm = self.perm_name(&mut perm_num);
-                    let p = Permission::new(nm, &pri.name, &res.name);
-                    perms.push(RolePerm::new(p).missing());
+                    let rp = self.make_perm(pri, res, &mut num);
+                    perms.push(rp.hashtag());
+                    let rp = self.make_perm(pri, res, &mut num);
+                    perms.push(rp.missing());
                 }
                 perms.push(RolePerm::new(perm.clone()));
                 if first && perm.hashtag.is_none() {
-                    let nm = self.perm_name(&mut perm_num);
-                    let p = Permission::new(nm, &pri.name, &res.name);
-                    perms.push(RolePerm::new(p).hashtag());
+                    let rp = self.make_perm(pri, res, &mut num);
+                    perms.push(rp.hashtag());
                 }
                 first = false;
             }
             // Missing permissions for this resource
             if first {
-                let nm = self.perm_name(&mut perm_num);
-                let p = Permission::new(nm, &pri.name, &res.name);
-                perms.push(RolePerm::new(p).missing());
+                let rp = self.make_perm(pri, res, &mut num);
+                perms.push(rp.missing());
             }
         }
         perms
