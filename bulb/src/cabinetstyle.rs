@@ -71,9 +71,9 @@ impl CabinetStyle {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self) -> String {
+    fn to_html_setup(&self, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         pin_row_html(
             "police_panel_pin_1",
             "Police Panel Pin 1",
@@ -109,7 +109,7 @@ impl CabinetStyle {
             .size(8)
             .value(opt_str(self.dip));
         div.close();
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -142,7 +142,7 @@ impl Card for CabinetStyle {
     fn to_html(&self, view: View, anc: &CabinetStyleAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Setup => self.to_html_setup(),
+            View::Setup(edit) => self.to_html_setup(edit),
             _ => self.to_html_compact(),
         }
     }

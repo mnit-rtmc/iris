@@ -58,7 +58,7 @@ impl AncillaryData for VideoMonitorAnc {
     fn new(pri: &VideoMonitor, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
         cio.assets.push(Asset::Access);
-        if view == View::Setup {
+        if let View::Setup(_edit) = view {
             cio.assets.push(Asset::MonitorStyles);
         }
         VideoMonitorAnc {
@@ -186,9 +186,9 @@ impl VideoMonitor {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &VideoMonitorAnc) -> String {
+    fn to_html_setup(&self, anc: &VideoMonitorAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("mon_num").cdata("Mon Num").close();
@@ -233,7 +233,7 @@ impl VideoMonitor {
         div.close();
         anc.cio.controller_html(self, &mut tree.root::<html::Div>());
         anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -303,7 +303,7 @@ impl Card for VideoMonitor {
         match view {
             View::Create => self.to_html_create(anc),
             View::Status => self.to_html_status(anc),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
         }
     }

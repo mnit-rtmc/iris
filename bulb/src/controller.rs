@@ -117,7 +117,7 @@ impl AncillaryData for ControllerAnc {
                 loc.assets
                     .push(Asset::GeoLoc(pri.name.to_string(), Res::Controller));
             }
-            View::Setup => {
+            View::Setup(_edit) => {
                 loc.assets.push(Asset::Conditions);
                 loc.assets.push(Asset::CabinetStyles);
             }
@@ -430,9 +430,9 @@ impl Controller {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &ControllerAnc) -> String {
+    fn to_html_setup(&self, anc: &ControllerAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("comm_link").cdata("Comm Link").close();
@@ -486,7 +486,7 @@ impl Controller {
             .size(26)
             .value(opt_ref(&self.password));
         div.close();
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -563,7 +563,7 @@ impl Card for Controller {
         match view {
             View::Create => self.to_html_create(anc),
             View::Location => anc.loc.to_html_loc(self),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             View::Status => self.to_html_status(anc),
             _ => self.to_html_compact(),
         }

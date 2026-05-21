@@ -72,10 +72,10 @@ pub enum View {
     /// Control view
     Control,
     /// Setup view
-    Setup,
+    Setup(bool),
     /// Status view
     Status,
-    /// Location view
+    /// Location view (FIXME: add edit bool)
     Location,
     /// Request view
     Request,
@@ -96,7 +96,7 @@ impl View {
         match self {
             View::Create
             | View::Control
-            | View::Setup
+            | View::Setup(_)
             | View::Status
             | View::Location
             | View::Request => true,
@@ -123,7 +123,7 @@ impl View {
             Create => "🆕 Create",
             Compact => "⌄ Compact",
             Control => "🕹️ Control",
-            Setup => "📝 Setup",
+            Setup(_edit) => "📝 Setup",
             Status => "☑️ Status",
             Location => "🗺️ Location",
             Request => "🙏 Request",
@@ -144,7 +144,7 @@ impl TryFrom<&str> for View {
             v if v == Create.as_str() => Ok(Create),
             v if v == Compact.as_str() => Ok(Compact),
             v if v == Control.as_str() => Ok(Control),
-            v if v == Setup.as_str() => Ok(Setup),
+            v if v == Setup(false).as_str() => Ok(Setup(false)),
             v if v == Status.as_str() => Ok(Status),
             v if v == Location.as_str() => Ok(Location),
             v if v == Request.as_str() => Ok(Request),
@@ -307,7 +307,7 @@ impl CardView {
                 self.handle_input_x::<Domain>(id).await
             }
             (Res::Lcs, View::Control) => self.handle_input_x::<Lcs>(id).await,
-            (Res::MsgPattern, View::Setup) => {
+            (Res::MsgPattern, View::Setup(true)) => {
                 self.handle_input_x::<MsgPattern>(id).await
             }
             (Res::RampMeter, View::Control) => {

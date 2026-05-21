@@ -118,7 +118,7 @@ impl AncillaryData for MsgPatternAnc {
     fn new(_pri: &MsgPattern, view: View) -> Self {
         let mut assets =
             vec![Asset::SignConfigs, Asset::Fonts, Asset::Graphics];
-        if view == View::Setup {
+        if let View::Setup(_edit) = view {
             assets.push(Asset::MsgLines);
         }
         MsgPatternAnc {
@@ -389,9 +389,9 @@ impl MsgPattern {
     }
 
     /// Convert to setup HTML
-    fn to_html_setup(&self, anc: &MsgPatternAnc) -> String {
+    fn to_html_setup(&self, anc: &MsgPatternAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label()
@@ -487,7 +487,7 @@ impl MsgPattern {
             input.checked();
         }
         div.close();
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 
@@ -623,7 +623,7 @@ impl Card for MsgPattern {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &MsgPatternAnc) -> String {
         match view {
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
         }
     }

@@ -106,7 +106,7 @@ where
                 View::Hidden
                 | View::Compact
                 | View::Control
-                | View::Setup
+                | View::Setup(_)
                 | View::Status,
                 Some(_nm),
             ) => vec![Asset::Controllers],

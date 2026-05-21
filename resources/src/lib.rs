@@ -376,23 +376,6 @@ impl Res {
         }
     }
 
-    /// Check if resource has a location
-    pub const fn has_location(self) -> bool {
-        use Res::*;
-        matches!(
-            self,
-            Beacon
-                | Camera
-                | Controller
-                | Dms
-                | GateArm
-                | Lcs
-                | RampMeter
-                | TagReader
-                | WeatherSensor
-        )
-    }
-
     /// Get base resource for permission checks
     pub const fn base(self) -> Self {
         use Res::*;
@@ -430,5 +413,71 @@ impl Res {
             // Others
             _ => self,
         }
+    }
+
+    /// Check if resource has control view
+    pub const fn has_control(self) -> bool {
+        use Res::*;
+        matches!(
+            self,
+            ActionPlan
+            | Beacon
+            | Camera
+            | Dms
+            | GateArm
+            | Incident
+            | Lcs
+            | RampMeter
+        )
+    }
+
+    /// Check if resource has a location
+    pub const fn has_location(self) -> bool {
+        use Res::*;
+        matches!(
+            self,
+            Beacon
+                | Camera
+                | Controller
+                | Dms
+                | GateArm
+                | Lcs
+                | RampMeter
+                | TagReader
+                | WeatherSensor
+        )
+    }
+
+    /// Check if resource has a request view
+    pub const fn has_request(self) -> bool {
+        use Res::*;
+        matches!(
+            self,
+            Camera | Dms | RampMeter
+        )
+    }
+
+    /// Check if resource has a setup view
+    pub const fn has_setup(self) -> bool {
+        use Res::*;
+        matches!(
+            self,
+            ActionPlan | Alarm | Beacon | CabinetStyle | Camera | CommConfig
+             | CommLink | Controller | Detector | Dms | Domain | EventConfig
+            | FlowStream | GateArm | Gps
+         | Incident | Lcs  | LcsState | MapExtent | MonitorStyle | MsgPattern
+        | PlanPhase | RampMeter  | Road | Role | SignConfig | SystemAttribute
+         | TagReader | User | VideoMonitor | WeatherSensor  | Word
+        )
+    }
+
+    /// Check if resource has a status view
+    pub const fn has_status(self) -> bool {
+        use Res::*;
+        matches!(
+            self,
+            Alarm | CommLink | Controller | Detector | Dms
+             | TagReader | VideoMonitor | WeatherSensor
+        )
     }
 }

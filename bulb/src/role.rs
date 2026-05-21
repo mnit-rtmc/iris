@@ -238,7 +238,7 @@ impl AncillaryData for RoleAnc {
     /// Construct ancillary role data
     fn new(_pri: &Role, view: View) -> Self {
         let assets = match view {
-            View::Setup | View::SaveEv => {
+            View::Setup(_) | View::SaveEv => {
                 vec![Asset::ResourceTypes, Asset::Permissions, Asset::Domains]
             }
             _ => Vec::new(),
@@ -451,9 +451,9 @@ impl Role {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &RoleAnc) -> String {
+    fn to_html_setup(&self, anc: &RoleAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row")
             .label()
@@ -470,7 +470,7 @@ impl Role {
         anc.permissions_html(self, &mut div);
         div = tree.root::<html::Div>();
         anc.domains_html(self, &mut div);
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 
@@ -522,7 +522,7 @@ impl Card for Role {
     fn to_html(&self, view: View, anc: &RoleAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(),
         }
     }

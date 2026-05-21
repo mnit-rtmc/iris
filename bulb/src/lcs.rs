@@ -178,7 +178,7 @@ impl AncillaryData for LcsAnc {
         let mut cio = ControllerIoAnc::new(pri, view);
         match view {
             View::Control => cio.assets.push(Asset::LcsStates),
-            View::Setup => cio.assets.push(Asset::LcsTypes),
+            View::Setup(_edit) => cio.assets.push(Asset::LcsTypes),
             _ => (),
         }
         let loc = LocAnc::new(pri, view);
@@ -509,9 +509,9 @@ impl Lcs {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &LcsAnc) -> String {
+    fn to_html_setup(&self, anc: &LcsAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
@@ -541,7 +541,7 @@ impl Lcs {
             .size(2)
             .value(opt_str(self.shift));
         div.close();
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -612,7 +612,7 @@ impl Card for Lcs {
             View::Create => self.to_html_create(anc),
             View::Control => self.to_html_control(anc),
             View::Location => anc.loc.to_html_loc(self),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
         }
     }

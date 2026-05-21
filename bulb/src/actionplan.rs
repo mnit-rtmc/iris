@@ -114,7 +114,7 @@ impl AncillaryData for ActionPlanAnc {
                     Asset::PlanPhases,
                 ]
             }
-            View::Setup => vec![Asset::DeviceActions, Asset::PlanPhases],
+            View::Setup(_edit) => vec![Asset::DeviceActions, Asset::PlanPhases],
             _ => vec![],
         };
         let phases = Vec::new();
@@ -326,9 +326,9 @@ impl ActionPlan {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &ActionPlanAnc) -> String {
+    fn to_html_setup(&self, anc: &ActionPlanAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
@@ -398,7 +398,7 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -459,7 +459,7 @@ impl Card for ActionPlan {
         match view {
             View::Create => self.to_html_create(anc),
             View::Control => self.to_html_control(anc),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
         }
     }

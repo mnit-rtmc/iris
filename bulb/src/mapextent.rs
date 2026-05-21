@@ -54,9 +54,9 @@ impl MapExtent {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self) -> String {
+    fn to_html_setup(&self, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("hashtag").cdata("Hashtag").close();
@@ -99,7 +99,7 @@ impl MapExtent {
             .max("18")
             .value(self.zoom);
         div.close();
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -132,7 +132,7 @@ impl Card for MapExtent {
     fn to_html(&self, view: View, anc: &MapExtentAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Setup => self.to_html_setup(),
+            View::Setup(edit) => self.to_html_setup(edit),
             _ => self.to_html_compact(),
         }
     }

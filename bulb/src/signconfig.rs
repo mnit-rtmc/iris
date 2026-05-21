@@ -66,7 +66,7 @@ impl AncillaryData for SignConfigAnc {
     /// Construct ancillary sign config data
     fn new(_pri: &SignConfig, view: View) -> Self {
         let mut assets = Vec::new();
-        if let View::Setup = view {
+        if let View::Setup(_edit) = view {
             assets.push(Asset::Fonts);
         }
         SignConfigAnc {
@@ -168,9 +168,9 @@ fn to_html_compact(sc: &SignConfig, anc: &SignConfigAnc) -> String {
 }
 
 /// Convert to setup HTML
-fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
+fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc, edit: bool) -> String {
     let mut tree = Tree::new();
-    sc.title(View::Setup, &mut tree.root::<html::Div>());
+    sc.title(View::Setup(edit), &mut tree.root::<html::Div>());
     let mut div = tree.root::<html::Div>();
     div.class("row");
     div.label().cdata("Color Scheme").close();
@@ -240,7 +240,7 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc) -> String {
         .close();
     anc.select_fonts_html(sc.default_font, &mut div.select());
     div.close();
-    footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+    footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
     String::from(tree)
 }
 
@@ -390,7 +390,7 @@ impl Card for SignConfig {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &SignConfigAnc) -> String {
         match view {
-            View::Setup => to_html_setup(self, anc),
+            View::Setup(edit) => to_html_setup(self, anc, edit),
             _ => to_html_compact(self, anc),
         }
     }

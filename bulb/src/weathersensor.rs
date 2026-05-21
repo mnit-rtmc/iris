@@ -815,10 +815,10 @@ impl WeatherSensor {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &WeatherSensorAnc) -> String {
+    fn to_html_setup(&self, anc: &WeatherSensorAnc, edit: bool) -> String {
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();
-        self.title(View::Setup, &mut div);
+        self.title(View::Setup(edit), &mut div);
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("site_id").cdata("Site ID").close();
@@ -850,7 +850,7 @@ impl WeatherSensor {
         div.close();
         anc.cio.controller_html(self, &mut tree.root::<html::Div>());
         anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -921,7 +921,7 @@ impl Card for WeatherSensor {
         match view {
             View::Create => self.to_html_create(anc),
             View::Location => anc.loc.to_html_loc(self),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             View::Status => self.to_html_status(anc),
             _ => self.to_html_compact(anc),
         }

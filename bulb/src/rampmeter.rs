@@ -158,7 +158,7 @@ impl AncillaryData for RampMeterAnc {
     /// Construct ancillary ramp meter data
     fn new(pri: &RampMeter, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        if let View::Setup = view {
+        if let View::Setup(_edit) = view {
             cio.assets.push(Asset::MeterAlgorithms);
             cio.assets.push(Asset::MeterTypes);
         }
@@ -677,9 +677,9 @@ impl RampMeter {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &RampMeterAnc) -> String {
+    fn to_html_setup(&self, anc: &RampMeterAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
@@ -747,7 +747,7 @@ impl RampMeter {
             .size(8)
             .value(opt_str(self.pm_target));
         div.close();
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -830,7 +830,7 @@ impl Card for RampMeter {
             View::Control => self.to_html_control(anc),
             View::Location => anc.loc.to_html_loc(self),
             View::Request => self.to_html_request(anc),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
         }
     }

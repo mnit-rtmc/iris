@@ -51,9 +51,9 @@ impl EventConfig {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self) -> String {
+    fn to_html_setup(&self, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("store").cdata("Enable Store").close();
@@ -84,7 +84,7 @@ impl EventConfig {
             .size(4)
             .value(self.purge_days);
         div.close();
-        footer_html(View::Setup, false, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), false, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -122,7 +122,7 @@ impl Card for EventConfig {
     fn to_html(&self, view: View, anc: &EventConfigAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Setup => self.to_html_setup(),
+            View::Setup(edit) => self.to_html_setup(edit),
             _ => self.to_html_compact(),
         }
     }

@@ -281,10 +281,14 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Build views select
     fn views_html<'p>(&self, view: View, select: &'p mut html::Select<'p>) {
+        let edit = match view {
+            View::Setup(true) => true,
+            _ => false,
+        };
         select.id(eid::VIEW);
-        for v in res_views(Self::res()) {
+        for v in res_views(Self::res(), edit) {
             let mut option = select.option();
-            if *v == view {
+            if v == view {
                 option.selected();
             }
             option.cdata(v.as_str()).close();
@@ -362,54 +366,24 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
 }
 
 /// Get available views for a resource type
-pub fn res_views(res: Res) -> &'static [View] {
-    match res {
-        Res::ActionPlan | Res::Incident => {
-            &[View::Compact, View::Control, View::Setup]
-        }
-        Res::CabinetStyle
-        | Res::CommConfig
-        | Res::Domain
-        | Res::EventConfig
-        | Res::FlowStream
-        | Res::Gps
-        | Res::LcsState
-        | Res::MapExtent
-        | Res::MonitorStyle
-        | Res::MsgPattern
-        | Res::PlanPhase
-        | Res::Road
-        | Res::Role
-        | Res::SignConfig
-        | Res::SystemAttribute
-        | Res::User
-        | Res::Word => &[View::Compact, View::Setup],
-        Res::Beacon | Res::GateArm | Res::Lcs => {
-            &[View::Compact, View::Control, View::Location, View::Setup]
-        }
-        Res::Camera | Res::RampMeter => &[
-            View::Compact,
-            View::Control,
-            View::Location,
-            View::Request,
-            View::Setup,
-        ],
-        Res::Dms => &[
-            View::Compact,
-            View::Control,
-            View::Location,
-            View::Request,
-            View::Setup,
-            View::Status,
-        ],
-        Res::Alarm | Res::CommLink | Res::Detector | Res::VideoMonitor => {
-            &[View::Compact, View::Status, View::Setup]
-        }
-        Res::Controller | Res::TagReader | Res::WeatherSensor => {
-            &[View::Compact, View::Status, View::Location, View::Setup]
-        }
-        _ => &[View::Compact],
+pub fn res_views(res: Res, edit: bool) -> Vec<View> {
+    let mut views = vec![View::Compact];
+    if res.has_control() {
+        views.push(View::Control);
     }
+    if res.has_location() {
+        views.push(View::Location);
+    }
+    if res.has_request() {
+        views.push(View::Request);
+    }
+    if res.has_setup() {
+        views.push(View::Setup(edit));
+    }
+    if res.has_status() {
+        views.push(View::Status);
+    }
+    views
 }
 
 /// Get the URI of a resource (all)
@@ -439,8 +413,8 @@ pub fn uri_one(res: Res, name: &str) -> Uri {
 pub struct CardList {
     /// Resource type
     res: Res,
-    /// Access level for resource
-    access_level: u32,
+    /// Access permissions for resource
+    access: Vec<Permission>,
     /// Old JSON list
     old_json: String,
     /// JSON list of cards
@@ -451,16 +425,13 @@ pub struct CardList {
 
 impl CardList {
     /// Create a new card list
-    pub fn new(res: Res, access: &[Permission]) -> Self {
-        let access_level = access
-            .iter()
-            .fold(0, |acc, perm| acc.max(perm.access_level_for(res)));
+    pub fn new(res: Res, access: Vec<Permission>) -> Self {
         let old_json = String::new();
         let json = String::new();
         let views = Vec::new();
         CardList {
             res,
-            access_level,
+            access,
             old_json,
             json,
             views,
@@ -535,6 +506,13 @@ impl CardList {
         Ok(states)
     }
 
+    /// Get highest access level for the resource
+    pub fn access_level(&self) -> u32 {
+        self.access
+            .iter()
+            .fold(0, |acc, perm| acc.max(perm.access_level_for(self.res)))
+    }
+
     /// Search card views
     async fn search_card_views<C: Card>(
         &mut self,
@@ -546,7 +524,7 @@ impl CardList {
         let search = Search::new(search);
         let mut views = Vec::with_capacity(cards.len());
         // "Create" card
-        let view = if self.access_level == 4
+        let view = if self.access_level() == 4
             && search.is_all()
             && res != Res::EventConfig
             && res != Res::SignConfig
@@ -712,6 +690,12 @@ pub async fn fetch_ancillary<C: Card>(
 
 /// Build card footer HTML
 pub fn footer_html<'p>(view: View, delete: bool, div: &'p mut html::Div<'p>) {
+    let (id, lbl) = match view {
+        View::Location => (eid::GEOLOC, "🖍️ Save"),
+        View::Create => (eid::CREATE, "🖍️ Create"),
+        View::Setup(true) => (eid::SAVE, "🖍️ Save"),
+        _ => return,
+    };
     div.class("row");
     div.span().close(); /* empty */
     if delete {
@@ -720,12 +704,6 @@ pub fn footer_html<'p>(view: View, delete: bool, div: &'p mut html::Div<'p>) {
             .r#type("button")
             .cdata("🗑️ Delete")
             .close();
-    };
-    let (id, lbl) = match view {
-        View::Location => (eid::GEOLOC, "🖍️ Save"),
-        View::Create => (eid::CREATE, "🖍️ Create"),
-        View::Setup => (eid::SAVE, "🖍️ Save"),
-        _ => ("", ""),
     };
     if !id.is_empty() {
         div.button().id(id).r#type("button").cdata(lbl).close();

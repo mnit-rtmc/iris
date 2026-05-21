@@ -93,7 +93,7 @@ impl AncillaryData for CameraAnc {
         if let (View::Status, Some(nm)) = (view, pri.geoloc()) {
             loc.assets.push(Asset::GeoLoc(nm.to_string(), Res::Camera));
         }
-        if let View::Setup = view {
+        if let View::Setup(_edit) = view {
             loc.assets.push(Asset::EncoderTypes);
         }
         CameraAnc {
@@ -556,9 +556,9 @@ impl Camera {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &CameraAnc) -> String {
+    fn to_html_setup(&self, anc: &CameraAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("cam_num").cdata("Cam Num").close();
@@ -651,7 +651,7 @@ impl Camera {
             .cdata(opt_ref(&self.cam_template))
             .close();
         div.close();
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 }
@@ -728,7 +728,7 @@ impl Card for Camera {
             View::Control => self.to_html_control(anc),
             View::Location => anc.loc.to_html_loc(self),
             View::Request => self.to_html_request(anc),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
         }
     }

@@ -119,6 +119,17 @@ pub fn card_list(cards: Option<CardList>) -> Option<CardList> {
     })
 }
 
+/// Check if card edit is allowed
+pub fn can_edit_card() -> bool {
+    STATE.with(|rc| {
+        rc.borrow()
+            .cards
+            .as_ref()
+            .map(|cl| cl.access_level() > 3)
+            .unwrap_or(false)
+    })
+}
+
 /// Set card view to global app state
 pub fn set_view(cv: CardView) {
     STATE.with(|rc| {

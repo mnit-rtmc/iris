@@ -811,8 +811,9 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
         let search = search_value()?;
         replace_card(cv.compact(), &search).await?;
     }
+    let edit = app::can_edit_card();
     // Expand to the second view (1) for this resource
-    let mut view = *card::res_views(res).get(1).unwrap_or(&View::Compact);
+    let mut view = *card::res_views(res, edit).get(1).unwrap_or(&View::Compact);
     if id.ends_with('_') && id.len() == res.as_str().len() + 1 {
         view = View::Create;
     }
@@ -881,8 +882,8 @@ async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
 async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
     match res {
         Some(res) => {
-            let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
-            let mut cards = CardList::new(res, &access);
+            let access = Asset::Access.uri().get_val().await?;
+            let mut cards = CardList::new(res, access);
             cards.fetch_all().await?;
             let search = search_value()?;
             let html = cards.build_html(&search).await?;
@@ -1134,8 +1135,8 @@ async fn update_card_list(res: Res) -> Result<bool> {
     let old_json = old_cards.json().to_string();
     let expanded = old_cards.expanded_view();
     app::card_list(Some(old_cards));
-    let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
-    let mut cards = CardList::new(res, &access).with_json(old_json);
+    let access = Asset::Access.uri().get_val().await?;
+    let mut cards = CardList::new(res, access).with_json(old_json);
     cards.fetch_all().await?;
     let search = search_value()?;
     for (cv, html) in cards.changed_html(&search).await? {
@@ -1174,9 +1175,8 @@ async fn update_map_states(
             let items = match cards {
                 Some(cards) => cards.states_main().await?,
                 None => {
-                    let access: Vec<Permission> =
-                        Asset::Access.uri().get_val().await?;
-                    let mut cards = CardList::new(res, &access);
+                    let access = Asset::Access.uri().get_val().await?;
+                    let mut cards = CardList::new(res, access);
                     cards.fetch_all().await?;
                     cards.states_main().await?
                 }

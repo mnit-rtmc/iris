@@ -226,7 +226,7 @@ impl AncillaryData for DmsAnc {
                 cio.assets.push(Asset::Graphics);
                 cio.assets.push(Asset::DeviceActions);
             }
-            View::Setup => {
+            View::Setup(_edit) => {
                 cio.assets.push(Asset::SignConfigs);
             }
             _ => (),
@@ -1029,9 +1029,9 @@ impl Dms {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &DmsAnc) -> String {
+    fn to_html_setup(&self, anc: &DmsAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
@@ -1047,7 +1047,7 @@ impl Dms {
         anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
         self.sign_config_html(anc, &mut tree.root::<html::Div>());
         // FIXME: add sign_detail button
-        footer_html(View::Setup, true, &mut tree.root::<html::Div>());
+        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 
@@ -1314,7 +1314,7 @@ impl Card for Dms {
             View::Control => self.to_html_control(anc),
             View::Location => anc.loc.to_html_loc(self),
             View::Request => self.to_html_request(anc),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             View::Status => self.to_html_status(anc),
             _ => self.to_html_compact(anc),
         }

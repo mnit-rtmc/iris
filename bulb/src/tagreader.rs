@@ -179,9 +179,9 @@ impl TagReader {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, anc: &TagReaderAnc) -> String {
+    fn to_html_setup(&self, anc: &TagReaderAnc, edit: bool) -> String {
         let mut tree = Tree::new();
-        self.title(View::Setup, &mut tree.root::<html::Div>());
+        self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         anc.cio.controller_html(self, &mut tree.root::<html::Div>());
         anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
         String::from(tree)
@@ -251,7 +251,7 @@ impl Card for TagReader {
         match view {
             View::Create => self.to_html_create(anc),
             View::Location => anc.loc.to_html_loc(self),
-            View::Setup => self.to_html_setup(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
             View::Status => self.to_html_status(anc),
             _ => self.to_html_compact(anc),
         }
