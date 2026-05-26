@@ -12,6 +12,7 @@
 //
 use crate::actionplan::ActionPlan;
 use crate::alarm::Alarm;
+use crate::app;
 use crate::asset::Asset;
 use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
@@ -281,10 +282,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Build views select
     fn views_html<'p>(&self, view: View, select: &'p mut html::Select<'p>) {
-        let edit = match view {
-            View::Setup(true) => true,
-            _ => false,
-        };
+        let edit = app::can_edit_card();
         select.id(eid::VIEW);
         for v in res_views(Self::res(), edit) {
             let mut option = select.option();
@@ -371,8 +369,8 @@ pub fn res_views(res: Res, edit: bool) -> Vec<View> {
     if res.has_control() {
         views.push(View::Control);
     }
-    if res.has_location() {
-        views.push(View::Location);
+    if res.has_status() {
+        views.push(View::Status);
     }
     if res.has_request() {
         views.push(View::Request);
@@ -380,8 +378,8 @@ pub fn res_views(res: Res, edit: bool) -> Vec<View> {
     if res.has_setup() {
         views.push(View::Setup(edit));
     }
-    if res.has_status() {
-        views.push(View::Status);
+    if res.has_location() {
+        views.push(View::Location(edit));
     }
     views
 }
@@ -691,8 +689,8 @@ pub async fn fetch_ancillary<C: Card>(
 /// Build card footer HTML
 pub fn footer_html<'p>(view: View, delete: bool, div: &'p mut html::Div<'p>) {
     let (id, lbl) = match view {
-        View::Location => (eid::GEOLOC, "🖍️ Save"),
         View::Create => (eid::CREATE, "🖍️ Create"),
+        View::Location(true) => (eid::GEOLOC, "🖍️ Save"),
         View::Setup(true) => (eid::SAVE, "🖍️ Save"),
         _ => return,
     };

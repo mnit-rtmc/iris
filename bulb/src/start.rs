@@ -557,7 +557,20 @@ fn handle_card_view_ev() {
 /// Get the selected view value
 fn card_view_value() -> Option<View> {
     match Doc::get().select_parse::<String>(eid::VIEW) {
-        Some(view) => View::try_from(view.as_str()).ok(),
+        Some(view) => {
+            match View::try_from(view.as_str()) {
+                Ok(View::Setup(_edit)) => {
+                    let edit = app::can_edit_card();
+                    Some(View::Setup(edit))
+                }
+                Ok(View::Location(_edit)) => {
+                    let edit = app::can_edit_card();
+                    Some(View::Location(edit))
+                }
+                Ok(view) => Some(view),
+                Err(_) => None,
+            }
+        }
         None => None,
     }
 }

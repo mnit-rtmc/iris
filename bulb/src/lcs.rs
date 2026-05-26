@@ -611,8 +611,8 @@ impl Card for Lcs {
         match view {
             View::Create => self.to_html_create(anc),
             View::Control => self.to_html_control(anc),
-            View::Location => anc.loc.to_html_loc(self),
             View::Setup(edit) => self.to_html_setup(anc, edit),
+            View::Location(edit) => anc.loc.to_html_loc(self, edit),
             _ => self.to_html_compact(anc),
         }
     }

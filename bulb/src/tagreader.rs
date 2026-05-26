@@ -250,9 +250,9 @@ impl Card for TagReader {
     fn to_html(&self, view: View, anc: &TagReaderAnc) -> String {
         match view {
             View::Create => self.to_html_create(anc),
-            View::Location => anc.loc.to_html_loc(self),
-            View::Setup(edit) => self.to_html_setup(anc, edit),
             View::Status => self.to_html_status(anc),
+            View::Setup(edit) => self.to_html_setup(anc, edit),
+            View::Location(edit) => anc.loc.to_html_loc(self, edit),
             _ => self.to_html_compact(anc),
         }
     }

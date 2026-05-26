@@ -71,14 +71,14 @@ pub enum View {
     Compact,
     /// Control view
     Control,
-    /// Setup view
-    Setup(bool),
     /// Status view
     Status,
-    /// Location view (FIXME: add edit bool)
-    Location,
     /// Request view
     Request,
+    /// Setup view
+    Setup(bool),
+    /// Location view
+    Location(bool),
 }
 
 impl View {
@@ -96,10 +96,10 @@ impl View {
         match self {
             View::Create
             | View::Control
-            | View::Setup(_)
             | View::Status
-            | View::Location
-            | View::Request => true,
+            | View::Request
+            | View::Setup(_)
+            | View::Location(_) => true,
             _ => false,
         }
     }
@@ -123,10 +123,10 @@ impl View {
             Create => "🆕 Create",
             Compact => "⌄ Compact",
             Control => "🕹️ Control",
-            Setup(_edit) => "📝 Setup",
             Status => "☑️ Status",
-            Location => "🗺️ Location",
             Request => "🙏 Request",
+            Setup(_edit) => "📝 Setup",
+            Location(_edit) => "🗺️ Location",
         }
     }
 }
@@ -144,10 +144,10 @@ impl TryFrom<&str> for View {
             v if v == Create.as_str() => Ok(Create),
             v if v == Compact.as_str() => Ok(Compact),
             v if v == Control.as_str() => Ok(Control),
-            v if v == Setup(false).as_str() => Ok(Setup(false)),
             v if v == Status.as_str() => Ok(Status),
-            v if v == Location.as_str() => Ok(Location),
             v if v == Request.as_str() => Ok(Request),
+            v if v == Setup(false).as_str() => Ok(Setup(false)),
+            v if v == Location(false).as_str() => Ok(Location(false)),
             _ => Err(()),
         }
     }
@@ -259,7 +259,7 @@ impl CardView {
         for action in pri.handle_click(anc, id) {
             action.perform().await?;
         }
-        if let View::SaveEv | View::Location = view {
+        if let View::SaveEv | View::Location(_) = view {
             Ok(Some(self.view.compact()))
         } else {
             Ok(None)

@@ -69,7 +69,7 @@ where
             (View::Control, Some(nm)) => {
                 assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
             }
-            (View::Location, Some(nm)) => {
+            (View::Location(_edit), Some(nm)) => {
                 assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
                 assets.push(Asset::Directions);
                 assets.push(Asset::Roads);
@@ -169,9 +169,9 @@ where
     }
 
     /// Convert to Location HTML
-    pub fn to_html_loc(&self, card: &C) -> String {
+    pub fn to_html_loc(&self, card: &C, edit: bool) -> String {
         let mut tree = Tree::new();
-        card.title(View::Location, &mut tree.root::<html::Div>());
+        card.title(View::Location(edit), &mut tree.root::<html::Div>());
         match &self.geoloc {
             Some(geoloc) => self.location_html(geoloc, &mut tree),
             None => {
@@ -179,7 +179,7 @@ where
                 span.cdata("Error: missing geo_loc!").close();
             }
         };
-        footer_html(View::Location, false, &mut tree.root::<html::Div>());
+        footer_html(View::Location(edit), false, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 
