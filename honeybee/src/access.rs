@@ -116,6 +116,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::Beacon, "message")
         | (Res::Beacon, "preset")
         | (Res::Camera, "publish")
+        | (Res::Camera, "store_preset")
         | (Res::CommConfig, "timeout_ms")
         | (Res::CommConfig, "retry_threshold")
         | (Res::CommConfig, "idle_disconnect_sec")
