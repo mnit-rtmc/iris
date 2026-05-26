@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2024  Minnesota Department of Transportation
+ * Copyright (C) 2024-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,9 @@ public class PermissionPanel extends ProxyTablePanel<Permission> {
 	/** Base resource types */
 	static public final String[] BASE_RES = {
 		"action_plan",
-		"alert_config",
 		"beacon",
 		"camera",
-		"controller",
-		"detector",
+		"comm_config",
 		"dms",
 		"gate_arm",
 		"incident",
@@ -44,6 +42,7 @@ public class PermissionPanel extends ProxyTablePanel<Permission> {
 		"parking_area",
 		"permission",
 		"ramp_meter",
+		"road",
 		"system_attribute",
 		"toll_zone",
 		"video_monitor",
