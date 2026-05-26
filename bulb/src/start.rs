@@ -393,7 +393,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     sb_search.set_value(search);
     let sb_state = doc.elem::<HtmlSelectElement>(eid::STATE)?;
     let html = match res {
-        Some(res) => card::item_states_html(res),
+        Some(res) => card::item_states_html(res, !search.is_empty()),
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
@@ -557,20 +557,18 @@ fn handle_card_view_ev() {
 /// Get the selected view value
 fn card_view_value() -> Option<View> {
     match Doc::get().select_parse::<String>(eid::VIEW) {
-        Some(view) => {
-            match View::try_from(view.as_str()) {
-                Ok(View::Setup(_edit)) => {
-                    let edit = app::can_edit_card();
-                    Some(View::Setup(edit))
-                }
-                Ok(View::Location(_edit)) => {
-                    let edit = app::can_edit_card();
-                    Some(View::Location(edit))
-                }
-                Ok(view) => Some(view),
-                Err(_) => None,
+        Some(view) => match View::try_from(view.as_str()) {
+            Ok(View::Setup(_edit)) => {
+                let edit = app::can_edit_card();
+                Some(View::Setup(edit))
             }
-        }
+            Ok(View::Location(_edit)) => {
+                let edit = app::can_edit_card();
+                Some(View::Location(edit))
+            }
+            Ok(view) => Some(view),
+            Err(_) => None,
+        },
         None => None,
     }
 }

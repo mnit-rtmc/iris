@@ -296,14 +296,17 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 }
 
 /// Build all item states HTML
-pub fn item_states_html(res: Res) -> String {
+pub fn item_states_html(res: Res, all: bool) -> String {
     let mut tree = Tree::new();
     let mut option = tree.root::<html::Option>();
+    if all {
+        option.selected();
+    }
     option.value("").cdata("all ↴").close();
     for st in item_states_all(res) {
         let mut option = tree.root::<html::Option>();
         option.value(st.code());
-        if Some(*st) == default_state(res) {
+        if !all && default_state(res) == Some(*st) {
             option.selected();
         }
         option
