@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
+use crate::util;
 use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
 use serde::de::DeserializeOwned;
 use std::borrow::{Borrow, Cow};
@@ -156,7 +157,7 @@ impl Uri {
 
 /// Fetch a GET response
 async fn get_response(uri: &Uri) -> Result<Response> {
-    let window = web_sys::window().ok_or(Error::NoWindow())?;
+    let window = util::window()?;
     let req = Request::new_with_str(uri.as_str())?;
     req.headers().set("Accept", uri.content_type.as_str())?;
     let resp = JsFuture::from(window.fetch_with_request(&req)).await?;
@@ -183,7 +184,7 @@ async fn perform_fetch(
     uri: &str,
     json: Option<&JsValue>,
 ) -> Result<Response> {
-    let window = web_sys::window().ok_or(Error::NoWindow())?;
+    let window = util::window()?;
     let ri = RequestInit::new();
     ri.set_method(method);
     if let Some(json) = &json {

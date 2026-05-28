@@ -137,25 +137,28 @@ impl From<OptVal<String>> for Value {
 }
 
 /// Get the DOM window
-pub fn window() -> Window {
-    let window = web_sys::window();
-    if window.is_none() {
-        log::error!("window: None");
-    }
-    window.unwrap_throw()
+pub fn window() -> Result<Window> {
+    web_sys::window()
+        .ok_or(Error::NoWindow())
+        .inspect_err(|e| log::error!("window: {e:?}"))
 }
 
 /// Wrapper for web_sys Document
 pub struct Doc(pub Document);
 
 impl Doc {
+    /// Get the document as result
+    pub fn new() -> Result<Self> {
+        let doc = window()?
+            .document()
+            .ok_or(Error::NoDocument())
+            .inspect_err(|e| log::error!("document: {e:?}"))?;
+        Ok(Doc(doc))
+    }
+
     /// Get document
     pub fn get() -> Self {
-        let doc = window().document();
-        if doc.is_none() {
-            log::error!("document: None");
-        }
-        Doc(doc.unwrap_throw())
+        Doc::new().unwrap_throw()
     }
 
     /// Get the document element

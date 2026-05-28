@@ -14,7 +14,7 @@ use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
 use crate::card::{self, CardList, CardState};
 use crate::eid;
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::item::ItemState;
@@ -34,7 +34,7 @@ use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
     Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
     HtmlSelectElement, KeyboardEvent, MouseEvent, ScrollBehavior,
-    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent, Window,
+    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent,
 };
 
 /// Layer groups
@@ -79,7 +79,7 @@ pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
 async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = earthwyrm::MapPane::get() {
         map_pane.position(zoom, lon, lat, RECT_X, RECT_Y);
-        Doc::get()
+        Doc::new()?
             .elem::<Element>("zoom-level")?
             .set_inner_html(&zoom.to_string());
         // FIXME: only call these when crossing zoom threshold
@@ -167,9 +167,7 @@ pub async fn start() -> core::result::Result<(), JsError> {
 
 /// Add event listeners
 fn add_listeners() -> Result<()> {
-    let window = web_sys::window().ok_or(Error::NoWindow())?;
-    let doc = window.document().ok_or(Error::NoDocument())?;
-    let doc = Doc(doc);
+    let doc = Doc::new()?;
     let resource = doc.elem::<HtmlSelectElement>(eid::RESOURCE)?;
     resource.set_value("");
     let divider: HtmlElement = doc.elem("divider")?;
@@ -184,7 +182,7 @@ fn add_listeners() -> Result<()> {
     add_input_enter_listener(&doc.elem("login_pass")?)?;
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem(eid::LIST)?)?;
-    add_interval_callback(&window)?;
+    add_interval_callback()?;
     if let Some(map_pane) = earthwyrm::MapPane::init(
         "map-pane",
         GROUPS,
@@ -224,7 +222,7 @@ async fn finish_init() -> Result<()> {
 /// Update resource select options
 async fn update_resource() -> Result<()> {
     let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
-    let doc = Doc::get();
+    let doc = Doc::new()?;
     if let Some(el) = doc.opt_elem::<Element>("opt_action_plan") {
         el.set_class_name(opt_class(&access, Res::ActionPlan));
     }
@@ -353,7 +351,7 @@ fn row_class(show: bool) -> &'static str {
 
 /// Handle change to selected resource type
 async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
-    let doc = Doc::get();
+    let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
     let sb_list = doc.elem::<Element>(eid::LIST)?;
@@ -449,7 +447,7 @@ fn selected_resource() -> Option<Res> {
 
 /// Get value to search
 fn search_value() -> Result<String> {
-    let doc = Doc::get();
+    let doc = Doc::new()?;
     let sb_search = doc.elem::<HtmlInputElement>(eid::SEARCH)?;
     let mut search = sb_search.value();
     if let Some(istate) = doc.select_parse::<String>(eid::STATE)
@@ -531,7 +529,7 @@ async fn handle_search() -> Result<()> {
             if let Some(cv) = cards.expanded_view() {
                 replace_card(cv.compact(), &search).await?
             }
-            let doc = Doc::get();
+            let doc = Doc::new()?;
             for cv in cards.search_views(&search).await? {
                 let id = cv.id();
                 if let Some(el) = doc.opt_elem::<Element>(&id) {
@@ -673,7 +671,7 @@ fn handle_button_click_ev(target: &Element) {
 
 /// Handle a show/hide sidebar button click
 async fn handle_show_sidebar(show: bool) -> Result<()> {
-    let doc = Doc::get();
+    let doc = Doc::new()?;
     if let Some(btn) = doc.opt_elem::<HtmlButtonElement>("show_sidebar") {
         btn.set_disabled(show);
     }
@@ -835,9 +833,7 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
 
 /// Handle login button press
 async fn handle_login() -> Result<()> {
-    let window = web_sys::window().ok_or(Error::NoWindow())?;
-    let doc = window.document().ok_or(Error::NoDocument())?;
-    let doc = Doc(doc);
+    let doc = Doc::new()?;
     if let (Some(user), Some(pass)) = (
         doc.input_parse::<String>("login_user"),
         doc.input_parse::<String>("login_pass"),
@@ -883,7 +879,7 @@ async fn go_resource(attrs: ButtonAttrs) -> Result<()> {
 
 /// Set selected resource
 async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
-    let resource = Doc::get().elem::<HtmlSelectElement>(eid::RESOURCE)?;
+    let resource = Doc::new()?.elem::<HtmlSelectElement>(eid::RESOURCE)?;
     let base = res.map(|r| r.base().as_str()).unwrap_or("");
     resource.set_value(base);
     handle_resource_change(res, search).await
@@ -898,7 +894,7 @@ async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
             cards.fetch_all().await?;
             let search = search_value()?;
             let html = cards.build_html(&search).await?;
-            let doc = Doc::get();
+            let doc = Doc::new()?;
             let sb_list = doc.elem::<Element>(eid::LIST)?;
             sb_list.set_inner_html(&html);
             app::card_list(Some(cards));
@@ -943,7 +939,8 @@ fn handle_transition_ev(ev: Event) {
 }
 
 /// Add callback for regular interval checks
-fn add_interval_callback(window: &Window) -> Result<()> {
+fn add_interval_callback() -> Result<()> {
+    let window = util::window()?;
     let closure: Closure<dyn Fn()> = Closure::new(tick_interval);
     window.set_interval_with_callback_and_timeout_and_arguments_0(
         closure.as_ref().unchecked_ref(),
@@ -976,7 +973,7 @@ fn fetch_station_data() {
 
 /// Actually fetch binned station data
 async fn do_fetch_station_data() -> Result<()> {
-    if let Some(el) = Doc::get().opt_elem::<Element>("segment-style") {
+    if let Some(el) = Doc::new()?.opt_elem::<Element>("segment-style") {
         let data = StationData::fetch().await?;
         let css = data.make_style();
         el.set_inner_html(&css);
@@ -1088,7 +1085,7 @@ fn handle_map_zoom(zoom: u32) {
 
 /// Handle map zoom
 async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
-    Doc::get()
+    Doc::new()?
         .elem::<Element>("zoom-level")?
         .set_inner_html(&zoom.to_string());
     match app::selected_item() {
@@ -1178,7 +1175,7 @@ async fn update_map_states(
     cards: Option<&CardList>,
 ) -> Result<()> {
     // NOTE: resource must have locations
-    let doc = Doc::get();
+    let doc = Doc::new()?;
     if let Some(el) = doc.opt_elem::<Element>(&format!("{res}-style")) {
         let displayed = is_layer_displayed(res, zoom);
         let css = if displayed {
@@ -1242,7 +1239,7 @@ fn item_states_css(
 
 /// Update map OSM style
 async fn update_osm_style(zoom: u32) -> Result<()> {
-    let doc = Doc::get();
+    let doc = Doc::new()?;
     let displayed = zoom >= doc.input_parse::<u32>("layer-osm").unwrap_or(32);
     let css = if displayed {
         ""
