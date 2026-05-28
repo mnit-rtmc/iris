@@ -421,13 +421,13 @@ impl Res {
         matches!(
             self,
             ActionPlan
-            | Beacon
-            | Camera
-            | Dms
-            | GateArm
-            | Incident
-            | Lcs
-            | RampMeter
+                | Beacon
+                | Camera
+                | Dms
+                | GateArm
+                | Incident
+                | Lcs
+                | RampMeter
         )
     }
 
@@ -451,10 +451,7 @@ impl Res {
     /// Check if resource has a request view
     pub const fn has_request(self) -> bool {
         use Res::*;
-        matches!(
-            self,
-            Camera | Dms | RampMeter
-        )
+        matches!(self, Camera | Dms | RampMeter)
     }
 
     /// Check if resource has a setup view
@@ -462,12 +459,39 @@ impl Res {
         use Res::*;
         matches!(
             self,
-            ActionPlan | Alarm | Beacon | CabinetStyle | Camera | CommConfig
-             | CommLink | Controller | Detector | Dms | Domain | EventConfig
-            | FlowStream | GateArm | Gps
-         | Incident | Lcs  | LcsState | MapExtent | MonitorStyle | MsgPattern
-        | PlanPhase | RampMeter  | Road | Role | SignConfig | SystemAttribute
-         | TagReader | User | VideoMonitor | WeatherSensor  | Word
+            ActionPlan
+                | Alarm
+                | Beacon
+                | CabinetStyle
+                | Camera
+                | CommConfig
+                | CommLink
+                | Controller
+                | DayPlan
+                | Detector
+                | Dms
+                | Domain
+                | EventConfig
+                | FlowStream
+                | GateArm
+                | Gps
+                | Incident
+                | Lcs
+                | LcsState
+                | MapExtent
+                | MonitorStyle
+                | MsgPattern
+                | PlanPhase
+                | RampMeter
+                | Road
+                | Role
+                | SignConfig
+                | SystemAttribute
+                | TagReader
+                | User
+                | VideoMonitor
+                | WeatherSensor
+                | Word
         )
     }
 
@@ -476,8 +500,14 @@ impl Res {
         use Res::*;
         matches!(
             self,
-            Alarm | CommLink | Controller | Detector | Dms
-             | TagReader | VideoMonitor | WeatherSensor
+            Alarm
+                | CommLink
+                | Controller
+                | Detector
+                | Dms
+                | TagReader
+                | VideoMonitor
+                | WeatherSensor
         )
     }
 }

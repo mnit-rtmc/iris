@@ -20,6 +20,7 @@ use crate::camera::Camera;
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
+use crate::dayplan::DayPlan;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
@@ -342,6 +343,7 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::Camera => Camera::item_states_all(),
         Res::CommLink => CommLink::item_states_all(),
         Res::Controller => Controller::item_states_all(),
+        Res::DayPlan => DayPlan::item_states_all(),
         Res::Detector => Detector::item_states_all(),
         Res::Dms => Dms::item_states_all(),
         Res::Domain => Domain::item_states_all(),

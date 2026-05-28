@@ -21,6 +21,7 @@ use crate::card::{
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
+use crate::dayplan::DayPlan;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;

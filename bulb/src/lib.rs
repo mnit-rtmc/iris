@@ -27,6 +27,7 @@ mod cio;
 mod commconfig;
 mod commlink;
 mod controller;
+mod dayplan;
 mod detector;
 mod device;
 mod dms;
