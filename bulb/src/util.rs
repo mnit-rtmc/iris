@@ -18,7 +18,7 @@ use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::{
     Document, Element, HtmlElement, HtmlInputElement, HtmlSelectElement,
-    HtmlTextAreaElement,
+    HtmlTextAreaElement, Window,
 };
 
 /// Check for items containing a search string (lower case)
@@ -136,20 +136,35 @@ impl From<OptVal<String>> for Value {
     }
 }
 
+/// Get the DOM window
+pub fn window() -> Window {
+    let window = web_sys::window();
+    if window.is_none() {
+        log::error!("window: None");
+    }
+    window.unwrap_throw()
+}
+
 /// Wrapper for web_sys Document
 pub struct Doc(pub Document);
 
 impl Doc {
     /// Get document
     pub fn get() -> Self {
-        let window = web_sys::window().unwrap_throw();
-        let doc = window.document().unwrap_throw();
-        Doc(doc)
+        let doc = window().document();
+        if doc.is_none() {
+            log::error!("document: None");
+        }
+        Doc(doc.unwrap_throw())
     }
 
     /// Get the document element
     pub fn doc_elem(&self) -> Option<Element> {
-        self.0.document_element()
+        let el = self.0.document_element();
+        if el.is_none() {
+            log::error!("doc_elem: None");
+        }
+        el
     }
 
     /// Get an element by ID and attempt to cast it
@@ -204,10 +219,11 @@ impl Doc {
     /// Request full screen mode
     pub fn request_fullscreen(&self, yes: bool) {
         if yes {
-            self.doc_elem()
-                .unwrap_throw()
-                .request_fullscreen()
-                .unwrap_throw();
+            self.doc_elem().inspect(|el| {
+                if let Err(e) = el.request_fullscreen() {
+                    log::error!("request_fullscreen: {e:?}");
+                }
+            });
         } else {
             self.0.exit_fullscreen();
         }
