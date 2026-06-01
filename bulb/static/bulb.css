@@ -68,7 +68,6 @@ button.go_link {
   padding: 0 0.2rem;
 }
 table {
-  table-layout: fixed;
   border-collapse: collapse;
   padding: 0;
   margin: 0.1rem;
@@ -78,17 +77,17 @@ tr {
   margin: 0;
 }
 th, td {
-  padding: 0;
+  padding: 0.1rem;
   margin: 0;
 }
-.hashtag {
-  font-style: italic;
-  color: #448;
-  background-color: #dda;
+.packed {
+  table-layout: fixed;
 }
-.hashtag:invalid {
-  text-decoration: line-through;
-  background-color: #daa;
+.packed th {
+  padding: 0;
+}
+.packed td {
+  padding: 0;
 }
 .scroll_table {
   height: 8rem;
@@ -102,6 +101,15 @@ th, td {
 }
 .scroll_table tr {
   width: 100%;
+}
+.hashtag {
+  font-style: italic;
+  color: #448;
+  background-color: #dda;
+}
+.hashtag:invalid {
+  text-decoration: line-through;
+  background-color: #daa;
 }
 
 /* Generic CSS classes */

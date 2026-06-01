@@ -269,6 +269,7 @@ fn render_sign<'p>(
 ) {
     let dms = anc.make_dms(sc);
     // make a 3x3 cell table
+    table.class("packed");
     let mut tr = table.tr();
     tr.td().close(); // empty cell
     tr.td()
