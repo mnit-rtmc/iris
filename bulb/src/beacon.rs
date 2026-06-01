@@ -229,7 +229,7 @@ impl Beacon {
             .id(eid::BCN_MESSAGE)
             .maxlength(128)
             .rows(3)
-            .cols(24)
+            .cols(22)
             .cdata(&self.message);
         div.close();
         div = tree.root::<html::Div>();
@@ -239,7 +239,7 @@ impl Beacon {
             .id(eid::BCN_NOTES)
             .maxlength(128)
             .rows(2)
-            .cols(24)
+            .cols(22)
             .cdata(opt_ref(&self.notes));
         div.close();
         anc.cio.controller_html(self, &mut tree.root::<html::Div>());

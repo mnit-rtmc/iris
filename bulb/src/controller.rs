@@ -473,7 +473,7 @@ impl Controller {
             .id("notes")
             .maxlength(128)
             .rows(2)
-            .cols(26)
+            .cols(22)
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();

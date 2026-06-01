@@ -687,7 +687,7 @@ impl RampMeter {
             .id("notes")
             .maxlength(255)
             .rows(4)
-            .cols(24)
+            .cols(22)
             .cdata(opt_ref(&self.notes))
             .close();
         div.close();
