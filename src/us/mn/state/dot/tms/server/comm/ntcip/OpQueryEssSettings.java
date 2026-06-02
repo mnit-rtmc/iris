@@ -234,13 +234,20 @@ public class OpQueryEssSettings extends OpEss {
 			mess.add(sr.location);
 			mess.add(sr.sub_surface_type);
 			mess.add(sr.depth);
-			mess.queryProps();
-			logQuery(sr.location);
-			logQuery(sr.sub_surface_type);
-			logQuery(sr.depth);
-			return ss_table.isDone()
-			      ? null
-			      : new QuerySubSurfaceTable();
+			try {
+				mess.queryProps();
+				logQuery(sr.location);
+				logQuery(sr.sub_surface_type);
+				logQuery(sr.depth);
+				return ss_table.isDone()
+						? null
+						: new QuerySubSurfaceTable();
+			} catch (NoSuchName e) {
+				// Subsurface on the RPU can be misconfigured and return 15 sensors when
+				// there are really only one. If these values don't exist, we've reached
+				// the end of the table
+				return null;
+			}
 		}
 	}
 
