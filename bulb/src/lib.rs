@@ -65,6 +65,7 @@ mod sse;
 mod start;
 mod systemattr;
 mod tagreader;
+mod tollzone;
 mod user;
 mod util;
 mod videomonitor;

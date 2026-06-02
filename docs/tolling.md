@@ -62,10 +62,10 @@ The toll price is then rounded to the nearest $0.25.
 * `iris/api/toll_zone` (primary)
 * `iris/api/toll_zone/{name}`
 
-| Access       | Primary | Secondary                                   |
-|--------------|---------|---------------------------------------------|
-| 👁️  View      | name    |                                             |
-| 💡 Manage    | tollway | start\_id, end\_id, alpha, beta, max\_price |
+| Access       | Primary                     | Secondary               |
+|--------------|-----------------------------|-------------------------|
+| 👁️  View      | name                        |                         |
+| 💡 Manage    | tollway, start\_id, end\_id | alpha, beta, max\_price |
 
 </details>
 

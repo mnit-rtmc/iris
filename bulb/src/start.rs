@@ -265,7 +265,7 @@ async fn update_resource() -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("opt_system") {
         el.set_class_name(opt_class(&access, Res::SystemAttribute));
     }
-    if let Some(el) = doc.opt_elem::<Element>("opt_toll_zone") {
+    if let Some(el) = doc.opt_elem::<Element>("opt_toll") {
         el.set_class_name(opt_class(&access, Res::TollZone));
     }
     Ok(())
@@ -381,6 +381,9 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("res_system_row") {
         el.set_class_name(row_class(base == Some(Res::SystemAttribute)));
     }
+    if let Some(el) = doc.opt_elem::<Element>("res_toll_row") {
+        el.set_class_name(row_class(base == Some(Res::TollZone)));
+    }
     if let Some(res) = res {
         let id = format!("res_{}", res.as_str());
         if let Some(el) = doc.opt_elem::<HtmlInputElement>(&id) {
@@ -410,9 +413,7 @@ fn selected_resource() -> Option<Res> {
         Res::ActionPlan if doc.input_bool("res_plan_phase") => {
             Some(Res::PlanPhase)
         }
-        Res::ActionPlan if doc.input_bool("res_day_plan") => {
-            Some(Res::DayPlan)
-        }
+        Res::ActionPlan if doc.input_bool("res_day_plan") => Some(Res::DayPlan),
         Res::Dms if doc.input_bool("res_msg_pattern") => Some(Res::MsgPattern),
         Res::Dms if doc.input_bool("res_sign_config") => Some(Res::SignConfig),
         Res::Dms if doc.input_bool("res_word") => Some(Res::Word),
@@ -443,6 +444,9 @@ fn selected_resource() -> Option<Res> {
         }
         Res::SystemAttribute if doc.input_bool("res_cabinet_style") => {
             Some(Res::CabinetStyle)
+        }
+        Res::TollZone if doc.input_bool("res_tag_reader") => {
+            Some(Res::TagReader)
         }
         _ => Some(res),
     }
@@ -510,6 +514,8 @@ fn handle_input(id: String) {
         | "res_system_attr"
         | "res_event_config"
         | "res_cabinet_style"
+        | "res_tag_reader"
+        | "res_toll_zone"
         | eid::RESOURCE => handle_res_change(),
         eid::SEARCH | eid::STATE => spawn_future(handle_search()),
         eid::VIEW => handle_card_view_ev(),

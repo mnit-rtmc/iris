@@ -983,13 +983,13 @@ pub const TIME_ACTION_ONE: &str = "\
 
 /// SQL query for all toll zones (primary)
 pub const TOLL_ZONE_ALL: &str = "\
-  SELECT name, tollway \
+  SELECT name, tollway, start_id, end_id \
   FROM iris.toll_zone \
   ORDER BY name";
 
 /// SQL query for one toll zone (secondary)
 pub const TOLL_ZONE_ONE: &str = "\
-  SELECT name, start_id, end_id, tollway, alpha, beta, max_price \
+  SELECT name, tollway, start_id, end_id, alpha, beta, max_price \
   FROM iris.toll_zone \
   WHERE name = $1";
 

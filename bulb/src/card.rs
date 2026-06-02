@@ -46,6 +46,7 @@ use crate::role::Role;
 use crate::signconfig::SignConfig;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
+use crate::tollzone::TollZone;
 use crate::user::User;
 use crate::videomonitor::VideoMonitor;
 use crate::view::{CardView, View};
@@ -360,6 +361,7 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::SignConfig => SignConfig::item_states_all(),
         Res::SystemAttribute => SystemAttr::item_states_all(),
         Res::TagReader => TagReader::item_states_all(),
+        Res::TollZone => TollZone::item_states_all(),
         Res::User => User::item_states_all(),
         Res::VideoMonitor => VideoMonitor::item_states_all(),
         Res::WeatherSensor => WeatherSensor::item_states_all(),

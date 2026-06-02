@@ -488,6 +488,7 @@ impl Res {
                 | SignConfig
                 | SystemAttribute
                 | TagReader
+                | TollZone
                 | User
                 | VideoMonitor
                 | WeatherSensor

@@ -136,6 +136,7 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::RampMeter, "pm_target")
         | (Res::Role, "enabled")
         | (Res::TimeAction, _)
+        | (Res::TollZone, _)
         | (Res::User, "enabled")
         | (Res::User, "password")
         | (Res::VideoMonitor, "restricted")
@@ -159,7 +160,8 @@ fn required_post_operate(res: Res) -> bool {
 fn required_post_manage(res: Res) -> bool {
     use Res::*;
     match res {
-        ActionPlan | DeviceAction | MsgPattern | MsgLine | TimeAction => true,
+        ActionPlan | DeviceAction | MsgPattern | MsgLine | TimeAction
+        | TollZone => true,
         _ => false,
     }
 }

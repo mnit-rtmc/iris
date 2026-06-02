@@ -92,7 +92,7 @@
             <option id="opt_road" class="no-display" value="road">🛣️ Road</option>
             <option id="opt_permission" class="no-display" value="permission">🗝️ Permission</option>
             <option id="opt_system" class="no-display" value="system_attribute">📃 System</option>
-            <option id="opt_toll_zone" class="no-display" value="tag_reader">🏷️ Tag Reader</option>
+            <option id="opt_toll" class="no-display" value="toll_zone">💲 Toll</option>
           </select>
           <label id="sb_monitor" class="sb_label">📺</label>
           <label id="sb_notify" class="sb_label">⚪</label>
@@ -171,6 +171,12 @@
           <label for="res_event_config">📜 Event</label>
           <input id="res_cabinet_style" class="toggle" type="radio" name="res_system">
           <label for="res_cabinet_style">🗄️ Cabinet</label>
+        </div>
+        <div id="res_toll_row" class="no-display">
+          <input id="res_toll_zone" class="toggle" type="radio" name="res_toll">
+          <label for="res_toll_zone">💲 Toll Zone</label>
+          <input id="res_tag_reader" class="toggle" type="radio" name="res_toll" checked>
+          <label for="res_tag_reader">🏷️ Tag Reader</label>
         </div>
         <div class="sb_row">
           <input id="sb_search" type="search" placeholder="🔍" size="16">

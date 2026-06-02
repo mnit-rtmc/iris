@@ -45,6 +45,7 @@ use crate::role::Role;
 use crate::signconfig::SignConfig;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
+use crate::tollzone::TollZone;
 use crate::user::User;
 use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
