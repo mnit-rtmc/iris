@@ -31,7 +31,10 @@ public enum MeterAlgorithm {
 	STRATIFIED("SZM (obsolete)"),
 
 	/** Density (K) Adaptive metering algorithm */
-	K_ADAPTIVE("K Adaptive Metering");
+	K_ADAPTIVE("K Adaptive Metering"),
+        
+        /** Max-pressure Adaptive metering algorithm */
+	MAX_PRESSURE("Max-pressure Metering");
 
 	/** Create a new metering algorithm */
 	private MeterAlgorithm(String d) {

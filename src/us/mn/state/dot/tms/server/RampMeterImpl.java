@@ -601,6 +601,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			return new SimpleAlgorithm();
 		case K_ADAPTIVE:
 			return createKAdaptiveState();
+                case MAX_PRESSURE:
+			return createMaxPressureState();
 		default:
 			return null;
 		}
@@ -611,6 +613,18 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		MeterAlgorithmState as = null;
 		if (ent_node != null) {
 			as = KAdaptiveAlgorithm.createState(this);
+			if (null == as)
+				updateFault(RampMeter.FAULT_MISSING_STATE);
+		}
+		return as;
+	}
+        
+        /** Create max-pressure algorithm state */
+	private MeterAlgorithmState createMaxPressureState() {
+		MeterAlgorithmState as = null;
+
+		if (ent_node != null) {
+			as = MaxPressureAlgorithm.createState(this);
 			if (null == as)
 				updateFault(RampMeter.FAULT_MISSING_STATE);
 		}
