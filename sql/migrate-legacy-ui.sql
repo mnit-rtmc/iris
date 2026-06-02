@@ -7,6 +7,7 @@ BEGIN;
 INSERT INTO iris.system_attribute (name, value) VALUES
     ('legacy_ui_event_cfg_enable', 'true'),
     ('legacy_ui_sys_attr_enable', 'true'),
-    ('legacy_ui_users_enable', 'true');
+    ('legacy_ui_users_enable', 'true')
+ON CONFLICT (name) DO NOTHING;
 
 COMMIT;
