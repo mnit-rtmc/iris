@@ -33,7 +33,7 @@ public enum MeterAlgorithm {
 	/** Density (K) Adaptive metering algorithm */
 	K_ADAPTIVE("K Adaptive Metering"),
 
-	/** Max-pressure Adaptive metering algorithm */
+	/** Max-Pressure metering algorithm */
 	MAX_PRESSURE("Max-pressure Metering");
 
 	/** Create a new metering algorithm */

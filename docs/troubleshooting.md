@@ -49,6 +49,7 @@ Filename               | Description
 `infinova`             | [Infinova] protocol
 `kadaptive`            | K Adaptive metering algorithm
 `manchester`           | [Manchester] protocol
+`max-pressure`         | Max-Pressure metering algorithm
 `mndot170`             | [MnDOT-170] protocol
 `ntcip`                | [NTCIP] protocols
 `org815`               | [ORG-815] protocol
