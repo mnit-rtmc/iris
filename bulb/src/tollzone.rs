@@ -12,7 +12,7 @@
 //
 use crate::card::{AncillaryData, Card, footer_html};
 use crate::item::ItemState;
-use crate::util::{ContainsLower, Fields, opt_ref};
+use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
@@ -73,6 +73,60 @@ impl TollZone {
             .size(16)
             .value(opt_ref(&self.tollway));
         div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("start_id")
+            .cdata("Start ID (station)")
+            .close();
+        div.input()
+            .id("start_id")
+            .maxlength(10)
+            .size(10)
+            .value(opt_ref(&self.start_id));
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("end_id")
+            .cdata("End ID (station)")
+            .close();
+        div.input()
+            .id("end_id")
+            .maxlength(10)
+            .size(10)
+            .value(opt_ref(&self.end_id));
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("alpha").cdata("Alpha").close();
+        div.input()
+            .id("alpha")
+            .r#type("number")
+            .step("0.00001")
+            .inputmode("decimal")
+            .value(opt_str(self.alpha));
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("beta").cdata("Beta").close();
+        div.input()
+            .id("beta")
+            .r#type("number")
+            .step("0.00001")
+            .inputmode("decimal")
+            .value(opt_str(self.beta));
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("max_price").cdata("Max Price").close();
+        div.input()
+            .id("max_price")
+            .r#type("number")
+            .step("0.25")
+            .inputmode("decimal")
+            .value(opt_str(self.max_price));
+        div.close();
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
@@ -127,6 +181,12 @@ impl Card for TollZone {
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
+        fields.changed_input("tollway", &self.tollway);
+        fields.changed_input("start_id", &self.start_id);
+        fields.changed_input("end_id", &self.end_id);
+        fields.changed_input("alpha", self.alpha);
+        fields.changed_input("beta", self.beta);
+        fields.changed_input("max_price", self.max_price);
         fields.into_value().to_string()
     }
 }

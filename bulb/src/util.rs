@@ -115,6 +115,18 @@ impl From<OptVal<i32>> for Value {
     }
 }
 
+impl From<OptVal<f32>> for Value {
+    fn from(val: OptVal<f32>) -> Self {
+        match val.0 {
+            Some(num) => match Number::from_f64(num.into()) {
+                Some(num) => Value::Number(num),
+                None => Value::Null,
+            },
+            None => Value::Null,
+        }
+    }
+}
+
 impl From<OptVal<f64>> for Value {
     fn from(val: OptVal<f64>) -> Self {
         match val.0 {
@@ -340,6 +352,17 @@ impl Input<u32> for Fields {
     }
 }
 
+impl Input<f32> for Fields {
+    fn changed_input(&mut self, id: &str, val: f32) {
+        if let Some(parsed) = self.doc.input_parse::<f32>(id)
+            && parsed != val
+            && let Some(val) = Number::from_f64(parsed.into())
+        {
+            self.insert(id, Value::Number(val));
+        }
+    }
+}
+
 impl Input<f64> for Fields {
     fn changed_input(&mut self, id: &str, val: f64) {
         if let Some(parsed) = self.doc.input_parse::<f64>(id)
@@ -381,6 +404,15 @@ impl Input<Option<u16>> for Fields {
 impl Input<Option<u32>> for Fields {
     fn changed_input(&mut self, id: &str, val: Option<u32>) {
         let parsed = self.doc.input_parse::<u32>(id);
+        if parsed != val {
+            self.insert(id, OptVal(parsed).into());
+        }
+    }
+}
+
+impl Input<Option<f32>> for Fields {
+    fn changed_input(&mut self, id: &str, val: Option<f32>) {
+        let parsed = self.doc.input_parse::<f32>(id);
         if parsed != val {
             self.insert(id, OptVal(parsed).into());
         }
