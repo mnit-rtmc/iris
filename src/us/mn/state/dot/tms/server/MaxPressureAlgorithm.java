@@ -70,6 +70,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         backup_limit,
     };
 
+    // are we running in a SUMO test environment?
     static private boolean SUMO = false;
 
     /** Algorithm debug log */
@@ -79,7 +80,8 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
     static public final int STEP_SECONDS = 30;
 
     /** used in my test version that connects to SUMO */
-    static private final int SIM_DELAY = 0; // SUMO? MeteringJob.SUMO_DELAY : 0;
+    static public final int SUMO_DELAY = 30;
+    static private final int SIM_DELAY = SUMO? SUMO_DELAY : 0;
 
     /** Number of milliseconds for one time step */
     static private final int PERIOD_MS =
@@ -141,6 +143,13 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         return Math.round(secs / STEP_SECONDS);
     }
 
+    /** Convert single step vehicle count to flow rate.
+    * @param v Vehicle count to convert.
+    * @return Flow rate (vehicles / hour), or null for missing data. */
+    static private Double flowRate(float v) {
+        return (v >= 0) ? (v * STEP_HOUR) : null;
+    }
+        
     /** Convert step vehicle count to flow rate.
      * @param v Vehicle count to convert.
      * @param n_steps Number of time steps of vehicle count.
@@ -523,6 +532,10 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
 
         /** Cumulative passage count (vehicles) */
         private int passage_accum = 0;
+        
+        /** Queue demand history (vehicles / hour) */
+        private final BoundedSampleHistory demand_hist =
+            new BoundedSampleHistory(steps(300));
 
         /** Cumulative green count (vehicles) */
         private int green_accum = 0;
@@ -535,6 +548,9 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
 
         /** Total occupancy for duration of a queue backup */
         private int backup_occ = 0;
+        
+        /** Ratio for min rate to target rate */
+	static private final float TARGET_MIN_RATIO = 0.75f;
 
         /** Controlling minimum rate limit */
         private MinimumRateLimit limit_control = MinimumRateLimit.target_min;
@@ -999,10 +1015,38 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             demand_accum += dem_veh;
             demand_adj = calculateDemandAdjustment();
             float adjusted_dem = Math.max(dem_veh + demand_adj, 0);
+            
+            demand_hist.push(flowRate(adjusted_dem));
 
             // Recalculate demand with adjustment
             demand_accum = da + adjusted_dem;
             demand_accum_hist.push((double) demand_accum);
+            tracking_demand = trackingDemand();
+        }
+        
+        /** Calculate tracking demand rate at queue detector.
+        * @return Tracking demand flow rate (vehicles / hour) */
+        private int trackingDemand() {
+            Double d = demand_hist.average();
+            return (d != null)
+                ?	(int) Math.round(d)
+                : getDefaultTarget();
+        }
+        
+        /** Calculate target minimum rate.
+        * @return Target minimum rate (vehicles / hour). */
+        private int targetMinRate() {
+            return Math.round(tracking_demand * TARGET_MIN_RATIO);
+        }
+        
+        private int calculateMinimumRate() {
+            if (passage_good) {
+                limit_control = MinimumRateLimit.target_min;
+                return calculateMinimumRate(targetMinRate());
+            } else {
+                limit_control = MinimumRateLimit.passage_fail;
+                return tracking_demand;
+            }
         }
 
         /** Calculate minimum rate (vehicles / hour).
@@ -1139,7 +1183,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             double weight_rd = ramp_weight - downstream_weight;
 
             int max_rate = getMaximumRate();
-            int min_rate = Math.min(max_rate, getMinimumRate()); // if min rate is less than max rate for some reason, use max rate
+            int min_rate = Math.min(max_rate, Math.max(calculateMinimumRate(), getMinimumRate())); // if min rate is less than max rate for some reason, use max rate
 
             int new_rate = calcBestRate(S_ud, S_rd, R_d, weight_ud, weight_rd, min_rate, max_rate);
 
