@@ -594,17 +594,21 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	@Override
 	public PlannedAction choosePlannedAction() {
 		PlannedAction pa = super.choosePlannedAction();
-		ActionPlan ap = pa.action.getActionPlan();
-		if (ap instanceof ActionPlanImpl) {
-			ActionPlanImpl api = (ActionPlanImpl) ap;
-			long now = TimeSteward.currentTimeMillis();
-			if (api.phaseSecs(now) < PLAN_REQUEST_SECS) {
-				GateArmInterlock gai = interlock;
-				if (pa != null && gai.isOpenAllowed())
-					requestArmOpen();
-				if (pa == null && gai.isCloseAllowed())
-					requestArmClose();
+		if (pa != null) {
+			ActionPlan ap = pa.action.getActionPlan();
+			if (ap instanceof ActionPlanImpl) {
+				ActionPlanImpl api = (ActionPlanImpl) ap;
+				long now = TimeSteward.currentTimeMillis();
+				if (api.phaseSecs(now) < PLAN_REQUEST_SECS) {
+					GateArmInterlock gai = interlock;
+					if (gai.isOpenAllowed())
+						requestArmOpen();
+				}
 			}
+		} else {
+			GateArmInterlock gai = interlock;
+			if (gai.isCloseAllowed())
+				requestArmClose();
 		}
 		return pa;
 	}
