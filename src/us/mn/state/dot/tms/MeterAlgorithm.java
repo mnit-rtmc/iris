@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ public enum MeterAlgorithm {
 
 	/** Density (K) Adaptive metering algorithm */
 	K_ADAPTIVE("K Adaptive Metering"),
-        
-        /** Max-pressure Adaptive metering algorithm */
+
+	/** Max-pressure Adaptive metering algorithm */
 	MAX_PRESSURE("Max-pressure Metering");
 
 	/** Create a new metering algorithm */
