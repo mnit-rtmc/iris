@@ -4382,6 +4382,7 @@ COPY iris.meter_algorithm (id, description) FROM stdin;
 1	Simple Metering
 2	SZM (obsolete)
 3	K Adaptive Metering
+4	Max-Pressure Metering
 \.
 
 CREATE TABLE iris._ramp_meter (

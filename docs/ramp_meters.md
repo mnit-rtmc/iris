@@ -38,7 +38,7 @@ Notes                  | administrator notes, possibly including [hashtag]s
 Meter Type             | number of metered lanes, etc.
 Storage                | distance from meter to queue detector
 Max Wait               | maximum allowed wait time (estimated)
-Metering Algorithm     | **simple** or **density adaptive**
+Metering Algorithm     | **simple**, **density adaptive** or **max-pressure**
 AM Target              | historical hourly AM target rate
 PM Target              | historical hourly PM target rate
 
