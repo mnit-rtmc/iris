@@ -265,7 +265,7 @@ async fn update_resource() -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("opt_system") {
         el.set_class_name(opt_class(&access, Res::SystemAttribute));
     }
-    if let Some(el) = doc.opt_elem::<Element>("opt_toll") {
+    if let Some(el) = doc.opt_elem::<Element>("opt_tolling") {
         el.set_class_name(opt_class(&access, Res::TollZone));
     }
     Ok(())
