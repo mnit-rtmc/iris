@@ -235,15 +235,6 @@ fn dir_arrow(deg: u32) -> Option<&'static str> {
     }
 }
 
-/// Build wind direction HTML
-fn wind_dir_html<'p>(deg: u32, span: &'p mut html::Span<'p>) {
-    span.class("info");
-    if let Some(arrow) = dir_arrow(deg) {
-        span.cdata(arrow);
-    }
-    span.close();
-}
-
 /// Format temperature quantity
 fn format_temp(temp: f32) -> String {
     let temp = (f64::from(temp) * DegC).to::<TempUnit>();
@@ -381,7 +372,7 @@ impl WeatherData {
         let mut summary = details.summary();
         summary.cdata("🌡️ ");
         if let Some(avg) = self.temperature_avg() {
-            summary.cdata(format_temp(avg));
+            summary.span().class("info").cdata(format_temp(avg));
         }
         summary.close();
         let mut ul = details.ul();
@@ -392,22 +383,42 @@ impl WeatherData {
                 let mut li = ul.li();
                 li.cdata("#").cdata(i).cdata(" Air ");
                 if let Some(temp) = temp.air_temp {
-                    li.cdata(format_temp(temp));
+                    li.span().class("info").cdata(format_temp(temp));
                 }
                 li.close();
             }
         }
         if let Some(temp) = self.min_air_temp {
-            ul.li().cdata("24h low ").cdata(format_temp(temp)).close();
+            let mut li = ul.li();
+            li.cdata("24h low ")
+                .span()
+                .class("info")
+                .cdata(format_temp(temp));
+            li.close();
         }
         if let Some(temp) = self.max_air_temp {
-            ul.li().cdata("24h high ").cdata(format_temp(temp)).close();
+            let mut li = ul.li();
+            li.cdata("24h high ")
+                .span()
+                .class("info")
+                .cdata(format_temp(temp));
+            li.close();
         }
         if let Some(temp) = self.dew_point_temp {
-            ul.li().cdata("Dew point ").cdata(format_temp(temp)).close();
+            let mut li = ul.li();
+            li.cdata("Dew point ")
+                .span()
+                .class("info")
+                .cdata(format_temp(temp));
+            li.close();
         }
         if let Some(temp) = self.wet_bulb_temp {
-            ul.li().cdata("Wet bulb ").cdata(format_temp(temp)).close();
+            let mut li = ul.li();
+            li.cdata("Wet bulb ")
+                .span()
+                .class("info")
+                .cdata(format_temp(temp));
+            li.close();
         }
         ul.close();
         details.close();
@@ -423,18 +434,24 @@ impl WeatherData {
         let mut ul = details.ul();
         if let Some(visibility) = self.visibility {
             let v = (f64::from(visibility) * m).to::<DistUnit>();
-            ul.li()
-                .cdata("Visibility ")
-                .cdata(format!("{v:.1}"))
-                .close();
+            let mut li = ul.li();
+            li.cdata("Visibility ")
+                .span()
+                .class("info")
+                .cdata(format!("{v:.1}"));
+            li.close();
         }
         if let Some(rh) = self.relative_humidity {
-            ul.li().cdata("RH ").cdata(rh).cdata("%").close();
+            let mut li = ul.li();
+            li.cdata("RH ").span().class("info").cdata(rh).cdata("%");
+            li.close();
         }
         if let Some(p) = self.atmospheric_pressure {
             let p = (p as f32) * PASCALS_TO_IN_HG;
-            ul.li()
-                .cdata("Barometer ")
+            let mut li = ul.li();
+            li.cdata("Barometer ")
+                .span()
+                .class("info")
                 .cdata(format!("{p:.2}"))
                 .cdata(" inHg");
         }
@@ -500,14 +517,19 @@ impl WeatherData {
         let mut summary = details.summary();
         summary.cdata("🌬️ Wind");
         if let Some(ws) = data.iter().next() {
-            if let Some(dir) = ws.avg_direction {
-                summary.cdata(" 🧭 ");
-                wind_dir_html(dir, &mut summary.span());
+            summary.cdata(" 🧭 ");
+            let mut span = summary.span();
+            span.class("info");
+            if let Some(deg) = ws.avg_direction
+                && let Some(arrow) = dir_arrow(deg)
+            {
+                span.cdata(arrow);
             }
             if let Some(speed) = ws.avg_speed {
-                summary.cdata(" ");
-                summary.cdata(format_speed(speed));
+                span.cdata(" ");
+                span.cdata(format_speed(speed));
             }
+            span.close();
         }
         summary.close();
         let mut ul = details.ul();
@@ -520,45 +542,57 @@ impl WeatherData {
             if i > 0 && (ws.avg_direction.is_some() || ws.avg_speed.is_some()) {
                 let mut li = ul.li();
                 if let Some(num) = &num {
-                    li.cdata(num);
+                    li.cdata(num).cdata(" ");
                 }
-                if let Some(dir) = ws.avg_direction {
-                    li.cdata("Avg 🧭 ");
-                    wind_dir_html(dir, &mut li.span());
+                li.cdata("Avg 🧭 ");
+                let mut span = li.span();
+                span.class("info");
+                if let Some(deg) = ws.avg_direction
+                    && let Some(arrow) = dir_arrow(deg)
+                {
+                    span.cdata(arrow);
                 }
                 if let Some(speed) = ws.avg_speed {
-                    li.cdata(" ");
-                    li.cdata(format_speed(speed));
+                    span.cdata(" ");
+                    span.cdata(format_speed(speed));
                 }
                 li.close();
             }
             if ws.spot_direction.is_some() || ws.spot_speed.is_some() {
                 let mut li = ul.li();
                 if let Some(num) = &num {
-                    li.cdata(num);
+                    li.cdata(num).cdata(" ");
                 }
-                if let Some(dir) = ws.spot_direction {
-                    li.cdata("Spot 🧭 ");
-                    wind_dir_html(dir, &mut li.span());
+                li.cdata("Spot 🧭 ");
+                let mut span = li.span();
+                span.class("info");
+                if let Some(deg) = ws.spot_direction
+                    && let Some(arrow) = dir_arrow(deg)
+                {
+                    span.cdata(arrow);
                 }
                 if let Some(speed) = ws.spot_speed {
-                    li.cdata(" ");
-                    li.cdata(format_speed(speed));
+                    span.cdata(" ");
+                    span.cdata(format_speed(speed));
                 }
                 li.close();
             }
             if ws.gust_direction.is_some() || ws.gust_speed.is_some() {
                 let mut li = ul.li();
                 if let Some(num) = &num {
-                    li.cdata(num);
+                    li.cdata(num).cdata(" ");
                 }
-                if let Some(dir) = ws.gust_direction {
-                    li.cdata("Gust 🧭 ");
-                    wind_dir_html(dir, &mut li.span());
+                li.cdata("Gust 🧭 ");
+                let mut span = li.span();
+                span.class("info");
+                if let Some(deg) = ws.gust_direction
+                    && let Some(arrow) = dir_arrow(deg)
+                {
+                    span.cdata(arrow);
                 }
                 if let Some(speed) = ws.gust_speed {
-                    li.cdata(" ");
-                    li.cdata(format_speed(speed));
+                    span.cdata(" ");
+                    span.cdata(format_speed(speed));
                 }
                 li.close();
             }
@@ -575,19 +609,44 @@ impl WeatherData {
         summary.close();
         let mut ul = details.ul();
         if let Some(precip) = self.precip_1_hour {
-            ul.li().cdata("1h, ").cdata(format_depth(precip)).close();
+            let mut li = ul.li();
+            li.cdata("1h, ")
+                .span()
+                .class("info")
+                .cdata(format_depth(precip));
+            li.close();
         }
         if let Some(precip) = self.precip_3_hours {
-            ul.li().cdata("3h, ").cdata(format_depth(precip)).close();
+            let mut li = ul.li();
+            li.cdata("3h, ")
+                .span()
+                .class("info")
+                .cdata(format_depth(precip));
+            li.close();
         }
         if let Some(precip) = self.precip_6_hours {
-            ul.li().cdata("6h, ").cdata(format_depth(precip)).close();
+            let mut li = ul.li();
+            li.cdata("6h, ")
+                .span()
+                .class("info")
+                .cdata(format_depth(precip));
+            li.close();
         }
         if let Some(precip) = self.precip_12_hours {
-            ul.li().cdata("12h, ").cdata(format_depth(precip)).close();
+            let mut li = ul.li();
+            li.cdata("12h, ")
+                .span()
+                .class("info")
+                .cdata(format_depth(precip));
+            li.close();
         }
         if let Some(precip) = self.precip_24_hours {
-            ul.li().cdata("24h, ").cdata(format_depth(precip)).close();
+            let mut li = ul.li();
+            li.cdata("24h, ")
+                .span()
+                .class("info")
+                .cdata(format_depth(precip));
+            li.close();
         }
         details.close();
     }
@@ -627,7 +686,7 @@ fn pavement_html<'p>(
                 }
             }
             if let Some(temp) = pd.surface_temp {
-                summary.cdata(format_temp(temp));
+                summary.span().class("info").cdata(format_temp(temp));
             }
         }
         summary.close();
@@ -720,7 +779,7 @@ fn sub_surface_html<'p>(
         if let Some(sd) = data.get(i)
             && let Some(temp) = sd.temp
         {
-            summary.cdata(format_temp(temp));
+            summary.span().class("info").cdata(format_temp(temp));
         }
         summary.close();
         let mut ul = details.ul();
@@ -789,14 +848,8 @@ impl WeatherSensor {
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
-        div.span()
-            .class("info")
-            .cdata(opt_ref(&self.site_id))
-            .close();
-        div.span()
-            .class("info")
-            .cdata(opt_ref(&self.alt_id))
-            .close();
+        div.span().cdata(opt_ref(&self.site_id)).close();
+        div.span().cdata(opt_ref(&self.alt_id)).close();
         div.close();
         if let Some(sample_time) = &self.sample_time {
             div = tree.root::<html::Div>();
