@@ -112,6 +112,160 @@ pub struct TagReaderAnc {
     loc: LocAnc<TagReader>,
 }
 
+impl ProtocolSettings {
+    /// Build settings HTML
+    fn build_html<'p>(&self, nm: &str, details: &'p mut html::Details<'p>) {
+        details.summary().cdata(nm).cdata(" Settings").close();
+        if let Some(rf_atten_downlink_db) = self.rf_atten_downlink_db {
+            let mut div = details.div();
+            div.cdata("RF Atten Downlink")
+                .span()
+                .class("info")
+                .cdata(rf_atten_downlink_db)
+                .cdata(" dB");
+            div.close();
+        }
+        if let Some(rf_atten_uplink_db) = self.rf_atten_uplink_db {
+            let mut div = details.div();
+            div.cdata("RF Atten Uplink")
+                .span()
+                .class("info")
+                .cdata(rf_atten_uplink_db)
+                .cdata(" dB");
+            div.close();
+        }
+        if let Some(data_detect_db) = self.data_detect_db {
+            let mut div = details.div();
+            div.cdata("Data Detect")
+                .span()
+                .class("info")
+                .cdata(data_detect_db)
+                .cdata(" dB");
+            div.close();
+        }
+        if let Some(seen_count) = self.seen_count {
+            let mut div = details.div();
+            div.cdata("Seen Count")
+                .span()
+                .class("info")
+                .cdata(seen_count);
+            div.close();
+        }
+        if let Some(unique_count) = self.unique_count {
+            let mut div = details.div();
+            div.cdata("Unique Count")
+                .span()
+                .class("info")
+                .cdata(unique_count);
+            div.close();
+        }
+        if let Some(uplink_source) = &self.uplink_source {
+            let mut div = details.div();
+            div.cdata("Uplink Source")
+                .span()
+                .class("info")
+                .cdata(format!("{uplink_source:?}"));
+            div.close();
+        }
+        if let Some(slot) = self.slot {
+            let mut div = details.div();
+            div.cdata("Slot").span().class("info").cdata(slot);
+            div.close();
+        }
+        details.close();
+    }
+}
+
+impl TagReaderSettings {
+    /// Build settings HTML
+    fn build_html<'p>(&self, div: &'p mut html::Div<'p>) {
+        let mut details = div.details();
+        details.summary().cdata("Settings").close();
+        if let Some(ack_timeout) = self.ack_timeout {
+            let mut div = details.div();
+            div.cdata("Ack Timeout")
+                .span()
+                .class("info")
+                .cdata(ack_timeout);
+            div.close();
+        }
+        if let Some(rf_control) = &self.rf_control {
+            let mut div = details.div();
+            div.cdata("RF Control")
+                .span()
+                .class("info")
+                .cdata(format!("{rf_control:?}"));
+            div.close();
+        }
+        if let Some(downlink_freq_khz) = self.downlink_freq_khz {
+            let mut div = details.div();
+            div.cdata("Downlink Freq")
+                .span()
+                .class("info")
+                .cdata(downlink_freq_khz)
+                .cdata(" kHz");
+            div.close();
+        }
+        if let Some(uplink_freq_khz) = self.uplink_freq_khz {
+            let mut div = details.div();
+            div.cdata("Uplink Freq")
+                .span()
+                .class("info")
+                .cdata(uplink_freq_khz)
+                .cdata(" kHz");
+            div.close();
+        }
+        if let Some(line_loss_db) = self.line_loss_db {
+            let mut div = details.div();
+            div.cdata("Line Loss")
+                .span()
+                .class("info")
+                .cdata(line_loss_db)
+                .cdata(" dB");
+            div.close();
+        }
+        if let Some(sync_mode) = &self.sync_mode {
+            let mut div = details.div();
+            div.cdata("Sync Mode")
+                .span()
+                .class("info")
+                .cdata(format!("{sync_mode:?}"));
+            div.close();
+        }
+        if let Some(slave_select_count) = self.slave_select_count {
+            let mut div = details.div();
+            div.cdata("Slave Select Count")
+                .span()
+                .class("info")
+                .cdata(slave_select_count);
+            div.close();
+        }
+        if let Some(mux_mode) = &self.mux_mode {
+            let mut div = details.div();
+            div.cdata("Mux Mode").span().class("info").cdata(mux_mode);
+            div.close();
+        }
+        if let Some(antenna_channel) = &self.antenna_channel {
+            let mut div = details.div();
+            div.cdata("Antenna Channel")
+                .span()
+                .class("info")
+                .cdata(format!("{antenna_channel:?}"));
+            div.close();
+        }
+        details.close();
+        if let Some(prot) = &self.sego {
+            prot.build_html("SeGo", &mut div.details());
+        }
+        if let Some(prot) = &self.iag {
+            prot.build_html("IAG", &mut div.details());
+        }
+        if let Some(prot) = &self._6c {
+            prot.build_html("6C", &mut div.details());
+        }
+    }
+}
+
 impl AncillaryData for TagReaderAnc {
     type Primary = TagReader;
 
@@ -177,6 +331,10 @@ impl TagReader {
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64);
+        div.close();
+        if let Some(settings) = &self.settings {
+            settings.build_html(&mut tree.root::<html::Div>());
+        }
         String::from(tree)
     }
 
