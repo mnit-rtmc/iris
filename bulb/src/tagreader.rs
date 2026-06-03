@@ -17,7 +17,7 @@ use crate::error::Result;
 use crate::geoloc::LocAnc;
 use crate::item::ItemState;
 use crate::start::select_item_map;
-use crate::util::{ContainsLower, Fields, Input, opt_ref};
+use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
@@ -96,10 +96,12 @@ pub struct TagReaderSettings {
 pub struct TagReader {
     pub name: String,
     pub location: Option<String>,
+    pub notes: Option<String>,
     pub controller: Option<String>,
     // secondary attributes
     pub geo_loc: Option<String>,
     pub pin: Option<u32>,
+    pub toll_zone: Option<String>,
     pub settings: Option<TagReaderSettings>,
 }
 
@@ -182,6 +184,25 @@ impl TagReader {
     fn to_html_setup(&self, anc: &TagReaderAnc, edit: bool) -> String {
         let mut tree = Tree::new();
         self.title(View::Setup(edit), &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("notes").cdata("Notes").close();
+        div.textarea()
+            .id("notes")
+            .maxlength(255)
+            .rows(3)
+            .cols(22)
+            .cdata(opt_ref(&self.notes));
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("toll_zone").cdata("Toll Zone").close();
+        div.input()
+            .id("toll_zone")
+            .maxlength(20)
+            .size(20)
+            .value(opt_ref(&self.toll_zone));
+        div.close();
         anc.cio.controller_html(self, &mut tree.root::<html::Div>());
         anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
         String::from(tree)
@@ -238,6 +259,7 @@ impl Card for TagReader {
     fn is_match(&self, search: &str, anc: &TagReaderAnc) -> bool {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
+            || self.notes.contains_lower(search)
             || anc.cio.item_states(self).is_match(search)
     }
 
@@ -260,6 +282,8 @@ impl Card for TagReader {
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
+        fields.changed_text_area("notes", &self.notes);
+        fields.changed_input("toll_zone", &self.toll_zone);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into_value().to_string()
