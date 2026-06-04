@@ -606,6 +606,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 				}
 			}
 		} else {
+			// FIXME: don't close if opened manually
 			GateArmInterlock gai = interlock;
 			if (gai.isCloseAllowed())
 				requestArmClose();
