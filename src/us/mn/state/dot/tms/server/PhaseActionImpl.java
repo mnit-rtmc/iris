@@ -287,8 +287,10 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 			if (trigger)
 				log("HOLD_TIME " + hs);
 			return trigger;
+		} else {
+			log("HOLD_TIME invalid: " + params);
+			return false;
 		}
-		return false;
 	}
 
 	/** Check CLOCK_TIME condition */
@@ -301,10 +303,15 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 				return false;
 		}
 		Integer mn = PhaseActionHelper.getClockTime(this);
-		boolean trigger = (mn != null) && (mn == min);
-		if (trigger)
-			log("CLOCK_TIME at " + min);
-		return trigger;
+		if (mn != null) {
+			boolean trigger = (mn == min);
+			if (trigger)
+				log("CLOCK_TIME at " + min);
+			return trigger;
+		} else {
+			log("CLOCK_TIME invalid: " + params);
+			return false;
+		}
 	}
 
 	/** Check TRAFFIC_THRESHOLD condition */
