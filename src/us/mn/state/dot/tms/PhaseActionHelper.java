@@ -56,41 +56,53 @@ public class PhaseActionHelper extends BaseHelper {
 	/** Get HOLD_TIME seconds */
 	static public Integer getHoldSecs(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.HOLD_TIME.ordinal()) {
-			String[] v = pa.getParams().split(":", 3);
-			try {
-				int hr = 0;
-				int mn = 0;
-				int sc = 0;
-				switch (v.length) {
-				case 1:
-					sc = Integer.parseUnsignedInt(v[0]);
-					break;
-				case 2:
-					mn = Integer.parseUnsignedInt(v[0]);
-					sc = Integer.parseUnsignedInt(v[1]);
-					break;
-				case 3:
-					hr = Integer.parseUnsignedInt(v[0]);
-					mn = Integer.parseUnsignedInt(v[1]);
-					sc = Integer.parseUnsignedInt(v[2]);
-					break;
-				default:
-					return null;
-				}
-				return (hr * 3600) + (mn * 60) + sc;
-			}
-			catch (NumberFormatException e) { }
+			String p = pa.getParams();
+			if (p != null)
+				return parseHoldTime(p);
 		}
 		return null;
+	}
+
+	/** Parse a hold time param */
+	static private Integer parseHoldTime(String p) {
+		String[] v = p.split(":", 3);
+		try {
+			int hr = 0;
+			int mn = 0;
+			int sc = 0;
+			switch (v.length) {
+			case 1:
+				sc = Integer.parseUnsignedInt(v[0]);
+				break;
+			case 2:
+				mn = Integer.parseUnsignedInt(v[0]);
+				sc = Integer.parseUnsignedInt(v[1]);
+				break;
+			case 3:
+				hr = Integer.parseUnsignedInt(v[0]);
+				mn = Integer.parseUnsignedInt(v[1]);
+				sc = Integer.parseUnsignedInt(v[2]);
+				break;
+			default:
+				return null;
+			}
+			return (hr * 3600) + (mn * 60) + sc;
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
 	}
 
 	/** Get CLOCK_TIME minute-of-day (0-1440) */
 	static public Integer getClockTime(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.CLOCK_TIME.ordinal()) {
-			Date d = parseClockTime(pa.getParams());
-			if (null == d)
-				d = parseClockDateTime(pa.getParams());
-			return (d != null) ? getMinuteOfDay(d) : null;
+			String p = pa.getParams();
+			if (p != null) {
+				Date d = parseClockTime(p);
+				if (null == d)
+					d = parseClockDateTime(p);
+				return (d != null) ? getMinuteOfDay(d) : null;
+			}
 		}
 		return null;
 	}
@@ -106,11 +118,14 @@ public class PhaseActionHelper extends BaseHelper {
 	/** Get CLOCK_TIME calendar date */
 	static public Calendar getClockDate(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.CLOCK_TIME.ordinal()) {
-			Date d = parseClockDateTime(pa.getParams());
-			if (d != null) {
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(d);
-				return cal;
+			String p = pa.getParams();
+			if (p != null) {
+				Date d = parseClockDateTime(p);
+				if (d != null) {
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(d);
+					return cal;
+				}
 			}
 		}
 		return null;
@@ -134,5 +149,17 @@ public class PhaseActionHelper extends BaseHelper {
 		catch (ParseException e) {
 			return null;
 		}
+	}
+
+	/** Get TRAFFIC_THRESHOLD value */
+	static public TrafThreshold getTrafficThreshold(PhaseAction pa) {
+		if (pa.getCondition() == ActCondition.TRAFFIC_THRESHOLD
+			.ordinal())
+		{
+			String p = pa.getParams();
+			if (p != null)
+				return TrafThreshold.parse(p);
+		}
+		return null;
 	}
 }

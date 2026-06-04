@@ -24,10 +24,15 @@ import us.mn.state.dot.tms.ActCondition;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
+import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PhaseAction;
 import us.mn.state.dot.tms.PhaseActionHelper;
+import us.mn.state.dot.tms.Station;
+import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.TrafThreshold;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
@@ -36,6 +41,32 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  * @author Douglas Lau
  */
 public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
+
+	/** Check if traffic threshold is currently triggered */
+	static private boolean isTrafTriggered(TrafThreshold tt) {
+		Integer dv = dataValue(tt);
+		if (dv != null) {
+			if (tt.greater)
+				return (dv > tt.value);
+			else
+				return (dv < tt.value);
+		} else
+			return false;
+	}
+
+	/** Get the current data value */
+	static private Integer dataValue(TrafThreshold tt) {
+		Detector det = DetectorHelper.lookup(tt.id);
+		if (det != null) {
+			// FIXME
+		} else {
+			Station st = StationHelper.lookup(tt.id);
+			if (st != null) {
+				// FIXME
+			}
+		}
+		return null;
+	}
 
 	/** Create a unique PhaseAction record name */
 	static public String createUniqueName(String template) {
@@ -316,8 +347,16 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check TRAFFIC_THRESHOLD condition */
 	private boolean checkTrafficThreshold() {
-		// FIXME
-		return false;
+		TrafThreshold tt = PhaseActionHelper.getTrafficThreshold(this);
+		if (tt != null) {
+			boolean trigger = isTrafTriggered(tt);
+			if (trigger)
+				log("TRAFFIC_THRESHOLD " + tt);
+			return trigger;
+		} else {
+			log("TRAFFIC_THRESHOLD invalid: " + params);
+			return false;
+		}
 	}
 
 	/** Check RWIS_THRESHOLD condition */
