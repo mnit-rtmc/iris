@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2025  Minnesota Department of Transportation
+ * Copyright (C) 2011-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,9 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	/** Color to display schedule icon */
 	static private final Color COLOR_SCHEDULE = new Color(208, 0, 208);
 
+	/** Color to display phase icon */
+	static private final Color COLOR_PHASE = new Color(192, 208, 128);
+
 	/** Color for active camera style */
 	static private final Color COLOR_CAMERA = new Color(0, 192, 255);
 
@@ -71,6 +74,10 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	static private final VectorSymbol SYM_TIME = new VectorSymbol(
 		new TimeMarker());
 
+	/** Symbol for phase actions */
+	static private final VectorSymbol SYM_PHASE = new VectorSymbol(
+		new PhaseMarker());
+
 	/** Create a new plan theme */
 	public PlanTheme(PlanManager man) {
 		super(man, new PlanMarker());
@@ -81,6 +88,7 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 		addStyle(ItemStyle.GATE_ARM, COLOR_DEPLOYED);
 		addStyle(ItemStyle.METER, MeterTheme.COLOR_METERING);
 		addStyle(ItemStyle.TIME, COLOR_SCHEDULE);
+		addStyle(ItemStyle.PHASE, COLOR_PHASE);
 		addStyle(ItemStyle.ACTIVE, COLOR);
 		addStyle(ItemStyle.UNDEPLOYED, COLOR_UNDEPLOYED);
 		addStyle(ItemStyle.ALL);
@@ -103,6 +111,8 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 			return SYM_METER.getLegend(sty);
 		case TIME:
 			return SYM_TIME.getLegend(sty);
+		case PHASE:
+			return SYM_PHASE.getLegend(sty);
 		default:
 			return super.getLegend(sty);
 		}
