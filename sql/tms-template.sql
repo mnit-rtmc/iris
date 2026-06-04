@@ -2139,9 +2139,10 @@ CREATE TRIGGER phase_action_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW phase_action_view AS
-    SELECT name, action_plan, day_plan, from_phase, to_phase, condition,
-           params
-    FROM iris.phase_action;
+    SELECT name, action_plan, day_plan, from_phase, to_phase,
+           c.description AS condition, params
+    FROM iris.phase_action pa
+    JOIN iris.action_condition c ON pa.condition = c.id;
 GRANT SELECT ON phase_action_view TO PUBLIC;
 
 CREATE TABLE event.action_plan_event (
