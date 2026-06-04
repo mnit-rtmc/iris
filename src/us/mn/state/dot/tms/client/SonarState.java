@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2025  Minnesota Department of Transportation
+ * Copyright (C) 2007-2026  Minnesota Department of Transportation
  * Copyright (C) 2015       Iteris Inc.
  * Copyright (C) 2016-2021  SRF Consulting Group
  *
@@ -49,6 +49,7 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.Permission;
+import us.mn.state.dot.tms.PhaseAction;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
@@ -432,6 +433,15 @@ public class SonarState extends Client {
 		return time_actions;
 	}
 
+	/** Cache of phase actions */
+	private final TypeCache<PhaseAction> phase_actions =
+		new TypeCache<PhaseAction>(PhaseAction.class, this);
+
+	/** Get the phase action cache */
+	public TypeCache<PhaseAction> getPhaseActions() {
+		return phase_actions;
+	}
+
 	/** Cache of device actions */
 	private final TypeCache<DeviceAction> device_actions =
 		new TypeCache<DeviceAction>(DeviceAction.class, this);
@@ -630,6 +640,7 @@ public class SonarState extends Client {
 			gate_arms.ignoreAttribute("operation");
 		populateReadable(parking_areas);
 		populateReadable(time_actions);
+		populateReadable(phase_actions);
 		populateReadable(device_actions);
 		populateReadable(gpses);
 		if (canRead(Gps.SONAR_TYPE))

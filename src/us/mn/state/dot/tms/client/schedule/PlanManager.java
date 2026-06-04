@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2025  Minnesota Department of Transportation
+ * Copyright (C) 2011-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@ import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.PhaseAction;
+import us.mn.state.dot.tms.PhaseActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
@@ -88,6 +90,8 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		case METER:
 			return proxy.getActive() &&
 			       ActionPlanHelper.countRampMeters(proxy) > 0;
+		case PHASE:
+			return proxy.getActive() && hasPhaseAction(proxy);
 		case TIME:
 			return proxy.getActive() && hasTimeAction(proxy);
 		case ACTIVE:
@@ -109,6 +113,17 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Test if an aciton plan is deployed */
 	private boolean isUndeployed(ActionPlan p) {
 		return PlanPhase.UNDEPLOYED.equals(p.getPhase().getName());
+	}
+
+	/** Test if an action plan has phase actions */
+	private boolean hasPhaseAction(ActionPlan p) {
+		Iterator<PhaseAction> it = PhaseActionHelper.iterator();
+		while (it.hasNext()) {
+			PhaseAction pa = it.next();
+			if (pa.getActionPlan() == p)
+				return true;
+		}
+		return false;
 	}
 
 	/** Test if an action plan has time actions */

@@ -65,7 +65,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		map.put("day_plan", day_plan);
 		map.put("from_phase", from_phase);
 		map.put("to_phase", to_phase);
-		map.put("condition", condition);
+		map.put("condition", condition.ordinal());
 		map.put("params", params);
 		return map;
 	}
@@ -73,6 +73,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 	/** Create a new phase action */
 	public PhaseActionImpl(String n) {
 		super(n);
+		condition = ActCondition.fromOrdinal(0);
 	}
 
 	/** Create a new phase action */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DeviceAction;
+import us.mn.state.dot.tms.PhaseAction;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
@@ -47,6 +48,9 @@ public class ActionPlanTab extends JPanel {
 	/** Time action table panel */
 	private final ProxyTablePanel<TimeAction> t_panel;
 
+	/** Phase action table panel */
+	private final ProxyTablePanel<PhaseAction> pa_panel;
+
 	/** Device action table panel */
 	private final ProxyTablePanel<DeviceAction> d_panel;
 
@@ -60,6 +64,7 @@ public class ActionPlanTab extends JPanel {
 			}
 		};
 		t_panel = new TimeActionPanel(s);
+		pa_panel = new PhaseActionPanel(s);
 		d_panel = new ProxyTablePanel<DeviceAction>(
 			new DeviceActionModel(s, null));
 	}
@@ -68,9 +73,11 @@ public class ActionPlanTab extends JPanel {
 	public void initialize() {
 		plan_pnl.initialize();
 		t_panel.initialize();
+		pa_panel.initialize();
 		d_panel.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("action.plan.schedule"), t_panel);
+		tab.add(I18N.get("phase.action"), pa_panel);
 		tab.add(I18N.get("action.plan.device"), d_panel);
 		GroupLayout gl = new GroupLayout(this);
 		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
@@ -89,6 +96,7 @@ public class ActionPlanTab extends JPanel {
 	public void dispose() {
 		plan_pnl.dispose();
 		t_panel.dispose();
+		pa_panel.dispose();
 		d_panel.dispose();
 	}
 
@@ -96,6 +104,7 @@ public class ActionPlanTab extends JPanel {
 	private void selectActionPlan() {
 		ActionPlan ap = plan_pnl.getSelectedProxy();
 		t_panel.setModel(new TimeActionModel(session, ap));
+		pa_panel.setModel(new PhaseActionModel(session, ap));
 		d_panel.setModel(new DeviceActionModel(session, ap));
 	}
 }
