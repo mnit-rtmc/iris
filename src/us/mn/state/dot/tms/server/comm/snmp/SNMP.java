@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2023  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,6 +106,12 @@ public class SNMP extends BER {
 			is = i;
 			community = (c != null) ? c : PUBLIC;
 			request_id = req_id;
+		}
+
+		/** Set flag to enable query logging */
+		@Override
+		public void setLogEnabled(boolean e) {
+			// not implemented
 		}
 
 		/** Add a controller property */

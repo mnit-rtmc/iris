@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,12 +75,19 @@ class Message implements CommMessage {
 	}
 
 	/** toString */
+	@Override
 	public String toString() {
 		String ret = "Message(";
 		if (m_xelems != null)
 			ret += "m_xelems=" + m_xelems.toString();
 		ret += ")";
 		return ret;
+	}
+
+	/** Set flag to enable query logging */
+	@Override
+	public void setLogEnabled(boolean e) {
+		// not implemented
 	}
 
 	/** set timeout value in MS */

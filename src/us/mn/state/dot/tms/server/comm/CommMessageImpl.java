@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2022  Minnesota Department of Transportation
+ * Copyright (C) 2010-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,15 @@ public class CommMessageImpl<T extends ControllerProperty>
 
 	/** Controller properties */
 	private final LinkedList<T> props;
+
+	/** Flag to enable query logging */
+	private boolean log_enabled = true;
+
+	/** Set flag to enable query logging */
+	@Override
+	public void setLogEnabled(boolean e) {
+		log_enabled = e;
+	}
 
 	/** Create a new comm message.
 	 * @param m Messenger to use for communication.
@@ -87,7 +96,7 @@ public class CommMessageImpl<T extends ControllerProperty>
 	/** Log a property query */
 	@Override
 	public void logQuery(T prop) {
-		if (p_log != null && p_log.isOpen())
+		if (log_enabled && p_log != null && p_log.isOpen())
 			p_log.log(op + ": " + prop);
 	}
 

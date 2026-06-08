@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2025  Minnesota Department of Transportation
+ * Copyright (C) 2021-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.util.Date;
 import us.mn.state.dot.tms.CommState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -56,7 +57,15 @@ public class OpQueryEvents extends OpSS125 {
 		{
 			ActiveEventProperty ev = new ActiveEventProperty();
 			mess.add(ev);
-			mess.queryProps();
+			// Disable query logging (too noisy)
+			mess.setLogEnabled(false);
+			try {
+				mess.queryProps();
+			}
+			catch (ControllerException e) {
+				mess.logError("EVENT: " + e.getMessage());
+				throw e;
+			}
 			if (ev.isValidEvent()) {
 				if (ev.isValidStamp()) {
 					ev.logVehicle(controller);
@@ -84,7 +93,13 @@ public class OpQueryEvents extends OpSS125 {
 		{
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
-			mess.storeProps();
+			try {
+				mess.storeProps();
+			}
+			catch (ControllerException e) {
+				mess.logError("DATE_TIME: " + e.getMessage());
+				throw e;
+			}
 			return new ClearEvents();
 		}
 	}
@@ -98,7 +113,13 @@ public class OpQueryEvents extends OpSS125 {
 		{
 			ClearEventsProperty clear = new ClearEventsProperty();
 			mess.add(clear);
-			mess.storeProps();
+			try {
+				mess.storeProps();
+			}
+			catch (ControllerException e) {
+				mess.logError("CLEAR_EVENTS: " + e.getMessage());
+				throw e;
+			}
 			return phaseOne();
 		}
 	}
