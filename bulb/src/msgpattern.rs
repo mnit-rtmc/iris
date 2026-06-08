@@ -239,16 +239,12 @@ impl Ord for MsgPattern {
         if len_ord != Ordering::Equal {
             return len_ord;
         }
+        // for same-length MULTI strings, sort by value
         let ms_ord = self.multi.cmp(&other.multi);
         if ms_ord != Ordering::Equal {
             return ms_ord;
         }
-        // prefer patterns with no prototype value
-        if self.prototype.is_some() && other.prototype.is_none() {
-            return Ordering::Greater;
-        } else if self.prototype.is_none() && other.prototype.is_some() {
-            return Ordering::Less;
-        }
+        // otherwise, sort by pattern name
         self.name.cmp(&other.name)
     }
 }
