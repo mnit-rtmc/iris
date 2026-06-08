@@ -112,11 +112,10 @@ public class MsgPatternHelper extends BaseHelper {
 			return p0;
 		else if (tr0 == null && tr1 != null)
 			return p1;
-		else {
-			int l0 = p0.getMulti().length();
-			int l1 = p1.getMulti().length();
-			return (l0 <= l1) ? p0 : p1;
-		}
+		else if (p1.getMulti().isEmpty() && !p0.getMulti().isEmpty())
+			return p1;
+		else
+			return p0;
 	}
 
 	/** Find all sign configs for a message pattern.

@@ -234,15 +234,11 @@ impl Ord for MsgPattern {
         } else if other_combine && !self_combine {
             return Ordering::Greater;
         }
-        // prefer patterns with shorter MULTI strings
-        let len_ord = self.multi.len().cmp(&other.multi.len());
-        if len_ord != Ordering::Equal {
-            return len_ord;
-        }
-        // for same-length MULTI strings, sort by value
-        let ms_ord = self.multi.cmp(&other.multi);
-        if ms_ord != Ordering::Equal {
-            return ms_ord;
+        // prefer patterns with empty MULTI strings
+        if self.multi.is_empty() && !other.multi.is_empty() {
+            return Ordering::Less;
+        } else if other.multi.is_empty() && !self.multi.is_empty() {
+            return Ordering::Greater;
         }
         // otherwise, sort by pattern name
         self.name.cmp(&other.name)
