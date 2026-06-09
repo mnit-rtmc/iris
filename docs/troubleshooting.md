@@ -35,6 +35,7 @@ have enough disk space available.
 Filename               | Description
 -----------------------|-----------------
 `{comm-link-name}.log` | Comm link log
+`alarm`                | [Alarm] states
 `alert`                | [Alert] information
 `bottleneck`           | Bottleneck calculation for VSA algorithm
 `canoga`               | [Canoga] protocol
@@ -74,6 +75,7 @@ Filename               | Description
 `vsa`                  | [Variable speed advisory] info log
 
 
+[Alarm]: alarms.html
 [Alert]: alerts.html
 [Canoga]: protocols.html#canoga
 [CBW]: protocols.html#cbw

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2024  Minnesota Department of Transportation
+ * Copyright (C) 2005-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -34,6 +35,20 @@ import us.mn.state.dot.tms.server.event.AlarmEvent;
  * @author Douglas Lau
  */
 public class AlarmImpl extends ControllerIoImpl implements Alarm {
+
+	/** Alarm debug log */
+	static private final DebugLog ALARM_LOG = new DebugLog("alarm");
+
+	/** Check if log is open */
+	protected boolean isLogging() {
+		return ALARM_LOG.isOpen();
+	}
+
+	/** Log a message */
+	protected void logMsg(String msg) {
+		if (ALARM_LOG.isOpen())
+			ALARM_LOG.log(getName() + ": " + msg);
+	}
 
 	/** Get the event type for the new state */
 	static private EventType getEventType(boolean s) {
@@ -135,9 +150,12 @@ public class AlarmImpl extends ControllerIoImpl implements Alarm {
 			ev.doStore();
 			state = s;
 			notifyAttribute("state");
+			if (isLogging())
+				logMsg("state: " + s);
 		}
 		catch (TMSException e) {
-			e.printStackTrace();
+			if (isLogging())
+				logMsg("state " + e.getMessage());
 		}
 	}
 
@@ -155,10 +173,12 @@ public class AlarmImpl extends ControllerIoImpl implements Alarm {
 		Long tt = TimeSteward.currentTimeMillis();
 		try {
 			store.update(this, "trigger_time", asTimestamp(tt));
+			if (isLogging())
+				logMsg("trigger_time: " + asTimestamp(tt));
 		}
 		catch (TMSException e) {
-			// FIXME: what else can we do with this exception?
-			e.printStackTrace();
+			if (isLogging())
+				logMsg("trigger_time " + e.getMessage());
 		}
 		triggerTime = tt;
 		notifyAttribute("triggerTime");
