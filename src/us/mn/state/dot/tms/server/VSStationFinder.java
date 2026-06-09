@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2024  Minnesota Department of Transportation
+ * Copyright (C) 2007-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,14 +117,16 @@ public class VSStationFinder implements Corridor.StationFinder {
 	}
 
 	/** Debug the finder */
-	public void debug(DebugLog VSA_LOG) {
+	public void debug(ActionPlanImpl plan) {
 		Float a = calculateSpeedAdvisory();
-		VSA_LOG.log("adv: " + a +
-		            ", upstream: " + su +
-		            ", downstream: " + sd +
-		            ", vss: " + vss +
-		            ", speed: " + getSpeed() +
-		            ", limit: " + getSpeedLimit());
+		plan.logMsg(
+			"adv: " + a +
+			", upstream: " + su +
+			", downstream: " + sd +
+			", vss: " + vss +
+			", speed: " + getSpeed() +
+			", limit: " + getSpeedLimit()
+		);
 	}
 
 	/** Get the speed */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2025  Minnesota Department of Transportation
+ * Copyright (C) 2013-2026  Minnesota Department of Transportation
  * Copyright (C) 2021-2022  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -206,6 +206,9 @@ public class TagProcessor {
 		}
 	}
 
+	/** Action plan */
+	private final ActionPlanImpl plan;
+
 	/** Device action */
 	private final DeviceAction action;
 
@@ -214,9 +217,6 @@ public class TagProcessor {
 
 	/** Device location */
 	private final GeoLoc loc;
-
-	/** Plan debug log */
-	private final DebugLog logger;
 
 	/** Flag to indicate passing all action tag conditions */
 	private boolean condition;
@@ -256,8 +256,8 @@ public class TagProcessor {
 	/** Fail parsing message */
 	private String fail(String msg) {
 		condition = false;
-		if (logger.isOpen()) {
-			logger.log("" + action + " [fail]: " + msg +
+		if (plan.isLoggerOpen()) {
+			plan.logMsg("" + action + " [fail]: " + msg +
 				" (" + getActionMulti() + ")");
 		}
 		return EMPTY_SPAN;
@@ -265,12 +265,14 @@ public class TagProcessor {
 
 	/** Create a new device action tag processor */
 	public TagProcessor(DeviceAction da, DeviceImpl d, GeoLoc gl) {
+		// NOTE: should always be ActionPlanImpl
+		plan = (ActionPlanImpl) da.getActionPlan();
 		action = da;
 		device = d;
 		loc = gl;
-		logger = DeviceActionJob.PLAN_LOG;
-		ActionPlan ap = da.getActionPlan();
-		condition = (da.getPhase() == ap.getPhase());
+		condition = (da.getPhase() == plan.getPhase());
+		if (plan.isLoggerOpen())
+			plan.logMsg(device.getName() + " checking " + da);
 	}
 
 	/** Get the MULTI string for the device action */
@@ -283,8 +285,8 @@ public class TagProcessor {
 	public PlannedAction process() {
 		String ms = getActionMulti();
 		String multi = (ms.length() > 0) ? process(ms) : null;
-		if (condition && logger.isOpen()) {
-			logger.log("" + action + " [ok]: " + multi +
+		if (condition && plan.isLoggerOpen()) {
+			plan.logMsg("" + action + " [ok]: " + multi +
 				" (" + getActionMulti() + ")");
 		}
 		return new PlannedAction(action, condition, multi, sources,
@@ -448,8 +450,8 @@ public class TagProcessor {
 	private String calculateSpeedAdvisory(Corridor cor, float m) {
 		VSStationFinder vss_finder = new VSStationFinder(m);
 		cor.findStation(vss_finder);
-		if (logger.isOpen())
-			vss_finder.debug(logger);
+		if (plan.isLoggerOpen())
+			vss_finder.debug(plan);
 		if (!vss_finder.foundVSS())
 			return fail("Start station not found");
 		Integer lim = vss_finder.getSpeedLimit();
@@ -600,7 +602,6 @@ public class TagProcessor {
 	 * @param det Exit detector.
 	 * @param occ Threshold occupancy to activate warning. */
 	private String exitWarningSpan(DetectorImpl det, int occ) {
-		ActionPlan plan = action.getActionPlan();
 		float o = det.getOccupancy(
 			DetectorImpl.BIN_PERIOD_MS * 3,
 			plan.getIgnoreAutoFail()
@@ -662,7 +663,6 @@ public class TagProcessor {
 	private String slowWarningSpan(Speed spd, Distance dist, String mode,
 		Corridor cor, float m)
 	{
-		ActionPlan plan = action.getActionPlan();
 		boolean ig = plan.getIgnoreAutoFail();
 		BackupFinder bf = new BackupFinder(spd, dist, m, ig);
 		cor.findStation(bf);
@@ -965,8 +965,8 @@ public class TagProcessor {
 			dms, wid, mode, idx);
 		if (stat != null && (stat < min || stat > max))
 			stat = null;
-		if (logger.isOpen()) {
-			logger.log("calcClearGuideAdvisory:" +
+		if (plan.isLoggerOpen()) {
+			plan.logMsg("calcClearGuideAdvisory:" +
 				" dms=" + dms + " wid=" + wid +
 				" min=" + min + " max=" + max +
 				" mode=" + mode + " idx=" + idx +
@@ -980,16 +980,15 @@ public class TagProcessor {
 		} else {
 			String msg = "No match: does statistic, " + 
 				"route_id and index match?";
-			if (logger.isOpen())
-				logger.log("calcClearGuideAdvisory: " + msg);
+			if (plan.isLoggerOpen())
+				plan.logMsg("calcClearGuideAdvisory: " + msg);
 			return fail(msg);
 		}
 	}
 
 	/** Calculate time action span */
 	private String timeActionSpan(String dir, String format) {
-		ActionPlan plan = action.getActionPlan();
-		Date dt = getDateDir(plan, dir);
+		Date dt = getDateDir(dir);
 		if (dt != null) {
 			LocalDateTime ldt = dt.toInstant().atZone(
 				ZoneId.systemDefault()).toLocalDateTime();
@@ -999,7 +998,7 @@ public class TagProcessor {
 	}
 
 	/** Get scheduled date that's most recent or soonest from now */
-	private Date getDateDir(ActionPlan plan, String dir) {
+	private Date getDateDir(String dir) {
 		Date now = TimeSteward.getDateInstance();
 		return ("p".equals(dir))
 			? TimeActionHelper.getMostRecent(plan, now)

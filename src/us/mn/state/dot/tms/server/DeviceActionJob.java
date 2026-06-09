@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Iterator;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
@@ -45,30 +44,18 @@ import us.mn.state.dot.tms.RampMeterHelper;
  */
 public class DeviceActionJob extends Job {
 
-	/** Plan debug log */
-	static final DebugLog PLAN_LOG = new DebugLog("plan");
-
 	/** Single action plan to process (null for all) */
 	private final ActionPlanImpl plan;
-
-	/** Logger for debugging */
-	private final DebugLog logger;
 
 	/** Create a new device action job */
 	public DeviceActionJob(ActionPlanImpl ap) {
 		super(0);
-		logger = PLAN_LOG;
 		plan = ap;
 	}
 
 	/** Create a new device action job */
 	public DeviceActionJob() {
 		this(null);
-	}
-
-	/** Log a device plan message */
-	private void logMsg(Device dev, String msg) {
-		logger.log(dev.getName() + ": " + msg);
 	}
 
 	/** Perform device actions */
@@ -187,8 +174,6 @@ public class DeviceActionJob extends Job {
 	private void checkAction(DeviceAction da, Device d, GeoLoc loc) {
 		if (d instanceof DeviceImpl) {
 			DeviceImpl dev = (DeviceImpl) d;
-			if (logger.isOpen())
-				logMsg(dev, "checking " + da);
 			TagProcessor tag = new TagProcessor(da, dev, loc);
 			PlannedAction pa = tag.process();
 			dev.addPlannedAction(pa);
@@ -219,8 +204,14 @@ public class DeviceActionJob extends Job {
 		if (d instanceof DeviceImpl) {
 			DeviceImpl dev = (DeviceImpl) d;
 			PlannedAction pa = dev.choosePlannedAction();
-			if (logger.isOpen())
-				logMsg(dev, "chose " + pa);
+			ActionPlan ap = pa.action.getActionPlan();
+			if (ap instanceof ActionPlanImpl) {
+				ActionPlanImpl api = (ActionPlanImpl) ap;
+				if (api.isLoggerOpen()) {
+					api.logMsg(dev.getName() +
+						" chose " + pa);
+				}
+			}
 		}
 	}
 }

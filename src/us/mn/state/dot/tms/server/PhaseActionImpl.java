@@ -280,11 +280,12 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		return params;
 	}
 
-	/** Log a message to the debug log */
-	private void log(String msg) {
-		if (DeviceActionJob.PLAN_LOG.isOpen()) {
-			DeviceActionJob.PLAN_LOG.log("phase action: " +
-				action_plan + ", " + msg);
+	/** Log a message to the action plan log */
+	private void logMsg(String msg) {
+		if (action_plan instanceof ActionPlanImpl) {
+			ActionPlanImpl ap = (ActionPlanImpl) action_plan;
+			if (ap.isLoggerOpen())
+				ap.logMsg("phase action " + msg);
 		}
 	}
 
@@ -340,10 +341,10 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 			int ht = ap.phaseSecs(cal.getTimeInMillis());
 			boolean trigger = (hs != null) && (ht >= hs);
 			if (trigger)
-				log("HOLD_TIME " + hs);
+				logMsg("HOLD_TIME " + hs);
 			return trigger;
 		} else {
-			log("HOLD_TIME invalid: " + params);
+			logMsg("HOLD_TIME invalid: " + params);
 			return false;
 		}
 	}
@@ -361,10 +362,10 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		if (mn != null) {
 			boolean trigger = (mn == min);
 			if (trigger)
-				log("CLOCK_TIME at " + min);
+				logMsg("CLOCK_TIME at " + min);
 			return trigger;
 		} else {
-			log("CLOCK_TIME invalid: " + params);
+			logMsg("CLOCK_TIME invalid: " + params);
 			return false;
 		}
 	}
@@ -375,10 +376,10 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		if (tt != null) {
 			boolean trigger = isTriggered(tt);
 			if (trigger)
-				log("TRAFFIC_THRESHOLD " + tt);
+				logMsg("TRAFFIC_THRESHOLD " + tt);
 			return trigger;
 		} else {
-			log("TRAFFIC_THRESHOLD invalid: " + params);
+			logMsg("TRAFFIC_THRESHOLD invalid: " + params);
 			return false;
 		}
 	}
@@ -389,10 +390,10 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		if (rt != null) {
 			boolean trigger = isTriggered(rt);
 			if (trigger)
-				log("RWIS_THRESHOLD " + rt);
+				logMsg("RWIS_THRESHOLD " + rt);
 			return trigger;
 		} else {
-			log("RWIS_THRESHOLD invalid: " + params);
+			logMsg("RWIS_THRESHOLD invalid: " + params);
 			return false;
 		}
 	}
@@ -404,7 +405,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 			// FIXME: add mode to toll zone
 			return false;
 		} else {
-			log("TOLL_MODE invalid: " + params);
+			logMsg("TOLL_MODE invalid: " + params);
 			return false;
 		}
 	}
@@ -416,7 +417,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 			// FIXME
 			return false;
 		} else {
-			log("ALERT_PERIOD invalid: " + params);
+			logMsg("ALERT_PERIOD invalid: " + params);
 			return false;
 		}
 	}
@@ -435,10 +436,10 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 						return !alarm.getState();
 				}
 			}
-			log("ALARM unknown ID: " + ac);
+			logMsg("ALARM unknown ID: " + ac);
 			return false;
 		} else {
-			log("ALARM invalid: " + params);
+			logMsg("ALARM invalid: " + params);
 			return false;
 		}
 	}

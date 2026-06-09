@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ActionPlan;
@@ -61,6 +62,9 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
  * @author Michael Darter
  */
 public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
+
+	/** Plan debug log */
+	static private final DebugLog PLAN_LOG = new DebugLog("plan");
 
 	/** Allow list of CIDR blocks */
 	static private final List<CidrBlock> ALLOWLIST =
@@ -169,6 +173,16 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		active = a;
 		default_phase = lookupPlanPhase(dp);
 		phase = lookupPlanPhase(p);
+	}
+
+	/** Check if debug log is open */
+	public boolean isLoggerOpen() {
+		return PLAN_LOG.isOpen();
+	}
+
+	/** Log an action plan message */
+	public void logMsg(String msg) {
+		PLAN_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Test whether gate arm system should be disabled.
@@ -416,9 +430,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			return setPhaseNotifyX(p, uid);
 		}
 		catch (TMSException e) {
-			DeviceActionJob.PLAN_LOG.log(
-				"setPhaseNotify: " + e.getMessage()
-			);
+			if (isLoggerOpen())
+				logMsg("setPhaseNotify: " + e.getMessage());
 			return false;
 		}
 	}
