@@ -23,6 +23,8 @@ import java.util.Map;
 import us.mn.state.dot.tms.ActCondition;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.AlarmCondition;
+import us.mn.state.dot.tms.Alarm;
+import us.mn.state.dot.tms.AlarmHelper;
 import us.mn.state.dot.tms.AlertCondition;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
@@ -423,7 +425,17 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 	private boolean checkAlarm() {
 		AlarmCondition ac = PhaseActionHelper.getAlarmCondition(this);
 		if (ac != null) {
-			// FIXME
+			Alarm a = AlarmHelper.lookup(ac.id);
+			if (a instanceof AlarmImpl) {
+				AlarmImpl alarm = (AlarmImpl) a;
+				switch (ac.field) {
+					case TRIGGERED:
+						return alarm.getState();
+					case CLEARED:
+						return !alarm.getState();
+				}
+			}
+			log("ALARM unknown ID: " + ac);
 			return false;
 		} else {
 			log("ALARM invalid: " + params);
