@@ -175,11 +175,11 @@ Condition triggers in a specific alert period.
 <details>
 <summary>Alarm</summary>
 
-Condition triggers when an alarm triggers or clears.
+Condition triggers when an alarm is triggered or cleared.
 
 - **Params**: Alarm ID, _state_
 
-- **State** keywords: `trigger`, `clear`
+- **State** keywords: `triggered`, `clear`
 
 - **Example**: `A100,trigger`
 

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ActCondition;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.AlarmCondition;
 import us.mn.state.dot.tms.AlertCondition;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
@@ -420,7 +421,13 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check ALARM condition */
 	private boolean checkAlarm() {
-		// FIXME
-		return false;
+		AlarmCondition ac = PhaseActionHelper.getAlarmCondition(this);
+		if (ac != null) {
+			// FIXME
+			return false;
+		} else {
+			log("ALARM invalid: " + params);
+			return false;
+		}
 	}
 }

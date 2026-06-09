@@ -151,7 +151,7 @@ public class PhaseActionHelper extends BaseHelper {
 		}
 	}
 
-	/** Get TRAFFIC_THRESHOLD value */
+	/** Get TRAFFIC_THRESHOLD condition */
 	static public TrafThreshold getTrafficThreshold(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.TRAFFIC_THRESHOLD
 			.ordinal())
@@ -163,7 +163,7 @@ public class PhaseActionHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get RWIS_THRESHOLD value */
+	/** Get RWIS_THRESHOLD condition */
 	static public RwisThreshold getRwisThreshold(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.RWIS_THRESHOLD
 			.ordinal())
@@ -175,7 +175,7 @@ public class PhaseActionHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get TOLL_MODE value */
+	/** Get TOLL_MODE condition */
 	static public TollMode getTollMode(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.TOLL_MODE.ordinal()) {
 			String p = pa.getParams();
@@ -185,12 +185,22 @@ public class PhaseActionHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get ALERT_PERIOD value */
+	/** Get ALERT_PERIOD condition */
 	static public AlertCondition getAlertCondition(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.ALERT_PERIOD.ordinal()) {
 			String p = pa.getParams();
 			if (p != null)
 				return AlertCondition.parse(p);
+		}
+		return null;
+	}
+
+	/** Get ALARM condition */
+	static public AlarmCondition getAlarmCondition(PhaseAction pa) {
+		if (pa.getCondition() == ActCondition.ALARM.ordinal()) {
+			String p = pa.getParams();
+			if (p != null)
+				return AlarmCondition.parse(p);
 		}
 		return null;
 	}
