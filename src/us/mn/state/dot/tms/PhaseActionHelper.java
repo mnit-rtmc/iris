@@ -174,4 +174,14 @@ public class PhaseActionHelper extends BaseHelper {
 		}
 		return null;
 	}
+
+	/** Get TOLL_MODE value */
+	static public TollMode getTollMode(PhaseAction pa) {
+		if (pa.getCondition() == ActCondition.TOLL_MODE.ordinal()) {
+			String p = pa.getParams();
+			if (p != null)
+				return TollMode.parse(p);
+		}
+		return null;
+	}
 }

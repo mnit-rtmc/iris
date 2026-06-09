@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.RwisThreshold;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.TollMode;
 import us.mn.state.dot.tms.TrafThreshold;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
@@ -394,8 +395,14 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check TOLL_MODE condition */
 	private boolean checkTollMode() {
-		// FIXME
-		return false;
+		TollMode tm = PhaseActionHelper.getTollMode(this);
+		if (tm != null) {
+			// FIXME: add mode to toll zone
+			return false;
+		} else {
+			log("TOLL_MODE invalid: " + params);
+			return false;
+		}
 	}
 
 	/** Check ALERT_PERIOD condition */

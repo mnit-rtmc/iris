@@ -26,7 +26,7 @@ public class RwisThreshold {
 		FRICTION, SURFACE_TEMP, WIND_GUST, VISIBILITY, PRECIPITATION
 	}
 
-	/** Detector or station ID */
+	/** Weather sensor ID */
 	public final String id;
 
 	/** Data field */
