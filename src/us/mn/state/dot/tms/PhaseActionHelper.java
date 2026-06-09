@@ -184,4 +184,14 @@ public class PhaseActionHelper extends BaseHelper {
 		}
 		return null;
 	}
+
+	/** Get ALERT_PERIOD value */
+	static public AlertCondition getAlertCondition(PhaseAction pa) {
+		if (pa.getCondition() == ActCondition.ALERT_PERIOD.ordinal()) {
+			String p = pa.getParams();
+			if (p != null)
+				return AlertCondition.parse(p);
+		}
+		return null;
+	}
 }
