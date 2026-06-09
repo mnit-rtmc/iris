@@ -179,7 +179,7 @@ Condition triggers when an alarm is triggered or cleared.
 
 - **Params**: Alarm ID, _state_
 
-- **State** keywords: `triggered`, `clear`
+- **State** keywords: `triggered`, `cleared`
 
 - **Example**: `A100,trigger`
 

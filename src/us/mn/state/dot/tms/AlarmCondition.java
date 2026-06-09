@@ -23,7 +23,7 @@ public class AlarmCondition {
 
 	/** Data field */
 	static public enum Field {
-		TRIGGERED, CLEAR
+		TRIGGERED, CLEARED
 	}
 
 	/** Alarm ID */
@@ -63,8 +63,8 @@ public class AlarmCondition {
 		f = f.trim().toLowerCase();
 		if ("triggered".startsWith(f))
 			return Field.TRIGGERED;
-		else if ("clear".startsWith(f))
-			return Field.CLEAR;
+		else if ("cleared".startsWith(f))
+			return Field.CLEARED;
 		else
 			return null;
 	}
