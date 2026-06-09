@@ -140,7 +140,7 @@ Condition triggers when an RWIS field goes above or below a threshold value.
 - **Params**: Sensor ID, _field_ `<` or `>` value
 
 - **Field** keywords: `friction`, `surface_temp`, `wind_gust`, `visibility`,
-  `precip`
+  `precipitation`
 
 - **Example**: `WS0123,fric<70` (station WS0123 friction less than 70)
 

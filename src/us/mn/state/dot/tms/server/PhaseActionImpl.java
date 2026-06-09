@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PhaseAction;
 import us.mn.state.dot.tms.PhaseActionHelper;
+import us.mn.state.dot.tms.RwisThreshold;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -43,7 +44,7 @@ import us.mn.state.dot.tms.utils.UniqueNameCreator;
 public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check if traffic threshold is currently triggered */
-	static private boolean isTrafTriggered(TrafThreshold tt) {
+	static private boolean isTriggered(TrafThreshold tt) {
 		Integer dv = dataValue(tt);
 		if (dv != null) {
 			if (tt.greater)
@@ -54,7 +55,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 			return false;
 	}
 
-	/** Get the current data value */
+	/** Get the current traffic data value */
 	static private Integer dataValue(TrafThreshold tt) {
 		Detector det = DetectorHelper.lookup(tt.id);
 		if (det != null) {
@@ -65,6 +66,24 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 				// FIXME
 			}
 		}
+		return null;
+	}
+
+	/** Check if RWIS threshold is currently triggered */
+	static private boolean isTriggered(RwisThreshold rt) {
+		Integer dv = dataValue(rt);
+		if (dv != null) {
+			if (rt.greater)
+				return (dv > rt.value);
+			else
+				return (dv < rt.value);
+		} else
+			return false;
+	}
+
+	/** Get the current RWIS data value */
+	static private Integer dataValue(RwisThreshold rt) {
+		// FIXME
 		return null;
 	}
 
@@ -349,7 +368,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 	private boolean checkTrafficThreshold() {
 		TrafThreshold tt = PhaseActionHelper.getTrafficThreshold(this);
 		if (tt != null) {
-			boolean trigger = isTrafTriggered(tt);
+			boolean trigger = isTriggered(tt);
 			if (trigger)
 				log("TRAFFIC_THRESHOLD " + tt);
 			return trigger;
@@ -361,8 +380,16 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check RWIS_THRESHOLD condition */
 	private boolean checkRwisThreshold() {
-		// FIXME
-		return false;
+		RwisThreshold rt = PhaseActionHelper.getRwisThreshold(this);
+		if (rt != null) {
+			boolean trigger = isTriggered(rt);
+			if (trigger)
+				log("RWIS_THRESHOLD " + rt);
+			return trigger;
+		} else {
+			log("RWIS_THRESHOLD invalid: " + params);
+			return false;
+		}
 	}
 
 	/** Check TOLL_MODE condition */

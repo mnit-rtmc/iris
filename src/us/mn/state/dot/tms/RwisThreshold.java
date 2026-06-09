@@ -15,15 +15,15 @@
 package us.mn.state.dot.tms;
 
 /**
- * Traffic data threshold for phase actions
+ * RWIS data threshold for phase actions
  *
  * @author Douglas Lau
  */
-public class TrafThreshold {
+public class RwisThreshold {
 
 	/** Data field */
 	static public enum Field {
-		SPEED, FLOW, DENSITY, OCCUPANCY
+		FRICTION, SURFACE_TEMP, WIND_GUST, VISIBILITY, PRECIPITATION
 	}
 
 	/** Detector or station ID */
@@ -38,8 +38,8 @@ public class TrafThreshold {
 	/** Threshold value */
 	public final int value;
 
-	/** Create a new traffic threshold */
-	private TrafThreshold(String i, Field f, boolean g, int v) {
+	/** Create a new RWIS threshold */
+	private RwisThreshold(String i, Field f, boolean g, int v) {
 		id = i;
 		field = f;
 		greater = g;
@@ -55,8 +55,8 @@ public class TrafThreshold {
 			return "" + id + "," + field + "<" + value;
 	}
 
-	/** Parse a traffic threshold parameter */
-	static public TrafThreshold parse(String p) {
+	/** Parse an RWIS threshold parameter */
+	static public RwisThreshold parse(String p) {
 		String[] v = p.split(",", 2);
 		if (v.length == 2) {
 			String i = v[0].trim();
@@ -67,7 +67,7 @@ public class TrafThreshold {
 				Field f = parseField(lt[0]);
 				if (f != null) {
 					Integer t = parseValue(lt[1]);
-					return new TrafThreshold(i, f, false, t);
+					return new RwisThreshold(i, f, false, t);
 				}
 			}
 			String[] gt = v[1].split(">", 2);
@@ -75,7 +75,7 @@ public class TrafThreshold {
 				Field f = parseField(gt[0]);
 				if (f != null) {
 					Integer t = parseValue(gt[1]);
-					return new TrafThreshold(i, f, true, t);
+					return new RwisThreshold(i, f, true, t);
 				}
 			}
 		}
@@ -85,14 +85,16 @@ public class TrafThreshold {
 	/** Parse a data field */
 	static private Field parseField(String f) {
 		f = f.trim().toLowerCase();
-		if ("speed".startsWith(f))
-			return Field.SPEED;
-		else if ("flow".startsWith(f))
-			return Field.FLOW;
-		else if ("density".startsWith(f))
-			return Field.DENSITY;
-		else if ("occupancy".startsWith(f))
-			return Field.OCCUPANCY;
+		if ("friction".startsWith(f))
+			return Field.FRICTION;
+		else if ("surface_temp".startsWith(f))
+			return Field.SURFACE_TEMP;
+		else if ("wind_gust".startsWith(f))
+			return Field.WIND_GUST;
+		else if ("visibility".startsWith(f))
+			return Field.VISIBILITY;
+		else if ("precipitation".startsWith(f))
+			return Field.PRECIPITATION;
 		else
 			return null;
 	}

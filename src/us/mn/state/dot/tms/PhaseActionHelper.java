@@ -162,4 +162,16 @@ public class PhaseActionHelper extends BaseHelper {
 		}
 		return null;
 	}
+
+	/** Get RWIS_THRESHOLD value */
+	static public RwisThreshold getRwisThreshold(PhaseAction pa) {
+		if (pa.getCondition() == ActCondition.RWIS_THRESHOLD
+			.ordinal())
+		{
+			String p = pa.getParams();
+			if (p != null)
+				return RwisThreshold.parse(p);
+		}
+		return null;
+	}
 }
