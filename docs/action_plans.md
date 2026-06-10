@@ -121,6 +121,8 @@ Condition triggers at a specific time of day, optionally on a specific date.
 <details>
 <summary>Traffic Threshold</summary>
 
+**WARNING: not implemented yet**
+
 Condition triggers when a detector or station field goes above or below a
 threshold value.
 
@@ -134,6 +136,8 @@ threshold value.
 
 <details>
 <summary>RWIS Threshold</summary>
+
+**WARNING: not implemented yet**
 
 Condition triggers when an RWIS field goes above or below a threshold value.
 
@@ -149,6 +153,8 @@ Condition triggers when an RWIS field goes above or below a threshold value.
 <details>
 <summary>Toll Mode</summary>
 
+**WARNING: not implemented yet**
+
 Condition triggers when a toll zone changes mode.
 
 - **Params**: Toll zone ID, _mode_
@@ -161,6 +167,8 @@ Condition triggers when a toll zone changes mode.
 
 <details>
 <summary>Alert Period</summary>
+
+**WARNING: not implemented yet**
 
 Condition triggers in a specific alert period.
 
