@@ -16,6 +16,31 @@ Every 30 seconds, the most recent collected data from all online detectors is
 written to files.  An [XML file] called `det_sample.xml.gz` and a JSON file
 called `station_sample` are generated.
 
+## Setup
+
+Each vehicle detector must be associated with a [controller] on an appropriate
+[comm link].  Several [protocol]s are supported:
+
+| Protocol             | [IO Pin]s | Data Type               | [Binning] |
+|----------------------|-----------|-------------------------|-----------|
+| ADEC TDC             | 1         | [vlog]                  |           |
+| Banner DXM           | 11-86     | occupancy               | 30s       |
+| Canoga               | 1-4       | [vlog]                  |           |
+| Central Park         | 1-64      | occupancy               | 30s       |
+| DR-500               | 1         | speed                   | 30-300s † |
+| MnDOT (v4/v5)        | 39 - 62   | count, occupancy        | 30s       |
+| Natch                | 39 - 62   | [vlog]                  |           |
+| NTCIP 1202           | 1-`??`    | count, occupancy        | 1-255s †  |
+| RTMS Echo vlg        | 1-`??`    | [vlg]                   |           |
+| RTMS G4              | 1-12      | count, occupancy, speed | 5-3600s † |
+| RTMS G4 vlog         | 1-12      | [vlog]                  |           |
+| SmartSensor 105      | 1-8       | count, occupancy, speed | 5-3600s † |
+| SmartSensor 125 HD   | 1-8       | count, occupancy, speed | 5-3600s † |
+| SmartSensor 125 vlog | 1-8       | [vlog]                  |           |
+
+† For protocols which allow the binning intereval to be adjusted, it will be
+set to the [poll period] of the [comm config].
+
 <details>
 <summary>API Resources 🕵️ </summary>
 
@@ -74,7 +99,7 @@ the [r_node].
 used to derive density from occupancy, for detectors which cannot measure speed
 directly.  For **Velocity** type detectors, this is the distance to the start
 of the upstream mainline detector.  This enables recording individual vehicle
-speeds ([Canoga] protocol only).
+speeds (Canoga protocol only).
 
 If a detector is no longer used, it can be marked **abandoned**.
 
@@ -105,35 +130,6 @@ Parking    | Parking space presence detector
 To move a detector to another `r_node`, select the target `r_node` and enter the
 detector **Name**.  The current label for that detector will appear on the
 right.  To move it to the current `r_node`, press the **Transfer** button.
-
-## Detector Protocols
-
-IRIS supports several different [protocols] for communicating with vehicle
-detection systems.  The protocol used depends on the [comm link] of the
-[controller] to which a detector is assigned.
-
-Traffic data can be collected in two ways: [vehicle logging](#vehicle-logging)
-and [binning](#binned-data) in fixed time periods.
-
-Protocol               | Binning         | Traffic Data
------------------------|-----------------|------------------------
-[ADEC TDC]             | N/A             | [vlog]
-[SmartSensor] 125 HD   | 5 sec to 1 hour | Count, Occupancy, Speed
-[SmartSensor] 125 vlog | N/A             | [vlog]
-[SmartSensor] 105      | 5 sec to 1 hour | Count, Occupancy, Speed
-[RTMS] G4              | 5 sec to 1 hour | Count, Occupancy, Speed
-[RTMS] G4 vlog         | N/A             | [vlog]
-[RTMS] Echo vlg        | N/A             | [vlg]
-[Natch]                | N/A             | [vlog]
-[MnDOT-170]            | 30 sec          | Count, Occupancy
-[Canoga]               | N/A             | [vlog]
-[Central Park]         | N/A             | Occupancy
-[DR-500]               | 30-300? sec     | Speed
-[DXM]                  | N/A             | Occupancy
-[NTCIP]                | 0-255 sec       | Count, Occupancy
-
-For protocols which allow the binning intereval to be adjusted, it will be set
-to the [poll period] of the [comm config].
 
 ## Auto-Fail
 
@@ -373,22 +369,14 @@ indicates missing data.  Any data outside the valid ranges should be considered
 _missing_.
 
 
-[ADEC TDC]: protocols.html#vehicle-detection
-[Canoga]: protocols.html#vehicle-detection
-[Central Park]: protocols.html#vehicle-detection
+[binning]: #binned-data
 [comm config]: comm_config.html
 [comm link]: comm_links.html
 [controller]: controllers.html
 [district]: installation.html#server-properties
-[DR-500]: protocols.html#vehicle-detection
-[DXM]: protocols.html#vehicle-detection
 [event]: events.html
-[RTMS]: protocols.html#vehicle-detection
 [IO pins]: controllers.html#io-pins
 [Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly
-[MnDOT-170]: protocols.html#device-control
-[Natch]: protocols.html#device-control
-[NTCIP]: protocols.html#device-control
 [Parking area]: parking_areas.html
 [poll period]: comm_config.html#setup
 [protocols]: protocols.html
@@ -396,7 +384,6 @@ _missing_.
 [Ramp metering]: ramp_meters.html
 [road topology]: road_topology.html
 [roads]: road_topology.html#roads
-[SmartSensor]: protocols.html#vehicle-detection
 [station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html
 [Tolling]: tolling.html

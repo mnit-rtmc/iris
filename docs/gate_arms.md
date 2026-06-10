@@ -1,9 +1,31 @@
 # Gate Arms
 
-Select `View ➔ Gate Arm` menu item
-
 Gate arms are traffic control devices which restrict access to a section of
 roadway.  They are commonly used for on-ramps or reversible lanes.
+
+## Setup
+
+Select `View ➔ Gate Arm` menu item
+
+The gate arm must be associated with a [controller] on an appropriate
+[comm link].  Two [protocol]s are supported:
+
+| Protocol       | [IO Pin]s |
+|----------------|-----------|
+| HySecurity STC | 1         |
+| NDORv5         | 1-8       |
+
+The gate arm properties form has setup information.
+
+Field             | Description
+------------------|----------------------------------------------------------------------------------------
+Notes             | administrator notes, possibly including [hashtag]s to be referenced in [device action]s
+Preset            | verification [camera] preset
+Opposing          | enable check for gates on this road in another direction
+Downstream (#tag) | [hashtag] for downstream gates which must open prior to this
+
+The verification [camera] preset can be used to check oncoming traffic
+before operating gates.
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -22,20 +44,6 @@ roadway.  They are commonly used for on-ramps or reversible lanes.
 † _Write only_
 
 </details>
-
-## Setup
-
-The gate arm properties form has setup information.
-
-Field             | Description
-------------------|----------------------------------------------------------------------------------------
-Notes             | administrator notes, possibly including [hashtag]s to be referenced in [device action]s
-Preset            | verification [camera] preset
-Opposing          | enable check for gates on this road in another direction
-Downstream (#tag) | [hashtag] for downstream gates which must open prior to this
-
-The verification [camera] preset can be used to check oncoming traffic
-before operating gates.
 
 An [action plan] is required for each gate arm group to be controlled.  It
 must have three [phase]s:
@@ -127,5 +135,6 @@ at `/var/lib/iris/gate_arm_enable` (using the touch command).
 [device action]: action_plans.html#device-actions
 [DMS]: dms.html
 [hashtag]: hashtags.html
+[IO pin]: controllers.html#io-pins
 [phase]: action_plans.html#plan-phases
 [system attribute]: system_attributes.html

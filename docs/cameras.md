@@ -1,12 +1,26 @@
 # Cameras
 
-Video cameras with remote _pan_, _tilt_, and _zoom_ capability can be used to
-monitor freeway conditions.  The **Camera** tab can display Motion JPEG (MJPEG)
-video.  To view MPEG4 or h.264 video, the [MonStream] application is required.
+Video cameras can be used to monitor freeway conditions, and may include
+remote _pan_, _tilt_, and _zoom_ (PTZ) capability.  The **Camera** tab can
+display Motion JPEG (MJPEG) video.  To view MPEG4 or h.264 video, the
+[MonStream] application is required.
 
 ## Setup
 
 Select `View ➔ Video ➔ Cameras` menu item
+
+For control, the camera must be associated with a [controller] on an
+appropriate [comm link].  Several [protocol]s are supported:
+
+| Protocol        | [IO Pin]s |
+|-----------------|-----------|
+| Axis            | 1         |
+| Cohu            | 1         |
+| Infinova        | 1         |
+| Manchester (AD) | 1         |
+| ONVIF           | 1         |
+| Pelco D         | 1         |
+| Vicon           | 1         |
 
 The **Setup** tab within a camera properties form contains attributes to
 configure the video encoder.
@@ -102,21 +116,18 @@ _multicast port_.
 
 </details>
 
-## Pan Tilt and Zoom
+## Control
 
-Many cameras have built-in pan/tilt/zoom (PTZ) functionality.  The following
-operations can be performed:
+Many camera models have built-in pan/tilt/zoom (PTZ) functionality.  The
+following operations can be performed:
 
 * Panning or tilting the camera
 * Zooming in or out
-* Manual focus: near / far
-* Manual iris: open / close
+* Manual focus: _near_ / _far_
+* Manual iris: _open_ / _close_
 * Wiper control
 * Recall [preset](#presets) positions
 * Store [preset](#presets) positions
-
-For PTZ control to function, the camera must be associated with a [controller]
-on a PTZ protocol [comm link].
 
 A selected camera can be panned and/or tilted by clicking on the video display
 on the **Camera** tab.  The pan/tilt speed will vary depending on distance from
@@ -196,6 +207,7 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [DMS]: dms.html
 [flow stream]: flow_streams.html
 [hashtag]: hashtags.html
+[IO pin]: controllers.html#io-pins
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address

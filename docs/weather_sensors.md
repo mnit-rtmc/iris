@@ -1,8 +1,18 @@
 # Weather Sensors
 
 Weather sensors can collect data such as precipitation rate, road surface
-temperature, wind speed, etc.  The [NTCIP] and [Org-815] protocols can collect
-this data.
+temperature, wind speed, etc.
+
+## Setup
+
+Each weather sensor must be associated with a [controller] on an appropriate
+[comm link].  Several [protocol]s are supported:
+
+| Protocol       | [IO Pin]s |
+|----------------|-----------|
+| Campbell Cloud | 1-`???`   |
+| NTCIP          | 1         |
+| OSi ORG-815    | 1         |
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -118,5 +128,7 @@ Key                           | Value
 † _Wind direction in degrees clockwise from due north_.
 
 
-[NTCIP]: protocols.html#ntcip
-[ORG-815]: protocols.html#org815
+[comm link]: comm_links.html
+[controller]: controllers.html
+[IO pin]: controllers.html#io-pins
+[protocol]: protocols.html

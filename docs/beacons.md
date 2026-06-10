@@ -1,16 +1,29 @@
 # Beacons
 
-Select `View ➔ Message Signs ➔ Beacons` menu item
-
 A beacon is a light or set of lights that flashes toward oncoming traffic.
 Sometimes called _flashers_ or _wig-wags_, their purpose is to draw attention to
 a static sign or [DMS].
 
-Beacons can be connected to controllers using one of these protocols:
-- [CBW]
-- [Din-Relay]
-- [MnDOT-170]
-- [Natch]
+## Setup
+
+Select `View ➔ Message Signs ➔ Beacons` menu item
+
+A beacon must be connected to a controller using one of these protocols:
+
+| Protocol        | Model      | [IO Pin]s |
+|-----------------|------------|-----------|
+| [CBW]           |            | _varies_  |
+|                 | X-WR-1R12  | 1         |
+|                 | X-301      | 1-2       |
+|                 | X-401      | 1-2       |
+|                 | X-310      | 1-4       |
+|                 | X-410      | 1-4       |
+|                 | X-WR-10R12 | 1-10      |
+|                 | X-332      | 1-16      |
+| [DLI] DIN Relay |            | 1-8       |
+| [MnDOT-170]     |            | 2         |
+| [Natch]         |            | 2         |
+| NDOT Beacon     |            | 1         |
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -27,8 +40,6 @@ Beacons can be connected to controllers using one of these protocols:
 | 🔧 Configure | controller, device, notes | pin, verify\_pin, ext\_mode |
 
 </details>
-
-## Setup
 
 **Message** is a static text message on the sign.
 
@@ -74,9 +85,9 @@ in the `beacon_event` table.
 
 
 [action plans]: action_plans.html
-[CBW]: protocols.html#cbw
+[CBW]: https://controlbyweb.com/
 [device actions]: action_plans.html#device-actions
-[Din-Relay]: protocols.html#din-relay
+[DLI]: https://dlidirect.com/
 [DMS]: dms.html
 [event]: events.html
 [MnDOT-170]: protocols.html#mndot-170

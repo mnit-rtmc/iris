@@ -4,6 +4,14 @@ A _video monitor_ is a dedicated screen which can display [camera] streams in
 real time.  IRIS can quickly switch the stream and title text displayed on a
 video monitor, using supported [protocol]s.
 
+Various video [protocol]s are supported:
+
+| Protocol                     | [IO Pin]s |
+|------------------------------|-----------|
+| [MonStream]                  | 1-16      |
+| Streambed ([flow streams])   | 1-150     |
+| [Pelco] P [camera keyboard]s | N/A       |
+
 ## MonStream
 
 [MonStream] is a full-screen video streaming application which runs on low-cost
@@ -15,16 +23,17 @@ video feeds onto a single large monitor.  The only configuration required on the
 MonStream computer is to grant access to the `/var/lib/monstream/` directory for
 the UID of the monstream process.
 
-A [controller] must be configured to represent each MonStream computer.  It will
-need to be on a [comm link] using the MonStream protocol, with a timeout of 2000
-ms.  The comm link URI should be of the form: `[ip address]:7001`.  Each video
-monitor to be displayed should be associated with an [IO pin] of the controller.
-For example, a quad-screen monitor would have monitors associated with pins 1
-thru 4.
+A [controller] must be configured to represent each MonStream computer.  It
+will need to be on a [comm link] using the MonStream protocol, with a timeout
+of 2000 ms.  The comm link URI should be of the form: `[ip address]:7001`.
 
-## Configuration
+## Setup
 
 Select `View ➔ Video ➔ Video Monitor` menu item
+
+Each video monitor should be associated with an [IO pin] of a MonStream
+controller.  For example, a quad-screen monitor would have monitors associated
+with pins 1 thru 4.
 
 Each row of the table represents one _video monitor_.
 
@@ -100,7 +109,7 @@ The [selector tool] can also be used to change the `monitor num` or camera.
 
 ### Keyboards
 
-Certain [camera keyboards] can be used for video monitor switching.
+Certain [camera keyboard]s can be used for video monitor switching.
 
 ### MonStream Control
 
@@ -139,7 +148,7 @@ Each role can have one _scratch_ play list:
 
 
 [camera]: cameras.html
-[camera keyboards]: cameras.html#camera-keyboards
+[camera keyboard]: cameras.html#camera-keyboards
 [comm link]: comm_links.html
 [controller]: controllers.html
 [flow streams]: flow_streams.html
