@@ -90,6 +90,7 @@ in the `beacon_event` table.
 [DLI]: https://dlidirect.com/
 [DMS]: dms.html
 [event]: events.html
+[IO pin]: controllers.html#io-pins
 [MnDOT-170]: protocols.html#mndot-170
 [Natch]: protocols.html#natch
 [remote]: dms.html#setup

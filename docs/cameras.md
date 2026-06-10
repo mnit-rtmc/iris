@@ -16,7 +16,8 @@ appropriate [comm link].  Several [protocol]s are supported:
 |-----------------|-----------|
 | Axis            | 1         |
 | Cohu            | 1         |
-| Infinova        | 1         |
+| Cohu Helios     | 1         |
+| Infinova D      | 1         |
 | Manchester (AD) | 1         |
 | ONVIF           | 1         |
 | Pelco D         | 1         |

@@ -49,3 +49,4 @@ The `Query GPS` button can be used to manually poll the coördinates.
 [controller]: controllers.html
 [DMS]: dms.html
 [hashtag]: hashtags.html
+[IO pin]: controllers.html#io-pins

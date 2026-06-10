@@ -375,7 +375,7 @@ _missing_.
 [controller]: controllers.html
 [district]: installation.html#server-properties
 [event]: events.html
-[IO pins]: controllers.html#io-pins
+[IO pin]: controllers.html#io-pins
 [Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly
 [Parking area]: parking_areas.html
 [poll period]: comm_config.html#setup

@@ -122,11 +122,11 @@ or `https`.  Typically, a single [controller] should be assigned and made
 [IPAWS]: https://www.fema.gov/emergency-managers/practitioners/integrated-public-alert-warning-system
 [LCS]: lcs.html
 [message feed]: msg_feed.html
-[MnDOT devices]: #MnDOT-Devices
+[MnDOT devices]: #mndot-devices
 [monstream]: video.html#monstream
 [Natch]: natch.html
 [NTCIP]: https://www.ntcip.org/
-[NTCIP devices]: #NTCIP-Devices
+[NTCIP devices]: #ntcip-devices
 [ONVIF]: https://en.wikipedia.org/wiki/ONVIF
 [parking area]: parking_areas.html
 [Pelco]: https://www.pelco.com/
