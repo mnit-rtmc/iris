@@ -204,12 +204,14 @@ public class DeviceActionJob extends Job {
 		if (d instanceof DeviceImpl) {
 			DeviceImpl dev = (DeviceImpl) d;
 			PlannedAction pa = dev.choosePlannedAction();
-			ActionPlan ap = pa.action.getActionPlan();
-			if (ap instanceof ActionPlanImpl) {
-				ActionPlanImpl api = (ActionPlanImpl) ap;
-				if (api.isLoggerOpen()) {
-					api.logMsg(dev.getName() +
-						" chose " + pa);
+			if (pa != null) {
+				ActionPlan ap = pa.action.getActionPlan();
+				if (ap instanceof ActionPlanImpl) {
+					ActionPlanImpl api = (ActionPlanImpl) ap;
+					if (api.isLoggerOpen()) {
+						api.logMsg(dev.getName() +
+							" chose " + pa);
+					}
 				}
 			}
 		}
