@@ -123,7 +123,7 @@ Condition triggers at a specific time of day, optionally on a specific date.
 
 **WARNING: not implemented yet**
 
-Condition triggers when a detector or station field goes above or below a
+Condition triggers when a [detector] or [station] field goes above or below a
 threshold value.
 
 - **Params**: Detector or station ID, _field_ `<` or `>` value
@@ -139,7 +139,7 @@ threshold value.
 
 **WARNING: not implemented yet**
 
-Condition triggers when an RWIS field goes above or below a threshold value.
+Condition triggers when an [RWIS] field goes above or below a threshold value.
 
 - **Params**: Sensor ID, _field_ `<` or `>` value
 
@@ -155,7 +155,7 @@ Condition triggers when an RWIS field goes above or below a threshold value.
 
 **WARNING: not implemented yet**
 
-Condition triggers when a toll zone changes mode.
+Condition triggers when a [toll zone] mode changes.
 
 - **Params**: Toll zone ID, _mode_
 
@@ -170,7 +170,7 @@ Condition triggers when a toll zone changes mode.
 
 **WARNING: not implemented yet**
 
-Condition triggers in a specific alert period.
+Condition triggers in a specific [alert] period.
 
 - **Params**: Alert ID, _period_
 
@@ -183,7 +183,7 @@ Condition triggers in a specific alert period.
 <details>
 <summary>Alarm</summary>
 
-Condition triggers when an alarm is triggered or cleared.
+Condition triggers when an [alarm] is triggered or cleared.
 
 - **Params**: Alarm ID, _state_
 
@@ -387,12 +387,14 @@ When a user changes the phase, if they are in the list specified by the
 the `email_event` table.
 
 
+[alarm]: alarms.html
 [alert]: alerts.html
 [auto-fail]: vehicle_detection.html#auto-fail
 [beacon]: beacons.html
 [camera]: cameras.html
 [ClearGuide]: clearguide.html
 [DateTimeFormatter]: https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
+[detector]: vehicle_detection.html
 [DMS]: dms.html
 [event]: events.html
 [exit ramp backup]: exit_backup.html
@@ -409,7 +411,8 @@ the `email_event` table.
 [ramp meter]: ramp_meters.html
 [rwis]: rwis.html
 [Slow traffic]: slow_warning.html
-[Variable speed advisory]: vsa.html
-[Toll zone]: tolling.html
-[Travel time]: travel_time.html
+[station]: road_topology.html#r_node-types
 [system attribute]: system_attributes.html
+[toll zone]: tolling.html
+[Travel time]: travel_time.html
+[Variable speed advisory]: vsa.html
