@@ -87,26 +87,26 @@ Some protocols allow IRIS to poll external systems periodically using `http`
 or `https`.  Typically, a single [controller] should be assigned and made
 `ACTIVE`.
 
-- **CampbellCloud**: Cloud service for [weather sensor] data
+- **[CampbellCloud]**: external [weather sensor] data feed
 
 - **CAP-IPAWS**: [CAP] feed from Integrated Public Alert and Warning System
   [IPAWS].  [Alert]s can be used to automatically post weather and other
   messages to [DMS].  This requires a URI provided by the Federal Emergency
   Management Agency.
 
-- **CAP-NWS**: [CAP] feed from National Weather Service.  [Alert]s can be used
-  to automatically post weather messages to [DMS].
+- **CAP-NWS**: [CAP] feed from National Weather Service [NWS].  [Alert]s can
+  be used to automatically post weather messages to [DMS].
 
-- **Central Park**: [Central Park] feed for [parking area] [vehicle detection].
-  Use "Data per stall" endpoint (URI ending in `/integration/spot`).
+- **[Central Park]**: external [parking area] system for [vehicle detection].
+  Use the "Data per stall" endpoint (URI ending in `/integration/spot`).
   
-- **ClearGuide**: [ClearGuide] external system [DMS] message feed
+- **[ClearGuide]**: external [DMS] message feed
 
-- **DMS-XML**: Legacy [DMS] external system
+- **DMS-XML**: external [DMS] system (legacy)
 
-- **Inc-Feed**: External system [incident feed]
+- **Inc-Feed**: external [incident feed]
 
-- **Msg-Feed**: External system [message feed]
+- **Msg-Feed**: external [message feed]
 
 
 [ADEC TDC]: https://adec-technologies.ch/en/product/tdc3/
@@ -145,6 +145,7 @@ or `https`.  Typically, a single [controller] should be assigned and made
 [Natch]: natch.html
 [NTCIP]: https://www.ntcip.org/
 [NTCIP devices]: #ntcip-devices
+[NWS]: https://www.weather.gov/documentation/services-web-alerts
 [ONVIF]: https://en.wikipedia.org/wiki/ONVIF
 [parking area]: parking_areas.html
 [Pelco]: https://www.pelco.com/
