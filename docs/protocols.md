@@ -14,7 +14,7 @@ _comm link_.
 | Canoga           | `tcp`          | 0-15; 128-255 ⸸ | [vehicle detection] |
 | CAP-IPAWS        | `https`        | 1               | [external]          |
 | CAP-NWS          | `https`        | 1               | [external]          |
-| [CBW]            | `http`         | 1               | [beacon]            |
+| [CBW]            | `http`         | 1               | [alarm], [beacon]   |
 | [Central Park]   | `https`        | 1               | [external]          |
 | [ClearGuide]     | `http`         | 1               | [external]          |
 | [Cohu]           | `tcp`          | 1-223           | [camera]            |

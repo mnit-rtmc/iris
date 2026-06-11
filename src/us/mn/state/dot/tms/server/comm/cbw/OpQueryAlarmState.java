@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2022-2026  Minnesota Department of Transportation
+ * Copyright (C) 2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,59 +15,64 @@
 package us.mn.state.dot.tms.server.comm.cbw;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Query the CBW controller setup
+ * Query the state of an alarm
  *
  * @author Douglas Lau
  */
-public class OpQuerySetup extends OpController<CBWProperty> {
+public class OpQueryAlarmState extends OpController<CBWProperty> {
 
-	/** Exception message for "Invalid Http response" -- this is fragile,
-	 *  since it matches a string literal from the JDK class
-	 *  "sun.net.www.protocol.http.HttpUrlConnection" */
-	static private final String INVALID_HTTP = "Invalid Http response";
+	/** Alarm */
+	private final AlarmImpl alarm;
 
-	/** Create a new query setup operation */
-	public OpQuerySetup(ControllerImpl c) {
-		super(PriorityLevel.CONFIGURE, c);
+	/** Relay/input state property */
+	private final CBWProperty prop;
+
+	/** Create a new query alarm state operation */
+	public OpQueryAlarmState(AlarmImpl a, ControllerImpl c) {
+		super(PriorityLevel.POLL_HIGH, c);
+		alarm = a;
+		String m = ControllerHelper.getSetup(c, "hw", "model");
+		Model mdl = Model.fromValue(m);
+		prop = new CBWProperty(mdl.statePath());
 	}
 
 	/** Create the first phase of the operation */
 	@Override
 	protected Phase<CBWProperty> phaseOne() {
-		return new QueryState();
+		return new QueryAlarm();
 	}
 
-	/** Phase to query the state */
-	private class QueryState extends Phase<CBWProperty> {
+	/** Phase to query the alarm status */
+	private class QueryAlarm extends Phase<CBWProperty> {
 
-		/** Query the state */
+		/** Query the alarm status */
 		protected Phase<CBWProperty> poll(
 			CommMessage<CBWProperty> mess) throws IOException
 		{
-			CBWProperty prop = new CBWProperty(
-				Model.X_301.statePath());
 			mess.add(prop);
-			try {
-				mess.queryProps();
-			}
-			catch (IOException e) {
-				// X-WR-1R12 models respond to "state.xml" with
-				// invalid HTTP; try "stateFull.xml" instead
-				if (INVALID_HTTP.equals(e.getMessage())) {
-					prop.setPathQuery(
-						Model.X_WR_1R12.statePath());
-					mess.queryProps();
-				} else
-					throw e;
-			}
-			controller.setSetupNotify(prop.getSetup());
+			mess.queryProps();
 			return null;
 		}
+	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			alarm.setStateNotify(getState());
+		super.cleanup();
+	}
+
+	/** Get the alarm input state */
+	private boolean getState() {
+		return prop.getInput(alarm.getPin());
 	}
 }

@@ -13,6 +13,7 @@ Several [protocol]s are supported:
 
 | Protocol | [IO Pin]s | Notes                              |
 |----------|-----------|------------------------------------|
+| CBW      | 1-16      | Uses input state (not relay)       |
 | MnDOT    | 70-79     |                                    |
 | Natch    | 70-79     |                                    |
 | NTCIP    | 11-`??`   | 10 + `auxIOv2PortNumber` (digital) |

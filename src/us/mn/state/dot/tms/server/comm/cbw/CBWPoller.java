@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2022  Minnesota Department of Transportation
+ * Copyright (C) 2016-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,12 @@ package us.mn.state.dot.tms.server.comm.cbw;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.server.AlarmImpl;
 import us.mn.state.dot.tms.server.BeaconImpl;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
@@ -28,7 +32,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
  * @author Douglas Lau
  */
 public class CBWPoller extends ThreadedPoller<CBWProperty>
-	implements BeaconPoller
+	implements AlarmPoller, BeaconPoller
 {
 	/** Control-By-Web debug log */
 	static final DebugLog CBW_LOG = new DebugLog("cbw");
@@ -38,12 +42,42 @@ public class CBWPoller extends ThreadedPoller<CBWProperty>
 		super(link, HTTP, CBW_LOG);
 	}
 
+	/** Send a device request to an alarm */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void sendRequest(AlarmImpl alarm, DeviceRequest r) {
+		Controller c;
+		switch (r) {
+		case SEND_SETTINGS:
+			c = alarm.getController();
+			if (c instanceof ControllerImpl) {
+				ControllerImpl ci = (ControllerImpl) c;
+				addOp(new OpQuerySetup(ci));
+			}
+			break;
+		case QUERY_STATUS:
+			c = alarm.getController();
+			if (c instanceof ControllerImpl) {
+				ControllerImpl ci = (ControllerImpl) c;
+				addOp(new OpQueryAlarmState(alarm, ci));
+			}
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
+	}
+
 	/** Send a device request */
 	@Override
 	public void sendRequest(BeaconImpl b, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
-			addOp(new OpQuerySetup(b));
+			Controller c = b.getController();
+			if (c instanceof ControllerImpl) {
+				ControllerImpl ci = (ControllerImpl) c;
+				addOp(new OpQuerySetup(ci));
+			}
 			break;
 		case QUERY_STATUS:
 			addOp(new OpQueryBeaconState(b));
