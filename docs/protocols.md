@@ -10,21 +10,26 @@ _comm link_.
 | [ADEC TDC]       | `tcp`          | 1-255           | [vehicle detection] |
 | [Axis]           | `http`         | 1               | [camera]            |
 | [Banner DXM]     | `tcp`          | 1               | [vehicle detection] |
-| CampbellCloud    | `https` ⸸      | 1               | [weather sensor]    |
-| Canoga           | `tcp`          | 0-15; 128-255 † | [vehicle detection] |
+| [CampbellCloud]  | `https` †      | 1               | [external]          |
+| Canoga           | `tcp`          | 0-15; 128-255 ⸸ | [vehicle detection] |
+| CAP-IPAWS        | `https`        | 1               | [external]          |
+| CAP-NWS          | `https`        | 1               | [external]          |
 | [CBW]            | `http`         | 1               | [beacon]            |
-| [Central Park]   | `https` ‡      | 1               | [vehicle detection] |
+| [Central Park]   | `https`        | 1               | [external]          |
+| [ClearGuide]     | `http`         | 1               | [external]          |
 | [Cohu]           | `tcp`          | 1-223           | [camera]            |
 | [Cohu] Helios    | `tcp`          | 1-223           | [camera]            |
 | [DLI] DIN Relay  | `http`         | 1               | [beacon]            |
+| DMS-XML          | `tcp`          | 0-65535         | [DMS]               |
 | [DR-500]         | `tcp`          | 1               | [vehicle detection] |
-| Transcore E6     | `udp`          | 1               | [tag reader]        |
 | [HySecurity STC] | `tcp`          | 1-99            | [gate arm]          |
+| Inc-Feed         | `http`         | 1               | [external]          |
 | [Infinova] D     | `tcp`          | 1-254           | [camera]            |
 | Manchester (AD)  | `udp`          | 1-1024          | [camera]            |
 | MnDOT 4-bit      | `tcp`          | 1-15            | [MnDOT devices]     |
 | MnDOT 5-bit      | `tcp`          | 1-31            | [MnDOT devices]     |
 | [MonStream]      | `udp`          | 1               | [video]             |
+| Msg-Feed         | `http`         | 1               | [external]          |
 | Natch            | `tcp`          | 1               | [MnDOT devices]     |
 | NDORv5           | `tcp`          | 1               | [gate arm]          |
 | NDOT Beacon      | `tcp`          | 1               | [beacon]            |
@@ -36,20 +41,19 @@ _comm link_.
 | [Pelco] D        | `udp`          | 1-254           | [camera]            |
 | [Pelco] P        | `tcp`          | 1               | [camera keyboard]   |
 | RedLion          | `tcp`          | 1               | [GPS]               |
-| RTMS Echo        | `http` ⸸       | 1               | [vehicle detection] |
+| RTMS Echo        | `http` †       | 1               | [vehicle detection] |
 | RTMS G4          | `tcp`          | 0-65535         | [vehicle detection] |
 | SierraGX         | `tcp`          | 1               | [GPS]               |
 | Sierra SSH       | `tcp`          | 1               | [GPS]               |
 | SmartSensor 105  | `tcp`          | 1-9999          | [vehicle detection] |
 | SmartSensor 125  | `tcp`          | 1-65534         | [vehicle detection] |
 | Streambed        | `tcp`          | 1               | [flow stream]       |
+| Transcore E6     | `udp`          | 1               | [tag reader]        |
 | [Vicon]          | `udp`          | 1-254           | [camera]            |
 
-† Backplane: 0-15, EEPROM: 128-255
+† Communicates using [pollinator] service
 
-‡ Use "Data per stall" endpoint (URI ending in `/integration/spot`)
-
-⸸ Communicates using [pollinator] service
+⸸ Backplane: 0-15, EEPROM: 128-255
 
 ## MnDOT Devices
 
@@ -81,16 +85,28 @@ Multiple [device] types are supported by [NTCIP]:
 
 Some protocols allow IRIS to poll external systems periodically using `http`
 or `https`.  Typically, a single [controller] should be assigned and made
-`ACTIVE`, but no devices need to be connected to IO pins.
+`ACTIVE`.
 
-| Protocol   | Description                         |
-|------------|-------------------------------------|
-| CAP-IPAWS  | [CAP] feed from Integrated Public Alert and Warning System [IPAWS].  [Alert]s can be used to automatically post weather and other messages to [DMS].  This requires an `https` URI provided by the Federal Emergency Management Agency. |
-| CAP-NWS    | [CAP] feed from National Weather Service.  [Alert]s can be used to automatically post weather messages to [DMS]. |
-| ClearGuide | [ClearGuide] external system feed   |
-| Inc-Feed   | External [incident feed]            |
-| Msg-Feed   | External [message feed]             |
-| DMS-XML    | Legacy [DMS] system (drops 0-65535) |
+- **CampbellCloud**: Cloud service for [weather sensor] data
+
+- **CAP-IPAWS**: [CAP] feed from Integrated Public Alert and Warning System
+  [IPAWS].  [Alert]s can be used to automatically post weather and other
+  messages to [DMS].  This requires an `https` URI provided by the Federal
+  Emergency Management Agency.
+
+- **CAP-NWS**: [CAP] feed from National Weather Service.  [Alert]s can be used
+  to automatically post weather messages to [DMS].
+
+- **Central Park**: [Central Park] feed for [parking area] [vehicle detection].
+  Use "Data per stall" endpoint (URI ending in `/integration/spot`).
+  
+- **ClearGuide**: [ClearGuide] external system [DMS] message feed
+
+- **DMS-XML**: Legacy [DMS] external system
+
+- **Inc-Feed**: External system [incident feed]
+
+- **Msg-Feed**: External system [message feed]
 
 
 [ADEC TDC]: https://adec-technologies.ch/en/product/tdc3/
@@ -101,6 +117,7 @@ or `https`.  Typically, a single [controller] should be assigned and made
 [beacon]: beacons.html
 [camera]: cameras.html
 [camera keyboard]: cameras.html#camera-keyboards
+[CampbellCloud]: https://www.campbellsci.com/campbellcloud
 [CAP]: http://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html
 [CBW]: https://controlbyweb.com/
 [Central Park]: https://drivewyze.com/drivewyze-central-park-for-truck-parking/
@@ -112,6 +129,7 @@ or `https`.  Typically, a single [controller] should be assigned and made
 [DLI]: https://dlidirect.com/
 [DMS]: dms.html
 [DR-500]: https://houston-radar.com/pdf/HoustonRadar_DR500_UserManual.pdf
+[external]: #external-systems
 [flow stream]: flow_streams.html
 [gate arm]: gate_arms.html
 [GPS]: gps.html
