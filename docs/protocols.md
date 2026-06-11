@@ -91,8 +91,8 @@ or `https`.  Typically, a single [controller] should be assigned and made
 
 - **CAP-IPAWS**: [CAP] feed from Integrated Public Alert and Warning System
   [IPAWS].  [Alert]s can be used to automatically post weather and other
-  messages to [DMS].  This requires an `https` URI provided by the Federal
-  Emergency Management Agency.
+  messages to [DMS].  This requires a URI provided by the Federal Emergency
+  Management Agency.
 
 - **CAP-NWS**: [CAP] feed from National Weather Service.  [Alert]s can be used
   to automatically post weather messages to [DMS].
