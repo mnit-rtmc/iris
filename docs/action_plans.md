@@ -243,7 +243,7 @@ Tag              | Description                      | Tag Mode            | Sour
 -----------------|----------------------------------|---------------------|-------------
 `[cg` *…* `]`    | [ClearGuide] data                | Condition + Replace | `clearguide`
 `[exit` *…* `]`  | [Exit ramp backup]               | Condition           | `exit_warning`
-`[feed` *…* `]`  | [Msg-Feed] message               | Replace             | N/A
+`[feed` *…* `]`  | Msg-Feed [protocol] message      | Replace             | N/A
 `[pa` *…* `]`    | [Parking area] availability      | Replace             | `parking`
 `[rwis_` *…* `]` | [RWIS] weather conditions        | Condition           | `rwis`
 `[slow` *…* `]`  | [Slow traffic] warning           | Condition + Replace | `slow_warning`
@@ -401,11 +401,11 @@ the `email_event` table.
 [incident]: incidents.html
 [message pattern]: message_patterns.html
 [priority]: sign_message.html#message-priority
-[Msg-Feed]: protocols.html#msg-feed
 [MULTI]: multi.html
 [Parking area]: parking_areas.html
 [permission]: permissions.html
 [preset]: cameras.html#presets
+[protocol]: protocols.html
 [ramp meter]: ramp_meters.html
 [rwis]: rwis.html
 [Slow traffic]: slow_warning.html

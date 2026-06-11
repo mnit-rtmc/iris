@@ -181,9 +181,9 @@ to [play list] selection mode — the icon will change to a play list.  Enter a
 
 Dedicated keyboards are supported for easier camera control.  These keyboards
 have joysticks for _pan / tilt / zoom_ control.  Two [protocol]s are supported:
-[Pelco-P] and Panasonic CU-950.
+Pelco-P and Panasonic CU-950.
 
-To configure a [Pelco-P] keyboard, a [comm link] using the `pelcop` protocol
+To configure a Pelco-P keyboard, a [comm link] using the `pelcop` protocol
 must be created.  One active controller must exist on that comm link, but no
 devices are necessary.  IRIS will initiate a TCP connection to connect to the
 keyboard — typically, this will be managed by an ethernet-to-serial device.
@@ -212,7 +212,6 @@ Otherwise, requests will be made directly to the camera's encoder address.
 [iris-client.properties]: client_properties.html
 [MonStream]: video.html#monstream
 [multicast]: https://en.wikipedia.org/wiki/Multicast_address
-[Pelco-P]: protocols.html#pelcop
 [play list]: video.html#play-lists
 [protocol]: protocols.html
 [ramp meter]: ramp_meters.html

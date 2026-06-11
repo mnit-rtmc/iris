@@ -28,7 +28,7 @@ A **comm link** is a network connection to field [device]s or external system
 address, and port number, using the standard `host:port` convention.  It can
 also contain an optional **scheme** prefix, which can be either `udp://` or
 `tcp://`.  If present, the scheme will override the _default scheme_ for the
-selected protocol.  For example, to use the [Pelco-D] protocol over TCP
+selected [protocol].  For example, to use the Pelco-D protocol over TCP
 (instead of the default UDP), prepend `tcp://` to the URI.
 
 **Poll Enabled** is a flag which can enable or disable polling.
@@ -39,4 +39,4 @@ links.
 
 [comm config]: comm_config.html
 [device]: controllers.html#devices
-[pelco-d]: protocols.html#pelco-d
+[protocol]: protocols.html

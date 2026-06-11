@@ -28,7 +28,7 @@ Each vehicle detector must be associated with a [controller] on an appropriate
 | Canoga               | 1-4       | [vlog]                  |           |
 | Central Park         | 1-64      | occupancy               | 30s       |
 | DR-500               | 1         | speed                   | 30-300s † |
-| MnDOT (v4/v5)        | 39 - 62   | count, occupancy        | 30s       |
+| MnDOT-170            | 39 - 62   | count, occupancy        | 30s       |
 | Natch                | 39 - 62   | [vlog]                  |           |
 | NTCIP 1202           | 1-`??`    | count, occupancy        | 1-255s †  |
 | RTMS Echo vlg        | 1-`??`    | [vlg]                   |           |
@@ -379,7 +379,7 @@ _missing_.
 [Mayfly]: https://github.com/mnit-rtmc/iris/tree/master/mayfly
 [Parking area]: parking_areas.html
 [poll period]: comm_config.html#setup
-[protocols]: protocols.html
+[protocol]: protocols.html
 [r_node]: road_topology.html#r_nodes
 [Ramp metering]: ramp_meters.html
 [road topology]: road_topology.html

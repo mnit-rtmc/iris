@@ -56,7 +56,7 @@ Preset   | verification camera [preset]
 Shift    | roadway corridor lane shift
 
 An LCS array must also be associated with a [controller], on [IO pin] 2.  For
-[NTCIP], any controller for a DMS in the array is allowed.
+NTCIP [protocol], any controller for a DMS in the array is allowed.
 
 ## LCS States
 
@@ -80,7 +80,7 @@ represented by an LCS state.
 Each state must be assigned to a separate [IO pin] on a [controller].  The
 pin specifies a digital output to activate that state.
 
-For DMS type signs using [NTCIP], the pin is not relevant; any number 3+ will
+For DMS type signs using NTCIP, the pin is not relevant; any number 3+ will
 work.  Instead, [message pattern] is used to specify the [MULTI] for the
 indication.  _Message number_ (2-65535) can be used to speed up activation,
 by caching the message in the controller's message table.
@@ -92,5 +92,5 @@ by caching the message in the controller's message table.
 [IO pin]: controllers.html#io-pins
 [message pattern]: message_patterns.html
 [MULTI]: multi.html
-[NTCIP]: protocols.html#ntcip
 [preset]: cameras.html#presets
+[protocol]: protocols.html

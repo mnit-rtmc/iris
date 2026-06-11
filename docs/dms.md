@@ -52,7 +52,7 @@ Static graphic | image of static sign in which DMS is inset
 ### Beacons
 
 - **Internal** beacons are controlled through the DMS controller using the
-               [NTCIP] protocol.
+               NTCIP [protocol].
 - **External** [beacon]s are controlled using a separate [comm link].
 
 In either case, the beacon will flash whenever a message with "flash beacon"
@@ -123,8 +123,8 @@ free-form text before sending the message to the sign.
 [hashtag]: hashtags.html
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
-[NTCIP]: protocols.html#ntcip
 [permissions]: permissions.html
+[protocol]: protocols.html
 [rwis]: rwis.html
 [sign configuration]: sign_configuration.html
 [sign message]: sign_message.html

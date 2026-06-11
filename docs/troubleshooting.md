@@ -38,23 +38,23 @@ Filename               | Description
 `alarm`                | [Alarm] states
 `alert`                | [Alert] information
 `bottleneck`           | Bottleneck calculation for VSA algorithm
-`canoga`               | [Canoga] protocol
-`cbw`                  | [CBW] protocol
+`canoga`               | Canoga [protocol]
+`cbw`                  | CBW [protocol]
 `device`               | Device error log
-`dinrelay`             | [DIN-Relay] protocol
-`dmsxml`               | [DMS-XML] protocol
-`e6`                   | [E6] protocol
-`e6_pkt`               | [E6] protocol packets
-`feed`                 | [Msg-Feed] protocol
-`g4`                   | [G4] protocol
-`infinova`             | [Infinova] protocol
+`dinrelay`             | DIN-Relay [protocol]
+`dmsxml`               | DMS-XML [protocol]
+`e6`                   | E6 [protocol]
+`e6_pkt`               | E6 [protocol] packets
+`feed`                 | Msg-Feed [protocol]
+`g4`                   | G4 [protocol]
+`infinova`             | Infinova [protocol]
 `kadaptive`            | K Adaptive metering algorithm
-`manchester`           | [Manchester] protocol
+`manchester`           | Manchester [protocol]
 `max-pressure`         | Max-Pressure metering algorithm
-`mndot170`             | [MnDOT-170] protocol
-`ntcip`                | [NTCIP] protocols
-`org815`               | [ORG-815] protocol
-`pelcod`               | [Pelco-D] protocol
+`mndot170`             | MnDOT-170 [protocol]
+`ntcip`                | NTCIP [protocol]
+`org815`               | ORG-815 [protocol]
+`pelcod`               | Pelco-D [protocol]
 `plan`                 | Action plan log
 `polling`              | Generic operaton polling log
 `prio`                 | Operation priority log
@@ -65,9 +65,9 @@ Filename               | Description
 `snmp`                 | SNMP error log
 `sonar`                | SONAR connection log
 `sql`                  | SQL database error log
-`ss105`                | Wavetronix [SS105] protocol
-`ss125`                | Wavetronix [SS125] protocol
-`stc`                  | [STC] protocol
+`ss105`                | Wavetronix SS105 [protocol]
+`ss125`                | Wavetronix SS125 [protocol]
+`stc`                  | STC [protocol]
 `sys_attr`             | [System attribute] change log
 `toll`                 | Tolling info log
 `travel`               | Travel time info log
@@ -77,28 +77,13 @@ Filename               | Description
 
 [Alarm]: alarms.html
 [Alert]: alerts.html
-[Canoga]: protocols.html#canoga
-[CBW]: protocols.html#cbw
 [database]: database.html
-[DIN-Relay]: protocols.html#din-relay
 [district]: installation.html#server-properties
-[DMS-XML]: protocols.html#dms-xml
-[E6]: protocols.html#e6
 [events]: events.html
-[G4]: protocols.html#g4
-[Infinova]: protocols.html#infinova
-[Manchester]: protocols.html#manchester
-[MnDOT-170]: protocols.html#mndot-170
-[Msg-Feed]: protocols.html#msg-feed
-[NTCIP]: protocols.html#ntcip
-[ORG-815]: protocols.html#org815
-[Pelco-D]: protocols.html#pelco-d
+[protocol]: protocols.html
 [pollinator]: https://github.com/mnit-rtmc/iris/tree/master/pollinator
 [slow traffic]: slow_warning.html
 [station]: road_topology.html#r_node-types
-[SS105]: protocols.html#smartsensor
-[SS125]: protocols.html#smartsensor
-[STC]: protocols.html#stc
 [system attribute]: system_attributes.html
 [Variable speed advisory]: vsa.html
 [vehicle detection systems]: vehicle_detection.html

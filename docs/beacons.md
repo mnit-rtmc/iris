@@ -8,22 +8,22 @@ a static sign or [DMS].
 
 Select `View ➔ Message Signs ➔ Beacons` menu item
 
-A beacon must be connected to a controller using one of these protocols:
+A beacon must be connected to a controller using one of these [protocol]s:
 
-| Protocol        | Model      | [IO Pin]s |
-|-----------------|------------|-----------|
-| [CBW]           |            | _varies_  |
-|                 | X-WR-1R12  | 1         |
-|                 | X-301      | 1-2       |
-|                 | X-401      | 1-2       |
-|                 | X-310      | 1-4       |
-|                 | X-410      | 1-4       |
-|                 | X-WR-10R12 | 1-10      |
-|                 | X-332      | 1-16      |
-| [DLI] DIN Relay |            | 1-8       |
-| [MnDOT-170]     |            | 2         |
-| [Natch]         |            | 2         |
-| NDOT Beacon     |            | 1         |
+| Protocol      | Model      | [IO Pin]s |
+|---------------|------------|-----------|
+| CBW           |            | _varies_  |
+|               | X-WR-1R12  | 1         |
+|               | X-301      | 1-2       |
+|               | X-401      | 1-2       |
+|               | X-310      | 1-4       |
+|               | X-410      | 1-4       |
+|               | X-WR-10R12 | 1-10      |
+|               | X-332      | 1-16      |
+| DLI DIN Relay |            | 1-8       |
+| MnDOT-170     |            | 2         |
+| Natch         |            | 2         |
+| NDOT Beacon   |            | 1         |
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -51,7 +51,7 @@ _alarm_, _dms_, _gate arm_, _lcs_, _ramp meter_, or _tag reader_.
 **Pin** is the controller output pin to activate beacon.
 
 **Verify Pin** is a digital input to sense whether the lights are activated,
-for beacons which have verify circuitry.  For the [CBW] protocol, it is also
+for beacons which have verify circuitry.  For the CBW [protocol], it is also
 an output to energize the verify circuit.  **Pin** and **Verify Pin** can be
 the same.
 
@@ -85,12 +85,9 @@ in the `beacon_event` table.
 
 
 [action plans]: action_plans.html
-[CBW]: https://controlbyweb.com/
 [device actions]: action_plans.html#device-actions
-[DLI]: https://dlidirect.com/
 [DMS]: dms.html
 [event]: events.html
 [IO pin]: controllers.html#io-pins
-[MnDOT-170]: protocols.html#mndot-170
-[Natch]: protocols.html#natch
+[protocol]: protocols.html
 [remote]: dms.html#setup

@@ -26,8 +26,8 @@ _comm link_.
 | Inc-Feed         | `http`         | 1               | [external]          |
 | [Infinova] D     | `tcp`          | 1-254           | [camera]            |
 | Manchester (AD)  | `udp`          | 1-1024          | [camera]            |
-| MnDOT 4-bit      | `tcp`          | 1-15            | [MnDOT devices]     |
-| MnDOT 5-bit      | `tcp`          | 1-31            | [MnDOT devices]     |
+| MnDOT-170 4-bit  | `tcp`          | 1-15            | [MnDOT devices]     |
+| MnDOT-170 5-bit  | `tcp`          | 1-31            | [MnDOT devices]     |
 | [MonStream]      | `udp`          | 1               | [video]             |
 | Msg-Feed         | `http`         | 1               | [external]          |
 | Natch            | `tcp`          | 1               | [MnDOT devices]     |
