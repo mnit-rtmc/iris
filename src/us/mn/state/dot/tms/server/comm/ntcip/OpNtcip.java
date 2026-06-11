@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2025  Minnesota Department of Transportation
+ * Copyright (C) 2013-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ import us.mn.state.dot.tms.utils.MultiString;
 abstract public class OpNtcip extends OpDevice {
 
 	/** NTCIP debug log */
-	static private final DebugLog NTCIP_LOG = new DebugLog("ntcip");
+	static final DebugLog NTCIP_LOG = new DebugLog("ntcip");
 
 	/** Test if a message pattern matches a multi string.
 	 * @param pat Message pattern.

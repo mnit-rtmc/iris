@@ -72,14 +72,14 @@ Old style 170 controllers using MnDOT-170 and Advanced Traffic Controllers
 
 Multiple [device] types are supported by [NTCIP]:
 
-| Device Type         | Standard    | [IO Pin]s |
-|---------------------|-------------|-----------|
-| [Alarm]             | _multiple_  |           |
-| [DMS]               | _1203_      | 1         |
-| [GPS]               | _1204_      | 2         |
-| [LCS]               | _1203_      | 1         |
-| [Vehicle detection] | _1202_      | 1-`??`    |
-| [Weather sensor]    | _1204_      | 1         |
+| Device Type         | Standard | [IO Pin]s |
+|---------------------|----------|-----------|
+| [Alarm]             | _1201_   | 11-`??`   |
+| [DMS]               | _1203_   | 1         |
+| [GPS]               | _1204_   | 2         |
+| [LCS]               | _1203_   | 1         |
+| [Vehicle detection] | _1202_   | 1-`??`    |
+| [Weather sensor]    | _1204_   | 1         |
 
 ## External Systems
 

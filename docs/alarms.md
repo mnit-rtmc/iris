@@ -11,10 +11,11 @@ Select `View ➔ Maintenance ➔ Alarms` menu item
 An alarm must be associated with a [controller] on an appropriate [comm link].
 Several [protocol]s are supported:
 
-| Protocol        | [IO Pin]s |
-|-----------------|-----------|
-| MnDOT           | 70 - 79   |
-| Natch           | 70 - 79   |
+| Protocol | [IO Pin]s | Notes                              |
+|----------|-----------|------------------------------------|
+| MnDOT    | 70-79     |                                    |
+| Natch    | 70-79     |                                    |
+| NTCIP    | 11-`??`   | 10 + `auxIOv2PortNumber` (digital) |
 
 <details>
 <summary>API Resources 🕵️ </summary>
