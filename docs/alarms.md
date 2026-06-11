@@ -1,13 +1,20 @@
 # Alarms
 
-Select `View ➔ Maintenance ➔ Alarms` menu item
-
 An alarm is a device which has a boolean `state` indicating whether or not it is
 _triggered_.  The `description` of the alarm might indicate an equipment
 failure, high temperature, low voltage, _etc_.
 
-An alarm can be created for controllers using a [protocol] that generates
-alarms, such as [MnDOT-170].
+## Setup
+
+Select `View ➔ Maintenance ➔ Alarms` menu item
+
+An alarm must be associated with a [controller] on an appropriate [comm link].
+Several [protocol]s are supported:
+
+| Protocol        | [IO Pin]s |
+|-----------------|-----------|
+| MnDOT           | 70 - 79   |
+| Natch           | 70 - 79   |
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -29,6 +36,8 @@ The `state` field is set to `true` when _triggered_.  When it changes, a
 time-stamped [event] record can be stored in the `alarm_event` table.
 
 
-[MnDOT-170]: protocols.html#mndot-170
+[comm link]: comm_links.html
+[controller]: controllers.html
+[IO pin]: controllers.html#io-pins
 [protocol]: protocols.html
 [event]: events.html
