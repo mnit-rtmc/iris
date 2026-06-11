@@ -70,6 +70,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	static private final List<CidrBlock> ALLOWLIST =
 		new ArrayList<CidrBlock>();
 
+	/** One year (ms), for initializing phase_time */
+	static private final long YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+
 	/** Initialize the gate arm allow list */
 	static public void initAllowList(Properties props)
 		throws IllegalArgumentException
@@ -372,7 +375,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	private PlanPhase phase;
 
 	/** Time stamp for last phase change */
-	private long phase_time = TimeSteward.currentTimeMillis();
+	private long phase_time = TimeSteward.currentTimeMillis() - YEAR_MS;
 
 	/** Set the phase */
 	@Override
