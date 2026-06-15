@@ -542,9 +542,9 @@ checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
 name = "earthwyrm"
-version = "0.12.1"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "876ae6d8251c1d638cdb449b94846608d3b603fb1fcdcd577d9882bd9b6b7aa8"
+checksum = "6a442f6bfada1188d39745f27097408242e7775c99130f702289a97c09264ab8"
 dependencies = [
  "futures-util",
  "hatmil",
@@ -833,9 +833,9 @@ dependencies = [
 
 [[package]]
 name = "gift"
-version = "0.11.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2aa295dab484c3b751608e0a537e47c4b51d921076f5c8b14829a7635413fa9"
+checksum = "86795cad64a1349acf4a9455c3c95bfc9ebc55d62b27414078361232b506be6a"
 dependencies = [
  "log",
  "pix",
@@ -1368,9 +1368,9 @@ dependencies = [
 
 [[package]]
 name = "ntcip"
-version = "0.14.4"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62af52bc37e5d3f4818fbbedfe0a038eaeb4431677c386bf05766f09cf0b69fe"
+checksum = "9ed47bd9a571401069a5a412e517ffee05f55a017c44c0e9888c6f130126cd4a"
 dependencies = [
  "crc",
  "enumflags2",
@@ -1535,9 +1535,9 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 
 [[package]]
 name = "pix"
-version = "0.14.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a054a84d1ff0dc456386e5fc081e099e6855ddcc8913dc9349c294d47d76bd4"
+checksum = "f1fd24e925049f369a437a68431d7fc3b59861a42c9249fa8c5a17883c121bd7"
 
 [[package]]
 name = "pkg-config"

@@ -28,6 +28,9 @@ pub enum Error {
     #[error("Gift: {0}")]
     Gift(#[from] gift::Error),
 
+    #[error("Too many colors")]
+    TooManyColors,
+
     #[error("Missing graphic")]
     MissingGraphic,
 
@@ -190,7 +193,7 @@ pub fn render_multi<W: Write>(
         let mut palette = make_palette(&raster);
         palette.set_threshold_fn(palette_threshold_rgb8_256);
         let face = make_face_raster(dms, raster, width, height);
-        let indexed = palette.make_indexed(face);
+        let indexed = palette.make_indexed(face).ok_or(Error::TooManyColors)?;
         steps.push(
             // The CARS iOS client can't read .gif files with no graphic
             // control extension -- set DisposalMethod to Keep to include it
@@ -238,7 +241,7 @@ pub fn render_pixels<W: Write>(
     let mut enc = Encoder::new(&mut writer).into_step_enc().with_loop_count(0);
     let mut palette = make_palette(&stuck);
     let face = make_face_raster(dms, stuck, width, height);
-    let indexed = palette.make_indexed(face);
+    let indexed = palette.make_indexed(face).ok_or(Error::TooManyColors)?;
     let step = Step::with_indexed(indexed, palette)
         .with_transparent_color(Some(0))
         .with_delay_time_cs(Some(50))
@@ -246,7 +249,7 @@ pub fn render_pixels<W: Write>(
     enc.encode_step(&step)?;
     let mut palette = make_palette(&clear);
     let face = make_face_raster(dms, clear, width, height);
-    let indexed = palette.make_indexed(face);
+    let indexed = palette.make_indexed(face).ok_or(Error::TooManyColors)?;
     let step = Step::with_indexed(indexed, palette)
         .with_transparent_color(Some(0))
         .with_delay_time_cs(Some(30))
