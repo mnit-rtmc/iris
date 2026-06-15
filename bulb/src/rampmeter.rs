@@ -262,40 +262,42 @@ fn make_meter_signal(state: MeterState) -> Raster<SRgb8> {
 }
 
 /// Make a GIF step for a meter state
-fn make_step(state: MeterState, hold: u16) -> Step {
+fn make_step(state: MeterState, hold: u16) -> Result<Step> {
     let raster = make_meter_signal(state);
     let mut palette = make_palette(&raster);
-    let indexed = palette.make_indexed(raster);
-    Step::with_indexed(indexed, palette)
+    let indexed = palette
+        .make_indexed(raster)
+        .ok_or(rendzina::Error::TooManyColors)?;
+    Ok(Step::with_indexed(indexed, palette)
         .with_delay_time_cs(Some(hold))
-        .with_disposal_method(DisposalMethod::Keep)
+        .with_disposal_method(DisposalMethod::Keep))
 }
 
 /// Encode a GIF of the meter `off` (flashing yellow)
 fn encode_meter_off<W: Write>(enc: Encoder<W>) -> Result<()> {
     let mut enc = enc.into_step_enc().with_loop_count(0);
-    enc.encode_step(&make_step(MeterState::Off, 50))?;
-    enc.encode_step(&make_step(MeterState::LowYellow, 50))?;
+    enc.encode_step(&make_step(MeterState::Off, 50)?)?;
+    enc.encode_step(&make_step(MeterState::LowYellow, 50)?)?;
     Ok(())
 }
 
 /// Encode a GIF of meter 1 (left) cycling
 fn encode_meter_1<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
     let mut enc = enc.into_step_enc().with_loop_count(0);
-    enc.encode_step(&make_step(MeterState::Green, 130))?;
-    enc.encode_step(&make_step(MeterState::Yellow, 70))?;
-    enc.encode_step(&make_step(MeterState::Red, red_cs))?;
-    enc.encode_step(&make_step(MeterState::Red, 200 + red_cs))?;
+    enc.encode_step(&make_step(MeterState::Green, 130)?)?;
+    enc.encode_step(&make_step(MeterState::Yellow, 70)?)?;
+    enc.encode_step(&make_step(MeterState::Red, red_cs)?)?;
+    enc.encode_step(&make_step(MeterState::Red, 200 + red_cs)?)?;
     Ok(())
 }
 
 /// Encode a GIF of meter 2 (right) cycling
 fn encode_meter_2<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
     let mut enc = enc.into_step_enc().with_loop_count(0);
-    enc.encode_step(&make_step(MeterState::Red, 200 + red_cs))?;
-    enc.encode_step(&make_step(MeterState::Green, 130))?;
-    enc.encode_step(&make_step(MeterState::Yellow, 70))?;
-    enc.encode_step(&make_step(MeterState::Red, red_cs))?;
+    enc.encode_step(&make_step(MeterState::Red, 200 + red_cs)?)?;
+    enc.encode_step(&make_step(MeterState::Green, 130)?)?;
+    enc.encode_step(&make_step(MeterState::Yellow, 70)?)?;
+    enc.encode_step(&make_step(MeterState::Red, red_cs)?)?;
     Ok(())
 }
 
