@@ -1,5 +1,21 @@
 # IRIS 5.x Release Notes
 
+5.86.0 (15 Jun 2026)
+ - Add Max-Pressure meter algorithm
+ - Add phase action setup UI (Java)
+ - Implement phase action conditions: HOLD_TIME, CLOCK_TIME, ALARM
+ - Add NTCIP alarm support (1201, auxIOv2)
+ - Add CBW alarm support (input state)
+ - Web UI: finish user and role administration
+ - Web UI: add toll zone cards
+ - Web UI: add tag reader settings to status card
+ - Web UI: refactor util module
+ - Web UI: add camera wiper, etc.
+ - Web UI: improved weather sensor styling
+ - Improved debug logging for ss125 protocol
+ - Fix Message Pattern sorting quirks
+ - Fix permission UI quirks
+
 5.85.0 (18 May 2026)
  - Web UI: rework DOM event handling on cards
  - Web UI: use hatmil to build dynamic CSS
