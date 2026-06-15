@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IMenu;
@@ -41,7 +42,8 @@ public class MaintenanceMenu extends IMenu {
 		addItem(createCommConfigItem());
 		addItem(createCommLinkItem());
 		addItem(createAlarmItem());
-		addItem(createCabinetStyleItem());
+		if (SystemAttrEnum.LEGACY_UI_SYSTEM_ENABLE.getBoolean())
+			addItem(createCabinetStyleItem());
 	}
 
 	/** Create a comm config menu item action */
