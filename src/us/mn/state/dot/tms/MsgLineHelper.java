@@ -59,20 +59,24 @@ public class MsgLineHelper extends BaseHelper {
 			MsgPatternHelper.lineTextRects(pat, dms);
 		if (line_rects == null || line_rects.size() <= 1)
 			return lines;
-		String prototype = pat.getPrototype();
 		Iterator<MsgLine> it = iterator();
 		while (it.hasNext()) {
 			MsgLine ml = it.next();
 			MsgPattern mp = ml.getMsgPattern();
-			if (compose.contains(mp) &&
-			    MsgPatternHelper.checkPrototype(mp, prototype))
-			{
+			if (compose.contains(mp) && checkPrototype(pat, mp)) {
 				MsgLine aml = abbreviateLine(ml, line_rects);
 				if (aml != null)
 					lines.add(aml);
 			}
 		}
 		return lines;
+	}
+
+	/** Check if a message pattern matches a prototype */
+	static private boolean checkPrototype(MsgPattern p0, MsgPattern p1) {
+		return (p0 == p1) ||
+			p0.getName().equals(p1.getPrototype()) ||
+			p1.getName().equals(p0.getPrototype());
 	}
 
 	/** Abbreviate a line for available text rectangle */
