@@ -781,7 +781,7 @@ impl SegmentState {
     /// Update (or add) a node
     pub fn update_node(&mut self, node: RNode) {
         let Some(ref cor_id) = node.cor_id() else {
-            log::debug!("ignoring node: {}", &node.name);
+            log::trace!("ignoring node: {}", &node.name);
             return;
         };
         match self.node_cors.insert(node.name.clone(), cor_id.clone()) {
@@ -821,7 +821,7 @@ impl SegmentState {
             Some(cor) => {
                 cor.remove_node(name);
                 if cor.nodes.is_empty() {
-                    log::debug!("removing corridor: {cid:?}");
+                    log::trace!("removing corridor: {cid:?}");
                     self.corridors.remove(cid);
                 }
             }

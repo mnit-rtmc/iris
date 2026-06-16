@@ -141,7 +141,7 @@ impl SseNotifier {
 
     /// Send an SSE event
     fn send_event_checked(&mut self, id: &Id, nm: &Name) {
-        log::debug!("checking {nm} for {id}");
+        log::trace!("checking {nm} for {id}");
         if self.is_listening(nm) {
             self.send_event(id, nm);
         }
@@ -149,7 +149,7 @@ impl SseNotifier {
 
     /// Send an SSE event
     fn send_event(&mut self, id: &Id, nm: &Name) {
-        log::debug!("SSE notify: {nm} to {id}");
+        log::trace!("SSE notify: {nm} to {id}");
         if let Some(tx) = &self.tx {
             self.activity = SystemTime::now();
             let ev = Event::default().data(nm.to_string());
@@ -236,7 +236,7 @@ impl Honey {
         name: &Name,
         access: Access,
     ) -> Result<Access> {
-        log::debug!("name_access {user} {name}");
+        log::trace!("name_access {user} {name}");
         let access_lvl = permission::name_access(&self.db, user, name).await?;
         let acc = Access::new(access_lvl).ok_or(Error::Forbidden)?;
         acc.check(access)?;
@@ -277,7 +277,7 @@ impl Honey {
     /// Store SSE sender for a session Id
     fn store_sender(&self, id: Id, tx: UnboundedSender<EventResult>) {
         let mut map = self.notifiers.lock().unwrap();
-        log::debug!("Adding SSE sender for {id}");
+        log::trace!("Adding SSE sender for {id}");
         match map.get_mut(&id) {
             Some(notifier) => {
                 if notifier.tx.is_some() {
@@ -299,14 +299,14 @@ impl Honey {
     // Remove sender for one session
     #[allow(unused)]
     fn remove_sender(&self, sid: Id) {
-        log::debug!("remove_sender: {sid}");
+        log::trace!("remove_sender: {sid}");
         let mut map = self.notifiers.lock().unwrap();
         map.retain(|id, _notifier| *id != sid);
     }
 
     /// Notify all SSE listeners
     pub async fn notify_sse(&self, nm: Name) {
-        log::debug!("Notify SSE {nm}");
+        log::trace!("notify_sse {nm}");
         let mut map = self.notifiers.lock().unwrap();
         for (id, notifier) in map.iter_mut() {
             notifier.send_event_checked(id, &nm);
@@ -315,7 +315,7 @@ impl Honey {
 
     // Purge notifiers with no recent activity
     pub fn purge_expired(&self) {
-        log::debug!("purge_expired");
+        log::trace!("purge_expired");
         let now = SystemTime::now();
         let mut map = self.notifiers.lock().unwrap();
         map.retain(|_id, notifier| {
@@ -724,11 +724,11 @@ fn other_resource(honey: Honey) -> Router {
                         let attr = &key[..];
                         if attr != "name" {
                             let anm = name.attr_n(attr)?;
-                            log::debug!("{anm} = {value} (phantom)");
+                            log::trace!("{anm} = {value} (phantom)");
                             msn.update_object(&anm, value).await?;
                         }
                     }
-                    log::debug!("creating {name}");
+                    log::trace!("creating {name}");
                     msn.create_object(&name.to_string()).await?;
                 }
                 Ok(StatusCode::CREATED)
@@ -882,7 +882,7 @@ fn other_object(honey: Honey) -> Router {
                 let attr = &key[..];
                 if patch_first_pass(nm.res_type, attr) {
                     let anm = nm.attr_n(attr)?;
-                    log::debug!("{anm} = {value}");
+                    log::trace!("{anm} = {value}");
                     msn.update_object(&anm, value).await?;
                 }
             }
@@ -891,7 +891,7 @@ fn other_object(honey: Honey) -> Router {
                 let attr = &key[..];
                 if !patch_first_pass(nm.res_type, attr) {
                     let anm = nm.attr_n(attr)?;
-                    log::debug!("{anm} = {value}");
+                    log::trace!("{anm} = {value}");
                     msn.update_object(&anm, value).await?;
                 }
             }

@@ -59,7 +59,7 @@ impl Future for NotificationHandler {
                 Poll::Ready(false)
             }
             Poll::Ready(Some(Ok(AsyncMessage::Notification(n)))) => {
-                log::debug!("Notification: {} {}", n.channel(), n.payload());
+                log::debug!("NOTIFY: {} {}", n.channel(), n.payload());
                 self.notify_channel(n);
                 Poll::Ready(true)
             }
