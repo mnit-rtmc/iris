@@ -91,22 +91,22 @@ impl NotificationHandler {
                     match nm.clone().obj(obj_n) {
                         Ok(nm) => nm,
                         Err(_e) => {
-                            log::warn!("Invalid payload: {obj_n}");
+                            log::warn!("notify_channel invalid: {obj_n}");
                             nm
                         }
                     }
                 };
                 send_event(&self.tx, nm);
             }
-            Err(_) => log::warn!("Unknown channel: {}", n.channel()),
+            Err(_) => log::warn!("notify_channel unknown: {}", n.channel()),
         }
     }
 }
 
-/// Send initial notify event
+/// Send notify event
 fn send_event(tx: &UnboundedSender<Name>, nm: Name) {
     if let Err(e) = tx.send(nm) {
-        log::warn!("Send notification: {e}");
+        log::warn!("send_event: {e}");
     }
 }
 
