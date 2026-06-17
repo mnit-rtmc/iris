@@ -20,7 +20,8 @@ const SIGN_CFGS: &'static str = r#"[{
   "color_scheme":"color24Bit",
   "default_font":13,
   "module_width":null,
-  "module_height":null
+  "module_height":null,
+  "sign_count":1
 }]"#;
 
 const MULTI: &'static str = "\
@@ -53,5 +54,5 @@ fn main() {
         .unwrap();
     let file = File::create("render.gif").unwrap();
     let writer = BufWriter::new(file);
-    rendzina::render(writer, &dms, MULTI, 240, 80, None).unwrap();
+    rendzina::render_multi(writer, &dms, MULTI, 240, 80, None).unwrap();
 }
