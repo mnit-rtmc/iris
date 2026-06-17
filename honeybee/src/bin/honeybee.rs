@@ -41,26 +41,27 @@ async fn main() -> Result<()> {
     tokio::spawn(serve_routes(honey.clone()));
     tokio::spawn(check_expired(honey.clone()));
     let mut state = SegmentState::new();
-    let mut events = HashSet::new();
+    let mut names = HashSet::new();
     let stream = notify_events(&db).await?;
-    let stream = stream.timeout(Duration::from_millis(300));
+    let stream = stream.chunks_timeout(50, Duration::from_millis(300));
     tokio::pin!(stream);
     loop {
         match stream.next().await {
             None => break,
-            Some(Ok(nm)) => {
-                // hold event until timeout passes
-                events.insert(nm);
-            }
-            Some(Err(_elapsed)) => {
-                // timeout expired, deliver all pending events
-                if !events.is_empty() {
-                    let mut client = db.client().await?;
-                    for nm in events.drain() {
-                        Resource::notify(&mut client, &mut state, &nm).await?;
-                        let hon = honey.clone();
-                        tokio::spawn(async move { hon.notify_sse(nm).await });
-                    }
+            Some(events) => {
+                // did timeout expire with no events?
+                if events.is_empty() {
+                    continue;
+                }
+                // put names in HashSet to deduplicate
+                for nm in events {
+                    names.insert(nm);
+                }
+                let mut client = db.client().await?;
+                for nm in names.drain() {
+                    Resource::notify(&mut client, &mut state, &nm).await?;
+                    let hon = honey.clone();
+                    tokio::spawn(async move { hon.notify_sse(nm).await });
                 }
             }
         }
