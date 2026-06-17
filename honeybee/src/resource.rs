@@ -503,7 +503,7 @@ impl Resource {
         segments: &mut SegmentState,
         nm: &Name,
     ) -> Result<()> {
-        log::info!("Resource::notify: {nm}");
+        log::debug!("Resource::notify: {nm}");
         for res in Resource::iter() {
             if nm.res_type == res.res_type() {
                 match nm.object_n() {
@@ -583,7 +583,7 @@ impl Resource {
         );
         let count = query_json(client, &sql, writer).await?;
         file.commit().await?;
-        log::info!("{name}: wrote {count} rows in {:?}", t.elapsed());
+        log::debug!("{name}: wrote {count} rows in {:?}", t.elapsed());
         Ok(())
     }
 

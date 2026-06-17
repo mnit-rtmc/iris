@@ -149,12 +149,12 @@ impl SseNotifier {
 
     /// Send an SSE event
     fn send_event(&mut self, id: &Id, nm: &Name) {
-        log::trace!("SSE notify: {nm} to {id}");
+        log::trace!("send_event SSE: {nm} to {id}");
         if let Some(tx) = &self.tx {
             self.activity = SystemTime::now();
             let ev = Event::default().data(nm.to_string());
             if let Err(e) = tx.send(Ok(ev)) {
-                log::warn!("SSE notification: {e}");
+                log::warn!("send_event SSE: {e}");
                 self.tx = None;
             }
         }
@@ -162,7 +162,7 @@ impl SseNotifier {
 
     /// Send an SSE event for all listening channels
     fn send_channels(&mut self, id: &Id) {
-        log::info!("SSE send channels {id} {}", self.channels.len());
+        log::debug!("send_channels SSE {id} {}", self.channels.len());
         for nm in &self.channels.clone() {
             self.send_event(id, nm);
         }
@@ -266,7 +266,7 @@ impl Honey {
                 notifier.send_channels(&id);
             }
             None => {
-                log::info!("SSE sender unknown {id}");
+                log::warn!("store_channels: SSE sender {id} unknown");
                 let mut notifier = SseNotifier::new();
                 notifier.channels = names;
                 map.insert(id, notifier);
@@ -283,7 +283,7 @@ impl Honey {
                 if notifier.tx.is_some() {
                     // NOTE: this happens when multiple tabs
                     //       are open on the same browser
-                    log::info!("SSE sender exists {id}");
+                    log::warn!("store_sender: SSE sender {id} exists");
                 }
                 notifier.tx = Some(tx);
                 notifier.send_channels(&id);
@@ -574,7 +574,7 @@ fn access_get(honey: Honey) -> Router {
 /// Try to make a sonar names from notify channels
 fn try_names_from_channels(channels: &[String]) -> Result<Vec<Name>> {
     if channels.len() > 32 {
-        log::info!("Too many notification channels");
+        log::warn!("try_names_from_channels: Too many channels");
         Err(Error::InvalidValue)?;
     }
     let mut names = Vec::with_capacity(channels.len());

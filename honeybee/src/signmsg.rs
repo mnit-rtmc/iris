@@ -154,11 +154,11 @@ impl MsgData {
         match rendzina::render_multi(&mut buf, &dms, &msg.multi, 450, 100, None)
         {
             Ok(()) => {
-                log::info!("{name} rendered in {:?}", t.elapsed());
+                log::info!("render_sign_msg: {name}, {:?}", t.elapsed());
                 Ok(Some(buf))
             }
             Err(e) => {
-                log::warn!("{name}, {e:?} multi={}", msg.multi);
+                log::warn!("render_sign_msg: {e:?} {name}, {}", msg.multi);
                 Ok(None)
             }
         }
@@ -188,7 +188,7 @@ pub async fn render_all() -> Result<()> {
                     file.write_buf(&buf).await?;
                 }
                 Ok(None) => (),
-                Err(e) => log::warn!("render {name}, {e:?}"),
+                Err(e) => log::warn!("render {e:?}, {name}"),
             }
         }
     }

@@ -493,7 +493,7 @@ impl Corridor {
             .filter_map(|n| n.pos())
             .map(|p| Pt::from(WebMercatorPos::from(p)))
             .collect();
-        log::info!("{}: {} points", self.cor_id, self.pts.len());
+        log::debug!("create_points {}: {}", self.cor_id, self.pts.len());
     }
 
     /// Create normal vectors for corridor points
