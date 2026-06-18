@@ -145,8 +145,6 @@ public class Name {
 		{ "dms", "deviceRequest" },
 		{ "dms", "lock" },
 		{ "gate_arm", "lock" },
-		{ "gate_arm_array", "armStateNext" },
-		{ "gate_arm_array", "ownerNext" },
 		{ "lcs", "deviceRequest" },
 		{ "lcs", "lock" },
 		{ "parking_area", "open" },
