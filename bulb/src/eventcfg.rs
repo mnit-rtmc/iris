@@ -56,23 +56,28 @@ impl EventConfig {
         self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("store").cdata("Enable Store").close();
+        div.label()
+            .r#for("enable_store")
+            .cdata("Enable Store")
+            .close();
         let mut input = div.input();
-        input.id("store").r#type("checkbox");
+        input.id("enable_store").r#type("checkbox");
         if self.enable_store {
             input.checked();
         }
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("purge").cdata("Enable Purge").close();
+        div.label()
+            .r#for("enable_purge")
+            .cdata("Enable Purge")
+            .close();
         let mut input = div.input();
-        input.id("purge").r#type("checkbox");
+        input.id("enable_purge").r#type("checkbox");
         if self.enable_purge {
             input.checked();
         }
         div.close();
-        // FIXME: add purge days
         div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("purge_days").cdata("Purge Days").close();
@@ -130,8 +135,8 @@ impl Card for EventConfig {
     /// Get changed fields from Setup form
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
-        fields.changed_input("store", self.enable_store);
-        fields.changed_input("purge", self.enable_purge);
+        fields.changed_input("enable_store", self.enable_store);
+        fields.changed_input("enable_purge", self.enable_purge);
         fields.changed_input("purge_days", self.purge_days);
         fields.into_value().to_string()
     }
