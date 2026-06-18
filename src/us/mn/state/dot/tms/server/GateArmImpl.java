@@ -23,6 +23,7 @@ import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -50,6 +51,16 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Time to request arm state since plan phase change (seconds) */
 	static private int PLAN_REQUEST_SECS = 90;
+
+	/** Check if an action plan's phase was recently changed */
+	static private boolean isPhaseRecentlyChanged(ActionPlan ap) {
+		if (ap instanceof ActionPlanImpl) {
+			ActionPlanImpl api = (ActionPlanImpl) ap;
+			long now = TimeSteward.currentTimeMillis();
+			return (api.phaseSecs(now) < PLAN_REQUEST_SECS);
+		} else
+			return false;
+	}
 
 	/** Timeout (ms) for a comm failure to result in UNKNOWN status */
 	static private final long failTimeoutMS() {
@@ -596,22 +607,34 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		PlannedAction pa = super.choosePlannedAction();
 		if (pa != null) {
 			ActionPlan ap = pa.action.getActionPlan();
-			if (ap instanceof ActionPlanImpl) {
-				ActionPlanImpl api = (ActionPlanImpl) ap;
-				long now = TimeSteward.currentTimeMillis();
-				if (api.phaseSecs(now) < PLAN_REQUEST_SECS) {
-					GateArmInterlock gai = interlock;
-					if (gai.isOpenAllowed())
-						requestArmOpen();
-				}
+			if (isPhaseRecentlyChanged(ap)) {
+				GateArmInterlock gai = interlock;
+				if (gai.isOpenAllowed())
+					requestArmOpen();
 			}
 		} else {
-			// FIXME: don't close if opened manually
-			GateArmInterlock gai = interlock;
-			if (gai.isCloseAllowed())
-				requestArmClose();
+			if (findRecentPlan() != null) {
+				GateArmInterlock gai = interlock;
+				if (gai.isCloseAllowed())
+					requestArmClose();
+			}
 		}
 		return pa;
+	}
+
+	/** Find gate arm action plan which recently changed phases */
+	private ActionPlan findRecentPlan() {
+		Hashtags tags = new Hashtags(getNotes());
+		Iterator<ActionPlan> it = ActionPlanHelper.iterator();
+		while (it.hasNext()) {
+			ActionPlan ap = it.next();
+			if (tags.containsAny(ActionPlanHelper.findHashtags(ap))
+			    && isPhaseRecentlyChanged(ap))
+			{
+				return ap;
+			}
+		}
+		return null;
 	}
 
 	/** Request to open the gate arm */
