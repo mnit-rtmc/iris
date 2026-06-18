@@ -248,7 +248,7 @@ dependencies = [
 
 [[package]]
 name = "bulb"
-version = "5.86.1"
+version = "5.86.2"
 dependencies = [
  "base64",
  "cfg-if",
@@ -922,7 +922,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "5.86.1"
+version = "5.86.2"
 dependencies = [
  "anyhow",
  "argh",
@@ -1261,7 +1261,7 @@ checksum = "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3"
 
 [[package]]
 name = "mayfly"
-version = "5.86.1"
+version = "5.86.2"
 dependencies = [
  "argh",
  "axum",
@@ -1535,9 +1535,9 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 
 [[package]]
 name = "pix"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1fd24e925049f369a437a68431d7fc3b59861a42c9249fa8c5a17883c121bd7"
+checksum = "193abc7f41904036e50a389a6298b3f4f49f0be03756bbfa1b3d3f3cb34be3ee"
 
 [[package]]
 name = "pkg-config"
@@ -1557,7 +1557,7 @@ dependencies = [
 
 [[package]]
 name = "pollinator"
-version = "5.86.1"
+version = "5.86.2"
 dependencies = [
  "argh",
  "bb8",
@@ -1771,7 +1771,7 @@ dependencies = [
 
 [[package]]
 name = "rendzina"
-version = "5.86.1"
+version = "5.86.2"
 dependencies = [
  "fstr",
  "gift",
@@ -1785,7 +1785,7 @@ dependencies = [
 
 [[package]]
 name = "resin"
-version = "5.86.1"
+version = "5.86.2"
 dependencies = [
  "bb8",
  "bb8-postgres",
@@ -1806,7 +1806,7 @@ dependencies = [
 
 [[package]]
 name = "resources"
-version = "5.86.1"
+version = "5.86.2"
 
 [[package]]
 name = "ring"
