@@ -304,7 +304,7 @@ impl Res {
             Dms => "⬛",
             Domain => "🖧 ",
             EncoderStream => "〜",
-            EncoderType => "🎥📽️",
+            EncoderType => "📀",
             EventConfig => "📜",
             FlowStream => "🎞️ ",
             GateArm => "⫬",
