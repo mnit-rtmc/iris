@@ -2346,7 +2346,8 @@ CREATE TRIGGER camera_delete_trig
     FOR EACH ROW EXECUTE FUNCTION iris.controller_io_delete();
 
 CREATE VIEW camera_view AS
-    SELECT c.name, cam_num, c.cam_template, encoder_type, et.make, et.model,
+    SELECT c.name, cam_num, c.cam_template, t.label AS template_label,
+           encoder_type, et.make, et.model,
            et.config, c.enc_address, c.enc_port, c.enc_mcast, c.enc_channel,
            c.publish, c.video_loss, c.geo_loc,
            l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
@@ -2355,6 +2356,7 @@ CREATE VIEW camera_view AS
            cnd.description AS condition, c.notes
     FROM iris._camera c
     JOIN iris.controller_io cio ON c.name = cio.name
+    LEFT JOIN iris.camera_template t ON c.cam_template = t.name
     LEFT JOIN iris.encoder_type et ON c.encoder_type = et.name
     LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
     LEFT JOIN iris.controller ctr ON cio.controller = ctr.name
