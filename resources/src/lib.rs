@@ -471,6 +471,7 @@ impl Res {
                 | Detector
                 | Dms
                 | Domain
+                | EncoderType
                 | EventConfig
                 | FlowStream
                 | GateArm

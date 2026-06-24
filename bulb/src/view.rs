@@ -26,6 +26,7 @@ use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
 use crate::eid;
+use crate::encodertype::EncoderType;
 use crate::error::Result;
 use crate::eventcfg::EventConfig;
 use crate::fetch::Action;

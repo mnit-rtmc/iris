@@ -14,6 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
+use crate::encodertype::EncoderType;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::LocAnc;
@@ -27,32 +28,8 @@ use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
-use std::fmt;
 use wasm_bindgen::JsValue;
 use web_sys::{Element, HtmlElement, HtmlInputElement};
-
-/// Encoder type
-#[derive(Debug, Default, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
-pub struct EncoderType {
-    pub make: String,
-    pub model: String,
-    pub config: String,
-    // NOTE: last to allow deriving PartialOrd / Ord
-    pub name: String,
-}
-
-impl fmt::Display for EncoderType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.make)?;
-        if !self.model.is_empty() {
-            write!(f, " {}", self.model)?;
-        }
-        if !self.config.is_empty() {
-            write!(f, " {}", self.config)?;
-        }
-        Ok(())
-    }
-}
 
 /// Camera
 #[derive(Debug, Default, Deserialize, PartialEq)]

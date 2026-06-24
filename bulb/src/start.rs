@@ -360,6 +360,9 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("res_plan_row") {
         el.set_class_name(row_class(base == Some(Res::ActionPlan)));
     }
+    if let Some(el) = doc.opt_elem::<Element>("res_camera_row") {
+        el.set_class_name(row_class(base == Some(Res::Camera)));
+    }
     if let Some(el) = doc.opt_elem::<Element>("res_dms_row") {
         el.set_class_name(row_class(base == Some(Res::Dms)));
     }
@@ -414,6 +417,9 @@ fn selected_resource() -> Option<Res> {
             Some(Res::PlanPhase)
         }
         Res::ActionPlan if doc.input_bool("res_day_plan") => Some(Res::DayPlan),
+        Res::Camera if doc.input_bool("res_encoder_type") => {
+            Some(Res::EncoderType)
+        }
         Res::Dms if doc.input_bool("res_msg_pattern") => Some(Res::MsgPattern),
         Res::Dms if doc.input_bool("res_sign_config") => Some(Res::SignConfig),
         Res::Dms if doc.input_bool("res_word") => Some(Res::Word),
@@ -489,6 +495,8 @@ fn handle_input(id: String) {
         | "res_plan_phase"
         | "res_day_plan"
         | "res_device_action"
+        | "res_camera"
+        | "res_encoder_type"
         | "res_dms"
         | "res_msg_pattern"
         | "res_sign_config"
