@@ -51,32 +51,49 @@ public class MsgLineHelper extends BaseHelper {
 		       m.equals(new MultiString(m).normalizeLine().toString());
 	}
 
-	/** Find all lines for a message pattern, including prototype */
-	static public List<MsgLine> findAllLines(MsgPattern pat, DMS dms) {
+	/** Find all composable message lines for a DMS */
+	static public List<MsgLine> findAllLines(DMS dms) {
+		ArrayList<MsgLine> lines = new ArrayList<MsgLine>();
 		Set<MsgPattern> compose = MsgPatternHelper.findAllCompose(dms);
+		Iterator<MsgLine> it = iterator();
+		while (it.hasNext()) {
+			MsgLine ml = it.next();
+			MsgPattern mp = ml.getMsgPattern();
+			if (checkCompose(compose, mp))
+				lines.add(ml);
+		}
+		return lines;
+	}
+
+	/** Check if a message pattern has composable lines */
+	static private boolean checkCompose(Set<MsgPattern> compose,
+		MsgPattern pat)
+	{
+		if (compose.contains(pat))
+			return true;
+		String nm = pat.getName();
+		for (MsgPattern mp: compose) {
+			if (nm.equals(mp.getPrototype()))
+				return true;
+		}
+		return false;
+	}
+
+	/** Find all composable message lines for a DMS */
+	static public List<MsgLine> findAllLines(MsgPattern pat, DMS dms) {
 		ArrayList<MsgLine> lines = new ArrayList<MsgLine>();
 		List<TextRect> line_rects =
 			MsgPatternHelper.lineTextRects(pat, dms);
 		if (line_rects == null || line_rects.size() <= 1)
 			return lines;
-		Iterator<MsgLine> it = iterator();
+		Iterator<MsgLine> it = findAllLines(dms).iterator();
 		while (it.hasNext()) {
 			MsgLine ml = it.next();
-			MsgPattern mp = ml.getMsgPattern();
-			if (compose.contains(mp) && checkPrototype(pat, mp)) {
-				MsgLine aml = abbreviateLine(ml, line_rects);
-				if (aml != null)
-					lines.add(aml);
-			}
+			MsgLine aml = abbreviateLine(ml, line_rects);
+			if (aml != null)
+				lines.add(aml);
 		}
 		return lines;
-	}
-
-	/** Check if a message pattern matches a prototype */
-	static private boolean checkPrototype(MsgPattern p0, MsgPattern p1) {
-		return (p0 == p1) ||
-			p0.getName().equals(p1.getPrototype()) ||
-			p1.getName().equals(p0.getPrototype());
 	}
 
 	/** Abbreviate a line for available text rectangle */
