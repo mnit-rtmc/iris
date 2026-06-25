@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2019-2023  Minnesota Department of Transportation
+ * Copyright (C) 2019-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class IncMultiBuilder {
 	/** Create a new incident MULTI builder */
 	public IncMultiBuilder(DMS dms, GeoLoc l, Distance d) {
 		MsgPattern best = null;
-		for (MsgPattern mp: MsgPatternHelper.findAllCompose(dms))
+		for (MsgPattern mp: MsgPatternHelper.findAllCompose(dms, false))
 			best = MsgPatternHelper.better(best, mp);
 		msg_pattern = best;
 		full_rect = SignConfigHelper.textRect(dms.getSignConfig());

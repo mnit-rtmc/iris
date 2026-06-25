@@ -394,7 +394,8 @@ public class DMSHelper extends BaseHelper {
 		if (dms == null || ms == null)
 			return "NULL VALUE";
 		String err = "NO PATTERN";
-		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms, true))
+		{
 			String e = MsgPatternHelper
 				.validateLines(pat, dms, ms);
 			if (e == null)
@@ -410,7 +411,8 @@ public class DMSHelper extends BaseHelper {
 		if (dms == null || ms == null)
 			return "NULL VALUE";
 		String err = "NO PATTERN";
-		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms)) {
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms, true))
+		{
 			String e = MsgPatternHelper
 				.validateWords(pat, dms, ms);
 			if (e == null)

@@ -54,29 +54,16 @@ public class MsgLineHelper extends BaseHelper {
 	/** Find all composable message lines for a DMS */
 	static public List<MsgLine> findAllLines(DMS dms) {
 		ArrayList<MsgLine> lines = new ArrayList<MsgLine>();
-		Set<MsgPattern> compose = MsgPatternHelper.findAllCompose(dms);
+		Set<MsgPattern> compose = MsgPatternHelper.findAllCompose(dms,
+			true);
 		Iterator<MsgLine> it = iterator();
 		while (it.hasNext()) {
 			MsgLine ml = it.next();
 			MsgPattern mp = ml.getMsgPattern();
-			if (checkCompose(compose, mp))
+			if (compose.contains(mp))
 				lines.add(ml);
 		}
 		return lines;
-	}
-
-	/** Check if a message pattern has composable lines */
-	static private boolean checkCompose(Set<MsgPattern> compose,
-		MsgPattern pat)
-	{
-		if (compose.contains(pat))
-			return true;
-		String nm = pat.getName();
-		for (MsgPattern mp: compose) {
-			if (nm.equals(mp.getPrototype()))
-				return true;
-		}
-		return false;
 	}
 
 	/** Find all composable message lines for a DMS */

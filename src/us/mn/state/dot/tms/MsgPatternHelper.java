@@ -65,7 +65,7 @@ public class MsgPatternHelper extends BaseHelper {
 	}
 
 	/** Find all compose message patterns for the specified DMS, sorted */
-	static public Set<MsgPattern> findAllCompose(DMS dms) {
+	static public Set<MsgPattern> findAllCompose(DMS dms, boolean proto) {
 		TreeSet<MsgPattern> pats = new TreeSet<MsgPattern>(
 			new NumericAlphaComparator<MsgPattern>());
 		if (dms == null)
@@ -78,6 +78,14 @@ public class MsgPatternHelper extends BaseHelper {
 			    hashtags.contains(pat.getComposeHashtag()))
 			{
 				pats.add(pat);
+				if (proto) {
+					String pt = pat.getPrototype();
+					if (pt != null) {
+						MsgPattern mp = lookup(pt);
+						if (mp != null)
+							pats.add(mp);
+					}
+				}
 			}
 		}
 		return pats;

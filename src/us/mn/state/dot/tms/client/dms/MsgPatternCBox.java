@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2025  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  * Copyright (C) 2010       AHMCT, University of California
  * Copyright (C) 2025       SRF Consulting Group
  *
@@ -46,7 +46,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	public void populateModel(DMS dms) {
 		DefaultComboBoxModel<MsgPattern> mdl =
 			new DefaultComboBoxModel<MsgPattern>();
-		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms))
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms, false))
 			mdl.addElement(pat);
 		mdl.setSelectedItem(null);
 		setModel(mdl);
