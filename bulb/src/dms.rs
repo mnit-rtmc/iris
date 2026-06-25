@@ -278,7 +278,7 @@ impl AncillaryData for DmsAnc {
                 let mut lines: Vec<MsgLine> =
                     serde_wasm_bindgen::from_value(value)?;
                 // NOTE: patterns *must* be populated before this!
-                lines.retain(|ln| self.has_compose_pattern(&ln.msg_pattern));
+                lines.retain(|ln| self.check_pattern(&ln.msg_pattern));
                 lines.sort();
                 self.lines = lines;
             }
@@ -370,9 +370,11 @@ impl DmsAnc {
         cfg.and_then(|cfg| self.configs.iter().find(|c| c.name == cfg))
     }
 
-    /// Check for compose pattern
-    fn has_compose_pattern(&self, pat: &str) -> bool {
-        self.compose_patterns.iter().any(|p| p.name == pat)
+    /// Check if a pattern can be composed (also prototypes)
+    fn check_pattern(&self, pat: &str) -> bool {
+        self.compose_patterns
+            .iter()
+            .any(|mp| mp.is_same_or_prototype(pat))
     }
 
     /// Make line input elements
@@ -416,7 +418,7 @@ impl DmsAnc {
                 }
                 let mut datalist = div.datalist();
                 datalist.id(mc_choice);
-                for ml in self.pat_lines(pat) {
+                for ml in &self.lines {
                     if ml.line == ln
                         && let Some(ms) =
                             self.line_multi(&ml.multi, width, font)
@@ -429,19 +431,6 @@ impl DmsAnc {
             }
         }
         div.close();
-    }
-
-    /// Get iterator of lines in a message pattern
-    fn pat_lines<'a>(
-        &'a self,
-        pat: &'a MsgPattern,
-    ) -> impl Iterator<Item = &'a MsgLine> {
-        self.lines.iter().filter(|ml| {
-            pat.check_line(&ml.msg_pattern)
-                || self.compose_patterns.iter().any(|cp| {
-                    cp.prototype.as_ref().is_some_and(|p| pat.check_line(p))
-                })
-        })
     }
 
     /// Get line that fits on sign

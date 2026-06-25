@@ -246,8 +246,8 @@ impl Ord for MsgPattern {
 }
 
 impl MsgPattern {
-    /// Check a message line pattern name
-    pub fn check_line(&self, nm: &str) -> bool {
+    /// Check if a pattern name is the same or prototype
+    pub fn is_same_or_prototype(&self, nm: &str) -> bool {
         self.name == nm || self.prototype.as_deref() == Some(nm)
     }
 
