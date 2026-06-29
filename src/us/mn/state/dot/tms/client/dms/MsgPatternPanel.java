@@ -67,13 +67,6 @@ public class MsgPatternPanel extends JPanel {
 	/** MULTI text area */
 	private final JTextArea multi_txt = new JTextArea(5, 40);
 
-	/** Prototype label */
-	private final ILabel prototype_lbl =
-		new ILabel("msg.pattern.prototype");
-
-	/** Prototype text field */
-	private final JTextField prototype_txt = new JTextField(20);
-
 	/** Flash beacon label */
 	private final ILabel beacon_lbl = new ILabel("dms.flash.beacon");
 
@@ -129,8 +122,6 @@ public class MsgPatternPanel extends JPanel {
 		@Override public void update(MsgPattern pat, String a) {
 			if (null == a)
 				updateMsgPattern(pat);
-			if (null == a || a.equals("prototype"))
-				prototype_txt.setText(pat.getPrototype());
 			if (null == a || a.equals("flashBeacon"))
 				beacon_chk.setSelected(pat.getFlashBeacon());
 			if (null == a || a.equals("pixelService"))
@@ -143,8 +134,6 @@ public class MsgPatternPanel extends JPanel {
 
 		@Override public void clear() {
 			msg_pattern = null;
-			prototype_txt.setEnabled(false);
-			prototype_txt.setText("");
 			beacon_chk.setEnabled(false);
 			beacon_chk.setSelected(false);
 			pix_srv_chk.setEnabled(false);
@@ -168,7 +157,6 @@ public class MsgPatternPanel extends JPanel {
 	/** Update the edit mode */
 	private void updateEditMode() {
 		MsgPattern pat = msg_pattern;
-		prototype_txt.setEnabled(session.canWrite(pat, "prototype"));
 		beacon_chk.setEnabled(session.canWrite(pat, "flashBeacon"));
 		pix_srv_chk.setEnabled(session.canWrite(pat, "pixelService"));
 		multi_txt.setEnabled(session.canWrite(pat, "multi"));
@@ -237,10 +225,6 @@ public class MsgPatternPanel extends JPanel {
 		// horizontal layout
 		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
 		hg.addGroup(gl.createSequentialGroup()
-		              .addComponent(prototype_lbl)
-		              .addGap(UI.hgap)
-		              .addComponent(prototype_txt))
-		  .addGroup(gl.createSequentialGroup()
 		              .addComponent(beacon_lbl)
 		              .addGap(UI.hgap)
 		              .addComponent(beacon_chk))
@@ -261,10 +245,6 @@ public class MsgPatternPanel extends JPanel {
 		// vertical layout
 		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
 		vg.addGroup(gl.createParallelGroup()
-		              .addComponent(prototype_lbl)
-		              .addComponent(prototype_txt))
-		  .addGap(UI.vgap)
-		  .addGroup(gl.createParallelGroup()
 		              .addComponent(beacon_lbl)
 		              .addComponent(beacon_chk))
 		  .addGap(UI.vgap)
@@ -287,27 +267,12 @@ public class MsgPatternPanel extends JPanel {
 
 	/** Create the jobs */
 	private void createJobs() {
-		prototype_txt.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				setPrototype(prototype_txt.getText());
-			}
-		});
 		multi_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
 				setMulti(multi_txt.getText());
 			}
 		});
-	}
-
-	/** Set the prototype pattern */
-	private void setPrototype(String pr) {
-		MsgPattern pat = msg_pattern;
-		if (pat != null) {
-			pr = pr.trim();
-			pat.setPrototype(pr.isEmpty() ? null : pr);
-		}
 	}
 
 	/** Set the MULTI string */

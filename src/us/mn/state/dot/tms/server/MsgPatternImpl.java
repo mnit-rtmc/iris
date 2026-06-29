@@ -44,8 +44,8 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 
 	/** Load all the message patterns */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, compose_hashtag, prototype, " +
-			"multi, flash_beacon, pixel_service FROM iris." +
+		store.query("SELECT name, compose_hashtag, multi, " +
+			"flash_beacon, pixel_service FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -60,7 +60,6 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("compose_hashtag", compose_hashtag);
-		map.put("prototype", prototype);
 		map.put("multi", multi);
 		map.put("flash_beacon", flash_beacon);
 		map.put("pixel_service", pixel_service);
@@ -82,20 +81,18 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 	private MsgPatternImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // compose_hashtag
-		     row.getString(3),  // prototype
-		     row.getString(4),  // multi
-		     row.getBoolean(5), // flash_beacon
-		     row.getBoolean(6)  // pixel_service
+		     row.getString(3),  // multi
+		     row.getBoolean(4), // flash_beacon
+		     row.getBoolean(5)  // pixel_service
 		);
 	}
 
 	/** Create a message pattern */
-	private MsgPatternImpl(String n, String cht, String p, String m,
-		boolean fb, boolean ps)
+	private MsgPatternImpl(String n, String cht, String m, boolean fb,
+		boolean ps)
 	{
 		super(n);
 		compose_hashtag = cht;
-		prototype = p;
 		multi = m;
 		flash_beacon = fb;
 		pixel_service = ps;
@@ -132,31 +129,6 @@ public class MsgPatternImpl extends BaseObjectImpl implements MsgPattern,
 		if (!objectEquals(cht, compose_hashtag)) {
 			store.update(this, "compose_hashtag", cht);
 			setComposeHashtag(cht);
-		}
-	}
-
-	/** Prototype message pattern */
-	private String prototype;
-
-	/** Get prototype pattern to derive from.
-	 * @return Prototype pattern name. */
-	@Override
-	public String getPrototype() {
-		return prototype;
-	}
-
-	/** Set prototype pattern to derive from.
-	 @param prototype Name of prototype pattern. */
-	@Override
-	public void setPrototype(String p) {
-		prototype = p;
-	}
-
-	/** Set prototype pattern to derive from */
-	public void doSetPrototype(String p) throws TMSException {
-		if (!objectEquals(p, prototype)) {
-			store.update(this, "prototype", p);
-			setPrototype(p);
 		}
 	}
 

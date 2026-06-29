@@ -46,7 +46,7 @@ public class MsgPatternCBox extends JComboBox<MsgPattern> {
 	public void populateModel(DMS dms) {
 		DefaultComboBoxModel<MsgPattern> mdl =
 			new DefaultComboBoxModel<MsgPattern>();
-		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms, false))
+		for (MsgPattern pat: MsgPatternHelper.findAllCompose(dms))
 			mdl.addElement(pat);
 		mdl.setSelectedItem(null);
 		setModel(mdl);

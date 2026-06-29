@@ -50,7 +50,7 @@ public class IncMultiBuilder {
 	/** Create a new incident MULTI builder */
 	public IncMultiBuilder(DMS dms, GeoLoc l, Distance d) {
 		MsgPattern best = null;
-		for (MsgPattern mp: MsgPatternHelper.findAllCompose(dms, false))
+		for (MsgPattern mp: MsgPatternHelper.findAllCompose(dms))
 			best = MsgPatternHelper.better(best, mp);
 		msg_pattern = best;
 		full_rect = SignConfigHelper.textRect(dms.getSignConfig());

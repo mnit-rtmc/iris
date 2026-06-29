@@ -3337,7 +3337,6 @@ CREATE TRIGGER dms_hashtag_trig
 CREATE TABLE iris.msg_pattern (
     name VARCHAR(20) PRIMARY KEY,
     compose_hashtag VARCHAR(16),
-    prototype VARCHAR(20) REFERENCES iris.msg_pattern,
     multi VARCHAR(1024) NOT NULL,
     flash_beacon BOOLEAN NOT NULL,
     pixel_service BOOLEAN NOT NULL,
@@ -3352,7 +3351,7 @@ INSERT INTO iris.msg_pattern (
     ('.2_LINE', '#TwoLine', '[np]', false, false),
     ('.3_LINE', '#ThreeLine', '', false, false),
     ('.4_LINE', '#FourLine', '', false, false),
-    ('.2_PAGE', '#Small', '[np]', false, false),
+    ('.2_PAGE', '#TwoPage', '[np]', false, false),
     ('RWIS_slippery_1',
         NULL,
         '[rwis_slippery,1]SLIPPERY[nl]ROAD[nl]DETECTED[np]USE[nl]CAUTION',
@@ -3404,7 +3403,7 @@ CREATE TRIGGER msg_pattern_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW msg_pattern_view AS
-    SELECT name, compose_hashtag, prototype, multi, flash_beacon, pixel_service
+    SELECT name, compose_hashtag, multi, flash_beacon, pixel_service
     FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
 

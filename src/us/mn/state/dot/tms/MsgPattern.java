@@ -36,14 +36,6 @@ public interface MsgPattern extends SonarObject {
 	/** SONAR base type name */
 	String SONAR_BASE = DMS.SONAR_TYPE;
 
-	/** Get prototype pattern to derive from.
-	 * @return Prototype pattern name. */
-	String getPrototype();
-
-	/** Set prototype pattern to derive from.
-	 @param prototype Name of prototype pattern. */
-	void setPrototype(String prototype);
-
 	/** Get the message MULTI string.
 	 * @return Message text in MULTI markup.
 	 * @see us.mn.state.dot.tms.utils.MultiString */
