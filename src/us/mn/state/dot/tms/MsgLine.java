@@ -39,8 +39,8 @@ public interface MsgLine extends SonarObject {
 	/** Maximum length of MULTI string */
 	int MAX_LEN_MULTI = 64;
 
-	/** Get the message pattern */
-	MsgPattern getMsgPattern();
+	/** Get the hashtag */
+	String getHashtag();
 
 	/** Set the line number */
 	void setLine(short l);

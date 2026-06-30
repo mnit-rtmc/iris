@@ -3409,11 +3409,12 @@ GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
 CREATE TABLE iris.msg_line (
     name VARCHAR(10) PRIMARY KEY,
-    msg_pattern VARCHAR(20) NOT NULL REFERENCES iris.msg_pattern,
+    hashtag VARCHAR(16) NOT NULL,
     line SMALLINT NOT NULL,
     multi VARCHAR(64) NOT NULL,
     rank SMALLINT NOT NULL,
 
+    CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$'),
     CONSTRAINT msg_line_line CHECK ((line >= 1) AND (line <= 12)),
     CONSTRAINT msg_line_rank CHECK ((rank >= 1) AND (rank <= 99))
 );
@@ -3423,7 +3424,7 @@ CREATE TRIGGER msg_line_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW msg_line_view AS
-    SELECT name, msg_pattern, line, rank, multi
+    SELECT name, hashtag, line, rank, multi
     FROM iris.msg_line;
 GRANT SELECT ON msg_line_view TO PUBLIC;
 

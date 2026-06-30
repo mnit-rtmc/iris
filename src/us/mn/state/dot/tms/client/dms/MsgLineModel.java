@@ -19,8 +19,9 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.tms.MsgPattern;
+import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MsgLine;
+import us.mn.state.dot.tms.MsgLineHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -33,13 +34,15 @@ import us.mn.state.dot.tms.utils.MultiString;
  *
  * @author Douglas Lau
  */
-public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
+public class MsgLineModel extends ProxyTableModel<MsgLine> {
 
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<MsgLine> descriptor(Session s) {
 		return new ProxyDescriptor<MsgLine>(
 			s.getSonarState().getDmsCache().getMsgLine(),
-			false
+			false,  /* has_properties */
+			true,   /* has_create_delete */
+			false   /* has_name */
 		);
 	}
 
@@ -63,7 +66,12 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 	@Override
 	protected ArrayList<ProxyColumn<MsgLine>> createColumns() {
 		ArrayList<ProxyColumn<MsgLine>> cols =
-			new ArrayList<ProxyColumn<MsgLine>>(3);
+			new ArrayList<ProxyColumn<MsgLine>>(4);
+		cols.add(new ProxyColumn<MsgLine>("hashtag", 100) {
+			public Object getValueAt(MsgLine ml) {
+				return ml.getHashtag();
+			}
+		});
 		cols.add(new ProxyColumn<MsgLine>("dms.line", 36, Short.class){
 			public Object getValueAt(MsgLine ml) {
 				return ml.getLine();
@@ -73,9 +81,9 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 			}
 			public void setValueAt(MsgLine ml, Object value) {
 				if (value instanceof Number) {
-					selected = ml.getName();
 					Number n = (Number) value;
 					ml.setLine(n.shortValue());
+					selected = ml;
 				}
 			}
 		});
@@ -89,9 +97,9 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 			}
 			public void setValueAt(MsgLine ml, Object value) {
 				if (value instanceof Number) {
-					selected = ml.getName();
 					Number n = (Number) value;
 					ml.setRank(n.shortValue());
+					selected = ml;
 				}
 			}
 			protected TableCellEditor createCellEditor() {
@@ -106,8 +114,8 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 				return canWrite(ml);
 			}
 			public void setValueAt(MsgLine ml, Object value) {
-				selected = ml.getName();
 				ml.setMulti(formatMulti(value));
+				selected = ml;
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return RENDERER;
@@ -116,19 +124,23 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 		return cols;
 	}
 
-	/** Message pattern */
-	private final MsgPattern msg_pattern;
+	/** Compose hashtag */
+	private final String hashtag;
+
+	/** Filter hashtags */
+	private final Hashtags tags;
 
 	/** Message line creator */
 	private final MsgLineCreator creator;
 
-	/** Name of selected message line */
-	protected String selected;
+	/** Selected message line */
+	private MsgLine selected;
 
-	/** Create a new message line table model */
-	public MsgLineTableModel(Session s, MsgPattern pat) {
+	/** Create a new message line model */
+	public MsgLineModel(Session s, String ht) {
 		super(s, descriptor(s), 12);
-		msg_pattern = pat;
+		hashtag = ht;
+		tags = new Hashtags(ht);
 		creator = new MsgLineCreator(s);
 	}
 
@@ -141,25 +153,27 @@ public class MsgLineTableModel extends ProxyTableModel<MsgLine> {
 	/** Check if a proxy is included in the list */
 	@Override
 	protected boolean check(MsgLine proxy) {
-		return proxy.getMsgPattern() == msg_pattern;
+		return hashtag == null || tags.contains(proxy.getHashtag());
 	}
 
 	/** Check if the user can add a proxy */
 	@Override
 	public boolean canAdd() {
-		return msg_pattern != null
-		    && super.canAdd(msg_pattern.getName() + "_XX");
+		return !tags.tags().isEmpty() && super.canAdd("ml_XX");
 	}
 
 	/** Create a new message line */
 	@Override
 	public void createObject(String v) {
-		if (msg_pattern != null) {
-			String ms = formatMulti(v);
-			if (ms.length() > 0) {
-				selected = creator.create(msg_pattern,
-					(short) 1, ms, DEF_RANK);
-			}
+		if (selected != null) {
+			MsgLine ml = selected;
+			String nm = creator.create(ml.getHashtag(),
+				ml.getLine(), ml.getMulti(), ml.getRank());
+			selected = MsgLineHelper.lookup(nm);
+		} else if (hashtag != null) {
+			String nm = creator.create(hashtag,
+				(short) 1, "", DEF_RANK);
+			selected = MsgLineHelper.lookup(nm);
 		}
 	}
 }

@@ -29,7 +29,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
@@ -106,9 +105,6 @@ public class MsgPatternPanel extends JPanel {
 	/** Pager for sign pixel panel */
 	private SignPixelPager pager;
 
-	/** Msg line panel */
-	private final ProxyTablePanel<MsgLine> msg_line_pnl;
-
 	/** User session */
 	private final Session session;
 
@@ -179,14 +175,6 @@ public class MsgPatternPanel extends JPanel {
 		config_pnl = new JScrollPane(config_lst);
 		config_pnl.setMaximumSize(UI.dimension(112, 118));
 		preview_pnl = createPreviewPanel();
-		msg_line_pnl = new ProxyTablePanel<MsgLine>(
-			new MsgLineTableModel(s, null)
-		) {
-			@Override protected void selectProxy() {
-				super.selectProxy();
-				updatePixelPnl();
-			}
-		};
 	}
 
 	/** Create message preview panel */
@@ -208,7 +196,6 @@ public class MsgPatternPanel extends JPanel {
 				updatePixelPnl();
 			}
 		});
-		msg_line_pnl.initialize();
 		layoutPanel();
 		watcher.initialize();
 		createJobs();
@@ -239,8 +226,7 @@ public class MsgPatternPanel extends JPanel {
 		  .addGroup(gl.createSequentialGroup()
 		              .addComponent(config_pnl)
 		              .addGap(UI.hgap)
-		              .addComponent(preview_pnl))
-		  .addComponent(msg_line_pnl);
+		              .addComponent(preview_pnl));
 		gl.setHorizontalGroup(hg);
 		// vertical layout
 		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
@@ -258,9 +244,7 @@ public class MsgPatternPanel extends JPanel {
 		  .addGap(UI.vgap)
 		  .addGroup(gl.createParallelGroup()
 		              .addComponent(config_pnl)
-		              .addComponent(preview_pnl))
-		  .addGap(UI.vgap)
-		  .addComponent(msg_line_pnl);
+		              .addComponent(preview_pnl));
 		gl.setVerticalGroup(vg);
 		setLayout(gl);
 	}
@@ -287,14 +271,6 @@ public class MsgPatternPanel extends JPanel {
 	/** Update the message pattern */
 	private void updateMsgPattern(MsgPattern pat) {
 		msg_pattern = pat;
-		msg_line_pnl.setModel(new MsgLineTableModel(session, pat) {
-			@Override protected void proxyUpdate(MsgLine ml) {
-				if (ml.getName().equals(selected)) {
-					msg_line_pnl.selectProxy(ml);
-					selected = null;
-				}
-			}
-		});
 		Set<SignConfig> cfgs = MsgPatternHelper.findSignConfigs(pat);
 		DefaultListModel<SignConfig> mdl =
 			new DefaultListModel<SignConfig>();
@@ -332,32 +308,6 @@ public class MsgPatternPanel extends JPanel {
 		MsgPattern pat = msg_pattern;
 		String ms = (pat != null) ? pat.getMulti() : "";
 		ArrayList<String> lines = new ArrayList<String>();
-		MsgLine ml = msg_line_pnl.getSelectedProxy();
-		if (ml != null) {
-			int line = ml.getLine();
-			// find the text rectangle containing the line
-			int i = 0;
-			TextRect rect = null;
-			for (TextRect r : tr.find(ms)) {
-				i += r.getLineCount();
-				if (i >= line) {
-					rect = r;
-					break;
-				}
-			}
-			String ln = ml.getMulti();
-			if (rect != null) {
-				for (int j = 0; j < 20 && ln != null; j++) {
-					int w = rect.calculateWidth(ln);
-					if (w <= rect.width)
-						break;
-					ln = WordHelper.abbreviate(ln);
-				}
-			}
-			while (lines.size() + 1 < line)
-				lines.add("");
-			lines.add((ln != null) ? ln : ml.getMulti());
-		}
 		MultiString multi = new MultiString(tr.fill(ms, lines));
 		return multi.stripTrailingWhitespaceTags().toString();
 	}
@@ -380,7 +330,6 @@ public class MsgPatternPanel extends JPanel {
 
 	/** Dispose of the panel */
 	public void dispose() {
-		msg_line_pnl.dispose();
 		watcher.dispose();
 		session.removeEditModeListener(edit_lsnr);
 		view.clear();

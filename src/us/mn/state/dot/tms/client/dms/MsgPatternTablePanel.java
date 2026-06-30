@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ public class MsgPatternTablePanel extends ProxyTablePanel<MsgPattern> {
 	/** User session */
 	private final Session session;
 
+	/** Message pattern panel */
 	final MsgPatternPanel pat_pnl;
 
 	/** Create a WYSIWYG edit button action */

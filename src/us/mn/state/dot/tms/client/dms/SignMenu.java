@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2023  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,6 +47,7 @@ public class SignMenu extends IMenu {
 		addItem(createSignDetailItem());
 		addItem(createGraphicItem());
 		addItem(createMsgPatternItem());
+		addItem(createMsgLineItem());
 		addItem(createWysiwygSelectorItem());
 		addItem(createWordItem());
 		addItem(session.createTableAction(Beacon.SONAR_TYPE));
@@ -88,6 +89,16 @@ public class SignMenu extends IMenu {
 		    new IAction("msg.patterns") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new MsgPatternForm(session));
+			}
+		    } : null;
+	}
+
+	/** Create a message line menu item action */
+	private IAction createMsgLineItem() {
+		return MsgLineForm.isPermitted(session) ?
+		    new IAction("msg.lines") {
+			protected void doActionPerformed(ActionEvent e) {
+				desktop.show(new MsgLineForm(session));
 			}
 		    } : null;
 	}

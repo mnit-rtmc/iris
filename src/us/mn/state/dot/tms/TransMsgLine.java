@@ -64,10 +64,10 @@ public class TransMsgLine implements MsgLine {
 		return null;
 	}
 
-	/** Get the message pattern */
+	/** Get the hashtag */
 	@Override
-	public MsgPattern getMsgPattern() {
-		return null;
+	public String getHashtag() {
+		return "#hashtag";
 	}
 
 	/** Set the line number */

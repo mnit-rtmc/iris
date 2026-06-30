@@ -10,10 +10,6 @@ with a sign config.  They can be:
   [hashtag]
 * Scheduled by [device actions] as part of an [action plan]
 
-Setting a **prototype** [extends](#message-lines) another pattern.  Both
-patterns should have the same configuration of
-[fillable text rectangles](#fillable-text-rectangles).
-
 If **flash beacon** is selected, any associated [beacon] (_internal_ or
 _external_) will also be activated.
 
@@ -31,7 +27,7 @@ active for long periods of time.
 |--------------|------------------------------------|-----------|
 | 👁️  View      | name, compose\_cfgs, planned\_cfgs |           |
 | 👉 Operate   |                                    |           |
-| 💡 Manage    | compose\_hashtag, prototype, multi | flash\_beacon, pixel\_service |
+| 💡 Manage    | compose\_hashtag, multi            | flash\_beacon, pixel\_service |
 | 🔧 Configure |                                    |           |
 
 </details>
@@ -53,12 +49,9 @@ be `[tr1,1,100,16]CRASH[nl]AHEAD[g5]`.
 
 ## Message Lines
 
-A pattern with fillable text rectangles can have lines of text associated with
-it.  Each line is used in a specific fillable rectangle of the pattern.  Lines
-can be ordered in the message composer by **rank**, 1-99.
-
-All lines from a **prototype** pattern will also be included, allowing a
-pattern to be extended for specific _compose_ [hashtag]s.
+A pattern with fillable text rectangles can be filled with message lines.
+Each line is used in a specific fillable rectangle of a pattern.  Lines can be
+ordered in the message composer by **rank**, 1-99.
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -66,12 +59,12 @@ pattern to be extended for specific _compose_ [hashtag]s.
 * `iris/api/msg_line` (primary)
 * `iris/api/msg_line/{name}`
 
-| Access       | Primary            | Secondary |
-|--------------|--------------------|-----------|
-| 👁️  View      | name, msg\_pattern |           |
-| 👉 Operate   |                    |           |
-| 💡 Manage    | line, rank, multi  |           |
-| 🔧 Configure |                    |           |
+| Access       | Primary           | Secondary |
+|--------------|-------------------|-----------|
+| 👁️  View      | name, hashtag     |           |
+| 👉 Operate   |                   |           |
+| 💡 Manage    | line, rank, multi |           |
+| 🔧 Configure |                   |           |
 
 </details>
 

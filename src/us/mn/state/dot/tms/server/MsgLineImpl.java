@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgLine;
 import us.mn.state.dot.tms.MsgLineHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -34,7 +33,7 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 
 	/** Load all the message lines */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, msg_pattern, line, rank, multi " +
+		store.query("SELECT name, hashtag, line, rank, multi " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -48,7 +47,7 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("msg_pattern", msg_pattern);
+		map.put("hashtag", hashtag);
 		map.put("line", line);
 		map.put("rank", rank);
 		map.put("multi", multi);
@@ -63,28 +62,28 @@ public class MsgLineImpl extends BaseObjectImpl implements MsgLine {
 	/** Create a message line */
 	private MsgLineImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
-		     row.getString(2),  // msg_pattern
+		     row.getString(2),  // hashtag
 		     row.getShort(3),   // line
 		     row.getShort(4),   // rank
 		     row.getString(5)); // multi
 	}
 
 	/** Create a message line */
-	private MsgLineImpl(String n, String mp, short l, short r, String m) {
+	private MsgLineImpl(String n, String h, short l, short r, String m) {
 		super(n);
-		msg_pattern = lookupMsgPattern(mp);
+		hashtag = h;
 		line = l;
 		rank = r;
 		multi = m;
 	}
 
-	/** Message pattern */
-	private MsgPattern msg_pattern;
+	/** Composing hashtag */
+	private String hashtag;
 
-	/** Get the message pattern */
+	/** Get the hashtag */
 	@Override
-	public MsgPattern getMsgPattern() {
-		return msg_pattern;
+	public String getHashtag() {
+		return hashtag;
 	}
 
 	/** Line number on sign (usually 1-3) */
