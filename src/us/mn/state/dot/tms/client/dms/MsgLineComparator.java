@@ -33,6 +33,8 @@ public class MsgLineComparator implements Comparator<MsgLine> {
 		if (c == 0)
 			c = compareMulti(ml0, ml1);
 		if (c == 0)
+			c = compareHashtag(ml0, ml1);
+		if (c == 0)
 			c = compareName(ml0, ml1);
 		return c;
 	}
@@ -54,6 +56,11 @@ public class MsgLineComparator implements Comparator<MsgLine> {
 	/** Compare multi strings */
 	private int compareMulti(MsgLine ml0, MsgLine ml1) {
 		return ml0.getMulti().compareTo(ml1.getMulti());
+	}
+
+	/** Compare hashtags */
+	private int compareHashtag(MsgLine ml0, MsgLine ml1) {
+		return ml0.getHashtag().compareTo(ml1.getHashtag());
 	}
 
 	/** Compare names */

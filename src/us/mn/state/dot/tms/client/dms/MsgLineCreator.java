@@ -73,7 +73,7 @@ public class MsgLineCreator {
 	}
 
 	/** Check if the user is permitted to write the named message line */
-	public boolean isWritePermitted(String name) {
+	private boolean isWritePermitted(String name) {
 		return session.isWritePermitted(MsgLine.SONAR_TYPE, name);
 	}
 

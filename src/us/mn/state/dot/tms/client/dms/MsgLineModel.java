@@ -83,7 +83,6 @@ public class MsgLineModel extends ProxyTableModel<MsgLine> {
 				if (value instanceof Number) {
 					Number n = (Number) value;
 					ml.setLine(n.shortValue());
-					selected = ml;
 				}
 			}
 		});
@@ -99,7 +98,6 @@ public class MsgLineModel extends ProxyTableModel<MsgLine> {
 				if (value instanceof Number) {
 					Number n = (Number) value;
 					ml.setRank(n.shortValue());
-					selected = ml;
 				}
 			}
 			protected TableCellEditor createCellEditor() {
@@ -115,7 +113,6 @@ public class MsgLineModel extends ProxyTableModel<MsgLine> {
 			}
 			public void setValueAt(MsgLine ml, Object value) {
 				ml.setMulti(formatMulti(value));
-				selected = ml;
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return RENDERER;
@@ -135,6 +132,11 @@ public class MsgLineModel extends ProxyTableModel<MsgLine> {
 
 	/** Selected message line */
 	private MsgLine selected;
+
+	/** Set the selected message line */
+	public void setSelected(MsgLine ml) {
+		selected = ml;
+	}
 
 	/** Create a new message line model */
 	public MsgLineModel(Session s, String ht) {
@@ -159,7 +161,8 @@ public class MsgLineModel extends ProxyTableModel<MsgLine> {
 	/** Check if the user can add a proxy */
 	@Override
 	public boolean canAdd() {
-		return !tags.tags().isEmpty() && super.canAdd("ml_XX");
+		boolean a = (selected != null) || !tags.tags().isEmpty();
+		return a && super.canAdd("ml_XX");
 	}
 
 	/** Create a new message line */

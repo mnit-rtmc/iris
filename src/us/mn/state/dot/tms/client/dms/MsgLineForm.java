@@ -46,6 +46,7 @@ public class MsgLineForm extends AbstractForm {
 	public void initialize() {
 		super.initialize();
 		ml_panel.initialize();
+		add(ml_panel);
 	}
 
 	/** Dispose of the form */

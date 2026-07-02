@@ -44,6 +44,9 @@ public class MsgLinePanel extends JPanel {
 	/** Message line table panel */
 	private final ProxyTablePanel<MsgLine> line_pnl;
 
+	/** Message line model */
+	private MsgLineModel line_mdl;
+
 	/** Create a new message line panel */
 	public MsgLinePanel(Session s) {
 		setBorder(UI.border);
@@ -64,14 +67,23 @@ public class MsgLinePanel extends JPanel {
 				updateHashtag();
 			}
 		});
-		MsgLineModel line_mdl = new MsgLineModel(s, "");
-		line_pnl = new ProxyTablePanel<MsgLine>(line_mdl);
+		line_mdl = new MsgLineModel(s, null);
+		line_pnl = new ProxyTablePanel<MsgLine>(line_mdl) {
+			@Override
+			protected void selectProxy() {
+				super.selectProxy();
+				line_mdl.setSelected(getSelectedProxy());
+			}
+		};
 	}
 
 	/** Update the hashtag filter */
 	private void updateHashtag() {
-		String ht = hash_txt.getText();
-		line_pnl.setModel(new MsgLineModel(session, ht));
+		String ht = hash_txt.getText().trim();
+		if (ht.isEmpty())
+			ht = null;
+		line_mdl = new MsgLineModel(session, ht);
+		line_pnl.setModel(line_mdl);
 	}
 
 	/** Initializze the panel */
