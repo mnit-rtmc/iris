@@ -634,7 +634,7 @@ pub const MONITOR_STYLE_ONE: &str = "\
 pub const MSG_LINE_ALL: &str = "\
   SELECT name, hashtag, line, rank, multi \
   FROM iris.msg_line \
-  ORDER BY line, rank, hashtag, multi";
+  ORDER BY line, rank, multi, hashtag, name";
 
 /// SQL query for all message patterns (primary)
 pub const MSG_PATTERN_ALL: &str = "\
