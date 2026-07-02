@@ -632,13 +632,13 @@ pub const MONITOR_STYLE_ONE: &str = "\
 
 /// SQL query for all message lines (primary)
 pub const MSG_LINE_ALL: &str = "\
-  SELECT name, msg_pattern, line, rank, multi \
+  SELECT name, hashtag, line, rank, multi \
   FROM iris.msg_line \
-  ORDER BY msg_pattern, line, rank, multi";
+  ORDER BY line, rank, hashtag, multi";
 
 /// SQL query for all message patterns (primary)
 pub const MSG_PATTERN_ALL: &str = "\
-  SELECT mp.name, compose_hashtag, prototype, multi, \
+  SELECT mp.name, compose_hashtag, multi, \
          to_jsonb(array_remove(array_agg(DISTINCT cd.sign_config), null)) \
       AS compose_cfgs, \
          to_jsonb(array_remove(array_agg(DISTINCT pd.sign_config), null)) \
@@ -655,8 +655,7 @@ pub const MSG_PATTERN_ALL: &str = "\
 
 /// SQL query for one message pattern (secondary)
 pub const MSG_PATTERN_ONE: &str = "\
-  SELECT mp.name, compose_hashtag, prototype, multi, flash_beacon, \
-         pixel_service, \
+  SELECT mp.name, compose_hashtag, multi, flash_beacon, pixel_service, \
          to_jsonb(array_remove(array_agg(DISTINCT cd.sign_config), null)) \
       AS compose_cfgs, \
          to_jsonb(array_remove(array_agg(DISTINCT pd.sign_config), null)) \
