@@ -69,6 +69,7 @@ public class MsgLineHelper extends BaseHelper {
 		ArrayList<MsgLine> lines = new ArrayList<MsgLine>();
 		List<TextRect> line_rects =
 			MsgPatternHelper.lineTextRects(pat, dms);
+		// NOTE: index 0 of `line_rects` is never valid
 		if (line_rects == null || line_rects.size() <= 1)
 			return lines;
 		Iterator<MsgLine> it = findAllLines(dms).iterator();
