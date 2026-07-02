@@ -30,4 +30,13 @@ CREATE VIEW msg_pattern_view AS
     FROM iris.msg_pattern;
 GRANT SELECT ON msg_pattern_view TO PUBLIC;
 
+-- DELETE superfluous msg_pattern records
+DELETE FROM iris.msg_pattern
+  WHERE (multi = '' OR multi = '[np]')
+    AND name NOT IN ('.1.LINE', '.2.LINE', '.3.LINE', '.4.LINE')
+    AND name NOT IN (
+        SELECT DISTINCT msg_pattern
+        FROM iris.device_action
+        WHERE msg_pattern IS NOT NULL);
+
 COMMIT;
