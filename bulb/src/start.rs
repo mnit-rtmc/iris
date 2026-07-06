@@ -445,7 +445,7 @@ fn selected_resource() -> Option<Res> {
         Res::Permission if doc.input_bool("res_user") => Some(Res::User),
         Res::Permission if doc.input_bool("res_role") => Some(Res::Role),
         Res::Permission if doc.input_bool("res_domain") => Some(Res::Domain),
-        Res::Permission => None, // no permission cards
+        Res::Permission => Some(Res::User), // no permission cards
         Res::SystemAttribute if doc.input_bool("res_event_config") => {
             Some(Res::EventConfig)
         }
@@ -517,7 +517,6 @@ fn handle_input(id: String) {
         | "res_detector"
         | "res_map_extent"
         | "res_r_node"
-        | "res_permission"
         | "res_user"
         | "res_role"
         | "res_domain"

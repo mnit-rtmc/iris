@@ -534,9 +534,7 @@ impl CardList {
         // "Create" card
         let view = if self.access_level() == 4
             && search.is_all()
-            && res != Res::EventConfig
-            && res != Res::SignConfig
-            && res != Res::SystemAttribute
+            && res.has_create()
         {
             View::CreateCompact
         } else {

@@ -416,6 +416,12 @@ impl Res {
         }
     }
 
+    /// Check if resource has create view
+    pub const fn has_create(self) -> bool {
+        use Res::*;
+        !matches!(self, EventConfig | SignConfig | SystemAttribute)
+    }
+
     /// Check if resource has control view
     pub const fn has_control(self) -> bool {
         use Res::*;
@@ -457,46 +463,7 @@ impl Res {
 
     /// Check if resource has a setup view
     pub const fn has_setup(self) -> bool {
-        use Res::*;
-        matches!(
-            self,
-            ActionPlan
-                | Alarm
-                | Beacon
-                | CabinetStyle
-                | Camera
-                | CommConfig
-                | CommLink
-                | Controller
-                | DayPlan
-                | Detector
-                | Dms
-                | Domain
-                | EncoderType
-                | EventConfig
-                | FlowStream
-                | GateArm
-                | Gps
-                | Incident
-                | Lcs
-                | LcsState
-                | MapExtent
-                | MonitorStyle
-                | MsgLine
-                | MsgPattern
-                | PlanPhase
-                | RampMeter
-                | Road
-                | Role
-                | SignConfig
-                | SystemAttribute
-                | TagReader
-                | TollZone
-                | User
-                | VideoMonitor
-                | WeatherSensor
-                | Word
-        )
+        true
     }
 
     /// Check if resource has a status view
