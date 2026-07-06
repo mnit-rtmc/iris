@@ -42,7 +42,7 @@ where
     C: ControllerIo + Card,
 {
     /// Find controller
-    fn controller(&self, pri: &C) -> Option<&Controller> {
+    pub fn controller(&self, pri: &C) -> Option<&Controller> {
         if let Some(nm) = pri.controller() {
             for c in &self.controllers {
                 if c.name == nm {

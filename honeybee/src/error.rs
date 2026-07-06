@@ -23,6 +23,14 @@ pub enum Error {
     #[error("Resin {0}")]
     Resin(#[from] resin::Error),
 
+    /// Hyper error
+    #[error("Hyper {0}")]
+    Hyper(#[from] hyper::Error),
+
+    /// Http error
+    #[error("HTTP {0}")]
+    Http(#[from] http::Error),
+
     /// Unauthenticated request
     #[error("Unauthenticated")]
     Unauthenticated,
@@ -50,6 +58,18 @@ pub enum Error {
     /// Timed out
     #[error("timed out")]
     TimedOut,
+
+    /// Too many requests (for PTZ)
+    #[error("too many requests")]
+    TooManyRequests,
+
+    /// Invalid URI error
+    #[error("Invalid URI {0}")]
+    InvalidUri(#[from] hyper::http::uri::InvalidUri),
+
+    /// Http Status Code
+    #[error("HTTP Status {0}")]
+    HttpStatus(StatusCode),
 
     /// Invalid ETag error
     #[error("Invalid ETag")]
@@ -94,6 +114,10 @@ pub enum Error {
     /// Serde JSON
     #[error("Json {0}")]
     Json(#[from] serde_json::Error),
+
+    /// XML
+    #[error("Xml {0}")]
+    Xml(#[from] xml::reader::Error),
 }
 
 impl From<Error> for StatusCode {
@@ -106,6 +130,7 @@ impl From<Error> for StatusCode {
             Error::Conflict => StatusCode::CONFLICT,
             Error::InvalidValue => StatusCode::BAD_REQUEST,
             Error::TimedOut => StatusCode::GATEWAY_TIMEOUT,
+            Error::TooManyRequests => StatusCode::TOO_MANY_REQUESTS,
             Error::Io(e) => {
                 if e.kind() == ErrorKind::TimedOut {
                     StatusCode::GATEWAY_TIMEOUT

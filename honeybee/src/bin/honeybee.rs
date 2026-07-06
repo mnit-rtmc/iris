@@ -34,7 +34,8 @@ struct Args {
 /// Main entry point
 #[tokio::main]
 async fn main() -> Result<()> {
-    env_logger::builder().format_timestamp(None).init();
+    //env_logger::builder().format_timestamp(None).init();
+    env_logger::builder().format_timestamp_nanos().init();
     let args: Args = argh::from_env();
     let db = Database::new("tms").await?;
     let honey = Honey::new(args.debug, &db);

@@ -23,6 +23,7 @@ mod event;
 mod files;
 mod honey;
 mod listener;
+mod onvif;
 mod permission;
 mod query;
 mod resource;

@@ -424,6 +424,14 @@ pub fn uri_one(res: Res, name: &str) -> Uri {
     uri
 }
 
+/// Get the URI of a resource (one, direct API)
+pub fn uri_one_direct(res: Res, name: &str) -> Uri {
+    let mut uri = Uri::from("/iris/api/direct/");
+    uri.push(res.as_str());
+    uri.push(name);
+    uri
+}
+
 /// Card list for one resource type
 ///
 /// | Cause    | Initiator | Fetch | List     | SSE  |

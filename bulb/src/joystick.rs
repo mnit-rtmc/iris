@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::uri_one;
+use crate::card::{uri_one, uri_one_direct};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::util::Doc;
@@ -30,12 +30,14 @@ pub fn create_joy<'a>(
     res: &str,
     name: &str,
     fields: &str,
+    fields_direct: &str,
 ) {
     div.id(id);
     div.class("joystick");
     div.data_("res", res)
         .data_("name", name)
         .data_("fields", fields)
+        .data_("fields-direct", fields_direct)
         .data_("x", "")
         .data_("y", "")
         .data_("start-x", "")
@@ -64,23 +66,46 @@ fn from_attr<T: for<'a> TryFrom<&'a str>>(
 }
 
 /// Format the JSON data for a joystick with x and y
-fn format_field(stick: &HtmlElement, x: f64, y: f64) -> Option<String> {
+fn format_field(stick: &HtmlElement, x: f64, y: f64, f_dir: &str) -> Option<String> {
     let x_val = format!("{:.1}", x);
     let y_val = format!("{:.1}", y);
     if let Some(f) = stick.get_attribute("data-fields") {
-        return Some(f.replacen("{}", &x_val, 1).replacen("{}", &y_val, 1));
+        return Some(
+            f.replacen("{}", &x_val, 1)
+            .replacen("{}", &y_val, 1)
+            .replacen("{}", &f_dir, 1)
+        );
     }
     None
 }
 
+///// Build the list of actions to perform based on normalized x and y
+//fn get_actions(stick: &HtmlElement, x: f64, y: f64) -> Vec<Action> {
+//    if let (Some(res), Some(name), Some(f)) = (
+//        from_attr::<Res>(stick, "data-res"),
+//        stick.get_attribute("data-name"),
+//        format_field(stick, x, y, ""),
+//    ) {
+//        return vec![Action::Patch(uri_one(res, &name), f.into())];
+//    }
+//    Vec::new()
+//}
+
 /// Build the list of actions to perform based on normalized x and y
 fn get_actions(stick: &HtmlElement, x: f64, y: f64) -> Vec<Action> {
+    let fields_direct = stick.get_attribute("data-fields-direct");
+    let f_dir = fields_direct.as_deref().unwrap_or("");
     if let (Some(res), Some(name), Some(f)) = (
         from_attr::<Res>(stick, "data-res"),
         stick.get_attribute("data-name"),
-        format_field(stick, x, y),
+        format_field(stick, x, y, f_dir),
     ) {
-        return vec![Action::Patch(uri_one(res, &name), f.into())];
+        log::debug!("{f}");
+        if f_dir.is_empty() {
+            return vec![Action::Patch(uri_one(res, &name), f.into())];
+        } else {
+            return vec![Action::Patch(uri_one_direct(res, &name), f.into())];
+        }
     }
     Vec::new()
 }

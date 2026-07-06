@@ -8,19 +8,25 @@ edition.workspace = true
 [dependencies]
 argh.workspace = true
 axum.workspace = true
+base64 = "0.22"
 bb8.workspace = true
 bb8-postgres.workspace = true
+chrono.workspace = true
 cidr.workspace = true
 env_logger.workspace = true
 futures.workspace = true
 headers = "0.4"
 heck = "0.5"
 http.workspace = true
+http-body-util = "0.1"
+hyper-util = { version = "0.1", features = ["http1", "client-legacy", "tokio"] }
+hyper = { version = "1.8", features = ["client", "http1"] }
 loam = "0.6"
 log.workspace = true
 ntcip.workspace = true
 percent-encoding = "2"
 pointy = "0.8"
+rand = "0.10.1"
 rendzina = { path = "../rendzina" }
 resin = { path = "../resin" }
 resources = { path = "../resources" }
@@ -28,6 +34,7 @@ rosewood = "0.6"
 rustls = "0.23"
 serde.workspace = true
 serde_json.workspace = true
+sha1 = "0.11.0"
 squarepeg = "0.4"
 thiserror.workspace = true
 time = "0.3"
@@ -38,6 +45,7 @@ tokio-stream.workspace = true
 tokio-util = "0.7"
 tower-sessions-moka-store = "0.15"
 whoami.workspace = true
+xml = "1.3.0"
 
 [dependencies.tower-sessions]
 version = "0.14"
