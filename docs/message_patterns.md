@@ -59,12 +59,12 @@ ordered in the message composer by **rank**, 1-99.
 * `iris/api/msg_line` (primary)
 * `iris/api/msg_line/{name}`
 
-| Access       | Primary           | Secondary |
-|--------------|-------------------|-----------|
-| 👁️  View      | name, hashtag     |           |
-| 👉 Operate   |                   |           |
-| 💡 Manage    | line, rank, multi |           |
-| 🔧 Configure |                   |           |
+| Access       | Primary       | Secondary |
+|--------------|---------------|-----------|
+| 👁️  View      | name, hashtag |           |
+| 👉 Operate   |               |           |
+| 💡 Manage    | line, multi   | rank      |
+| 🔧 Configure |               |           |
 
 </details>
 

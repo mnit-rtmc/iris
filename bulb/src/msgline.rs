@@ -64,6 +64,10 @@ impl MsgLine {
         self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
+        div.span().class("info fill").cdata(&self.hashtag);
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
         div.label().r#for("line").cdata("Ln").close();
         div.input()
             .id("line")
@@ -74,6 +78,7 @@ impl MsgLine {
             .value(self.line);
         div.close();
         div = tree.root::<html::Div>();
+        div.class("row");
         div.label().r#for("rank").cdata("Rank").close();
         div.input()
             .id("rank")
@@ -84,6 +89,7 @@ impl MsgLine {
             .value(opt_str(self.rank));
         div.close();
         div = tree.root::<html::Div>();
+        div.class("row");
         div.label().r#for("multi").cdata("MULTI").close();
         div.input()
             .id("multi")
@@ -92,6 +98,7 @@ impl MsgLine {
             .autocomplete("off")
             .spellcheck("false")
             .maxlength(64)
+            .size(24)
             .value(&self.multi)
             .close();
         div.close();
@@ -122,6 +129,11 @@ impl Card for MsgLine {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Get the main item state
+    fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
+        ItemState::Available
     }
 
     /// Check if a search string matches

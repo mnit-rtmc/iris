@@ -319,6 +319,7 @@ impl Res {
             LcsState => "🠟",
             MapExtent => "🗺️",
             MonitorStyle => "🖵 ",
+            MsgLine => "💬",
             MsgPattern => "📑",
             Permission => "🗝️ ",
             PlanPhase => "🌘",
@@ -481,6 +482,7 @@ impl Res {
                 | LcsState
                 | MapExtent
                 | MonitorStyle
+                | MsgLine
                 | MsgPattern
                 | PlanPhase
                 | RampMeter
