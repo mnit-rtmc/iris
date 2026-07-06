@@ -636,6 +636,12 @@ pub const MSG_LINE_ALL: &str = "\
   FROM iris.msg_line \
   ORDER BY line, rank, multi, hashtag, name";
 
+/// SQL query for one message line (secondary)
+pub const MSG_LINE_ONE: &str = "\
+  SELECT name, hashtag, line, rank, multi \
+  FROM iris.msg_line \
+  WHERE name = $1";
+
 /// SQL query for all message patterns (primary)
 pub const MSG_PATTERN_ALL: &str = "\
   SELECT mp.name, compose_hashtag, multi, \
