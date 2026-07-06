@@ -184,15 +184,15 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     }
 
     /// Convert to Create HTML
-    fn to_html_create(&self, _anc: &Self::Ancillary) -> String {
+    fn to_html_create(&self, len: u32) -> String {
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("create_name").cdata("Name").close();
         div.input()
             .id("create_name")
-            .maxlength(24)
-            .size(24)
+            .maxlength(len)
+            .size(len.min(24))
             .value(self.name());
         String::from(tree)
     }
@@ -521,6 +521,11 @@ impl CardList {
             .fold(0, |acc, perm| acc.max(perm.access_level_for(self.res)))
     }
 
+    /// Check if new resource can be created
+    fn can_create<C: Card>(&self) -> bool {
+        C::res().has_create() && self.access_level() == 4
+    }
+
     /// Search card views
     async fn search_card_views<C: Card>(
         &mut self,
@@ -532,10 +537,7 @@ impl CardList {
         let search = Search::new(search);
         let mut views = Vec::with_capacity(cards.len());
         // "Create" card
-        let view = if self.access_level() == 4
-            && search.is_all()
-            && res.has_create()
-        {
+        let view = if search.is_all() && self.can_create::<C>() {
             View::CreateCompact
         } else {
             View::Hidden

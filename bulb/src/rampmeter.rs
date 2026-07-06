@@ -828,7 +828,7 @@ impl Card for RampMeter {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &RampMeterAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
+            View::Create => self.to_html_create(20),
             View::Control => self.to_html_control(anc),
             View::Request => self.to_html_request(anc),
             View::Setup(edit) => self.to_html_setup(anc, edit),

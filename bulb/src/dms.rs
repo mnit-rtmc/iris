@@ -1292,7 +1292,7 @@ impl Card for Dms {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &DmsAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
+            View::Create => self.to_html_create(20),
             View::Control => self.to_html_control(anc),
             View::Status => self.to_html_status(anc),
             View::Request => self.to_html_request(anc),

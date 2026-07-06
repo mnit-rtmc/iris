@@ -208,7 +208,7 @@ impl Card for User {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &UserAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
+            View::Create => self.to_html_create(15),
             View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
         }

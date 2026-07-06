@@ -131,9 +131,9 @@ impl Card for Word {
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &WordAnc) -> String {
+    fn to_html(&self, view: View, _anc: &WordAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
+            View::Create => self.to_html_create(24),
             View::Setup(edit) => self.to_html_setup(edit),
             _ => self.to_html_compact(),
         }

@@ -259,7 +259,7 @@ impl Card for GateArm {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &GateArmAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
+            View::Create => self.to_html_create(20),
             View::Control => self.to_html_control(),
             View::Status => self.to_html_status(anc),
             View::Setup(edit) => self.to_html_setup(anc, edit),

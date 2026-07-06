@@ -111,9 +111,9 @@ impl Card for PlanPhase {
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &PlanPhaseAnc) -> String {
+    fn to_html(&self, view: View, _anc: &PlanPhaseAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
+            View::Create => self.to_html_create(12),
             View::Setup(edit) => self.to_html_setup(edit),
             _ => self.to_html_compact(),
         }

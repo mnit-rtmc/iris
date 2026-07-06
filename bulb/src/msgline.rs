@@ -51,7 +51,7 @@ impl MsgLine {
     }
 
     /// Convert to compact HTML
-    fn to_html_compact(&self, _anc: &MsgLineAnc) -> String {
+    fn to_html_compact(&self) -> String {
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();
         div.class("title row").cdata(&self.multi);
@@ -59,7 +59,7 @@ impl MsgLine {
     }
 
     /// Convert to setup HTML
-    fn to_html_setup(&self, _anc: &MsgLineAnc, edit: bool) -> String {
+    fn to_html_setup(&self, edit: bool) -> String {
         let mut tree = Tree::new();
         self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
@@ -145,10 +145,10 @@ impl Card for MsgLine {
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &MsgLineAnc) -> String {
+    fn to_html(&self, view: View, _anc: &MsgLineAnc) -> String {
         match view {
-            View::Setup(edit) => self.to_html_setup(anc, edit),
-            _ => self.to_html_compact(anc),
+            View::Setup(edit) => self.to_html_setup(edit),
+            _ => self.to_html_compact(),
         }
     }
 

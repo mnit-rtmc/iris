@@ -172,7 +172,7 @@ impl Card for TollZone {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &TollZoneAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
+            View::Create => self.to_html_create(20),
             View::Setup(edit) => self.to_html_setup(edit),
             _ => self.to_html_compact(anc),
         }

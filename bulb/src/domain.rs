@@ -124,9 +124,9 @@ impl Card for Domain {
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &DomainAnc) -> String {
+    fn to_html(&self, view: View, _anc: &DomainAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
+            View::Create => self.to_html_create(15),
             View::Setup(edit) => self.to_html_setup(edit),
             _ => self.to_html_compact(),
         }

@@ -93,9 +93,8 @@ impl Card for SystemAttr {
     }
 
     /// Convert to HTML view
-    fn to_html(&self, view: View, anc: &SystemAttrAnc) -> String {
+    fn to_html(&self, view: View, _anc: &SystemAttrAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
             View::Setup(edit) => self.to_html_setup(edit),
             _ => self.to_html_compact(),
         }

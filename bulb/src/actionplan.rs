@@ -457,7 +457,7 @@ impl Card for ActionPlan {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &ActionPlanAnc) -> String {
         match view {
-            View::Create => self.to_html_create(anc),
+            View::Create => self.to_html_create(16),
             View::Control => self.to_html_control(anc),
             View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
