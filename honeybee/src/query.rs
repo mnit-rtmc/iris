@@ -632,7 +632,7 @@ pub const MONITOR_STYLE_ONE: &str = "\
 
 /// SQL query for all message lines (primary)
 pub const MSG_LINE_ALL: &str = "\
-  SELECT name, hashtag, line, rank, multi \
+  SELECT name, hashtag, line, multi \
   FROM iris.msg_line \
   ORDER BY line, rank, multi, hashtag, name";
 

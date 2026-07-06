@@ -20,7 +20,8 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
-use crate::msgpattern::{FontName, GraphicName, MsgLine, MsgPattern};
+use crate::msgline::MsgLine;
+use crate::msgpattern::{FontName, GraphicName, MsgPattern};
 use crate::notes::contains_hashtag;
 use crate::rend::Renderer;
 use crate::rle::Table;
@@ -277,8 +278,7 @@ impl AncillaryData for DmsAnc {
             Asset::MsgLines => {
                 let mut lines: Vec<MsgLine> =
                     serde_wasm_bindgen::from_value(value)?;
-                // NOTE: patterns *must* be populated before this!
-                lines.retain(|ln| self.check_pattern(&ln.msg_pattern));
+                lines.retain(|ln| pri.has_hashtag(&ln.hashtag));
                 lines.sort();
                 self.lines = lines;
             }
@@ -368,13 +368,6 @@ impl DmsAnc {
     /// Find a sign config
     fn sign_config(&self, cfg: Option<&str>) -> Option<&SignConfig> {
         cfg.and_then(|cfg| self.configs.iter().find(|c| c.name == cfg))
-    }
-
-    /// Check if a pattern can be composed (also prototypes)
-    fn check_pattern(&self, pat: &str) -> bool {
-        self.compose_patterns
-            .iter()
-            .any(|mp| mp.is_same_or_prototype(pat))
     }
 
     /// Make line input elements

@@ -50,6 +50,7 @@ mod lcsstate;
 mod lock;
 mod mapextent;
 mod monitorstyle;
+mod msgline;
 mod msgpattern;
 mod notes;
 mod panic;

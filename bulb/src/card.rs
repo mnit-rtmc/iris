@@ -38,6 +38,7 @@ use crate::lcs::Lcs;
 use crate::lcsstate::LcsState;
 use crate::mapextent::MapExtent;
 use crate::monitorstyle::MonitorStyle;
+use crate::msgline::MsgLine;
 use crate::msgpattern::MsgPattern;
 use crate::permission::Permission;
 use crate::planphase::PlanPhase;

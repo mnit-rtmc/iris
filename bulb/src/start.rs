@@ -421,6 +421,7 @@ fn selected_resource() -> Option<Res> {
             Some(Res::EncoderType)
         }
         Res::Dms if doc.input_bool("res_msg_pattern") => Some(Res::MsgPattern),
+        Res::Dms if doc.input_bool("res_msg_line") => Some(Res::MsgLine),
         Res::Dms if doc.input_bool("res_sign_config") => Some(Res::SignConfig),
         Res::Dms if doc.input_bool("res_word") => Some(Res::Word),
         Res::Lcs if doc.input_bool("res_lcs_state") => Some(Res::LcsState),
@@ -499,6 +500,7 @@ fn handle_input(id: String) {
         | "res_encoder_type"
         | "res_dms"
         | "res_msg_pattern"
+        | "res_msg_line"
         | "res_sign_config"
         | "res_word"
         | "res_lcs"

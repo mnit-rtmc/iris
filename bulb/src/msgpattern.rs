@@ -49,44 +49,6 @@ pub struct GraphicName {
     pub name: String,
 }
 
-/// Message Line
-#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
-#[allow(dead_code)]
-pub struct MsgLine {
-    pub name: String,
-    pub msg_pattern: String,
-    pub line: u16,
-    pub rank: u16,
-    pub multi: String,
-}
-
-impl PartialOrd for MsgLine {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for MsgLine {
-    fn cmp(&self, other: &Self) -> Ordering {
-        if self == other {
-            return Ordering::Equal;
-        }
-        let line_ord = self.line.cmp(&other.line);
-        if line_ord != Ordering::Equal {
-            return line_ord;
-        }
-        let rank_ord = self.rank.cmp(&other.rank);
-        if rank_ord != Ordering::Equal {
-            return rank_ord;
-        }
-        let ms_ord = self.multi.cmp(&other.multi);
-        if ms_ord != Ordering::Equal {
-            return ms_ord;
-        }
-        self.name.cmp(&other.name)
-    }
-}
-
 /// Ancillary message pattern data
 #[derive(Default)]
 pub struct MsgPatternAnc {
@@ -94,7 +56,6 @@ pub struct MsgPatternAnc {
     configs: Vec<SignConfig>,
     fonts: FontTable<256, 24>,
     graphics: GraphicTable<32>,
-    lines: Vec<MsgLine>,
 }
 
 /// Message Pattern
@@ -102,7 +63,6 @@ pub struct MsgPatternAnc {
 pub struct MsgPattern {
     pub name: String,
     pub compose_hashtag: Option<String>,
-    pub prototype: Option<String>,
     pub multi: String,
     pub compose_cfgs: Vec<String>,
     pub planned_cfgs: Vec<String>,
@@ -115,12 +75,8 @@ impl AncillaryData for MsgPatternAnc {
     type Primary = MsgPattern;
 
     /// Construct ancillary message pattern data
-    fn new(_pri: &MsgPattern, view: View) -> Self {
-        let mut assets =
-            vec![Asset::SignConfigs, Asset::Fonts, Asset::Graphics];
-        if let View::Setup(_edit) = view {
-            assets.push(Asset::MsgLines);
-        }
+    fn new(_pri: &MsgPattern, _view: View) -> Self {
+        let assets = vec![Asset::SignConfigs, Asset::Fonts, Asset::Graphics];
         MsgPatternAnc {
             assets,
             ..Default::default()
@@ -135,7 +91,7 @@ impl AncillaryData for MsgPatternAnc {
     /// Set asset value
     fn set_asset(
         &mut self,
-        pri: &MsgPattern,
+        _pri: &MsgPattern,
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
@@ -183,12 +139,6 @@ impl AncillaryData for MsgPatternAnc {
                 } else {
                     log::warn!("invalid graphic: {nm}");
                 }
-            }
-            Asset::MsgLines => {
-                let mut lines: Vec<MsgLine> =
-                    serde_wasm_bindgen::from_value(value)?;
-                lines.retain(|ln| ln.msg_pattern == pri.name);
-                self.lines = lines;
             }
             _ => unreachable!(),
         }
@@ -246,11 +196,6 @@ impl Ord for MsgPattern {
 }
 
 impl MsgPattern {
-    /// Check if a pattern name is the same or prototype
-    pub fn is_same_or_prototype(&self, nm: &str) -> bool {
-        self.name == nm || self.prototype.as_deref() == Some(nm)
-    }
-
     /// Get entered MULTI string
     fn multi_string(&self) -> String {
         match Doc::get().opt_elem::<HtmlTextAreaElement>("multi") {
@@ -396,15 +341,6 @@ impl MsgPattern {
             .size(16)
             .value(opt_ref(&self.compose_hashtag));
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.label().r#for("mp_prototype").cdata("Prototype").close();
-        div.input()
-            .id("mp_prototype")
-            .maxlength(20)
-            .size(20)
-            .value(opt_ref(&self.prototype));
-        div.close();
         let mut fs = tree.root::<html::FieldSet>();
         let mut legend = fs.legend();
         legend
@@ -422,13 +358,6 @@ impl MsgPattern {
             .r#type("radio")
             .name("pattern_tab");
         legend.label().r#for("tab_multi").cdata("MULTI").close();
-        legend
-            .input()
-            .id("tab_lines")
-            .class("toggle")
-            .r#type("radio")
-            .name("pattern_tab");
-        legend.label().r#for("tab_lines").cdata("Lines").close();
         legend.close();
         div = fs.div();
         div.id("mp_preview_div");
@@ -449,10 +378,6 @@ impl MsgPattern {
             .rows(5)
             .cdata(&self.multi)
             .close();
-        div.close();
-        div = fs.div();
-        div.id("mp_lines_div").class("no-display");
-        self.render_lines(anc, &mut div.div());
         div.close();
         fs.close();
         div = tree.root::<html::Div>();
@@ -548,31 +473,6 @@ impl MsgPattern {
             el.set_outer_html(&String::from(tree));
         }
     }
-
-    /// Render the message lines table
-    fn render_lines<'p>(
-        &self,
-        anc: &MsgPatternAnc,
-        div: &'p mut html::Div<'p>,
-    ) {
-        div.class("scroll_table");
-        let mut table = div.table();
-        let mut thead = table.thead();
-        let mut tr = thead.tr();
-        tr.th().cdata("Ln").close();
-        tr.th().cdata("Rank").close();
-        tr.th().cdata("MULTI").close();
-        thead.close();
-        for ln in &anc.lines {
-            let mut tr = table.tr();
-            tr.td().cdata(ln.line).close();
-            tr.td().cdata(ln.rank).close();
-            tr.td().cdata(&ln.multi).close();
-            tr.close();
-        }
-        table.close();
-        div.close();
-    }
 }
 
 impl Card for MsgPattern {
@@ -625,7 +525,6 @@ impl Card for MsgPattern {
         let mut fields = Fields::new();
         fields.changed_text_area("multi", &self.multi);
         fields.changed_input("compose_hashtag", &self.compose_hashtag);
-        fields.changed_input("mp_prototype", &self.prototype);
         fields.changed_input("flash_beacon", self.flash_beacon);
         fields.changed_input("pixel_service", self.pixel_service);
         fields.into_value().to_string()
@@ -646,9 +545,6 @@ impl Card for MsgPattern {
             if let Some(el) = doc.opt_elem::<HtmlElement>("mp_multi_div") {
                 el.set_class_name(tab.row_class(Tab::Multi));
             }
-            if let Some(el) = doc.opt_elem::<HtmlElement>("mp_lines_div") {
-                el.set_class_name(tab.row_class(Tab::Lines));
-            }
         }
         Vec::new()
     }
@@ -659,7 +555,6 @@ impl Card for MsgPattern {
 enum Tab {
     Preview,
     Multi,
-    Lines,
 }
 
 impl TryFrom<&str> for Tab {
@@ -669,7 +564,6 @@ impl TryFrom<&str> for Tab {
         match id {
             "tab_preview" => Ok(Self::Preview),
             "tab_multi" => Ok(Tab::Multi),
-            "tab_lines" => Ok(Tab::Lines),
             _ => Err(()),
         }
     }
