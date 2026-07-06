@@ -39,7 +39,7 @@ impl Alarm {
     fn item_states<'a>(&'a self, anc: &'a AlarmAnc) -> ItemStates<'a> {
         let states = anc.item_states(self);
         if states.contains(ItemState::Online) && self.state {
-            ItemState::Fault.into()
+            ItemState::Triggered.into()
         } else {
             states
         }
@@ -122,6 +122,17 @@ impl Card for Alarm {
     /// Get the resource
     fn res() -> Res {
         Res::Alarm
+    }
+
+    /// Get all item states
+    fn item_states_all() -> &'static [ItemState] {
+        &[
+            ItemState::Online,
+            ItemState::Fault,
+            ItemState::Triggered,
+            ItemState::Offline,
+            ItemState::Inactive,
+        ]
     }
 
     /// Get the name

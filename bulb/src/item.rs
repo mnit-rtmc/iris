@@ -42,6 +42,8 @@ pub enum ItemState {
     Offline,
     /// Inactive (deactivated)
     Inactive,
+    /// Triggered (alarm)
+    Triggered,
     /// View (permission)
     View,
     /// Operate (permission)
@@ -107,6 +109,7 @@ impl ItemState {
             "⚠️" => Some(Self::Fault),
             "🔌" => Some(Self::Offline),
             "🔺" => Some(Self::Inactive),
+            "📢" => Some(Self::Triggered),
             "👁️" => Some(Self::View),
             "👉" => Some(Self::Operate),
             "💡" => Some(Self::Manage),
@@ -144,6 +147,7 @@ impl ItemState {
             Self::Fault => "⚠️",
             Self::Offline => "🔌",
             Self::Inactive => "🔺",
+            Self::Triggered => "📢",
             Self::View => "👁️",
             Self::Operate => "👉",
             Self::Manage => "💡",
@@ -183,6 +187,7 @@ impl ItemState {
             Self::Hazard => "#ffff80",
             Self::Roadwork => "#ffd080",
             Self::Inactive => "#fff2",
+            Self::Triggered => "#884",
             _ => "none",
         }
     }
@@ -203,6 +208,7 @@ impl ItemState {
             Self::Fault => "fault",
             Self::Offline => "offline",
             Self::Inactive => "inactive",
+            Self::Triggered => "triggered",
             Self::View => "view",
             Self::Operate => "operate",
             Self::Manage => "manage",
