@@ -110,6 +110,9 @@ impl MsgLine {
 impl Card for MsgLine {
     type Ancillary = MsgLineAnc;
 
+    /// Suggested name prefix
+    const PREFIX: &'static str = "ml";
+
     /// Get the resource
     fn res() -> Res {
         Res::MsgLine
@@ -147,6 +150,7 @@ impl Card for MsgLine {
     /// Convert to HTML view
     fn to_html(&self, view: View, _anc: &MsgLineAnc) -> String {
         match view {
+            View::Create => self.to_html_create(10),
             View::Setup(edit) => self.to_html_setup(edit),
             _ => self.to_html_compact(),
         }

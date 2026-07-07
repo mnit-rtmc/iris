@@ -515,6 +515,7 @@ impl Card for MsgPattern {
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &MsgPatternAnc) -> String {
         match view {
+            View::Create => self.to_html_create(20),
             View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
         }

@@ -566,7 +566,7 @@ fn handle_card_view_ev() {
     if let Some(cv) = app::expanded_view()
         && let Some(view) = card_view_value()
     {
-        spawn_future(replace_card(cv.view(view), ""));
+        spawn_future(replace_card(cv.with_view(view), ""));
     }
 }
 
@@ -789,10 +789,10 @@ async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
         } else if eid::DELETE == attrs.id {
             if app::delete_enabled() {
                 cv.handle_delete().await?;
-                replace_card(cv.view(View::Hidden), "").await?;
+                replace_card(cv.with_view(View::Hidden), "").await?;
             }
         } else if let Some(v) = cv.handle_click(&attrs.id).await? {
-            replace_card(cv.view(v), "").await?;
+            replace_card(cv.with_view(v), "").await?;
         }
     }
     Ok(())
@@ -838,12 +838,13 @@ async fn click_card(res: Res, name: String, id: String) -> Result<()> {
         let search = search_value()?;
         replace_card(cv.compact(), &search).await?;
     }
-    let edit = app::can_edit_card();
-    // Expand to the second view (1) for this resource
-    let mut view = *card::res_views(res, edit).get(1).unwrap_or(&View::Compact);
-    if id.ends_with('_') && id.len() == res.as_str().len() + 1 {
-        view = View::Create;
-    }
+    let view = if id.ends_with('_') && id.len() == res.as_str().len() + 1 {
+        View::Create
+    } else {
+        let edit = app::can_edit_card();
+        // Expand to the second view (1) for the resource
+        *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
+    };
     let cv = CardView::new(res, &name, view);
     replace_card(cv, "").await?;
     Ok(())
@@ -1167,7 +1168,7 @@ async fn update_card_list(res: Res) -> Result<bool> {
     let search = search_value()?;
     for (cv, html) in cards.changed_html(&search).await? {
         if let Some(ev) = &expanded
-            && cv.name == ev.name
+            && cv.name() == ev.name()
         {
             // update expanded card (Control cards only)
             ev.handle_update().await?;

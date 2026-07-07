@@ -75,7 +75,7 @@ pub struct CardState {
 }
 
 /// Search term
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Search {
     /// Empty search (matches anything)
     Empty(),
@@ -477,7 +477,7 @@ impl CardList {
     /// Set card view
     pub fn set_view(&mut self, cv: CardView) {
         for vv in &mut self.views {
-            if vv.name == cv.name {
+            if vv.id() == cv.id() {
                 vv.view = cv.view;
                 break;
             }
@@ -537,20 +537,16 @@ impl CardList {
         let search = Search::new(search);
         let mut views = Vec::with_capacity(cards.len());
         // "Create" card
-        let view = if search.is_all() && self.can_create::<C>() {
-            View::CreateCompact
-        } else {
-            View::Hidden
-        };
-        let cv = CardView::new(res, Self::next_name(&cards), view);
+        let mut cv = CardView::new(res, Self::next_name(&cards), View::CreateCompact);
+        if !search.is_all() || !self.can_create::<C>() {
+            cv = cv.with_view(View::Hidden);
+        }
         views.push(cv);
         for pri in &cards {
-            let view = if search.is_match(pri, anc) {
-                View::Compact
-            } else {
-                View::Hidden
-            };
-            let cv = CardView::new(res, pri.name(), view);
+            let mut cv = CardView::new(res, pri.name(), View::Compact);
+            if !search.is_match(pri, anc) {
+                cv = cv.with_view(View::Hidden);
+            }
             views.push(cv);
         }
         self.views = views;
@@ -575,19 +571,19 @@ impl CardList {
         if let Some(cv) = views.next() {
             let mut li = ul.li();
             li.id(cv.id())
-                .data_("name", &cv.name)
+                .data_("name", cv.name())
                 .class(cv.view.class_name());
             li.span().class("create").cdata("Create 🆕").close();
             li.close();
         }
         for (cv, pri) in views.zip(cards) {
-            if cv.name != pri.name() {
-                log::warn!("card mismatch: {} != {}", cv.name, pri.name());
+            if cv.name() != pri.name() {
+                log::warn!("card mismatch: {} != {}", cv.name(), pri.name());
                 return Err(Error::CardMismatch());
             }
             let mut li = ul.li();
             li.id(cv.id())
-                .data_("name", &cv.name)
+                .data_("name", cv.name())
                 .class(cv.view.class_name());
             li.raw(pri.to_html(cv.view, &anc));
             li.close();

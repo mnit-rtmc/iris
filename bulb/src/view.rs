@@ -162,8 +162,10 @@ impl TryFrom<&str> for View {
 pub struct CardView {
     /// Resource type
     pub res: Res,
+    /// Card ID
+    id: String,
     /// Object name
-    pub name: String,
+    name: String,
     /// Card view
     pub view: View,
 }
@@ -172,17 +174,22 @@ impl CardView {
     /// Create a new card view
     pub fn new<N: Into<String>>(res: Res, name: N, view: View) -> Self {
         let name = name.into();
-        CardView { res, name, view }
+        let nm = match view {
+            View::CreateCompact | View::Create => "",
+            _ => &name,
+        };
+        let id = format!("{res}_{nm}");
+        CardView { res, id, name, view }
     }
 
     /// Get HTML element ID of card
-    pub fn id(&self) -> String {
-        let res = self.res;
-        let nm = match self.view {
-            View::CreateCompact | View::Create => "",
-            _ => &self.name,
-        };
-        format!("{res}_{nm}")
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    /// Get card name
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     /// Set the view to compact
@@ -192,7 +199,7 @@ impl CardView {
     }
 
     /// Set the view
-    pub fn view(mut self, v: View) -> Self {
+    pub fn with_view(mut self, v: View) -> Self {
         self.view = v;
         self
     }

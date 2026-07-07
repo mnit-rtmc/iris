@@ -141,7 +141,7 @@ pub fn set_view(cv: CardView) {
                 state.cards = Some(cards);
             }
             None => {
-                log::warn!("set_view: no cards for {}", cv.name);
+                log::warn!("set_view: no cards for {}", cv.name());
             }
         }
         // purge all deferred refresh list actions
