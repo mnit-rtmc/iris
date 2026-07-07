@@ -279,7 +279,6 @@ impl AncillaryData for DmsAnc {
                 let mut lines: Vec<MsgLine> =
                     serde_wasm_bindgen::from_value(value)?;
                 lines.retain(|ln| pri.has_hashtag(&ln.hashtag));
-                lines.sort();
                 self.lines = lines;
             }
             Asset::Words => {
