@@ -550,7 +550,7 @@ async fn handle_search() -> Result<()> {
             let doc = Doc::new()?;
             for cv in cards.search_views(&search).await? {
                 let id = cv.id();
-                if let Some(el) = doc.opt_elem::<Element>(&id) {
+                if let Some(el) = doc.opt_elem::<Element>(id) {
                     el.set_class_name(cv.view.class_name());
                 }
             }
@@ -808,7 +808,7 @@ async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
 
 /// Replace a card with provided HTML
 fn replace_card_html(cv: &CardView, html: &str) {
-    let Some(el) = Doc::get().opt_elem::<HtmlElement>(&cv.id()) else {
+    let Some(el) = Doc::get().opt_elem::<HtmlElement>(cv.id()) else {
         log::warn!("element {} not found", cv.id());
         return;
     };

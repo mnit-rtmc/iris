@@ -14,17 +14,18 @@
 
 /* General element IDs */
 
+pub const LIST: &str = "sb_list";
+pub const RESOURCE: &str = "sb_resource";
 pub const CREATE: &str = "ob_create";
 pub const DELETE: &str = "ob_delete";
 pub const GEOLOC: &str = "ob_geoloc";
-pub const LIST: &str = "sb_list";
 pub const LOGIN: &str = "ob_login";
 pub const LOGOUT: &str = "ob_logout";
-pub const RESOURCE: &str = "sb_resource";
 pub const SAVE: &str = "ob_save";
 pub const SEARCH: &str = "sb_search";
 pub const STATE: &str = "sb_state";
 pub const VIEW: &str = "ob_view";
+pub const NAME: &str = "ob_name";
 
 /* Beacon element IDs */
 

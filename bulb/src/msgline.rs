@@ -10,13 +10,17 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, footer_html};
+use crate::card::{AncillaryData, Card, footer_html, uri_all};
+use crate::eid;
+use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, Input, opt_str};
+use crate::util::{ContainsLower, Doc, Fields, Input, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
+use serde_json::Value;
+use serde_json::map::Map;
 use std::borrow::Cow;
 
 /// Message Line
@@ -123,6 +127,27 @@ impl Card for MsgLine {
         &[ItemState::Available]
     }
 
+    /// Handle click event for the create button
+    fn handle_create() -> Vec<Action> {
+        let doc = Doc::get();
+        if let (Some(name), Some(hashtag)) = (
+            doc.input_option_string(eid::NAME),
+            doc.input_option_string("ob_hashtag"),
+        ) {
+            let mut obj = Map::new();
+            obj.insert("name".to_string(), Value::String(name));
+            obj.insert("hashtag".to_string(), Value::String(hashtag));
+            obj.insert("line".to_string(), Value::Number(1.into()));
+            obj.insert("multi".to_string(), Value::String(String::new()));
+            obj.insert("rank".to_string(), Value::Number(50.into()));
+            let value = Value::Object(obj).to_string();
+            let uri = uri_all(Self::res());
+            vec![Action::Post(uri, value.into())]
+        } else {
+            Vec::new()
+        }
+    }
+
     /// Get the name
     fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)
@@ -145,6 +170,29 @@ impl Card for MsgLine {
             || self.item_states().is_match(search)
             || self.hashtag.contains_lower(search)
             || self.multi.contains_lower(search)
+    }
+
+    /// Convert to Create HTML
+    fn to_html_create(&self, len: u32) -> String {
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for(eid::NAME).cdata("Name").close();
+        div.input()
+            .id(eid::NAME)
+            .maxlength(len)
+            .size(len.min(24))
+            .value(self.name());
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("ob_hashtag").cdata("Hashtag").close();
+        div.input()
+            .id("ob_hashtag")
+            .maxlength(16)
+            .size(16)
+            .value("#");
+        String::from(tree)
     }
 
     /// Convert to HTML view

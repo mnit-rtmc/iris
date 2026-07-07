@@ -50,6 +50,7 @@ use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::tollzone::TollZone;
 use crate::user::User;
+use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
 use crate::view::{CardView, View};
 use crate::weathersensor::WeatherSensor;
@@ -60,6 +61,7 @@ use hatmil::{Tree, html};
 use resources::Res;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
+use serde_json::map::Map;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
@@ -162,6 +164,20 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         Ok(serde_wasm_bindgen::from_value(json)?)
     }
 
+    /// Handle click event for the create button
+    fn handle_create() -> Vec<Action> {
+        let doc = Doc::get();
+        if let Some(name) = doc.input_option_string(eid::NAME) {
+            let mut obj = Map::new();
+            obj.insert("name".to_string(), Value::String(name));
+            let value = Value::Object(obj).to_string();
+            let uri = uri_all(Self::res());
+            vec![Action::Post(uri, value.into())]
+        } else {
+            Vec::new()
+        }
+    }
+
     /// Get the name
     fn name(&self) -> Cow<'_, str>;
 
@@ -188,9 +204,9 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("create_name").cdata("Name").close();
+        div.label().r#for(eid::NAME).cdata("Name").close();
         div.input()
-            .id("create_name")
+            .id(eid::NAME)
             .maxlength(len)
             .size(len.min(24))
             .value(self.name());
@@ -537,7 +553,8 @@ impl CardList {
         let search = Search::new(search);
         let mut views = Vec::with_capacity(cards.len());
         // "Create" card
-        let mut cv = CardView::new(res, Self::next_name(&cards), View::CreateCompact);
+        let mut cv =
+            CardView::new(res, Self::next_name(&cards), View::CreateCompact);
         if !search.is_all() || !self.can_create::<C>() {
             cv = cv.with_view(View::Hidden);
         }
