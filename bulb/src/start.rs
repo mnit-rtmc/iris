@@ -160,7 +160,7 @@ fn clear_selected_item(zoom: u32) {
 #[wasm_bindgen(start)]
 pub async fn start() -> core::result::Result<(), JsError> {
     crate::panic::set_hook_once();
-    wasm_log::init(wasm_log::Config::default());
+    wasm_log::init(wasm_log::Config::new(log::Level::Info));
     log::info!("Started");
     Ok(add_listeners()?)
 }
