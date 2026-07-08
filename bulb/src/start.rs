@@ -181,7 +181,7 @@ fn add_listeners() -> Result<()> {
     add_input_listener(&sidebar)?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
     add_focus_listener(&sidebar)?;
-    add_transition_listener(&doc.elem(eid::LIST)?)?;
+    add_transition_listener(&doc.elem(eid::CARDS)?)?;
     add_interval_callback()?;
     if let Some(map_pane) = earthwyrm::MapPane::init(
         "map-pane",
@@ -354,8 +354,8 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
-    let sb_list = doc.elem::<Element>(eid::LIST)?;
-    sb_list.set_inner_html("");
+    let sb_cards = doc.elem::<Element>(eid::CARDS)?;
+    sb_cards.set_inner_html("");
     let base = res.map(|r| r.base());
     if let Some(el) = doc.opt_elem::<Element>("res_plan_row") {
         el.set_class_name(row_class(base == Some(Res::ActionPlan)));
@@ -914,8 +914,8 @@ async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
             let search = search_value()?;
             let html = cards.build_html(&search).await?;
             let doc = Doc::new()?;
-            let sb_list = doc.elem::<Element>(eid::LIST)?;
-            sb_list.set_inner_html(&html);
+            let sb_cards = doc.elem::<Element>(eid::CARDS)?;
+            sb_cards.set_inner_html(&html);
             app::card_list(Some(cards));
         }
         None => {

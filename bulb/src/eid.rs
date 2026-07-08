@@ -14,7 +14,7 @@
 
 /* General element IDs */
 
-pub const LIST: &str = "sb_list";
+pub const CARDS: &str = "sb_cards";
 pub const RESOURCE: &str = "sb_resource";
 pub const CREATE: &str = "ob_create";
 pub const DELETE: &str = "ob_delete";
