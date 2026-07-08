@@ -705,7 +705,7 @@ async fn handle_show_sidebar(show: bool) -> Result<()> {
 }
 
 /// Add enter/submit event listener to an element
-fn add_input_enter_listener(elem: &Element) -> Result<()> {
+fn add_input_enter_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let (Some(Ok(target)), Ok(keydown_ev)) = (
             e.target().map(|e| e.dyn_into::<Element>()),
@@ -715,7 +715,7 @@ fn add_input_enter_listener(elem: &Element) -> Result<()> {
             handle_input_enter(target.id());
         }
     });
-    elem.add_event_listener_with_callback(
+    el.add_event_listener_with_callback(
         "keydown",
         closure.as_ref().unchecked_ref(),
     )?;
