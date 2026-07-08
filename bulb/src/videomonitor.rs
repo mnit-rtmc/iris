@@ -14,6 +14,7 @@ use crate::app;
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::eid;
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::monitorstyle::MonitorStyle;
@@ -154,7 +155,7 @@ impl VideoMonitor {
             Some(num) => format!("📺 #{num}"),
             None => "📺".to_string(),
         };
-        if let Ok(t) = Doc::get().elem::<HtmlElement>("sb_monitor") {
+        if let Ok(t) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
             t.set_inner_html(&mon_num);
         }
     }

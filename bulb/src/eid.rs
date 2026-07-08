@@ -14,8 +14,9 @@
 
 /* General element IDs */
 
-pub const CARDS: &str = "sb_cards";
 pub const RESOURCE: &str = "sb_resource";
+pub const MONITOR: &str = "sb_monitor";
+pub const CARDS: &str = "sb_cards";
 pub const CREATE: &str = "ob_create";
 pub const DELETE: &str = "ob_delete";
 pub const GEOLOC: &str = "ob_geoloc";
