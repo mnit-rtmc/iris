@@ -186,7 +186,7 @@ fn add_listeners() -> Result<()> {
     if let Some(map_pane) = earthwyrm::MapPane::init(
         "map-pane",
         GROUPS,
-        handle_map_click_ev,
+        handle_map_click,
         handle_map_zoom,
     ) {
         map_pane.position(10, -93.2, 44.95, RECT_X, RECT_Y);
@@ -927,7 +927,7 @@ async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
 
 /// Add transition event listener to an element
 fn add_transition_listener(el: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(handle_transition_ev);
+    let closure: Closure<dyn Fn(_)> = Closure::new(handle_transition);
     el.add_event_listener_with_callback(
         "transitionstart",
         closure.as_ref().unchecked_ref(),
@@ -945,7 +945,7 @@ fn add_transition_listener(el: &Element) -> Result<()> {
 }
 
 /// Handle a `transition*` event
-fn handle_transition_ev(ev: Event) {
+fn handle_transition(ev: Event) {
     if let Some(target) = ev.target()
         && let Ok(target) = target.dyn_into::<Element>()
         && let Ok(ev) = ev.dyn_into::<TransitionEvent>()
@@ -1053,7 +1053,7 @@ fn density_color(density: u32) -> &'static str {
 }
 
 /// Handle a `click` event
-fn handle_map_click_ev(ev: Event) {
+fn handle_map_click(ev: Event) {
     // Is it within a map `g` or `path` element
     if let Some(Ok(target)) = ev.target().map(|e| e.dyn_into::<Element>())
         && let Ok(Some(gm)) = target.closest("g,path")
