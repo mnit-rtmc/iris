@@ -193,7 +193,7 @@ impl Camera {
     }
 
     /// send PTZ command action
-    fn send_ptz(&self, pan: f32, tilt: f32, zoom: f32, anc: &CameraAnc) -> Vec<Action> {
+    fn send_ptz(&self, pan: f32, tilt: f32, zoom: f32) -> Vec<Action> {
         let mut speed = 1.0;
         if let Some(slider) =
             Doc::get().opt_elem::<HtmlInputElement>("ptz-speed")
@@ -202,23 +202,14 @@ impl Camera {
             speed = s;
         }
         let uri = self.enc_address.as_deref().unwrap_or("No enc_address");
-        let password = anc.cio.controller(self).map_or("", |c| {
-            log::debug!("controller: {c:#?}");
-            let p = &c.password;
-            log::debug!("password field: {p:#?}");
-            let der = p.as_deref();
-            log::debug!("password deref: {der:#?}");
-            der.unwrap_or("")
-        });
-        let (user, pass) = password.split_once(":").unwrap_or(("", password));
         let mut fields = Fields::new();
         fields.insert_arr("ptz", vec![pan * speed, tilt * speed, zoom * speed]);
         fields.insert_str("uri", uri);
-        fields.insert_str("user", user);
-        fields.insert_str("pass", pass);
         let value = fields.into_value().to_string();
-        //vec![Action::Patch(uri_one(Res::Camera, &self.name), value.into())]
-        vec![Action::Patch(uri_one_direct(Res::Camera, &self.name), value.into())]
+        vec![Action::Patch(
+            uri_one_direct(Res::Camera, &self.name),
+            value.into(),
+        )]
     }
 
     /// Send focus stop command action
@@ -232,12 +223,12 @@ impl Camera {
     }
 
     /// send PTZ stop command action
-    fn stop_ptz(&self, anc: &CameraAnc) -> Vec<Action> {
-        self.send_ptz(0.0, 0.0, 0.0, anc)
+    fn stop_ptz(&self) -> Vec<Action> {
+        self.send_ptz(0.0, 0.0, 0.0)
     }
 
     /// Handles a mousedown event on the expanded card
-    fn mouse_down(&self, id: &str, anc: CameraAnc) -> Vec<Action> {
+    fn mouse_down(&self, id: &str) -> Vec<Action> {
         let mut actions = Vec::new();
         // Types of controls handled by MouseEvent
         let handled_types = vec!["iris", "focus", "ptz"];
@@ -260,7 +251,7 @@ impl Camera {
                         actions.extend(match t {
                             "focus" => self.stop_focus(),
                             "iris" => self.stop_iris(),
-                            "ptz" => self.stop_ptz(&anc),
+                            "ptz" => self.stop_ptz(),
                             _ => Vec::new(),
                         });
                     }
@@ -274,12 +265,12 @@ impl Camera {
             "focus-far" => self.device_req(DeviceReq::CameraFocusFar),
             "iris-open" => self.device_req(DeviceReq::CameraIrisOpen),
             "iris-close" => self.device_req(DeviceReq::CameraIrisClose),
-            "ptz-pan-right" => self.send_ptz(1.0, 0.0, 0.0, &anc),
-            "ptz-pan-left" => self.send_ptz(-1.0, 0.0, 0.0, &anc),
-            "ptz-tilt-up" => self.send_ptz(0.0, 1.0, 0.0, &anc),
-            "ptz-tilt-down" => self.send_ptz(0.0, -1.0, 0.0, &anc),
-            "ptz-zoom-in" => self.send_ptz(0.0, 0.0, 1.0, &anc),
-            "ptz-zoom-out" => self.send_ptz(0.0, 0.0, -1.0, &anc),
+            "ptz-pan-right" => self.send_ptz(1.0, 0.0, 0.0),
+            "ptz-pan-left" => self.send_ptz(-1.0, 0.0, 0.0),
+            "ptz-tilt-up" => self.send_ptz(0.0, 1.0, 0.0),
+            "ptz-tilt-down" => self.send_ptz(0.0, -1.0, 0.0),
+            "ptz-zoom-in" => self.send_ptz(0.0, 0.0, 1.0),
+            "ptz-zoom-out" => self.send_ptz(0.0, 0.0, -1.0),
             _ => Vec::new(),
         });
         actions
@@ -287,7 +278,7 @@ impl Camera {
 
     /// Handles a mouseup event on the expanded card
     #[allow(clippy::single_match)]
-    fn mouse_up(&self, id: &str, anc: CameraAnc) -> Vec<Action> {
+    fn mouse_up(&self, id: &str) -> Vec<Action> {
         let mut actions = Vec::new();
         // Types of controls handled by MouseEvent
         let handled_types = vec!["iris", "focus", "ptz"];
@@ -309,7 +300,7 @@ impl Camera {
                 actions.extend(match t {
                     "focus" => self.stop_focus(),
                     "iris" => self.stop_iris(),
-                    "ptz" => self.stop_ptz(&anc),
+                    "ptz" => self.stop_ptz(),
                     _ => Vec::new(),
                 });
             }
@@ -319,7 +310,7 @@ impl Camera {
 
     fn to_html_ptz_controls(
         &self,
-        anc: &CameraAnc,
+        _anc: &CameraAnc,
         parent_row: &mut html::Div,
     ) {
         // Add PTZ controls
@@ -346,12 +337,8 @@ impl Camera {
             .cdata("←")
             .close();
         let uri = self.enc_address.as_deref().unwrap_or("No enc_address");
-        let password = anc.cio.controller(self).map_or("", |c| c.password.as_deref().unwrap_or(""));
-        let (user, pass) = password.split_once(":").unwrap_or(("", password));
         let mut fields_direct = String::from("");
         fields_direct.push_str(&format!(",\"uri\":\"{}\"", uri));
-        fields_direct.push_str(&format!(",\"user\":\"{}\"", user));
-        fields_direct.push_str(&format!(",\"pass\":\"{}\"", pass));
         joystick::create_joy(
             &mut row.div(),
             "ptz-joystick",
@@ -781,14 +768,14 @@ impl Card for Camera {
     /// Handle mouse event for an element on the card
     fn handle_mouse(
         &self,
-        anc: CameraAnc,
+        _anc: CameraAnc,
         id: &str,
         mouse_down: bool,
     ) -> Vec<Action> {
         if mouse_down {
-            self.mouse_down(id, anc)
+            self.mouse_down(id)
         } else {
-            self.mouse_up(id, anc)
+            self.mouse_up(id)
         }
     }
 }

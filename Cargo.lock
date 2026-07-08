@@ -978,7 +978,7 @@ dependencies = [
  "percent-encoding",
  "pointy",
  "postgres-types",
- "rand 0.10.1",
+ "rand 0.10.2",
  "rendzina",
  "resin",
  "resources",

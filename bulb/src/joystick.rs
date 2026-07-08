@@ -66,30 +66,23 @@ fn from_attr<T: for<'a> TryFrom<&'a str>>(
 }
 
 /// Format the JSON data for a joystick with x and y
-fn format_field(stick: &HtmlElement, x: f64, y: f64, f_dir: &str) -> Option<String> {
+fn format_field(
+    stick: &HtmlElement,
+    x: f64,
+    y: f64,
+    f_dir: &str,
+) -> Option<String> {
     let x_val = format!("{:.1}", x);
     let y_val = format!("{:.1}", y);
     if let Some(f) = stick.get_attribute("data-fields") {
         return Some(
             f.replacen("{}", &x_val, 1)
-            .replacen("{}", &y_val, 1)
-            .replacen("{}", &f_dir, 1)
+                .replacen("{}", &y_val, 1)
+                .replacen("{}", f_dir, 1),
         );
     }
     None
 }
-
-///// Build the list of actions to perform based on normalized x and y
-//fn get_actions(stick: &HtmlElement, x: f64, y: f64) -> Vec<Action> {
-//    if let (Some(res), Some(name), Some(f)) = (
-//        from_attr::<Res>(stick, "data-res"),
-//        stick.get_attribute("data-name"),
-//        format_field(stick, x, y, ""),
-//    ) {
-//        return vec![Action::Patch(uri_one(res, &name), f.into())];
-//    }
-//    Vec::new()
-//}
 
 /// Build the list of actions to perform based on normalized x and y
 fn get_actions(stick: &HtmlElement, x: f64, y: f64) -> Vec<Action> {
@@ -229,7 +222,6 @@ pub async fn handle_mouse_event(
             _ => Vec::new(),
         };
         for action in actions {
-            //log::debug!("Sending action {:?}", action);
             action.perform().await?;
         }
     }

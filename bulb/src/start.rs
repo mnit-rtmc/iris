@@ -31,7 +31,7 @@ use std::collections::HashMap;
 use std::time::Duration;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::{JsCast, JsError};
+use wasm_bindgen::{JsCast, JsError, UnwrapThrowExt};
 use web_sys::{
     Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
     HtmlSelectElement, KeyboardEvent, MouseEvent, ScrollBehavior,
@@ -178,8 +178,9 @@ fn add_listeners() -> Result<()> {
     let layer_menu: HtmlElement = doc.elem("layer-menu")?;
     add_change_listener(&layer_menu)?;
     add_click_listener(&sidebar)?;
-    add_joystick_listener(&doc.0.body().unwrap().into())?;
-    add_mouse_listener(&doc.0.body().unwrap().into())?;
+    let body = doc.0.body().unwrap_throw();
+    add_joystick_listener(&body)?;
+    add_mouse_listener(&body)?;
     add_input_listener(&sidebar)?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
     add_focus_listener(&sidebar)?;
@@ -737,22 +738,22 @@ fn add_joystick_listener(el: &Element) -> Result<()> {
         if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
             && mouse_event.button() == 0
             && let Some(Ok(target)) =
-                mouse_event.target().map(|e| e.dyn_into::<HtmlElement>())
+                mouse_event.target().map(|e| e.dyn_into::<Element>())
         {
             let type_ = mouse_event.type_();
-            if type_ == "mouseup" {
+            if type_ == "mouseup" || type_ == "mousemove" {
                 let sticks =
                     Doc::get().0.get_elements_by_class_name("joystick");
                 for i in 0..sticks.length() {
+                    // x and y ignored by mouseup, but not mousemove
                     spawn_future(joystick::handle_mouse_event(
-                        sticks.get_with_index(i).unwrap().id(),
-                        "mouseup".to_string(),
-                        0,
-                        0,
+                        sticks.item(i).unwrap_throw().id(),
+                        type_.clone(),
+                        mouse_event.x(),
+                        mouse_event.y(),
                     ));
                 }
             } else if target.class_name() == "joystick" {
-                mouse_event.prevent_default();
                 spawn_future(joystick::handle_mouse_event(
                     target.id(),
                     type_,
