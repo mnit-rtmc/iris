@@ -179,7 +179,7 @@ th, td {
   cursor: pointer;
 }
 
-#layer-menu {
+#layer-zoom {
   display: none;
   position: fixed;
   left: 0;
@@ -192,10 +192,33 @@ th, td {
   border-right: 1px solid white;
   user-select: none;
 }
-#zoom-level {
+#layer-zoom button {
+  border: none;
+  background-color: #566;
+  color: white;
+}
+#layer-zoom button:hover {
+  background-color: #677;
+}
+#layer-zoom label {
   padding: 0.3rem;
 }
-#layer-menu input {
+
+#layer-popover {
+  position-area: top;
+  background-color: #566;
+  color: white;
+  border: 1px solid white;
+}
+#layer-menu {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+}
+#layer-menu label:nth-child(-n+2) {
+  font-weight: bold;
+  text-decoration: underline dotted;
+}
+#layer-menu button {
   background: white;
   color: black;
 }
@@ -204,28 +227,6 @@ th, td {
 }
 #layer-menu a:visited {
   color: #bbf;
-}
-#layer-zoom {
-  display: none;
-}
-#layer-zoom:has(+ #toggle-zoom:checked) {
-  display: grid;
-  grid-template-columns: repeat(2, max-content);
-}
-#toggle-zoom + label {
-  border-left: none;
-  border-bottom: none;
-  border-top: 1px solid white;
-  border-right: 1px solid white;
-  border-radius: 0;
-  background-color: #566;
-  color: white;
-}
-#toggle-zoom:hover + label {
-  background-color: #677;
-}
-#toggle-zoom:active + label {
-  background-color: #788;
 }
 
 #side-pane {
@@ -319,7 +320,7 @@ label:has(+ #sb_resource) {
   #map-pane {
     display: block;
   }
-  #layer-menu {
+  #layer-zoom {
     display: block;
   }
   #divider {

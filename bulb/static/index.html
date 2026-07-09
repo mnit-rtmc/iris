@@ -44,8 +44,13 @@
       </svg>
     </div>
     <div id="map-pane"></div>
-    <div id="layer-menu">
-      <div id="layer-zoom">
+    <div id="layer-zoom">
+      <button popovertarget="layer-popover">🞁 Layers</button>
+    </div>
+    <div id="layer-popover" popover>
+      <div id="layer-menu">
+        <label>Current Zoom:</label>
+        <label id="zoom-level">10</label>
         <label for="layer-incident">🚨 Incident</label>
         <input id="layer-incident" type="number" value="10" min="6" max="18">
         <label for="layer-dms">⬛ DMS</label>
@@ -67,9 +72,6 @@
         <label for="layer-osm">© <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener noreferrer">OpenStreetMap</a></label>
         <input id="layer-osm" type="number" value="6" min="6" max="18">
       </div>
-      <input id="toggle-zoom" type="checkbox" class="toggle">
-      <label for="toggle-zoom">🞁 Layer Zoom Levels 🞁</label>
-      <label id="zoom-level">10</label>
     </div>
     <div id="side-pane">
       <div id="sidebar">
