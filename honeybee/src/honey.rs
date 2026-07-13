@@ -963,19 +963,18 @@ fn route_direct(honey: Honey) -> Router {
             (attrs.get("ptz"), attrs.get("uri"))
             && ptz_val.len() == 3
         {
-            log::debug!("Converting ptz_val to tuple...");
             let ptz: (f64, f64, f64) = (
                 ptz_val[0].as_f64().ok_or(Error::InvalidValue)?,
                 ptz_val[1].as_f64().ok_or(Error::InvalidValue)?,
                 ptz_val[2].as_f64().ok_or(Error::InvalidValue)?,
             );
-            log::debug!("Received request for ONVIF PTZ");
 
             let mut onvif =
                 OnvifMessenger::new(uri, 80, "", "", &session).await?;
 
             if onvif.should_send(Some(ptz)).await {
-                if !onvif.set_user_pass_from_session().await {
+                onvif.update_pending(true).await;
+                if !onvif.get_user_pass_from_store().await {
                     // User and pass still empty, fetch from DB into session
                     let cs = get_by_pkey(&honey.db, query::CAMERA_ONE, &obj_n)
                         .await?;
@@ -999,7 +998,6 @@ fn route_direct(honey: Honey) -> Router {
                     onvif.set_user_pass(userpass.0, userpass.1).await;
                 }
 
-                onvif.update_pending(true).await;
                 onvif.send_ptz(ptz).await?;
                 onvif.update_pending(false).await;
             } else {
@@ -1007,7 +1005,6 @@ fn route_direct(honey: Honey) -> Router {
                 log::debug!("Skipped PTZ: {ptz:?}");
             }
         }
-
         Ok(StatusCode::NO_CONTENT)
     }
 

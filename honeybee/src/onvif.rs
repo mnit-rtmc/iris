@@ -12,38 +12,20 @@
 // GNU General Public License for more details.
 //
 use crate::error::{Error, Result};
-//use crate::tls;
+use crate::soap;
+use crate::xml::{XmlDocument, XmlWriter};
+use xml::EmitterConfig;
 
-use base64::{Engine as _, engine::general_purpose::STANDARD as b64};
-use chrono::{SecondsFormat, Utc};
-use http_body_util::BodyExt;
-use hyper::body::Incoming;
-use hyper::{Request, Response};
-use hyper_util::rt::TokioIo;
-//use rustls::pki_types::ServerName;
 use serde::{Deserialize, Serialize};
-use sha1::{Digest, Sha1};
 
 use std::collections::HashMap;
 use std::fmt;
 use std::io;
-//use std::net::ToSocketAddrs;
 
-//use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::TcpStream;
-//use tokio_rustls::client::TlsStream;
 use tower_sessions::Session;
 
-use xml::reader::{EventReader, XmlEvent as ReaderEvent};
-use xml::writer::{EmitterConfig, EventWriter, XmlEvent};
-
-/// SOAP/XML namespaces for ONVIF
-const SOAP: &str = "http://www.w3.org/2003/05/soap-envelope";
+/// ONVIF namespaces
 const TT: &str = "http://www.onvif.org/ver10/schema";
-const WSSE: &str = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
-const WSU: &str = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
-const XSD: &str = "http://www.w3.org/2001/XMLSchema";
-const XSI: &str = "http://www.w3.org/2001/XMLSchema-instance";
 const VELOCITY_SPACE: &str =
     "http://www.onvif.org/ver10/tptz/PanTiltSpaces/VelocityGenericSpace";
 const DEVICE_WSDL: &str = "http://www.onvif.org/ver10/device/wsdl";
@@ -54,150 +36,7 @@ const PTZ_WSDL: &str = "http://www.onvif.org/ver20/ptz/wsdl";
 /// Top-level key, map of device address, device state
 pub const DEVICE_STATES_KEY: &str = "onvif_devices";
 
-fn is_stop(ptz: Option<(f64, f64, f64)>) -> bool {
-    if let Some(ptz) = ptz {
-        let eps = 1e-10;
-        ptz.0.abs() < eps && ptz.1.abs() < eps && ptz.2.abs() < eps
-    } else {
-        false
-    }
-}
-
-/// Parse HTTP response
-async fn parse_response(mut res: Response<Incoming>) -> Result<Vec<u8>> {
-    let status = res.status();
-
-    let mut body = Vec::<u8>::new();
-    while let Some(next) = res.frame().await {
-        let frame = next?;
-        if let Some(chunk) = frame.data_ref() {
-            body.extend(chunk);
-        }
-    }
-
-    if !status.is_success() {
-        let body_str = String::from_utf8(body.clone())
-            .unwrap_or("Could not parse string from response body".to_owned());
-        log::debug!("Not successful: {status}. Body: {body_str}");
-    }
-
-    Ok(body)
-}
-
-struct XmlWriter<W> {
-    writer: EventWriter<W>,
-}
-
-impl<W: io::Write> XmlWriter<W> {
-    fn new(writer: EventWriter<W>) -> Self {
-        XmlWriter { writer }
-    }
-
-    fn write(&mut self, event: XmlEvent) {
-        if let Err(e) = self.writer.write(event) {
-            panic!("Write error: {e}")
-        }
-    }
-
-    fn start_element(&mut self, name: &str, attr: &[(&str, &str)]) {
-        self.start_element_ns(name, ("", ""), attr);
-    }
-
-    fn start_element_default_ns(
-        &mut self,
-        name: &str,
-        ns: &str,
-        attr: &[(&str, &str)],
-    ) {
-        let mut event = XmlEvent::start_element(name);
-        event = event.default_ns(ns);
-        for (a, v) in attr {
-            event = event.attr(*a, v);
-        }
-        self.write(event.into());
-    }
-
-    fn start_element_ns(
-        &mut self,
-        name: &str,
-        ns: (&str, &str),
-        attr: &[(&str, &str)],
-    ) {
-        let mut event = XmlEvent::start_element(name);
-        event = event.ns(ns.0, ns.1);
-        for (a, v) in attr {
-            event = event.attr(*a, v);
-        }
-        self.write(event.into());
-    }
-
-    fn start_body(&mut self) {
-        self.write(
-            XmlEvent::start_element("s:Body")
-                .ns("xsd", XSD)
-                .ns("xsi", XSI)
-                .into(),
-        );
-    }
-
-    fn end_element(&mut self, name: Option<&str>) {
-        let mut event = XmlEvent::end_element();
-        if let Some(name) = name {
-            event = event.name(name);
-        }
-        self.write(event.into());
-    }
-
-    fn finish(&mut self) {
-        // loop until no more elements to end
-        loop {
-            let event = XmlEvent::end_element();
-            match self.writer.write(event) {
-                Ok(_) => (),
-                Err(_) => return,
-            }
-        }
-    }
-
-    fn characters(&mut self, chars: &str) {
-        let event = XmlEvent::Characters(chars);
-        self.write(event);
-    }
-
-    fn single_element(
-        &mut self,
-        name: &str,
-        chars: &str,
-        attr: &[(&str, &str)],
-    ) {
-        self.single_element_ns(name, ("", ""), chars, attr);
-    }
-
-    fn single_element_default_ns(
-        &mut self,
-        name: &str,
-        ns: &str,
-        chars: &str,
-        attr: &[(&str, &str)],
-    ) {
-        self.start_element_default_ns(name, ns, attr);
-        self.characters(chars);
-        self.end_element(Some(name));
-    }
-
-    fn single_element_ns(
-        &mut self,
-        name: &str,
-        ns: (&str, &str),
-        chars: &str,
-        attr: &[(&str, &str)],
-    ) {
-        self.start_element_ns(name, ns, attr);
-        self.characters(chars);
-        self.end_element(Some(name));
-    }
-}
-
+/// Create ONVIF GetSystemDateAndTime XML
 fn get_system_date_and_time_document<W: io::Write>(writer: &mut XmlWriter<W>) {
     writer.single_element_ns(
         "wsdl:GetSystemDateAndTime",
@@ -208,11 +47,13 @@ fn get_system_date_and_time_document<W: io::Write>(writer: &mut XmlWriter<W>) {
     writer.finish();
 }
 
+/// Create ONVIF GetProfiles XML
 fn get_profiles_document<W: io::Write>(writer: &mut XmlWriter<W>) {
     writer.single_element_default_ns("GetProfiles", MEDIA_WSDL, "", &[]);
     writer.finish();
 }
 
+/// Create ONVIF GetCapabilities XML
 fn get_capabilities_document<W: io::Write>(
     writer: &mut XmlWriter<W>,
     category: &[Category],
@@ -236,6 +77,7 @@ fn get_capabilities_document<W: io::Write>(
     writer.finish();
 }
 
+/// Create ONVIF PTZ ContinuousMove XML
 fn continuous_move_document<W: io::Write>(
     writer: &mut XmlWriter<W>,
     profile: String,
@@ -265,13 +107,14 @@ fn continuous_move_document<W: io::Write>(
     writer.finish();
 }
 
+/// Create ONVIF PTZ Stop XML
 fn stop_document<W: io::Write>(writer: &mut XmlWriter<W>, profile: String) {
     writer.start_element_default_ns("Stop", PTZ_WSDL, &[]);
     writer.single_element("ProfileToken", &profile, &[]);
     writer.finish();
 }
 
-/// Category for GetCapabilities
+/// CapabilityCategory for GetCapabilities
 #[derive(Debug, Clone, Copy)]
 #[allow(dead_code)]
 pub enum Category {
@@ -284,27 +127,43 @@ pub enum Category {
     Ptz,
 }
 
-/// ONVIF message
+/// Supported ONVIF operations and associated responses
 #[derive(Debug)]
-pub enum OnvifOperation {
+pub enum OnvifOperation<'a> {
+    /// Continuous pan/tilt/zoom movement on a device
+    /// (ProfileToken, Pan, Tilt, Zoom)
     ContinuousMove(String, f64, f64, f64),
+    /// No child nodes in ONVIF spec, nothing to parse
     ContinuousMoveResponse,
-    GetCapabilities(&'static [Category]),
-    GetCapabilitiesResponse(HashMap<String, String>),
+
+    /// Get ONVIF capabilities of a device, including service addresses
+    /// Takes a list of CapabilityCategory items
+    GetCapabilities(&'a [Category]),
+    GetCapabilitiesResponse(XmlDocument),
+
+    /// Get the media profiles of a device (needed for PTZ)
     GetProfiles,
-    GetProfilesResponse(HashMap<String, String>),
+    GetProfilesResponse(XmlDocument),
+
+    /// Get the date/time of a device
+    /// Unused, but may be needed if auth timestamp is too far off
     #[allow(dead_code)]
     GetSystemDateAndTime,
-    GetSystemDateAndTimeResponse(HashMap<String, String>),
+    #[allow(dead_code)]
+    GetSystemDateAndTimeResponse(XmlDocument),
+
+    /// Stop pan/tilt/zoom movements on a device
     #[allow(dead_code)]
     Stop(String),
+    /// No child nodes in ONVIF spec, nothing to parse
     StopResponse,
-    OtherResponse(String, String),
-    Fault(String),
+
+    /// Any SOAP/ONVIF Fault response
+    Fault(XmlDocument),
 }
 
-impl fmt::Display for OnvifOperation {
-    /// "Display" format will be the corresponding SOAP action, the contained message, or empty
+/// "Display" as the corresponding SOAP action, contained message, or empty
+impl fmt::Display for OnvifOperation<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let action = match self {
             OnvifOperation::ContinuousMove(_, _, _, _) => {
@@ -322,9 +181,8 @@ impl fmt::Display for OnvifOperation {
             OnvifOperation::Stop(_) => {
                 "http://www.onvif.org/ver20/ptz/wsdl/Stop"
             }
-            OnvifOperation::OtherResponse(ns, res) => &format!("{ns}: {res}"),
-            OnvifOperation::Fault(res) => res,
-            _ => "",
+            OnvifOperation::Fault(doc) => &format!("{doc}"),
+            _ => &format!("{:#?}", self),
         };
         if !action.is_empty() {
             write!(f, "{action}")
@@ -334,7 +192,7 @@ impl fmt::Display for OnvifOperation {
     }
 }
 
-impl OnvifOperation {
+impl OnvifOperation<'_> {
     /// Get the name of the ONVIF service the message belongs to
     fn get_service(&self) -> &'static str {
         match self {
@@ -347,15 +205,7 @@ impl OnvifOperation {
         }
     }
 
-    fn get_map(&mut self) -> Option<&mut HashMap<String, String>> {
-        match self {
-            Self::GetSystemDateAndTimeResponse(map)
-            | Self::GetCapabilitiesResponse(map)
-            | Self::GetProfilesResponse(map) => Some(map),
-            _ => None,
-        }
-    }
-
+    /// Set the media profile token of ONVIF PTZ operation
     fn set_profile(&mut self, profile: String) {
         match self {
             Self::ContinuousMove(p, _, _, _) | Self::Stop(p) => {
@@ -367,69 +217,7 @@ impl OnvifOperation {
         }
     }
 
-    /// Returns (password, nonce, created)
-    fn get_digest(pass: &str) -> Option<(String, String, String)> {
-        if pass.is_empty() {
-            log::debug!("Password is empty, not creating digest.");
-            return None;
-        }
-        let mut nonce_bytes = [0u8; 16];
-        rand::fill(&mut nonce_bytes[..]);
-        let pass_bytes = pass.as_bytes();
-        let mut hasher = Sha1::new();
-        let created = Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true);
-        hasher.update(nonce_bytes);
-        hasher.update(created.as_bytes());
-        hasher.update(pass_bytes);
-        let digest = hasher.finalize();
-        let digest_b64 = b64.encode(digest);
-        Some((digest_b64, b64.encode(nonce_bytes), created))
-    }
-
-    /// Writes a WSSE security header
-    fn add_security_header<W: io::Write>(
-        writer: &mut XmlWriter<W>,
-        user: &str,
-        pass: &str,
-    ) {
-        if let Some((password, nonce, created)) =
-            Self::get_digest(pass).as_ref()
-        {
-            writer.start_element_default_ns(
-                "Security",
-                WSSE,
-                &[("s:mustUnderstand", "1")],
-            );
-            writer.start_element("UsernameToken", &[]);
-            writer.single_element("Username", user, &[]);
-            writer.single_element("Password", password, &[
-                ("Type", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest")
-            ]);
-            writer.single_element("Nonce", nonce, &[
-                ("EncodingType", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary")
-            ]);
-            writer.single_element_default_ns("Created", WSU, created, &[]);
-            // Don't call .finish(), since we need to write the Body
-            writer.end_element(Some("UsernameToken"));
-            writer.end_element(Some("Security"));
-        }
-    }
-
-    fn get_base_document<W: io::Write>(
-        writer: &mut XmlWriter<W>,
-        userpass: Option<(&str, &str)>,
-    ) {
-        writer.start_element_ns("s:Envelope", ("s", SOAP), &[]);
-        writer.start_element("s:Header", &[]);
-        if let Some((user, pass)) = userpass {
-            Self::add_security_header(writer, user, pass);
-        } else {
-            log::debug!("No security headers added for {userpass:?}");
-        }
-        writer.end_element(Some("s:Header"));
-        writer.start_body();
-    }
-
+    /// Encode this ONVIF operation as XML into the buffer
     fn encode(&self, buf: &mut Vec<u8>, userpass: Option<(&str, &str)>) {
         let mut xml_writer = XmlWriter::new(
             EmitterConfig::new()
@@ -442,9 +230,9 @@ impl OnvifOperation {
                 .keep_element_names_stack(true) //default: true
                 .autopad_comments(false) // default: true
                 .pad_self_closing(false) // default: true
-                .create_writer(buf), //.clone())
+                .create_writer(buf),
         );
-        Self::get_base_document(&mut xml_writer, userpass);
+        soap::get_base_document(&mut xml_writer, userpass);
         match self {
             OnvifOperation::ContinuousMove(profile, p, t, z) => {
                 continuous_move_document(
@@ -472,114 +260,69 @@ impl OnvifOperation {
     }
 }
 
-/// Implement FromStr to allow parsing SOAP Body into a map
-impl std::str::FromStr for OnvifOperation {
-    type Err = Error;
-    fn from_str(s: &str) -> Result<Self> {
-        let mut msg = Self::OtherResponse("".to_owned(), "".to_owned());
+/// Attempts to map an XML Document to the enum
+impl TryFrom<XmlDocument> for OnvifOperation<'_> {
+    type Error = Error;
 
-        let reader = EventReader::new(s.as_bytes());
-        let mut current_path = String::new();
-        let mut in_body = false;
-        for event in reader {
-            match event {
-                Ok(ReaderEvent::StartElement {
-                    name,
-                    attributes,
-                    namespace,
-                }) => {
-                    let mut name = name.local_name.clone();
-                    if name.contains("Fault") {
-                        return Ok(Self::Fault(s.to_owned()));
-                    }
-                    if !in_body {
-                        if name == "Body" {
-                            in_body = true;
-                        }
-                        continue;
-                    }
-
-                    if name.contains("Response") {
-                        msg = match name.as_ref() {
-                            "ContinuousMoveResponse" => {
-                                Self::ContinuousMoveResponse
-                            }
-                            "GetCapabilitiesResponse" => {
-                                Self::GetCapabilitiesResponse(HashMap::new())
-                            }
-                            "GetProfilesResponse" => {
-                                Self::GetProfilesResponse(HashMap::new())
-                            }
-                            "GetSystemDateAndTimeResponse" => {
-                                Self::GetSystemDateAndTimeResponse(
-                                    HashMap::new(),
-                                )
-                            }
-                            "StopResponse" => Self::StopResponse,
-                            _ => {
-                                return Ok(Self::OtherResponse(
-                                    format!("{namespace:?}:{name}"),
-                                    s.to_owned(),
-                                ));
-                            }
-                        };
-                    }
-
-                    if let Self::GetProfilesResponse(_) = msg {
-                        // Add token to name if it has one
-                        for attr in attributes {
-                            if attr.name.local_name.to_lowercase() == "token" {
-                                name.push_str(&format!("[{}]", attr.value));
-                                break;
-                            }
-                        }
-                    }
-
-                    // NOTE: top-level element has a leading '.' by design
-                    current_path.push_str(&format!(".{name}"));
+    fn try_from(doc: XmlDocument) -> Result<Self> {
+        let body_opt = doc.find("Body");
+        let body = if let Some(b) = body_opt {
+            b
+        } else {
+            log::error!("Couldn't find Body element in {doc}");
+            Err(Error::InvalidValue)?
+        };
+        for child in doc.get_child_elements(body) {
+            let name = child.get_local_name();
+            match name.as_ref() {
+                "ContinuousMoveResponse" => {
+                    return Ok(Self::ContinuousMoveResponse);
                 }
-                Ok(ReaderEvent::EndElement { name }) => {
-                    let name = name.local_name.clone();
-                    if in_body {
-                        if name == "Body" {
-                            in_body = false;
-                            continue;
-                        }
-                    } else {
-                        continue;
-                    }
-
-                    // 'Pop' element name from current path
-                    // Removes children if not last in path
-                    // Gives error if not found
-                    if let Some((path, _)) =
-                        current_path.rsplit_once(&format!(".{name}"))
-                    {
-                        current_path = path.to_owned();
-                    } else {
-                        // Never reached if well-formed XML and parsed correctly
-                        log::error!(
-                            "{name} not the last element! Current path: {current_path}"
-                        );
-                    }
+                "GetCapabilitiesResponse" => {
+                    return Ok(Self::GetCapabilitiesResponse(doc));
                 }
-                Ok(ReaderEvent::Characters(text)) => {
-                    if in_body && let Some(map) = msg.get_map() {
-                        map.insert(current_path.clone(), text);
-                    }
+                "GetProfilesResponse" => {
+                    return Ok(Self::GetProfilesResponse(doc));
                 }
-                // StartDocument, EndDocument, ProcessingInstruction, CData, Comment, Whitespace, Doctype:
-                Ok(_) => (),
-                Err(e) => {
-                    log::error!("Reader event error: {e:?}");
+                "GetSystemDateAndTimeResponse" => {
+                    return Ok(Self::GetSystemDateAndTimeResponse(doc));
                 }
+                "StopResponse" => {
+                    return Ok(Self::StopResponse);
+                }
+                "Fault" => {
+                    return Ok(Self::Fault(doc));
+                }
+                _ => (),
             }
         }
 
-        Ok(msg)
+        Err(Error::InvalidValue)
     }
 }
 
+/// Attempts to create OnvifOperation from bytes by converting to XmlDocument
+impl TryFrom<Vec<u8>> for OnvifOperation<'_> {
+    type Error = Error;
+
+    fn try_from(source: Vec<u8>) -> Result<Self> {
+        let b: &[u8] = &source;
+        let doc = XmlDocument::from(b);
+        Self::try_from(doc)
+    }
+}
+
+/// Attempts to create OnvifOperation from bytes by converting to XmlDocument
+impl TryFrom<&[u8]> for OnvifOperation<'_> {
+    type Error = Error;
+
+    fn try_from(source: &[u8]) -> Result<Self> {
+        let doc = XmlDocument::from(source);
+        Self::try_from(doc)
+    }
+}
+
+/// Device data stored in session for reuse
 //TODO: track authentication Faults, add valid_auth flag
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 struct DeviceState {
@@ -596,43 +339,38 @@ struct DeviceState {
 }
 
 impl DeviceState {
-    fn get_default_xaddr(&self, service: &str) -> String {
-        match service {
-            "Imaging" => "/onvif/imaging_service",
-            "Media" => "/onvif/media_service",
-            "PTZ" => "/onvif/ptz_service",
-            _ => "/onvif/device_service",
-        }
-        .to_owned()
-    }
-
+    /// If the current device state has fetched the PTZ media profile
     fn has_media_profile(&self) -> bool {
         !self.media_profile.is_empty()
     }
 
+    /// If the current device state has fetched a service XAddr
     fn has_xaddr(&self, service: &str) -> bool {
-        self.xaddrs.contains_key(service)
+        service == "Device" || self.xaddrs.contains_key(service)
     }
 
+    /// Get the XAddr for the service
+    /// Device service address is part of the ONVIF spec
     fn get_xaddr(&self, service: &str) -> String {
-        self.xaddrs
-            .get(service)
-            .unwrap_or(&self.get_default_xaddr(service))
-            .to_owned()
+        if service == "Device" {
+            return String::from("/onvif/device_service");
+        }
+        match self.xaddrs.get(service) {
+            Some(s) => s.to_owned(),
+            None => String::new(),
+        }
     }
 }
 
 /// Messenger to an ONVIF-conformant device
 #[derive(Debug)]
 pub struct OnvifMessenger<'a> {
-    /// Hostname
+    /// Hostname of device
     host: String,
-    /// Hostname
+    /// Username for ONVIF authentication
     user: String,
-    /// Hostname
+    /// Password for ONVIF authentication
     pass: String,
-    ///// TLS encrypted stream
-    //stream: TlsStream<TcpStream>,
     /// Session reference for persistent data
     session: &'a Session,
 }
@@ -646,73 +384,58 @@ impl<'a> OnvifMessenger<'a> {
         pass: &str,
         session: &'a Session,
     ) -> Result<Self> {
-        //let addr = (host, port)
-        //    .to_socket_addrs()?
-        //    .next()
-        //    .ok_or_else(|| Error::NotFound)?;
-        //let tcp_stream = TcpStream::connect(&addr).await?;
-        //let connector = tls::connector();
-        //let domain = ServerName::try_from(host)
-        //    .map_err(|_| {
-        //        tokio::io::Error::new(io::ErrorKind::InvalidValue, "invalid dnsname")
-        //    })?
-        //    .to_owned();
-        //let tls_stream = connector.connect(domain, tcp_stream).await?;
         Ok(OnvifMessenger {
             host: host.to_owned(),
             user: user.to_owned(),
             pass: pass.to_owned(),
-            //stream: tls_stream,
             session,
         })
     }
 
+    /// Fetch the media profile token from the device if not cached
     async fn get_and_store_media_profile(
         &mut self,
-        msg: &mut OnvifOperation,
+        msg: &mut OnvifOperation<'_>,
     ) -> Result<()> {
         let mut state = self.get_device_state().await;
 
         // If the stored state already has the profile, don't request one
         if !state.has_media_profile() {
-            log::debug!("Doesn't have media profile already, pulling...");
-            let profile = self.pull_media_profile().await?;
+            log::debug!("State doesn't have media profile: {state:#?}");
+            let profile = self.fetch_media_profile().await?;
             state.media_profile = profile.clone();
             msg.set_profile(profile);
-            self.set_device_state(state.clone()).await;
+            self.store_device_state(state.clone()).await;
         }
 
         Ok(())
     }
 
-    async fn pull_media_profile(&mut self) -> Result<String> {
+    /// Fetch the media profile token from the device
+    async fn fetch_media_profile(&mut self) -> Result<String> {
         let msg = OnvifOperation::GetProfiles;
         let res_bytes = self.send_message(msg).await?;
 
-        let body = &String::from_utf8(res_bytes)
-            .map_err(|_| Error::UnexpectedResponse)?;
-        let capabilities: OnvifOperation = body.parse()?;
+        let profiles = OnvifOperation::try_from(res_bytes)?;
 
-        if let OnvifOperation::GetProfilesResponse(mut map) = capabilities {
-            // Retain only profiles with PTZ configurations, then use first
-            map.retain(|k, _| k.contains("PTZConfiguration"));
-
-            let mut tokens: Vec<String> = map
-                .into_keys()
-                .map(|k| {
-                    if let Some((_, rest)) = k.split_once("Profiles[")
-                        && let Some((token, _)) = rest.split_once("]")
-                    {
-                        return token.to_owned();
-                    }
-                    "".to_owned()
-                })
-                .collect();
-            tokens.sort();
-            return Ok(tokens[0].clone());
+        if let OnvifOperation::GetProfilesResponse(doc) = profiles {
+            let ptz_config = doc.find("PTZConfiguration");
+            if let Some(ptz_config) = ptz_config {
+                let parent = doc.get_parent_element(ptz_config);
+                let token_opt = parent.get("token");
+                if let Some(token) = token_opt {
+                    return Ok(token);
+                }
+            } else {
+                log::error!("Couldn't find PTZ config!");
+            }
+        } else if let OnvifOperation::Fault(doc) = profiles {
+            log::error!("Fault: {doc}");
+        } else {
+            log::error!("Not Fault or Response: {profiles}");
         }
 
-        Err(Error::InvalidValue)
+        Err(Error::InvalidValue)?
     }
 
     /// Update the session with the host's pending status
@@ -721,13 +444,15 @@ impl<'a> OnvifMessenger<'a> {
 
         state.pending = pending;
 
-        self.set_device_state(state.clone()).await;
+        self.store_device_state(state).await;
     }
 
+    /// If the messenger has a username and password set
     pub fn has_user_pass(&self) -> bool {
         !self.user.is_empty() || !self.pass.is_empty()
     }
 
+    /// Set the device's user/pass in the session store
     pub async fn set_user_pass(&mut self, user: &str, pass: &str) {
         let mut state = self.get_device_state().await;
 
@@ -736,18 +461,28 @@ impl<'a> OnvifMessenger<'a> {
         state.user = self.user.clone();
         state.pass = self.pass.clone();
 
-        self.set_device_state(state.clone()).await;
+        self.store_device_state(state).await;
     }
 
-    pub async fn set_user_pass_from_session(&mut self) -> bool {
+    /// Get the device's user/pass from the session store
+    /// Returns true if they were in store
+    pub async fn get_user_pass_from_store(&mut self) -> bool {
         let state = self.get_device_state().await;
 
         self.user = state.user.clone();
         self.pass = state.pass.clone();
 
-        self.set_device_state(state.clone()).await;
-
         self.has_user_pass()
+    }
+
+    /// Whether a given PTZ value is equivalent to a Stop command
+    fn is_stop(ptz: Option<(f64, f64, f64)>) -> bool {
+        if let Some(ptz) = ptz {
+            let eps = 1e-10;
+            ptz.0.abs() < eps && ptz.1.abs() < eps && ptz.2.abs() < eps
+        } else {
+            false
+        }
     }
 
     /// Fetch pending status from state
@@ -775,9 +510,9 @@ impl<'a> OnvifMessenger<'a> {
         device.pending
     }
 
-    /// Should send to device if URI has no active request, or if now stopping PTZ
+    /// True if device has no pending ONVIF request, or if sending a stop
     pub async fn should_send(&self, ptz: Option<(f64, f64, f64)>) -> bool {
-        if is_stop(ptz) {
+        if Self::is_stop(ptz) {
             // Always send stop operations
             return true;
         }
@@ -788,59 +523,59 @@ impl<'a> OnvifMessenger<'a> {
 
     /// Gets the path from the session store, or a default
     /// Does not update the session store
-    async fn message_path(&mut self, msg: &OnvifOperation) -> String {
+    async fn message_path(&mut self, msg: &OnvifOperation<'_>) -> String {
         let state = self.get_device_state().await;
         state.get_xaddr(msg.get_service())
     }
 
-    async fn pull_device_xaddrs(&mut self) -> Result<HashMap<String, String>> {
+    /// Fetch the ONVIF service addresses from the device
+    async fn fetch_device_xaddrs(&mut self) -> Result<HashMap<String, String>> {
         let msg =
             OnvifOperation::GetCapabilities(&[Category::Ptz, Category::Media]);
         let res_bytes = self.send_message(msg).await?;
 
-        let body = &String::from_utf8(res_bytes)
-            .map_err(|_| Error::UnexpectedResponse)?;
-        let capabilities: OnvifOperation = body.parse()?;
+        let capabilities = OnvifOperation::try_from(res_bytes)?;
 
-        if let OnvifOperation::GetCapabilitiesResponse(mut map) = capabilities {
-            // Keep just the XAddr mappings, map to services as keys
-            map.retain(|k, _| k.to_lowercase().ends_with("xaddr"));
-            return Ok(map
-                .into_iter()
-                .map(|(key, value)| {
-                    // (GetCapabilitiesResponse.Capabilities.[...].PTZ, XAddr)
-                    let prefix = key.rsplit_once('.').unwrap_or((&key, &key)).0;
-                    // (GetCapabilitiesResponse.Capabilities.[...], PTZ)
-                    let service = prefix
-                        .rsplit_once('.')
-                        .unwrap_or((prefix, prefix))
-                        .1
-                        .to_string();
-                    (service, value)
-                })
-                .collect());
+        if let OnvifOperation::GetCapabilitiesResponse(doc) = capabilities {
+            let xaddrs = doc.find_all("XAddr");
+            let mut map = HashMap::new();
+
+            for xaddr in &xaddrs {
+                let parent = doc.get_parent_element(xaddr);
+                let nm = parent.get_local_name();
+                let text = doc.get_text(xaddr);
+                map.insert(nm, text);
+            }
+            return Ok(map);
+        } else if let OnvifOperation::Fault(doc) = capabilities {
+            log::error!("Fault: {doc}");
+        } else {
+            log::error!("Not Fault or Response: {capabilities}");
         }
-        Err(Error::InvalidValue)
+
+        Err(Error::InvalidValue)?
     }
 
-    /// Populate ONVIF service entrypoints if needed
+    /// Fetch the ONVIF service addresses from the device if not cached
     async fn get_and_store_xaddrs(
         &mut self,
-        msg: &OnvifOperation,
+        msg: &OnvifOperation<'_>,
     ) -> Result<()> {
         let mut state = self.get_device_state().await;
 
-        // If the stored state already has the xaddr, don't request one
+        // If the stored state already has the XAddr, don't request one
         if !state.has_xaddr(msg.get_service()) {
-            log::debug!("Doesn't have xaddr already, pulling...");
-            let addrs = self.pull_device_xaddrs().await?;
+            log::debug!("State doesn't have xaddr: {state:#?}");
+            let addrs = self.fetch_device_xaddrs().await?;
             state.xaddrs = addrs;
-            self.set_device_state(state.clone()).await;
+            self.store_device_state(state).await;
         }
 
         Ok(())
     }
 
+    /// Get the list of device states stored in the session
+    /// Indexed by URI/hostname of device
     async fn get_devices(&self) -> HashMap<String, DeviceState> {
         let devices: HashMap<String, DeviceState> = HashMap::new();
         match self.session.get(DEVICE_STATES_KEY).await {
@@ -871,6 +606,7 @@ impl<'a> OnvifMessenger<'a> {
         }
     }
 
+    /// Get this device's state from the store, or add to store if not present
     async fn get_device_state(&self) -> DeviceState {
         let mut devices = self.get_devices().await;
         let device = if let Some(d) = devices.get_mut(&self.host) {
@@ -884,7 +620,8 @@ impl<'a> OnvifMessenger<'a> {
         device.clone()
     }
 
-    async fn set_device_state(&self, device: DeviceState) {
+    /// Save a state to the session store for this device
+    async fn store_device_state(&self, device: DeviceState) {
         let mut devices = self.get_devices().await;
         devices.insert(self.host.clone(), device);
         self.session
@@ -894,77 +631,52 @@ impl<'a> OnvifMessenger<'a> {
         self.session.save().await.expect("Couldn't save session");
     }
 
-    async fn send_message(&mut self, msg: OnvifOperation) -> Result<Vec<u8>> {
+    /// Create the ONVIF envelope then send the SOAP message
+    async fn send_message(
+        &mut self,
+        msg: OnvifOperation<'_>,
+    ) -> Result<Vec<u8>> {
         let mut envelope = Vec::new();
         msg.encode(&mut envelope, Some((&self.user, &self.pass)));
         let envelope = match str::from_utf8(&envelope) {
             Ok(s) => s,
             Err(e) => {
                 log::error!("Error {e:?} parsing envelope: {envelope:?}");
-                ""
+                Err(Error::InvalidValue)?
             }
-        };
-
-        let hostport = format!("{}:80", self.host);
-        let stream = TcpStream::connect(&hostport).await?;
-        let io = TokioIo::new(stream);
-        let (mut sender, conn) =
-            hyper::client::conn::http1::handshake(io).await?;
-
-        // Don't await a conn_task, just handle in task itself
-        tokio::spawn(async move {
-            if let Err(err) = conn.await {
-                log::error!("Connection failed: {:?}", err);
-            }
-        });
+        }
+        .to_owned();
 
         let path = self.message_path(&msg).await;
-        let mut builder = Request::post(path.to_owned())
-            .header("Accept", "application/soap+xml")
-            .header("Host", self.host.to_owned())
-            .header("Accept-Encoding", "gzip, deflate")
-            .header("Connection", "Close");
-        let mut content_type =
-            String::from("application/soap+xml; charset=utf-8");
-        let action = msg.to_string();
-        if !action.is_empty() {
-            content_type.push_str(&format!("; action=\"{}\"", action));
-            builder = builder.header("SOAPAction", action);
+        if path.is_empty() {
+            return Err(Error::NotFound)?;
         }
-        builder = builder.header("Content-Type", content_type);
-        let req = builder.body(envelope.to_owned())?;
 
-        log::debug!("Sending request: {req:#?}");
-
-        let res = sender.send_request(req).await?;
-
-        parse_response(res).await
+        soap::send(self.host.clone(), path, msg.to_string(), envelope).await
     }
 
+    /// Send an ONVIF operation to the device
+    /// Fetches the service address and media ProfileToken if needed
     async fn send_onvif(
         &mut self,
-        mut msg: OnvifOperation,
-    ) -> Result<OnvifOperation> {
+        mut msg: OnvifOperation<'_>,
+    ) -> Result<OnvifOperation<'_>> {
         self.get_and_store_xaddrs(&msg).await?;
         self.get_and_store_media_profile(&mut msg).await?;
         let res_bytes = self.send_message(msg).await?;
 
-        let body = &String::from_utf8(res_bytes)
-            .map_err(|_| Error::UnexpectedResponse)?;
-        log::debug!("response from device: {body:?}");
-
-        let decoded = body.parse()?;
+        let decoded = OnvifOperation::try_from(res_bytes)?;
         log::debug!("decoded message from device: {decoded:#?}");
 
         Ok(decoded)
     }
 
-    /// Send an ONVIF PTZ command to a camera
+    /// Send a PTZ command to a camera
     pub async fn send_ptz(&mut self, ptz: (f64, f64, f64)) -> Result<()> {
         let profile = self.get_device_state().await.media_profile;
 
         // Round near-stop to exactly 0.0
-        let op = if is_stop(Some(ptz)) {
+        let op = if Self::is_stop(Some(ptz)) {
             // NOTE: some cameras send a StopResponse but still don't stop
             // Most compatible option is just PTZ (0, 0, 0)
             OnvifOperation::ContinuousMove(profile, 0.0, 0.0, 0.0)
@@ -975,9 +687,5 @@ impl<'a> OnvifMessenger<'a> {
         self.send_onvif(op).await?;
 
         Ok(())
-    }
-
-    pub async fn _get_datetime(&mut self) -> Result<OnvifOperation> {
-        self.send_onvif(OnvifOperation::GetSystemDateAndTime).await
     }
 }
