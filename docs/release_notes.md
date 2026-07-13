@@ -1,5 +1,14 @@
 # IRIS 5.x Release Notes
 
+5.87.0 (13 Jul 2026)
+ - Add `hashtag` to MsgLine (replacing `prototype` from MsgPattern), more
+   flexible and easier to manage
+ - Fix honeybee DB notification starvation, which could cause long lag times
+   for Web UI client updates
+ - Web UI: add encoder type cards
+ - Web UI: add message line cards
+ - Web UI: improved "create" card / name logic
+
 5.86.0 (15 Jun 2026)
  - Add Max-Pressure meter algorithm
  - Add phase action setup UI (Java)
