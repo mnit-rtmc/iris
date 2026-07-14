@@ -14,7 +14,7 @@ env_logger.workspace = true
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["http1", "client-legacy", "tokio"] }
 hyper = { version = "1.8", features = ["client", "http1"] }
-hyper-tls = "0.6"
+hyper-rustls = { version = "0.27.9", features = ["webpki-roots"] }
 jiff.workspace = true
 log.workspace = true
 resin = { path = "../resin" }
