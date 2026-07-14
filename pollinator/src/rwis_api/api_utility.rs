@@ -11,7 +11,7 @@ struct Auth {
 }
 
 pub struct ApiUtility {
-    client: http::HttpsClient,
+    client: http::Client,
     username: String,
     password: String,
     auth: Option<Auth>,
@@ -23,11 +23,7 @@ pub struct ApiUtility {
 
 impl ApiUtility {
     /** Request new authorization tokens from the API */
-    async fn get_auth(
-        client: http::HttpsClient,
-        u: &str,
-        p: &str,
-    ) -> Result<Auth> {
+    async fn get_auth(client: http::Client, u: &str, p: &str) -> Result<Auth> {
         let body = format!(
             "{{ \
                 \"username\": \"{u}\", \
@@ -50,11 +46,14 @@ impl ApiUtility {
         password: &str,
         organization_id: &str,
     ) -> Self {
-        let mut c = http::HttpsClient::new(base_url);
+        let mut c = http::Client::new_tls(base_url);
         let a_res = Self::get_auth(c.clone(), username, password).await;
         let a_opt = match a_res {
             Ok(a) => {
-                c.set_bearer_token(a.access_token.clone());
+                c.set_bearer_token(format!(
+                    "Bearer {}",
+                    a.access_token.clone()
+                ));
                 Some(a)
             }
             Err(_) => None,
@@ -87,7 +86,8 @@ impl ApiUtility {
         let a =
             Self::get_auth(self.client.clone(), &self.username, &self.password)
                 .await?;
-        self.client.set_bearer_token(a.access_token.clone());
+        self.client
+            .set_bearer_token(format!("Bearer {}", a.access_token.clone()));
         self.auth = Some(a);
         Ok(())
     }
