@@ -924,7 +924,7 @@ dependencies = [
  "http",
  "httpdate",
  "mime",
- "sha1",
+ "sha1 0.10.6",
 ]
 
 [[package]]
@@ -959,20 +959,26 @@ dependencies = [
  "argh",
  "axum",
  "axum-extra",
+ "base64",
  "bb8",
  "bb8-postgres",
+ "chrono",
  "cidr",
  "env_logger",
  "futures",
  "headers",
  "heck",
  "http",
+ "http-body-util",
+ "hyper",
+ "hyper-util",
  "loam",
  "log",
  "ntcip",
  "percent-encoding",
  "pointy",
  "postgres-types",
+ "rand 0.10.2",
  "rendzina",
  "resin",
  "resources",
@@ -980,6 +986,7 @@ dependencies = [
  "rustls",
  "serde",
  "serde_json",
+ "sha1 0.11.0",
  "squarepeg",
  "thiserror",
  "time",
@@ -991,6 +998,7 @@ dependencies = [
  "tower-sessions",
  "tower-sessions-moka-store",
  "whoami",
+ "xml",
 ]
 
 [[package]]
@@ -2061,6 +2069,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sha1"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aacc4cc499359472b4abe1bf11d0b12e688af9a805fa5e3016f9a386dc2d0214"
+dependencies = [
+ "cfg-if",
+ "cpufeatures 0.3.0",
+ "digest 0.11.3",
+]
+
+[[package]]
 name = "sha2"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2500,7 +2519,7 @@ dependencies = [
  "httparse",
  "log",
  "rand 0.9.4",
- "sha1",
+ "sha1 0.10.6",
  "thiserror",
  "utf-8",
 ]
@@ -2894,6 +2913,12 @@ name = "wit-bindgen"
 version = "0.57.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
+
+[[package]]
+name = "xml"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "636f85e5ca6488e96401b61eb7de54f4e44755c988af0f52cf90230c312a1a89"
 
 [[package]]
 name = "zerocopy"

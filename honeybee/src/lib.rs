@@ -23,14 +23,17 @@ mod event;
 mod files;
 mod honey;
 mod listener;
+mod onvif;
 mod permission;
 mod query;
 mod resource;
 mod segments;
 mod signmsg;
+mod soap;
 pub mod sonar;
 mod tls;
 mod xff;
+mod xml;
 
 pub use error::{Error, Result};
 pub use honey::Honey;

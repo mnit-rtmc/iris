@@ -17,6 +17,7 @@ use crate::cred::Credentials;
 use crate::domain;
 use crate::error::{Error, Result};
 use crate::event::{self, EventTp};
+use crate::onvif::OnvifMessenger;
 use crate::permission;
 use crate::query;
 use crate::sonar::{Messenger, Name};
@@ -27,7 +28,7 @@ use axum::extract::{ConnectInfo, Json, Path as AxumPath, Query, State};
 use axum::http::{StatusCode, header};
 use axum::response::sse::{Event, KeepAlive};
 use axum::response::{IntoResponse, Sse};
-use axum::routing::get;
+use axum::routing::{get, patch};
 use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
@@ -226,6 +227,7 @@ impl Honey {
             .merge(notify_resource(self.clone()))
             .merge(other_resource(self.clone()))
             .merge(other_object(self.clone()))
+            .merge(route_direct(self.clone()))
             .layer(session_layer)
     }
 
@@ -922,6 +924,92 @@ fn other_object(honey: Honey) -> Router {
             "/{type_n}/{obj_n}",
             get(handle_get).patch(handle_patch).delete(handle_delete),
         )
+        .with_state(honey)
+}
+
+/// Build 'direct' route (skip IRIS server/SONAR)
+/// Use only for non-DB actions
+fn route_direct(honey: Honey) -> Router {
+    /// Handle `PATCH` request
+    async fn handle_patch(
+        session: Session,
+        State(honey): State<Honey>,
+        AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
+        params: Query<QueryParams>,
+        Json(attrs): Json<Map<String, Value>>,
+    ) -> Resp0 {
+        log::info!("PATCH direct/{type_n}/{obj_n} {params:?}");
+
+        let nm = Name::new(&type_n)?.obj(&obj_n)?;
+        if nm.res_type != Res::Camera {
+            // Only allow direct routing for cameras
+            Err(StatusCode::UNSUPPORTED_MEDIA_TYPE)?
+        }
+        let ck_nm = check_name(&type_n, &obj_n, &params.0)?;
+        let obj_n = nm.object_n().ok_or(Error::InvalidValue)?;
+        let cred = Credentials::load(&session).await?;
+        // At least Operate access needed
+        let access = honey
+            .name_access(cred.user(), &ck_nm, Access::Operate)
+            .await?;
+        for key in attrs.keys() {
+            let attr = &key[..];
+            let required = Access::required_patch(ck_nm.res_type, attr);
+            access.check(required)?;
+        }
+
+        // TODO: store connection in State? (or Session?)
+        if let (Some(Value::Array(ptz_val)), Some(Value::String(uri))) =
+            (attrs.get("ptz"), attrs.get("uri"))
+            && ptz_val.len() == 3
+        {
+            let ptz: (f64, f64, f64) = (
+                ptz_val[0].as_f64().ok_or(Error::InvalidValue)?,
+                ptz_val[1].as_f64().ok_or(Error::InvalidValue)?,
+                ptz_val[2].as_f64().ok_or(Error::InvalidValue)?,
+            );
+
+            let mut onvif =
+                OnvifMessenger::new(uri, 80, "", "", &session).await?;
+
+            if onvif.should_send(Some(ptz)).await {
+                onvif.update_pending(true).await;
+                if !onvif.get_user_pass_from_store().await {
+                    // User and pass still empty, fetch from DB into session
+                    let cs = get_by_pkey(&honey.db, query::CAMERA_ONE, &obj_n)
+                        .await?;
+                    let camera = serde_json::from_str::<Value>(&cs)
+                        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+                    let con_name = camera["controller"]
+                        .as_str()
+                        .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
+
+                    let cons = get_by_pkey(
+                        &honey.db,
+                        query::CONTROLLER_ONE,
+                        &con_name,
+                    )
+                    .await?;
+                    let controller = serde_json::from_str::<Value>(&cons)
+                        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+                    let password =
+                        controller["password"].as_str().unwrap_or("");
+                    let userpass = password.split_once(":").unwrap_or(("", ""));
+                    onvif.set_user_pass(userpass.0, userpass.1).await;
+                }
+
+                onvif.send_ptz(ptz).await?;
+                onvif.update_pending(false).await;
+            } else {
+                // Don't 429 here; rapid requests are expected
+                log::debug!("Skipped PTZ: {ptz:?}");
+            }
+        }
+        Ok(StatusCode::NO_CONTENT)
+    }
+
+    Router::new()
+        .route("/direct/{type_n}/{obj_n}", patch(handle_patch))
         .with_state(honey)
 }
 

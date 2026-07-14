@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, footer_html, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_one, uri_one_direct};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::encodertype::EncoderType;
@@ -19,6 +19,7 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::LocAnc;
 use crate::item::ItemState;
+use crate::joystick;
 use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
@@ -200,11 +201,15 @@ impl Camera {
         {
             speed = s;
         }
-        let uri = uri_one(Res::Camera, &self.name);
+        let uri = self.enc_address.as_deref().unwrap_or("No enc_address");
         let mut fields = Fields::new();
         fields.insert_arr("ptz", vec![pan * speed, tilt * speed, zoom * speed]);
+        fields.insert_str("uri", uri);
         let value = fields.into_value().to_string();
-        vec![Action::Patch(uri, value.into())]
+        vec![Action::Patch(
+            uri_one_direct(Res::Camera, &self.name),
+            value.into(),
+        )]
     }
 
     /// Send focus stop command action
@@ -331,7 +336,17 @@ impl Camera {
             .r#type("button")
             .cdata("←")
             .close();
-        row.span().id("ptz-joystick").close();
+        let uri = self.enc_address.as_deref().unwrap_or("No enc_address");
+        let mut fields_direct = String::from("");
+        fields_direct.push_str(&format!(",\"uri\":\"{}\"", uri));
+        joystick::create_joy(
+            &mut row.div(),
+            "ptz-joystick",
+            Res::Camera.as_str(),
+            &self.name,
+            "{\"ptz\":[{},{},0.0]{}}",
+            &fields_direct,
+        );
         row.button().id("ptz-pan-right").r#type("button").cdata("→");
         row.close();
         row = div.div();
