@@ -15,7 +15,8 @@ use http_body_util::{BodyExt, Empty};
 use hyper::body::Incoming;
 use hyper::header::{AUTHORIZATION, HeaderValue};
 use hyper::{Request, Response, Uri};
-use hyper_tls::HttpsConnector;
+use hyper_rustls::HttpsConnectorBuilder;
+use hyper_util::client::legacy::Client as HyperClient;
 use hyper_util::rt::{TokioExecutor, TokioIo};
 use resin::{Error, Result};
 use tokio::net::TcpStream;
@@ -129,10 +130,13 @@ impl HttpsClient {
         let uri = format!("https://{host}/{path}").parse::<Uri>()?;
         log::debug!("HTTPS GET to {uri}");
 
-        let https = HttpsConnector::new();
-        let client =
-            hyper_util::client::legacy::Client::builder(TokioExecutor::new())
-                .build::<_, _>(https);
+        let https = HttpsConnectorBuilder::new()
+            .with_native_roots()
+            .unwrap_or(HttpsConnectorBuilder::new().with_webpki_roots())
+            .https_only()
+            .enable_http1()
+            .build();
+        let client = HyperClient::builder(TokioExecutor::new()).build(https);
 
         let mut req = Request::get(uri);
         if let Some(token) = &self.bearer_token {
@@ -154,10 +158,13 @@ impl HttpsClient {
         let uri = format!("https://{host}/{path}").parse::<Uri>()?;
         log::debug!("HTTPS POST to {uri}");
 
-        let https = HttpsConnector::new();
-        let client =
-            hyper_util::client::legacy::Client::builder(TokioExecutor::new())
-                .build::<_, _>(https);
+        let https = HttpsConnectorBuilder::new()
+            .with_native_roots()
+            .unwrap_or(HttpsConnectorBuilder::new().with_webpki_roots())
+            .https_only()
+            .enable_http1()
+            .build();
+        let client = HyperClient::builder(TokioExecutor::new()).build(https);
 
         let req = Request::post(uri)
             .header("content-type", "application/json")
