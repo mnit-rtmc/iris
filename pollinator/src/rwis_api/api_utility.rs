@@ -163,11 +163,11 @@ impl ApiUtility {
         let datastreams = self.list_datastreams().await;
         let mut res = Ok(json!({}));
         if let Ok(ds) = datastreams {
-            for d in ds.as_array().unwrap() {
+            for d in ds.as_array().cloned().iter().flatten() {
                 if d["asset_id"] == json!(asset_id)
                     && d["metadata"]["field"] == json!(datastream_name)
+                        && let Some(id) = d["id"].as_str()
                 {
-                    let id = d["id"].as_str().unwrap();
                     if let Ok(data) = self.last_datapoint(id).await {
                         res = Ok(data["data"][0]["value"].clone());
                         break;

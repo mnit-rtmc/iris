@@ -14,18 +14,18 @@ pub async fn run(db: Option<Database>) -> Result<()> {
     // Host with no trailing slash
     let host = props
         .get("campbellcloud.host")
-        .expect("campbellcloud.host not set in properties");
+        .ok_or(Error::InvalidConfig("campbellcloud.host not set in properties"))?;
     // Organization ID for use with API
     let organization_id = props
         .get("campbellcloud.org_id")
-        .expect("campbellcloud.org_id not set in properties");
+        .ok_or(Error::InvalidConfig("campbellcloud.org_id not set in properties"))?;
     // Credentials for account with access to the organization/API
     let username = props
         .get("campbellcloud.user")
-        .expect("campbellcloud.user not set in properties");
+        .ok_or(Error::InvalidConfig("campbellcloud.user not set in properties"))?;
     let api_password = props
         .get("campbellcloud.pass")
-        .expect("campbellcloud.pass not set in properties");
+        .ok_or(Error::InvalidConfig("campbellcloud.pass not set in properties"))?;
     let mut api_util = api_utility::ApiUtility::new(
         host,
         username,
@@ -51,13 +51,8 @@ pub async fn run(db: Option<Database>) -> Result<()> {
         }
 
         // Then push them at same time
-        if let Err(e) = insert_samples(&client, samples).await {
-            panic!("{}", e);
-        }
-        match insert_fails(&client, fails).await {
-            Ok(_) => return Ok(()),
-            Err(e) => panic!("{}", e),
-        }
+        insert_samples(&client, samples).await?;
+        insert_fails(&client, fails).await?;
     }
     Ok(())
 }
@@ -65,7 +60,7 @@ pub async fn run(db: Option<Database>) -> Result<()> {
 fn read_properties() -> HashMap<String, String> {
     let lines: Vec<String> =
         std::fs::read_to_string("/etc/iris/iris-server.properties")
-            .unwrap()
+            .unwrap_or(String::new())
             .lines()
             .map(String::from)
             .collect();
@@ -133,7 +128,7 @@ async fn build_sample_json(
             if rh.is_f64() {
                 s.insert(
                     String::from("relative_humidity"),
-                    (rh.as_f64().unwrap() as i64).into(),
+                    (rh.as_f64()? as i64).into(),
                 );
                 changed = true;
             } else {
