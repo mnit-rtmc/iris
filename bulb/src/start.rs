@@ -753,7 +753,9 @@ fn add_joystick_listener(el: &Element) -> Result<()> {
                         mouse_event.y(),
                     ));
                 }
-            } else if target.class_name() == "joystick" {
+            } else if Some("joystick")
+                == target.get_attribute("class").as_deref()
+            {
                 spawn_future(joystick::handle_mouse_event(
                     target.id(),
                     type_,
