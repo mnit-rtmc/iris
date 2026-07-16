@@ -45,8 +45,8 @@ struct AppState {
     selected_item: Option<(Res, String)>,
     /// Card list
     cards: Option<CardList>,
-    /// Selected video monitor number
-    mon_num: Option<u32>,
+    /// Selected video monitor name
+    vid_mon: Option<String>,
     /// Deferred actions (with tick number)
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
@@ -162,14 +162,14 @@ pub fn expanded_view() -> Option<CardView> {
     })
 }
 
-/// Set video monitor number in global app state
-pub fn set_mon_num(num: Option<u32>) {
-    STATE.with(|rc| rc.borrow_mut().mon_num = num);
+/// Set video monitor in global app state
+pub fn set_vid_mon(vm: Option<String>) {
+    STATE.with(|rc| rc.borrow_mut().vid_mon = vm);
 }
 
-/// Get video monitor number from global app state
-pub fn mon_num() -> Option<u32> {
-    STATE.with(|rc| rc.borrow().mon_num)
+/// Get video monitor from global app state
+pub fn vid_mon() -> Option<String> {
+    STATE.with(|rc| rc.borrow().vid_mon.clone())
 }
 
 /// Defer action to a future time

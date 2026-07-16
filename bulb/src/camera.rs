@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::app;
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_one, uri_one_direct};
 use crate::cio::{ControllerIo, ControllerIoAnc};
@@ -18,6 +19,7 @@ use crate::encodertype::EncoderType;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::LocAnc;
+use crate::helper::spawn_future;
 use crate::item::ItemState;
 use crate::joystick;
 use crate::start::select_item_map;
@@ -486,11 +488,15 @@ impl Camera {
         if let Some((lon, lat)) = anc.loc.lonlat() {
             select_item_map(Res::Camera, &self.name, lon, lat);
         }
-        // FIXME: set selected video monitor to this camera
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
-
         let mut div = tree.root::<html::Div>();
+        div.class("no-display");
+        div.button().id("switch-monitor").r#type("button");
+        spawn_future(dispatch_switch_monitor());
+        div.close();
+
+        div = tree.root::<html::Div>();
         div.class("row");
         anc.cio.item_states(self).spans(&mut div.span());
         if let Some(num) = self.cam_num {
@@ -533,6 +539,19 @@ impl Camera {
         let value = fields.into_value().to_string();
         let mut actions = Vec::with_capacity(1);
         actions.push(Action::Patch(uri, value.into()));
+        actions
+    }
+
+    /// Switch the selected monitor to this camera
+    fn switch_monitor(&self) -> Vec<Action> {
+        let mut actions = Vec::with_capacity(1);
+        if let Some(nm) = app::vid_mon() {
+            let uri = uri_one(Res::VideoMonitor, &nm);
+            let mut fields = Fields::new();
+            fields.insert_str("camera", &self.name);
+            let value = fields.into_value().to_string();
+            actions.push(Action::Patch(uri, value.into()));
+        }
         actions
     }
 
@@ -648,6 +667,14 @@ impl Camera {
     }
 }
 
+/// Dispatch a click event from `switch-monitor` button
+async fn dispatch_switch_monitor() -> Result<()> {
+    if let Some(btn) = Doc::get().opt_elem::<HtmlElement>("switch-monitor") {
+        btn.click();
+    }
+    Ok(())
+}
+
 impl ControllerIo for Camera {
     /// Get controller name
     fn controller(&self) -> Option<&str> {
@@ -757,6 +784,7 @@ impl Card for Camera {
             }
         }
         match id {
+            "switch-monitor" => self.switch_monitor(),
             "focus-auto" => self.device_req(DeviceReq::CameraFocusAuto),
             "iris-auto" => self.device_req(DeviceReq::CameraIrisAuto),
             "camera-wiper" => self.device_req(DeviceReq::CameraWiperOneShot),

@@ -150,13 +150,10 @@ impl VideoMonitor {
 
     /// Set this card as the selected video monitor
     fn set_selected(&self) {
-        app::set_mon_num(Some(self.mon_num));
-        let mon_num = match app::mon_num() {
-            Some(num) => format!("📺 #{num}"),
-            None => "📺".to_string(),
-        };
+        app::set_vid_mon(Some(self.name.clone()));
         if let Ok(t) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
-            t.set_inner_html(&mon_num);
+            let num = format!("📺 #{}", self.mon_num);
+            t.set_inner_html(&num);
         }
     }
 
