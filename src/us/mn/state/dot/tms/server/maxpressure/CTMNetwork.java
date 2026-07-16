@@ -91,7 +91,7 @@ public class CTMNetwork {
             int n = Math.min(ncells, inc.cells.length);
             
             for(int i = 0; i < n; i++){
-                total += inc.cells[inc.cells.length-1-i].n;
+                total += inc.cells[inc.cells.length-1-i].getOccupancy();
             }
             
             ncells -= n;
@@ -300,9 +300,7 @@ public class CTMNetwork {
     */
    public void simulateLastTimestep(long stamp, int PERIOD_MS){
         int num_steps = (int)Math.round(STEP_SECONDS / CTM_DT);
-
-        //String before_occ = "before occ "+getTotalOccupancy()+" "+getDetOccupancy(stamp-PERIOD_MS, PERIOD_MS);
-
+        
         for(SimLink l : links){
             l.prepare(stamp, PERIOD_MS);
         }
@@ -326,7 +324,7 @@ public class CTMNetwork {
             }
 
         }
-       
+        
         // clean up process
         // 1) propagate excess removed flow backwards
         // 2) move excess entering flow to mainline if possible

@@ -23,10 +23,8 @@ import us.mn.state.dot.tms.server.MaxPressureAlgorithm;
  * @author Michael Levin
  */
 public class Cell {
-    protected double n, y;
+    private double n, y;
     private CTMLink link;
-    
-    protected double cc;
 
     public Cell(CTMLink link){
         this.link = link;
@@ -56,6 +54,15 @@ public class Cell {
     public double getMaxOccupancy(){
         return link.K * link.cell_len;
     }
+    
+    public double getOccupancy()
+    {
+        return n;
+    }
+    
+    public void addOccupancy(double add){
+        n = Math.max(0, n + add);
+    }
 
     public void addFlow(double y)
     {
@@ -67,13 +74,10 @@ public class Cell {
         this.y -= y;
     }
 
-
     public void update()
     {
-        n += y;
+        n = Math.max(0, n + y);
         y = 0;
-        
-        cc += y;
     }
 
     public double getDensity(){

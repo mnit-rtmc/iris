@@ -57,8 +57,8 @@ public class CTMLink extends SimLink {
     
     public void propagateExcessRemovedFlow(double y){
         for(int i = cells.length-1; i >= 0; i--){
-            double removed = Math.min(y, cells[i].n);
-            cells[i].n -= removed;
+            double removed = Math.min(y, cells[i].getOccupancy());
+            cells[i].addOccupancy(-removed);
             
             y -= removed;
             
@@ -87,8 +87,8 @@ public class CTMLink extends SimLink {
         double total_added = 0;
         
         for(int i = 0; i < cells.length; i++){
-            double added = Math.min(y, cells[i].getMaxOccupancy() - cells[i].n);
-            cells[i].n += added;
+            double added = Math.min(y, cells[i].getMaxOccupancy() - cells[i].getOccupancy());
+            cells[i].addOccupancy(added);
             
             total_added += added;
             y -= added;
@@ -108,7 +108,7 @@ public class CTMLink extends SimLink {
         double total_n = 0;
 
         for(Cell c : cells){
-            total_n += c.n;
+            total_n += c.getOccupancy();
         }
 
         return total_n;
@@ -119,18 +119,37 @@ public class CTMLink extends SimLink {
     }
 
     public void addFlow(double y){
-        cells[0].n += y;
+        cells[0].addOccupancy(y);
     }
 
     public void removeFlow(double y){
-        cells[cells.length-1].n -= y;
+        int idx = cells.length-1;
+
+        // if y > occupancy, propagate backwards
+        while(y > EPSILON && idx >= 0){
+            
+            Cell cell = cells[idx];
+            double remove = Math.min(y, cell.getOccupancy());
+
+            cell.addOccupancy(-remove);
+            y -= remove;
+            
+            idx --;
+        }
+        
+        // if y > 0 still after removing from all cells of this link, attempt to go to upstream link
+        // use the existing propagate excess removed flow method
+        if(y > EPSILON){
+            this.start.propagateExcessRemovedFlow(y);
+        }
+        
     }
     
     public double getCleanupMaxAdd(){
         double total = 0;
         
         for(Cell c : cells){
-            total += c.getMaxOccupancy() - c.n;
+            total += c.getMaxOccupancy() - c.getOccupancy();
         }
         return total;
     }
@@ -139,7 +158,7 @@ public class CTMLink extends SimLink {
         double total = 0;
         
         for(Cell c : cells){
-            total += c.n;
+            total += c.getOccupancy();
         }
         return total;
     }

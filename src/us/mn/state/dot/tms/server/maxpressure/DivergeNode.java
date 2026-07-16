@@ -66,12 +66,14 @@ public class DivergeNode extends SimNode {
         // no diverge model here: out_ramp tells us how much flow exits
         double y_exit = out_ramp.getReceivingFlow();
         
+        // we always remove y_exit. This is additional flow removed.
         double S = Math.max(0, inc.getSendingFlow()-y_exit);
         double R = out_mainline.getReceivingFlow();
         
         double y = Math.min(S, R);
         inc.removeFlow(y + y_exit);
         out_mainline.addFlow(y);
+        out_ramp.addFlow(y_exit);
     }
     
 }
