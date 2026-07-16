@@ -27,8 +27,6 @@ use resin::{Error, Result};
 pub struct Client {
     /// URI address
     uri: String,
-    /// If Client is TLS
-    scheme: String,
     /// Bearer token
     bearer_token: Option<String>,
 }
@@ -39,40 +37,42 @@ impl Client {
         let uri = uri.to_string();
         Client {
             uri,
-            scheme: "http".to_owned(),
             bearer_token: None,
         }
     }
 
-    /// Make a new HTTPS client
-    pub fn new_tls(uri: &str) -> Self {
-        let uri = uri.to_string();
-        Client {
-            uri,
-            scheme: "https".to_owned(),
-            bearer_token: None,
-        }
-    }
-
-    /// Get host and port of URI
-    pub fn hostport(&self) -> Result<String> {
+    /// Get scheme of URI
+    pub fn scheme(&self) -> Result<String> {
         let uri = self.uri.parse::<Uri>()?;
-        let mut hostport =
-            uri.host().ok_or(Error::InvalidConfig("host"))?.to_string();
-
-        if self.scheme == "https" {
-            return Ok(hostport);
+        match uri.scheme_str() {
+            Some(scheme) => Ok(scheme.to_string()),
+            None => Ok("http".to_string()),
         }
-
-        let port = uri.port_u16().unwrap_or(80);
-        hostport.push_str(&format!(":{port}"));
-        Ok(hostport)
     }
 
-    /// Build URI from path
+    /// Get host of URI
+    pub fn host(&self) -> Result<String> {
+        let uri = self.uri.parse::<Uri>()?;
+        let host = uri.host().ok_or(Error::InvalidConfig("host"))?.to_string();
+        Ok(host)
+    }
+
+    /// Get port of URI
+    pub fn port(&self) -> Result<u16> {
+        let uri = self.uri.parse::<Uri>()?;
+        let port = uri.port_u16().unwrap_or_else(|| match uri.scheme_str() {
+            Some("https") | Some("wss") => 443,
+            _ => 80,
+        });
+        Ok(port)
+    }
+
+    /// Build URI from path, including required parts
     pub fn uri(&self, path: &str) -> Result<Uri> {
-        let hostport = self.hostport()?;
-        Ok(format!("{}://{hostport}/{path}", self.scheme).parse::<Uri>()?)
+        let scheme = self.scheme()?;
+        let host = self.host()?;
+        let port = self.port()?;
+        Ok(format!("{scheme}://{host}:{port}/{path}").parse::<Uri>()?)
     }
 
     /// Set bearer token
@@ -84,16 +84,13 @@ impl Client {
     pub async fn get(&self, path: &str) -> Result<Vec<u8>> {
         let uri = self.uri(path)?;
         log::debug!("GET {uri}");
-
         let client = build_client();
-
         let mut builder = Request::get(uri);
         if let Some(token) = &self.bearer_token {
             builder =
                 builder.header(AUTHORIZATION, HeaderValue::from_str(token)?);
         }
         let req = builder.body(Empty::<Bytes>::new())?;
-
         let res = client.request(req).await?;
         let body = parse_response(res).await?;
         Ok(body)
@@ -103,9 +100,7 @@ impl Client {
     pub async fn post(&self, path: &str, body: &str) -> Result<Vec<u8>> {
         let uri = self.uri(path)?;
         log::debug!("POST {uri}");
-
         let client = build_client();
-
         let req = Request::post(uri)
             .header("content-type", "application/json")
             .body(body.to_string())?;
@@ -134,6 +129,7 @@ async fn parse_response(mut res: Response<Incoming>) -> Result<Vec<u8>> {
     Ok(body)
 }
 
+/// Build Hyper client
 fn build_client<B: Body + std::marker::Send>()
 -> HyperClient<HttpsConnector<HttpConnector>, B>
 where
@@ -146,6 +142,5 @@ where
         .https_or_http()
         .enable_http1()
         .build();
-
     HyperClient::builder(TokioExecutor::new()).build(https)
 }

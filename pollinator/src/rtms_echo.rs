@@ -286,8 +286,9 @@ impl Sensor {
     /// Collect vehicle data
     async fn collect_vehicle_data(&mut self) -> Result<()> {
         let per = self.link.per_s();
-        let hostport = self.client.hostport()?;
-        let req = format!("ws://{hostport}/api/v1/live-vehicle-data")
+        let host = self.client.host()?;
+        let port = self.client.port()?;
+        let req = format!("ws://{host}:{port}/api/v1/live-vehicle-data")
             .into_client_request()?;
         let (stream, res) = connect_async(req).await?;
         match res.into_body() {

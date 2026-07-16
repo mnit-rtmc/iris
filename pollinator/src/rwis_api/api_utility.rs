@@ -46,7 +46,7 @@ impl ApiUtility {
         password: &str,
         organization_id: &str,
     ) -> Self {
-        let mut c = http::Client::new_tls(base_url);
+        let mut c = http::Client::new(base_url);
         let a_res = Self::get_auth(c.clone(), username, password).await;
         let a_opt = match a_res {
             Ok(a) => {
