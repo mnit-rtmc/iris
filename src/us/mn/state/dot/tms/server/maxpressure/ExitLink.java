@@ -52,6 +52,8 @@ public class ExitLink extends SimLink {
         exited = det.getVehCount(stamp, PERIOD_MS);
         actual_exited = 0;
         
+        // 0 out queue, if queue was for some reason leftover from last 30 seconds.
+        queue = 0;
         
         if(exited >= 0){
             

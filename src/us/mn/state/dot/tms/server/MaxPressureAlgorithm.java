@@ -126,16 +126,22 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
     /** Ratio for target storage to max storage */
     static private final float STORAGE_TARGET_RATIO = 0.75f;
 
+    /** Jam density (vehicles / mile) */
+    static private final int K_JAM = 180;
+
+    /** Ramp queue jam density (vehicles / mile) */
+    static private final int K_JAM_RAMP = 140;
+
     /* this needs to be updated */
-    static private final double AVG_VEH_LEN = 27.6;
+    static private final double AVG_VEH_LEN = FEET_PER_MILE / K_JAM;
 
     static private final int NUM_PRESSURE_INTERVAL = 10;
-
+    
     // jam density
-    static private final double K = SUMO? 119.1 * 1.609 : AVG_VEH_LEN;
+    static private final double K = SUMO? 119.1 * 1.609 : (float) K_JAM;
 
     /** Ramp queue jam density (vehicles per foot) */
-    static private final float JAM_VPF = (float) K / FEET_PER_MILE;
+    static private final float JAM_VPF = (float) K_JAM_RAMP / FEET_PER_MILE;
 
     /** Calculate the number of steps for an interval */
     static private int steps(int seconds) {
@@ -241,12 +247,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
     private Node createNode(R_NodeImpl rnode, float mile) {
         switch (R_NodeType.fromOrdinal(rnode.getNodeType())) {
         case ENTRANCE:
-            // I was getting duplicates because there's the start of the on-ramp and the merge point that could both be labeled as 'entrance'
-            if (rnode.getSamplerSet().filter(LaneCode.MERGE).size() > 0) {
-                return new EntranceNode(rnode, mile);
-            } else {
-                break;
-            }
+            return new EntranceNode(rnode, mile);
         case STATION:
             StationImpl stat = rnode.getStation();
             if (stat != null && stat.getActive())
@@ -329,7 +330,8 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
                     return en;
             }
         }
-        if (ALG_LOG.isOpen()) {
+        if (ALG_LOG.isOpen()) 
+        {
             log("Entrance " + rnode.getName() + " for " +
                 meter.getName() + " not found");
         }
@@ -536,6 +538,23 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         /** Queue demand history (vehicles / hour) */
         private final BoundedSampleHistory demand_hist =
             new BoundedSampleHistory(steps(300));
+        
+        /** Seconds to average segment density for start metering check */
+        static private final int START_SECS = 120;
+
+        /** Seconds to average segment density for stop metering check */
+        static private final int STOP_SECS = 600;
+
+        /** Seconds to average segment density for restart metering check */
+        static private final int RESTART_SECS = 300;
+        
+        /** Maximum number of time steps needed for sample history */
+        static private final int MAX_STEPS = steps(Math.max(Math.max(START_SECS,
+            STOP_SECS), RESTART_SECS));
+        
+        /** Ramp passage history (vehicles / hour) */
+        private final BoundedSampleHistory passage_hist =
+            new BoundedSampleHistory(MAX_STEPS);
 
         /** Cumulative green count (vehicles) */
         private int green_accum = 0;
@@ -817,6 +836,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
                 // these are copied by k-adaptive and used to determine the minimum metering rate
                 checkQueueBackedUp();
                 checkQueueEmpty();
+                updatePassageState();
                 updateDemandState();
 
                 min_rate = filterRate((int)MIN_RATE);
@@ -829,6 +849,47 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
                 log(ex.toString());
             }
         }
+        
+        /** Update ramp passage output state */
+        private void updatePassageState() {
+            int passage_vol = calculatePassageCount();
+            passage_hist.push(flowRate(passage_vol));
+
+            if (passage_vol >= 0)
+                passage_accum += passage_vol;
+            else
+                passage_good = false;
+            int green_vol = green.getVehCount(stamp, PERIOD_MS);
+            if (green_vol > 0)
+                green_accum += green_vol;
+        }
+        
+        /** Get historical passage flow.
+        * @param step Time step in past (0 for current).
+        * @param secs Number of seconds to average.
+        * @return Passage flow at 'step' time steps ago. */
+       private Double getPassage(int step, int secs) {
+            return passage_hist.average(step, steps(secs));
+       }
+        
+        /** Calculate passage count (vehicles).
+        * @return Passage vehicle count */
+        private int calculatePassageCount() {
+            int vol = passage.getVehCount(stamp, PERIOD_MS);
+            if (vol >= 0)
+                return vol;
+            vol = merge.getVehCount(stamp, PERIOD_MS);
+            if (vol >= 0) {
+                int b = bypass.getVehCount(stamp, PERIOD_MS);
+                if (b > 0) {
+                    vol -= b;
+                    if (vol < 0)
+                        return 0;
+                }
+                return vol;
+            }
+            return MISSING_DATA;
+       }
 
         /** Check the queue backed-up state */
         private void checkQueueBackedUp() {
@@ -909,7 +970,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
          * @return Available storage (vehicles, may be negative). */
         private float availableStorage() {
             if (passage_good) {
-                float q_len = Math.max(queueLength(), 0);
+                float q_len = Math.max(estimateQueueLength(), 0);
                 return maxStorage() - q_len;
             } else
                 return maxStorage() / 3;
@@ -918,14 +979,71 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         /** Estimate demand overcount when queue is empty.
          * @return Vehicle overcount at queue detector (may be negative). */
         private float estimateDemandOvercount() {
-            return queueRatio(queue_empty_secs) * queueLength();
+            return queueRatio(queue_empty_secs) * estimateQueueLength();
+        }
+        
+        /**
+         * I would like to obtain the exact queue length using cumulative counts from detectors.
+         * Failing that, I will return KAdaptive's estimated queue length.
+         */
+        private float getQueueLength(long stamp){
+            float output = getCCQueueLength(stamp);
+
+            if(output >= 0){
+                return output;
+            }
+            else{
+                return estimateQueueLength();
+            }
         }
 
         /** Estimate the length of queue (vehicles).
+         * This is copied from KAdaptive queueLength().
+         * I am relabeling it as "estimate queue length" because calculating the queue length from cumulative counts is preferred.
          * @return Queue length (may be negative). */
-        private float queueLength() {
-            long stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
-            return (float) getRampQueueLength(stamp);
+        private float estimateQueueLength() {
+            return (passage_good)
+                 ? (demand_accum - passage_accum)
+                 : 0;
+        }
+        
+        /**
+         * I want to estimate the queue length as the number of vehicles in between the PASSAGE and QUEUE detectors
+            this only works if both detectors exist and are sampling properly
+            I will first check this. As a backup, I will estimate queue length using the method from KAdaptive
+            I will return -1 if I do not have good data here.
+         */
+        private float getCCQueueLength(long stamp) {
+            if(queue.isPerfect()){
+                double queuein = queue.getCumulativeCount(stamp, PERIOD_MS);
+                double queueout = -1;
+
+                // based on k-adaptive, I believe that MERGE count = PASSAGE count + BYPASS count = GREEN count + BYPASS count
+                if (passage.isPerfect()) {
+                    queueout = passage.getCumulativeCount(stamp, PERIOD_MS);
+                    
+                    if (bypass.isPerfect()) {
+                        queueout += bypass.getCumulativeCount(stamp, PERIOD_MS);
+                    }
+                }
+                else if (merge.isPerfect()) {
+                    queueout = merge.getCumulativeCount(stamp, PERIOD_MS);
+                }
+                else if (green.isPerfect()) {
+                    queueout = green.getCumulativeCount(stamp, PERIOD_MS);
+
+                    if (bypass.isPerfect()) {
+                        queueout += bypass.getCumulativeCount(stamp, PERIOD_MS);
+                    }
+                }
+                
+                if(queueout >= 0){
+                    return (float)(queuein - queueout);
+                }
+            }
+
+            return -1;
+            
         }
 
         /** Get the default target metering rate (vehicles / hour) */
@@ -949,7 +1067,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
 
         /** Check if cumulative demand is below cumulative passage */
         private boolean isDemandBelowPassage() {
-            return queueLength() < QUEUE_EMPTY_THRESHOLD;
+            return estimateQueueLength() < QUEUE_EMPTY_THRESHOLD;
         }
 
         /** Check if queue occupancy is above threshold */
@@ -1000,12 +1118,12 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
 
         /** Check if the ramp queue storage is full */
         private boolean isQueueStorageFull() {
-            return queueLength() >= targetStorage();
+            return estimateQueueLength() >= targetStorage();
         }
 
         /** Check if the meter queue is empty */
         private boolean isQueueEmpty() {
-            return queueLength() < 1;
+            return estimateQueueLength() < 1;
         }
 
         private void updateDemandState() {
@@ -1015,7 +1133,6 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             demand_accum += dem_veh;
             demand_adj = calculateDemandAdjustment();
             float adjusted_dem = Math.max(dem_veh + demand_adj, 0);
-            
             demand_hist.push(flowRate(adjusted_dem));
 
             // Recalculate demand with adjustment
@@ -1106,7 +1223,6 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             float demand_proj = demand_accum + proj_arrive;
             int req = Math.round(demand_proj - targetStorage());
             int pass_min = req - passage_accum;
-
             return flowRate(pass_min, steps(targetWaitTime()));
         }
 
@@ -1157,7 +1273,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         /** Calculate the metering rate */
         private void calculateMeteringRate() {
             network.simulateLastTimestep(stamp, PERIOD_MS);
-
+            
             long stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
 
             // need num lanes to help calculate capacities
@@ -1173,20 +1289,24 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             // weight by number of upstream lanes so that the weights are more comparable
             double c_r = 1 / 2.0; // divide by 2 because 2 ramp lanes
             double c_d = 1.0 / network.getDownstreamLanes();
-
+            
             // these are the position weights
             double downstream_weight = c_d * network.getDownstreamWeight(false);
             double ramp_weight = c_r * getRampWeight(stamp);
             double upstream_weight = c_u * network.getUpstreamWeight(false);
-
+            
             double weight_ud = upstream_weight - downstream_weight;
             double weight_rd = ramp_weight - downstream_weight;
-
+            
             int max_rate = getMaximumRate();
             int min_rate = Math.min(max_rate, Math.max(calculateMinimumRate(), getMinimumRate())); // if min rate is less than max rate for some reason, use max rate
-
+         
             int new_rate = calcBestRate(S_ud, S_rd, R_d, weight_ud, weight_rd, min_rate, max_rate);
-
+            
+            // added logging so if anything breaks, we have some idea of what was going on.
+            log(stamp+" "+meter.getName()+" weights: "+upstream_weight+" "+ramp_weight+" "+downstream_weight);
+            log("\t rate="+new_rate+" "+weight_ud+" "+weight_rd);
+            
             if (smoothing) {
                 new_rate = smoothRate(new_rate, release_rate, min_rate, max_rate);
             }
@@ -1306,7 +1426,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         }
 
         private double getRampWeight(long stamp) {
-            double ramp_n = getRampQueueLength(stamp);
+            double ramp_n = getQueueLength(stamp);
 
             // assume density is equal to K_r, so queue is at end of ramp
             // density behind queue is assumed to be 0
@@ -1319,26 +1439,10 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
 
             return integral;
         }
-        private double getRampQueueLength(long stamp) {
-            double queuein = queue.getCumulativeCount(stamp, PERIOD_MS);
-            double queueout = queuein;
-
-            if (green.isPerfect()) {
-                queueout = green.getCumulativeCount(stamp, PERIOD_MS);
-
-                if (bypass.isPerfect()) {
-                    queueout += bypass.getCumulativeCount(stamp, PERIOD_MS);
-                }
-            }
-            else if (passage.isPerfect()) {
-                queueout = passage.getCumulativeCount(stamp, PERIOD_MS);
-            }
-
-            return queuein - queueout;
-        }
+        
 
         private double getRampSendingFlow(long stamp) {
-            double S_rd = Math.min(Q_r * STEP_SECONDS / 3600.0, getRampQueueLength(stamp));
+            double S_rd = Math.min(Q_r * STEP_SECONDS / 3600.0, getQueueLength(stamp));
 
             if (S_rd < 0) {
                 S_rd = 0;
@@ -1367,7 +1471,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             float seg_den = (float)network.getDownstreamAvgDensity();
             MeterEvent ev = new MeterEvent(EventType.METER_EVENT,
                 meter.name, phase.ordinal(),
-                getQueueState().ordinal(), queueLength(),
+                getQueueState().ordinal(), estimateQueueLength(),
                 demand_adj, estimateWaitSecs(),
                 limit_control.ordinal(), min_rate, release_rate,
                 max_rate, dns, seg_den
@@ -1376,7 +1480,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         }
 
         private int estimateWaitSecs() {
-            return (int) Math.round(queueLength() * 3600.0 / release_rate);
+            return (int) Math.round(estimateQueueLength() * 3600.0 / release_rate);
         }
 
         /** Get current metering rate.
