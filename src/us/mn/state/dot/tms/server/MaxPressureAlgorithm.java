@@ -149,6 +149,19 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         return Math.round(secs / STEP_SECONDS);
     }
 
+    /** Seconds to average segment density for start metering check */
+    static private final int START_SECS = 120;
+
+    /** Seconds to average segment density for stop metering check */
+    static private final int STOP_SECS = 600;
+
+    /** Seconds to average segment density for restart metering check */
+    static private final int RESTART_SECS = 300;
+
+    /** Maximum number of time steps needed for sample history */
+    static private final int MAX_STEPS = steps(Math.max(Math.max(START_SECS,
+        STOP_SECS), RESTART_SECS));
+
     /** Convert single step vehicle count to flow rate.
     * @param v Vehicle count to convert.
     * @return Flow rate (vehicles / hour), or null for missing data. */
@@ -534,24 +547,11 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
 
         /** Cumulative passage count (vehicles) */
         private int passage_accum = 0;
-        
+
         /** Queue demand history (vehicles / hour) */
         private final BoundedSampleHistory demand_hist =
             new BoundedSampleHistory(steps(300));
-        
-        /** Seconds to average segment density for start metering check */
-        static private final int START_SECS = 120;
 
-        /** Seconds to average segment density for stop metering check */
-        static private final int STOP_SECS = 600;
-
-        /** Seconds to average segment density for restart metering check */
-        static private final int RESTART_SECS = 300;
-        
-        /** Maximum number of time steps needed for sample history */
-        static private final int MAX_STEPS = steps(Math.max(Math.max(START_SECS,
-            STOP_SECS), RESTART_SECS));
-        
         /** Ramp passage history (vehicles / hour) */
         private final BoundedSampleHistory passage_hist =
             new BoundedSampleHistory(MAX_STEPS);
