@@ -78,7 +78,7 @@ impl RolePerm {
     /// Build HTML table row
     fn table_row<'p>(self, tr: &'p mut html::Tr<'p>) {
         let perm = self.perm;
-        let ht_res = format!("ht_{}", &perm.base_resource);
+        let ht_res = format!("ht_{}", perm.base_resource);
         match self.state {
             PermState::Existing => {
                 match perm.hashtag.as_deref() {
@@ -200,7 +200,7 @@ impl RolePerm {
 
     /// Get input hashtag
     fn input_hashtag(&self) -> Option<String> {
-        let id = format!("ht_{}_inp", &self.perm.base_resource);
+        let id = format!("ht_{}_inp", self.perm.base_resource);
         let input = Doc::get().opt_elem::<HtmlInputElement>(&id)?;
         let ht = input.value();
         if ht.starts_with("#")

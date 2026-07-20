@@ -155,7 +155,7 @@ fn build_list(res: Option<Res>) -> String {
         resources.retain(|rs| *rs != r.as_str());
         resources.push(r.as_str());
     }
-    format!("[\"{}\"]", &resources.join("\",\""))
+    format!("[\"{}\"]", resources.join("\",\""))
 }
 
 /// Set refresh button text

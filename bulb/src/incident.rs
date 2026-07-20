@@ -128,7 +128,7 @@ impl Incident {
             .get(usize::from(self.dir))
             .map(|d| &d.direction[..])
             .unwrap_or("");
-        format!("{} {dir}", &self.road)
+        format!("{} {dir}", self.road)
     }
 
     /// Get incident description

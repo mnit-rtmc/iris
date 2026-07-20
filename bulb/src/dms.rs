@@ -84,7 +84,7 @@ pub struct DmsLock {
 impl fmt::Display for DmsLock {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // format as JSON for setting DMS lock
-        write!(f, "{{\"reason\":\"{}\"", &self.reason)?;
+        write!(f, "{{\"reason\":\"{}\"", self.reason)?;
         if let Some(multi) = &self.multi {
             write!(f, ",\"multi\":\"{multi}\"")?;
         }
@@ -139,7 +139,7 @@ impl DmsLock {
     fn expires(&self) -> Option<String> {
         if let Some(expires) = &self.expires {
             match DateTime::parse_from_rfc3339(expires) {
-                Ok(dt) => return Some(format!("⏲️ {}", &dt.format("%H:%M"))),
+                Ok(dt) => return Some(format!("⏲️ {}", dt.format("%H:%M"))),
                 Err(e) => log::warn!("expires: {e}, {expires}"),
             }
         }

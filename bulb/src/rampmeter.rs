@@ -313,7 +313,7 @@ fn meter_html<'p>(buf: Vec<u8>, img: &'p mut html::Img<'p>) {
 impl fmt::Display for MeterLock {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // format as JSON for setting meter lock
-        write!(f, "{{\"reason\":\"{}\"", &self.reason)?;
+        write!(f, "{{\"reason\":\"{}\"", self.reason)?;
         if let Some(rate) = self.rate {
             write!(f, ",\"rate\":{rate}")?;
         }
@@ -356,7 +356,7 @@ impl MeterLock {
         if let Some(expires) = &self.expires
             && let Ok(dt) = DateTime::parse_from_rfc3339(expires)
         {
-            return Some(format!("⏲️ {}", &dt.format("%H:%M")));
+            return Some(format!("⏲️ {}", dt.format("%H:%M")));
         }
         None
     }

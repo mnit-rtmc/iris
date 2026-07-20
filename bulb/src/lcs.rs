@@ -87,7 +87,7 @@ pub struct LcsAnc {
 impl fmt::Display for LcsLock {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // format as JSON for setting LCS lock
-        write!(f, "{{\"reason\":\"{}\"", &self.reason)?;
+        write!(f, "{{\"reason\":\"{}\"", self.reason)?;
         if let Some(ind) = &self.indications {
             write!(f, ",\"indications\":[")?;
             let mut first = true;
@@ -141,7 +141,7 @@ impl LcsLock {
         if let Some(expires) = &self.expires
             && let Ok(dt) = DateTime::parse_from_rfc3339(expires)
         {
-            return Some(format!("⏲️ {}", &dt.format("%H:%M")));
+            return Some(format!("⏲️ {}", dt.format("%H:%M")));
         }
         None
     }
