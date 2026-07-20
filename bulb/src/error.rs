@@ -1,4 +1,4 @@
-// Copyright (C) 2022-2025  Minnesota Department of Transportation
+// Copyright (C) 2022-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,10 @@ pub enum Error {
     /// Unable to get document
     #[error("No document")]
     NoDocument(),
+
+    /// Unable to get body
+    #[error("No body")]
+    NoBody(),
 
     /// Failed to cast element
     #[error("Cast failed {0}")]

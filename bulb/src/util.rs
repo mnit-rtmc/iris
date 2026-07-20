@@ -173,6 +173,14 @@ impl Doc {
         Doc::new().unwrap_throw()
     }
 
+    /// Get body
+    pub fn body(&self) -> Result<HtmlElement> {
+        self.0
+            .body()
+            .ok_or(Error::NoBody())
+            .inspect_err(|e| log::error!("body: {e:?}"))
+    }
+
     /// Get the document element
     pub fn doc_elem(&self) -> Option<Element> {
         let el = self.0.document_element();

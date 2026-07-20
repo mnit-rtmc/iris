@@ -178,7 +178,7 @@ fn add_listeners() -> Result<()> {
     let layer_menu: HtmlElement = doc.elem("layer-menu")?;
     add_change_listener(&layer_menu)?;
     add_click_listener(&sidebar)?;
-    let body = doc.0.body().unwrap_throw();
+    let body = doc.body()?;
     add_joystick_listener(&body)?;
     add_mouse_listener(&body)?;
     add_input_listener(&sidebar)?;
