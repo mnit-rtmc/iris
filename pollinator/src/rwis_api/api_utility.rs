@@ -166,12 +166,11 @@ impl ApiUtility {
             for d in ds.as_array().cloned().iter().flatten() {
                 if d["asset_id"] == json!(asset_id)
                     && d["metadata"]["field"] == json!(datastream_name)
-                        && let Some(id) = d["id"].as_str()
+                    && let Some(id) = d["id"].as_str()
+                    && let Ok(data) = self.last_datapoint(id).await
                 {
-                    if let Ok(data) = self.last_datapoint(id).await {
-                        res = Ok(data["data"][0]["value"].clone());
-                        break;
-                    }
+                    res = Ok(data["data"][0]["value"].clone());
+                    break;
                 }
             }
         } else {

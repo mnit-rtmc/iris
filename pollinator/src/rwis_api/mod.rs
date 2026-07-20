@@ -12,20 +12,23 @@ pub async fn run(db: Option<Database>) -> Result<()> {
     let props = read_properties();
 
     // Host with no trailing slash
-    let host = props
-        .get("campbellcloud.host")
-        .ok_or(Error::InvalidConfig("campbellcloud.host not set in properties"))?;
+    let host = props.get("campbellcloud.host").ok_or(Error::InvalidConfig(
+        "campbellcloud.host not set in properties",
+    ))?;
     // Organization ID for use with API
-    let organization_id = props
-        .get("campbellcloud.org_id")
-        .ok_or(Error::InvalidConfig("campbellcloud.org_id not set in properties"))?;
+    let organization_id =
+        props
+            .get("campbellcloud.org_id")
+            .ok_or(Error::InvalidConfig(
+                "campbellcloud.org_id not set in properties",
+            ))?;
     // Credentials for account with access to the organization/API
-    let username = props
-        .get("campbellcloud.user")
-        .ok_or(Error::InvalidConfig("campbellcloud.user not set in properties"))?;
-    let api_password = props
-        .get("campbellcloud.pass")
-        .ok_or(Error::InvalidConfig("campbellcloud.pass not set in properties"))?;
+    let username = props.get("campbellcloud.user").ok_or(
+        Error::InvalidConfig("campbellcloud.user not set in properties"),
+    )?;
+    let api_password = props.get("campbellcloud.pass").ok_or(
+        Error::InvalidConfig("campbellcloud.pass not set in properties"),
+    )?;
     let mut api_util = api_utility::ApiUtility::new(
         host,
         username,
@@ -60,7 +63,7 @@ pub async fn run(db: Option<Database>) -> Result<()> {
 fn read_properties() -> HashMap<String, String> {
     let lines: Vec<String> =
         std::fs::read_to_string("/etc/iris/iris-server.properties")
-            .unwrap_or(String::new())
+            .unwrap_or_default()
             .lines()
             .map(String::from)
             .collect();

@@ -184,11 +184,11 @@ impl IntervalBinner {
                 count += 1;
                 sum += u32::from(spd.get());
             }
-            if count > 0 {
-                let spd = sum / count;
-                writer.write_all(spd.to_string().as_bytes()).await?;
-            } else {
-                writer.write_all(b"null").await?;
+            match sum.checked_div(count) {
+                Some(spd) => {
+                    writer.write_all(spd.to_string().as_bytes()).await?
+                }
+                None => writer.write_all(b"null").await?,
             }
             writer.write_all(b"]").await?;
             first = false;
