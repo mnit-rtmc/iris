@@ -31,7 +31,7 @@ use std::collections::HashMap;
 use std::time::Duration;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::{JsCast, JsError, UnwrapThrowExt};
+use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
     Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
     HtmlSelectElement, KeyboardEvent, MouseEvent, ScrollBehavior,
@@ -733,6 +733,7 @@ fn handle_input_enter(id: String) {
     }
 }
 
+/// Add a joystick event listener to an element
 fn add_joystick_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
@@ -745,13 +746,15 @@ fn add_joystick_listener(el: &Element) -> Result<()> {
                 let sticks =
                     Doc::get().0.get_elements_by_class_name("joystick");
                 for i in 0..sticks.length() {
-                    // x and y ignored by mouseup, but not mousemove
-                    spawn_future(joystick::handle_mouse_event(
-                        sticks.item(i).unwrap_throw().id(),
-                        type_.clone(),
-                        mouse_event.x(),
-                        mouse_event.y(),
-                    ));
+                    if let Some(stick) = sticks.item(i) {
+                        // x and y ignored by mouseup, but not mousemove
+                        spawn_future(joystick::handle_mouse_event(
+                            stick.id(),
+                            type_.clone(),
+                            mouse_event.x(),
+                            mouse_event.y(),
+                        ));
+                    }
                 }
             } else if Some("joystick")
                 == target.get_attribute("class").as_deref()
