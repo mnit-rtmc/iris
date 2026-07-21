@@ -345,29 +345,22 @@ impl MsgPattern {
         let mut legend = fs.legend();
         legend
             .input()
-            .id("tab_preview")
+            .id("tab_multi")
             .class("toggle")
             .r#type("radio")
             .name("pattern_tab")
             .checked();
-        legend.label().r#for("tab_preview").cdata("Preview").close();
+        legend.label().r#for("tab_multi").cdata("MULTI").close();
         legend
             .input()
-            .id("tab_multi")
+            .id("tab_preview")
             .class("toggle")
             .r#type("radio")
             .name("pattern_tab");
-        legend.label().r#for("tab_multi").cdata("MULTI").close();
+        legend.label().r#for("tab_preview").cdata("Preview").close();
         legend.close();
         div = fs.div();
-        div.id("mp_preview_div");
-        let mut div2 = div.div();
-        div2.class("row");
-        self.configs_select(&mut div2.select());
-        self.render_preview(anc, &mut div2.img());
-        div.close();
-        div = fs.div();
-        div.id("mp_multi_div").class("no-display");
+        div.id("mp_multi_div");
         div.textarea()
             .id("multi")
             .class("multi")
@@ -375,9 +368,16 @@ impl MsgPattern {
             .autocomplete("off")
             .spellcheck("false")
             .maxlength(1024)
-            .rows(5)
+            .rows(4)
             .cdata(&self.multi)
             .close();
+        div.close();
+        div = fs.div();
+        div.id("mp_preview_div").class("no-display");
+        let mut div2 = div.div();
+        div2.class("row");
+        self.configs_select(&mut div2.select());
+        self.render_preview(anc, &mut div2.img());
         div.close();
         fs.close();
         div = tree.root::<html::Div>();
