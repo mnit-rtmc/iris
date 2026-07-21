@@ -11,9 +11,11 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, footer_html};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::device::DeviceReq;
 use crate::error::Result;
+use crate::fetch::Action;
 use crate::geoloc::LocAnc;
 use crate::item::ItemState;
 use crate::start::select_item_map;
@@ -813,6 +815,15 @@ fn sub_surface_html<'p>(
 }
 
 impl WeatherSensor {
+    /// Create action to handle click on a device request button
+    #[allow(clippy::vec_init_then_push)]
+    fn device_req(&self, req: DeviceReq) -> Vec<Action> {
+        let uri = uri_one(Res::WeatherSensor, &self.name);
+        let mut actions = Vec::with_capacity(1);
+        actions.push(Action::Patch(uri, req.to_string().into()));
+        actions
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &WeatherSensorAnc) -> String {
         let mut tree = Tree::new();
@@ -864,6 +875,32 @@ impl WeatherSensor {
                 &mut tree.root::<html::Div>(),
             );
         }
+        String::from(tree)
+    }
+
+    /// Convert to Request HTML
+    fn to_html_request(&self, _anc: &WeatherSensorAnc) -> String {
+        let work = "http://example.com"; // FIXME
+        let mut tree = Tree::new();
+        self.title(View::Request, &mut tree.root::<html::Div>());
+        let mut div = tree.root::<html::Div>();
+        div.class("row");
+        div.span().cdata("Settings").close();
+        div.button()
+            .id("rq_settings")
+            .r#type("button")
+            .cdata("Send")
+            .close();
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.span().cdata("Work Request").close();
+        div.a()
+            .href(work)
+            .target("_blank")
+            .rel("noopener noreferrer")
+            .cdata("🔗 ")
+            .cdata(self.name());
         String::from(tree)
     }
 
@@ -974,6 +1011,7 @@ impl Card for WeatherSensor {
         match view {
             View::Create => self.to_html_create(20),
             View::Status => self.to_html_status(anc),
+            View::Request => self.to_html_request(anc),
             View::Setup(edit) => self.to_html_setup(anc, edit),
             View::Location(edit) => anc.loc.to_html_loc(self, edit),
             _ => self.to_html_compact(anc),
@@ -994,5 +1032,13 @@ impl Card for WeatherSensor {
     /// Get changed fields on Location view
     fn changed_location(&self, anc: WeatherSensorAnc) -> String {
         anc.loc.changed_location()
+    }
+
+    /// Handle click event for a button on the card
+    fn handle_click(&self, anc: WeatherSensorAnc, id: &str) -> Vec<Action> {
+        match id {
+            "rq_settings" => self.device_req(DeviceReq::SendSettings),
+            _ => self.handle_click_common(anc, id),
+        }
     }
 }

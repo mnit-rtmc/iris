@@ -458,7 +458,7 @@ impl Res {
     /// Check if resource has a request view
     pub const fn has_request(self) -> bool {
         use Res::*;
-        matches!(self, Camera | Dms | RampMeter)
+        matches!(self, Camera | Dms | RampMeter | WeatherSensor)
     }
 
     /// Check if resource has a setup view
