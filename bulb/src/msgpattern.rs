@@ -362,7 +362,7 @@ impl MsgPattern {
         div = fs.div();
         div.id("mp_preview_div");
         let mut div2 = div.div();
-        div2.class("sb_row_left");
+        div2.class("row");
         self.configs_select(&mut div2.select());
         self.render_preview(anc, &mut div2.img());
         div.close();
