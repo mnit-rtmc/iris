@@ -186,7 +186,7 @@ impl Card for MsgLine {
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("ob_hashtag").cdata("Hashtag").close();
+        div.label().r#for("ob_hashtag").cdata("#Tag").close();
         div.input()
             .id("ob_hashtag")
             .maxlength(16)

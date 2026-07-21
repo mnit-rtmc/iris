@@ -59,7 +59,7 @@ impl MapExtent {
         self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("hashtag").cdata("Hashtag").close();
+        div.label().r#for("hashtag").cdata("#Tag").close();
         div.input()
             .id("hashtag")
             .maxlength(16)

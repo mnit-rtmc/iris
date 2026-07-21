@@ -333,7 +333,7 @@ impl MsgPattern {
         div.class("row");
         div.label()
             .r#for("compose_hashtag")
-            .cdata("Compose Hashtag")
+            .cdata("Compose #Tag")
             .close();
         div.input()
             .id("compose_hashtag")

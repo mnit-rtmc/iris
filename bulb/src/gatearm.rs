@@ -198,7 +198,7 @@ impl GateArm {
         div.class("row");
         div.label()
             .r#for("downstream")
-            .cdata("Downstream (#tag)")
+            .cdata("Downstream (#Tag)")
             .close();
         div.input()
             .id("downstream")
