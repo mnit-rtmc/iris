@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017 Iteris Inc.
- * Copyright (C) 2019-2025  Minnesota Department of Transportation
+ * Copyright (C) 2019-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 public class OpQueryEssSettings extends OpEss {
 
 	/** Record of values read from the controller */
-	private final EssRec ess_rec = new EssRec();;
+	private final EssRec ess_rec = new EssRec();
 
 	/** Wind sensors table */
 	private final WindSensorsTable ws_table;

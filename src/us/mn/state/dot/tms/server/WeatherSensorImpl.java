@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2024  Minnesota Department of Transportation
+ * Copyright (C) 2010-2026  Minnesota Department of Transportation
  * Copyright (C) 2017-2021  Iteris Inc.
  * Copyright (C) 2023-2024  SRF Consulting Group
  *
@@ -189,7 +189,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 	}
 
 	/** Set the alt id.
- 	 * @param aid Alt id (null for missing) */
+	 * @param aid Alt id (null for missing) */
 	public void setAltId(String aid) {
 		alt_id = aid;
 	}
