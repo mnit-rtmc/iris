@@ -537,8 +537,8 @@ impl Corridor {
     fn add_node(&mut self, node: RNode) {
         log::trace!(
             "Corridor::add_node {} to {} ({} + 1)",
-            &node.name,
-            &self.cor_id,
+            node.name,
+            self.cor_id,
             self.nodes.len()
         );
         if node.is_valid() {
@@ -551,8 +551,8 @@ impl Corridor {
     fn update_node(&mut self, node: RNode) {
         log::trace!(
             "Corridor::update_node {} to {} ({})",
-            &node.name,
-            &self.cor_id,
+            node.name,
+            self.cor_id,
             self.nodes.len()
         );
         let Some(n) = self.nodes.iter_mut().find(|n| n.name == node.name)
@@ -571,7 +571,7 @@ impl Corridor {
     fn remove_node(&mut self, name: &str) {
         log::trace!(
             "Corridor::remove_node {name} from {} ({} - 1)",
-            &self.cor_id,
+            self.cor_id,
             self.nodes.len()
         );
         match self.nodes.iter().position(|n| n.name == name) {
@@ -781,7 +781,7 @@ impl SegmentState {
     /// Update (or add) a node
     pub fn update_node(&mut self, node: RNode) {
         let Some(ref cor_id) = node.cor_id() else {
-            log::trace!("ignoring node: {}", &node.name);
+            log::trace!("ignoring node: {}", node.name);
             return;
         };
         match self.node_cors.insert(node.name.clone(), cor_id.clone()) {

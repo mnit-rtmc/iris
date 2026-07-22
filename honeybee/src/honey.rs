@@ -489,7 +489,7 @@ fn login_resource(honey: Honey) -> Router {
                     user,
                 )
                 .await;
-                return Err(Error::Forbidden)?;
+                Err(Error::Forbidden)?;
             }
         }
         for addr in xff {
@@ -503,7 +503,7 @@ fn login_resource(honey: Honey) -> Router {
                         user,
                     )
                     .await;
-                    return Err(Error::Forbidden)?;
+                    Err(Error::Forbidden)?;
                 }
             }
         }

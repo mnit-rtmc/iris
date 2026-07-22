@@ -208,10 +208,10 @@ impl OnvifOperation<'_> {
     /// Set the media profile token of ONVIF PTZ operation
     fn set_profile(&mut self, profile: String) {
         match self {
-            Self::ContinuousMove(p, _, _, _) | Self::Stop(p) => {
-                if p.is_empty() {
-                    *p = profile;
-                }
+            Self::ContinuousMove(p, _, _, _) | Self::Stop(p)
+                if p.is_empty() =>
+            {
+                *p = profile;
             }
             _ => (),
         }
@@ -649,7 +649,7 @@ impl<'a> OnvifMessenger<'a> {
 
         let path = self.message_path(&msg).await;
         if path.is_empty() {
-            return Err(Error::NotFound)?;
+            Err(Error::NotFound)?;
         }
 
         soap::send(self.host.clone(), path, msg.to_string(), envelope).await
