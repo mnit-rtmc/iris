@@ -52,6 +52,7 @@ pub enum Res {
     Gps,
     Graphic,
     Hashtag,
+    HashtagSignCfg,
     Incident,
     IncAdvice,
     IncDescriptor,
@@ -151,6 +152,7 @@ impl Res {
             Gps,
             Graphic,
             Hashtag,
+            HashtagSignCfg,
             Incident,
             IncAdvice,
             IncDescriptor,
@@ -238,6 +240,7 @@ impl Res {
             Gps => "gps",
             Graphic => "graphic",
             Hashtag => "hashtag",
+            HashtagSignCfg => "hashtag_sign_cfg",
             Incident => "incident",
             IncAdvice => "inc_advice",
             IncDescriptor => "inc_descriptor",
@@ -393,8 +396,8 @@ impl Res {
                 CommConfig
             }
             // DMS resources
-            Font | Graphic | MsgLine | MsgPattern | SignConfig | SignDetail
-            | SignMessage | Word => Dms,
+            Font | Graphic | HashtagSignCfg | MsgLine | MsgPattern
+            | SignConfig | SignDetail | SignMessage | Word => Dms,
             // Incident resources
             IncAdvice | IncDescriptor | IncDetail | IncLocator | RoadAffix => {
                 Incident
