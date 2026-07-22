@@ -6,7 +6,7 @@ letters (A-Z, a-z) and/or numbers.  They can be used for grouping resources
 into categories or districts.
 
 - [Message patterns] can have a **compose** hashtag
-- [Message lines] can have a **restrict** hashtag
+- [Message lines] have a hashtag for associated [DMS]
 - [Device actions] use hashtags to associate devices
 - [Alert configurations] and [alert messages]
 - [Permissions] can restrict access by hashtag
@@ -39,6 +39,7 @@ Hashtag     | Purpose
 [alert configurations]: alerts.html#dms-hashtags
 [alert messages]: alerts.html#alert-messages
 [device actions]: action_plans.html#device-actions
+[DMS]: dms.html
 [lane-use]: lcs.html
 [message lines]: message_patterns.html#message-lines
 [message patterns]: message_patterns.html
