@@ -28,7 +28,7 @@ use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 
 /// NTCIP sign
-type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
+pub type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
 
 /// Length display units
 type LenUnit = mag::length::ft;

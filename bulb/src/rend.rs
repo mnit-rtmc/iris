@@ -10,12 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::signconfig::NtcipDms;
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use hatmil::html;
 use ntcip::dms::multi::join_text;
-
-/// NTCIP sign
-type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
 
 /// Ntcip DMS renderer
 pub struct Renderer<'r> {

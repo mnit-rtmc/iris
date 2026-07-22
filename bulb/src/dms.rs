@@ -25,6 +25,7 @@ use crate::msgpattern::{FontName, GraphicName, MsgPattern};
 use crate::notes::contains_hashtag;
 use crate::rend::Renderer;
 use crate::rle::Table;
+use crate::signconfig::NtcipDms;
 use crate::signmessage::SignMessage;
 use crate::start::select_item_map;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
@@ -47,9 +48,6 @@ use std::iter::repeat;
 use std::time::Duration;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement};
-
-/// NTCIP sign
-type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
 
 /// Display Units
 type TempUnit = mag::temp::DegF;

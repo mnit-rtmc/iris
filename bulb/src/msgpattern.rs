@@ -16,6 +16,7 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::rend::Renderer;
+use crate::signconfig::NtcipDms;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -29,9 +30,6 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{HtmlElement, HtmlSelectElement, HtmlTextAreaElement};
-
-/// NTCIP sign
-type NtcipDms = ntcip::dms::Dms<256, 24, 32>;
 
 /// Font name
 #[derive(Debug, Default, Deserialize)]
@@ -199,7 +197,7 @@ impl MsgPattern {
     /// Get entered MULTI string
     fn multi_string(&self) -> String {
         match Doc::get().opt_elem::<HtmlTextAreaElement>("multi") {
-            Some(elem) => elem.value(),
+            Some(el) => el.value(),
             None => self.multi.clone(),
         }
     }
