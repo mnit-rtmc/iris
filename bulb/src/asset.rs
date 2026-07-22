@@ -41,6 +41,7 @@ pub enum Asset {
     Graphic(String),
     Graphics,
     HashtagResources,
+    HashtagSignCfgs,
     IncDetails,
     LaneCodes,
     LcsIndications,
@@ -112,6 +113,7 @@ impl Asset {
             }
             Graphics => "/iris/api/graphic".into(),
             HashtagResources => "/iris/api/hashtag".into(),
+            HashtagSignCfgs => "/iris/api/hashtag_sign_cfg".into(),
             IncDetails => "/iris/api/inc_detail".into(),
             LaneCodes => "/iris/lut/lane_code".into(),
             LcsIndications => "/iris/lut/lcs_indication".into(),

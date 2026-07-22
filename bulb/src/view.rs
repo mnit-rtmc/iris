@@ -304,6 +304,9 @@ impl CardView {
                 self.handle_input_x::<Domain>(id).await
             }
             (Res::Lcs, View::Control) => self.handle_input_x::<Lcs>(id).await,
+            (Res::MsgLine, View::Setup(true)) => {
+                self.handle_input_x::<MsgLine>(id).await
+            }
             (Res::MsgPattern, View::Setup(true)) => {
                 self.handle_input_x::<MsgPattern>(id).await
             }
