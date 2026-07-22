@@ -2,44 +2,19 @@ mod api_utility;
 
 use resin::{Database, Error, Result};
 use serde_json::{Map, Value, json};
-use std::collections::HashMap;
 use tokio_postgres::Client;
 
 pub use api_utility::ApiUtility;
 
 pub async fn run(db: Option<Database>) -> Result<()> {
+    let db = db.ok_or(Error::InvalidConfig("Database is None"))?;
+    let client = db.client().await?;
+
     // Read IRIS server properties for API and database credentials
-    let props = read_properties();
+    let (host, id, user, pass) = get_creds_from_db(&client).await?;
 
-    // Host with no trailing slash
-    let host = props.get("campbellcloud.host").ok_or(Error::InvalidConfig(
-        "campbellcloud.host not set in properties",
-    ))?;
-    // Organization ID for use with API
-    let organization_id =
-        props
-            .get("campbellcloud.org_id")
-            .ok_or(Error::InvalidConfig(
-                "campbellcloud.org_id not set in properties",
-            ))?;
-    // Credentials for account with access to the organization/API
-    let username = props.get("campbellcloud.user").ok_or(
-        Error::InvalidConfig("campbellcloud.user not set in properties"),
-    )?;
-    let api_password = props.get("campbellcloud.pass").ok_or(
-        Error::InvalidConfig("campbellcloud.pass not set in properties"),
-    )?;
-    let mut api_util = api_utility::ApiUtility::new(
-        host,
-        username,
-        api_password,
-        organization_id,
-    )
-    .await;
-
-    // Remove protocols and just use host/database name (user/pass must be inserted)
-    let _db = db.ok_or(Error::InvalidConfig("Database is None"))?;
-    let client = _db.client().await?;
+    let mut api_util =
+        api_utility::ApiUtility::new(&host, &user, &pass, &id).await;
 
     // Get all the samples first
     if let Ok(serials) = get_serial_numbers(&client).await {
@@ -60,23 +35,60 @@ pub async fn run(db: Option<Database>) -> Result<()> {
     Ok(())
 }
 
-fn read_properties() -> HashMap<String, String> {
-    let lines: Vec<String> =
-        std::fs::read_to_string("/etc/iris/iris-server.properties")
-            .unwrap_or_default()
-            .lines()
-            .map(String::from)
-            .collect();
+/// Get host, organization ID, username, and password for the CampbellCloud API
+async fn get_creds_from_db(
+    client: &Client,
+) -> Result<(String, String, String, String)> {
+    let links = client
+        .query(
+            "
+            SELECT name, uri
+            FROM iris.comm_link
+            WHERE comm_config IN
+            (
+                SELECT name
+                FROM iris.comm_config
+                WHERE description='CampbellCloud'
+            );
+            ",
+            &[],
+        )
+        .await?;
+    // All CampbellCloud controllers should be on one link
+    let cl_name: &str = links[0].try_get("name")?;
 
-    let mut map = HashMap::<String, String>::new();
-    for line in lines {
-        if let Some((key, value)) = line.split_once("=")
-            && !key.starts_with("#")
-        {
-            map.insert(key.into(), value.into());
+    // org_id@https://...
+    if let Some((org_id, uri)) =
+        links[0].try_get::<_, &str>("uri")?.split_once("@")
+    {
+        let passwords = client
+            .query(
+                "
+                SELECT password
+                FROM iris.controller
+                WHERE comm_link=$1
+                ORDER BY drop_id
+                ",
+                &[&cl_name],
+            )
+            .await?;
+        for password in &passwords {
+            if let Some((user, pass)) =
+                password.try_get::<_, &str>(0)?.split_once(":")
+            {
+                return Ok((
+                    uri.to_owned(),
+                    org_id.to_owned(),
+                    user.to_owned(),
+                    pass.to_owned(),
+                ));
+            }
         }
     }
-    map
+
+    Err(Error::InvalidConfig(
+        "Could not get credentials from database",
+    ))
 }
 
 async fn get_serial_numbers(client: &Client) -> Result<Vec<String>> {
@@ -86,7 +98,7 @@ async fn get_serial_numbers(client: &Client) -> Result<Vec<String>> {
         .query("SELECT alt_id FROM iris._weather_sensor", &[])
         .await?
     {
-        let alt_id: Option<String> = row.get(0);
+        let alt_id: Option<String> = row.try_get(0)?;
 
         if let Some(id) = alt_id
             && !id.is_empty()
