@@ -15,7 +15,7 @@ use crate::card::{AncillaryData, Card, footer_html};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
-use crate::rend::Renderer;
+use crate::rend::{Renderer, replace_action_tags};
 use crate::signconfig::NtcipDms;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
@@ -203,49 +203,8 @@ impl MsgPattern {
     }
 
     /// Get MULTI string with action tags replaced with a filler character
-    #[allow(clippy::if_same_then_else)]
     fn multi(&self) -> String {
-        let mut multi = String::new();
-        for val in multi_split(&self.multi_string()) {
-            if val.starts_with("[cg") {
-                multi.push_str("**");
-            } else if val.starts_with("[exit") {
-                // replaced with empty string
-            } else if val.starts_with("[feed") {
-                // replaced with empty string
-            } else if val.starts_with("[pa") {
-                let mut v = "**";
-                let mut it = val.split(',');
-                if it.next().is_some() {
-                    // skip ID
-                    if let Some(low) = it.next() {
-                        if low.len() > v.len() {
-                            v = low;
-                        }
-                        if let Some(closed) = it.next()
-                            && let Some(closed) = closed.strip_suffix(']')
-                            && closed.len() > v.len()
-                        {
-                            v = closed;
-                        }
-                    }
-                }
-                multi.push_str(v);
-            } else if val.starts_with("[slow") {
-                if val.ends_with("dist]") || val.ends_with("speed]") {
-                    multi.push_str("**");
-                }
-            } else if val.starts_with("[tt") {
-                multi.push_str("**");
-            } else if val.starts_with("[tzp") {
-                multi.push_str("*.**");
-            } else if val.starts_with("[tz") {
-                // replaced with empty string
-            } else {
-                multi.push_str(val);
-            }
-        }
-        multi
+        replace_action_tags(&self.multi_string())
     }
 
     // Check if pattern can combine (shared) in second position

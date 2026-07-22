@@ -14,6 +14,7 @@ use crate::signconfig::NtcipDms;
 use base64::{Engine as _, engine::general_purpose::STANDARD_NO_PAD as b64enc};
 use hatmil::html;
 use ntcip::dms::multi::join_text;
+use ntcip::dms::multi::split as multi_split;
 
 /// Ntcip DMS renderer
 pub struct Renderer<'r> {
@@ -174,4 +175,50 @@ fn encode_gif(buf: &[u8]) -> String {
     let mut src = "data:image/gif;base64,".to_owned();
     b64enc.encode_string(buf, &mut src);
     src
+}
+
+/// Replace action tags in a MULTI string with filler characters
+#[allow(clippy::if_same_then_else)]
+pub fn replace_action_tags(ms: &str) -> String {
+    let mut multi = String::new();
+    for val in multi_split(ms) {
+        if val.starts_with("[cg") {
+            multi.push_str("**");
+        } else if val.starts_with("[exit") {
+            // replaced with empty string
+        } else if val.starts_with("[feed") {
+            // replaced with empty string
+        } else if val.starts_with("[pa") {
+            let mut v = "**";
+            let mut it = val.split(',');
+            if it.next().is_some() {
+                // skip ID
+                if let Some(low) = it.next() {
+                    if low.len() > v.len() {
+                        v = low;
+                    }
+                    if let Some(closed) = it.next()
+                        && let Some(closed) = closed.strip_suffix(']')
+                        && closed.len() > v.len()
+                    {
+                        v = closed;
+                    }
+                }
+            }
+            multi.push_str(v);
+        } else if val.starts_with("[slow") {
+            if val.ends_with("dist]") || val.ends_with("speed]") {
+                multi.push_str("**");
+            }
+        } else if val.starts_with("[tt") {
+            multi.push_str("**");
+        } else if val.starts_with("[tzp") {
+            multi.push_str("*.**");
+        } else if val.starts_with("[tz") {
+            // replaced with empty string
+        } else {
+            multi.push_str(val);
+        }
+    }
+    multi
 }
