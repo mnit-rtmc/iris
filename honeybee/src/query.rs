@@ -302,6 +302,15 @@ pub const DMS_STATUS: &str = "\
   FROM dms_message_view WHERE condition = 'Active' \
   ORDER BY name";
 
+/// SQL query for all hashtag sign configs
+pub const HASHTAG_SIGN_CFG: &str = "\
+  SELECT hashtag, sign_config \
+  FROM iris.hashtag ht \
+  JOIN iris.dms d ON d.name = ht.name \
+  WHERE sign_config IS NOT NULL \
+  GROUP BY hashtag, sign_config \
+  ORDER BY hashtag, sign_config";
+
 /// SQL query for all domains (primary)
 pub const DOMAIN_ALL: &str = "\
   SELECT name, enabled \

@@ -65,6 +65,7 @@ pub enum Resource {
     Gps,
     Graphic,
     Hashtag,
+    HashtagSignCfg,
     Incident,
     IncidentPub,
     IncAdvice,
@@ -158,6 +159,7 @@ impl Resource {
             Gps,
             Graphic,
             Hashtag,
+            // NOTE: HashtagSignCfg handled by Dms
             Incident,
             IncidentPub,
             IncAdvice,
@@ -234,7 +236,7 @@ impl Resource {
             Detector | DetectorPub => Res::Detector,
             DeviceAction => Res::DeviceAction,
             Direction => Res::Direction,
-            Dms | DmsPub | DmsStat => Res::Dms,
+            Dms | DmsPub | DmsStat | HashtagSignCfg => Res::Dms,
             Domain => Res::Domain,
             EncoderStream => Res::EncoderStream,
             EncoderType => Res::EncoderType,
@@ -338,6 +340,7 @@ impl Resource {
             Gps => "api/gps",
             Graphic => "api/graphic",
             Hashtag => "api/hashtag",
+            HashtagSignCfg => "api/hashtag_sign_cfg",
             Incident => "api/incident",
             IncidentPub => "incident",
             IncAdvice => "api/inc_advice",
@@ -441,6 +444,7 @@ impl Resource {
             Gps => query::GPS_ALL,
             Graphic => query::GRAPHIC_ALL,
             Hashtag => query::HASHTAG_ALL,
+            HashtagSignCfg => query::HASHTAG_SIGN_CFG,
             Incident => query::INCIDENT_ALL,
             IncidentPub => query::INCIDENT_PUB,
             IncAdvice => query::INC_ADVICE_ALL,
@@ -554,9 +558,15 @@ impl Resource {
             Rnode => query_all_nodes(client, segments).await,
             RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
-            Beacon | Camera | Controller | Dms | Incident | Lcs | RampMeter
+            Beacon | Camera | Controller | Incident | Lcs | RampMeter
             | TagReader | WeatherSensor => {
                 self.query_all_locs(client, segments).await
+            }
+            Dms => {
+                self.query_all_locs(client, segments).await?;
+                HashtagSignCfg
+                    .query_file(client, HashtagSignCfg.path())
+                    .await
             }
             DayPlan => {
                 // there is no separate channel for DayMatcher
