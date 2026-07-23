@@ -195,17 +195,14 @@ impl MsgLine {
     fn render_preview<'p>(&self, anc: &MsgLineAnc, img: &'p mut html::Img<'p>) {
         img.id("ml_preview");
         let sc = anc.selected_config();
-        if let Some(cfg) = anc.sign_config(sc.as_ref()) {
-            match &anc.make_dms(cfg) {
-                Some(dms) => {
-                    let mut rend = Renderer::new().with_dms(dms);
-                    rend.render_multi(&self.multi(), img);
-                }
-                None => {
-                    img.alt("FAILED TO RENDER");
-                }
-            }
+        if let Some(cfg) = anc.sign_config(sc.as_ref())
+            && let Some(dms) = &anc.make_dms(cfg)
+        {
+            let mut rend = Renderer::new().with_dms(dms);
+            rend.render_multi(&self.multi(), img);
+            return;
         }
+        img.alt("FAILED TO RENDER");
     }
 
     /// Replace preview image
