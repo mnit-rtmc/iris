@@ -2,10 +2,15 @@ mod api_utility;
 
 use resin::{Database, Error, Result};
 use serde_json::{Map, Value, json};
+use std::time::{SystemTime, UNIX_EPOCH};
+use tokio::join;
 use tokio_postgres::Client;
 
 pub use api_utility::ApiUtility;
 
+/// Runs the CampbellCloud API process ("RWIS API").
+/// Retrieves API credentials from database, fetches data from API,
+/// formats it into weather sensor samples, then updates the database.
 pub async fn run(db: Option<Database>) -> Result<()> {
     let db = db.ok_or(Error::InvalidConfig("Database is None"))?;
     let client = db.client().await?;
@@ -21,21 +26,32 @@ pub async fn run(db: Option<Database>) -> Result<()> {
         let mut samples = vec![];
         let mut fails = vec![];
         for s in serials {
-            if let Some(sample) = build_sample_json(&mut api_util, &s).await {
-                samples.push((s, sample));
+            if let Some((sample, time, up_to_date)) =
+                build_sample_json(&mut api_util, &s).await
+            {
+                // Update the sample with the most up-to-date data...
+                samples.push((s.clone(), sample, time));
+                // ...but if it's outdated (>1 day), also mark a failure
+                if !up_to_date {
+                    fails.push((s, Some(time)));
+                }
             } else {
-                fails.push(s);
+                fails.push((s, None));
             }
         }
 
         // Then push them at same time
-        insert_samples(&client, samples).await?;
-        insert_fails(&client, fails).await?;
+        if !samples.is_empty() {
+            insert_samples(&client, samples).await?;
+        }
+        if !fails.is_empty() {
+            insert_fails(&client, fails).await?;
+        }
     }
     Ok(())
 }
 
-/// Get host, organization ID, username, and password for the CampbellCloud API
+/// Gets host, organization ID, user, and password for the CampbellCloud API.
 async fn get_creds_from_db(
     client: &Client,
 ) -> Result<(String, String, String, String)> {
@@ -91,6 +107,7 @@ async fn get_creds_from_db(
     ))
 }
 
+/// Gets the serial numbers stored in the alt_id column of the database.
 async fn get_serial_numbers(client: &Client) -> Result<Vec<String>> {
     let mut serials = vec![];
 
@@ -109,136 +126,169 @@ async fn get_serial_numbers(client: &Client) -> Result<Vec<String>> {
     Ok(serials)
 }
 
-/** Build the sample JSON for one station designated by SN */
+/// Builds the sample for one sensor designated by its serial number.
+/// Returns data, sample time, and whether the data is less than one day old.
 async fn build_sample_json(
     api: &mut ApiUtility,
     serial_number: &str,
-) -> Option<Value> {
-    if let Some(id_val) = api.get_id_from_serial(serial_number).await {
-        let id = id_val.as_str().unwrap_or("");
-        let mut s = Map::new();
-        let mut changed: bool = false;
-        if let Ok(dpt) =
-            api.get_asset_last_datapoint_value(id, "DewPointTemp").await
-        {
-            if dpt.is_f64() {
-                s.insert(String::from("dew_point_temp"), dpt);
-                changed = true;
-            } else {
-                eprintln!("DewPointTemp for asset {serial_number} is invalid");
-            }
-        }
-        if let Ok(st) =
-            api.get_asset_last_datapoint_value(id, "SurfaceTemp").await
-        {
-            if st.is_f64() {
-                let data = json!([{"surface_temp": st}]);
-                s.insert(String::from("pavement_sensor"), data);
-                changed = true;
-            } else {
-                eprintln!("SurfaceTemp for asset {serial_number} is invalid");
-            }
-        }
-        if let Ok(rh) = api.get_asset_last_datapoint_value(id, "RH").await {
-            if rh.is_f64() {
-                s.insert(
-                    String::from("relative_humidity"),
-                    (rh.as_f64()? as i64).into(),
-                );
-                changed = true;
-            } else {
-                eprintln!("RH for asset {serial_number} is invalid");
-            }
-        }
-        if let Ok(at) = api.get_asset_last_datapoint_value(id, "AirTemp").await
-        {
-            if at.is_f64() {
-                let data = json!([{"air_temp": at}]);
-                s.insert(String::from("temperature_sensor"), data);
-                changed = true;
-            } else {
-                eprintln!("AirTemp for asset {serial_number} is invalid");
-            }
+) -> Option<(Value, u64, bool)> {
+    let _ = api.update_auth().await;
+    let id_val = api.get_id_from_serial(serial_number).await?;
+    let id = id_val.as_str()?;
+    let mut time: u64 = 0;
+    let mut s = Map::new();
+
+    let dpt_fut = api.get_asset_last_datapoint_value(id, "DewPointTemp");
+    let st_fut = api.get_asset_last_datapoint_value(id, "SurfaceTemp");
+    let rh_fut = api.get_asset_last_datapoint_value(id, "RH");
+    let at_fut = api.get_asset_last_datapoint_value(id, "AirTemp");
+    let (dpt, st, rh, at) = join!(dpt_fut, st_fut, rh_fut, at_fut);
+
+    // Check for values and use latest timestamp
+    if let Ok((dpt, ts)) = dpt {
+        if ts > time {
+            time = ts;
         }
 
-        if changed {
-            return Some(Value::Object(s));
+        if dpt.is_f64() {
+            s.insert(String::from("dew_point_temp"), dpt);
+        } else {
+            log::error!("DewPointTemp for asset {serial_number} is invalid");
         }
+    }
+    if let Ok((st, ts)) = st {
+        if ts > time {
+            time = ts;
+        }
+
+        if st.is_f64() {
+            let data = json!([{"surface_temp": st}]);
+            s.insert(String::from("pavement_sensor"), data);
+        } else {
+            log::error!("SurfaceTemp for asset {serial_number} is invalid");
+        }
+    }
+    if let Ok((rh, ts)) = rh {
+        if ts > time {
+            time = ts;
+        }
+
+        if rh.is_f64() {
+            s.insert(
+                String::from("relative_humidity"),
+                (rh.as_f64()? as i64).into(),
+            );
+        } else {
+            log::error!("RH for asset {serial_number} is invalid");
+        }
+    }
+    if let Ok((at, ts)) = at {
+        if ts > time {
+            time = ts;
+        }
+
+        if at.is_f64() {
+            let data = json!([{"air_temp": at}]);
+            s.insert(String::from("temperature_sensor"), data);
+        } else {
+            log::error!("AirTemp for asset {serial_number} is invalid");
+        }
+    }
+
+    if !s.is_empty() && time > 0 {
+        let one_day = 24 * 60 * 60 * 1000;
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .ok()?
+            .as_millis();
+        let up_to_date = now - (time as u128) < one_day;
+        return Some((Value::Object(s), time, up_to_date));
     }
 
     None
 }
 
+/// Inserts the samples, one list item per sensor, into the database.
+/// Clears the fail times, which are updated in insert_fails.
 async fn insert_samples(
     client: &Client,
-    samples: Vec<(String, Value)>,
+    samples: Vec<(String, Value, u64)>,
 ) -> Result<()> {
-    if !samples.is_empty() {
-        // for updating _weather_sensor
-        let mut values = String::new();
-        // for updating controller.fail_time
-        let mut serial_values = String::new();
-        for (serial, sample) in samples {
-            values.push_str(&format!("('{}', '{}'::jsonb),", serial, sample));
-            serial_values.push_str(&format!("('{}'),", serial));
-        }
-        values.pop(); // remove trailing comma
-        serial_values.pop(); // remove trailing comma
-
-        let update_ws: String = format!(
-            "\
-            UPDATE iris._weather_sensor AS ws \
-            SET sample = new.sample, sample_time = current_timestamp \
-            FROM (VALUES {}) AS new(alt_id, sample) \
-            WHERE new.alt_id = ws.alt_id;",
-            values
-        );
-        let ws_updated = client.execute(&update_ws, &[]).await?;
-
-        let update_failtimes = format!(
-            "\
-            UPDATE iris.controller AS c \
-            SET fail_time = NULL \
-            FROM iris.controller_io AS cio \
-            JOIN iris._weather_sensor AS ws ON ws.name = cio.name \
-            JOIN (VALUES {}) AS new(alt_id) \
-                ON new.alt_id = ws.alt_id \
-            WHERE cio.controller = c.name;",
-            serial_values
-        );
-        let fails_updated = client.execute(&update_failtimes, &[]).await?;
-
-        println!(
-            "Updated sample, fail_time for {}, {} rows",
-            ws_updated, fails_updated
-        );
+    // for updating _weather_sensor
+    let mut values = String::new();
+    // for updating controller.fail_time
+    let mut serial_values = String::new();
+    for (serial, sample, time) in samples {
+        values.push_str(&format!(
+            "('{}', '{}'::jsonb, to_timestamp({} / 1000.0)),",
+            serial, sample, time
+        ));
+        serial_values.push_str(&format!("('{}'),", serial));
     }
+    values.pop(); // remove trailing comma
+    serial_values.pop(); // remove trailing comma
+
+    let update_ws: String = format!(
+        "\
+        UPDATE iris._weather_sensor AS ws \
+        SET sample = new.sample, sample_time = new.time \
+        FROM (VALUES {}) AS new(alt_id, sample, time) \
+        WHERE new.alt_id = ws.alt_id;",
+        values
+    );
+    let ws_updated = client.execute(&update_ws, &[]).await?;
+
+    let clear_failtimes = format!(
+        "\
+        UPDATE iris.controller AS c \
+        SET fail_time = NULL \
+        FROM iris.controller_io AS cio \
+        JOIN iris._weather_sensor AS ws ON ws.name = cio.name \
+        JOIN (VALUES {}) AS new(alt_id) \
+            ON new.alt_id = ws.alt_id \
+        WHERE cio.controller = c.name;",
+        serial_values
+    );
+    let fails_cleared = client.execute(&clear_failtimes, &[]).await?;
+
+    log::debug!(
+        "Updated sample, fail_time for {}, {} rows",
+        ws_updated,
+        fails_cleared
+    );
     Ok(())
 }
 
-async fn insert_fails(client: &Client, fails: Vec<String>) -> Result<()> {
-    if !fails.is_empty() {
-        let mut query: String = "\
-            UPDATE iris.controller as c \
-            SET fail_time=current_timestamp \
-            FROM (VALUES "
-            .to_owned();
-        for serial in fails {
-            query.push_str(format!("('{}'),", serial).as_str());
-        }
-        query.pop();
-        query.push_str(
-            ") AS new(alt_id) \
-            WHERE c.name = (\
-                SELECT controller from iris.controller_io \
-                WHERE name=(\
-                    SELECT name from iris._weather_sensor \
-                    WHERE alt_id=new.alt_id\
-                )\
-            )",
-        );
-        let rows_updated = client.execute(&query, &[]).await?;
-        println!("Updated fail_time for {} rows", rows_updated);
+/// Inserts the fail times, one per failed sensor, into the database.
+async fn insert_fails(
+    client: &Client,
+    fails: Vec<(String, Option<u64>)>,
+) -> Result<()> {
+    let mut query: String = "\
+        UPDATE iris.controller as c \
+        SET fail_time=new.time \
+        FROM (VALUES "
+        .to_owned();
+    for (serial, t) in fails {
+        let time = if let Some(time) = t {
+            &format!("to_timestamp({time} / 1000.0)")
+        } else {
+            "current_timestamp"
+        };
+        query.push_str(&format!("('{}', {}),", serial, time));
     }
+    query.pop();
+    query.push_str(
+        ") AS new(alt_id, time) \
+        WHERE c.name = (\
+            SELECT controller from iris.controller_io \
+            WHERE name=(\
+                SELECT name from iris._weather_sensor \
+                WHERE alt_id=new.alt_id\
+            )\
+        )",
+    );
+    let rows_updated = client.execute(&query, &[]).await?;
+    log::debug!("Updated fail_time for {} rows", rows_updated);
     Ok(())
 }
