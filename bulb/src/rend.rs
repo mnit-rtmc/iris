@@ -22,6 +22,7 @@ pub struct Renderer<'r> {
     gif: Option<&'r str>,
     id: Option<&'r str>,
     class: Option<&'r str>,
+    alt: Option<&'static str>,
     max_width: u16,
     max_height: u16,
     mod_size: Option<(u32, u32)>,
@@ -35,6 +36,7 @@ impl<'r> Renderer<'r> {
             gif: None,
             id: None,
             class: None,
+            alt: None,
             max_width: 240,
             max_height: 80,
             mod_size: None,
@@ -62,6 +64,12 @@ impl<'r> Renderer<'r> {
     /// Set the element class
     pub fn with_class(mut self, class: &'r str) -> Self {
         self.class = Some(class);
+        self
+    }
+
+    /// Set the alt description
+    pub fn with_alt(mut self, alt: &'static str) -> Self {
+        self.alt = Some(alt);
         self
     }
 
@@ -103,7 +111,11 @@ impl<'r> Renderer<'r> {
         img: &'p mut html::Img<'p>,
     ) {
         let (width, height) = self.size();
-        img.alt(join_text(multi, " ")).width(width).height(height);
+        match self.alt {
+            Some(alt) => img.alt(alt),
+            None => img.alt(join_text(multi, " ")),
+        };
+        img.width(width).height(height);
         if let Some(id) = &self.id {
             img.id(*id);
         }

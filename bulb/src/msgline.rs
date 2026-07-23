@@ -198,11 +198,12 @@ impl MsgLine {
         if let Some(cfg) = anc.sign_config(sc.as_ref())
             && let Some(dms) = &anc.make_dms(cfg)
         {
-            let mut rend = Renderer::new().with_dms(dms);
+            let mut rend =
+                Renderer::new().with_dms(dms).with_alt("FAILED TO RENDER");
             rend.render_multi(&self.multi(), img);
             return;
         }
-        img.alt("FAILED TO RENDER");
+        img.alt("BAD CONFIGURATION");
     }
 
     /// Replace preview image
