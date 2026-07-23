@@ -24,6 +24,7 @@ use crate::sse;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use chrono::{DateTime, Local};
+use earthwyrm::MapPane;
 use hatmil::css::{Prop, Rule, Sel};
 use resources::Res;
 use serde::Deserialize;
@@ -38,14 +39,17 @@ use web_sys::{
     ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent,
 };
 
+/// Map pane ID
+const MAP_PANE: &str = "map-pane";
+
 /// Layer groups
 const GROUPS: &[&str] = &["tile", "tms"];
 
-/// Rectangle X position
-const RECT_X: f64 = 0.32;
+/// Anchor X position
+const ANCHOR_X: f64 = 0.32;
 
-/// Rectangle Y position
-const RECT_Y: f64 = 0.5;
+/// Anchor Y position
+const ANCHOR_Y: f64 = 0.5;
 
 /// Binned station data
 #[derive(Deserialize)]
@@ -78,8 +82,8 @@ pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
 
 /// Select item on map
 async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
-    if let Some(map_pane) = earthwyrm::MapPane::get() {
-        map_pane.position(zoom, lon, lat, RECT_X, RECT_Y);
+    if let Some(map_pane) = MapPane::get(MAP_PANE) {
+        map_pane.set_position(zoom, lon, lat);
         Doc::new()?
             .elem::<Element>("zoom-level")?
             .set_inner_html(&zoom.to_string());
@@ -186,13 +190,14 @@ fn add_listeners() -> Result<()> {
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem(eid::CARDS)?)?;
     add_interval_callback()?;
-    if let Some(map_pane) = earthwyrm::MapPane::init(
-        "map-pane",
-        GROUPS,
-        handle_map_click,
-        handle_map_zoom,
-    ) {
-        map_pane.position(10, -93.2, 44.95, RECT_X, RECT_Y);
+    MapPane::new(MAP_PANE)
+        .with_anchor(ANCHOR_X, ANCHOR_Y)
+        .with_groups(GROUPS)
+        .with_click_handler(handle_map_click)
+        .with_zoom_handler(handle_map_zoom)
+        .register();
+    if let Some(map_pane) = MapPane::get(MAP_PANE) {
+        map_pane.set_position(10, -93.2, 44.95);
         doc.elem::<Element>("zoom-level")?.set_inner_html("10");
         clear_selected_item(10);
     }
@@ -344,7 +349,7 @@ async fn handle_layer_zoom(id: String) -> Result<()> {
 
 /// Get current map zoom level
 fn current_zoom() -> u32 {
-    earthwyrm::MapPane::get().map(|mp| mp.zoom()).unwrap_or(0)
+    MapPane::get(MAP_PANE).map(|mp| mp.zoom()).unwrap_or(0)
 }
 
 /// Get dependent resource row class name
