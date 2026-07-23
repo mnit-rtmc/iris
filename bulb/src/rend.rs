@@ -35,8 +35,8 @@ impl<'r> Renderer<'r> {
             gif: None,
             id: None,
             class: None,
-            max_width: u16::MAX,
-            max_height: u16::MAX,
+            max_width: 240,
+            max_height: 80,
             mod_size: None,
         }
     }

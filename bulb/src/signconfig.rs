@@ -297,11 +297,8 @@ fn render_sign<'p>(
     let mut img = td.img();
     match &dms {
         Some(dms) => {
-            let mut rend = Renderer::new()
-                .with_dms(dms)
-                .with_max_width(240)
-                .with_max_height(80)
-                .with_mod_size(mod_size);
+            let mut rend =
+                Renderer::new().with_dms(dms).with_mod_size(mod_size);
             rend.render_multi("A1", &mut img);
         }
         None => {

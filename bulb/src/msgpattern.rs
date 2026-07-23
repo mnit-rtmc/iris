@@ -262,10 +262,7 @@ impl MsgPattern {
             .or_else(|| self.planned_cfgs.first());
         anc.sign_config(sc).is_some_and(|cfg| {
             anc.make_dms(cfg).is_some_and(|dms| {
-                let rend = Renderer::new()
-                    .with_dms(&dms)
-                    .with_max_width(240)
-                    .with_max_height(80);
+                let rend = Renderer::new().with_dms(&dms);
                 rend.is_renderable(&self.multi())
             })
         })
@@ -408,10 +405,7 @@ impl MsgPattern {
         if let Some(cfg) = anc.sign_config(sc.as_ref()) {
             match &anc.make_dms(cfg) {
                 Some(dms) => {
-                    let mut rend = Renderer::new()
-                        .with_dms(dms)
-                        .with_max_width(240)
-                        .with_max_height(80);
+                    let mut rend = Renderer::new().with_dms(dms);
                     rend.render_multi(&self.multi(), img);
                 }
                 None => {

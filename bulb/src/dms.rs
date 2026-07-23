@@ -631,11 +631,8 @@ impl Dms {
         div.close();
         if let Some(gif) = self.msg_current_gif() {
             let multi = self.current_multi(anc);
-            let mut rend = Renderer::new()
-                .with_class("sign_message")
-                .with_gif(&gif)
-                .with_max_width(240)
-                .with_max_height(80);
+            let mut rend =
+                Renderer::new().with_class("sign_message").with_gif(&gif);
             rend.render_multi(multi, &mut tree.root::<html::Img>());
         }
         div = tree.root::<html::Div>();
@@ -730,9 +727,7 @@ impl Dms {
         let mut rend = Renderer::new()
             .with_dms(&dms)
             .with_id("mc_pixels")
-            .with_class("preview")
-            .with_max_width(240)
-            .with_max_height(80);
+            .with_class("preview");
         if let Some(pix) = self.failed_pixels(anc) {
             rend.render_pixels(&pix[..], &mut div.img());
         }
@@ -1366,9 +1361,7 @@ impl Card for Dms {
             let mut rend = Renderer::new()
                 .with_dms(&dms)
                 .with_id("mc_preview")
-                .with_class("preview")
-                .with_max_width(240)
-                .with_max_height(80);
+                .with_class("preview");
             let mut img = tree.root::<html::Img>();
             rend.render_multi(&multi, &mut img);
             el.set_outer_html(&String::from(tree));
