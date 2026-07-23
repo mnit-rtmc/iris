@@ -269,16 +269,7 @@ impl MsgLine {
             .close();
         div.close();
         let mut fs = tree.root::<html::FieldSet>();
-        let mut legend = fs.legend();
-        legend
-            .input()
-            .id("tab_preview")
-            .class("toggle")
-            .r#type("radio")
-            .name("pattern_tab")
-            .checked();
-        legend.label().r#for("tab_preview").cdata("Preview").close();
-        legend.close();
+        fs.legend().cdata("Preview").close();
         div = fs.div();
         div.id("ml_preview_div");
         let mut div2 = div.div();
