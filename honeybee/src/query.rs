@@ -654,13 +654,9 @@ pub const MSG_LINE_ONE: &str = "\
 /// SQL query for all message patterns (primary)
 pub const MSG_PATTERN_ALL: &str = "\
   SELECT mp.name, compose_hashtag, multi, \
-         to_jsonb(array_remove(array_agg(DISTINCT cd.sign_config), null)) \
-      AS compose_cfgs, \
          to_jsonb(array_remove(array_agg(DISTINCT pd.sign_config), null)) \
       AS planned_cfgs \
   FROM iris.msg_pattern mp \
-  LEFT JOIN iris.hashtag ch ON LOWER(ch.hashtag) = LOWER(mp.compose_hashtag) \
-  LEFT JOIN iris.dms cd ON ch.name = cd.name \
   LEFT JOIN iris.device_action da ON da.msg_pattern = mp.name \
   LEFT JOIN iris.hashtag ph ON LOWER(ph.hashtag) = LOWER(da.hashtag) \
   LEFT JOIN iris.dms pd ON ph.name = pd.name \
@@ -671,13 +667,9 @@ pub const MSG_PATTERN_ALL: &str = "\
 /// SQL query for one message pattern (secondary)
 pub const MSG_PATTERN_ONE: &str = "\
   SELECT mp.name, compose_hashtag, multi, flash_beacon, pixel_service, \
-         to_jsonb(array_remove(array_agg(DISTINCT cd.sign_config), null)) \
-      AS compose_cfgs, \
          to_jsonb(array_remove(array_agg(DISTINCT pd.sign_config), null)) \
       AS planned_cfgs \
   FROM iris.msg_pattern mp \
-  LEFT JOIN iris.hashtag ch ON LOWER(ch.hashtag) = LOWER(mp.compose_hashtag) \
-  LEFT JOIN iris.dms cd ON ch.name = cd.name \
   LEFT JOIN iris.device_action da ON da.msg_pattern = mp.name \
   LEFT JOIN iris.hashtag ph ON LOWER(ph.hashtag) = LOWER(da.hashtag) \
   LEFT JOIN iris.dms pd ON ph.name = pd.name \

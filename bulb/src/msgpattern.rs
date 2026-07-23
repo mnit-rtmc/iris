@@ -15,6 +15,7 @@ use crate::card::{AncillaryData, Card, footer_html};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
+use crate::notes::contains_hashtag;
 use crate::rend::{Renderer, replace_action_tags};
 use crate::signconfig::NtcipDms;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
@@ -30,6 +31,13 @@ use std::borrow::Cow;
 use std::cmp::Ordering;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{HtmlElement, HtmlSelectElement, HtmlTextAreaElement};
+
+/// Hashtag sign configs
+#[derive(Debug, Default, Deserialize, PartialEq)]
+pub struct HashtagSignCfg {
+    hashtag: String,
+    sign_config: String,
+}
 
 /// Font name
 #[derive(Debug, Default, Deserialize)]
@@ -51,6 +59,7 @@ pub struct GraphicName {
 #[derive(Default)]
 pub struct MsgPatternAnc {
     assets: Vec<Asset>,
+    hashtag_cfgs: Vec<HashtagSignCfg>,
     configs: Vec<SignConfig>,
     fonts: FontTable<256, 24>,
     graphics: GraphicTable<32>,
@@ -62,7 +71,6 @@ pub struct MsgPattern {
     pub name: String,
     pub compose_hashtag: Option<String>,
     pub multi: String,
-    pub compose_cfgs: Vec<String>,
     pub planned_cfgs: Vec<String>,
     // secondary attributes
     pub flash_beacon: Option<bool>,
@@ -74,7 +82,12 @@ impl AncillaryData for MsgPatternAnc {
 
     /// Construct ancillary message pattern data
     fn new(_pri: &MsgPattern, _view: View) -> Self {
-        let assets = vec![Asset::SignConfigs, Asset::Fonts, Asset::Graphics];
+        let assets = vec![
+            Asset::HashtagSignCfgs,
+            Asset::SignConfigs,
+            Asset::Fonts,
+            Asset::Graphics,
+        ];
         MsgPatternAnc {
             assets,
             ..Default::default()
@@ -94,6 +107,9 @@ impl AncillaryData for MsgPatternAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::HashtagSignCfgs => {
+                self.hashtag_cfgs = serde_wasm_bindgen::from_value(value)?;
+            }
             Asset::SignConfigs => {
                 self.configs = serde_wasm_bindgen::from_value(value)?;
             }
@@ -145,8 +161,17 @@ impl AncillaryData for MsgPatternAnc {
 }
 
 impl MsgPatternAnc {
+    /// Get iterator of compose configs for a message pattern
+    fn compose_configs(&self, pri: &MsgPattern) -> impl Iterator<Item = &str> {
+        let ht = pri.compose_hashtag.as_deref().unwrap_or("");
+        self.hashtag_cfgs
+            .iter()
+            .filter(|hc| contains_hashtag(ht, &hc.hashtag))
+            .map(|hc| hc.sign_config.as_str())
+    }
+
     /// Find a sign config
-    fn sign_config(&self, cfg: Option<&String>) -> Option<&SignConfig> {
+    fn sign_config(&self, cfg: Option<&str>) -> Option<&SignConfig> {
         cfg.and_then(|cfg| self.configs.iter().find(|c| c.name == *cfg))
     }
 
@@ -238,11 +263,12 @@ impl MsgPattern {
 
     /// Get item states
     fn item_states(&self, anc: &MsgPatternAnc) -> ItemStates<'static> {
-        if self.compose_cfgs.is_empty() && self.planned_cfgs.is_empty() {
+        let has_compose = anc.compose_configs(self).next().is_some();
+        if !has_compose && self.planned_cfgs.is_empty() {
             return ItemState::Inactive.into();
         }
         let mut states = ItemStates::default();
-        if !self.compose_cfgs.is_empty() {
+        if has_compose {
             states = states.with(ItemState::Available, "");
         }
         if !self.planned_cfgs.is_empty() {
@@ -256,10 +282,10 @@ impl MsgPattern {
 
     /// Check if the pattern is renderable
     fn is_renderable(&self, anc: &MsgPatternAnc) -> bool {
-        let sc = self
-            .compose_cfgs
-            .first()
-            .or_else(|| self.planned_cfgs.first());
+        let sc = anc
+            .compose_configs(self)
+            .next()
+            .or_else(|| self.planned_cfgs.first().map(|c| c.as_str()));
         anc.sign_config(sc).is_some_and(|cfg| {
             anc.make_dms(cfg).is_some_and(|dms| {
                 let rend = Renderer::new().with_dms(&dms);
@@ -330,7 +356,7 @@ impl MsgPattern {
         div.id("mp_preview_div").class("no-display");
         let mut div2 = div.div();
         div2.class("row");
-        self.configs_select(&mut div2.select());
+        self.configs_select(anc, &mut div2.select());
         self.render_preview(anc, &mut div2.img());
         div.close();
         fs.close();
@@ -363,10 +389,13 @@ impl MsgPattern {
     }
 
     /// Make a select element for sign configs
-    fn configs_select<'p>(&self, select: &'p mut html::Select<'p>) {
+    fn configs_select<'p>(
+        &self,
+        anc: &MsgPatternAnc,
+        select: &'p mut html::Select<'p>,
+    ) {
         select.id("mp_config").size(4);
-        let mut cfgs: Vec<&str> =
-            self.compose_cfgs.iter().map(String::as_str).collect();
+        let mut cfgs: Vec<&str> = anc.compose_configs(self).collect();
         cfgs.extend(self.planned_cfgs.iter().map(String::as_str));
         let sc = cfgs.first().map(|c| c.to_owned());
         cfgs.sort();
@@ -382,16 +411,16 @@ impl MsgPattern {
     }
 
     /// Get selected sign configuration
-    fn selected_config(&self) -> Option<String> {
+    fn selected_config(&self, anc: &MsgPatternAnc) -> Option<String> {
         if let Some(elem) =
             Doc::get().opt_elem::<HtmlSelectElement>("mp_config")
         {
             return Some(elem.value());
         }
-        self.compose_cfgs
-            .first()
-            .or_else(|| self.planned_cfgs.first())
-            .cloned()
+        anc.compose_configs(self)
+            .next()
+            .or_else(|| self.planned_cfgs.first().map(|c| c.as_str()))
+            .map(String::from)
     }
 
     /// Render the message pattern image preview
@@ -401,8 +430,8 @@ impl MsgPattern {
         img: &'p mut html::Img<'p>,
     ) {
         img.id("mp_preview");
-        let sc = self.selected_config();
-        if let Some(cfg) = anc.sign_config(sc.as_ref())
+        let sc = self.selected_config(anc);
+        if let Some(cfg) = anc.sign_config(sc.as_deref())
             && let Some(dms) = &anc.make_dms(cfg)
         {
             let mut rend =

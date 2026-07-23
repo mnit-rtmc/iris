@@ -23,12 +23,12 @@ active for long periods of time.
 * `iris/api/msg_pattern` (primary)
 * `iris/api/msg_pattern/{name}`
 
-| Access       | Primary                            | Secondary |
-|--------------|------------------------------------|-----------|
-| 👁️  View      | name, compose\_cfgs, planned\_cfgs |           |
-| 👉 Operate   |                                    |           |
-| 💡 Manage    | compose\_hashtag, multi            | flash\_beacon, pixel\_service |
-| 🔧 Configure |                                    |           |
+| Access       | Primary                 | Secondary                     |
+|--------------|-------------------------|-------------------------------|
+| 👁️  View      | name, planned\_cfgs     |                               |
+| 👉 Operate   |                         |                               |
+| 💡 Manage    | compose\_hashtag, multi | flash\_beacon, pixel\_service |
+| 🔧 Configure |                         |                               |
 
 </details>
 
