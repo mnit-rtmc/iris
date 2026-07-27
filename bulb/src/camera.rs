@@ -22,9 +22,7 @@ use crate::geoloc::LocAnc;
 use crate::helper::spawn_future;
 use crate::item::ItemState;
 use crate::joystick;
-use crate::permission::{
-    ACCESS_MANAGE, ACCESS_NONE, ACCESS_OPERATE, Permission,
-};
+use crate::permission::{ACCESS_MANAGE, ACCESS_OPERATE, Permission};
 use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
@@ -83,8 +81,7 @@ impl AncillaryData for CameraAnc {
         CameraAnc {
             cio,
             loc,
-            access: Vec::new(),
-            enc_types: Vec::new(),
+            ..Default::default()
         }
     }
 
@@ -119,13 +116,11 @@ impl AncillaryData for CameraAnc {
 impl CameraAnc {
     /// Get permission access level
     fn access_level(&self, pri: &Camera) -> u32 {
-        let mut access_level = ACCESS_NONE;
-        for perm in &self.access {
-            if perm.check_access(Res::Camera, pri.notes.as_deref()) {
-                access_level = access_level.max(perm.access_level);
-            }
-        }
-        access_level
+        Permission::access_level(
+            self.access.as_slice(),
+            Res::Camera,
+            pri.notes.as_deref(),
+        )
     }
 
     /// Build encoder types HTML

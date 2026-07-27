@@ -124,4 +124,15 @@ impl Permission {
                 .as_deref()
                 .is_none_or(|ht| notes.is_some_and(|n| contains_hashtag(n, ht)))
     }
+
+    /// Get permission access level for a resource
+    pub fn access_level(perms: &[Self], res: Res, notes: Option<&str>) -> u32 {
+        let mut access_level = ACCESS_NONE;
+        for perm in perms {
+            if perm.check_access(res, notes) {
+                access_level = access_level.max(perm.access_level);
+            }
+        }
+        access_level
+    }
 }

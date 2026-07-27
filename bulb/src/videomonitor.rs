@@ -18,7 +18,7 @@ use crate::eid;
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::monitorstyle::MonitorStyle;
-use crate::permission::{ACCESS_NONE, ACCESS_VIEW, Permission};
+use crate::permission::{ACCESS_VIEW, Permission};
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
 };
@@ -98,13 +98,11 @@ impl AncillaryData for VideoMonitorAnc {
 impl VideoMonitorAnc {
     /// Get permission access level
     fn access_level(&self, pri: &VideoMonitor) -> u32 {
-        let mut access_level = ACCESS_NONE;
-        for perm in &self.access {
-            if perm.check_access(Res::VideoMonitor, pri.notes.as_deref()) {
-                access_level = access_level.max(perm.access_level);
-            }
-        }
-        access_level
+        Permission::access_level(
+            self.access.as_slice(),
+            Res::VideoMonitor,
+            pri.notes.as_deref(),
+        )
     }
 
     /// Build monitor styles HTML

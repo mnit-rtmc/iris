@@ -23,6 +23,7 @@ use crate::lock::LockReason;
 use crate::msgline::MsgLine;
 use crate::msgpattern::{FontName, GraphicName, MsgPattern};
 use crate::notes::contains_hashtag;
+use crate::permission::{ACCESS_OPERATE, Permission};
 use crate::rend::Renderer;
 use crate::rle::Table;
 use crate::signconfig::NtcipDms;
@@ -195,6 +196,7 @@ pub struct Dms {
 pub struct DmsAnc {
     cio: ControllerIoAnc<Dms>,
     loc: LocAnc<Dms>,
+    access: Vec<Permission>,
     messages: Vec<SignMessage>,
     configs: Vec<SignConfig>,
     compose_patterns: Vec<MsgPattern>,
@@ -217,6 +219,7 @@ impl AncillaryData for DmsAnc {
                 cio.assets.push(Asset::SignMessages);
             }
             View::Control => {
+                cio.assets.push(Asset::Access);
                 cio.assets.push(Asset::SignMessages);
                 cio.assets.push(Asset::SignConfigs);
                 cio.assets.push(Asset::MsgPatterns);
@@ -251,6 +254,9 @@ impl AncillaryData for DmsAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::Access => {
+                self.access = serde_wasm_bindgen::from_value(value)?;
+            }
             Asset::Controllers => {
                 self.cio.set_asset(pri, asset, value)?;
             }
@@ -350,6 +356,15 @@ impl AncillaryData for DmsAnc {
 }
 
 impl DmsAnc {
+    /// Get permission access level
+    fn access_level(&self, pri: &Dms) -> u32 {
+        Permission::access_level(
+            self.access.as_slice(),
+            Res::Dms,
+            pri.notes.as_deref(),
+        )
+    }
+
     /// Get a sign message by name
     fn sign_message(&self, msg: Option<&str>) -> Option<&SignMessage> {
         msg.and_then(|msg| self.messages.iter().find(|m| m.name == msg))
@@ -669,7 +684,9 @@ impl Dms {
         div.class("info fill")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
-        self.message_composer_html(anc, &mut tree.root::<html::Div>());
+        if anc.access_level(self) >= ACCESS_OPERATE {
+            self.message_composer_html(anc, &mut tree.root::<html::Div>());
+        }
         self.action_plans_html(anc, &mut tree.root::<html::Details>());
         String::from(tree)
     }
