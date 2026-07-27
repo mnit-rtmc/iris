@@ -34,7 +34,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
-    Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
+    Element, Event, Gamepad, HtmlButtonElement, HtmlElement, HtmlInputElement,
     HtmlSelectElement, KeyboardEvent, MouseEvent, ScrollBehavior,
     ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent,
 };
@@ -184,6 +184,7 @@ fn add_listeners() -> Result<()> {
     add_click_listener(&sidebar)?;
     let body = doc.body()?;
     add_joystick_listener(&body)?;
+    add_physical_joystick_listener()?;
     add_mouse_listener(&body)?;
     add_input_listener(&sidebar)?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
@@ -797,6 +798,46 @@ fn add_joystick_listener(el: &Element) -> Result<()> {
     el.add_event_listener_with_callback(
         "mousemove",
         closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
+}
+
+fn add_physical_joystick_listener() -> Result<()> {
+    let window = util::window()?;
+    let window_clone = window.clone();
+    let closure: Closure<dyn Fn()> = Closure::new(move || {
+        if let Some(cv) = app::expanded_view()
+            && cv.res == Res::Camera
+        {
+            let nav = window_clone.navigator();
+            let gamepads = match nav.get_gamepads() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::debug!("Couldn't get gamepads due to {e:?}");
+                    return;
+                }
+            };
+            let sticks = Doc::get().0.get_elements_by_class_name("joystick");
+            for val in gamepads {
+                let Ok(gp) = val.dyn_into::<Gamepad>() else {
+                    continue;
+                };
+                let axes = gp.axes();
+                for i in 0..sticks.length() {
+                    if let Some(stick) = sticks.item(i) {
+                        spawn_future(joystick::handle_gamepad(
+                            stick.id(),
+                            axes.clone(),
+                        ));
+                    }
+                }
+            }
+        }
+    });
+    window.set_interval_with_callback_and_timeout_and_arguments_0(
+        closure.as_ref().unchecked_ref(),
+        50,
     )?;
     closure.forget();
     Ok(())

@@ -18,7 +18,7 @@ use hatmil::html;
 use resources::Res;
 use web_sys::HtmlElement;
 
-/// Turn the div into a joystick element
+/// Turns a div into a joystick element
 /// div: the div of the joystick
 /// id: id of the joystick element
 /// res: resource &str to send requests for
@@ -70,15 +70,18 @@ fn format_field(
     stick: &HtmlElement,
     x: f64,
     y: f64,
-    f_dir: &str,
+    z: f64,
+    fields_direct: &str,
 ) -> Option<String> {
     let x_val = format!("{:.1}", x);
     let y_val = format!("{:.1}", y);
+    let z_val = format!("{:.1}", z);
     if let Some(f) = stick.get_attribute("data-fields") {
         return Some(
             f.replacen("{}", &x_val, 1)
                 .replacen("{}", &y_val, 1)
-                .replacen("{}", f_dir, 1),
+                .replacen("{}", &z_val, 1)
+                .replacen("{}", fields_direct, 1),
         );
     }
     None
@@ -87,18 +90,21 @@ fn format_field(
 /// Build the list of actions to perform based on normalized x and y
 fn get_actions(stick: &HtmlElement, x: f64, y: f64) -> Vec<Action> {
     let fields_direct = stick.get_attribute("data-fields-direct");
-    let f_dir = fields_direct.as_deref().unwrap_or("");
+    let fields_direct = fields_direct.as_deref().unwrap_or("");
     if let (Some(res), Some(name), Some(f)) = (
         from_attr::<Res>(stick, "data-res"),
         stick.get_attribute("data-name"),
-        format_field(stick, x, y, f_dir),
+        format_field(stick, x, y, 0.0, fields_direct),
     ) {
         log::debug!("{f}");
-        if f_dir.is_empty() {
-            return vec![Action::Patch(uri_one(res, &name), f.into())];
-        } else {
-            return vec![Action::Patch(uri_one_direct(res, &name), f.into())];
-        }
+        return vec![Action::Patch(
+            if fields_direct.is_empty() {
+                uri_one(res, &name)
+            } else {
+                uri_one_direct(res, &name)
+            },
+            f.into(),
+        )];
     }
     Vec::new()
 }
@@ -167,7 +173,20 @@ fn handle_mouse_move(
     stick: &HtmlElement,
     mouse_x: i32,
     mouse_y: i32,
+    physical: bool,
 ) -> Vec<Action> {
+    // If triggered by physical gamepad, only visual transform
+    if physical
+        && let Some(max_diff) = parse_attr::<f64>(stick, "data-max-diff")
+    {
+        let x = (mouse_x as f64 / i32::MAX as f64) * max_diff;
+        let y = (mouse_y as f64 / i32::MAX as f64) * max_diff;
+        let t = format!("translate3d({}px, {}px, 0px)", x, y);
+        stick.style().set_property("transform", &t).ok();
+        return vec![];
+    }
+
+    // Otherwise, handle Action too
     if let (Some(start_x), Some(start_y), Some(max_diff)) = (
         parse_attr::<i32>(stick, "data-start-x"),
         parse_attr::<i32>(stick, "data-start-y"),
@@ -218,11 +237,80 @@ pub async fn handle_mouse_event(
         let actions = match type_.as_str() {
             "mouseup" => handle_mouse_up(&target),
             "mousedown" => handle_mouse_down(&target, x, y),
-            "mousemove" => handle_mouse_move(&target, x, y),
+            "mousemove" => handle_mouse_move(&target, x, y, false),
             _ => Vec::new(),
         };
         for action in actions {
             action.perform().await?;
+        }
+    }
+    Ok(())
+}
+
+/// Handle movement for a physical joystick/gamepad
+pub async fn handle_gamepad(id: String, axes: js_sys::Array) -> Result<()> {
+    if let Some(stick) = Doc::get().opt_elem::<HtmlElement>(&id) {
+        let fields_direct = stick.get_attribute("data-fields-direct");
+        let fields_direct = fields_direct.as_deref().unwrap_or("");
+
+        // Get PTZ axes clamped to [-1, 1]
+        let mut x = axes.get(0).as_f64().unwrap_or(0.0).clamp(-1.0, 1.0);
+        let mut y = axes.get(1).as_f64().unwrap_or(0.0).clamp(-1.0, 1.0);
+        // Axis 4 seems to be up/down on second stick, with reversed direction
+        let mut z = axes
+            .get(3)
+            .as_f64()
+            .unwrap_or(-axes.get(2).as_f64().unwrap_or(0.0))
+            .clamp(-1.0, 1.0);
+
+        // Determine if joystick should be ignored, because physical input is stopped
+        let dead_zone = 0.1;
+        if x.abs() < dead_zone {
+            x = 0.0;
+        }
+        if y.abs() < dead_zone {
+            y = 0.0;
+        }
+        if z.abs() < dead_zone {
+            z = 0.0;
+        }
+
+        // Whether physical input was stopped already
+        let stopped = stick
+            .get_attribute("stopped")
+            .unwrap_or(String::from("true"))
+            == "true";
+
+        if let (Some(res), Some(name), Some(f)) = (
+            from_attr::<Res>(&stick, "data-res"),
+            stick.get_attribute("data-name"),
+            format_field(&stick, x, -y, -z, fields_direct),
+        ) {
+            let x = (x * (i32::MAX as f64)) as i32;
+            let y = (y * (i32::MAX as f64)) as i32;
+            let z = (z * (i32::MAX as f64)) as i32;
+            let sending_stop = x == 0 && y == 0 && z == 0;
+            if stopped && sending_stop {
+                // We were already stopped, and there's no significant stick input
+                // Do nothing
+                return Ok(());
+            }
+            // Update attribute and handle animation
+            let sending_stop = &format!("{}", sending_stop);
+            stick.set_attribute("stopped", sending_stop).ok();
+            handle_mouse_move(&stick, x, y, true);
+
+            // Now actually send PTZ action
+            Action::Patch(
+                if fields_direct.is_empty() {
+                    uri_one(res, &name)
+                } else {
+                    uri_one_direct(res, &name)
+                },
+                f.into(),
+            )
+            .perform()
+            .await?;
         }
     }
     Ok(())

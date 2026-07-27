@@ -361,7 +361,7 @@ impl Camera {
             "ptz-joystick",
             Res::Camera.as_str(),
             &self.name,
-            "{\"ptz\":[{},{},0.0]{}}",
+            "{\"ptz\":[{},{},{}]{}}",
             &fields_direct,
         );
         row.button().id("ptz-pan-right").r#type("button").cdata("→");
