@@ -659,6 +659,8 @@ fn add_click_listener(el: &Element) -> Result<()> {
                 handle_button_click_ev(&target);
             } else if let Ok(Some(cc)) = target.closest(".card-compact") {
                 handle_card_click_ev(&cc);
+            } else {
+                handle_click_ev(&target);
             }
         }
     });
@@ -691,6 +693,17 @@ fn handle_button_click_ev(target: &Element) {
                 data_type: target.get_attribute("data-type"),
             };
             spawn_future(handle_button_card(attrs));
+        }
+    }
+}
+
+/// Handle a `click` event for non-button target
+fn handle_click_ev(target: &Element) {
+    let id = target.id();
+    if eid::MONITOR == id.as_str() {
+        app::set_vid_mon(None);
+        if let Ok(t) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
+            t.set_inner_html("📺");
         }
     }
 }
