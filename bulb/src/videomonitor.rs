@@ -18,7 +18,7 @@ use crate::eid;
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::monitorstyle::MonitorStyle;
-use crate::permission::Permission;
+use crate::permission::{ACCESS_NONE, ACCESS_VIEW, Permission};
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
 };
@@ -98,7 +98,7 @@ impl AncillaryData for VideoMonitorAnc {
 impl VideoMonitorAnc {
     /// Get permission access level
     fn access_level(&self, pri: &VideoMonitor) -> u32 {
-        let mut access_level = 0;
+        let mut access_level = ACCESS_NONE;
         for perm in &self.access {
             if perm.check_access(Res::VideoMonitor, pri.notes.as_deref()) {
                 access_level = access_level.max(perm.access_level);
@@ -141,7 +141,9 @@ impl VideoMonitor {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a VideoMonitorAnc) -> ItemStates<'a> {
         let mut states = anc.cio.item_states(self);
-        if states.contains(ItemState::Online) && anc.access_level(self) <= 1 {
+        if states.contains(ItemState::Online)
+            && anc.access_level(self) <= ACCESS_VIEW
+        {
             states.remove(ItemState::Online);
             states = states.with(ItemState::Prohibited, "");
         }

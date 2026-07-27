@@ -16,7 +16,7 @@ use crate::domain::Domain;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::ItemState;
-use crate::permission::{Permission, access_item_state};
+use crate::permission::{ACCESS_NONE, Permission, access_item_state};
 use crate::util::{ContainsLower, Doc, Fields, Input};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -162,7 +162,7 @@ impl RolePerm {
         match self.state {
             PermState::Existing => {
                 let uri = uri_one(Res::Permission, &perm.name);
-                if perm.access_level == 0 {
+                if perm.access_level == ACCESS_NONE {
                     actions.push(Action::Delete(uri));
                 } else {
                     let mut fields = Fields::new();

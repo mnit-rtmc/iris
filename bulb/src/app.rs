@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::CardList;
+use crate::permission::ACCESS_CONFIGURE;
 use crate::sse::NotifyState;
 use crate::view::CardView;
 use resources::Res;
@@ -125,7 +126,7 @@ pub fn can_edit_card() -> bool {
         rc.borrow()
             .cards
             .as_ref()
-            .map(|cl| cl.access_level() > 3)
+            .map(|cl| cl.access_level() >= ACCESS_CONFIGURE)
             .unwrap_or(false)
     })
 }

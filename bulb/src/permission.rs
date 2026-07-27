@@ -18,13 +18,28 @@ use serde_json::Value;
 use serde_json::map::Map;
 use std::cmp::Ordering;
 
+/// Prohibited access level
+pub const ACCESS_NONE: u32 = 0;
+
+/// View access level
+pub const ACCESS_VIEW: u32 = 1;
+
+/// Operate access level
+pub const ACCESS_OPERATE: u32 = 2;
+
+/// Manage access level
+pub const ACCESS_MANAGE: u32 = 3;
+
+/// Configure access level
+pub const ACCESS_CONFIGURE: u32 = 4;
+
 /// Get item state for an access level
 pub fn access_item_state(access_level: u32) -> ItemState {
     match access_level {
-        1 => ItemState::View,
-        2 => ItemState::Operate,
-        3 => ItemState::Manage,
-        4 => ItemState::Configure,
+        ACCESS_VIEW => ItemState::View,
+        ACCESS_OPERATE => ItemState::Operate,
+        ACCESS_MANAGE => ItemState::Manage,
+        ACCESS_CONFIGURE => ItemState::Configure,
         _ => ItemState::Prohibited,
     }
 }
@@ -76,7 +91,7 @@ impl Permission {
             role: role.to_string(),
             base_resource: base_resource.to_string(),
             hashtag: None,
-            access_level: 0,
+            access_level: ACCESS_NONE,
         }
     }
 
@@ -97,7 +112,7 @@ impl Permission {
         if res.base().as_str() == self.base_resource {
             self.access_level
         } else {
-            0
+            ACCESS_NONE
         }
     }
 
