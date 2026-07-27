@@ -65,9 +65,11 @@ struct StationData {
 
 /// Button attributes
 struct ButtonAttrs {
+    /// Element ID
     id: String,
-    class_name: String,
+    /// Data-link attribute
     data_link: Option<String>,
+    /// Data-type attribute
     data_type: Option<String>,
 }
 
@@ -686,12 +688,7 @@ fn handle_button_click_ev(target: &Element) {
         | "ptz-zoom-in" | "ptz-zoom-out" | "focus-near" | "focus-far"
         | "iris-open" | "iris-close" => (),
         _ => {
-            let attrs = ButtonAttrs {
-                id,
-                class_name: target.class_name(),
-                data_link: target.get_attribute("data-link"),
-                data_type: target.get_attribute("data-type"),
-            };
+            let attrs = ButtonAttrs::new(id, target);
             spawn_future(handle_button_card(attrs));
         }
     }
@@ -853,11 +850,45 @@ async fn handle_mouse_card(id: String, mouse_down: bool) -> Result<()> {
     Ok(())
 }
 
+impl ButtonAttrs {
+    /// Create button attributes
+    fn new(id: String, target: &Element) -> Self {
+        let mut data_link = None;
+        let mut data_type = None;
+        if let Some("go_link") = target.get_attribute("class").as_deref() {
+            data_link = target.get_attribute("data-link");
+            data_type = target.get_attribute("data-type");
+        }
+        ButtonAttrs {
+            id,
+            data_link,
+            data_type,
+        }
+    }
+
+    /// Check if data link
+    fn is_link(&self) -> bool {
+        self.data_link.is_some() && self.data_type.is_some()
+    }
+
+    /// Go to resource from target's `data-link` attribute
+    async fn go_resource(self) -> Result<()> {
+        if let (Some(link), Some(rname)) = (self.data_link, self.data_type)
+            && let Ok(res) = Res::try_from(rname.as_str())
+        {
+            set_resource(Some(res), &link).await?;
+            sse::post_req(Some(res)).await
+        } else {
+            Ok(())
+        }
+    }
+}
+
 /// Handle button click event on an expanded card
 async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
-        if attrs.class_name == "go_link" {
-            go_resource(attrs).await?;
+        if attrs.is_link() {
+            attrs.go_resource().await?;
         } else if eid::DELETE == attrs.id {
             if app::delete_enabled() {
                 cv.handle_delete().await?;
@@ -954,18 +985,6 @@ async fn handle_logout() -> Result<()> {
     let uri = Uri::from("/iris/api/login");
     uri.delete().await?;
     Ok(())
-}
-
-/// Go to resource from target's `data-link` attribute
-async fn go_resource(attrs: ButtonAttrs) -> Result<()> {
-    if let (Some(link), Some(rname)) = (attrs.data_link, attrs.data_type)
-        && let Ok(res) = Res::try_from(rname.as_str())
-    {
-        set_resource(Some(res), &link).await?;
-        sse::post_req(Some(res)).await
-    } else {
-        Ok(())
-    }
 }
 
 /// Set selected resource
