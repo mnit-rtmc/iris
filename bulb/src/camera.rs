@@ -22,6 +22,9 @@ use crate::geoloc::LocAnc;
 use crate::helper::spawn_future;
 use crate::item::ItemState;
 use crate::joystick;
+use crate::permission::{
+    ACCESS_MANAGE, ACCESS_NONE, ACCESS_OPERATE, Permission,
+};
 use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
@@ -60,6 +63,7 @@ pub struct Camera {
 pub struct CameraAnc {
     cio: ControllerIoAnc<Camera>,
     loc: LocAnc<Camera>,
+    access: Vec<Permission>,
     enc_types: Vec<EncoderType>,
 }
 
@@ -70,8 +74,8 @@ impl AncillaryData for CameraAnc {
     fn new(pri: &Camera, view: View) -> Self {
         let cio = ControllerIoAnc::new(pri, view);
         let mut loc = LocAnc::new(pri, view);
-        if let (View::Status, Some(nm)) = (view, pri.geoloc()) {
-            loc.assets.push(Asset::GeoLoc(nm.to_string(), Res::Camera));
+        if let View::Control = view {
+            loc.assets.push(Asset::Access);
         }
         if let View::Setup(_edit) = view {
             loc.assets.push(Asset::EncoderTypes);
@@ -79,6 +83,7 @@ impl AncillaryData for CameraAnc {
         CameraAnc {
             cio,
             loc,
+            access: Vec::new(),
             enc_types: Vec::new(),
         }
     }
@@ -96,6 +101,10 @@ impl AncillaryData for CameraAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::Access => {
+                self.access = serde_wasm_bindgen::from_value(value)?;
+                Ok(())
+            }
             Asset::Controllers => self.cio.set_asset(pri, asset, value),
             Asset::EncoderTypes => {
                 self.enc_types = serde_wasm_bindgen::from_value(value)?;
@@ -108,6 +117,17 @@ impl AncillaryData for CameraAnc {
 }
 
 impl CameraAnc {
+    /// Get permission access level
+    fn access_level(&self, pri: &Camera) -> u32 {
+        let mut access_level = ACCESS_NONE;
+        for perm in &self.access {
+            if perm.check_access(Res::Camera, pri.notes.as_deref()) {
+                access_level = access_level.max(perm.access_level);
+            }
+        }
+        access_level
+    }
+
     /// Build encoder types HTML
     fn encoder_type_html<'p>(
         &self,
@@ -433,19 +453,17 @@ impl Camera {
     }
 
     /// Add preset controls to tree
-    fn to_html_ptz_presets(
-        &self,
-        _anc: &CameraAnc,
-        parent_row: &mut html::Div,
-    ) {
+    fn to_html_ptz_presets(&self, anc: &CameraAnc, parent_row: &mut html::Div) {
         let mut div = parent_row.div();
-        div.class("camera-presets")
-            .button()
-            .id("preset-mode-toggle")
-            .class("default") // .active after click until store
-            .r#type("button")
-            .cdata("Store preset...")
-            .close();
+        div.class("camera-presets");
+        if anc.access_level(self) >= ACCESS_MANAGE {
+            div.button()
+                .id("preset-mode-toggle")
+                .class("default") // .active after click until store
+                .r#type("button")
+                .cdata("Store preset...")
+                .close();
+        }
         let mut btns = div.div();
         btns.class("preset-buttons");
         for r in 0..=3 {
@@ -488,6 +506,7 @@ impl Camera {
         if let Some((lon, lat)) = anc.loc.lonlat() {
             select_item_map(Res::Camera, &self.name, lon, lat);
         }
+        let access_level = anc.access_level(self);
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
@@ -495,7 +514,6 @@ impl Camera {
         div.button().id("switch-monitor").r#type("button");
         spawn_future(dispatch_switch_monitor());
         div.close();
-
         div = tree.root::<html::Div>();
         div.class("row");
         anc.cio.item_states(self).spans(&mut div.span());
@@ -509,24 +527,25 @@ impl Camera {
             .class("info")
             .cdata_len(opt_ref(&self.location), 64);
         div.close();
-
-        div = tree.root::<html::Div>();
-        div.class("row");
-        self.to_html_ptz_controls(anc, &mut div);
-        self.to_html_lens_controls(anc, &mut div);
-        self.to_html_ptz_presets(anc, &mut div);
-        div.close();
-
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.label().r#for("publish").cdata("Publish").close();
-        let mut input = div.input();
-        input.id("publish").r#type("checkbox");
-        if self.publish {
-            input.checked();
+        if access_level >= ACCESS_OPERATE {
+            div = tree.root::<html::Div>();
+            div.class("row");
+            self.to_html_ptz_controls(anc, &mut div);
+            self.to_html_lens_controls(anc, &mut div);
+            self.to_html_ptz_presets(anc, &mut div);
+            div.close();
         }
-        div.close();
-
+        if access_level >= ACCESS_MANAGE {
+            div = tree.root::<html::Div>();
+            div.class("row");
+            div.label().r#for("publish").cdata("Publish").close();
+            let mut input = div.input();
+            input.id("publish").r#type("checkbox");
+            if self.publish {
+                input.checked();
+            }
+            div.close();
+        }
         String::from(tree)
     }
 
