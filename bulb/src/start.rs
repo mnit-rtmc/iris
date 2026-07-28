@@ -77,7 +77,7 @@ struct ButtonAttrs {
 pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
     if !app::is_selected_item(res, name) {
         let zoom = selected_zoom(res).max(12);
-        set_selected_item(res, name, zoom);
+        set_selected_item(zoom, res, name);
         spawn_future(do_select_item_map(zoom, lon, lat));
     }
 }
@@ -111,30 +111,22 @@ fn selected_zoom(res: Res) -> u32 {
 }
 
 /// Set selected item
-fn set_selected_item(res: Res, name: &str, zoom: u32) {
+fn set_selected_item(zoom: u32, res: Res, name: &str) {
     app::set_selected_item(res, name);
-    set_selected_style(res, name, zoom);
+    set_marker_style(zoom, Some((res, name)));
 }
 
-/// Set selected item style
-fn set_selected_style(res: Res, name: &str, zoom: u32) {
-    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        let sel = Sel::cls(format!("{}-{name}", res.as_str()));
-        let prop = Prop::new().stroke("white").stroke_width(2);
+/// Set marker style
+fn set_marker_style(zoom: u32, res_name: Option<(Res, &str)>) {
+    if let Some(el) = Doc::get().opt_elem::<Element>("marker-style") {
+        let sel = Sel::cls("wyrm-tile").descendant(Sel::tp("use"));
+        let prop = Prop::new().scale(zoom_scale(zoom));
         let mut css = Rule::new(sel, prop).to_string();
-        let sel = Sel::cls("wyrm-tile").descendant(Sel::tp("use"));
-        let prop = Prop::new().scale(zoom_scale(zoom));
-        css.push_str(&Rule::new(sel, prop).to_string());
-        el.set_inner_html(&css);
-    }
-}
-
-/// Clear selected item style
-fn clear_selected_style(zoom: u32) {
-    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        let sel = Sel::cls("wyrm-tile").descendant(Sel::tp("use"));
-        let prop = Prop::new().scale(zoom_scale(zoom));
-        let css = Rule::new(sel, prop).to_string();
+        if let Some((res, name)) = res_name {
+            let sel = Sel::cls(format!("{}-{name}", res.as_str()));
+            let prop = Prop::new().stroke("white").stroke_width(2);
+            css.push_str(&Rule::new(sel, prop).to_string());
+        }
         el.set_inner_html(&css);
     }
 }
@@ -160,7 +152,7 @@ fn zoom_scale(zoom: u32) -> &'static str {
 /// Clear selected item
 fn clear_selected_item(zoom: u32) {
     app::clear_selected_item();
-    clear_selected_style(zoom);
+    set_marker_style(zoom, None);
 }
 
 /// Application starting function
@@ -1174,7 +1166,7 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     let changed = res != selected_resource();
     if let Some(res) = res {
         let zoom = current_zoom();
-        set_selected_item(res, &name, zoom);
+        set_selected_item(zoom, res, &name);
         if changed {
             set_resource(Some(res), "").await?;
         }
@@ -1199,8 +1191,8 @@ async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
         .elem::<Element>("zoom-level")?
         .set_inner_html(&zoom.to_string());
     match app::selected_item() {
-        Some((res, name)) => set_selected_style(res, &name, zoom),
-        None => clear_selected_style(zoom),
+        Some((res, nm)) => set_marker_style(zoom, Some((res, &nm))),
+        None => set_marker_style(zoom, None),
     }
     // FIXME: only call these when crossing zoom threshold
     update_map_states(Res::Incident, zoom, None).await?;
