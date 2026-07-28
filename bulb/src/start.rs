@@ -409,6 +409,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
+    set_selected_item(None);
     let res = fetch_and_populate_cards(res).await;
     // Turn off "wait" style
     sidebar.set_class_name("");
@@ -1204,10 +1205,10 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     }
     let changed = res != selected_resource();
     if let Some(res) = res {
-        set_selected_item(Some((res, &name)));
         if changed {
             set_resource(Some(res), "").await?;
         }
+        set_selected_item(Some((res, &name)));
         let id = format!("{res}_{name}");
         click_card(res, name, id).await?;
     }
