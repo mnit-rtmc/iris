@@ -24,7 +24,7 @@ use crate::sse;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use chrono::{DateTime, Local};
-use earthwyrm::MapPane;
+use earthwyrm::{MapPane, Target};
 use hatmil::css::{Prop, Rule, Sel};
 use resources::Res;
 use serde::Deserialize;
@@ -193,8 +193,9 @@ fn add_listeners() -> Result<()> {
     MapPane::new(MAP_PANE)
         .with_anchor(ANCHOR_X, ANCHOR_Y)
         .with_groups(GROUPS)
-        .with_click_handler(handle_map_click)
         .with_zoom_handler(handle_map_zoom)
+        .with_click_handler(handle_map_click)
+        .with_contextmenu_handler(handle_contextmenu)
         .register();
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
         set_selected_item(None);
@@ -1176,13 +1177,9 @@ fn density_color(density: u32) -> &'static str {
 }
 
 /// Handle a `click` event
-fn handle_map_click(ev: Event) {
-    // Is it within a map `g` or `path` element
-    if let Some(Ok(target)) = ev.target().map(|e| e.dyn_into::<Element>())
-        && let Ok(Some(gm)) = target.closest("g,path")
-        && let Some(cls) = gm.get_attribute("class")
-        && let Some((rname, nm)) = cls.split_once('-')
-    {
+fn handle_map_click(target: Target) {
+    log::info!("click target: {target:?}");
+    if let Some((rname, nm)) = target.cls.split_once('-') {
         let res = Res::try_from(rname).ok();
         spawn_future(select_card_map(res, nm.to_string()));
     }
@@ -1217,6 +1214,11 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     } else {
         Ok(())
     }
+}
+
+/// Handle a `contextmenu` event
+fn handle_contextmenu(target: Target, _x: i32, _y: i32) {
+    log::info!("contextmenu target: {target:?}");
 }
 
 /// Handle map zoom
