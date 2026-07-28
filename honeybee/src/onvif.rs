@@ -102,7 +102,7 @@ fn continuous_move_document<W: io::Write>(
         "Zoom",
         TT,
         "",
-        &[("z", &z.to_string()), ("space", VELOCITY_SPACE)],
+        &[("x", &z.to_string()), ("space", VELOCITY_SPACE)],
     );
     writer.finish();
 }

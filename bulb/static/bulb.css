@@ -774,6 +774,11 @@ label:has(+ #sb_resource) {
   width: 100%;
   user-select: none;
 }
+#joystick-status {
+  color: #448;
+  font-size: smaller;
+  font-style: italic;
+}
 #ptz-controls #ptz-tilt-up,
 #ptz-controls #ptz-tilt-down {
   width: 33%;

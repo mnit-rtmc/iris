@@ -16,6 +16,7 @@ use crate::sse::NotifyState;
 use crate::view::CardView;
 use resources::Res;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 /// Interval (ms) between ticks for deferred actions
 pub const TICK_INTERVAL: i32 = 500;
@@ -54,6 +55,8 @@ struct AppState {
     tick: i32,
     /// Delete action enabled (slider transition finished)
     delete_enabled: bool,
+    /// Active joystick interval IDs
+    joystick_intervals: HashMap<u32, i32>,
 }
 
 thread_local! {
@@ -222,4 +225,14 @@ pub fn set_delete_enabled(enabled: bool) {
 /// Get delete enabled from global app state
 pub fn delete_enabled() -> bool {
     STATE.with(|rc| rc.borrow().delete_enabled)
+}
+
+/// Add a joystick interval ID
+pub fn add_joystick_interval_id(index: u32, id: i32) {
+    STATE.with(|rc| rc.borrow_mut().joystick_intervals.insert(index, id));
+}
+
+/// Remove and return a joystick interval ID
+pub fn remove_joystick_interval_id(index: &u32) -> Option<i32> {
+    STATE.with(|rc| rc.borrow_mut().joystick_intervals.remove(index))
 }

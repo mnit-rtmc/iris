@@ -34,9 +34,10 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
-    Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
-    HtmlSelectElement, KeyboardEvent, MouseEvent, ScrollBehavior,
-    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent,
+    Element, Event, GamepadEvent, HtmlButtonElement, HtmlElement,
+    HtmlInputElement, HtmlSelectElement, KeyboardEvent, MouseEvent,
+    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition,
+    TransitionEvent,
 };
 
 /// Map pane ID
@@ -182,6 +183,7 @@ fn add_listeners() -> Result<()> {
     add_click_listener(&sidebar)?;
     let body = doc.body()?;
     add_joystick_listener(&body)?;
+    add_gamepad_listener()?;
     add_mouse_listener(&body)?;
     add_input_listener(&sidebar)?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
@@ -789,6 +791,39 @@ fn add_joystick_listener(el: &Element) -> Result<()> {
     )?;
     el.add_event_listener_with_callback(
         "mousemove",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
+}
+
+/// Add the event listener for joystick/gamepad connections
+fn add_gamepad_listener() -> Result<()> {
+    // Starts polling a gamepad when connected, stops when disconnected
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Ok(gamepad_event) = e.dyn_into::<GamepadEvent>()
+            && let Some(gamepad) = gamepad_event.gamepad()
+        {
+            if gamepad_event.type_() == "gamepadconnected" {
+                let _ = joystick::update_gamepad_status(true);
+                if let Err(e) = joystick::start_gamepad_poll(gamepad) {
+                    log::error!("Couldn't start polling due to {e:?}");
+                }
+            } else {
+                let _ = joystick::update_gamepad_status(false);
+                if let Err(e) = joystick::stop_gamepad_poll(gamepad) {
+                    log::error!("Couldn't stop polling due to {e:?}");
+                }
+            }
+        }
+    });
+    let window = util::window()?;
+    window.add_event_listener_with_callback(
+        "gamepaddisconnected",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    window.add_event_listener_with_callback(
+        "gamepadconnected",
         closure.as_ref().unchecked_ref(),
     )?;
     closure.forget();
