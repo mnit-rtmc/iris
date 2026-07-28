@@ -76,8 +76,8 @@ struct ButtonAttrs {
 /// Select item on map
 pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
     if !app::is_selected_item(res, name) {
+        set_selected_item(Some((res, name)));
         let zoom = selected_zoom(res).max(12);
-        set_selected_item(zoom, res, name);
         spawn_future(do_select_item_map(zoom, lon, lat));
     }
 }
@@ -86,9 +86,7 @@ pub fn select_item_map(res: Res, name: &str, lon: f64, lat: f64) {
 async fn do_select_item_map(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
         map_pane.set_position(zoom, lon, lat);
-        Doc::new()?
-            .elem::<Element>("zoom-level")?
-            .set_inner_html(&zoom.to_string());
+        set_zoom_level(zoom);
         // FIXME: only call these when crossing zoom threshold
         update_map_states(Res::Incident, zoom, None).await?;
         update_map_states(Res::Dms, zoom, None).await?;
@@ -111,48 +109,54 @@ fn selected_zoom(res: Res) -> u32 {
 }
 
 /// Set selected item
-fn set_selected_item(zoom: u32, res: Res, name: &str) {
-    app::set_selected_item(res, name);
-    set_marker_style(zoom, Some((res, name)));
+fn set_selected_item(res_name: Option<(Res, &str)>) {
+    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
+        match res_name {
+            Some((res, name)) => {
+                app::set_selected_item(res, name);
+                let sel = Sel::cls(format!("{}-{name}", res.as_str()));
+                let prop = Prop::new().stroke("white").stroke_width(2);
+                let css = Rule::new(sel, prop).to_string();
+                el.set_inner_html(&css);
+            }
+            None => {
+                app::clear_selected_item();
+                el.set_inner_html("");
+            }
+        }
+    }
 }
 
-/// Set marker style
-fn set_marker_style(zoom: u32, res_name: Option<(Res, &str)>) {
+/// Set the map zoom level
+fn set_zoom_level(zoom: u32) {
     if let Some(el) = Doc::get().opt_elem::<Element>("marker-style") {
         let sel = Sel::cls("wyrm-tile").descendant(Sel::tp("use"));
         let prop = Prop::new().scale(zoom_scale(zoom));
-        let mut css = Rule::new(sel, prop).to_string();
-        if let Some((res, name)) = res_name {
-            let sel = Sel::cls(format!("{}-{name}", res.as_str()));
-            let prop = Prop::new().stroke("white").stroke_width(2);
-            css.push_str(&Rule::new(sel, prop).to_string());
-        }
+        let css = Rule::new(sel, prop).to_string();
         el.set_inner_html(&css);
+    }
+    if let Some(el) = Doc::get().opt_elem::<Element>("zoom-level") {
+        el.set_inner_html(&zoom.to_string());
     }
 }
 
 /// Get marker scale for a zoom level
 fn zoom_scale(zoom: u32) -> &'static str {
     match zoom {
-        1 => "0.006",
-        2 => "0.012",
-        3 => "0.025",
-        4 => "0.05",
-        5 => "0.1",
-        6 => "0.2",
-        7 => "0.3",
-        8 => "0.4",
-        9 => "0.5",
-        10 => "0.6",
-        11 => "0.8",
+        1 => "0.003",
+        2 => "0.006",
+        3 => "0.012",
+        4 => "0.025",
+        5 => "0.05",
+        6 => "0.1",
+        7 => "0.2",
+        8 => "0.3",
+        9 => "0.4",
+        10 => "0.5",
+        11 => "0.6",
+        12 => "0.8",
         _ => "1.0",
     }
-}
-
-/// Clear selected item
-fn clear_selected_item(zoom: u32) {
-    app::clear_selected_item();
-    set_marker_style(zoom, None);
 }
 
 /// Application starting function
@@ -191,9 +195,9 @@ fn add_listeners() -> Result<()> {
         .with_zoom_handler(handle_map_zoom)
         .register();
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
+        set_selected_item(None);
         map_pane.set_position(10, -93.2, 44.95);
-        doc.elem::<Element>("zoom-level")?.set_inner_html("10");
-        clear_selected_item(10);
+        set_zoom_level(10);
     }
     spawn_future(finish_init());
     fetch_station_data();
@@ -911,7 +915,7 @@ fn replace_card_html(cv: &CardView, html: &str) {
     el.set_class_name(cv.view.class_name());
     if cv.view.is_expanded() {
         let opt = ScrollIntoViewOptions::new();
-        opt.set_behavior(ScrollBehavior::Smooth);
+        opt.set_behavior(ScrollBehavior::Instant);
         opt.set_block(ScrollLogicalPosition::Nearest);
         el.scroll_into_view_with_scroll_into_view_options(&opt);
     }
@@ -1156,7 +1160,7 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
             (None, _name) => true,
         };
     if clear {
-        clear_selected_item(current_zoom());
+        set_selected_item(None);
         if let Some(cv) = app::expanded_view() {
             let search = search_value()?;
             replace_card(cv.compact(), &search).await?;
@@ -1165,8 +1169,7 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     }
     let changed = res != selected_resource();
     if let Some(res) = res {
-        let zoom = current_zoom();
-        set_selected_item(zoom, res, &name);
+        set_selected_item(Some((res, &name)));
         if changed {
             set_resource(Some(res), "").await?;
         }
@@ -1187,13 +1190,7 @@ fn handle_map_zoom(zoom: u32) {
 
 /// Handle map zoom
 async fn do_handle_map_zoom(zoom: u32) -> Result<()> {
-    Doc::new()?
-        .elem::<Element>("zoom-level")?
-        .set_inner_html(&zoom.to_string());
-    match app::selected_item() {
-        Some((res, nm)) => set_marker_style(zoom, Some((res, &nm))),
-        None => set_marker_style(zoom, None),
-    }
+    set_zoom_level(zoom);
     // FIXME: only call these when crossing zoom threshold
     update_map_states(Res::Incident, zoom, None).await?;
     update_map_states(Res::Dms, zoom, None).await?;

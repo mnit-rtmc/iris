@@ -101,6 +101,7 @@ pub fn is_selected_item(res: Res, name: &str) -> bool {
 }
 
 /// Get selected item
+#[allow(dead_code)]
 pub fn selected_item() -> Option<(Res, String)> {
     STATE.with(|rc| {
         rc.borrow()
