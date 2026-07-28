@@ -50,6 +50,7 @@ features = [
   'Event',
   'EventSource',
   'Gamepad',
+  'GamepadEvent',
   'Headers',
   'HtmlButtonElement',
   'HtmlInputElement',

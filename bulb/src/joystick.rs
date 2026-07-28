@@ -10,13 +10,17 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::app;
 use crate::card::{uri_one, uri_one_direct};
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::fetch::Action;
-use crate::util::Doc;
+use crate::helper::spawn_future;
+use crate::util::{self, Doc};
 use hatmil::html;
 use resources::Res;
-use web_sys::HtmlElement;
+use wasm_bindgen::JsCast;
+use wasm_bindgen::closure::Closure;
+use web_sys::{Gamepad, HtmlElement};
 
 /// Turns a div into a joystick element
 /// div: the div of the joystick
@@ -313,5 +317,77 @@ pub async fn handle_gamepad(id: String, axes: js_sys::Array) -> Result<()> {
             .await?;
         }
     }
+    Ok(())
+}
+
+/// Starts polling a gamepad
+pub fn start_gamepad_poll(gamepad: Gamepad) -> Result<()> {
+    let index = gamepad.index();
+    let closure: Closure<dyn Fn()> = Closure::new(move || {
+        if let Some(cv) = app::expanded_view()
+            && cv.res == Res::Camera
+        {
+            let _ = update_gamepad_status(true);
+            let axes = gamepad.axes();
+            let sticks = Doc::get().0.get_elements_by_class_name("joystick");
+            for i in 0..sticks.length() {
+                if let Some(stick) = sticks.item(i) {
+                    spawn_future(handle_gamepad(stick.id(), axes.clone()));
+                }
+            }
+        }
+    });
+    let window = util::window()?;
+    let id = window.set_interval_with_callback_and_timeout_and_arguments_0(
+        closure.as_ref().unchecked_ref(),
+        50,
+    )?;
+    app::add_joystick_interval_id(index, id);
+    closure.forget();
+    Ok(())
+}
+
+/// Stops polling a gamepad
+pub fn stop_gamepad_poll(gamepad: Gamepad) -> Result<()> {
+    if let Some(id) = app::remove_joystick_interval_id(&gamepad.index()) {
+        util::window()?.clear_interval_with_handle(id);
+    }
+    Ok(())
+}
+
+/// Updates the UI with the status of the gamepad
+/// Should only be called if there ever was a joystick connected
+pub fn update_gamepad_status(connected: bool) -> Result<()> {
+    // Get or create the status element
+    let status_elem = if let Some(status) =
+        Doc::get().opt_elem::<HtmlElement>("joystick-status")
+    {
+        status
+    } else if let Some(ptz_controls) =
+        Doc::get().opt_elem::<HtmlElement>("ptz-controls")
+        && let Ok(status) = Doc::get()
+            .0
+            .create_element("div")?
+            .dyn_into::<HtmlElement>()
+    {
+        status.set_class_name("row");
+        status.set_id("joystick-status");
+        ptz_controls.append_child(&status).ok();
+        status
+    } else {
+        return Err(Error::JsValue(
+            "couldn't get or create joystick status element".to_owned(),
+        ));
+    };
+
+    let msg = if connected {
+        status_elem.style().set_property("color", "#66C").ok();
+        "Joystick connected"
+    } else {
+        status_elem.style().set_property("color", "#224").ok();
+        "Joystick disconnected"
+    };
+
+    status_elem.set_text_content(Some(msg));
     Ok(())
 }
