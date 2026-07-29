@@ -1447,7 +1447,8 @@ BEGIN
        (NEW.cabinet_style IS DISTINCT FROM OLD.cabinet_style) OR
        (NEW.condition IS DISTINCT FROM OLD.condition) OR
        (NEW.notes IS DISTINCT FROM OLD.notes) OR
-       (NEW.setup IS DISTINCT FROM OLD.setup)
+       (NEW.status IS DISTINCT FROM OLD.status) OR
+       (NEW.fail_time IS DISTINCT FROM OLD.fail_time)
     THEN
         NOTIFY controller;
     ELSE
