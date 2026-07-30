@@ -13,6 +13,7 @@
 use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
 use crate::card::{self, CardList, CardState};
+use crate::click;
 use crate::eid;
 use crate::error::Result;
 use crate::fetch::Uri;
@@ -24,7 +25,7 @@ use crate::sse;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use chrono::{DateTime, Local};
-use earthwyrm::{MapPane, Target};
+use earthwyrm::MapPane;
 use hatmil::css::{Prop, Rule, Sel};
 use resources::Res;
 use serde::Deserialize;
@@ -34,10 +35,9 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
-    Element, Event, GamepadEvent, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, KeyboardEvent, MouseEvent,
-    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition,
-    TransitionEvent,
+    Element, Event, GamepadEvent, HtmlElement, HtmlInputElement,
+    HtmlSelectElement, KeyboardEvent, MouseEvent, ScrollBehavior,
+    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent,
 };
 
 /// Map pane ID
@@ -62,16 +62,6 @@ struct StationData {
     period: u32,
     /// Data samples
     samples: HashMap<String, [Option<u32>; 2]>,
-}
-
-/// Button attributes
-struct ButtonAttrs {
-    /// Element ID
-    id: String,
-    /// Data-link attribute
-    data_link: Option<String>,
-    /// Data-type attribute
-    data_type: Option<String>,
 }
 
 /// Select item on map
@@ -110,7 +100,7 @@ fn selected_zoom(res: Res) -> u32 {
 }
 
 /// Set selected item
-fn set_selected_item(res_name: Option<(Res, &str)>) {
+pub fn set_selected_item(res_name: Option<(Res, &str)>) {
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
         match res_name {
             Some((res, name)) => {
@@ -175,12 +165,12 @@ fn add_listeners() -> Result<()> {
     let resource = doc.elem::<HtmlSelectElement>(eid::RESOURCE)?;
     resource.set_value("");
     let divider: HtmlElement = doc.elem("divider")?;
-    add_click_listener(&divider)?;
+    click::add_listener(&divider)?;
     let sidebar: HtmlElement = doc.elem("sidebar")?;
     add_change_listener(&sidebar)?;
     let layer_menu: HtmlElement = doc.elem("layer-menu")?;
     add_change_listener(&layer_menu)?;
-    add_click_listener(&sidebar)?;
+    click::add_listener(&sidebar)?;
     let body = doc.body()?;
     add_joystick_listener(&body)?;
     add_gamepad_listener()?;
@@ -194,8 +184,8 @@ fn add_listeners() -> Result<()> {
         .with_anchor(ANCHOR_X, ANCHOR_Y)
         .with_groups(GROUPS)
         .with_zoom_handler(handle_map_zoom)
-        .with_click_handler(handle_map_click)
-        .with_contextmenu_handler(handle_contextmenu)
+        .with_click_handler(click::handle_map_click)
+        .with_contextmenu_handler(click::handle_contextmenu)
         .register();
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
         set_selected_item(None);
@@ -211,7 +201,7 @@ fn add_listeners() -> Result<()> {
 }
 
 /// Finish initialization
-async fn finish_init() -> Result<()> {
+pub async fn finish_init() -> Result<()> {
     sse::add_listener();
     let user = Uri::from("/iris/api/login").get().await?;
     match user.as_string() {
@@ -418,7 +408,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
 }
 
 /// Get the selected resource value
-fn selected_resource() -> Option<Res> {
+pub fn selected_resource() -> Option<Res> {
     let doc = Doc::get();
     let rname = doc.select_parse::<String>(eid::RESOURCE);
     let res = Res::try_from(rname?.as_str()).ok()?;
@@ -470,7 +460,7 @@ fn selected_resource() -> Option<Res> {
 }
 
 /// Get value to search
-fn search_value() -> Result<String> {
+pub fn search_value() -> Result<String> {
     let doc = Doc::new()?;
     let sb_search = doc.elem::<HtmlInputElement>(eid::SEARCH)?;
     let mut search = sb_search.value();
@@ -653,75 +643,6 @@ async fn handle_focus_events(
     Ok(())
 }
 
-/// Add a `click` event listener to an element
-fn add_click_listener(el: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
-            if target.is_instance_of::<HtmlButtonElement>() {
-                handle_button_click_ev(&target);
-            } else if let Ok(Some(cc)) = target.closest(".card-compact") {
-                handle_card_click_ev(&cc);
-            } else {
-                handle_click_ev(&target);
-            }
-        }
-    });
-    el.add_event_listener_with_callback(
-        "click",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    // can't drop closure, just forget it to make JS happy
-    closure.forget();
-    Ok(())
-}
-
-/// Handle a `click` event with a button target
-fn handle_button_click_ev(target: &Element) {
-    let id = target.id();
-    match id.as_str() {
-        eid::LOGIN => spawn_future(handle_login()),
-        eid::LOGOUT => spawn_future(handle_logout()),
-        "show_sidebar" => spawn_future(handle_show_sidebar(true)),
-        "hide_sidebar" => spawn_future(handle_show_sidebar(false)),
-        // handled by mouse event listener, prevent click:
-        "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up" | "ptz-tilt-down"
-        | "ptz-zoom-in" | "ptz-zoom-out" | "focus-near" | "focus-far"
-        | "iris-open" | "iris-close" => (),
-        _ => {
-            let attrs = ButtonAttrs::new(id, target);
-            spawn_future(handle_button_card(attrs));
-        }
-    }
-}
-
-/// Handle a `click` event for non-button target
-fn handle_click_ev(target: &Element) {
-    let id = target.id();
-    if eid::MONITOR == id.as_str() {
-        app::set_vid_mon(None);
-        if let Ok(t) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
-            t.set_inner_html("📺");
-        }
-    }
-}
-
-/// Handle a show/hide sidebar button click
-async fn handle_show_sidebar(show: bool) -> Result<()> {
-    let doc = Doc::new()?;
-    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>("show_sidebar") {
-        btn.set_disabled(show);
-    }
-    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>("hide_sidebar") {
-        btn.set_disabled(!show);
-    }
-    if show {
-        util::show_elem("sidebar");
-    } else {
-        util::hide_elem("sidebar");
-    }
-    Ok(())
-}
-
 /// Add enter/submit event listener to an element
 fn add_input_enter_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
@@ -883,59 +804,8 @@ async fn handle_mouse_card(id: String, mouse_down: bool) -> Result<()> {
     Ok(())
 }
 
-impl ButtonAttrs {
-    /// Create button attributes
-    fn new(id: String, target: &Element) -> Self {
-        let mut data_link = None;
-        let mut data_type = None;
-        if let Some("go_link") = target.get_attribute("class").as_deref() {
-            data_link = target.get_attribute("data-link");
-            data_type = target.get_attribute("data-type");
-        }
-        ButtonAttrs {
-            id,
-            data_link,
-            data_type,
-        }
-    }
-
-    /// Check if data link
-    fn is_link(&self) -> bool {
-        self.data_link.is_some() && self.data_type.is_some()
-    }
-
-    /// Go to resource from target's `data-link` attribute
-    async fn go_resource(self) -> Result<()> {
-        if let (Some(link), Some(rname)) = (self.data_link, self.data_type)
-            && let Ok(res) = Res::try_from(rname.as_str())
-        {
-            set_resource(Some(res), &link).await?;
-            sse::post_req(Some(res)).await
-        } else {
-            Ok(())
-        }
-    }
-}
-
-/// Handle button click event on an expanded card
-async fn handle_button_card(attrs: ButtonAttrs) -> Result<()> {
-    if let Some(cv) = app::expanded_view() {
-        if attrs.is_link() {
-            attrs.go_resource().await?;
-        } else if eid::DELETE == attrs.id {
-            if app::delete_enabled() {
-                cv.handle_delete().await?;
-                replace_card(cv.with_view(View::Hidden), "").await?;
-            }
-        } else if let Some(v) = cv.handle_click(&attrs.id).await? {
-            replace_card(cv.with_view(v), "").await?;
-        }
-    }
-    Ok(())
-}
-
 /// Replace a card view element with another view
-async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
+pub async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
     let html = cv.fetch_one(search).await?;
     replace_card_html(&cv, &html);
     app::set_view(cv);
@@ -958,36 +828,8 @@ fn replace_card_html(cv: &CardView, html: &str) {
     }
 }
 
-/// Handle a `click` event within a card element
-fn handle_card_click_ev(el: &Element) {
-    if let Some(id) = el.get_attribute("id")
-        && let Some(name) = el.get_attribute("data-name")
-        && let Some(res) = selected_resource()
-    {
-        spawn_future(click_card(res, name, id));
-    }
-}
-
-/// Handle a card click event
-async fn click_card(res: Res, name: String, id: String) -> Result<()> {
-    if let Some(cv) = app::expanded_view() {
-        let search = search_value()?;
-        replace_card(cv.compact(), &search).await?;
-    }
-    let view = if id.ends_with('_') && id.len() == res.as_str().len() + 1 {
-        View::Create
-    } else {
-        let edit = app::can_edit_card();
-        // Expand to the second view (1) for the resource
-        *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
-    };
-    let cv = CardView::new(res, &name, view);
-    replace_card(cv, "").await?;
-    Ok(())
-}
-
 /// Handle login button press
-async fn handle_login() -> Result<()> {
+pub async fn handle_login() -> Result<()> {
     let doc = Doc::new()?;
     if let (Some(user), Some(pass)) = (
         doc.input_parse::<String>("login_user"),
@@ -1014,14 +856,14 @@ async fn handle_login() -> Result<()> {
 }
 
 /// Handle logout button press
-async fn handle_logout() -> Result<()> {
+pub async fn handle_logout() -> Result<()> {
     let uri = Uri::from("/iris/api/login");
     uri.delete().await?;
     Ok(())
 }
 
 /// Set selected resource
-async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
+pub async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
     let resource = Doc::new()?.elem::<HtmlSelectElement>(eid::RESOURCE)?;
     let base = res.map(|r| r.base().as_str()).unwrap_or("");
     resource.set_value(base);
@@ -1174,51 +1016,6 @@ fn density_color(density: u32) -> &'static str {
         50..200 => "#d00",
         200.. => "#c0f",
     }
-}
-
-/// Handle a `click` event
-fn handle_map_click(target: Target) {
-    log::info!("click target: {target:?}");
-    if let Some((rname, nm)) = target.cls.split_once('-') {
-        let res = Res::try_from(rname).ok();
-        spawn_future(select_card_map(res, nm.to_string()));
-    }
-}
-
-/// Select a card from a map marker click
-async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
-    let clear = name.is_empty()
-        || match (res, &name) {
-            (Some(res), name) => app::is_selected_item(res, name),
-            (None, _name) => true,
-        };
-    if clear {
-        set_selected_item(None);
-        if let Some(cv) = app::expanded_view() {
-            let search = search_value()?;
-            replace_card(cv.compact(), &search).await?;
-        }
-        return Ok(());
-    }
-    let changed = res != selected_resource();
-    if let Some(res) = res {
-        if changed {
-            set_resource(Some(res), "").await?;
-        }
-        set_selected_item(Some((res, &name)));
-        let id = format!("{res}_{name}");
-        click_card(res, name, id).await?;
-    }
-    if changed {
-        sse::post_req(res).await
-    } else {
-        Ok(())
-    }
-}
-
-/// Handle a `contextmenu` event
-fn handle_contextmenu(target: Target, _x: i32, _y: i32) {
-    log::info!("contextmenu target: {target:?}");
 }
 
 /// Handle map zoom

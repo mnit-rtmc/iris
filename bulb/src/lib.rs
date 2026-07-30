@@ -24,6 +24,7 @@ mod cabinetstyle;
 mod camera;
 mod card;
 mod cio;
+mod click;
 mod commconfig;
 mod commlink;
 mod controller;
