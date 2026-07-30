@@ -38,28 +38,27 @@ pub async fn start() -> core::result::Result<(), JsError> {
 
 /// Add event listeners
 fn add_listeners() -> Result<()> {
+    add_interval_callback()?;
     let doc = Doc::new()?;
     map::add_listeners()?;
     sidebar::add_listeners()?;
     let body = doc.body()?;
+    add_mouse_listener(&body)?;
     add_joystick_listener(&body)?;
     add_gamepad_listener()?;
-    add_mouse_listener(&body)?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
-    add_interval_callback()?;
     spawn_future(finish_init());
     Ok(())
 }
 
 /// Finish initialization
-pub async fn finish_init() -> Result<()> {
+async fn finish_init() -> Result<()> {
     sse::add_listener();
     let user = Uri::from("/iris/api/login").get().await?;
     match user.as_string() {
         Some(user) => {
             app::set_user(Some(user));
-            sidebar::update_resource().await?;
-            sidebar::set_resource(None, "").await?;
+            sidebar::init_resource().await?;
             sse::post_req(None).await
         }
         None => {
@@ -69,37 +68,81 @@ pub async fn finish_init() -> Result<()> {
     }
 }
 
-/// Set fullscreen mode
-pub fn set_fullscreen() {
-    let doc = Doc::get();
-    let checked = doc.input_bool("sb_fullscreen");
-    doc.request_fullscreen(checked);
+/// Add callback for regular interval checks
+fn add_interval_callback() -> Result<()> {
+    let window = util::window()?;
+    let closure: Closure<dyn Fn()> = Closure::new(tick_interval);
+    window.set_interval_with_callback_and_timeout_and_arguments_0(
+        closure.as_ref().unchecked_ref(),
+        app::TICK_INTERVAL,
+    )?;
+    closure.forget();
+    Ok(())
 }
 
-/// Add enter/submit event listener to an element
-fn add_input_enter_listener(el: &Element) -> Result<()> {
+/// Process a tick interval
+fn tick_interval() {
+    app::tick_tock();
+    while let Some(action) = app::next_action() {
+        match action {
+            DeferredAction::FetchStationData => map::fetch_station_data(),
+            DeferredAction::HideToast => util::hide_elem("sb_toast"),
+            DeferredAction::RefreshList => sidebar::handle_res_change(),
+            DeferredAction::MakeEventSource => sse::add_listener(),
+            DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
+        }
+    }
+}
+
+/// Add a mouse event listener to an element
+fn add_mouse_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let (Some(Ok(target)), Ok(keydown_ev)) = (
-            e.target().map(|e| e.dyn_into::<Element>()),
-            e.dyn_into::<KeyboardEvent>(),
-        ) && keydown_ev.key().as_str() == "Enter"
+        if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
+            && mouse_event.button() == 0
+            && let Some(Ok(target)) =
+                mouse_event.target().map(|e| e.dyn_into::<Element>())
         {
-            handle_input_enter(target.id());
+            handle_mouse_ev(&target, &mouse_event.type_() == "mousedown");
         }
     });
     el.add_event_listener_with_callback(
-        "keydown",
+        "mousedown",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
+        "mouseup",
         closure.as_ref().unchecked_ref(),
     )?;
     closure.forget();
     Ok(())
 }
 
-/// Handle an input enter/submit event
-fn handle_input_enter(id: String) {
-    if id.as_str() == "login_pass" {
-        spawn_future(handle_login());
+/// Handle a mouse event
+fn handle_mouse_ev(target: &Element, mouse_down: bool) {
+    let mut id = target.id();
+    let mut parts = id.split("-");
+    id = match (parts.next(), parts.next()) {
+        // focus/iris auto buttons are on click, not mousedown/up
+        (_, Some("auto")) => String::new(),
+        (Some("focus"), _)
+        | (Some("iris"), _)
+        | (Some("ptz"), _)
+        | (Some("publish"), _) => id,
+        _ => String::new(),
+    };
+    spawn_future(handle_mouse_card(id, mouse_down));
+}
+
+/// Handle a mouse event on an expanded card
+async fn handle_mouse_card(id: String, mouse_down: bool) -> Result<()> {
+    if let Some(cv) = app::expanded_view() {
+        match id.as_str() {
+            // mouse on invalid target, so always release mouse
+            "" => cv.handle_mouse(id.as_str(), false).await?,
+            _ => cv.handle_mouse(id.as_str(), mouse_down).await?,
+        }
     }
+    Ok(())
 }
 
 /// Add a joystick event listener to an element
@@ -186,55 +229,30 @@ fn add_gamepad_listener() -> Result<()> {
     Ok(())
 }
 
-/// Add a mouse event listener to an element
-fn add_mouse_listener(el: &Element) -> Result<()> {
+/// Add enter/submit event listener to an element
+fn add_input_enter_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
-            && mouse_event.button() == 0
-            && let Some(Ok(target)) =
-                mouse_event.target().map(|e| e.dyn_into::<Element>())
+        if let (Some(Ok(target)), Ok(keydown_ev)) = (
+            e.target().map(|e| e.dyn_into::<Element>()),
+            e.dyn_into::<KeyboardEvent>(),
+        ) && keydown_ev.key().as_str() == "Enter"
         {
-            handle_mouse_ev(&target, &mouse_event.type_() == "mousedown");
+            handle_input_enter(target.id());
         }
     });
     el.add_event_listener_with_callback(
-        "mousedown",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    el.add_event_listener_with_callback(
-        "mouseup",
+        "keydown",
         closure.as_ref().unchecked_ref(),
     )?;
     closure.forget();
     Ok(())
 }
 
-/// Handle a mouse event
-fn handle_mouse_ev(target: &Element, mouse_down: bool) {
-    let mut id = target.id();
-    let mut parts = id.split("-");
-    id = match (parts.next(), parts.next()) {
-        // focus/iris auto buttons are on click, not mousedown/up
-        (_, Some("auto")) => String::new(),
-        (Some("focus"), _)
-        | (Some("iris"), _)
-        | (Some("ptz"), _)
-        | (Some("publish"), _) => id,
-        _ => String::new(),
-    };
-    spawn_future(handle_mouse_card(id, mouse_down));
-}
-
-/// Handle a mouse event on an expanded card
-async fn handle_mouse_card(id: String, mouse_down: bool) -> Result<()> {
-    if let Some(cv) = app::expanded_view() {
-        match id.as_str() {
-            // mouse on invalid target, so always release mouse
-            "" => cv.handle_mouse(id.as_str(), false).await?,
-            _ => cv.handle_mouse(id.as_str(), mouse_down).await?,
-        }
+/// Handle an input enter/submit event
+fn handle_input_enter(id: String) {
+    if id.as_str() == "login_pass" {
+        spawn_future(handle_login());
     }
-    Ok(())
 }
 
 /// Handle login button press
@@ -269,30 +287,4 @@ pub async fn handle_logout() -> Result<()> {
     let uri = Uri::from("/iris/api/login");
     uri.delete().await?;
     Ok(())
-}
-
-/// Add callback for regular interval checks
-fn add_interval_callback() -> Result<()> {
-    let window = util::window()?;
-    let closure: Closure<dyn Fn()> = Closure::new(tick_interval);
-    window.set_interval_with_callback_and_timeout_and_arguments_0(
-        closure.as_ref().unchecked_ref(),
-        app::TICK_INTERVAL,
-    )?;
-    closure.forget();
-    Ok(())
-}
-
-/// Process a tick interval
-fn tick_interval() {
-    app::tick_tock();
-    while let Some(action) = app::next_action() {
-        match action {
-            DeferredAction::FetchStationData => map::fetch_station_data(),
-            DeferredAction::HideToast => util::hide_elem("sb_toast"),
-            DeferredAction::RefreshList => sidebar::handle_res_change(),
-            DeferredAction::MakeEventSource => sse::add_listener(),
-            DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
-        }
-    }
 }

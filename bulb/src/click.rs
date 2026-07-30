@@ -17,11 +17,9 @@ use crate::error::Result;
 use crate::helper::spawn_future;
 use crate::sidebar;
 use crate::sse;
-use crate::start::{handle_login, handle_logout};
+use crate::start;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
-use earthwyrm::Target;
-use hatmil::css::{Prop, Rule, Sel};
 use resources::Res;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
@@ -115,8 +113,8 @@ pub fn add_listener(el: &Element) -> Result<()> {
 fn handle_ev_button(target: &Element) {
     let id = target.id();
     match id.as_str() {
-        eid::LOGIN => spawn_future(handle_login()),
-        eid::LOGOUT => spawn_future(handle_logout()),
+        eid::LOGIN => spawn_future(start::handle_login()),
+        eid::LOGOUT => spawn_future(start::handle_logout()),
         "show_sidebar" => spawn_future(handle_show_sidebar(true)),
         "hide_sidebar" => spawn_future(handle_show_sidebar(false)),
         // handled by mouse event listener, prevent click:
@@ -185,21 +183,4 @@ pub async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     let cv = CardView::new(res, &name, view);
     sidebar::replace_card(cv, "").await?;
     Ok(())
-}
-
-/// Handle a `contextmenu` event
-pub fn handle_contextmenu(target: Target, x: i32, y: i32) {
-    log::info!("contextmenu: {target:?} {x} {y}");
-    app::clear_selected_item();
-    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        if let Some(po) = Doc::get().opt_elem::<HtmlElement>("menu-popover")
-            && let Err(err) = po.show_popover()
-        {
-            log::error!("show_popover: {err:?}");
-        }
-        let prop = Prop::new().fill("#96a");
-        let sel = Sel::cls(&target.cls);
-        let css = Rule::new(sel, prop).to_string();
-        el.set_inner_html(&css);
-    }
 }

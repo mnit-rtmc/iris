@@ -66,7 +66,7 @@ pub fn add_listeners() -> Result<()> {
         .with_groups(GROUPS)
         .with_zoom_handler(handle_zoom)
         .with_click_handler(handle_click)
-        .with_contextmenu_handler(click::handle_contextmenu)
+        .with_contextmenu_handler(handle_contextmenu)
         .register();
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
         set_selected_style(None);
@@ -420,4 +420,21 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
     doc.elem::<Element>("layer-osm")?
         .set_attribute("style", &String::from(prop))?;
     Ok(())
+}
+
+/// Handle a `contextmenu` event
+fn handle_contextmenu(target: Target, x: i32, y: i32) {
+    log::info!("contextmenu: {target:?} {x} {y}");
+    app::clear_selected_item();
+    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
+        if let Some(po) = Doc::get().opt_elem::<HtmlElement>("menu-popover")
+            && let Err(err) = po.show_popover()
+        {
+            log::error!("show_popover: {err:?}");
+        }
+        let prop = Prop::new().fill("#96a");
+        let sel = Sel::cls(&target.cls);
+        let css = Rule::new(sel, prop).to_string();
+        el.set_inner_html(&css);
+    }
 }

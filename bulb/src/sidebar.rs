@@ -21,7 +21,6 @@ use crate::item::ItemState;
 use crate::map;
 use crate::permission::Permission;
 use crate::sse;
-use crate::start;
 use crate::util::Doc;
 use crate::view::{CardView, View};
 use resources::Res;
@@ -52,8 +51,8 @@ pub fn add_listeners() -> Result<()> {
     Ok(())
 }
 
-/// Update resource select options
-pub async fn update_resource() -> Result<()> {
+/// Initialize resource select options
+pub async fn init_resource() -> Result<()> {
     let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
     let doc = Doc::new()?;
     if let Some(el) = doc.opt_elem::<Element>("opt_action_plan") {
@@ -101,6 +100,7 @@ pub async fn update_resource() -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("opt_tolling") {
         el.set_class_name(opt_class(&access, Res::TollZone));
     }
+    set_resource(None, "").await?;
     Ok(())
 }
 
@@ -137,7 +137,7 @@ fn add_change_listener(el: &Element) -> Result<()> {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             let id = target.id();
             if id == "sb_fullscreen" {
-                start::set_fullscreen();
+                set_fullscreen();
             }
         }
     });
@@ -148,6 +148,13 @@ fn add_change_listener(el: &Element) -> Result<()> {
     // can't drop closure, just forget it to make JS happy
     closure.forget();
     Ok(())
+}
+
+/// Set fullscreen mode
+fn set_fullscreen() {
+    let doc = Doc::get();
+    let checked = doc.input_bool("sb_fullscreen");
+    doc.request_fullscreen(checked);
 }
 
 /// Get dependent resource row class name
