@@ -63,6 +63,7 @@ mod rend;
 mod rle;
 mod road;
 mod role;
+mod sidebar;
 mod signconfig;
 mod signmessage;
 mod sse;

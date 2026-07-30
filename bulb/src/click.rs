@@ -15,11 +15,9 @@ use crate::card;
 use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
+use crate::sidebar;
 use crate::sse;
-use crate::start::{
-    handle_login, handle_logout, replace_card, search_value, selected_resource,
-    set_resource, set_selected_item,
-};
+use crate::start::{handle_login, handle_logout, set_selected_item};
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use earthwyrm::Target;
@@ -68,10 +66,11 @@ impl ButtonAttrs {
             } else if eid::DELETE == self.id {
                 if app::delete_enabled() {
                     cv.handle_delete().await?;
-                    replace_card(cv.with_view(View::Hidden), "").await?;
+                    sidebar::replace_card(cv.with_view(View::Hidden), "")
+                        .await?;
                 }
             } else if let Some(v) = cv.handle_click(&self.id).await? {
-                replace_card(cv.with_view(v), "").await?;
+                sidebar::replace_card(cv.with_view(v), "").await?;
             }
         }
         Ok(())
@@ -82,7 +81,7 @@ impl ButtonAttrs {
         if let (Some(link), Some(rname)) = (self.data_link, self.data_type)
             && let Ok(res) = Res::try_from(rname.as_str())
         {
-            set_resource(Some(res), &link).await?;
+            sidebar::set_resource(Some(res), &link).await?;
             sse::post_req(Some(res)).await
         } else {
             Ok(())
@@ -164,7 +163,7 @@ async fn handle_show_sidebar(show: bool) -> Result<()> {
 fn handle_ev_card(el: &Element) {
     if let Some(id) = el.get_attribute("id")
         && let Some(name) = el.get_attribute("data-name")
-        && let Some(res) = selected_resource()
+        && let Some(res) = sidebar::selected_resource()
     {
         spawn_future(click_card(res, name, id));
     }
@@ -173,8 +172,8 @@ fn handle_ev_card(el: &Element) {
 /// Handle a card click event
 pub async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
-        let search = search_value()?;
-        replace_card(cv.compact(), &search).await?;
+        let search = sidebar::search_value()?;
+        sidebar::replace_card(cv.compact(), &search).await?;
     }
     let view = if id.ends_with('_') && id.len() == res.as_str().len() + 1 {
         View::Create
@@ -184,7 +183,7 @@ pub async fn click_card(res: Res, name: String, id: String) -> Result<()> {
         *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
     };
     let cv = CardView::new(res, &name, view);
-    replace_card(cv, "").await?;
+    sidebar::replace_card(cv, "").await?;
     Ok(())
 }
 
@@ -207,15 +206,15 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     if clear {
         set_selected_item(None);
         if let Some(cv) = app::expanded_view() {
-            let search = search_value()?;
-            replace_card(cv.compact(), &search).await?;
+            let search = sidebar::search_value()?;
+            sidebar::replace_card(cv.compact(), &search).await?;
         }
         return Ok(());
     }
-    let changed = res != selected_resource();
+    let changed = res != sidebar::selected_resource();
     if let Some(res) = res {
         if changed {
-            set_resource(Some(res), "").await?;
+            sidebar::set_resource(Some(res), "").await?;
         }
         set_selected_item(Some((res, &name)));
         let id = format!("{res}_{name}");
@@ -233,10 +232,10 @@ pub fn handle_contextmenu(target: Target, x: i32, y: i32) {
     log::info!("contextmenu: {target:?} {x} {y}");
     app::clear_selected_item();
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        if let Some(po) = Doc::get().opt_elem::<HtmlElement>("menu-popover") {
-            if let Err(err) = po.show_popover() {
-                log::error!("show_popover: {err:?}");
-            }
+        if let Some(po) = Doc::get().opt_elem::<HtmlElement>("menu-popover")
+            && let Err(err) = po.show_popover()
+        {
+            log::error!("show_popover: {err:?}");
         }
         let prop = Prop::new().fill("#96a");
         let sel = Sel::cls(&target.cls);

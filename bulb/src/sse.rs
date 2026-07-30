@@ -13,7 +13,7 @@
 use crate::app::{self, DeferredAction};
 use crate::error::Result;
 use crate::fetch::Uri;
-use crate::start::handle_notification;
+use crate::sidebar::handle_notification;
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
