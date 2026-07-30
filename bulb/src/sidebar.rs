@@ -18,6 +18,7 @@ use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
 use crate::item::ItemState;
+use crate::map;
 use crate::permission::Permission;
 use crate::sse;
 use crate::start;
@@ -137,8 +138,6 @@ fn add_change_listener(el: &Element) -> Result<()> {
             let id = target.id();
             if id == "sb_fullscreen" {
                 start::set_fullscreen();
-            } else {
-                spawn_future(start::handle_layer_zoom(id));
             }
         }
     });
@@ -208,7 +207,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
-    start::set_selected_item(None);
+    map::set_selected_style(None);
     let res = fetch_and_populate_cards(res).await;
     // Turn off "wait" style
     sidebar.set_class_name("");
@@ -556,8 +555,7 @@ async fn do_handle_notification(
     if let Ok(res) = Res::try_from(chan.as_str())
         && res.has_location()
     {
-        let zoom = start::current_zoom();
-        start::update_map_states(res, zoom, None).await?;
+        map::update_states(res, None).await?;
     }
     Ok(())
 }
@@ -588,8 +586,7 @@ async fn update_card_list(res: Res) -> Result<bool> {
         }
     }
     if res.has_location() {
-        let zoom = start::current_zoom();
-        start::update_map_states(res, zoom, Some(&cards)).await?;
+        map::update_states(res, Some(&cards)).await?;
     }
     if let Some(cv) = expanded {
         cards.set_view(cv);

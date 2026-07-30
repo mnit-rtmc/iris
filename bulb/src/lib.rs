@@ -50,6 +50,7 @@ mod joystick;
 mod lcs;
 mod lcsstate;
 mod lock;
+mod map;
 mod mapextent;
 mod monitorstyle;
 mod msgline;

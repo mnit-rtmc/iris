@@ -14,8 +14,8 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html};
 use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
+use crate::map;
 use crate::road::Direction;
-use crate::start::select_item_map;
 use crate::util::{ContainsLower, Fields};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -163,7 +163,7 @@ impl Incident {
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &IncidentAnc) -> String {
         if let Some((lon, lat)) = self.lonlat() {
-            select_item_map(Res::Incident, &self.name, lon, lat);
+            map::select_item(Res::Incident, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();

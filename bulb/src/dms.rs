@@ -20,6 +20,7 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
+use crate::map;
 use crate::msgline::MsgLine;
 use crate::msgpattern::{FontName, GraphicName, MsgPattern};
 use crate::notes::contains_hashtag;
@@ -28,7 +29,6 @@ use crate::rend::Renderer;
 use crate::rle::Table;
 use crate::signconfig::NtcipDms;
 use crate::signmessage::SignMessage;
-use crate::start::select_item_map;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use crate::word::Word;
@@ -674,7 +674,7 @@ impl Dms {
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &DmsAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
-            select_item_map(Res::Dms, &self.name, lon, lat);
+            map::select_item(Res::Dms, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());

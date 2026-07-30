@@ -22,8 +22,8 @@ use crate::geoloc::LocAnc;
 use crate::helper::spawn_future;
 use crate::item::ItemState;
 use crate::joystick;
+use crate::map;
 use crate::permission::{ACCESS_MANAGE, ACCESS_OPERATE, Permission};
-use crate::start::select_item_map;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -499,7 +499,7 @@ impl Camera {
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &CameraAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
-            select_item_map(Res::Camera, &self.name, lon, lat);
+            map::select_item(Res::Camera, &self.name, lon, lat);
         }
         let access_level = anc.access_level(self);
         let mut tree = Tree::new();

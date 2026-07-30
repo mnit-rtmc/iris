@@ -18,7 +18,7 @@ use crate::commlink::CommLink;
 use crate::error::Result;
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
-use crate::start::select_item_map;
+use crate::map;
 use crate::util::{ContainsLower, Fields, Input, Select, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -364,7 +364,7 @@ impl Controller {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
-            select_item_map(Res::Controller, &self.name, lon, lat);
+            map::select_item(Res::Controller, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Status, &mut tree.root::<html::Div>());

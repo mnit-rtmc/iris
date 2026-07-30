@@ -19,7 +19,7 @@ use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lcsstate::LcsState;
 use crate::lock::LockReason;
-use crate::start::select_item_map;
+use crate::map;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -484,7 +484,7 @@ impl Lcs {
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &LcsAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
-            select_item_map(Res::Lcs, &self.name, lon, lat);
+            map::select_item(Res::Lcs, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());

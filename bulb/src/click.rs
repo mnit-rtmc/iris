@@ -17,7 +17,7 @@ use crate::error::Result;
 use crate::helper::spawn_future;
 use crate::sidebar;
 use crate::sse;
-use crate::start::{handle_login, handle_logout, set_selected_item};
+use crate::start::{handle_login, handle_logout};
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use earthwyrm::Target;
@@ -185,46 +185,6 @@ pub async fn click_card(res: Res, name: String, id: String) -> Result<()> {
     let cv = CardView::new(res, &name, view);
     sidebar::replace_card(cv, "").await?;
     Ok(())
-}
-
-/// Handle a `click` event
-pub fn handle_map_click(target: Target) {
-    log::debug!("click: {target:?}");
-    if let Some((rname, nm)) = target.cls.split_once('-') {
-        let res = Res::try_from(rname).ok();
-        spawn_future(select_card_map(res, nm.to_string()));
-    }
-}
-
-/// Select a card from a map marker click
-async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
-    let clear = name.is_empty()
-        || match (res, &name) {
-            (Some(res), name) => app::is_selected_item(res, name),
-            (None, _name) => true,
-        };
-    if clear {
-        set_selected_item(None);
-        if let Some(cv) = app::expanded_view() {
-            let search = sidebar::search_value()?;
-            sidebar::replace_card(cv.compact(), &search).await?;
-        }
-        return Ok(());
-    }
-    let changed = res != sidebar::selected_resource();
-    if let Some(res) = res {
-        if changed {
-            sidebar::set_resource(Some(res), "").await?;
-        }
-        set_selected_item(Some((res, &name)));
-        let id = format!("{res}_{name}");
-        click_card(res, name, id).await?;
-    }
-    if changed {
-        sse::post_req(res).await
-    } else {
-        Ok(())
-    }
 }
 
 /// Handle a `contextmenu` event
