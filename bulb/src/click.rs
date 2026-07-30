@@ -115,8 +115,8 @@ fn handle_ev_button(target: &Element) {
     match id.as_str() {
         eid::LOGIN => spawn_future(start::handle_login()),
         eid::LOGOUT => spawn_future(start::handle_logout()),
-        "show_sidebar" => spawn_future(handle_show_sidebar(true)),
-        "hide_sidebar" => spawn_future(handle_show_sidebar(false)),
+        eid::SHOW_SIDEBAR => spawn_future(handle_show_sidebar(true)),
+        eid::HIDE_SIDEBAR => spawn_future(handle_show_sidebar(false)),
         // handled by mouse event listener, prevent click:
         "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up" | "ptz-tilt-down"
         | "ptz-zoom-in" | "ptz-zoom-out" | "focus-near" | "focus-far"
@@ -143,10 +143,10 @@ fn handle_ev(target: &Element) {
 /// Handle a show/hide sidebar button click
 async fn handle_show_sidebar(show: bool) -> Result<()> {
     let doc = Doc::new()?;
-    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>("show_sidebar") {
+    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>(eid::SHOW_SIDEBAR) {
         btn.set_disabled(show);
     }
-    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>("hide_sidebar") {
+    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>(eid::HIDE_SIDEBAR) {
         btn.set_disabled(!show);
     }
     if show {

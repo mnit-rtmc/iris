@@ -28,6 +28,10 @@ pub const STATE: &str = "sb_state";
 pub const VIEW: &str = "ob_view";
 pub const NAME: &str = "ob_name";
 
+/* Divider buttons */
+pub const SHOW_SIDEBAR: &str = "show_sidebar";
+pub const HIDE_SIDEBAR: &str = "hide_sidebar";
+
 /* Beacon element IDs */
 
 pub const BCN_FLASHING: &str = "ob_flashing";
