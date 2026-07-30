@@ -157,11 +157,6 @@ fn set_fullscreen() {
     doc.request_fullscreen(checked);
 }
 
-/// Get dependent resource row class name
-fn row_class(show: bool) -> &'static str {
-    if show { "sb_row_left" } else { "no-display" }
-}
-
 /// Handle change to selected resource type
 async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     let doc = Doc::new()?;
@@ -219,6 +214,11 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     // Turn off "wait" style
     sidebar.set_class_name("");
     res
+}
+
+/// Get dependent resource row class name
+fn row_class(show: bool) -> &'static str {
+    if show { "sb_row_left" } else { "no-display" }
 }
 
 /// Get the selected resource value
