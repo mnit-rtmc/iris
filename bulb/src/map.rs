@@ -443,10 +443,19 @@ fn menu_title(target: &Target) -> Option<String> {
 
 /// Handle a `contextmenu` event
 fn handle_contextmenu(target: Target, x: i32, y: i32) {
-    log::info!("contextmenu: {target:?} {x} {y}");
-    app::clear_selected_item();
-    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        let prop = Prop::new().fill("#96a");
+    log::debug!("contextmenu: {target:?} {x} {y}");
+    spawn_future(do_handle_contextmenu(target, x, y));
+}
+
+/// Handle a `contextmenu` event
+async fn do_handle_contextmenu(target: Target, x: i32, y: i32) -> Result<()> {
+    if let Some((rname, nm)) = target.cls.split_once('-')
+        && let Ok(res) = Res::try_from(rname)
+    {
+        select_card_map(Some(res), nm.to_string()).await?;
+    } else if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
+        select_card_map(None, String::new()).await?;
+        let prop = Prop::new().fill("#96b");
         let sel = Sel::cls(&target.cls);
         let css = Rule::new(sel, prop).to_string();
         el.set_inner_html(&css);
@@ -466,6 +475,7 @@ fn handle_contextmenu(target: Target, x: i32, y: i32) {
         }
         el.set_outer_html(&String::from(tree));
     }
+    Ok(())
 }
 
 /// Dismiss the map context menu
