@@ -814,6 +814,21 @@ impl Card for Camera {
         id: &str,
         mouse_down: bool,
     ) -> Vec<Action> {
+        let mut parts = id.split("-");
+        let id = match (parts.next(), parts.next()) {
+            // focus/iris auto buttons are on click, not mousedown/up
+            (_, Some("auto")) => "",
+            (Some("focus"), _)
+            | (Some("iris"), _)
+            | (Some("ptz"), _)
+            | (Some("publish"), _) => id,
+            _ => "",
+        };
+        let mouse_down = match id {
+            // mouse on invalid target, so always release mouse
+            "" => false,
+            _ => mouse_down,
+        };
         if mouse_down {
             self.mouse_down(id)
         } else {
