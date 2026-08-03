@@ -140,6 +140,9 @@ fn add_mouse_listener(el: &Element) -> Result<()> {
 
 /// Handle a mouse event
 fn handle_mouse_ev(target: &Element, tp: MouseEventTp, button: i16) {
+    if MouseEventTp::Down == tp {
+        map::dismiss_context_menu();
+    }
     if button == 0 {
         spawn_future(handle_mouse_card(target.id(), tp));
     }

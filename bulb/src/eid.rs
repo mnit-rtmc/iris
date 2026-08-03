@@ -13,7 +13,6 @@
 //! Element IDs
 
 /* General element IDs */
-
 pub const RESOURCE: &str = "sb_resource";
 pub const MONITOR: &str = "sb_monitor";
 pub const CARDS: &str = "sb_cards";
@@ -32,8 +31,10 @@ pub const NAME: &str = "ob_name";
 pub const SHOW_SIDEBAR: &str = "show_sidebar";
 pub const HIDE_SIDEBAR: &str = "hide_sidebar";
 
-/* Beacon element IDs */
+/* Map menu */
+pub const MAP_MENU: &str = "map-menu";
 
+/* Beacon element IDs */
 pub const BCN_FLASHING: &str = "ob_flashing";
 pub const BCN_MESSAGE: &str = "message";
 pub const BCN_NOTES: &str = "notes";

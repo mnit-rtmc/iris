@@ -14,6 +14,7 @@ use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
 use crate::card::{self, CardList, CardState};
 use crate::click;
+use crate::eid;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
@@ -24,6 +25,7 @@ use crate::util::Doc;
 use chrono::{DateTime, Local};
 use earthwyrm::{MapPane, Target};
 use hatmil::css::{Prop, Rule, Sel};
+use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -422,19 +424,56 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
     Ok(())
 }
 
+/// Get title for map context menu
+fn menu_title(target: &Target) -> Option<String> {
+    if !target.name.is_empty() {
+        let mut title = target.name.to_string();
+        if !target.osm_ref.is_empty() {
+            title.push_str(&format!(" ({})", target.osm_ref));
+        }
+        Some(title)
+    } else if let Some((rname, nm)) = target.cls.split_once('-')
+        && let Ok(res) = Res::try_from(rname)
+    {
+        Some(format!("{}: {nm}", res.as_str()))
+    } else {
+        None
+    }
+}
+
 /// Handle a `contextmenu` event
 fn handle_contextmenu(target: Target, x: i32, y: i32) {
     log::info!("contextmenu: {target:?} {x} {y}");
     app::clear_selected_item();
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        if let Some(po) = Doc::get().opt_elem::<HtmlElement>("menu-popover")
-            && let Err(err) = po.show_popover()
-        {
-            log::error!("show_popover: {err:?}");
-        }
         let prop = Prop::new().fill("#96a");
         let sel = Sel::cls(&target.cls);
         let css = Rule::new(sel, prop).to_string();
         el.set_inner_html(&css);
+    }
+    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
+        let title = menu_title(&target);
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
+        div.id(eid::MAP_MENU);
+        if let Some(title) = title {
+            div.style(Prop::new().left(format!("{x}px")).top(format!("{y}px")));
+            let mut menu = div.menu();
+            menu.style(Prop::new().left("0px").bottom("0px"));
+            menu.li().cdata(&title);
+        } else {
+            div.class("no-display");
+        }
+        el.set_outer_html(&String::from(tree));
+    }
+}
+
+/// Dismiss the map context menu
+pub fn dismiss_context_menu() {
+    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
+        div.id(eid::MAP_MENU).class("no-display");
+        el.set_outer_html(&String::from(tree));
     }
 }

@@ -83,6 +83,7 @@ th, td {
   padding: 0.1rem;
   margin: 0;
 }
+
 .packed {
   table-layout: fixed;
 }
@@ -204,11 +205,33 @@ th, td {
   padding: 0.3rem;
 }
 
+#map-menu {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+}
+#map-menu menu {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  background-color: #566;
+  color: white;
+  border: 1px solid white;
+  border-radius: 0.2rem;
+  padding: 0.2rem;
+  margin: 0;
+}
+#map-menu li {
+  list-style-type: none;
+  white-space: nowrap;
+}
+
 #layer-popover {
   position-area: top;
   background-color: #566;
   color: white;
   border: 1px solid white;
+  border-radius: 0.2rem;
 }
 #layer-menu {
   display: grid;
