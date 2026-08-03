@@ -46,6 +46,7 @@ use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;
 use crate::signconfig::SignConfig;
+use crate::start::MouseEventTp;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::tollzone::TollZone;
@@ -226,7 +227,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         &self,
         _anc: Self::Ancillary,
         _id: &str,
-        _mouse_down: bool,
+        _tp: MouseEventTp,
     ) -> Vec<Action> {
         Vec::new()
     }

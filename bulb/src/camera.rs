@@ -24,6 +24,7 @@ use crate::item::ItemState;
 use crate::joystick;
 use crate::map;
 use crate::permission::{ACCESS_MANAGE, ACCESS_OPERATE, Permission};
+use crate::start::MouseEventTp;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -812,7 +813,7 @@ impl Card for Camera {
         &self,
         _anc: CameraAnc,
         id: &str,
-        mouse_down: bool,
+        tp: MouseEventTp,
     ) -> Vec<Action> {
         let mut parts = id.split("-");
         let id = match (parts.next(), parts.next()) {
@@ -827,7 +828,7 @@ impl Card for Camera {
         let mouse_down = match id {
             // mouse on invalid target, so always release mouse
             "" => false,
-            _ => mouse_down,
+            _ => tp == MouseEventTp::Down,
         };
         if mouse_down {
             self.mouse_down(id)

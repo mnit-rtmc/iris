@@ -43,6 +43,7 @@ use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;
 use crate::signconfig::SignConfig;
+use crate::start::MouseEventTp;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::tollzone::TollZone;
@@ -278,13 +279,13 @@ impl CardView {
     }
 
     /// Handle mouse event for a card
-    pub async fn handle_mouse(&self, id: &str, mouse_down: bool) -> Result<()> {
+    pub async fn handle_mouse(&self, id: &str, tp: MouseEventTp) -> Result<()> {
         #[allow(clippy::single_match)]
         match (self.res, self.view) {
             (Res::Camera, View::Control) => {
                 let pri = self.fetch_primary::<Camera>().await?;
                 let anc = fetch_ancillary(&pri, self.view).await?;
-                for action in pri.handle_mouse(anc, id, mouse_down) {
+                for action in pri.handle_mouse(anc, id, tp) {
                     action.perform().await?;
                 }
             }

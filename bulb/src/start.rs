@@ -27,6 +27,27 @@ use web_sys::{
     MouseEvent,
 };
 
+/// Mouse event type
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MouseEventTp {
+    Down,
+    Move,
+    Up,
+}
+
+impl TryFrom<&MouseEvent> for MouseEventTp {
+    type Error = ();
+
+    fn try_from(me: &MouseEvent) -> std::result::Result<Self, Self::Error> {
+        match me.type_().as_str() {
+            "mousedown" => Ok(Self::Down),
+            "mousemove" => Ok(Self::Move),
+            "mouseup" => Ok(Self::Up),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Application starting function
 #[wasm_bindgen(start)]
 pub async fn start() -> core::result::Result<(), JsError> {
@@ -97,12 +118,12 @@ fn tick_interval() {
 /// Add a mouse event listener to an element
 fn add_mouse_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
-            && mouse_event.button() == 0
+        if let Ok(me) = e.dyn_into::<MouseEvent>()
             && let Some(Ok(target)) =
-                mouse_event.target().map(|e| e.dyn_into::<Element>())
+                me.target().map(|e| e.dyn_into::<Element>())
+            && let Ok(tp) = MouseEventTp::try_from(&me)
         {
-            handle_mouse_ev(&target, &mouse_event.type_() == "mousedown");
+            handle_mouse_ev(&target, tp, me.button());
         }
     });
     el.add_event_listener_with_callback(
@@ -118,14 +139,16 @@ fn add_mouse_listener(el: &Element) -> Result<()> {
 }
 
 /// Handle a mouse event
-fn handle_mouse_ev(target: &Element, mouse_down: bool) {
-    spawn_future(handle_mouse_card(target.id(), mouse_down));
+fn handle_mouse_ev(target: &Element, tp: MouseEventTp, button: i16) {
+    if button == 0 {
+        spawn_future(handle_mouse_card(target.id(), tp));
+    }
 }
 
 /// Handle a mouse event on an expanded card
-async fn handle_mouse_card(id: String, mouse_down: bool) -> Result<()> {
+async fn handle_mouse_card(id: String, tp: MouseEventTp) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
-        cv.handle_mouse(id.as_str(), mouse_down).await?;
+        cv.handle_mouse(id.as_str(), tp).await?;
     }
     Ok(())
 }
