@@ -318,7 +318,7 @@ impl Res {
             IncDescriptor => "🚨❓",
             IncDetail => "🚨➕",
             IncLocator => "🚨🗺️",
-            Lcs => "🠟✖🠟",
+            Lcs => "⬇️",
             LcsState => "🠟",
             MapExtent => "🗺️",
             MonitorStyle => "🖵 ",

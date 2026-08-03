@@ -435,7 +435,7 @@ fn menu_title(target: &Target) -> Option<String> {
     } else if let Some((rname, nm)) = target.cls.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
-        Some(format!("{}: {nm}", res.as_str()))
+        Some(format!("{} {nm}", res.symbol()))
     } else {
         None
     }

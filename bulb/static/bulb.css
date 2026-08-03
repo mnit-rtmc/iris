@@ -214,7 +214,7 @@ th, td {
   position: absolute;
   width: fit-content;
   height: fit-content;
-  background-color: #566;
+  background-color: #677;
   color: white;
   border: 1px solid white;
   border-radius: 0.2rem;
@@ -228,7 +228,7 @@ th, td {
 
 #layer-popover {
   position-area: top;
-  background-color: #566;
+  background-color: #677;
   color: white;
   border: 1px solid white;
   border-radius: 0.2rem;
