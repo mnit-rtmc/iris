@@ -21,21 +21,21 @@ http.workspace = true
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["http1", "client-legacy", "tokio"] }
 hyper = { version = "1.8", features = ["client", "http1"] }
-loam = "0.6"
+loam = "0.7"
 log.workspace = true
 ntcip.workspace = true
 percent-encoding = "2"
-pointy = "0.8"
+pointy = "0.9"
 rand = "0.10.1"
 rendzina = { path = "../rendzina" }
 resin = { path = "../resin" }
 resources = { path = "../resources" }
-rosewood = "0.6"
+rosewood = "0.7"
 rustls = "0.23"
 serde.workspace = true
 serde_json.workspace = true
 sha1 = "0.11.0"
-squarepeg = "0.4"
+squarepeg = "0.5"
 thiserror.workspace = true
 time = "0.3"
 tokio.workspace = true
