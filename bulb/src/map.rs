@@ -216,8 +216,7 @@ fn add_change_listener(el: &Element) -> Result<()> {
 
 /// Handle layer zoom threshold change
 async fn handle_layer_zoom(id: String) -> Result<()> {
-    if let Some((layer, rname)) = id.split_once('-')
-        && layer == "layer"
+    if let Some(("layer", rname)) = id.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
         // FIXME: only call when crossing zoom threshold
@@ -307,6 +306,7 @@ fn handle_zoom(zoom: u32) {
 
 /// Handle map zoom
 async fn do_handle_zoom(zoom: u32) -> Result<()> {
+    dismiss_context_menu();
     set_zoom_level(zoom);
     update_states_all(zoom).await?;
     update_osm_style(zoom).await?;
@@ -426,10 +426,10 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
 
 /// Get title for map context menu
 fn menu_title(target: &Target) -> Option<String> {
-    if !target.name.is_empty() {
-        let mut title = target.name.to_string();
-        if !target.osm_ref.is_empty() {
-            title.push_str(&format!(" ({})", target.osm_ref));
+    if let Some(name) = &target.name {
+        let mut title = name.to_string();
+        if let Some(osm_ref) = &target.osm_ref {
+            title.push_str(&format!(" ({})", osm_ref));
         }
         Some(title)
     } else if let Some((rname, nm)) = target.cls.split_once('-')
@@ -455,7 +455,11 @@ async fn do_handle_contextmenu(target: Target, x: i32, y: i32) -> Result<()> {
         select_card_map(Some(res), nm.to_string()).await?;
     } else if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
         select_card_map(None, String::new()).await?;
-        let prop = Prop::new().fill("#96b");
+        let prop = match target.layer.as_str() {
+            "motorway" | "trunk" | "primary" | "secondary" | "tertiary"
+            | "road" | "railway" | "path" => Prop::new().stroke("#96b"),
+            _ => Prop::new().fill("#96b"),
+        };
         let sel = Sel::cls(&target.cls);
         let css = Rule::new(sel, prop).to_string();
         el.set_inner_html(&css);
@@ -468,7 +472,18 @@ async fn do_handle_contextmenu(target: Target, x: i32, y: i32) -> Result<()> {
         if let Some(title) = title {
             div.style(Prop::new().left(format!("{x}px")).top(format!("{y}px")));
             let mut menu = div.menu();
-            menu.style(Prop::new().left("0px").bottom("0px"));
+            let mut prop = Prop::new();
+            if x < 200 {
+                prop = prop.left("0px");
+            } else {
+                prop = prop.right("0px");
+            }
+            if y < 200 {
+                prop = prop.top("0px");
+            } else {
+                prop = prop.bottom("0px");
+            }
+            menu.style(prop);
             menu.li().cdata(&title);
         } else {
             div.class("no-display");

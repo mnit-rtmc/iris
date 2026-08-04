@@ -580,9 +580,9 @@ checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
 name = "earthwyrm"
-version = "0.15.0"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "777afacc1329b5ae6c031ec6d70ed9583b12b729dbdf358131830c4dc457946c"
+checksum = "f0c4fbc146e39fe2d829838058cc416874047d72b72d0bb709abd0033721e4c9"
 dependencies = [
  "futures-util",
  "hatmil",
