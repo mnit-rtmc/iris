@@ -53,11 +53,11 @@ layer_group: tile
   layer: county
     geom_type: polygon
     zoom: 4-14
-    tags: $osm_id ?name ?population type=boundary boundary=administrative admin_level=6
+    tags: $osm_id ?name type=boundary boundary=administrative admin_level=6
   layer: city
     geom_type: polygon
     zoom: 10+
-    tags: $osm_id ?name ?population type=boundary boundary=administrative admin_level=8
+    tags: $osm_id ?name type=boundary boundary=administrative admin_level=8
   layer: leisure
     geom_type: polygon
     zoom: 13+
