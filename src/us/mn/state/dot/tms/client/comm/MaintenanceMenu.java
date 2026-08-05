@@ -39,9 +39,11 @@ public class MaintenanceMenu extends IMenu {
 		super("maintenance");
 		session = s;
 		desktop = s.getDesktop();
-		addItem(createCommConfigItem());
+		if (SystemAttrEnum.LEGACY_UI_COMM_ENABLE.getBoolean())
+			addItem(createCommConfigItem());
 		addItem(createCommLinkItem());
-		addItem(createAlarmItem());
+		if (SystemAttrEnum.LEGACY_UI_COMM_ENABLE.getBoolean())
+			addItem(createAlarmItem());
 		if (SystemAttrEnum.LEGACY_UI_SYSTEM_ENABLE.getBoolean())
 			addItem(createCabinetStyleItem());
 	}

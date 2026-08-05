@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.alert.AlertMenu;
 import us.mn.state.dot.tms.client.camera.VideoMenu;
@@ -62,7 +63,8 @@ public class ViewMenu extends IMenu {
 		addMenu(new AlertMenu(session));
 		addItem(createDetectorItem());
 		addItem(createStationItem());
-		addItem(createGpsItem());
+		if (SystemAttrEnum.LEGACY_UI_COMM_ENABLE.getBoolean())
+			addItem(createGpsItem());
 		addItem(session.createTableAction(RampMeter.SONAR_TYPE));
 		addItem(createScheduleItem());
 		addItem(session.createTableAction(WeatherSensor.SONAR_TYPE));
