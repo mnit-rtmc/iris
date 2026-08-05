@@ -23,7 +23,7 @@ use crate::sidebar;
 use crate::sse;
 use crate::util::Doc;
 use chrono::{DateTime, Local};
-use earthwyrm::{MapPane, Target};
+use earthwyrm::{MapPane, MapEvent};
 use hatmil::css::{Prop, Rule, Sel};
 use hatmil::{Tree, html};
 use resources::Res;
@@ -80,9 +80,9 @@ pub fn add_listeners() -> Result<()> {
 }
 
 /// Handle a `click` event on the map
-fn handle_click(target: Target) {
-    log::debug!("click: {target:?}");
-    if let Some((rname, nm)) = target.cls.split_once('-') {
+fn handle_click(me: MapEvent) {
+    log::debug!("click: {me:?}");
+    if let Some((rname, nm)) = me.target.split_once('-') {
         let res = Res::try_from(rname).ok();
         spawn_future(select_card_map(res, nm.to_string()));
     }
@@ -425,14 +425,14 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
 }
 
 /// Get title for map context menu
-fn menu_title(target: &Target) -> Option<String> {
-    if let Some(name) = &target.name {
+fn menu_title(me: &MapEvent) -> Option<String> {
+    if let Some(name) = &me.name {
         let mut title = name.to_string();
-        if let Some(osm_ref) = &target.osm_ref {
+        if let Some(osm_ref) = &me.osm_ref {
             title.push_str(&format!(" ({})", osm_ref));
         }
         Some(title)
-    } else if let Some((rname, nm)) = target.cls.split_once('-')
+    } else if let Some((rname, nm)) = me.target.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
         Some(format!("{} {nm}", res.symbol()))
@@ -442,30 +442,30 @@ fn menu_title(target: &Target) -> Option<String> {
 }
 
 /// Handle a `contextmenu` event
-fn handle_contextmenu(target: Target, x: i32, y: i32) {
-    log::debug!("contextmenu: {target:?} {x} {y}");
-    spawn_future(do_handle_contextmenu(target, x, y));
+fn handle_contextmenu(me: MapEvent, x: i32, y: i32) {
+    log::debug!("contextmenu: {me:?} {x} {y}");
+    spawn_future(do_handle_contextmenu(me, x, y));
 }
 
 /// Handle a `contextmenu` event
-async fn do_handle_contextmenu(target: Target, x: i32, y: i32) -> Result<()> {
-    if let Some((rname, nm)) = target.cls.split_once('-')
+async fn do_handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
+    if let Some((rname, nm)) = me.target.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
         select_card_map(Some(res), nm.to_string()).await?;
     } else if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
         select_card_map(None, String::new()).await?;
-        let prop = match target.layer.as_str() {
+        let prop = match me.layer.as_str() {
             "motorway" | "trunk" | "primary" | "secondary" | "tertiary"
             | "road" | "railway" | "path" => Prop::new().stroke("#96b"),
             _ => Prop::new().fill("#96b"),
         };
-        let sel = Sel::cls(&target.cls);
+        let sel = Sel::cls(&me.target);
         let css = Rule::new(sel, prop).to_string();
         el.set_inner_html(&css);
     }
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
-        let title = menu_title(&target);
+        let title = menu_title(&me);
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();
         div.id(eid::MAP_MENU);
