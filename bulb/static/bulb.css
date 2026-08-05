@@ -187,16 +187,16 @@ th, td {
   bottom: 0;
   margin: 0;
   padding: 0;
-  background-color: #566;
-  color: white;
+  background-color: #899;
   border-top: 1px solid white;
   border-right: 1px solid white;
   user-select: none;
 }
 #layer-zoom button {
   border: none;
-  background-color: #566;
-  color: white;
+  padding: 0;
+  background-color: #899;
+  color: black;
 }
 #layer-zoom button:hover {
   background-color: #677;
@@ -214,8 +214,8 @@ th, td {
   position: absolute;
   width: fit-content;
   height: fit-content;
-  background-color: #677;
-  color: white;
+  background-color: #899;
+  color: black;
   border: 1px solid white;
   border-radius: 0.2rem;
   padding: 0.2rem;
@@ -228,8 +228,8 @@ th, td {
 
 #layer-popover {
   position-area: top;
-  background-color: #677;
-  color: white;
+  background-color: #899;
+  color: black;
   border: 1px solid white;
   border-radius: 0.2rem;
 }
@@ -246,10 +246,10 @@ th, td {
   color: black;
 }
 #layer-menu a {
-  color: white;
+  color: #004;
 }
 #layer-menu a:visited {
-  color: #bbf;
+  color: #448;
 }
 
 #side-pane {
