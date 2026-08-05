@@ -435,7 +435,11 @@ fn menu_title(me: &MapEvent) -> Option<String> {
     } else if let Some((rname, nm)) = me.target.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
-        Some(format!("{} {nm}", res.symbol()))
+        let mut title = format!("{} {nm}", res.symbol());
+        if let Some(osm_ref) = &me.osm_ref {
+            title.push_str(&format!(" ({})", osm_ref));
+        }
+        Some(title)
     } else {
         None
     }
