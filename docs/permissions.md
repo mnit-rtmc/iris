@@ -105,7 +105,7 @@ resource.  These include:
 [incident]: incidents.html
 [lcs]: lcs.html
 [lcs state]: lcs.html#lcs-states
-[map extent]: mapping.html#map-extents
+[map extent]: road_topology.html#map-extents
 [message line]: message_patterns.html#message-lines
 [message pattern]: message_patterns.html
 [monitor style]: video.html#style

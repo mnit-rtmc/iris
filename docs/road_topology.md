@@ -128,6 +128,17 @@ included in any corridor or drawn on the [traffic layer].
 The r_node **Detectors** tab allows vehicle [detectors] to be created and
 associated with an r_node.
 
+## Map Extents
+
+Select `View ➔ System ➔ Map Extents` menu item
+
+This form enables the creation of map extents, which are buttons allowing quick
+selection of a map location and zoom level.  Each map extent will be displayed
+as a button on the upper right area of the map (next to the zoom in/out
+buttons).  First, a `Home` extent should be created, which is selected by
+default when a user logs in.  Other extents can also be created for commonly
+selected map spots.
+
 
 [detectors]: vehicle_detection.html
 [DMS]: dms.html

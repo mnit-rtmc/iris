@@ -75,17 +75,6 @@ time ./generate_tiles_multiprocess.py
 scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 ```
 
-## Map Extents
-
-Select `View ➔ System ➔ Map Extents` menu item
-
-This form enables the creation of map extents, which are buttons allowing quick
-selection of a map location and zoom level.  Each map extent will be displayed
-as a button on the upper right area of the map (next to the zoom in/out
-buttons).  First, a `Home` extent should be created, which is selected by
-default when a user logs in.  Other extents can also be created for commonly
-selected map spots.
-
 
 [Geofabrik]: http://download.geofabrik.de
 [here]: http://download.geofabrik.de/north-america/us/minnesota.html

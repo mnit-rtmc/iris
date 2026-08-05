@@ -62,7 +62,7 @@ dialogs.
 [selector tool]: cameras.html#selector-tool
 [device]: controllers.html#devices
 [LDAP]: installation.html#ldap
-[map extents]: mapping.html#map-extents
+[map extents]: road_topology.html#map-extents
 [permissions]: permissions.html
 [role]: users.html#roles
 [traffic layer]: vehicle_detection.html#traffic-layer
