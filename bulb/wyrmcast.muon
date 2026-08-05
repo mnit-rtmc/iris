@@ -195,7 +195,7 @@ layer_group: tms
   layer: camera
     geom_type: point
     zoom: 6+
-    tags: ?name ?rotate
+    tags: ?name ?rotate ?ref
   layer: lcs
     geom_type: point
     zoom: 6+

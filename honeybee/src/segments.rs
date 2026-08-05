@@ -100,6 +100,7 @@ pub struct GeoLoc {
     road_dir: i16,
     lat: Option<f64>,
     lon: Option<f64>,
+    data_ref: Option<String>,
 }
 
 /// General direction of travel
@@ -326,6 +327,7 @@ impl GeoLoc {
             road_dir: row.get(2),
             lat: row.get(3),
             lon: row.get(4),
+            data_ref: row.try_get(5).ok(),
         }
     }
 
@@ -928,6 +930,9 @@ impl SegmentState {
                     let norm = self.loc_normal(loc);
                     let rotate = -norm.to_degrees().round() as i16;
                     values.push(Some(rotate.to_string()));
+                    if let Some(data_ref) = &loc.data_ref {
+                        values.push(Some(data_ref.to_string()));
+                    }
                     let mut points = Points::new(values);
                     points.push(pt);
                     writer.push(&points)?;

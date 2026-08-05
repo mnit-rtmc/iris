@@ -115,6 +115,12 @@ pub const CAMERA_PUB: &str = "\
   ) h ON c.name = h.name \
   ORDER BY c.name";
 
+/// SQL query for camera geo location markers
+pub const CAMERA_LOCS: &str = "\
+  SELECT g.name, roadway, road_dir, lat, lon, cam_num::VARCHAR \
+  FROM iris.geo_loc g \
+  JOIN iris.camera c ON c.geo_loc = g.name";
+
 /// SQL query for all camera presets (primary)
 pub const CAMERA_PRESET_ALL: &str = "\
   SELECT name, camera, preset_num \

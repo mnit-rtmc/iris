@@ -627,10 +627,29 @@ impl Resource {
     /// * `client` The database connection.
     async fn query_locs(self, client: &mut Client) -> Result<Vec<GeoLoc>> {
         let locs = match self.res_type() {
+            Res::Camera => self.query_locs_camera(client).await?,
             Res::Incident => self.query_locs_inc(client).await?,
             _ => self.query_locs_other(client).await?,
         };
         log::trace!("query_locs: {}, {}", self.res_type().as_str(), locs.len());
+        Ok(locs)
+    }
+
+    /// Query geo locations for camera resource.
+    ///
+    /// * `client` The database connection.
+    async fn query_locs_camera(
+        self,
+        client: &mut Client,
+    ) -> Result<Vec<GeoLoc>> {
+        log::trace!("query_locs_camera");
+        let params: &[&str] = &[];
+        let it = client.query_raw(query::CAMERA_LOCS, params).await?;
+        pin_mut!(it);
+        let mut locs = Vec::new();
+        while let Some(row) = it.try_next().await? {
+            locs.push(GeoLoc::from_row(row));
+        }
         Ok(locs)
     }
 
@@ -649,7 +668,7 @@ impl Resource {
         Ok(locs)
     }
 
-    /// Query geo locations for non-incident resource.
+    /// Query geo locations for other resources.
     ///
     /// * `client` The database connection.
     async fn query_locs_other(
