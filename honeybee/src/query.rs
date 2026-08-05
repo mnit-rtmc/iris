@@ -117,7 +117,7 @@ pub const CAMERA_PUB: &str = "\
 
 /// SQL query for camera geo location markers
 pub const CAMERA_LOCS: &str = "\
-  SELECT g.name, roadway, road_dir, lat, lon, cam_num::VARCHAR \
+  SELECT g.name, roadway, road_dir, lat, lon, '#' || cam_num::VARCHAR \
   FROM iris.geo_loc g \
   JOIN iris.camera c ON c.geo_loc = g.name";
 
