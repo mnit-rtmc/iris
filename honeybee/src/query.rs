@@ -1019,7 +1019,7 @@ pub const USER_ONE: &str = "\
 
 /// SQL query for all video monitors (primary)
 pub const VIDEO_MONITOR_ALL: &str = "\
-  SELECT name, mon_num, controller, notes \
+  SELECT name, mon_num, controller, notes, restricted \
   FROM iris.video_monitor \
   ORDER BY mon_num, name";
 

@@ -30,7 +30,7 @@ pub enum ItemState {
     Prohibited,
     /// Deployed for incident
     Incident,
-    /// Locked by operator
+    /// Locked by operator (or restricted to published cameras only)
     Locked,
     /// Deployed by external system
     External,

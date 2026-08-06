@@ -36,10 +36,10 @@ pub struct VideoMonitor {
     pub name: String,
     pub mon_num: u32,
     pub notes: Option<String>,
+    pub restricted: bool,
     pub controller: Option<String>,
     // secondary attributes
     pub pin: Option<u32>,
-    pub restricted: Option<bool>,
     pub monitor_style: Option<String>,
     pub camera: Option<String>,
 }
@@ -145,6 +145,9 @@ impl VideoMonitor {
             states.remove(ItemState::Online);
             states = states.with(ItemState::Prohibited, "");
         }
+        if self.restricted {
+            states = states.with(ItemState::Locked, "restricted");
+        }
         states
     }
 
@@ -217,7 +220,7 @@ impl VideoMonitor {
             .close();
         let mut input = div.input();
         input.id("restricted").r#type("checkbox");
-        if self.restricted == Some(true) {
+        if self.restricted {
             input.checked();
         }
         div.close();
@@ -259,6 +262,7 @@ impl Card for VideoMonitor {
         &[
             ItemState::Online,
             ItemState::Prohibited,
+            ItemState::Locked,
             ItemState::Offline,
             ItemState::Inactive,
         ]
