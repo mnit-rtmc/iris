@@ -58,12 +58,16 @@
   fill: #8a8;
   stroke-width: 0.1;
 }
+.wyrm-agriculture {
+  fill: #ab7;
+  stroke: none;
+}
 .wyrm-building {
   fill: #bca9a9;
   stroke: #baa;
   stroke-width: 0.5;
 }
-.wyrm-retail {
+.wyrm-commercial {
   fill: #b99;
   stroke: none;
 }

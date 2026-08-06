@@ -66,6 +66,10 @@ layer_group: tile
     geom_type: polygon
     zoom: 13+
     tags: $osm_id ?name landuse=cemetery
+  layer: agriculture
+    geom_type: polygon
+    zoom: 13+
+    tags: $osm_id ?name landuse=aquaculture|allotments|animal_keeping|farmland|farmyard|greenhouse_horticulture|orchard|plant_nursery|vineyard
   layer: lake
     geom_type: polygon
     zoom: 5+
@@ -86,10 +90,10 @@ layer_group: tile
     geom_type: polygon
     zoom: 12+
     tags: $osm_id ?name natural=wetland
-  layer: retail
+  layer: commercial
     geom_type: polygon
     zoom: 14+
-    tags: $osm_id ?name landuse=retail
+    tags: $osm_id ?name landuse=retail|commercial|construction|industrial
   layer: parking
     geom_type: polygon
     zoom: 15+
