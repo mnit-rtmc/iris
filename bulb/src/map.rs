@@ -270,21 +270,22 @@ impl StationData {
     /// Make station segment style
     fn do_make_style(&self) -> String {
         let len = self.samples.len();
-        let mut style = String::with_capacity(32 * (len + 1));
-        style.push_str(".wyrm-segment { fill: #aaa; }\n");
+        let mut css = String::with_capacity(32 * (len + 1));
+        let sel = Sel::cls("wyrm-segment");
+        let prop = Prop::new().fill("#aaa");
+        css.push_str(&Rule::new(sel, prop).to_string());
         for (sid, data) in &self.samples {
             let flow = data.first();
             let speed = data.get(1);
             if let (Some(Some(fl)), Some(Some(sp))) = (flow, speed) {
                 let density = ((*fl as f32) / (*sp as f32)).round() as u32;
-                style.push_str(".segment-");
-                style.push_str(sid);
-                style.push_str(" { fill: ");
-                style.push_str(density_color(density));
-                style.push_str("; }\n");
+                css.push('\n');
+                let sel = Sel::cls(format!("segment-{sid}"));
+                let prop = Prop::new().fill(density_color(density));
+                css.push_str(&Rule::new(sel, prop).to_string());
             }
         }
-        style
+        css
     }
 }
 
