@@ -281,7 +281,7 @@ impl Card for VideoMonitor {
 
     /// Get the main item state
     fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
-        let states = anc.cio.item_states(self);
+        let states = self.item_states(anc);
         if states.contains(ItemState::Inactive) {
             ItemState::Inactive
         } else if states.contains(ItemState::Prohibited) {

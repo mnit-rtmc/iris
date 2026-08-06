@@ -20,7 +20,7 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::LocAnc;
 use crate::helper::spawn_future;
-use crate::item::ItemState;
+use crate::item::{ItemState, ItemStates};
 use crate::joystick;
 use crate::map;
 use crate::permission::{ACCESS_MANAGE, ACCESS_OPERATE, Permission};
@@ -153,6 +153,15 @@ impl Camera {
         }
     }
 
+    /// Get item states
+    fn item_states<'a>(&'a self, anc: &'a CameraAnc) -> ItemStates<'a> {
+        let mut states = anc.cio.item_states(self);
+        if !self.publish {
+            states = states.with(ItemState::Locked, "unpublished");
+        }
+        states
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &CameraAnc) -> String {
         let mut tree = Tree::new();
@@ -160,7 +169,7 @@ impl Camera {
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
-            .cdata(anc.cio.item_states(self).to_string());
+            .cdata(self.item_states(anc).to_string());
         if let Some(num) = self.cam_num {
             div.span().class("info").cdata(format!("#{num}"));
         }
@@ -512,7 +521,7 @@ impl Camera {
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
-        anc.cio.item_states(self).spans(&mut div.span());
+        self.item_states(anc).spans(&mut div.span());
         if let Some(num) = self.cam_num {
             div.span().class("info").cdata(format!("#{num}"));
         }
@@ -712,8 +721,9 @@ impl Card for Camera {
     fn item_states_all() -> &'static [ItemState] {
         &[
             ItemState::Online,
-            ItemState::Offline,
+            ItemState::Locked,
             ItemState::Fault,
+            ItemState::Offline,
             ItemState::Inactive,
         ]
     }
@@ -731,11 +741,13 @@ impl Card for Camera {
 
     /// Get the main item state
     fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
-        let states = anc.cio.item_states(self);
+        let states = self.item_states(anc);
         if states.contains(ItemState::Inactive) {
             ItemState::Inactive
         } else if states.contains(ItemState::Offline) {
             ItemState::Offline
+        } else if states.contains(ItemState::Locked) {
+            ItemState::Locked
         } else {
             ItemState::Online
         }
@@ -746,7 +758,7 @@ impl Card for Camera {
         self.name.contains_lower(search)
             || self.location.contains_lower(search)
             || self.notes.contains_lower(search)
-            || anc.cio.item_states(self).is_match(search)
+            || self.item_states(anc).is_match(search)
             || self.check_number(search)
     }
 

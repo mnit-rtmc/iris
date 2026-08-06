@@ -23,7 +23,7 @@ use crate::sidebar;
 use crate::sse;
 use crate::util::Doc;
 use chrono::{DateTime, Local};
-use earthwyrm::{MapPane, MapEvent};
+use earthwyrm::{MapEvent, MapPane};
 use hatmil::css::{Prop, Rule, Sel};
 use hatmil::{Tree, html};
 use resources::Res;
