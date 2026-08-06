@@ -288,6 +288,10 @@ impl Controller {
             return ItemState::Inactive.into();
         }
         let mut states = ItemStates::default();
+        states = match &self.fail_time {
+            Some(fail_time) => states.with(ItemState::Offline, fail_time),
+            None => states.with(dflt, ""),
+        };
         if let Some(status) = &self.status {
             let msg = if let Some(msg) = status.msg.as_ref()
                 && status.faults == "other"
@@ -298,10 +302,7 @@ impl Controller {
             };
             states = states.with(ItemState::Fault, msg);
         }
-        match &self.fail_time {
-            Some(fail_time) => states.with(ItemState::Offline, fail_time),
-            None => states.with(dflt, ""),
-        }
+        states
     }
 
     /// Get controller `link:drop`
