@@ -232,14 +232,13 @@ impl Lcs {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a LcsAnc) -> ItemStates<'a> {
         let mut states = anc.cio.item_states(self);
-        if states.contains(ItemState::Inactive) {
-            return states;
-        }
-        if !states.contains(ItemState::Offline) {
-            states = self.item_states_lock();
-        }
-        if let Some(faults) = self.faults() {
-            states = states.with(ItemState::Fault, faults);
+        if !states.contains(ItemState::Inactive) {
+            if !states.contains(ItemState::Offline) {
+                states = self.item_states_lock();
+            }
+            if let Some(faults) = self.faults() {
+                states = states.with(ItemState::Fault, faults);
+            }
         }
         states
     }

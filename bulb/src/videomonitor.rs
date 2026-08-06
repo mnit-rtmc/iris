@@ -139,14 +139,16 @@ impl VideoMonitor {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a VideoMonitorAnc) -> ItemStates<'a> {
         let mut states = anc.cio.item_states(self);
-        if states.contains(ItemState::Online)
-            && anc.access_level(self) <= ACCESS_VIEW
-        {
-            states.remove(ItemState::Online);
-            states = states.with(ItemState::Prohibited, "");
-        }
-        if self.restricted {
-            states = states.with(ItemState::Locked, "restricted");
+        if !states.contains(ItemState::Inactive) {
+            if states.contains(ItemState::Online)
+                && anc.access_level(self) <= ACCESS_VIEW
+            {
+                states.remove(ItemState::Online);
+                states = states.with(ItemState::Prohibited, "");
+            }
+            if self.restricted {
+                states = states.with(ItemState::Locked, "restricted");
+            }
         }
         states
     }

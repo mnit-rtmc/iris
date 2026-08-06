@@ -617,17 +617,16 @@ impl Dms {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a DmsAnc) -> ItemStates<'a> {
         let mut states = anc.cio.item_states(self);
-        if states.contains(ItemState::Inactive) {
-            return states;
-        }
-        if states.contains(ItemState::Available) {
-            states = anc.msg_states(self.msg_current.as_deref());
-        }
-        if let Some(dedicated) = self.dedicated() {
-            states = states.with(ItemState::Dedicated, dedicated);
-        }
-        if let Some(faults) = self.faults() {
-            states = states.with(ItemState::Fault, faults);
+        if !states.contains(ItemState::Inactive) {
+            if states.contains(ItemState::Available) {
+                states = anc.msg_states(self.msg_current.as_deref());
+            }
+            if let Some(dedicated) = self.dedicated() {
+                states = states.with(ItemState::Dedicated, dedicated);
+            }
+            if let Some(faults) = self.faults() {
+                states = states.with(ItemState::Fault, faults);
+            }
         }
         states
     }

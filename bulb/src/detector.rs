@@ -121,11 +121,13 @@ impl Detector {
         if self.abandoned.unwrap_or(false) {
             states = states.with(ItemState::Inactive, "abandoned");
         }
-        if self.force_fail.unwrap_or(false) {
-            states = states.with(ItemState::Fault, "force fail");
-        }
-        if self.auto_fail.unwrap_or(false) {
-            states = states.with(ItemState::Fault, "auto fail");
+        if !states.contains(ItemState::Inactive) {
+            if self.force_fail.unwrap_or(false) {
+                states = states.with(ItemState::Fault, "force fail");
+            }
+            if self.auto_fail.unwrap_or(false) {
+                states = states.with(ItemState::Fault, "auto fail");
+            }
         }
         states
     }

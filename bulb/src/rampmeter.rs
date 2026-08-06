@@ -376,14 +376,13 @@ impl RampMeter {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a RampMeterAnc) -> ItemStates<'a> {
         let mut states = anc.cio.item_states(self);
-        if states.contains(ItemState::Inactive) {
-            return states;
-        }
-        if states.contains(ItemState::Available) {
-            states = self.item_states_lock();
-        }
-        if let Some(fault) = self.fault() {
-            states = states.with(ItemState::Fault, fault);
+        if !states.contains(ItemState::Inactive) {
+            if states.contains(ItemState::Available) {
+                states = self.item_states_lock();
+            }
+            if let Some(fault) = self.fault() {
+                states = states.with(ItemState::Fault, fault);
+            }
         }
         states
     }

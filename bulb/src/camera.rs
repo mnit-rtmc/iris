@@ -156,7 +156,7 @@ impl Camera {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a CameraAnc) -> ItemStates<'a> {
         let mut states = anc.cio.item_states(self);
-        if !self.publish {
+        if !states.contains(ItemState::Inactive) && !self.publish {
             states = states.with(ItemState::Locked, "unpublished");
         }
         states
