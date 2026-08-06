@@ -426,18 +426,18 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
 
 /// Get title for map context menu
 fn menu_title(me: &MapEvent) -> Option<String> {
-    if let Some(name) = &me.name {
-        let mut title = name.to_string();
-        if let Some(osm_ref) = &me.osm_ref {
-            title.push_str(&format!(" ({})", osm_ref));
+    if let Some(data_name) = &me.data_name {
+        let mut title = data_name.to_string();
+        if let Some(data_ref) = &me.data_ref {
+            title.push_str(&format!(" ({})", data_ref));
         }
         Some(title)
     } else if let Some((rname, nm)) = me.target.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
         let mut title = format!("{} {nm}", res.symbol());
-        if let Some(osm_ref) = &me.osm_ref {
-            title.push_str(&format!(" ({})", osm_ref));
+        if let Some(data_ref) = &me.data_ref {
+            title.push_str(&format!(" ({})", data_ref));
         }
         Some(title)
     } else {
