@@ -1,5 +1,15 @@
 # IRIS 5.x Release Notes
 
+5.88.0 (10 Aug 2026)
+ - Web UI: add direct ONVIF camera PTZ driver, through honeybee
+ - Web UI: add camera switching for selected video monitor
+ - Web UI: add preview to MsgLine setup card
+ - Web UI: add right-click menu to map (contextmenu)
+ - Web UI: improve DOM event handling (mouse / click)
+ - Web UI: add weather sensor request card
+ - Web UI: various cleanups and improvements
+ - Fixed problems with Max-Pressure algorithm
+
 5.87.0 (13 Jul 2026)
  - Add `hashtag` to MsgLine (replacing `prototype` from MsgPattern), more
    flexible and easier to manage
