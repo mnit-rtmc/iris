@@ -3,6 +3,8 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.87.0', '5.88.0');
+
 -- Fix controller `fail_time` as primary attribute
 CREATE OR REPLACE FUNCTION iris.controller_notify() RETURNS TRIGGER AS
     $controller_notify$
@@ -26,5 +28,10 @@ BEGIN
     RETURN NULL; -- AFTER trigger return is ignored
 END;
 $controller_notify$ LANGUAGE plpgsql;
+
+-- Add attributes to disable legacy UI
+INSERT INTO iris.system_attribute (name, value) VALUES
+    ('legacy_ui_comm_enable', 'true')
+ON CONFLICT (name) DO NOTHING;
 
 COMMIT;
