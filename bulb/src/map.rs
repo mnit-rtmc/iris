@@ -128,21 +128,20 @@ pub fn select_item(res: Res, name: &str, lon: f64, lat: f64) {
     }
 }
 
+/// Get zoom level for selected resource
+fn selected_zoom(res: Res) -> u32 {
+    let layer = format!("layer-{res}");
+    Doc::get().input_parse::<u32>(&layer).unwrap_or(32)
+}
+
 /// Select item on map
 async fn do_select_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
         map_pane.set_position(zoom, lon, lat);
         set_zoom_level(zoom);
         update_states_all(zoom).await?;
-        update_osm_style(zoom).await?;
     }
     Ok(())
-}
-
-/// Get zoom level for selected resource
-fn selected_zoom(res: Res) -> u32 {
-    let layer = format!("layer-{res}");
-    Doc::get().input_parse::<u32>(&layer).unwrap_or(32)
 }
 
 /// Set selected style (CSS)
@@ -310,6 +309,21 @@ async fn do_handle_zoom(zoom: u32) -> Result<()> {
     dismiss_context_menu();
     set_zoom_level(zoom);
     update_states_all(zoom).await?;
+    Ok(())
+}
+
+/// Update item states for all map layers
+async fn update_states_all(zoom: u32) -> Result<()> {
+    // FIXME: only call these when crossing zoom threshold
+    update_states_zoom(Res::Incident, None, zoom).await?;
+    update_states_zoom(Res::Dms, None, zoom).await?;
+    update_states_zoom(Res::Lcs, None, zoom).await?;
+    update_states_zoom(Res::Camera, None, zoom).await?;
+    update_states_zoom(Res::RampMeter, None, zoom).await?;
+    update_states_zoom(Res::Beacon, None, zoom).await?;
+    update_states_zoom(Res::WeatherSensor, None, zoom).await?;
+    update_states_zoom(Res::TagReader, None, zoom).await?;
+    update_states_zoom(Res::Controller, None, zoom).await?;
     update_osm_style(zoom).await?;
     Ok(())
 }
@@ -353,30 +367,15 @@ async fn update_states_zoom(
     Ok(())
 }
 
-/// Update item states for all map layers
-async fn update_states_all(zoom: u32) -> Result<()> {
-    // FIXME: only call these when crossing zoom threshold
-    update_states_zoom(Res::Incident, None, zoom).await?;
-    update_states_zoom(Res::Dms, None, zoom).await?;
-    update_states_zoom(Res::Lcs, None, zoom).await?;
-    update_states_zoom(Res::Camera, None, zoom).await?;
-    update_states_zoom(Res::RampMeter, None, zoom).await?;
-    update_states_zoom(Res::Beacon, None, zoom).await?;
-    update_states_zoom(Res::WeatherSensor, None, zoom).await?;
-    update_states_zoom(Res::TagReader, None, zoom).await?;
-    update_states_zoom(Res::Controller, None, zoom).await?;
-    Ok(())
+/// Check if a resource layer is displayed
+fn is_layer_displayed(res: Res, zoom: u32) -> bool {
+    (sidebar::selected_resource() == Some(res)) || zoom >= selected_zoom(res)
 }
 
 /// Update map item states with a list of cards
 pub async fn update_states(res: Res, cards: Option<&CardList>) -> Result<()> {
     let zoom = current_zoom();
     update_states_zoom(res, cards, zoom).await
-}
-
-/// Check if a resource layer is displayed
-fn is_layer_displayed(res: Res, zoom: u32) -> bool {
-    (sidebar::selected_resource() == Some(res)) || zoom >= selected_zoom(res)
 }
 
 /// Build resource item states style
