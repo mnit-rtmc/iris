@@ -589,7 +589,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		Incident inc = IncidentHelper.lookupByOriginal(
 			lk.optIncident());
 		if (inc != null) {
-			mp = IncidentHelper.getPriority(inc);
+			SignMsgPriority ip = IncidentHelper.getPriority(inc);
+			if (ip != null)
+				mp = ip;
 			src |= SignMsgSource.incident.bit();
 		}
 		String owner = SignMessageHelper.makeMsgOwner(src, user);
