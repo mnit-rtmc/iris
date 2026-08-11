@@ -19,6 +19,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::item::ItemState;
+use crate::permission::Permission;
 use crate::sidebar;
 use crate::sse;
 use crate::util::Doc;
@@ -315,15 +316,16 @@ async fn do_handle_zoom(zoom: u32) -> Result<()> {
 /// Update item states for all map layers
 async fn update_states_all(zoom: u32) -> Result<()> {
     // FIXME: only call these when crossing zoom threshold
-    update_states_zoom(Res::Incident, None, zoom).await?;
-    update_states_zoom(Res::Dms, None, zoom).await?;
-    update_states_zoom(Res::Lcs, None, zoom).await?;
-    update_states_zoom(Res::Camera, None, zoom).await?;
-    update_states_zoom(Res::RampMeter, None, zoom).await?;
-    update_states_zoom(Res::Beacon, None, zoom).await?;
-    update_states_zoom(Res::WeatherSensor, None, zoom).await?;
-    update_states_zoom(Res::TagReader, None, zoom).await?;
-    update_states_zoom(Res::Controller, None, zoom).await?;
+    let access: Vec<_> = Asset::Access.uri().get_val().await?;
+    update_states_zoom(Res::Incident, &access, None, zoom).await?;
+    update_states_zoom(Res::Dms, &access, None, zoom).await?;
+    update_states_zoom(Res::Lcs, &access, None, zoom).await?;
+    update_states_zoom(Res::Camera, &access, None, zoom).await?;
+    update_states_zoom(Res::RampMeter, &access, None, zoom).await?;
+    update_states_zoom(Res::Beacon, &access, None, zoom).await?;
+    update_states_zoom(Res::WeatherSensor, &access, None, zoom).await?;
+    update_states_zoom(Res::TagReader, &access, None, zoom).await?;
+    update_states_zoom(Res::Controller, &access, None, zoom).await?;
     update_osm_style(zoom).await?;
     Ok(())
 }
@@ -331,6 +333,7 @@ async fn update_states_all(zoom: u32) -> Result<()> {
 /// Update map item states
 async fn update_states_zoom(
     res: Res,
+    access: &[Permission],
     cards: Option<&CardList>,
     zoom: u32,
 ) -> Result<()> {
@@ -343,8 +346,7 @@ async fn update_states_zoom(
             let items = match cards {
                 Some(cards) => cards.states_main().await?,
                 None => {
-                    let access = Asset::Access.uri().get_val().await?;
-                    let mut cards = CardList::new(res, access);
+                    let mut cards = CardList::new(res, access.to_vec());
                     cards.fetch_all().await?;
                     cards.states_main().await?
                 }
@@ -375,7 +377,8 @@ fn is_layer_displayed(res: Res, zoom: u32) -> bool {
 /// Update map item states with a list of cards
 pub async fn update_states(res: Res, cards: Option<&CardList>) -> Result<()> {
     let zoom = current_zoom();
-    update_states_zoom(res, cards, zoom).await
+    let access: Vec<_> = Asset::Access.uri().get_val().await?;
+    update_states_zoom(res, &access, cards, zoom).await
 }
 
 /// Build resource item states style
