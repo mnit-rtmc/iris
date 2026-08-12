@@ -11,8 +11,10 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction};
+use crate::asset::Asset;
 use crate::error::Result;
 use crate::fetch::Uri;
+use crate::permission::{AccessLevel, Permission};
 use crate::sidebar::handle_notification;
 use crate::util::Doc;
 use js_sys::JsString;
@@ -130,32 +132,52 @@ pub fn add_listener() {
 
 /// POST a request for SSE notifications
 pub async fn post_req(res: Option<Res>) -> Result<()> {
+    let json = build_list(res).await?;
     let uri = Uri::from("/iris/api/notify");
-    let json = build_list(res);
     uri.post(&json.into()).await.inspect_err(|e| {
         log::warn!("/iris/api/notify POST: {e}");
     })
 }
 
 /// Build resource list for notifications
-fn build_list(res: Option<Res>) -> String {
+async fn build_list(res: Option<Res>) -> Result<String> {
+    let access: Vec<_> = Asset::Access.uri().get_val().await?;
+    let mut resources = String::from("[\"");
     // Always listen for resources with map markers
-    let mut resources = vec![
-        Res::Beacon.as_str(),
-        Res::Camera.as_str(),
-        Res::Controller.as_str(),
-        Res::Dms.as_str(),
-        Res::Incident.as_str(),
-        Res::Lcs.as_str(),
-        Res::RampMeter.as_str(),
-        Res::TagReader.as_str(),
-        Res::WeatherSensor.as_str(),
-    ];
-    if let Some(r) = res {
-        resources.retain(|rs| *rs != r.as_str());
-        resources.push(r.as_str());
+    for r in [
+        Res::Beacon,
+        Res::Camera,
+        Res::Controller,
+        Res::Dms,
+        Res::Incident,
+        Res::Lcs,
+        Res::RampMeter,
+        Res::TagReader,
+        Res::WeatherSensor,
+    ] {
+        if Some(r) != res
+            && Permission::access_level_max(&access, r) > AccessLevel::None
+        {
+            resources.push_str(r.as_str());
+            resources.push_str("\",\"");
+        }
     }
-    format!("[\"{}\"]", resources.join("\",\""))
+    match res {
+        Some(r) => {
+            resources.push_str(r.as_str());
+            resources.push('"');
+        }
+        None => {
+            if resources.ends_with('"') {
+                resources.pop();
+            }
+            if resources.ends_with(',') {
+                resources.pop();
+            }
+        }
+    }
+    resources.push(']');
+    Ok(resources)
 }
 
 /// Set refresh button text
