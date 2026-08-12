@@ -23,7 +23,7 @@ use crate::helper::spawn_future;
 use crate::item::{ItemState, ItemStates};
 use crate::joystick;
 use crate::map;
-use crate::permission::{ACCESS_MANAGE, ACCESS_OPERATE, Permission};
+use crate::permission::{AccessLevel, Permission};
 use crate::start::MouseEventTp;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
@@ -116,8 +116,8 @@ impl AncillaryData for CameraAnc {
 
 impl CameraAnc {
     /// Get permission access level
-    fn access_level(&self, pri: &Camera) -> u32 {
-        Permission::access_level(
+    fn access_level(&self, pri: &Camera) -> AccessLevel {
+        Permission::access_notes(
             self.access.as_slice(),
             Res::Camera,
             pri.notes.as_deref(),
@@ -461,7 +461,7 @@ impl Camera {
     fn to_html_ptz_presets(&self, anc: &CameraAnc, parent_row: &mut html::Div) {
         let mut div = parent_row.div();
         div.class("camera-presets");
-        if anc.access_level(self) >= ACCESS_MANAGE {
+        if anc.access_level(self) >= AccessLevel::Manage {
             div.button()
                 .id("preset-mode-toggle")
                 .class("default") // .active after click until store
@@ -532,7 +532,7 @@ impl Camera {
             .class("info")
             .cdata_len(opt_ref(&self.location), 64);
         div.close();
-        if access_level >= ACCESS_OPERATE {
+        if access_level >= AccessLevel::Operate {
             div = tree.root::<html::Div>();
             div.class("row");
             self.to_html_ptz_controls(anc, &mut div);
@@ -540,7 +540,7 @@ impl Camera {
             self.to_html_ptz_presets(anc, &mut div);
             div.close();
         }
-        if access_level >= ACCESS_MANAGE {
+        if access_level >= AccessLevel::Manage {
             div = tree.root::<html::Div>();
             div.class("row");
             div.label().r#for("publish").cdata("Publish").close();

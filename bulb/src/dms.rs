@@ -24,7 +24,7 @@ use crate::map;
 use crate::msgline::MsgLine;
 use crate::msgpattern::{FontName, GraphicName, MsgPattern};
 use crate::notes::contains_hashtag;
-use crate::permission::{ACCESS_OPERATE, Permission};
+use crate::permission::{AccessLevel, Permission};
 use crate::rend::Renderer;
 use crate::rle::Table;
 use crate::signconfig::NtcipDms;
@@ -357,8 +357,8 @@ impl AncillaryData for DmsAnc {
 
 impl DmsAnc {
     /// Get permission access level
-    fn access_level(&self, pri: &Dms) -> u32 {
-        Permission::access_level(
+    fn access_level(&self, pri: &Dms) -> AccessLevel {
+        Permission::access_notes(
             self.access.as_slice(),
             Res::Dms,
             pri.notes.as_deref(),
@@ -683,7 +683,7 @@ impl Dms {
         div.class("info fill")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
-        if anc.access_level(self) >= ACCESS_OPERATE {
+        if anc.access_level(self) >= AccessLevel::Operate {
             self.message_composer_html(anc, &mut tree.root::<html::Div>());
         }
         self.action_plans_html(anc, &mut tree.root::<html::Details>());

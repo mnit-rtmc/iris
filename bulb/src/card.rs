@@ -40,7 +40,7 @@ use crate::mapextent::MapExtent;
 use crate::monitorstyle::MonitorStyle;
 use crate::msgline::MsgLine;
 use crate::msgpattern::MsgPattern;
-use crate::permission::{ACCESS_CONFIGURE, Permission};
+use crate::permission::{AccessLevel, Permission};
 use crate::planphase::PlanPhase;
 use crate::rampmeter::RampMeter;
 use crate::road::Road;
@@ -540,15 +540,15 @@ impl CardList {
     }
 
     /// Get highest access level for the resource
-    pub fn access_level(&self) -> u32 {
-        self.access
-            .iter()
-            .fold(0, |acc, perm| acc.max(perm.access_level_for(self.res)))
+    pub fn access_level(&self) -> AccessLevel {
+        self.access.iter().fold(AccessLevel::None, |acc, perm| {
+            acc.max(perm.access_level_for(self.res))
+        })
     }
 
     /// Check if new resource can be created
     fn can_create<C: Card>(&self) -> bool {
-        C::res().has_create() && self.access_level() == ACCESS_CONFIGURE
+        C::res().has_create() && self.access_level() == AccessLevel::Configure
     }
 
     /// Search card views

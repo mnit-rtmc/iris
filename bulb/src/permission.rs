@@ -18,29 +18,43 @@ use serde_json::Value;
 use serde_json::map::Map;
 use std::cmp::Ordering;
 
-/// Prohibited access level
-pub const ACCESS_NONE: u32 = 0;
+/// Permission access level for a resource type
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum AccessLevel {
+    /// Prohibited access level
+    None = 0,
+    /// View access level
+    View = 1,
+    /// Operate access level
+    Operate = 2,
+    /// Manage access level
+    Manage = 3,
+    /// Configure access level
+    Configure = 4,
+}
 
-/// View access level
-pub const ACCESS_VIEW: u32 = 1;
+impl From<u32> for AccessLevel {
+    fn from(v: u32) -> Self {
+        match v {
+            1 => Self::View,
+            2 => Self::Operate,
+            3 => Self::Manage,
+            4 => Self::Configure,
+            _ => Self::None,
+        }
+    }
+}
 
-/// Operate access level
-pub const ACCESS_OPERATE: u32 = 2;
-
-/// Manage access level
-pub const ACCESS_MANAGE: u32 = 3;
-
-/// Configure access level
-pub const ACCESS_CONFIGURE: u32 = 4;
-
-/// Get item state for an access level
-pub fn access_item_state(access_level: u32) -> ItemState {
-    match access_level {
-        ACCESS_VIEW => ItemState::View,
-        ACCESS_OPERATE => ItemState::Operate,
-        ACCESS_MANAGE => ItemState::Manage,
-        ACCESS_CONFIGURE => ItemState::Configure,
-        _ => ItemState::Prohibited,
+impl AccessLevel {
+    /// Get item state for an access level
+    pub fn item_state(self) -> ItemState {
+        match self {
+            AccessLevel::View => ItemState::View,
+            AccessLevel::Operate => ItemState::Operate,
+            AccessLevel::Manage => ItemState::Manage,
+            AccessLevel::Configure => ItemState::Configure,
+            _ => ItemState::Prohibited,
+        }
     }
 }
 
@@ -91,7 +105,7 @@ impl Permission {
             role: role.to_string(),
             base_resource: base_resource.to_string(),
             hashtag: None,
-            access_level: ACCESS_NONE,
+            access_level: AccessLevel::None as u32,
         }
     }
 
@@ -107,12 +121,17 @@ impl Permission {
         Value::Object(obj)
     }
 
+    /// Get access level
+    pub fn access_level(&self) -> AccessLevel {
+        self.access_level.into()
+    }
+
     /// Get access level for a given resource type
-    pub fn access_level_for(&self, res: Res) -> u32 {
+    pub fn access_level_for(&self, res: Res) -> AccessLevel {
         if res.base().as_str() == self.base_resource {
-            self.access_level
+            self.access_level()
         } else {
-            ACCESS_NONE
+            AccessLevel::None
         }
     }
 
@@ -125,12 +144,16 @@ impl Permission {
                 .is_none_or(|ht| notes.is_some_and(|n| contains_hashtag(n, ht)))
     }
 
-    /// Get permission access level for a resource
-    pub fn access_level(perms: &[Self], res: Res, notes: Option<&str>) -> u32 {
-        let mut access_level = ACCESS_NONE;
+    /// Get access level from permissions and notes (checking hashtags)
+    pub fn access_notes(
+        perms: &[Self],
+        res: Res,
+        notes: Option<&str>,
+    ) -> AccessLevel {
+        let mut access_level = AccessLevel::None;
         for perm in perms {
             if perm.check_access(res, notes) {
-                access_level = access_level.max(perm.access_level);
+                access_level = access_level.max(perm.access_level());
             }
         }
         access_level
