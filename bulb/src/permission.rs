@@ -136,7 +136,7 @@ impl Permission {
     }
 
     /// Check access for a resource with notes containing hashtags
-    pub fn check_access(&self, res: Res, notes: Option<&str>) -> bool {
+    fn has_access_notes(&self, res: Res, notes: Option<&str>) -> bool {
         res.base().as_str() == self.base_resource
             && self
                 .hashtag
@@ -145,14 +145,27 @@ impl Permission {
     }
 
     /// Get access level from permissions and notes (checking hashtags)
-    pub fn access_notes(
+    pub fn access_level_notes(
         perms: &[Self],
         res: Res,
         notes: Option<&str>,
     ) -> AccessLevel {
         let mut access_level = AccessLevel::None;
         for perm in perms {
-            if perm.check_access(res, notes) {
+            if perm.has_access_notes(res, notes) {
+                access_level = access_level.max(perm.access_level());
+            }
+        }
+        access_level
+    }
+
+    /// Get maximum access level from permissions
+    pub fn access_level_max(perms: &[Self], res: Res) -> AccessLevel {
+        let mut access_level = AccessLevel::None;
+        for perm in perms {
+            if res.base().as_str() == perm.base_resource
+                && perm.hashtag.is_none()
+            {
                 access_level = access_level.max(perm.access_level());
             }
         }

@@ -18,8 +18,7 @@ use crate::eid;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
-use crate::item::ItemState;
-use crate::permission::Permission;
+use crate::permission::{AccessLevel, Permission};
 use crate::sidebar;
 use crate::sse;
 use crate::util::Doc;
@@ -140,7 +139,7 @@ async fn do_select_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
         map_pane.set_position(zoom, lon, lat);
         set_zoom_level(zoom);
-        update_states_all(zoom).await?;
+        update_layers_all(zoom).await?;
     }
     Ok(())
 }
@@ -152,7 +151,7 @@ pub fn set_selected_style(res_name: Option<(Res, &str)>) {
             Some((res, name)) => {
                 // FIXME: maybe this shouldn't be a side-effect here
                 app::set_selected_item(res, name);
-                let sel = Sel::cls(format!("{}-{name}", res.as_str()));
+                let sel = Sel::cls(format!("{res}-{name}"));
                 let prop = Prop::new().stroke("white").stroke_width(2);
                 let css = Rule::new(sel, prop).to_string();
                 el.set_inner_html(&css);
@@ -220,7 +219,7 @@ async fn handle_layer_zoom(id: String) -> Result<()> {
         && let Ok(res) = Res::try_from(rname)
     {
         // FIXME: only call when crossing zoom threshold
-        update_states(res, None).await?;
+        update_layer(res).await?;
     }
     Ok(())
 }
@@ -309,54 +308,36 @@ fn handle_zoom(zoom: u32) {
 async fn do_handle_zoom(zoom: u32) -> Result<()> {
     dismiss_context_menu();
     set_zoom_level(zoom);
-    update_states_all(zoom).await?;
+    update_layers_all(zoom).await?;
     Ok(())
 }
 
-/// Update item states for all map layers
-async fn update_states_all(zoom: u32) -> Result<()> {
+/// Update all map layer styles
+async fn update_layers_all(zoom: u32) -> Result<()> {
     // FIXME: only call these when crossing zoom threshold
     let access: Vec<_> = Asset::Access.uri().get_val().await?;
-    update_states_zoom(Res::Incident, &access, None, zoom).await?;
-    update_states_zoom(Res::Dms, &access, None, zoom).await?;
-    update_states_zoom(Res::Lcs, &access, None, zoom).await?;
-    update_states_zoom(Res::Camera, &access, None, zoom).await?;
-    update_states_zoom(Res::RampMeter, &access, None, zoom).await?;
-    update_states_zoom(Res::Beacon, &access, None, zoom).await?;
-    update_states_zoom(Res::WeatherSensor, &access, None, zoom).await?;
-    update_states_zoom(Res::TagReader, &access, None, zoom).await?;
-    update_states_zoom(Res::Controller, &access, None, zoom).await?;
+    update_layer_style(Res::Incident, &access, zoom).await?;
+    update_layer_style(Res::Dms, &access, zoom).await?;
+    update_layer_style(Res::Lcs, &access, zoom).await?;
+    update_layer_style(Res::Camera, &access, zoom).await?;
+    update_layer_style(Res::RampMeter, &access, zoom).await?;
+    update_layer_style(Res::Beacon, &access, zoom).await?;
+    update_layer_style(Res::WeatherSensor, &access, zoom).await?;
+    update_layer_style(Res::TagReader, &access, zoom).await?;
+    update_layer_style(Res::Controller, &access, zoom).await?;
     update_osm_style(zoom).await?;
     Ok(())
 }
 
-/// Update map item states
-async fn update_states_zoom(
+/// Update styles for one map layer
+async fn update_layer_style(
     res: Res,
     access: &[Permission],
-    cards: Option<&CardList>,
     zoom: u32,
 ) -> Result<()> {
-    // NOTE: resource must have locations
     let doc = Doc::new()?;
     if let Some(el) = doc.opt_elem::<Element>(&format!("{res}-style")) {
-        let displayed = is_layer_displayed(res, zoom);
-        let css = if displayed {
-            let states_all = card::item_states_all(res);
-            let items = match cards {
-                Some(cards) => cards.states_main().await?,
-                None => {
-                    let mut cards = CardList::new(res, access.to_vec());
-                    cards.fetch_all().await?;
-                    cards.states_main().await?
-                }
-            };
-            item_states_css(states_all, &items)
-        } else {
-            let sel = Sel::cls(format!("wyrm-{res}"));
-            let prop = Prop::new().display("none");
-            Rule::new(sel, prop).to_string()
-        };
+        let css = layer_style_css(res, access, zoom).await?;
         el.set_inner_html(&css);
     }
     if let Some(el) = doc.opt_elem::<Element>(&format!("layer-{res}")) {
@@ -369,29 +350,41 @@ async fn update_states_zoom(
     Ok(())
 }
 
+/// Build layer style CSS for a resource type
+async fn layer_style_css(
+    res: Res,
+    access: &[Permission],
+    zoom: u32,
+) -> Result<String> {
+    let displayed = is_layer_displayed(res, access, zoom);
+    if displayed {
+        let mut cards = CardList::new(res, access);
+        cards.fetch_all().await?;
+        let states = cards.states_main().await?;
+        Ok(res_states_css(res, &states))
+    } else {
+        let sel = Sel::cls(format!("wyrm-{res}"));
+        let prop = Prop::new().display("none");
+        Ok(Rule::new(sel, prop).to_string())
+    }
+}
+
 /// Check if a resource layer is displayed
-fn is_layer_displayed(res: Res, zoom: u32) -> bool {
-    (sidebar::selected_resource() == Some(res)) || zoom >= selected_zoom(res)
+fn is_layer_displayed(res: Res, access: &[Permission], zoom: u32) -> bool {
+    sidebar::selected_resource() == Some(res)
+        || (Permission::access_level_max(access, res) > AccessLevel::None
+            && zoom >= selected_zoom(res))
 }
 
-/// Update map item states with a list of cards
-pub async fn update_states(res: Res, cards: Option<&CardList>) -> Result<()> {
-    let zoom = current_zoom();
-    let access: Vec<_> = Asset::Access.uri().get_val().await?;
-    update_states_zoom(res, &access, cards, zoom).await
-}
-
-/// Build resource item states style
-fn item_states_css(
-    states_all: &'static [ItemState],
-    card_states: &[CardState],
-) -> String {
+/// Build resource style CSS from card item states
+fn res_states_css(res: Res, card_states: &[CardState]) -> String {
+    let states_all = card::item_states_all(res);
     let mut css = String::with_capacity(32 * card_states.len());
     for st in states_all {
         let mut sel: Option<Sel> = None;
         for cs in card_states {
             if cs.state == *st {
-                let s = Sel::cls(format!("{}-{}", cs.res.as_str(), cs.name));
+                let s = Sel::cls(format!("{res}-{}", cs.name));
                 sel = Some(match sel {
                     Some(sel) => sel.list(s),
                     None => s,
@@ -425,6 +418,17 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
     doc.elem::<Element>("layer-osm")?
         .set_attribute("style", &String::from(prop))?;
     Ok(())
+}
+
+/// Update layer for a resource type
+pub async fn update_layer(res: Res) -> Result<()> {
+    if Res::Incident == res || res.has_location() {
+        let zoom = current_zoom();
+        let access: Vec<_> = Asset::Access.uri().get_val().await?;
+        update_layer_style(res, &access, zoom).await
+    } else {
+        Ok(())
+    }
 }
 
 /// Get title for map context menu

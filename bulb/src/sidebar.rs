@@ -196,7 +196,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
         el.set_class_name(row_class(base == Some(Res::TollZone)));
     }
     if let Some(res) = res {
-        let id = format!("res_{}", res.as_str());
+        let id = format!("res_{res}");
         if let Some(el) = doc.opt_elem::<HtmlInputElement>(&id) {
             el.set_checked(true);
         }
@@ -493,8 +493,8 @@ pub async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
 async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
     match res {
         Some(res) => {
-            let access = Asset::Access.uri().get_val().await?;
-            let mut cards = CardList::new(res, access);
+            let access: Vec<_> = Asset::Access.uri().get_val().await?;
+            let mut cards = CardList::new(res, &access);
             cards.fetch_all().await?;
             let search = search_value()?;
             let html = cards.build_html(&search).await?;
@@ -559,10 +559,8 @@ async fn do_handle_notification(
     {
         return Ok(());
     }
-    if let Ok(res) = Res::try_from(chan.as_str())
-        && res.has_location()
-    {
-        map::update_states(res, None).await?;
+    if let Ok(res) = Res::try_from(chan.as_str()) {
+        map::update_layer(res).await?;
     }
     Ok(())
 }
@@ -578,8 +576,8 @@ async fn update_card_list(res: Res) -> Result<bool> {
     let old_json = old_cards.json().to_string();
     let expanded = old_cards.expanded_view();
     app::card_list(Some(old_cards));
-    let access = Asset::Access.uri().get_val().await?;
-    let mut cards = CardList::new(res, access).with_json(old_json);
+    let access: Vec<_> = Asset::Access.uri().get_val().await?;
+    let mut cards = CardList::new(res, &access).with_json(old_json);
     cards.fetch_all().await?;
     let search = search_value()?;
     for (cv, html) in cards.changed_html(&search).await? {
@@ -592,12 +590,10 @@ async fn update_card_list(res: Res) -> Result<bool> {
             replace_card_html(&cv, &html);
         }
     }
-    if res.has_location() {
-        map::update_states(res, Some(&cards)).await?;
-    }
     if let Some(cv) = expanded {
         cards.set_view(cv);
     }
     app::card_list(Some(cards));
+    map::update_layer(res).await?;
     Ok(true)
 }

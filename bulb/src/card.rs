@@ -458,7 +458,12 @@ pub struct CardList {
 
 impl CardList {
     /// Create a new card list
-    pub fn new(res: Res, access: Vec<Permission>) -> Self {
+    pub fn new(res: Res, access: &[Permission]) -> Self {
+        let access = access
+            .iter()
+            .filter(|p| p.access_level_for(res) > AccessLevel::None)
+            .cloned()
+            .collect();
         let old_json = String::new();
         let json = String::new();
         let views = Vec::new();

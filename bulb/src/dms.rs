@@ -358,7 +358,7 @@ impl AncillaryData for DmsAnc {
 impl DmsAnc {
     /// Get permission access level
     fn access_level(&self, pri: &Dms) -> AccessLevel {
-        Permission::access_notes(
+        Permission::access_level_notes(
             self.access.as_slice(),
             Res::Dms,
             pri.notes.as_deref(),

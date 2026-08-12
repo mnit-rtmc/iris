@@ -117,7 +117,7 @@ impl AncillaryData for CameraAnc {
 impl CameraAnc {
     /// Get permission access level
     fn access_level(&self, pri: &Camera) -> AccessLevel {
-        Permission::access_notes(
+        Permission::access_level_notes(
             self.access.as_slice(),
             Res::Camera,
             pri.notes.as_deref(),
