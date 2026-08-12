@@ -599,18 +599,11 @@ fn notify_resource(honey: Honey) -> Router {
         State(honey): State<Honey>,
     ) -> impl IntoResponse {
         log::info!("GET notify");
-        let nm = Name::from(Res::Permission);
         // NOTE: no question-mark operator -- unable to infer return type
-        let Ok(cred) = Credentials::load(&session).await else {
+        if let Err(err) = Credentials::load(&session).await {
+            log::warn!("GET notify err: {err:?}");
             return Err(StatusCode::UNAUTHORIZED);
         };
-        if honey
-            .name_access(cred.user(), &nm, Access::View)
-            .await
-            .is_err()
-        {
-            return Err(StatusCode::UNAUTHORIZED);
-        }
         let id = session.id().unwrap_or_default();
         let (tx, rx) = unbounded_channel();
         honey.store_sender(id, tx);
