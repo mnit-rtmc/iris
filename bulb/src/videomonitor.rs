@@ -298,8 +298,9 @@ impl Card for VideoMonitor {
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &VideoMonitorAnc) -> bool {
         self.name.contains_lower(search)
-            || self.item_states(anc).is_match(search)
             || self.check_number(search)
+            || self.notes.contains_lower(search)
+            || self.item_states(anc).is_match(search)
     }
 
     /// Convert to HTML view
