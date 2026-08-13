@@ -18,7 +18,7 @@ use crate::eid;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
-use crate::permission::{AccessLevel, Permission};
+use crate::permission::Permission;
 use crate::sidebar;
 use crate::sse;
 use crate::util::Doc;
@@ -341,8 +341,7 @@ async fn update_layer_style(
         let css = layer_style_css(res, access, zoom).await?;
         el.set_inner_html(&css);
     }
-    let permitted =
-        Permission::access_level_max(access, res) > AccessLevel::None;
+    let permitted = Permission::is_view_permitted(access, res);
     if permitted
         && let Some(el) = doc.opt_elem::<Element>(&format!("{res}-zoom"))
     {
@@ -361,8 +360,7 @@ async fn layer_style_css(
     access: &[Permission],
     zoom: u32,
 ) -> Result<String> {
-    let permitted =
-        Permission::access_level_max(access, res) > AccessLevel::None;
+    let permitted = Permission::is_view_permitted(access, res);
     let displayed =
         sidebar::selected_resource() == Some(res) || zoom >= selected_zoom(res);
     if permitted && displayed {

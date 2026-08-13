@@ -162,13 +162,21 @@ impl Permission {
     /// Get maximum access level from permissions
     pub fn access_level_max(perms: &[Self], res: Res) -> AccessLevel {
         let mut access_level = AccessLevel::None;
+        let base = res.base().as_str();
         for perm in perms {
-            if res.base().as_str() == perm.base_resource
-                && perm.hashtag.is_none()
-            {
+            if base == perm.base_resource && perm.hashtag.is_none() {
                 access_level = access_level.max(perm.access_level());
             }
         }
         access_level
+    }
+
+    /// Check if View is permitted for a resource (with tweaks)
+    pub fn is_view_permitted(perms: &[Self], res: Res) -> bool {
+        let threshold = match res.base() {
+            Res::CommConfig => AccessLevel::Operate,
+            _ => AccessLevel::View,
+        };
+        Self::access_level_max(perms, res) >= threshold
     }
 }

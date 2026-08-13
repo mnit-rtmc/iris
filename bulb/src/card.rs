@@ -546,9 +546,7 @@ impl CardList {
 
     /// Get highest access level for the resource
     pub fn access_level(&self) -> AccessLevel {
-        self.access.iter().fold(AccessLevel::None, |acc, perm| {
-            acc.max(perm.access_level_for(self.res))
-        })
+        Permission::access_level_max(&self.access, self.res)
     }
 
     /// Check if new resource can be created

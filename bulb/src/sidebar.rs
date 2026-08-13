@@ -106,12 +106,11 @@ pub async fn init_resource() -> Result<()> {
 
 /// Check for view access to a (base) resource name
 fn opt_class(access: &[Permission], res: Res) -> &'static str {
-    for perm in access {
-        if perm.base_resource == res.as_str() {
-            return "";
-        }
+    if Permission::is_view_permitted(access, res) {
+        ""
+    } else {
+        "no-display"
     }
-    "no-display"
 }
 
 /// Add a "fullscreenchange" event listener to an element
