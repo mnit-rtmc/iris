@@ -211,7 +211,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
     }
 
     /** Lookup an algorithm for a corridor */
-    static private MaxPressureAlgorithm lookupAlgorithm(Corridor c) {
+    static private MaxPressureAlgorithm lookupAlgorithm(Corridor c) { 
         MaxPressureAlgorithm alg = ALL_ALGS.get(c.getName());
         if (null == alg) {
             alg = new MaxPressureAlgorithm(c);
@@ -286,13 +286,22 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
     @Override
     public void validate(RampMeterImpl meter) {
         MeterState ms = getMeterState(meter);
+        
+        // if ms = null persists, it appears to be fixed by creating a new MeterState
+        if(ms == null){
+            log("Creating new state for " + meter.getName()+" stored meter="+meter_states.get(meter.getName())+" corridor="+meter.getCorridor()+"|"+corridor);
+            createMeterState(meter);
+            ms = getMeterState(meter);
+        }
+        
+        
         if (ms != null) {
             ms.validate();
 
             log(ms.toString());
             ms.logMeterEvent();
         } else {
-            log("No state for " + meter.getName());
+            log("No  state for " + meter.getName()+" stored meter="+meter_states.get(meter.getName())+" corridor="+meter.getCorridor()+"|"+corridor);
         }
     }
 
@@ -307,11 +316,17 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
 
     /** Get the meter state for a given ramp meter */
     private MeterState getMeterState(RampMeterImpl meter) {
-        if (meter.getCorridor() == corridor)
-            return meter_states.get(meter.getName());
+        if (meter.getCorridor() == corridor){
+            MeterState output = null;
+            synchronized(meter_states){
+                output = meter_states.get(meter.getName());
+            }
+            return output;
+        }
         else {
             // Meter must have been changed to a different
             // corridor; throw away old meter state
+            log("removing meter state for "+meter.getName()+" corridor="+corridor+" meter.getCorridor()="+meter.getCorridor());
             meter_states.remove(meter.getName());
             return null;
         }
@@ -322,7 +337,9 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         EntranceNode en = findEntranceNode(meter);
         if (en != null) {
             MeterState ms = new MeterState(meter, en);
-            meter_states.put(meter.getName(), ms);
+            synchronized(meter_states){
+                meter_states.put(meter.getName(), ms);
+            }
             return true;
         } else
             return false;
