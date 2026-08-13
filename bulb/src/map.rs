@@ -74,6 +74,7 @@ pub fn add_listeners() -> Result<()> {
         set_selected_style(None);
         map_pane.set_position(10, -93.2, 44.95);
         set_zoom_level(10);
+        spawn_future(update_layers_all(10));
     }
     fetch_station_data();
     Ok(())
@@ -130,8 +131,8 @@ pub fn select_item(res: Res, name: &str, lon: f64, lat: f64) {
 
 /// Get zoom level for selected resource
 fn selected_zoom(res: Res) -> u32 {
-    let layer = format!("layer-{res}");
-    Doc::get().input_parse::<u32>(&layer).unwrap_or(32)
+    let id = format!("{res}-zoom");
+    Doc::get().input_parse::<u32>(&id).unwrap_or(32)
 }
 
 /// Select item on map
@@ -172,7 +173,7 @@ fn set_zoom_level(zoom: u32) {
         let css = Rule::new(sel, prop).to_string();
         el.set_inner_html(&css);
     }
-    if let Some(el) = Doc::get().opt_elem::<Element>("zoom-level") {
+    if let Some(el) = Doc::get().opt_elem::<Element>("current-zoom") {
         el.set_inner_html(&zoom.to_string());
     }
 }
@@ -215,7 +216,7 @@ fn add_change_listener(el: &Element) -> Result<()> {
 
 /// Handle layer zoom threshold change
 async fn handle_layer_zoom(id: String) -> Result<()> {
-    if let Some(("layer", rname)) = id.split_once('-')
+    if let Some((rname, "zoom")) = id.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
         // FIXME: only call when crossing zoom threshold
@@ -340,7 +341,11 @@ async fn update_layer_style(
         let css = layer_style_css(res, access, zoom).await?;
         el.set_inner_html(&css);
     }
-    if let Some(el) = doc.opt_elem::<Element>(&format!("layer-{res}")) {
+    let permitted =
+        Permission::access_level_max(access, res) > AccessLevel::None;
+    if permitted
+        && let Some(el) = doc.opt_elem::<Element>(&format!("{res}-zoom"))
+    {
         let mut prop = Prop::new();
         if zoom < selected_zoom(res) {
             prop = prop.background_color("#aaa");
@@ -356,24 +361,23 @@ async fn layer_style_css(
     access: &[Permission],
     zoom: u32,
 ) -> Result<String> {
-    let displayed = is_layer_displayed(res, access, zoom);
-    if displayed {
+    let permitted =
+        Permission::access_level_max(access, res) > AccessLevel::None;
+    let displayed =
+        sidebar::selected_resource() == Some(res) || zoom >= selected_zoom(res);
+    if permitted && displayed {
         let mut cards = CardList::new(res, access);
         cards.fetch_all().await?;
         let states = cards.states_main().await?;
         Ok(res_states_css(res, &states))
     } else {
-        let sel = Sel::cls(format!("wyrm-{res}"));
+        let mut sel = Sel::cls(format!("wyrm-{res}"));
+        if !permitted {
+            sel = sel.list(Sel::cls(format!("menu-{res}")));
+        }
         let prop = Prop::new().display("none");
         Ok(Rule::new(sel, prop).to_string())
     }
-}
-
-/// Check if a resource layer is displayed
-fn is_layer_displayed(res: Res, access: &[Permission], zoom: u32) -> bool {
-    sidebar::selected_resource() == Some(res)
-        || (Permission::access_level_max(access, res) > AccessLevel::None
-            && zoom >= selected_zoom(res))
 }
 
 /// Build resource style CSS from card item states
@@ -402,7 +406,7 @@ fn res_states_css(res: Res, card_states: &[CardState]) -> String {
 /// Update map OSM style
 async fn update_osm_style(zoom: u32) -> Result<()> {
     let doc = Doc::new()?;
-    let displayed = zoom >= doc.input_parse::<u32>("layer-osm").unwrap_or(32);
+    let displayed = zoom >= doc.input_parse::<u32>("osm-zoom").unwrap_or(32);
     let css = if displayed {
         ""
     } else {
@@ -415,7 +419,7 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
     if !displayed {
         prop = prop.background_color("#aaa");
     }
-    doc.elem::<Element>("layer-osm")?
+    doc.elem::<Element>("osm-zoom")?
         .set_attribute("style", &String::from(prop))?;
     Ok(())
 }

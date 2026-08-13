@@ -13,7 +13,7 @@
     </script>
     <link rel="stylesheet" href="bulb/bulb.css">
     <link rel="stylesheet" href="bulb/wyrm.css">
-    <style id="osm-style"></style>
+    <style id="osm-style">.wyrm-osm { display: none; }</style>
     <style id="segment-style">.wyrm-segment { display: none; }</style>
     <style id="controller-style">.wyrm-controller { display: none; }</style>
     <style id="tag_reader-style">.wyrm-tag_reader { display: none; }</style>
@@ -50,30 +50,52 @@
       <button popovertarget="layer-popover">🞁 Layers</button>
     </div>
     <div id="layer-popover" popover>
-      <div id="layer-menu">
-        <label>Current Zoom:</label>
-        <label id="zoom-level">10</label>
-        <label for="layer-incident">🚨 Incident</label>
-        <input id="layer-incident" type="number" value="10" min="6" max="18">
-        <label for="layer-dms">⬛ DMS</label>
-        <input id="layer-dms" type="number" value="11" min="6" max="18">
-        <label for="layer-lcs">⬇️ LCS</label>
-        <input id="layer-lcs" type="number" value="14" min="6" max="18">
-        <label for="layer-camera">🎥 Camera</label>
-        <input id="layer-camera" type="number" value="13" min="6" max="18">
-        <label for="layer-ramp_meter">🚦 Ramp Meter</label>
-        <input id="layer-ramp_meter" type="number" value="15" min="6" max="18">
-        <label for="layer-beacon">🔆 Beacon</label>
-        <input id="layer-beacon" type="number" value="14" min="6" max="18">
-        <label for="layer-weather_sensor">🌦️ Weather Sensor</label>
-        <input id="layer-weather_sensor" type="number" value="12" min="6" max="18">
-        <label for="layer-tag_reader">🏷️ Tag Reader</label>
-        <input id="layer-tag_reader" type="number" value="15" min="6" max="18">
-        <label for="layer-controller">🎛️ Controller</label>
-        <input id="layer-controller" type="number" value="16" min="6" max="18">
-        <label for="layer-osm">© <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener noreferrer">OpenStreetMap</a></label>
-        <input id="layer-osm" type="number" value="6" min="6" max="18">
-      </div>
+      <menu id="layer-menu">
+        <li>
+          <label id="current-zoom">10</label>
+          <label>Current Zoom</label>
+        </li>
+        <li class="menu-incident">
+          <input id="incident-zoom" type="number" value="10" min="6" max="18">
+          <label for="incident-zoom">🚨 Incident</label>
+        </li>
+        <li class="menu-dms">
+          <input id="dms-zoom" type="number" value="11" min="6" max="18">
+          <label for="dms-zoom">⬛ DMS</label>
+        </li>
+        <li class="menu-lcs">
+          <input id="lcs-zoom" type="number" value="14" min="6" max="18">
+          <label for="lcs-zoom">⬇️ LCS</label>
+        </li>
+        <li class="menu-camera">
+          <input id="camera-zoom" type="number" value="13" min="6" max="18">
+          <label for="camera-zoom">🎥 Camera</label>
+        </li>
+        <li class="menu-ramp_meter">
+          <input id="ramp_meter-zoom" type="number" value="15" min="6" max="18">
+          <label for="ramp_meter-zoom">🚦 Ramp Meter</label>
+        </li>
+        <li class="menu-beacon">
+          <input id="beacon-zoom" type="number" value="14" min="6" max="18">
+          <label for="beacon-zoom">🔆 Beacon</label>
+        </li>
+        <li class="menu-weather_sensor">
+          <input id="weather_sensor-zoom" type="number" value="12" min="6" max="18">
+          <label for="weather_sensor-zoom">🌦️ Weather Sensor</label>
+        </li>
+        <li class="menu-tag_reader">
+          <input id="tag_reader-zoom" type="number" value="15" min="6" max="18">
+          <label for="tag_reader-zoom">🏷️ Tag Reader</label>
+        </li>
+        <li class="menu-controller">
+          <input id="controller-zoom" type="number" value="16" min="6" max="18">
+          <label for="controller-zoom">🎛️ Controller</label>
+        </li>
+        <li class="menu-osm">
+          <input id="osm-zoom" type="number" value="6" min="6" max="18">
+          <label for="osm-zoom">© <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener noreferrer">OpenStreetMap</a></label>
+        </li>
+      </menu>
     </div>
     <div id="side-pane">
       <div id="sidebar">
