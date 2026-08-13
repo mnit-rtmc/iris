@@ -569,7 +569,9 @@ impl Camera {
     /// Switch the selected monitor to this camera
     fn switch_monitor(&self) -> Vec<Action> {
         let mut actions = Vec::with_capacity(1);
-        if let Some(nm) = app::vid_mon() {
+        if let Some((nm, restricted)) = app::vid_mon()
+            && (self.publish || !restricted)
+        {
             let uri = uri_one(Res::VideoMonitor, &nm);
             let mut fields = Fields::new();
             fields.insert_str("camera", &self.name);
