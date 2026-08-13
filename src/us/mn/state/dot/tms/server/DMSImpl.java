@@ -1230,8 +1230,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			resetStateNotify(false);
 			return;
 		}
-		if (DeviceRequest.RESET_DEVICE == dr)
-			resetStateNotify(true);
+		if (DeviceRequest.RESET_DEVICE == dr) {
+			setSignDetailNotify(null);
+			setSignConfigNotify(null);
+		}
 		DMSPoller p = getDMSPoller();
 		if (p != null)
 			p.sendRequest(this, dr);
