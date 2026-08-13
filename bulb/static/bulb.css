@@ -224,6 +224,9 @@ menu li {
   width: fit-content;
   height: fit-content;
 }
+#map-menu menu {
+  position: absolute;
+}
 
 #layer-popover {
   position-area: top;
