@@ -16,7 +16,6 @@ use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
 use crate::sidebar;
-use crate::sse;
 use crate::start;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
@@ -79,8 +78,7 @@ impl ButtonAttrs {
         if let (Some(link), Some(rname)) = (self.data_link, self.data_type)
             && let Ok(res) = Res::try_from(rname.as_str())
         {
-            sidebar::set_resource(Some(res), &link).await?;
-            sse::post_req(Some(res)).await
+            sidebar::set_resource(Some(res), &link).await
         } else {
             Ok(())
         }

@@ -20,7 +20,6 @@ use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::permission::Permission;
 use crate::sidebar;
-use crate::sse;
 use crate::util::Doc;
 use chrono::{DateTime, Local};
 use earthwyrm::{MapEvent, MapPane};
@@ -113,11 +112,7 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
         let id = format!("{res}_{name}");
         click::click_card(res, name, id).await?;
     }
-    if changed {
-        sse::post_req(res).await
-    } else {
-        Ok(())
-    }
+    Ok(())
 }
 
 /// Select item on map

@@ -60,9 +60,9 @@ pub async fn start() -> core::result::Result<(), JsError> {
 /// Add event listeners
 fn add_listeners() -> Result<()> {
     add_interval_callback()?;
-    let doc = Doc::new()?;
     map::add_listeners()?;
     sidebar::add_listeners()?;
+    let doc = Doc::new()?;
     let body = doc.body()?;
     add_mouse_listener(&body)?;
     add_joystick_listener(&body)?;
@@ -79,8 +79,7 @@ async fn finish_init() -> Result<()> {
     match user.as_string() {
         Some(user) => {
             app::set_user(Some(user));
-            sidebar::init_resource().await?;
-            sse::post_req(None).await
+            sidebar::init_resource().await
         }
         None => {
             log::warn!("invalid user: {user:?}");
@@ -92,7 +91,7 @@ async fn finish_init() -> Result<()> {
 /// Add callback for regular interval checks
 fn add_interval_callback() -> Result<()> {
     let window = util::window()?;
-    let closure: Closure<dyn Fn()> = Closure::new(tick_interval);
+    let closure: Closure<dyn Fn()> = Closure::new(handle_tick_interval);
     window.set_interval_with_callback_and_timeout_and_arguments_0(
         closure.as_ref().unchecked_ref(),
         app::TICK_INTERVAL,
@@ -101,14 +100,14 @@ fn add_interval_callback() -> Result<()> {
     Ok(())
 }
 
-/// Process a tick interval
-fn tick_interval() {
+/// Handle a tick interval
+fn handle_tick_interval() {
     app::tick_tock();
     while let Some(action) = app::next_action() {
         match action {
             DeferredAction::FetchStationData => map::fetch_station_data(),
             DeferredAction::HideToast => util::hide_elem("sb_toast"),
-            DeferredAction::RefreshList => sidebar::handle_res_change(),
+            DeferredAction::RefreshList => sidebar::refresh_res_list(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
         }

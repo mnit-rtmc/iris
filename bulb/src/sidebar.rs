@@ -345,11 +345,16 @@ fn handle_input(id: String) {
     }
 }
 
-/// Handle resource change
-pub fn handle_res_change() {
+/// Handle selected resource change
+fn handle_res_change() {
     let res = selected_resource();
     spawn_future(handle_resource_change(res, ""));
     spawn_future(sse::post_req(res));
+}
+
+/// Refresh resource list
+pub fn refresh_res_list() {
+    handle_res_change();
 }
 
 /// Search card list for matching cards
@@ -485,7 +490,8 @@ pub async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
     let resource = Doc::new()?.elem::<HtmlSelectElement>(eid::RESOURCE)?;
     let base = res.map(|r| r.base().as_str()).unwrap_or("");
     resource.set_value(base);
-    handle_resource_change(res, search).await
+    handle_resource_change(res, search).await?;
+    sse::post_req(res).await
 }
 
 /// Fetch and populate card list
