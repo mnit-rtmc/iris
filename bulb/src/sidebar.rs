@@ -209,10 +209,13 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
     };
     sb_state.set_inner_html(&html);
     map::set_selected_style(None);
-    let res = fetch_and_populate_cards(res).await;
+    let mut rslt = fetch_and_populate_cards(res).await;
+    if rslt.is_ok() {
+        rslt = sse::post_req(res).await;
+    }
     // Turn off "wait" style
     sidebar.set_class_name("");
-    res
+    rslt
 }
 
 /// Get dependent resource row class name
@@ -349,7 +352,6 @@ fn handle_input(id: String) {
 fn handle_res_change() {
     let res = selected_resource();
     spawn_future(handle_resource_change(res, ""));
-    spawn_future(sse::post_req(res));
 }
 
 /// Refresh resource list
@@ -490,8 +492,7 @@ pub async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
     let resource = Doc::new()?.elem::<HtmlSelectElement>(eid::RESOURCE)?;
     let base = res.map(|r| r.base().as_str()).unwrap_or("");
     resource.set_value(base);
-    handle_resource_change(res, search).await?;
-    sse::post_req(res).await
+    handle_resource_change(res, search).await
 }
 
 /// Fetch and populate card list
