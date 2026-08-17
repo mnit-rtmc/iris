@@ -19,12 +19,14 @@ use crate::map;
 use crate::sidebar;
 use crate::sse;
 use crate::util::{self, Doc};
+use hyper::Uri as Huri;
+use resources::Res;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
     Element, Event, GamepadEvent, HtmlElement, HtmlInputElement, KeyboardEvent,
-    MouseEvent,
+    MouseEvent, NavigateEvent,
 };
 
 /// Mouse event type
@@ -60,6 +62,7 @@ pub async fn start() -> core::result::Result<(), JsError> {
 /// Add event listeners
 fn add_listeners() -> Result<()> {
     add_interval_callback()?;
+    add_navigate_callback()?;
     map::add_listeners()?;
     sidebar::add_listeners()?;
     let doc = Doc::new()?;
@@ -110,6 +113,46 @@ fn handle_tick_interval() {
             DeferredAction::RefreshList => sidebar::refresh_res_list(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
+        }
+    }
+}
+
+/// Add callback for navigate events
+fn add_navigate_callback() -> Result<()> {
+    let window = util::window()?;
+    let navigation = window.navigation();
+    let closure: Closure<dyn Fn(_)> = Closure::new(handle_navigate);
+    navigation.add_event_listener_with_callback(
+        "navigate",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
+}
+
+/// Handle a navigate event
+fn handle_navigate(ev: NavigateEvent) {
+    log::trace!("handle_navigate: {ev:?}");
+    if ev.can_intercept() && !ev.hash_change() {
+        let url = ev.destination().url();
+        log::debug!("navigate to: {url}");
+        let _ = ev.intercept();
+        if let Ok(uri) = url.parse::<Huri>() {
+            if let Some(query) = uri.query() {
+                let mut res = None;
+                let mut search = String::new();
+                for part in query.split('&') {
+                    if let Some(("res", val)) = part.split_once('=') {
+                        if let Ok(rs) = Res::try_from(val) {
+                            res = Some(rs);
+                        }
+                    }
+                    if let Some(("q", val)) = part.split_once('=') {
+                        search = val.to_string();
+                    }
+                }
+                spawn_future(sidebar::update_resource(res, search));
+            }
         }
     }
 }

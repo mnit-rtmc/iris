@@ -41,7 +41,7 @@ features = [
 ]
 
 [dependencies.web-sys]
-version = "0.3"
+version = "0.3.104"
 features = [
   'Blob',
   'CssStyleDeclaration',
@@ -59,6 +59,10 @@ features = [
   'HtmlTextAreaElement',
   'KeyboardEvent',
   'MessageEvent',
+  'NavigateEvent',
+  'Navigation',
+  'NavigationDestination',
+  'NavigationResult',
   'Navigator',
   'Request',
   'RequestInit',

@@ -21,7 +21,7 @@ use crate::item::ItemState;
 use crate::map;
 use crate::permission::Permission;
 use crate::sse;
-use crate::util::Doc;
+use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use resources::Res;
 use wasm_bindgen::JsCast;
@@ -158,6 +158,21 @@ fn set_fullscreen() {
 
 /// Handle change to selected resource type
 async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
+    let window = util::window()?;
+    let navigation = window.navigation();
+    let mut uri = String::from("/iris/");
+    match (res, search.is_empty()) {
+        (Some(res), true) => uri.push_str(&format!("?res={res}")),
+        (Some(res), false) => uri.push_str(&format!("?res={res}&q={search}")),
+        (None, true) => (),
+        (None, false) => uri.push_str(&format!("?q={search}")),
+    }
+    navigation.navigate(&uri);
+    Ok(())
+}
+
+/// Handle change to selected resource type
+pub async fn update_resource(res: Option<Res>, search: String) -> Result<()> {
     let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
@@ -201,7 +216,7 @@ async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
         }
     }
     let sb_search = doc.elem::<HtmlInputElement>(eid::SEARCH)?;
-    sb_search.set_value(search);
+    sb_search.set_value(&search);
     let sb_state = doc.elem::<HtmlSelectElement>(eid::STATE)?;
     let html = match res {
         Some(res) => card::item_states_html(res, !search.is_empty()),
