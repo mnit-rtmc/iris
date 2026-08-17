@@ -20,7 +20,7 @@ heck = "0.5"
 http.workspace = true
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["http1", "client-legacy", "tokio"] }
-hyper = { version = "1.8", features = ["client", "http1"] }
+hyper.workspace = true
 loam = "0.7"
 log.workspace = true
 ntcip.workspace = true

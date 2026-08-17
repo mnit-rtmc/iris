@@ -16,6 +16,7 @@ earthwyrm = "0.18.0"
 gift.workspace = true
 hatmil = "1.5.0"
 humantime = "2.1"
+hyper.workspace = true
 js-sys = "0.3"
 log.workspace = true
 mag.workspace = true

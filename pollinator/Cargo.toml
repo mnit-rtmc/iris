@@ -13,7 +13,7 @@ bytes = "1.11.1"
 env_logger.workspace = true
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["http1", "client-legacy", "tokio"] }
-hyper = { version = "1.8", features = ["client", "http1"] }
+hyper.workspace = true
 hyper-rustls = { version = "0.27.9", features = ["webpki-roots"] }
 log.workspace = true
 resin = { path = "../resin" }
