@@ -52,6 +52,7 @@ mod lcsstate;
 mod lock;
 mod map;
 mod mapextent;
+mod mjpeg;
 mod monitorstyle;
 mod msgline;
 mod msgpattern;

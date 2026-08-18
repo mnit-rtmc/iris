@@ -13,6 +13,7 @@
 use crate::card::CardList;
 use crate::permission::AccessLevel;
 use crate::sse::NotifyState;
+use crate::util;
 use crate::view::CardView;
 use resources::Res;
 use std::cell::RefCell;
@@ -57,6 +58,8 @@ struct AppState {
     delete_enabled: bool,
     /// Active joystick interval IDs
     joystick_intervals: HashMap<u32, i32>,
+    /// Active stream interval IDs
+    stream_intervals: HashMap<String, i32>,
 }
 
 thread_local! {
@@ -235,4 +238,31 @@ pub fn add_joystick_interval_id(index: u32, id: i32) {
 /// Remove and return a joystick interval ID
 pub fn remove_joystick_interval_id(index: &u32) -> Option<i32> {
     STATE.with(|rc| rc.borrow_mut().joystick_intervals.remove(index))
+}
+
+/// Add a stream interval ID
+pub fn add_stream_interval_id(index: String, id: i32) {
+    STATE.with(|rc| rc.borrow_mut().stream_intervals.insert(index, id));
+}
+
+/// Get a copy of all stream interval mappings
+#[allow(dead_code)]
+pub fn get_stream_intervals() -> HashMap<String, i32> {
+    STATE.with(|rc| rc.borrow().stream_intervals.clone())
+}
+
+/// Stops the stream interval for the given source
+pub fn stop_stream_interval(source: &String) -> crate::error::Result<()> {
+    STATE.with(|rc| {
+        let mut rc_mut = rc.borrow_mut();
+        log::debug!("Intervals before removal: {:?}", rc_mut.stream_intervals);
+        let window = util::window()?;
+        if let Some(id) = rc_mut.stream_intervals.remove(source) {
+            window.clear_interval_with_handle(id);
+            log::debug!("Removed stream {source} (interval #{id})");
+        } else {
+            log::error!("No stream interval for {source}");
+        }
+        Ok(())
+    })
 }
