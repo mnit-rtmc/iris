@@ -91,14 +91,7 @@ fn handle_click(me: MapEvent) {
 
 /// Select a card from a map marker click
 async fn select_card_map(query: QueryState) -> Result<()> {
-    let res = query.res();
-    let name = query.sel();
-    let clear = name.is_empty()
-        || match (res, &name) {
-            (Some(res), name) => app::is_selected_item(res, name),
-            (None, _name) => true,
-        };
-    if clear {
+    if should_clear(&query) {
         set_selected_style(QueryState::new());
         if let Some(cv) = app::expanded_view() {
             let search = sidebar::search_value()?;
@@ -106,16 +99,21 @@ async fn select_card_map(query: QueryState) -> Result<()> {
         }
         return Ok(());
     }
-    let changed = res != sidebar::selected_resource();
-    if let Some(res) = res {
-        if changed {
+    if let Some(res) = query.res() {
+        if sidebar::selected_resource() != Some(res) {
             sidebar::set_query(query.clone()).await?;
         }
         set_selected_style(query.clone());
-        let id = format!("{res}_{name}");
+        let id = format!("{res}_{}", query.sel());
         click::click_card(id, query).await?;
     }
     Ok(())
+}
+
+/// Check if style should be cleared
+fn should_clear(query: &QueryState) -> bool {
+    let sel = query.sel();
+    sel.is_empty() || query.res().is_none_or(|r| app::is_selected_item(r, sel))
 }
 
 /// Select item on map
