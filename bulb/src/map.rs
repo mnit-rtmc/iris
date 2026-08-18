@@ -214,8 +214,9 @@ async fn handle_layer_zoom(id: String) -> Result<()> {
     if let Some((rname, "zoom")) = id.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
+        let access: Vec<_> = Asset::Access.uri().get_val().await?;
         // FIXME: only call when crossing zoom threshold
-        update_layer(res).await?;
+        update_layer(res, &access).await?;
     }
     Ok(())
 }
@@ -418,11 +419,10 @@ async fn update_osm_style(zoom: u32) -> Result<()> {
 }
 
 /// Update layer for a resource type
-pub async fn update_layer(res: Res) -> Result<()> {
+pub async fn update_layer(res: Res, access: &[Permission]) -> Result<()> {
     if Res::Incident == res || res.has_location() {
         let zoom = current_zoom();
-        let access: Vec<_> = Asset::Access.uri().get_val().await?;
-        update_layer_style(res, &access, zoom).await
+        update_layer_style(res, access, zoom).await
     } else {
         Ok(())
     }

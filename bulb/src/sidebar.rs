@@ -588,7 +588,8 @@ async fn do_handle_notification(
         return Ok(());
     }
     if let Ok(res) = Res::try_from(chan.as_str()) {
-        map::update_layer(res).await?;
+        let access: Vec<_> = Asset::Access.uri().get_val().await?;
+        map::update_layer(res, &access).await?;
     }
     Ok(())
 }
@@ -622,6 +623,6 @@ async fn update_card_list(res: Res) -> Result<bool> {
         cards.set_view(cv);
     }
     app::card_list(Some(cards));
-    map::update_layer(res).await?;
+    map::update_layer(res, &access).await?;
     Ok(true)
 }
