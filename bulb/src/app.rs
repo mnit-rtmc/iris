@@ -43,7 +43,7 @@ struct AppState {
     user: Option<String>,
     /// SSE connection count
     connect_count: u32,
-    /// Selected item (resource / name)
+    /// Selected map item (resource / name)
     selected_item: Option<(Res, String)>,
     /// Card list
     cards: Option<CardList>,
@@ -83,19 +83,19 @@ pub fn connect_count() -> u32 {
     STATE.with(|rc| rc.borrow().connect_count)
 }
 
-/// Set selected item in global app state
+/// Set selected map item in global app state
 pub fn set_selected_item(res: Res, name: &str) {
     STATE.with(|rc| {
         rc.borrow_mut().selected_item = Some((res, name.to_string()))
     });
 }
 
-/// Clear selected item in global app state
+/// Clear selected map item in global app state
 pub fn clear_selected_item() {
     STATE.with(|rc| rc.borrow_mut().selected_item = None);
 }
 
-/// Check if an item is selected
+/// Check if a map item is selected
 pub fn is_selected_item(res: Res, name: &str) -> bool {
     STATE.with(|rc| match &rc.borrow().selected_item {
         Some((r, n)) => (r, n.as_str()) == (&res, name),
@@ -103,7 +103,7 @@ pub fn is_selected_item(res: Res, name: &str) -> bool {
     })
 }
 
-/// Get selected item
+/// Get selected map item
 #[allow(dead_code)]
 pub fn selected_item() -> Option<(Res, String)> {
     STATE.with(|rc| {

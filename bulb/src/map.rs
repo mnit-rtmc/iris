@@ -149,7 +149,6 @@ pub fn set_selected_style(query: QueryState) {
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
         match query.res_sel() {
             Some((res, name)) => {
-                // FIXME: maybe this shouldn't be a side-effect here
                 app::set_selected_item(res, name);
                 let sel = Sel::cls(format!("{res}-{name}"));
                 let prop = Prop::new().stroke("white").stroke_width(2);
