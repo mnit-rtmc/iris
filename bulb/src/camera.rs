@@ -532,6 +532,13 @@ impl Camera {
             .class("info")
             .cdata_len(opt_ref(&self.location), 64);
         div.close();
+        if access_level >= AccessLevel::View {
+            div = tree.root::<html::Div>();
+            div.class("row");
+            div.img().class("mjpeg_player").id("mjpeg_player").close();
+            div.video().class("video_player").id("video_player").close();
+            div.close();
+        }
         if access_level >= AccessLevel::Operate {
             div = tree.root::<html::Div>();
             div.class("row");

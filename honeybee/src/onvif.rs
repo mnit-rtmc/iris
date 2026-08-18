@@ -579,56 +579,44 @@ impl<'a> OnvifMessenger<'a> {
     async fn get_devices(&self) -> HashMap<String, DeviceState> {
         let devices: HashMap<String, DeviceState> = HashMap::new();
         match self.session.get(DEVICE_STATES_KEY).await {
-            Ok(Some(d)) => d,
+            Ok(Some(d)) => return d,
             Ok(None) => {
-                self.session
-                    .insert(DEVICE_STATES_KEY, devices)
-                    .await
-                    .expect(
-                        "Couldn't insert DEVICE_STATES_KEY {DEVICE_STATES_KEY}",
-                    );
-                self.session.get(DEVICE_STATES_KEY).await.unwrap().expect(
-                    "Couldn't get DEVICE_STATES_KEY {DEVICE_STATES_KEY} after setting",
-                )
+                log::debug!("{DEVICE_STATES_KEY} not found in session store")
             }
-            Err(e) => {
-                log::debug!("Error getting devices from session: {e}");
-                self.session
-                    .insert(DEVICE_STATES_KEY, devices)
-                    .await
-                    .expect(
-                        "Couldn't insert DEVICE_STATES_KEY {DEVICE_STATES_KEY}",
-                    );
-                self.session.get(DEVICE_STATES_KEY).await.unwrap().expect(
-                    "Couldn't get DEVICE_STATES_KEY {DEVICE_STATES_KEY} after setting",
-                )
-            }
+            Err(e) => log::error!("Error getting devices from session: {e}"),
         }
+        if let Err(e) = self.session.insert(DEVICE_STATES_KEY, &devices).await {
+            log::error!("Couldn't insert {DEVICE_STATES_KEY}: {e}");
+        }
+        devices
     }
 
     /// Get this device's state from the store, or add to store if not present
     async fn get_device_state(&self) -> DeviceState {
         let mut devices = self.get_devices().await;
-        let device = if let Some(d) = devices.get_mut(&self.host) {
+        let default = Default::default();
+        if let Some(d) = devices.get_mut(&self.host) {
             d
         } else {
             devices.insert(self.host.clone(), Default::default());
-            devices
-                .get(&self.host)
-                .expect("Couldn't get device after inserting")
-        };
-        device.clone()
+            devices.get(&self.host).unwrap_or_else(|| {
+                log::error!("Couldn't get device after inserting");
+                &default
+            })
+        }
+        .clone()
     }
 
     /// Save a state to the session store for this device
     async fn store_device_state(&self, device: DeviceState) {
         let mut devices = self.get_devices().await;
         devices.insert(self.host.clone(), device);
-        self.session
-            .insert(DEVICE_STATES_KEY, devices)
-            .await
-            .expect("Couldn't insert DEVICE_STATES_KEY {DEVICE_STATES_KEY}");
-        self.session.save().await.expect("Couldn't save session");
+        if let Err(e) = self.session.insert(DEVICE_STATES_KEY, devices).await {
+            log::error!("Couldn't insert {DEVICE_STATES_KEY}: {e}")
+        }
+        if let Err(e) = self.session.save().await {
+            log::error!("Couldn't save session: {e}");
+        }
     }
 
     /// Create the ONVIF envelope then send the SOAP message

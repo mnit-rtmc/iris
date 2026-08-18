@@ -25,13 +25,15 @@ use crate::xff::XForwardedFor;
 use axum::Router;
 use axum::body::Body;
 use axum::extract::{ConnectInfo, Json, Path as AxumPath, Query, State};
-use axum::http::{StatusCode, header};
+use axum::http::{StatusCode, Uri, header};
 use axum::response::sse::{Event, KeepAlive};
 use axum::response::{IntoResponse, Sse};
 use axum::routing::{get, patch};
 use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
 use http::header::HeaderName;
+use hyper_util::client::legacy::Client as HttpClient;
+use hyper_util::rt::TokioExecutor;
 use resin::Database;
 use resources::Res;
 use serde::Deserialize;
@@ -228,6 +230,7 @@ impl Honey {
             .merge(other_resource(self.clone()))
             .merge(other_object(self.clone()))
             .merge(route_direct(self.clone()))
+            .merge(route_mjpeg(self.clone()))
             .layer(session_layer)
     }
 
@@ -917,6 +920,97 @@ fn other_object(honey: Honey) -> Router {
             "/{type_n}/{obj_n}",
             get(handle_get).patch(handle_patch).delete(handle_delete),
         )
+        .with_state(honey)
+}
+
+/// Build 'mjpeg' route to a camera feed
+fn route_mjpeg(honey: Honey) -> Router {
+    /// Handle `GET` request for mjpeg
+    async fn handle_get(
+        session: Session,
+        State(honey): State<Honey>,
+        AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
+    ) -> impl IntoResponse {
+        log::info!("GET mjpeg/{type_n}/{obj_n}");
+        let nm = Name::new(&type_n)?.obj(&obj_n)?;
+        if nm.res_type != Res::Camera {
+            // Only allow direct routing for cameras
+            Err(StatusCode::UNSUPPORTED_MEDIA_TYPE)?
+        }
+        let cred = Credentials::load(&session).await?;
+        // At least View access needed
+        honey.name_access(cred.user(), &nm, Access::View).await?;
+
+        // Get camera URI from session, and create map if needed
+        let mut camera_uris = HashMap::<String, String>::new();
+        const CAMERA_URI_KEY: &str = "camera_uris";
+        camera_uris = match session.get(CAMERA_URI_KEY).await {
+            Ok(Some(c)) => c,
+            Ok(None) => {
+                session
+                    .insert(CAMERA_URI_KEY, camera_uris)
+                    .await
+                    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+                session
+                    .get(CAMERA_URI_KEY)
+                    .await
+                    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+                    .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?
+            }
+            Err(e) => {
+                log::debug!("Error getting camera URIs from session: {e}");
+                session
+                    .insert(CAMERA_URI_KEY, camera_uris)
+                    .await
+                    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+                session
+                    .get(CAMERA_URI_KEY)
+                    .await
+                    .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+                    .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?
+            }
+        };
+
+        // If there is a URI already, use it, otherwise fetch from DB
+        let uri_str = if let Some(u) = camera_uris.get(&obj_n) {
+            u
+        } else {
+            let cam_str =
+                get_by_pkey(&honey.db, query::CAMERA_ONE, &obj_n).await?;
+            let camera = serde_json::from_str::<Value>(&cam_str)
+                .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            let uri = camera["enc_address"]
+                .as_str()
+                .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
+
+            // Update session store with URI to avoid extra queries
+            let uri_str = format!("http://{}/jpegpull/0", uri);
+            camera_uris.insert(obj_n.clone(), uri_str);
+            match session.insert(CAMERA_URI_KEY, camera_uris.clone()).await {
+                Ok(_) => (),
+                Err(e) => log::debug!("Error inserting camera URI map: {e}"),
+            }
+            camera_uris
+                .get(&obj_n)
+                .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?
+        };
+
+        let uri =
+            Uri::try_from(uri_str).map_err(|_| StatusCode::BAD_REQUEST)?;
+        let client =
+            HttpClient::builder(TokioExecutor::new()).build_http::<Body>();
+        let res = match client.get(uri).await {
+            Ok(res) => res,
+            Err(_) => return Err(StatusCode::BAD_GATEWAY),
+        };
+
+        // Return the JPEG response as-is to the client as an axum Body
+        let body = res.map(Body::new).into_body();
+        Ok(body)
+    }
+
+    Router::new()
+        .route("/mjpeg/{type_n}/{obj_n}", get(handle_get))
         .with_state(honey)
 }
 

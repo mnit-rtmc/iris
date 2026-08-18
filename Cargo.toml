@@ -59,3 +59,11 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = "symbols"
+
+# For quicker compilation compared to default web profile (not for production)
+# opt-level = 0 causes panics/errors, so using 1
+[profile.web-debug]
+inherits = "web"
+opt-level = 1
+lto = "off"
+codegen-units = 16
