@@ -130,29 +130,29 @@ fn add_navigate_callback() -> Result<()> {
     Ok(())
 }
 
-/// Handle a navigate event
+/// Handle a navigate event (new URL)
 fn handle_navigate(ev: NavigateEvent) {
     log::trace!("handle_navigate: {ev:?}");
     if ev.can_intercept() && !ev.hash_change() {
         let url = ev.destination().url();
         log::debug!("navigate to: {url}");
         let _ = ev.intercept();
-        if let Ok(uri) = url.parse::<Huri>() {
-            if let Some(query) = uri.query() {
-                let mut res = None;
-                let mut search = String::new();
-                for part in query.split('&') {
-                    if let Some(("res", val)) = part.split_once('=') {
-                        if let Ok(rs) = Res::try_from(val) {
-                            res = Some(rs);
-                        }
-                    }
-                    if let Some(("q", val)) = part.split_once('=') {
-                        search = val.to_string();
-                    }
+        if let Ok(uri) = url.parse::<Huri>()
+            && let Some(query) = uri.query()
+        {
+            let mut res = None;
+            let mut search = String::new();
+            for part in query.split('&') {
+                if let Some(("res", val)) = part.split_once('=')
+                    && let Ok(rs) = Res::try_from(val)
+                {
+                    res = Some(rs);
                 }
-                spawn_future(sidebar::update_resource(res, search));
+                if let Some(("q", val)) = part.split_once('=') {
+                    search = val.to_string();
+                }
             }
+            spawn_future(sidebar::update_resource(res, search));
         }
     }
 }

@@ -11,7 +11,6 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction};
-use crate::asset::Asset;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::permission::{AccessLevel, Permission};
@@ -131,8 +130,8 @@ pub fn add_listener() {
 }
 
 /// POST a request for SSE notifications
-pub async fn post_req(res: Option<Res>) -> Result<()> {
-    let json = build_list(res).await?;
+pub async fn post_req(res: Option<Res>, access: &[Permission]) -> Result<()> {
+    let json = build_list(res, access);
     let uri = Uri::from("/iris/api/notify");
     uri.post(&json.into()).await.inspect_err(|e| {
         log::warn!("/iris/api/notify POST: {e}");
@@ -140,8 +139,7 @@ pub async fn post_req(res: Option<Res>) -> Result<()> {
 }
 
 /// Build resource list for notifications
-async fn build_list(res: Option<Res>) -> Result<String> {
-    let access: Vec<_> = Asset::Access.uri().get_val().await?;
+fn build_list(res: Option<Res>, access: &[Permission]) -> String {
     let mut resources = String::from("[\"");
     // Always listen for resources with map markers
     for r in [
@@ -156,7 +154,7 @@ async fn build_list(res: Option<Res>) -> Result<String> {
         Res::WeatherSensor,
     ] {
         if Some(r) != res
-            && Permission::access_level_max(&access, r) > AccessLevel::None
+            && Permission::access_level_max(access, r) > AccessLevel::None
         {
             resources.push_str(r.as_str());
             resources.push_str("\",\"");
@@ -177,7 +175,7 @@ async fn build_list(res: Option<Res>) -> Result<String> {
         }
     }
     resources.push(']');
-    Ok(resources)
+    resources
 }
 
 /// Set refresh button text

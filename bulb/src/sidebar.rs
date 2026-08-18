@@ -51,7 +51,7 @@ pub fn add_listeners() -> Result<()> {
     Ok(())
 }
 
-/// Initialize resource select options
+/// Initialize resource select options based on permissions
 pub async fn init_resource() -> Result<()> {
     let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
     let doc = Doc::new()?;
@@ -100,7 +100,7 @@ pub async fn init_resource() -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("opt_tolling") {
         el.set_class_name(opt_class(&access, Res::TollZone));
     }
-    set_resource(None, "").await?;
+    // FIXME: navigate reload current entry
     Ok(())
 }
 
@@ -176,6 +176,15 @@ pub async fn update_resource(res: Option<Res>, search: String) -> Result<()> {
     let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
+    let rslt = do_update_resource(res, search).await;
+    // Turn off "wait" style
+    sidebar.set_class_name("");
+    rslt
+}
+
+/// Handle change to selected resource type
+async fn do_update_resource(res: Option<Res>, search: String) -> Result<()> {
+    let doc = Doc::new()?;
     let sb_cards = doc.elem::<Element>(eid::CARDS)?;
     sb_cards.set_inner_html("");
     let base = res.map(|r| r.base());
@@ -224,13 +233,9 @@ pub async fn update_resource(res: Option<Res>, search: String) -> Result<()> {
     };
     sb_state.set_inner_html(&html);
     map::set_selected_style(None);
-    let mut rslt = fetch_and_populate_cards(res).await;
-    if rslt.is_ok() {
-        rslt = sse::post_req(res).await;
-    }
-    // Turn off "wait" style
-    sidebar.set_class_name("");
-    rslt
+    let access: Vec<_> = Asset::Access.uri().get_val().await?;
+    fetch_and_populate_cards(res, &access).await?;
+    sse::post_req(res, &access).await
 }
 
 /// Get dependent resource row class name
@@ -238,56 +243,27 @@ fn row_class(show: bool) -> &'static str {
     if show { "sb_row_left" } else { "no-display" }
 }
 
-/// Get the selected resource value
-pub fn selected_resource() -> Option<Res> {
-    let doc = Doc::get();
-    let rname = doc.select_parse::<String>(eid::RESOURCE);
-    let res = Res::try_from(rname?.as_str()).ok()?;
-    match res.base() {
-        Res::ActionPlan if doc.input_bool("res_plan_phase") => {
-            Some(Res::PlanPhase)
+/// Fetch and populate card list
+async fn fetch_and_populate_cards(
+    res: Option<Res>,
+    access: &[Permission],
+) -> Result<()> {
+    match res {
+        Some(res) => {
+            let mut cards = CardList::new(res, access);
+            cards.fetch_all().await?;
+            let search = search_value()?;
+            let html = cards.build_html(&search).await?;
+            let doc = Doc::new()?;
+            let sb_cards = doc.elem::<Element>(eid::CARDS)?;
+            sb_cards.set_inner_html(&html);
+            app::card_list(Some(cards));
         }
-        Res::ActionPlan if doc.input_bool("res_day_plan") => Some(Res::DayPlan),
-        Res::Camera if doc.input_bool("res_encoder_type") => {
-            Some(Res::EncoderType)
+        None => {
+            app::card_list(None);
         }
-        Res::Dms if doc.input_bool("res_msg_pattern") => Some(Res::MsgPattern),
-        Res::Dms if doc.input_bool("res_msg_line") => Some(Res::MsgLine),
-        Res::Dms if doc.input_bool("res_sign_config") => Some(Res::SignConfig),
-        Res::Dms if doc.input_bool("res_word") => Some(Res::Word),
-        Res::Lcs if doc.input_bool("res_lcs_state") => Some(Res::LcsState),
-        Res::VideoMonitor if doc.input_bool("res_monitor_style") => {
-            Some(Res::MonitorStyle)
-        }
-        Res::VideoMonitor if doc.input_bool("res_flow_stream") => {
-            Some(Res::FlowStream)
-        }
-        Res::CommConfig if doc.input_bool("res_comm_link") => {
-            Some(Res::CommLink)
-        }
-        Res::CommConfig if doc.input_bool("res_controller") => {
-            Some(Res::Controller)
-        }
-        Res::CommConfig if doc.input_bool("res_alarm") => Some(Res::Alarm),
-        Res::CommConfig if doc.input_bool("res_gps") => Some(Res::Gps),
-        //Res::Road if doc.input_bool("res_r_node") => Some(Res::Rnode),
-        Res::Road if doc.input_bool("res_detector") => Some(Res::Detector),
-        Res::Road if doc.input_bool("res_map_extent") => Some(Res::MapExtent),
-        Res::Permission if doc.input_bool("res_user") => Some(Res::User),
-        Res::Permission if doc.input_bool("res_role") => Some(Res::Role),
-        Res::Permission if doc.input_bool("res_domain") => Some(Res::Domain),
-        Res::Permission => Some(Res::User), // no permission cards
-        Res::SystemAttribute if doc.input_bool("res_event_config") => {
-            Some(Res::EventConfig)
-        }
-        Res::SystemAttribute if doc.input_bool("res_cabinet_style") => {
-            Some(Res::CabinetStyle)
-        }
-        Res::TollZone if doc.input_bool("res_tag_reader") => {
-            Some(Res::TagReader)
-        }
-        _ => Some(res),
     }
+    Ok(())
 }
 
 /// Get value to search
@@ -369,7 +345,59 @@ fn handle_res_change() {
     spawn_future(handle_resource_change(res, ""));
 }
 
-/// Refresh resource list
+/// Get the selected resource value
+pub fn selected_resource() -> Option<Res> {
+    let doc = Doc::get();
+    let rname = doc.select_parse::<String>(eid::RESOURCE);
+    let res = Res::try_from(rname?.as_str()).ok()?;
+    match res.base() {
+        Res::ActionPlan if doc.input_bool("res_plan_phase") => {
+            Some(Res::PlanPhase)
+        }
+        Res::ActionPlan if doc.input_bool("res_day_plan") => Some(Res::DayPlan),
+        Res::Camera if doc.input_bool("res_encoder_type") => {
+            Some(Res::EncoderType)
+        }
+        Res::Dms if doc.input_bool("res_msg_pattern") => Some(Res::MsgPattern),
+        Res::Dms if doc.input_bool("res_msg_line") => Some(Res::MsgLine),
+        Res::Dms if doc.input_bool("res_sign_config") => Some(Res::SignConfig),
+        Res::Dms if doc.input_bool("res_word") => Some(Res::Word),
+        Res::Lcs if doc.input_bool("res_lcs_state") => Some(Res::LcsState),
+        Res::VideoMonitor if doc.input_bool("res_monitor_style") => {
+            Some(Res::MonitorStyle)
+        }
+        Res::VideoMonitor if doc.input_bool("res_flow_stream") => {
+            Some(Res::FlowStream)
+        }
+        Res::CommConfig if doc.input_bool("res_comm_link") => {
+            Some(Res::CommLink)
+        }
+        Res::CommConfig if doc.input_bool("res_controller") => {
+            Some(Res::Controller)
+        }
+        Res::CommConfig if doc.input_bool("res_alarm") => Some(Res::Alarm),
+        Res::CommConfig if doc.input_bool("res_gps") => Some(Res::Gps),
+        //Res::Road if doc.input_bool("res_r_node") => Some(Res::Rnode),
+        Res::Road if doc.input_bool("res_detector") => Some(Res::Detector),
+        Res::Road if doc.input_bool("res_map_extent") => Some(Res::MapExtent),
+        Res::Permission if doc.input_bool("res_user") => Some(Res::User),
+        Res::Permission if doc.input_bool("res_role") => Some(Res::Role),
+        Res::Permission if doc.input_bool("res_domain") => Some(Res::Domain),
+        Res::Permission => Some(Res::User), // no permission cards
+        Res::SystemAttribute if doc.input_bool("res_event_config") => {
+            Some(Res::EventConfig)
+        }
+        Res::SystemAttribute if doc.input_bool("res_cabinet_style") => {
+            Some(Res::CabinetStyle)
+        }
+        Res::TollZone if doc.input_bool("res_tag_reader") => {
+            Some(Res::TagReader)
+        }
+        _ => Some(res),
+    }
+}
+
+/// Refresh resource list (after errors)
 pub fn refresh_res_list() {
     handle_res_change();
 }
@@ -508,27 +536,6 @@ pub async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
     let base = res.map(|r| r.base().as_str()).unwrap_or("");
     resource.set_value(base);
     handle_resource_change(res, search).await
-}
-
-/// Fetch and populate card list
-async fn fetch_and_populate_cards(res: Option<Res>) -> Result<()> {
-    match res {
-        Some(res) => {
-            let access: Vec<_> = Asset::Access.uri().get_val().await?;
-            let mut cards = CardList::new(res, &access);
-            cards.fetch_all().await?;
-            let search = search_value()?;
-            let html = cards.build_html(&search).await?;
-            let doc = Doc::new()?;
-            let sb_cards = doc.elem::<Element>(eid::CARDS)?;
-            sb_cards.set_inner_html(&html);
-            app::card_list(Some(cards));
-        }
-        None => {
-            app::card_list(None);
-        }
-    }
-    Ok(())
 }
 
 /// Add transition event listener to an element
