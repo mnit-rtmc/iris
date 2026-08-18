@@ -81,13 +81,15 @@ async fn finish_init() -> Result<()> {
     match user.as_string() {
         Some(user) => {
             app::set_user(Some(user));
-            sidebar::init_resource().await
+            sidebar::init_resource().await?;
+            let window = util::window()?;
+            let navigation = window.navigation();
+            // NOTE: reload will trigger a NavigateEvent for handle_navigate
+            navigation.reload();
         }
-        None => {
-            log::warn!("invalid user: {user:?}");
-            Ok(())
-        }
+        None => log::warn!("invalid user: {user:?}"),
     }
+    Ok(())
 }
 
 /// Add callback for regular interval checks

@@ -99,7 +99,6 @@ pub async fn init_resource() -> Result<()> {
     if let Some(el) = doc.opt_elem::<Element>("opt_tolling") {
         el.set_class_name(opt_class(&access, Res::TollZone));
     }
-    // FIXME: navigate reload current entry
     Ok(())
 }
 
