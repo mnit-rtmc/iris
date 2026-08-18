@@ -135,7 +135,8 @@ fn handle_ev(target: &Element) {
         app::set_vid_mon(None);
         if let Ok(t) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
             t.set_inner_html("📺");
-            // FIXME: set resource to video?
+            let query = QueryState::new().with_res(Some(Res::VideoMonitor));
+            spawn_future(sidebar::set_query(query));
         }
     }
 }
