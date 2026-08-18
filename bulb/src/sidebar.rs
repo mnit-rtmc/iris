@@ -20,6 +20,7 @@ use crate::helper::spawn_future;
 use crate::item::ItemState;
 use crate::map;
 use crate::permission::Permission;
+use crate::query::QueryState;
 use crate::sse;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
@@ -35,8 +36,6 @@ use web_sys::{
 /// Add event listeners
 pub fn add_listeners() -> Result<()> {
     let doc = Doc::new()?;
-    let resource = doc.elem::<HtmlSelectElement>(eid::RESOURCE)?;
-    resource.set_value("");
     let divider: HtmlElement = doc.elem("divider")?;
     click::add_listener(&divider)?;
     let sidebar: HtmlElement = doc.elem("sidebar")?;
@@ -156,38 +155,26 @@ fn set_fullscreen() {
     doc.request_fullscreen(checked);
 }
 
-/// Handle change to selected resource type
-async fn handle_resource_change(res: Option<Res>, search: &str) -> Result<()> {
-    let window = util::window()?;
-    let navigation = window.navigation();
-    let mut uri = String::from("/iris/");
-    match (res, search.is_empty()) {
-        (Some(res), true) => uri.push_str(&format!("?res={res}")),
-        (Some(res), false) => uri.push_str(&format!("?res={res}&q={search}")),
-        (None, true) => (),
-        (None, false) => uri.push_str(&format!("?q={search}")),
-    }
-    navigation.navigate(&uri);
-    Ok(())
-}
-
-/// Handle change to selected resource type
-pub async fn update_resource(res: Option<Res>, search: String) -> Result<()> {
+/// Update controls to reflect query state (resource, selection, etc.)
+pub async fn update_query(query: QueryState) -> Result<()> {
     let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
-    let rslt = do_update_resource(res, search).await;
+    let rslt = do_update_query(query).await;
     // Turn off "wait" style
     sidebar.set_class_name("");
     rslt
 }
 
-/// Handle change to selected resource type
-async fn do_update_resource(res: Option<Res>, search: String) -> Result<()> {
+/// Update query state (resource, selection, etc.)
+async fn do_update_query(query: QueryState) -> Result<()> {
     let doc = Doc::new()?;
+    let resource = doc.elem::<HtmlSelectElement>(eid::RESOURCE)?;
+    let res = query.res();
+    let base = query.res().map(|r| r.base());
+    resource.set_value(base.map(|r| r.as_str()).unwrap_or(""));
     let sb_cards = doc.elem::<Element>(eid::CARDS)?;
     sb_cards.set_inner_html("");
-    let base = res.map(|r| r.base());
     if let Some(el) = doc.opt_elem::<Element>("res_plan_row") {
         el.set_class_name(row_class(base == Some(Res::ActionPlan)));
     }
@@ -225,16 +212,16 @@ async fn do_update_resource(res: Option<Res>, search: String) -> Result<()> {
         }
     }
     let sb_search = doc.elem::<HtmlInputElement>(eid::SEARCH)?;
-    sb_search.set_value(&search);
+    sb_search.set_value(query.q());
     let sb_state = doc.elem::<HtmlSelectElement>(eid::STATE)?;
     let html = match res {
-        Some(res) => card::item_states_html(res, !search.is_empty()),
+        Some(res) => card::item_states_html(res, !query.q().is_empty()),
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
-    map::set_selected_style(None);
+    map::set_selected_style(query.clone());
     let access: Vec<_> = Asset::Access.uri().get_val().await?;
-    fetch_and_populate_cards(res, &access).await?;
+    fetch_and_populate_cards(query, &access).await?;
     sse::post_req(res, &access).await
 }
 
@@ -245,10 +232,10 @@ fn row_class(show: bool) -> &'static str {
 
 /// Fetch and populate card list
 async fn fetch_and_populate_cards(
-    res: Option<Res>,
+    query: QueryState,
     access: &[Permission],
 ) -> Result<()> {
-    match res {
+    match query.res() {
         Some(res) => {
             let mut cards = CardList::new(res, access);
             cards.fetch_all().await?;
@@ -341,8 +328,8 @@ fn handle_input(id: String) {
 
 /// Handle selected resource change
 fn handle_res_change() {
-    let res = selected_resource();
-    spawn_future(handle_resource_change(res, ""));
+    let query = QueryState::new().with_res(selected_resource());
+    spawn_future(change_query_state(query));
 }
 
 /// Get the selected resource value
@@ -395,6 +382,14 @@ pub fn selected_resource() -> Option<Res> {
         }
         _ => Some(res),
     }
+}
+
+/// Change query state
+async fn change_query_state(query: QueryState) -> Result<()> {
+    let window = util::window()?;
+    let navigation = window.navigation();
+    navigation.navigate(&format!("/iris/{query}"));
+    Ok(())
 }
 
 /// Refresh resource list (after errors)
@@ -530,12 +525,9 @@ fn replace_card_html(cv: &CardView, html: &str) {
     }
 }
 
-/// Set selected resource
-pub async fn set_resource(res: Option<Res>, search: &str) -> Result<()> {
-    let resource = Doc::new()?.elem::<HtmlSelectElement>(eid::RESOURCE)?;
-    let base = res.map(|r| r.base().as_str()).unwrap_or("");
-    resource.set_value(base);
-    handle_resource_change(res, search).await
+/// Set query state
+pub async fn set_query(query: QueryState) -> Result<()> {
+    change_query_state(query).await
 }
 
 /// Add transition event listener to an element

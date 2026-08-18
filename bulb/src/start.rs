@@ -16,11 +16,10 @@ use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::joystick;
 use crate::map;
+use crate::query::QueryState;
 use crate::sidebar;
 use crate::sse;
 use crate::util::{self, Doc};
-use hyper::Uri as Huri;
-use resources::Res;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
@@ -137,22 +136,8 @@ fn handle_navigate(ev: NavigateEvent) {
         let url = ev.destination().url();
         log::debug!("navigate to: {url}");
         let _ = ev.intercept();
-        if let Ok(uri) = url.parse::<Huri>()
-            && let Some(query) = uri.query()
-        {
-            let mut res = None;
-            let mut search = String::new();
-            for part in query.split('&') {
-                if let Some(("res", val)) = part.split_once('=')
-                    && let Ok(rs) = Res::try_from(val)
-                {
-                    res = Some(rs);
-                }
-                if let Some(("q", val)) = part.split_once('=') {
-                    search = val.to_string();
-                }
-            }
-            spawn_future(sidebar::update_resource(res, search));
+        if let Ok(query) = url.parse::<QueryState>() {
+            spawn_future(sidebar::update_query(query));
         }
     }
 }

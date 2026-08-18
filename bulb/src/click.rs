@@ -15,6 +15,7 @@ use crate::card;
 use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
+use crate::query::QueryState;
 use crate::sidebar;
 use crate::start;
 use crate::util::{self, Doc};
@@ -78,7 +79,8 @@ impl ButtonAttrs {
         if let (Some(link), Some(rname)) = (self.data_link, self.data_type)
             && let Ok(res) = Res::try_from(rname.as_str())
         {
-            sidebar::set_resource(Some(res), &link).await
+            let query = QueryState::new().with_res(Some(res)).with_q(&link);
+            sidebar::set_query(query).await
         } else {
             Ok(())
         }
@@ -161,24 +163,27 @@ fn handle_ev_card(el: &Element) {
         && let Some(name) = el.get_attribute("data-name")
         && let Some(res) = sidebar::selected_resource()
     {
-        spawn_future(click_card(res, name, id));
+        let query = QueryState::new().with_res(Some(res)).with_sel(&name);
+        spawn_future(click_card(id, query));
     }
 }
 
 /// Handle a card click event
-pub async fn click_card(res: Res, name: String, id: String) -> Result<()> {
+pub async fn click_card(id: String, query: QueryState) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
         let search = sidebar::search_value()?;
         sidebar::replace_card(cv.compact(), &search).await?;
     }
-    let view = if id.ends_with('_') && id.len() == res.as_str().len() + 1 {
-        View::Create
-    } else {
-        let edit = app::can_edit_card();
-        // Expand to the second view (1) for the resource
-        *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
-    };
-    let cv = CardView::new(res, &name, view);
-    sidebar::replace_card(cv, "").await?;
+    if let Some(res) = query.res() {
+        let view = if id.ends_with('_') && id.len() == res.as_str().len() + 1 {
+            View::Create
+        } else {
+            let edit = app::can_edit_card();
+            // Expand to the second view (1) for the resource
+            *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
+        };
+        let cv = CardView::new(res, query.sel(), view);
+        sidebar::replace_card(cv, "").await?;
+    }
     Ok(())
 }

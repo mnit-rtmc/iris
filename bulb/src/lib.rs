@@ -59,6 +59,7 @@ mod notes;
 mod panic;
 mod permission;
 mod planphase;
+mod query;
 mod rampmeter;
 mod rend;
 mod rle;

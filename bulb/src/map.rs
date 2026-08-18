@@ -19,6 +19,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::permission::Permission;
+use crate::query::QueryState;
 use crate::sidebar;
 use crate::util::Doc;
 use chrono::{DateTime, Local};
@@ -70,7 +71,6 @@ pub fn add_listeners() -> Result<()> {
         .with_contextmenu_handler(handle_contextmenu)
         .register();
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
-        set_selected_style(None);
         map_pane.set_position(10, -93.2, 44.95);
         set_zoom_level(10);
         spawn_future(update_layers_all(10));
@@ -84,19 +84,22 @@ fn handle_click(me: MapEvent) {
     log::debug!("click: {me:?}");
     if let Some((rname, nm)) = me.target.split_once('-') {
         let res = Res::try_from(rname).ok();
-        spawn_future(select_card_map(res, nm.to_string()));
+        let query = QueryState::new().with_res(res).with_sel(nm);
+        spawn_future(select_card_map(query));
     }
 }
 
 /// Select a card from a map marker click
-async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
+async fn select_card_map(query: QueryState) -> Result<()> {
+    let res = query.res();
+    let name = query.sel();
     let clear = name.is_empty()
         || match (res, &name) {
             (Some(res), name) => app::is_selected_item(res, name),
             (None, _name) => true,
         };
     if clear {
-        set_selected_style(None);
+        set_selected_style(QueryState::new());
         if let Some(cv) = app::expanded_view() {
             let search = sidebar::search_value()?;
             sidebar::replace_card(cv.compact(), &search).await?;
@@ -106,11 +109,11 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
     let changed = res != sidebar::selected_resource();
     if let Some(res) = res {
         if changed {
-            sidebar::set_resource(Some(res), "").await?;
+            sidebar::set_query(query.clone()).await?;
         }
-        set_selected_style(Some((res, &name)));
+        set_selected_style(query.clone());
         let id = format!("{res}_{name}");
-        click::click_card(res, name, id).await?;
+        click::click_card(id, query).await?;
     }
     Ok(())
 }
@@ -118,7 +121,8 @@ async fn select_card_map(res: Option<Res>, name: String) -> Result<()> {
 /// Select item on map
 pub fn select_item(res: Res, name: &str, lon: f64, lat: f64) {
     if !app::is_selected_item(res, name) {
-        set_selected_style(Some((res, name)));
+        let query = QueryState::new().with_res(Some(res)).with_sel(name);
+        set_selected_style(query);
         let zoom = selected_zoom(res).max(12);
         spawn_future(do_select_item(zoom, lon, lat));
     }
@@ -141,9 +145,9 @@ async fn do_select_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
 }
 
 /// Set selected style (CSS)
-pub fn set_selected_style(res_name: Option<(Res, &str)>) {
+pub fn set_selected_style(query: QueryState) {
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        match res_name {
+        match query.res_sel() {
             Some((res, name)) => {
                 // FIXME: maybe this shouldn't be a side-effect here
                 app::set_selected_item(res, name);
@@ -460,9 +464,10 @@ async fn do_handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
     if let Some((rname, nm)) = me.target.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
-        select_card_map(Some(res), nm.to_string()).await?;
+        let query = QueryState::new().with_res(Some(res)).with_sel(nm);
+        select_card_map(query).await?;
     } else if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        select_card_map(None, String::new()).await?;
+        select_card_map(QueryState::new()).await?;
         let prop = match me.layer.as_str() {
             "motorway" | "trunk" | "primary" | "secondary" | "tertiary"
             | "road" | "railway" | "path" => Prop::new().stroke("#96b"),
