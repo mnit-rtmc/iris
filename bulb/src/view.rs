@@ -335,6 +335,7 @@ impl CardView {
         }
         match self.res {
             Res::Beacon => self.handle_update_x::<Beacon>().await,
+            Res::Camera => self.handle_update_x::<Camera>().await,
             Res::Dms => self.handle_update_x::<Dms>().await,
             Res::GateArm => self.handle_update_x::<GateArm>().await,
             Res::Lcs => self.handle_update_x::<Lcs>().await,

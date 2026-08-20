@@ -514,33 +514,18 @@ impl Camera {
         let access_level = anc.access_level(self);
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("no-display");
-        div.button().id("switch-monitor").r#type("button");
-        spawn_future(dispatch_switch_monitor());
-        div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        self.item_states(anc).spans(&mut div.span());
-        if let Some(num) = self.cam_num {
-            div.span().class("info").cdata(format!("#{num}"));
-        }
-        div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.span()
-            .class("info")
-            .cdata_len(opt_ref(&self.location), 64);
-        div.close();
+        self.render_switch_row(&mut tree.root::<html::Div>());
+        self.render_state_row(anc, &mut tree.root::<html::Div>());
+        self.render_location_row(&mut tree.root::<html::Div>());
         if access_level >= AccessLevel::View {
-            div = tree.root::<html::Div>();
+            let mut div = tree.root::<html::Div>();
             div.class("row");
             div.img().class("mjpeg_player").id("mjpeg_player").close();
             div.video().class("video_player").id("video_player").close();
             div.close();
         }
         if access_level >= AccessLevel::Operate {
-            div = tree.root::<html::Div>();
+            let mut div = tree.root::<html::Div>();
             div.class("row");
             self.to_html_ptz_controls(anc, &mut div);
             self.to_html_lens_controls(anc, &mut div);
@@ -548,7 +533,7 @@ impl Camera {
             div.close();
         }
         if access_level >= AccessLevel::Manage {
-            div = tree.root::<html::Div>();
+            let mut div = tree.root::<html::Div>();
             div.class("row");
             div.label().r#for("publish").cdata("Publish").close();
             let mut input = div.input();
@@ -559,6 +544,36 @@ impl Camera {
             div.close();
         }
         String::from(tree)
+    }
+
+    /// Render hidden row to switch monitor as an HTML div element
+    fn render_switch_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.class("no-display");
+        div.button().id("switch-monitor").r#type("button");
+        spawn_future(dispatch_switch_monitor());
+        div.close();
+    }
+
+    /// Render item state row as an HTML div element
+    fn render_state_row<'p>(
+        &self,
+        anc: &CameraAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        div.id("state-row").class("row fill");
+        self.item_states(anc).spans(&mut div.span());
+        if let Some(num) = self.cam_num {
+            div.span().class("info").cdata(format!("#{num}"));
+        }
+        div.close();
+    }
+
+    /// Render location row as an HTML div element
+    fn render_location_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.id("location-row")
+            .class("info fill")
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
     }
 
     /// Create action to handle click on a device request button
@@ -855,6 +870,21 @@ impl Card for Camera {
             self.mouse_down(id)
         } else {
             self.mouse_up(id)
+        }
+    }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: CameraAnc) {
+        let doc = Doc::get();
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
         }
     }
 }
