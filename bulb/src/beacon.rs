@@ -19,13 +19,16 @@ use crate::fetch::Action;
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::map;
-use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref, opt_str};
+use crate::util::{
+    ContainsLower, Doc, Fields, Input, TextArea, opt_ref, opt_str,
+};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlElement;
 
 /// Beacon States
 #[derive(Debug, Deserialize)]
@@ -185,19 +188,37 @@ impl Beacon {
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("row");
+        self.render_state_row(anc, &mut tree.root::<html::Div>());
+        self.render_location_row(&mut tree.root::<html::Div>());
+        self.render_signal_row(&mut tree.root::<html::Div>());
+        self.render_beacon_state_row(anc, &mut tree.root::<html::Div>());
+        String::from(tree)
+    }
+
+    /// Render item state row as an HTML div element
+    fn render_state_row<'p>(
+        &self,
+        anc: &BeaconAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        div.id("state-row").class("row fill");
         self.item_states(anc).spans(&mut div.span());
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
+    }
+
+    /// Render location row as an HTML div element
+    fn render_location_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.id("location-row").class("row");
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("beacon-container row center");
+    }
+
+    /// Render signal row as an HTML div element
+    fn render_signal_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.id("signal-row").class("beacon-container row center");
         div.button().id(eid::BCN_FLASHING).close();
         let mut label = div.label();
         label
@@ -212,10 +233,17 @@ impl Beacon {
             .class("beacon signal-housing");
         label.span().class(self.class_delayed()).cdata("🔆");
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("row center");
+    }
+
+    /// Render beacon state row as an HTML div element
+    fn render_beacon_state_row<'p>(
+        &self,
+        anc: &BeaconAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        div.id("beacon-state-row").class("row center");
         div.span().cdata(self.beacon_state(anc));
-        String::from(tree)
+        div.close();
     }
 
     /// Convert to Setup HTML
@@ -391,6 +419,31 @@ impl Card for Beacon {
             vec![Action::Patch(uri, val.into())]
         } else {
             self.handle_click_common(anc, id)
+        }
+    }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: BeaconAnc) {
+        let doc = Doc::get();
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("signal-row") {
+            let mut tree = Tree::new();
+            self.render_signal_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("beacon-state-row") {
+            let mut tree = Tree::new();
+            self.render_beacon_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
         }
     }
 }

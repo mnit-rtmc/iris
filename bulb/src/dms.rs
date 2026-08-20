@@ -678,11 +678,8 @@ impl Dms {
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
         self.render_state_row(anc, &mut tree.root::<html::Div>());
-        self.render_current_msg(anc, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("info fill")
-            .cdata_len(opt_ref(&self.location), 64)
-            .close();
+        self.render_message_row(anc, &mut tree.root::<html::Div>());
+        self.render_location_row(&mut tree.root::<html::Div>());
         if anc.access_level(self) >= AccessLevel::Operate {
             self.message_composer_html(anc, &mut tree.root::<html::Div>());
         }
@@ -692,7 +689,7 @@ impl Dms {
 
     /// Render item state row as an HTML div element
     fn render_state_row<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
-        div.id("state_row").class("row fill");
+        div.id("state-row").class("row fill");
         self.item_states(anc).spans(&mut div.span());
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
@@ -703,8 +700,8 @@ impl Dms {
     }
 
     /// Render current message as an HTML div element
-    fn render_current_msg<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
-        div.id("sign_msg");
+    fn render_message_row<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
+        div.id("message-row");
         let mut rend = Renderer::new()
             .with_class("sign_message")
             .with_max_width(450)
@@ -722,6 +719,14 @@ impl Dms {
             rend.render_pixels(&pix[..], &mut div.img());
         }
         div.close();
+    }
+
+    /// Render location row as an HTML div element
+    fn render_location_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.id("location-row")
+            .class("info fill")
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
     }
 
     /// Build message composer HTML
@@ -1388,15 +1393,20 @@ impl Card for Dms {
     /// Handle updating a card in response to an SSE notification
     fn handle_update(&self, anc: DmsAnc) {
         let doc = Doc::get();
-        if let Some(state_row) = doc.opt_elem::<HtmlElement>("state_row") {
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
             let mut tree = Tree::new();
             self.render_state_row(&anc, &mut tree.root::<html::Div>());
-            state_row.set_outer_html(&String::from(tree));
+            row.set_outer_html(&String::from(tree));
         }
-        if let Some(sign_msg) = doc.opt_elem::<HtmlElement>("sign_msg") {
+        if let Some(row) = doc.opt_elem::<HtmlElement>("message-row") {
             let mut tree = Tree::new();
-            self.render_current_msg(&anc, &mut tree.root::<html::Div>());
-            sign_msg.set_outer_html(&String::from(tree));
+            self.render_message_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
         }
     }
 }

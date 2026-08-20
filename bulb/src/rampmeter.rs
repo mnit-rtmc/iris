@@ -900,21 +900,20 @@ impl Card for RampMeter {
     /// Handle updating a card in response to an SSE notification
     fn handle_update(&self, anc: RampMeterAnc) {
         let doc = Doc::get();
-        if let Some(state_row) = doc.opt_elem::<HtmlElement>("state-row") {
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
             let mut tree = Tree::new();
             self.render_state_row(&anc, &mut tree.root::<html::Div>());
-            state_row.set_outer_html(&String::from(tree));
+            row.set_outer_html(&String::from(tree));
         }
-        if let Some(location_row) = doc.opt_elem::<HtmlElement>("location-row")
-        {
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
             let mut tree = Tree::new();
             self.render_location_row(&mut tree.root::<html::Div>());
-            location_row.set_outer_html(&String::from(tree));
+            row.set_outer_html(&String::from(tree));
         }
-        if let Some(lock_row) = doc.opt_elem::<HtmlElement>("lock-row") {
+        if let Some(row) = doc.opt_elem::<HtmlElement>("lock-row") {
             let mut tree = Tree::new();
             self.render_lock_row(&mut tree.root::<html::Div>());
-            lock_row.set_outer_html(&String::from(tree));
+            row.set_outer_html(&String::from(tree));
         }
     }
 }

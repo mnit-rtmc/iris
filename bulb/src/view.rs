@@ -334,6 +334,7 @@ impl CardView {
             return Ok(());
         }
         match self.res {
+            Res::Beacon => self.handle_update_x::<Beacon>().await,
             Res::Dms => self.handle_update_x::<Dms>().await,
             Res::RampMeter => self.handle_update_x::<RampMeter>().await,
             _ => Ok(()),
