@@ -158,6 +158,12 @@ fn set_fullscreen() {
 /// Update controls to reflect query state (resource, selection, etc.)
 pub async fn update_query(query: QueryState) -> Result<()> {
     let doc = Doc::new()?;
+    let title = doc.elem::<HtmlElement>("page-title")?;
+    let html = match app::user() {
+        Some(user) => format!("IRIS: {user}"),
+        None => "IRIS: not logged in".to_string(),
+    };
+    title.set_inner_html(&html);
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
     let rslt = do_update_query(query).await;

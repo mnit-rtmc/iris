@@ -77,18 +77,32 @@ fn add_listeners() -> Result<()> {
 /// Finish initialization
 async fn finish_init() -> Result<()> {
     sse::add_listener();
-    let user = Uri::from("/iris/api/login").get().await?;
-    match user.as_string() {
-        Some(user) => {
+    match Uri::from("/iris/api/login").get().await {
+        Ok(user) => {
+            let Some(user) = user.as_string() else {
+                log::warn!("finish_init: bad JS string");
+                return Ok(())
+            };
             app::set_user(Some(user));
             sidebar::init_resource().await?;
-            let window = util::window()?;
-            let navigation = window.navigation();
-            // NOTE: reload will trigger a NavigateEvent for handle_navigate
-            navigation.reload();
+            trigger_reload()?;
+            Ok(())
         }
-        None => log::warn!("invalid user: {user:?}"),
+        Err(err) => {
+            if let Err(e) = trigger_reload() {
+                log::warn!("finish_init: {e:?}");
+            }
+            Err(err)
+        }
     }
+}
+
+/// Trigger reload (on Navigation API)
+fn trigger_reload() -> Result<()> {
+    let window = util::window()?;
+    let navigation = window.navigation();
+    // NOTE: reload will trigger a NavigateEvent for handle_navigate
+    navigation.reload();
     Ok(())
 }
 
@@ -326,5 +340,6 @@ pub async fn handle_login() -> Result<()> {
 pub async fn handle_logout() -> Result<()> {
     let uri = Uri::from("/iris/api/login");
     uri.delete().await?;
-    Ok(())
+    app::set_user(None);
+    trigger_reload()
 }
