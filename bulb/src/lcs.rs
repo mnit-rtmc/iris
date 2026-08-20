@@ -32,7 +32,7 @@ use serde_json::Value;
 use std::borrow::Cow;
 use std::fmt;
 use wasm_bindgen::JsValue;
-use web_sys::HtmlButtonElement;
+use web_sys::{HtmlButtonElement, HtmlElement};
 
 /// LCS types
 #[derive(Debug, Deserialize)]
@@ -311,95 +311,6 @@ impl Lcs {
             .unwrap_or(&[0])
     }
 
-    /// Build indications HTML
-    fn indications_html<'p>(&self, anc: &LcsAnc, div: &'p mut html::Div<'p>) {
-        let enabled = self.lock_reason().is_deployable();
-        div.class("row center");
-        let indications = self.indications();
-        let lock_indications = self.lock_indications().unwrap_or(&[0]);
-        let len = indications.len().max(lock_indications.len());
-        for ln in (0..len).rev() {
-            let ind = *indications.get(ln).unwrap_or(&0);
-            let lki = *lock_indications.get(ln).unwrap_or(&1);
-            let ln = (ln + 1) as u16;
-            let ind_id = format!("ind_{ln}");
-            let mut div2 = div.div();
-            div2.class("column");
-            let mut span = div2.span();
-            match ind {
-                1 => span.class("lcs lcs_dark").cdata("⍽"),
-                2 => span.class("lcs lcs_lane_open").cdata("↓"),
-                3 => span.class("lcs lcs_use_caution").cdata("⇣"),
-                4 => span.class("lcs lcs_lane_closed_ahead").cdata("✕"),
-                5 => span.class("lcs lcs_lane_closed").cdata("✖"),
-                _ => span.class("lcs lcs_unknown").cdata("?"),
-            };
-            span.close();
-            let mut select = div2.select();
-            select.id(ind_id);
-            if !enabled {
-                select.disabled();
-            }
-            // FIXME: use customizable select elements once browsers have
-            //        support for them: https://caniuse.com/selectlist
-            let mut option = select.option();
-            option.class("lcs lcs_dark").value("1").cdata(" ").close();
-            if anc.has_indication(self, ln, 2) {
-                let mut option = select.option();
-                option.class("lcs lcs_lane_open").value("2");
-                if lki == 2 {
-                    option.selected();
-                }
-                option.cdata("↓").close();
-            }
-            if anc.has_indication(self, ln, 3) {
-                let mut option = select.option();
-                option.class("lcs lcs_use_caution").value("3");
-                if lki == 3 {
-                    option.selected();
-                }
-                option.cdata("⇣").close();
-            }
-            if anc.has_indication(self, ln, 4) {
-                let mut option = select.option();
-                option.class("lcs lcs_lane_closed_ahead").value("4");
-                if lki == 4 {
-                    option.selected();
-                }
-                option.cdata("✕").close();
-            }
-            if anc.has_indication(self, ln, 5) {
-                let mut option = select.option();
-                option.class("lcs lcs_lane_closed").value("5");
-                if lki == 5 {
-                    option.selected();
-                }
-                option.cdata("✖").close();
-            }
-            select.close();
-            div2.close();
-        }
-        let mut div2 = div.div();
-        div2.class("column");
-        self.lock_reason_html(&mut div2.span());
-        let mut span = div2.span();
-        span.button()
-            .id("lk_send")
-            .r#type("button")
-            .disabled()
-            .cdata("Send")
-            .close();
-        let mut blank = span.button();
-        blank.id("lk_blank").r#type("button");
-        if !enabled || !self.is_deployed() {
-            blank.disabled();
-        }
-        blank.cdata("Blank").close();
-        span.close();
-        div2.close();
-        div.close();
-    }
-
     /// Get selected lock reason
     fn selected_lock_reason(&self) -> LockReason {
         Doc::get()
@@ -487,8 +398,15 @@ impl Lcs {
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("row fill");
+        self.render_state_row(anc, &mut tree.root::<html::Div>());
+        self.render_location_row(&mut tree.root::<html::Div>());
+        self.render_indication_row(anc, &mut tree.root::<html::Div>());
+        String::from(tree)
+    }
+
+    /// Render item state row as an HTML div element
+    fn render_state_row<'p>(&self, anc: &LcsAnc, div: &'p mut html::Div<'p>) {
+        div.id("state-row").class("row fill");
         self.item_states(anc).spans(&mut div.span());
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
@@ -496,15 +414,107 @@ impl Lcs {
             div.span().cdata(expires);
         }
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.span()
-            .class("info")
+    }
+
+    /// Render location row as an HTML div element
+    fn render_location_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.id("location-row")
+            .class("info fill")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
+    }
+
+    /// Render indication row as an HTML div element
+    fn render_indication_row<'p>(
+        &self,
+        anc: &LcsAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        div.id("indication-row").class("row center");
+        let enabled = self.lock_reason().is_deployable();
+        let indications = self.indications();
+        let lock_indications = self.lock_indications().unwrap_or(&[0]);
+        let len = indications.len().max(lock_indications.len());
+        for ln in (0..len).rev() {
+            let ind = *indications.get(ln).unwrap_or(&0);
+            let lki = *lock_indications.get(ln).unwrap_or(&1);
+            let ln = (ln + 1) as u16;
+            let ind_id = format!("ind_{ln}");
+            let mut div2 = div.div();
+            div2.class("column");
+            let mut span = div2.span();
+            match ind {
+                1 => span.class("lcs lcs_dark").cdata("⍽"),
+                2 => span.class("lcs lcs_lane_open").cdata("↓"),
+                3 => span.class("lcs lcs_use_caution").cdata("⇣"),
+                4 => span.class("lcs lcs_lane_closed_ahead").cdata("✕"),
+                5 => span.class("lcs lcs_lane_closed").cdata("✖"),
+                _ => span.class("lcs lcs_unknown").cdata("?"),
+            };
+            span.close();
+            let mut select = div2.select();
+            select.id(ind_id);
+            if !enabled {
+                select.disabled();
+            }
+            // FIXME: use customizable select elements once browsers have
+            //        support for them: https://caniuse.com/selectlist
+            let mut option = select.option();
+            option.class("lcs lcs_dark").value("1").cdata(" ").close();
+            if anc.has_indication(self, ln, 2) {
+                let mut option = select.option();
+                option.class("lcs lcs_lane_open").value("2");
+                if lki == 2 {
+                    option.selected();
+                }
+                option.cdata("↓").close();
+            }
+            if anc.has_indication(self, ln, 3) {
+                let mut option = select.option();
+                option.class("lcs lcs_use_caution").value("3");
+                if lki == 3 {
+                    option.selected();
+                }
+                option.cdata("⇣").close();
+            }
+            if anc.has_indication(self, ln, 4) {
+                let mut option = select.option();
+                option.class("lcs lcs_lane_closed_ahead").value("4");
+                if lki == 4 {
+                    option.selected();
+                }
+                option.cdata("✕").close();
+            }
+            if anc.has_indication(self, ln, 5) {
+                let mut option = select.option();
+                option.class("lcs lcs_lane_closed").value("5");
+                if lki == 5 {
+                    option.selected();
+                }
+                option.cdata("✖").close();
+            }
+            select.close();
+            div2.close();
+        }
+        let mut div2 = div.div();
+        div2.class("column");
+        self.lock_reason_html(&mut div2.span());
+        let mut span = div2.span();
+        span.button()
+            .id("lk_send")
+            .r#type("button")
+            .disabled()
+            .cdata("Send")
+            .close();
+        let mut blank = span.button();
+        blank.id("lk_blank").r#type("button");
+        if !enabled || !self.is_deployed() {
+            blank.disabled();
+        }
+        blank.cdata("Blank").close();
+        span.close();
+        div2.close();
         div.close();
-        self.indications_html(anc, &mut tree.root::<html::Div>());
-        String::from(tree)
     }
 
     /// Convert to Setup HTML
@@ -661,5 +671,25 @@ impl Card for Lcs {
             self.update_indications();
         }
         Vec::new()
+    }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: LcsAnc) {
+        let doc = Doc::get();
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("indication-row") {
+            let mut tree = Tree::new();
+            self.render_indication_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
     }
 }
