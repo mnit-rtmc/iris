@@ -280,8 +280,8 @@ impl MsgLine {
         div.close();
         let mut fs = tree.root::<html::FieldSet>();
         let mut legend = fs.legend();
-        legend.cdata("Preview ").span().class("info").cdata(&self.hashtag);
-        legend.close();
+        legend.span().class("info").cdata(&self.hashtag).close();
+        legend.cdata(" Preview").close();
         div = fs.div();
         div.id("ml_preview_div");
         let mut div2 = div.div();
