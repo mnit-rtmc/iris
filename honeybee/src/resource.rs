@@ -559,8 +559,8 @@ impl Resource {
             Rnode => query_all_nodes(client, segments).await,
             RoadFull => query_all_roads(client, segments).await,
             SignMessage => self.query_sign_msgs(client).await,
-            Beacon | Camera | Controller | Incident | Lcs | RampMeter
-            | TagReader | WeatherSensor => {
+            Beacon | Camera | Controller | GateArm | Incident | Lcs
+            | RampMeter | TagReader | WeatherSensor => {
                 self.query_all_locs(client, segments).await
             }
             Dms => {

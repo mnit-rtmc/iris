@@ -319,6 +319,7 @@ async fn update_layers_all(zoom: u32) -> Result<()> {
     update_layer_style(Res::Lcs, &access, zoom).await?;
     update_layer_style(Res::Camera, &access, zoom).await?;
     update_layer_style(Res::RampMeter, &access, zoom).await?;
+    update_layer_style(Res::GateArm, &access, zoom).await?;
     update_layer_style(Res::Beacon, &access, zoom).await?;
     update_layer_style(Res::WeatherSensor, &access, zoom).await?;
     update_layer_style(Res::TagReader, &access, zoom).await?;

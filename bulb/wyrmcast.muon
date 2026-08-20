@@ -192,6 +192,10 @@ layer_group: tms
     geom_type: point
     zoom: 6+
     tags: ?name ?rotate
+  layer: gate_arm
+    geom_type: point
+    zoom: 6+
+    tags: ?name ?rotate
   layer: ramp_meter
     geom_type: point
     zoom: 6+

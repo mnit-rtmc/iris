@@ -16,6 +16,7 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
+use crate::map;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -144,7 +145,10 @@ impl GateArm {
     }
 
     /// Convert to Control HTML
-    fn to_html_control(&self) -> String {
+    fn to_html_control(&self, anc: &GateArmAnc) -> String {
+        if let Some((lon, lat)) = anc.loc.lonlat() {
+            map::select_item(Res::GateArm, &self.name, lon, lat);
+        }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
         self.render_state_row(&mut tree.root::<html::Div>());
@@ -272,7 +276,7 @@ impl Card for GateArm {
     fn to_html(&self, view: View, anc: &GateArmAnc) -> String {
         match view {
             View::Create => self.to_html_create(20),
-            View::Control => self.to_html_control(),
+            View::Control => self.to_html_control(anc),
             View::Status => self.to_html_status(anc),
             View::Setup(edit) => self.to_html_setup(anc, edit),
             View::Location(edit) => anc.loc.to_html_loc(self, edit),

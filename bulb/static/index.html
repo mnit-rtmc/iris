@@ -19,6 +19,7 @@
     <style id="tag_reader-style">.wyrm-tag_reader { display: none; }</style>
     <style id="weather_sensor-style">.wyrm-weather_sensor { display: none; }</style>
     <style id="beacon-style">.wyrm-beacon { display: none; }</style>
+    <style id="gate_arm-style">.wyrm-gate_arm { display: none; }</style>
     <style id="ramp_meter-style">.wyrm-ramp_meter { display: none; }</style>
     <style id="camera-style">.wyrm-camera { display: none; }</style>
     <style id="lcs-style">.wyrm-lcs { display: none; }</style>
@@ -36,6 +37,7 @@
           <path id="tag_reader-marker" d="M0 -6 L-6 0 A8,8 0 0 0 6 0z M-8 2 A10,10 0 0 0 8 2 L7 1 A9,9 0 0 1 -7 1z M-10 4 A12,12 0 0 0 10 4 L9 3 A11,11 0 0 1 -9 3z M-12 6 A14,14 0 0 0 12 6 L11 5 A13,13 0 0 1 -11 5z" />
           <path id="weather_sensor-marker" d="M-10 -10 L15 -5 10 0 15 5 -10 10z" />
           <path id="beacon-marker" d="M0 -16 L4 -9 12 -12 9 -4 16 0 9 4 12 12 4 9 0 20 -4 9 -12 12 -9 4 -16 0 -9 -4 -12 -12 -4 -9z" />
+          <path id="gate_arm-marker" d="M0 0 L10 -8 10 -10 0 -2 -4 -2 -4 8 0 8z" />
           <path id="ramp_meter-marker" d="M0 0 L0 8 A8 8 0 1 0 8 0 L0 0z L8 8" />
           <path id="camera-marker" d="M0 6 L7 2 10 2 10 6 28 6 28 -6 10 -6 10 -2 7 -2 0 -6z" />
           <path id="lcs-marker" d="M0 0 L10 0 10 10 0 10z M12 0 L22 0 22 10 12 10z" />
@@ -74,6 +76,10 @@
         <li class="menu-ramp_meter">
           <input id="ramp_meter-zoom" type="number" value="15" min="6" max="18">
           <label for="ramp_meter-zoom">🚦 Ramp Meter</label>
+        </li>
+        <li class="menu-gate_arm">
+          <input id="gate_arm-zoom" type="number" value="15" min="6" max="18">
+          <label for="gate_arm-zoom">⫬ Gate Arm</label>
         </li>
         <li class="menu-beacon">
           <input id="beacon-zoom" type="number" value="14" min="6" max="18">
