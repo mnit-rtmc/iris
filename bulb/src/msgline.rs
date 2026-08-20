@@ -95,8 +95,12 @@ impl AncillaryData for MsgLineAnc {
                 let mut cfgs: Vec<HashtagSignCfg> =
                     serde_wasm_bindgen::from_value(value)?;
                 cfgs.retain(|c| contains_hashtag(&c.hashtag, &pri.hashtag));
-                self.sign_cfgs =
-                    cfgs.into_iter().map(|c| c.sign_config).collect();
+                for c in cfgs {
+                    let sc = c.sign_config;
+                    if !self.sign_cfgs.contains(&sc) {
+                        self.sign_cfgs.push(sc);
+                    }
+                }
                 self.assets.push(Asset::SignConfigs);
             }
             Asset::SignConfigs => {
@@ -139,7 +143,7 @@ impl MsgLineAnc {
         {
             return Some(el.value());
         }
-        self.configs.first().map(|sc| sc.name.clone())
+        self.sign_cfgs.first().cloned()
     }
 
     /// Make an NTCIP sign
@@ -240,10 +244,6 @@ impl MsgLine {
         self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
         div.class("row");
-        div.span().class("info fill").cdata(&self.hashtag);
-        div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
         div.label().r#for("line").cdata("Ln").close();
         div.input()
             .id("line")
@@ -279,7 +279,9 @@ impl MsgLine {
             .close();
         div.close();
         let mut fs = tree.root::<html::FieldSet>();
-        fs.legend().cdata("Preview").close();
+        let mut legend = fs.legend();
+        legend.cdata("Preview ").span().class("info").cdata(&self.hashtag);
+        legend.close();
         div = fs.div();
         div.id("ml_preview_div");
         let mut div2 = div.div();
