@@ -335,6 +335,7 @@ impl CardView {
         }
         match self.res {
             Res::Dms => self.handle_update_x::<Dms>().await,
+            Res::RampMeter => self.handle_update_x::<RampMeter>().await,
             _ => Ok(()),
         }
     }

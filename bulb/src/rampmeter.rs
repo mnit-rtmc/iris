@@ -40,6 +40,7 @@ use std::borrow::Cow;
 use std::fmt;
 use std::io::Write;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlElement;
 
 /// Meter signal state for rendering GIF
 #[derive(Clone, Copy, Debug)]
@@ -620,25 +621,41 @@ impl RampMeter {
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("row fill");
+        self.render_state_row(anc, &mut tree.root::<html::Div>());
+        self.render_location_row(&mut tree.root::<html::Div>());
+        self.render_lock_row(&mut tree.root::<html::Div>());
+        String::from(tree)
+    }
+
+    /// Render item state row as an HTML div element
+    fn render_state_row<'p>(
+        &self,
+        anc: &RampMeterAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        div.id("state-row").class("row fill");
         self.item_states(anc).spans(&mut div.span());
-        let mut span = div.span();
         if let Some(lock) = &self.lock
             && let Some(expires) = lock.expires()
         {
-            span.cdata(expires);
+            div.span().cdata(expires);
         }
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
+    }
+
+    /// Render location row as an HTML div element
+    fn render_location_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.id("location-row").class("row");
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("row center");
+    }
+
+    /// Render meter lock row as an HTML div element
+    fn render_lock_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.id("lock-row").class("row center");
         self.meter_image_html(1, &mut div.img());
         let mut div2 = div.div();
         div2.class("column");
@@ -648,7 +665,7 @@ impl RampMeter {
         self.queue_html(&mut div2.span());
         div2.close();
         self.meter_image_html(2, &mut div.img());
-        String::from(tree)
+        div.close();
     }
 
     /// Convert to Request HTML
@@ -878,5 +895,26 @@ impl Card for RampMeter {
             return self.make_lock_action(reason, rate);
         }
         Vec::new()
+    }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: RampMeterAnc) {
+        let doc = Doc::get();
+        if let Some(state_row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            state_row.set_outer_html(&String::from(tree));
+        }
+        if let Some(location_row) = doc.opt_elem::<HtmlElement>("location-row")
+        {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            location_row.set_outer_html(&String::from(tree));
+        }
+        if let Some(lock_row) = doc.opt_elem::<HtmlElement>("lock-row") {
+            let mut tree = Tree::new();
+            self.render_lock_row(&mut tree.root::<html::Div>());
+            lock_row.set_outer_html(&String::from(tree));
+        }
     }
 }

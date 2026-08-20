@@ -81,7 +81,7 @@ async fn finish_init() -> Result<()> {
         Ok(user) => {
             let Some(user) = user.as_string() else {
                 log::warn!("finish_init: bad JS string");
-                return Ok(())
+                return Ok(());
             };
             app::set_user(Some(user));
             sidebar::init_resource().await?;
