@@ -16,13 +16,14 @@ use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::map;
 use crate::road::Direction;
-use crate::util::{ContainsLower, Fields};
+use crate::util::{ContainsLower, Doc, Fields};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlElement;
 
 /// Incident detail
 #[derive(Debug, Default, Deserialize, PartialEq)]
@@ -166,13 +167,45 @@ impl Incident {
             map::select_item(Res::Incident, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
-        let mut div = tree.root::<html::Div>();
-        div.class("title row").cdata(self.description(anc));
-        self.views_html(View::Control, &mut div.select());
-        div.close();
-        div = tree.root::<html::Div>();
-        div.class("row info").cdata(self.detail(anc));
+        self.render_title(anc, View::Control, &mut tree.root::<html::Div>());
+        self.render_state_row(anc, &mut tree.root::<html::Div>());
+        self.render_detail_row(anc, &mut tree.root::<html::Div>());
         String::from(tree)
+    }
+
+    /// Render card title
+    fn render_title<'p>(
+        &self,
+        anc: &IncidentAnc,
+        view: View,
+        div: &'p mut html::Div<'p>,
+    ) {
+        div.class("title row").cdata(self.description(anc));
+        self.views_html(view, &mut div.select());
+        div.close();
+    }
+
+    /// Render item state row as an HTML div element
+    fn render_state_row<'p>(
+        &self,
+        anc: &IncidentAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        div.id("state-row").class("row fill");
+        self.item_states(anc).spans(&mut div.span());
+        div.close();
+    }
+
+    /// Render detail row as an HTML div element
+    fn render_detail_row<'p>(
+        &self,
+        anc: &IncidentAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        div.id("detail-row")
+            .class("row info")
+            .cdata(self.detail(anc))
+            .close();
     }
 
     /// Convert to Setup HTML
@@ -252,5 +285,20 @@ impl Card for Incident {
         let fields = Fields::new();
         // FIXME
         fields.into_value().to_string()
+    }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: IncidentAnc) {
+        let doc = Doc::get();
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("detail-row") {
+            let mut tree = Tree::new();
+            self.render_detail_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
     }
 }

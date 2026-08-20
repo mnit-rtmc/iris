@@ -338,6 +338,7 @@ impl CardView {
             Res::Camera => self.handle_update_x::<Camera>().await,
             Res::Dms => self.handle_update_x::<Dms>().await,
             Res::GateArm => self.handle_update_x::<GateArm>().await,
+            Res::Incident => self.handle_update_x::<Incident>().await,
             Res::Lcs => self.handle_update_x::<Lcs>().await,
             Res::RampMeter => self.handle_update_x::<RampMeter>().await,
             _ => Ok(()),
