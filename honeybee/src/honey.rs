@@ -548,10 +548,9 @@ async fn insert_client_ev(
     db: &Database,
     event_tp: EventTp,
     host_port: &str,
-    iris_user: &str,
+    user_id: &str,
 ) {
-    if let Err(e) =
-        event::insert_client(db, event_tp, host_port, iris_user).await
+    if let Err(e) = event::insert_client(db, event_tp, host_port, user_id).await
     {
         log::warn!("insert_client_ev: {e}");
     }

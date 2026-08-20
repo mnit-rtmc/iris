@@ -1,6 +1,6 @@
 // event.rs
 //
-// Copyright (C) 2024-2025  Minnesota Department of Transportation
+// Copyright (C) 2024-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ pub enum EventTp {
 /// Insert a client event
 const INSERT_CLIENT: &str = "\
   INSERT INTO event.client_event (\
-    event_desc_id, host_port, iris_user\
+    event_desc, host_port, user_id\
   ) VALUES ($1, $2, $3)";
 
 impl EventTp {
@@ -43,11 +43,11 @@ pub async fn insert_client(
     db: &Database,
     event_tp: EventTp,
     host_port: &str,
-    iris_user: &str,
+    user_id: &str,
 ) -> Result<()> {
     let client = db.client().await?;
     let rows = client
-        .execute(INSERT_CLIENT, &[&event_tp.id(), &host_port, &iris_user])
+        .execute(INSERT_CLIENT, &[&event_tp.id(), &host_port, &user_id])
         .await
         .map_err(|_e| Error::InvalidValue)?;
     if rows == 1 {
