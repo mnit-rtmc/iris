@@ -23,7 +23,7 @@ use crate::signconfig::NtcipDms;
 use crate::util::{ContainsLower, Doc, Fields, Input, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
-use ntcip::dms::{FontTable, tfon};
+use ntcip::dms::{FontTable, MessagePattern, tfon};
 use rendzina::SignConfig;
 use resources::Res;
 use serde::Deserialize;
@@ -198,9 +198,19 @@ impl MsgLine {
         if let Some(cfg) = anc.sign_config(sc.as_ref())
             && let Some(dms) = &anc.make_dms(cfg)
         {
+            let n_lines = MessagePattern::new(dms, "").widths().count();
+            let line = if self.line > 1 && n_lines > 0 {
+                (usize::from(self.line) - 1) % n_lines
+            } else {
+                0
+            };
+            let mut multi = self.multi();
+            for _ in 0..line {
+                multi.insert_str(0, "[nl]");
+            }
             let mut rend =
                 Renderer::new().with_dms(dms).with_alt("FAILED TO RENDER");
-            rend.render_multi(&self.multi(), img);
+            rend.render_multi(&multi, img);
             return;
         }
         img.alt("BAD CONFIGURATION");
