@@ -16,13 +16,14 @@ use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::error::Result;
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
-use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
+use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlElement;
 
 /// Gate arm states
 #[derive(Debug, Deserialize)]
@@ -146,13 +147,24 @@ impl GateArm {
     fn to_html_control(&self) -> String {
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("row");
+        self.render_state_row(&mut tree.root::<html::Div>());
+        self.render_location_row(&mut tree.root::<html::Div>());
+        String::from(tree)
+    }
+
+    /// Render item state row as an HTML div element
+    fn render_state_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.id("state-row").class("row fill");
         item_states(self.arm_state).spans(&mut div.span());
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("info").cdata_len(opt_ref(&self.location), 64);
-        String::from(tree)
+    }
+
+    /// Render location row as an HTML div element
+    fn render_location_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.id("location-row")
+            .class("info fill")
+            .cdata_len(opt_ref(&self.location), 64)
+            .close();
     }
 
     /// Convert to Status HTML
@@ -282,5 +294,20 @@ impl Card for GateArm {
         fields.changed_input("opposing", self.opposing);
         fields.changed_input("downstream_hashtag", &self.downstream_hashtag);
         fields.into_value().to_string()
+    }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, _anc: GateArmAnc) {
+        let doc = Doc::get();
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
     }
 }
