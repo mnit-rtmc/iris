@@ -258,39 +258,39 @@ fn add_input_listener(el: &Element) -> Result<()> {
 /// Handle an input event
 fn handle_input(id: String) {
     match id.as_str() {
-        "res_action_plan"
-        | "res_plan_phase"
-        | "res_day_plan"
-        | "res_device_action"
-        | "res_camera"
-        | "res_encoder_type"
-        | "res_dms"
-        | "res_msg_pattern"
-        | "res_msg_line"
-        | "res_sign_config"
-        | "res_word"
-        | "res_lcs"
-        | "res_lcs_state"
-        | "res_video_monitor"
-        | "res_monitor_style"
-        | "res_flow_stream"
-        | "res_comm_config"
-        | "res_alarm"
-        | "res_comm_link"
-        | "res_controller"
-        | "res_gps"
-        | "res_road"
-        | "res_detector"
-        | "res_map_extent"
-        | "res_r_node"
-        | "res_user"
-        | "res_role"
-        | "res_domain"
-        | "res_system_attr"
-        | "res_event_config"
-        | "res_cabinet_style"
-        | "res_tag_reader"
-        | "res_toll_zone"
+        "res-action_plan"
+        | "res-plan_phase"
+        | "res-day_plan"
+        | "res-device_action"
+        | "res-camera"
+        | "res-encoder_type"
+        | "res-dms"
+        | "res-msg_pattern"
+        | "res-msg_line"
+        | "res-sign_config"
+        | "res-word"
+        | "res-lcs"
+        | "res-lcs_state"
+        | "res-video_monitor"
+        | "res-monitor_style"
+        | "res-flow_stream"
+        | "res-comm_config"
+        | "res-alarm"
+        | "res-comm_link"
+        | "res-controller"
+        | "res-gps"
+        | "res-road"
+        | "res-detector"
+        | "res-map_extent"
+        | "res-r_node"
+        | "res-user"
+        | "res-role"
+        | "res-domain"
+        | "res-system_attribute"
+        | "res-event_config"
+        | "res-cabinet_style"
+        | "res-tag_reader"
+        | "res-toll_zone"
         | eid::RESOURCE => handle_res_change(),
         eid::SEARCH | eid::STATE => spawn_future(handle_search()),
         eid::VIEW => handle_card_view_ev(),
@@ -310,46 +310,46 @@ pub fn selected_resource() -> Option<Res> {
     let rname = doc.select_parse::<String>(eid::RESOURCE);
     let res = Res::try_from(rname?.as_str()).ok()?;
     match res.base() {
-        Res::ActionPlan if doc.input_bool("res_plan_phase") => {
+        Res::ActionPlan if doc.input_bool("res-plan_phase") => {
             Some(Res::PlanPhase)
         }
-        Res::ActionPlan if doc.input_bool("res_day_plan") => Some(Res::DayPlan),
-        Res::Camera if doc.input_bool("res_encoder_type") => {
+        Res::ActionPlan if doc.input_bool("res-day_plan") => Some(Res::DayPlan),
+        Res::Camera if doc.input_bool("res-encoder_type") => {
             Some(Res::EncoderType)
         }
-        Res::Dms if doc.input_bool("res_msg_pattern") => Some(Res::MsgPattern),
-        Res::Dms if doc.input_bool("res_msg_line") => Some(Res::MsgLine),
-        Res::Dms if doc.input_bool("res_sign_config") => Some(Res::SignConfig),
-        Res::Dms if doc.input_bool("res_word") => Some(Res::Word),
-        Res::Lcs if doc.input_bool("res_lcs_state") => Some(Res::LcsState),
-        Res::VideoMonitor if doc.input_bool("res_monitor_style") => {
+        Res::Dms if doc.input_bool("res-msg_pattern") => Some(Res::MsgPattern),
+        Res::Dms if doc.input_bool("res-msg_line") => Some(Res::MsgLine),
+        Res::Dms if doc.input_bool("res-sign_config") => Some(Res::SignConfig),
+        Res::Dms if doc.input_bool("res-word") => Some(Res::Word),
+        Res::Lcs if doc.input_bool("res-lcs_state") => Some(Res::LcsState),
+        Res::VideoMonitor if doc.input_bool("res-monitor_style") => {
             Some(Res::MonitorStyle)
         }
-        Res::VideoMonitor if doc.input_bool("res_flow_stream") => {
+        Res::VideoMonitor if doc.input_bool("res-flow_stream") => {
             Some(Res::FlowStream)
         }
-        Res::CommConfig if doc.input_bool("res_comm_link") => {
+        Res::CommConfig if doc.input_bool("res-comm_link") => {
             Some(Res::CommLink)
         }
-        Res::CommConfig if doc.input_bool("res_controller") => {
+        Res::CommConfig if doc.input_bool("res-controller") => {
             Some(Res::Controller)
         }
-        Res::CommConfig if doc.input_bool("res_alarm") => Some(Res::Alarm),
-        Res::CommConfig if doc.input_bool("res_gps") => Some(Res::Gps),
-        //Res::Road if doc.input_bool("res_r_node") => Some(Res::Rnode),
-        Res::Road if doc.input_bool("res_detector") => Some(Res::Detector),
-        Res::Road if doc.input_bool("res_map_extent") => Some(Res::MapExtent),
-        Res::Permission if doc.input_bool("res_user") => Some(Res::User),
-        Res::Permission if doc.input_bool("res_role") => Some(Res::Role),
-        Res::Permission if doc.input_bool("res_domain") => Some(Res::Domain),
+        Res::CommConfig if doc.input_bool("res-alarm") => Some(Res::Alarm),
+        Res::CommConfig if doc.input_bool("res-gps") => Some(Res::Gps),
+        //Res::Road if doc.input_bool("res-r_node") => Some(Res::Rnode),
+        Res::Road if doc.input_bool("res-detector") => Some(Res::Detector),
+        Res::Road if doc.input_bool("res-map_extent") => Some(Res::MapExtent),
+        Res::Permission if doc.input_bool("res-user") => Some(Res::User),
+        Res::Permission if doc.input_bool("res-role") => Some(Res::Role),
+        Res::Permission if doc.input_bool("res-domain") => Some(Res::Domain),
         Res::Permission => Some(Res::User), // no permission cards
-        Res::SystemAttribute if doc.input_bool("res_event_config") => {
+        Res::SystemAttribute if doc.input_bool("res-event_config") => {
             Some(Res::EventConfig)
         }
-        Res::SystemAttribute if doc.input_bool("res_cabinet_style") => {
+        Res::SystemAttribute if doc.input_bool("res-cabinet_style") => {
             Some(Res::CabinetStyle)
         }
-        Res::TollZone if doc.input_bool("res_tag_reader") => {
+        Res::TollZone if doc.input_bool("res-tag_reader") => {
             Some(Res::TagReader)
         }
         _ => Some(res),
