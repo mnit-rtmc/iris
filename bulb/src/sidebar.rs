@@ -55,60 +55,33 @@ pub fn add_listeners() -> Result<()> {
 pub async fn init_resource() -> Result<()> {
     let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
     let doc = Doc::new()?;
-    if let Some(el) = doc.opt_elem::<Element>("opt_action_plan") {
-        el.set_class_name(opt_class(&access, Res::ActionPlan));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_beacon") {
-        el.set_class_name(opt_class(&access, Res::Beacon));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_camera") {
-        el.set_class_name(opt_class(&access, Res::Camera));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_dms") {
-        el.set_class_name(opt_class(&access, Res::Dms));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_gate_arm") {
-        el.set_class_name(opt_class(&access, Res::GateArm));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_incident") {
-        el.set_class_name(opt_class(&access, Res::Incident));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_lcs") {
-        el.set_class_name(opt_class(&access, Res::Lcs));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_ramp_meter") {
-        el.set_class_name(opt_class(&access, Res::RampMeter));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_video_monitor") {
-        el.set_class_name(opt_class(&access, Res::VideoMonitor));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_weather_sensor") {
-        el.set_class_name(opt_class(&access, Res::WeatherSensor));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_comm") {
-        el.set_class_name(opt_class(&access, Res::CommConfig));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_road") {
-        el.set_class_name(opt_class(&access, Res::Road));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_permission") {
-        el.set_class_name(opt_class(&access, Res::Permission));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_system") {
-        el.set_class_name(opt_class(&access, Res::SystemAttribute));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("opt_tolling") {
-        el.set_class_name(opt_class(&access, Res::TollZone));
-    }
+    show_hide_res_opt(&doc, Res::ActionPlan, &access);
+    show_hide_res_opt(&doc, Res::Beacon, &access);
+    show_hide_res_opt(&doc, Res::Camera, &access);
+    show_hide_res_opt(&doc, Res::Dms, &access);
+    show_hide_res_opt(&doc, Res::GateArm, &access);
+    show_hide_res_opt(&doc, Res::Incident, &access);
+    show_hide_res_opt(&doc, Res::Lcs, &access);
+    show_hide_res_opt(&doc, Res::RampMeter, &access);
+    show_hide_res_opt(&doc, Res::VideoMonitor, &access);
+    show_hide_res_opt(&doc, Res::WeatherSensor, &access);
+    show_hide_res_opt(&doc, Res::CommConfig, &access);
+    show_hide_res_opt(&doc, Res::Road, &access);
+    show_hide_res_opt(&doc, Res::Permission, &access);
+    show_hide_res_opt(&doc, Res::SystemAttribute, &access);
+    show_hide_res_opt(&doc, Res::TollZone, &access);
     Ok(())
 }
 
-/// Check for view access to a (base) resource name
-fn opt_class(access: &[Permission], res: Res) -> &'static str {
-    if Permission::is_view_permitted(access, res) {
-        ""
-    } else {
-        "no-display"
+/// Show or hide a resource option
+fn show_hide_res_opt(doc: &Doc, res: Res, access: &[Permission]) {
+    if let Some(el) = doc.opt_elem::<Element>(&format!("opt-{res}")) {
+        let cls = if Permission::is_view_permitted(access, res) {
+            ""
+        } else {
+            "no-display"
+        };
+        el.set_class_name(cls);
     }
 }
 
