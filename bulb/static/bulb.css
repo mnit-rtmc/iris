@@ -597,18 +597,18 @@ label:has(+ #sb_resource) {
 }
 
 /* Sign messages */
-#sign_msg {
+#message-row {
   display: grid;
   grid-template-areas: "ms";
   justify-items: center;
 }
-.sign_message {
+.sign-message {
   grid-area: ms;
 }
-.card-compact img.sign_message {
+.card-compact img.sign-message {
   max-height: 3rem;
 }
-.card-expanded img.sign_message {
+.card-expanded img.sign-message {
   max-height: 6rem;
 }
 

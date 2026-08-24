@@ -646,7 +646,7 @@ impl Dms {
         if let Some(gif) = self.msg_current_gif() {
             let multi = self.current_multi(anc);
             let mut rend =
-                Renderer::new().with_class("sign_message").with_gif(&gif);
+                Renderer::new().with_class("sign-message").with_gif(&gif);
             rend.render_multi(multi, &mut tree.root::<html::Img>());
         }
         div = tree.root::<html::Div>();
@@ -703,7 +703,7 @@ impl Dms {
     fn render_message_row<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
         div.id("message-row");
         let mut rend = Renderer::new()
-            .with_class("sign_message")
+            .with_class("sign-message")
             .with_max_width(450)
             .with_max_height(100);
         let gif = self.msg_current_gif();
