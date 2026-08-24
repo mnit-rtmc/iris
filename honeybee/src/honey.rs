@@ -190,7 +190,12 @@ impl Honey {
         cred: Credentials,
     ) -> Result<Option<Messenger>> {
         if self.debug {
-            Ok(None)
+            let perms = permission::get_by_user(&self.db, cred.user()).await?;
+            if perms.is_empty() {
+                Err(Error::Forbidden)
+            } else {
+                Ok(None)
+            }
         } else {
             let mut msn = Messenger::new(SONAR_HOST, 1037).await?;
             msn.login(cred.user(), cred.password()).await?;
