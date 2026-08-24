@@ -20,7 +20,7 @@ use crate::helper::spawn_future;
 use crate::item::ItemState;
 use crate::map;
 use crate::mjpeg;
-use crate::permission::Permission;
+use crate::permission::{AccessLevel, Permission};
 use crate::query::QueryState;
 use crate::sse;
 use crate::util::{self, Doc};
@@ -166,51 +166,31 @@ pub async fn update_query(query: QueryState) -> Result<()> {
     title.set_inner_html(&html);
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
-    let rslt = do_update_query(query).await;
+    let rslt = do_update_query(doc, query).await;
     // Turn off "wait" style
     sidebar.set_class_name("");
     rslt
 }
 
-/// Update query state (resource, selection, etc.)
-async fn do_update_query(query: QueryState) -> Result<()> {
-    let doc = Doc::new()?;
-    let resource = doc.elem::<HtmlSelectElement>(eid::RESOURCE)?;
+/// Update controls to reflect query state (resource, selection, etc.)
+async fn do_update_query(doc: Doc, query: QueryState) -> Result<()> {
+    let access: Vec<_> = Asset::Access.uri().get_val().await?;
     let res = query.res();
-    let base = query.res().map(|r| r.base());
+    let base = res.map(|r| r.base());
+    let resource = doc.elem::<HtmlSelectElement>(eid::RESOURCE)?;
     resource.set_value(base.map(|r| r.as_str()).unwrap_or(""));
     let sb_cards = doc.elem::<Element>(eid::CARDS)?;
     sb_cards.set_inner_html("");
-    if let Some(el) = doc.opt_elem::<Element>("res_plan_row") {
-        el.set_class_name(row_class(base == Some(Res::ActionPlan)));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("res_camera_row") {
-        el.set_class_name(row_class(base == Some(Res::Camera)));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("res_dms_row") {
-        el.set_class_name(row_class(base == Some(Res::Dms)));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("res_lcs_row") {
-        el.set_class_name(row_class(base == Some(Res::Lcs)));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("res_video_monitor_row") {
-        el.set_class_name(row_class(base == Some(Res::VideoMonitor)));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("res_comm_row") {
-        el.set_class_name(row_class(base == Some(Res::CommConfig)));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("res_road_row") {
-        el.set_class_name(row_class(base == Some(Res::Road)));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("res_permission_row") {
-        el.set_class_name(row_class(base == Some(Res::Permission)));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("res_system_row") {
-        el.set_class_name(row_class(base == Some(Res::SystemAttribute)));
-    }
-    if let Some(el) = doc.opt_elem::<Element>("res_toll_row") {
-        el.set_class_name(row_class(base == Some(Res::TollZone)));
-    }
+    show_hide_res_row(&doc, base, Res::ActionPlan, &access);
+    show_hide_res_row(&doc, base, Res::Camera, &access);
+    show_hide_res_row(&doc, base, Res::Dms, &access);
+    show_hide_res_row(&doc, base, Res::Lcs, &access);
+    show_hide_res_row(&doc, base, Res::VideoMonitor, &access);
+    show_hide_res_row(&doc, base, Res::CommConfig, &access);
+    show_hide_res_row(&doc, base, Res::Road, &access);
+    show_hide_res_row(&doc, base, Res::Permission, &access);
+    show_hide_res_row(&doc, base, Res::SystemAttribute, &access);
+    show_hide_res_row(&doc, base, Res::TollZone, &access);
     if let Some(res) = res {
         let id = format!("res_{res}");
         if let Some(el) = doc.opt_elem::<HtmlInputElement>(&id) {
@@ -226,14 +206,27 @@ async fn do_update_query(query: QueryState) -> Result<()> {
     };
     sb_state.set_inner_html(&html);
     map::set_selected_style(query.clone());
-    let access: Vec<_> = Asset::Access.uri().get_val().await?;
     fetch_and_populate_cards(query, &access).await?;
     sse::post_req(res, &access).await
 }
 
-/// Get dependent resource row class name
-fn row_class(show: bool) -> &'static str {
-    if show { "sb_row_left" } else { "no-display" }
+/// Show or hide a resource row
+fn show_hide_res_row(
+    doc: &Doc,
+    base: Option<Res>,
+    res: Res,
+    access: &[Permission],
+) {
+    if let Some(el) = doc.opt_elem::<Element>(&format!("row-{res}")) {
+        let cls = if base == Some(res)
+            && Permission::access_level_max(access, res) >= AccessLevel::Operate
+        {
+            "sb_row_left"
+        } else {
+            "no-display"
+        };
+        el.set_class_name(cls);
+    }
 }
 
 /// Fetch and populate card list
