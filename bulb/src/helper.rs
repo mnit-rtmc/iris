@@ -12,6 +12,7 @@
 //
 use crate::app::{self, DeferredAction};
 use crate::error::{Error, Result};
+use crate::sidebar;
 use crate::util::{self, Doc};
 use std::error::Error as _;
 use wasm_bindgen_futures::spawn_local;
@@ -47,7 +48,9 @@ async fn do_future(future: impl Future<Output = Result<()>>) {
 
 /// Show auth panel shade
 fn show_auth() {
-    app::set_user(None);
+    if let Err(e) = sidebar::logout() {
+        log::warn!("show_auth: {e:?}");
+    }
     util::show_elem("sb_auth_panel");
 }
 

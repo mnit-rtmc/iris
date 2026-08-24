@@ -51,25 +51,44 @@ pub fn add_listeners() -> Result<()> {
     Ok(())
 }
 
-/// Initialize resource select options based on permissions
-pub async fn init_resource() -> Result<()> {
-    let access: Vec<Permission> = Asset::Access.uri().get_val().await?;
+/// Login user and initialize elements
+pub async fn login(user: String) -> Result<()> {
+    app::set_user(Some(user.clone()));
+    let access: Vec<_> = Asset::Access.uri().get_val().await?;
+    initialize(Some(&user), &access)
+}
+
+/// Logout user and initialize elements
+pub fn logout() -> Result<()> {
+    app::set_user(None);
+    let access = Vec::new();
+    initialize(None, &access)
+}
+
+/// Initialize sidebar elements after login/logout
+fn initialize(user: Option<&str>, access: &[Permission]) -> Result<()> {
     let doc = Doc::new()?;
-    show_hide_res_opt(&doc, Res::ActionPlan, &access);
-    show_hide_res_opt(&doc, Res::Beacon, &access);
-    show_hide_res_opt(&doc, Res::Camera, &access);
-    show_hide_res_opt(&doc, Res::Dms, &access);
-    show_hide_res_opt(&doc, Res::GateArm, &access);
-    show_hide_res_opt(&doc, Res::Incident, &access);
-    show_hide_res_opt(&doc, Res::Lcs, &access);
-    show_hide_res_opt(&doc, Res::RampMeter, &access);
-    show_hide_res_opt(&doc, Res::VideoMonitor, &access);
-    show_hide_res_opt(&doc, Res::WeatherSensor, &access);
-    show_hide_res_opt(&doc, Res::CommConfig, &access);
-    show_hide_res_opt(&doc, Res::Road, &access);
-    show_hide_res_opt(&doc, Res::Permission, &access);
-    show_hide_res_opt(&doc, Res::SystemAttribute, &access);
-    show_hide_res_opt(&doc, Res::TollZone, &access);
+    let title = doc.elem::<HtmlElement>("page-title")?;
+    let html = match user {
+        Some(user) => format!("IRIS: {user}"),
+        None => "IRIS: not logged in".to_string(),
+    };
+    title.set_inner_html(&html);
+    show_hide_res_opt(&doc, Res::ActionPlan, access);
+    show_hide_res_opt(&doc, Res::Beacon, access);
+    show_hide_res_opt(&doc, Res::Camera, access);
+    show_hide_res_opt(&doc, Res::Dms, access);
+    show_hide_res_opt(&doc, Res::GateArm, access);
+    show_hide_res_opt(&doc, Res::Incident, access);
+    show_hide_res_opt(&doc, Res::Lcs, access);
+    show_hide_res_opt(&doc, Res::RampMeter, access);
+    show_hide_res_opt(&doc, Res::VideoMonitor, access);
+    show_hide_res_opt(&doc, Res::WeatherSensor, access);
+    show_hide_res_opt(&doc, Res::CommConfig, access);
+    show_hide_res_opt(&doc, Res::Road, access);
+    show_hide_res_opt(&doc, Res::Permission, access);
+    show_hide_res_opt(&doc, Res::SystemAttribute, access);
+    show_hide_res_opt(&doc, Res::TollZone, access);
     Ok(())
 }
 
@@ -131,12 +150,6 @@ fn set_fullscreen() {
 /// Update controls to reflect query state (resource, selection, etc.)
 pub async fn update_query(query: QueryState) -> Result<()> {
     let doc = Doc::new()?;
-    let title = doc.elem::<HtmlElement>("page-title")?;
-    let html = match app::user() {
-        Some(user) => format!("IRIS: {user}"),
-        None => "IRIS: not logged in".to_string(),
-    };
-    title.set_inner_html(&html);
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
     let rslt = do_update_query(doc, query).await;

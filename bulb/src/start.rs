@@ -83,8 +83,7 @@ async fn finish_init() -> Result<()> {
                 log::warn!("finish_init: bad JS string");
                 return Ok(());
             };
-            app::set_user(Some(user));
-            sidebar::init_resource().await?;
+            sidebar::login(user).await?;
             trigger_reload()?;
             Ok(())
         }
@@ -340,6 +339,6 @@ pub async fn handle_login() -> Result<()> {
 pub async fn handle_logout() -> Result<()> {
     let uri = Uri::from("/iris/api/login");
     uri.delete().await?;
-    app::set_user(None);
+    sidebar::logout()?;
     trigger_reload()
 }
