@@ -147,6 +147,7 @@ fn build_list(res: Option<Res>, access: &[Permission]) -> String {
         Res::Camera,
         Res::Controller,
         Res::Dms,
+        Res::GateArm,
         Res::Incident,
         Res::Lcs,
         Res::RampMeter,

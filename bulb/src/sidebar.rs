@@ -271,42 +271,14 @@ fn add_input_listener(el: &Element) -> Result<()> {
 /// Handle an input event
 fn handle_input(id: String) {
     match id.as_str() {
-        "res-action_plan"
-        | "res-plan_phase"
-        | "res-day_plan"
-        | "res-device_action"
-        | "res-camera"
-        | "res-encoder_type"
-        | "res-dms"
-        | "res-msg_pattern"
-        | "res-msg_line"
-        | "res-sign_config"
-        | "res-word"
-        | "res-lcs"
-        | "res-lcs_state"
-        | "res-video_monitor"
-        | "res-monitor_style"
-        | "res-flow_stream"
-        | "res-comm_config"
-        | "res-alarm"
-        | "res-comm_link"
-        | "res-controller"
-        | "res-gps"
-        | "res-road"
-        | "res-detector"
-        | "res-map_extent"
-        | "res-r_node"
-        | "res-user"
-        | "res-role"
-        | "res-domain"
-        | "res-system_attribute"
-        | "res-event_config"
-        | "res-cabinet_style"
-        | "res-tag_reader"
-        | "res-toll_zone"
-        | eid::RESOURCE => handle_res_change(),
         eid::SEARCH | eid::STATE => spawn_future(handle_search()),
         eid::VIEW => handle_card_view_ev(),
+        eid::RESOURCE => handle_res_change(),
+        _ if let Some(("res", rname)) = id.split_once('-')
+            && Res::try_from(rname).is_ok() =>
+        {
+            handle_res_change()
+        }
         _ => spawn_future(handle_input_other(id)),
     }
 }
