@@ -617,7 +617,7 @@ impl RampMeter {
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &RampMeterAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
-            map::select_item(Res::RampMeter, &self.name, lon, lat);
+            map::center_item(Res::RampMeter, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());

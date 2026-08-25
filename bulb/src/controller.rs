@@ -365,7 +365,7 @@ impl Controller {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &ControllerAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
-            map::select_item(Res::Controller, &self.name, lon, lat);
+            map::center_item(Res::Controller, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Status, &mut tree.root::<html::Div>());

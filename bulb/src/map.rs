@@ -113,17 +113,7 @@ async fn select_card_map(query: QueryState) -> Result<()> {
 /// Check if style should be cleared
 fn should_clear(query: &QueryState) -> bool {
     let sel = query.sel();
-    sel.is_empty() || query.res().is_none_or(|r| app::is_selected_item(r, sel))
-}
-
-/// Select item on map
-pub fn select_item(res: Res, name: &str, lon: f64, lat: f64) {
-    if !app::is_selected_item(res, name) {
-        let query = QueryState::new().with_res(Some(res)).with_sel(name);
-        set_selected_style(query);
-        let zoom = selected_zoom(res).max(12);
-        spawn_future(do_select_item(zoom, lon, lat));
-    }
+    sel.is_empty() || query.res().is_none_or(|r| app::is_centered_item(r, sel))
 }
 
 /// Get zoom level for selected resource
@@ -132,8 +122,16 @@ fn selected_zoom(res: Res) -> u32 {
     Doc::get().input_parse::<u32>(&id).unwrap_or(32)
 }
 
-/// Select item on map
-async fn do_select_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
+/// Center item on map
+pub fn center_item(res: Res, name: &str, lon: f64, lat: f64) {
+    if !app::is_centered_item(res, name) {
+        let zoom = selected_zoom(res).max(12);
+        spawn_future(do_center_item(zoom, lon, lat));
+    }
+}
+
+/// Center item on map
+async fn do_center_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
         map_pane.set_position(zoom, lon, lat);
         set_zoom_level(zoom);
@@ -147,14 +145,14 @@ pub fn set_selected_style(query: QueryState) {
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
         match query.res_sel() {
             Some((res, name)) => {
-                app::set_selected_item(res, name);
+                app::set_centered_item(res, name);
                 let sel = Sel::cls(format!("{res}-{name}"));
                 let prop = Prop::new().stroke("white").stroke_width(2);
                 let css = Rule::new(sel, prop).to_string();
                 el.set_inner_html(&css);
             }
             None => {
-                app::clear_selected_item();
+                app::clear_centered_item();
                 el.set_inner_html("");
             }
         }

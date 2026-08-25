@@ -44,8 +44,8 @@ struct AppState {
     user: Option<String>,
     /// SSE connection count
     connect_count: u32,
-    /// Selected map item (resource / name)
-    selected_item: Option<(Res, String)>,
+    /// Centered map item (resource / name)
+    centered_item: Option<(Res, String)>,
     /// Card list
     cards: Option<CardList>,
     /// Selected video monitor name (+restricted)
@@ -86,34 +86,23 @@ pub fn connect_count() -> u32 {
     STATE.with(|rc| rc.borrow().connect_count)
 }
 
-/// Set selected map item in global app state
-pub fn set_selected_item(res: Res, name: &str) {
+/// Set centered map item in global app state
+pub fn set_centered_item(res: Res, name: &str) {
     STATE.with(|rc| {
-        rc.borrow_mut().selected_item = Some((res, name.to_string()))
+        rc.borrow_mut().centered_item = Some((res, name.to_string()))
     });
 }
 
-/// Clear selected map item in global app state
-pub fn clear_selected_item() {
-    STATE.with(|rc| rc.borrow_mut().selected_item = None);
+/// Clear centered map item in global app state
+pub fn clear_centered_item() {
+    STATE.with(|rc| rc.borrow_mut().centered_item = None);
 }
 
-/// Check if a map item is selected
-pub fn is_selected_item(res: Res, name: &str) -> bool {
-    STATE.with(|rc| match &rc.borrow().selected_item {
+/// Check if a map item is centered
+pub fn is_centered_item(res: Res, name: &str) -> bool {
+    STATE.with(|rc| match &rc.borrow().centered_item {
         Some((r, n)) => (r, n.as_str()) == (&res, name),
         _ => false,
-    })
-}
-
-/// Get selected map item
-#[allow(dead_code)]
-pub fn selected_item() -> Option<(Res, String)> {
-    STATE.with(|rc| {
-        rc.borrow()
-            .selected_item
-            .as_ref()
-            .map(|(r, n)| (*r, n.clone()))
     })
 }
 

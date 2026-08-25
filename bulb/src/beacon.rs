@@ -184,7 +184,7 @@ impl Beacon {
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &BeaconAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
-            map::select_item(Res::Beacon, &self.name, lon, lat);
+            map::center_item(Res::Beacon, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
