@@ -161,6 +161,20 @@ pub fn set_selected_style(query: QueryState) {
     }
 }
 
+/// Set selected style for a layer
+fn set_selected_style_layer(me: &MapEvent) {
+    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
+        let prop = match me.layer.as_str() {
+            "motorway" | "trunk" | "primary" | "secondary" | "tertiary"
+            | "road" | "railway" | "path" => Prop::new().stroke("#96b"),
+            _ => Prop::new().fill("#96b"),
+        };
+        let sel = Sel::cls(&me.target);
+        let css = Rule::new(sel, prop).to_string();
+        el.set_inner_html(&css);
+    }
+}
+
 /// Set the map zoom level
 fn set_zoom_level(zoom: u32) {
     if let Some(el) = Doc::get().opt_elem::<Element>("marker-style") {
@@ -464,16 +478,9 @@ async fn do_handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
     {
         let query = QueryState::new().with_res(Some(res)).with_sel(nm);
         select_card_map(query).await?;
-    } else if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
+    } else {
         select_card_map(QueryState::new()).await?;
-        let prop = match me.layer.as_str() {
-            "motorway" | "trunk" | "primary" | "secondary" | "tertiary"
-            | "road" | "railway" | "path" => Prop::new().stroke("#96b"),
-            _ => Prop::new().fill("#96b"),
-        };
-        let sel = Sel::cls(&me.target);
-        let css = Rule::new(sel, prop).to_string();
-        el.set_inner_html(&css);
+        set_selected_style_layer(&me);
     }
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
         let title = menu_title(&me);
