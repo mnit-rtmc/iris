@@ -245,15 +245,20 @@ async fn shrink_card() -> Result<()> {
 /// Expand selected card
 async fn expand_card(query: QueryState, res: Res) -> Result<()> {
     let sel = query.sel();
-    let view = if sel.ends_with('_') && sel.len() == res.as_str().len() + 1 {
-        View::Create
+    if sel.is_empty() {
+        Ok(())
     } else {
-        let edit = app::can_edit_card();
-        // Expand to the second view (1) for the resource
-        *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
-    };
-    let cv = CardView::new(res, sel, view);
-    replace_card(cv, "").await
+        let view = if sel.ends_with('_') && sel.len() == res.as_str().len() + 1
+        {
+            View::Create
+        } else {
+            let edit = app::can_edit_card();
+            // Expand to the second view (1) for the resource
+            *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
+        };
+        let cv = CardView::new(res, sel, view);
+        replace_card(cv, "").await
+    }
 }
 
 /// Fetch and populate card list
