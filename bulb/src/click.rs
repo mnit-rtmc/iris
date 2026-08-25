@@ -11,7 +11,6 @@
 // GNU General Public License for more details.
 //
 use crate::app;
-use crate::card;
 use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
@@ -19,7 +18,6 @@ use crate::query::QueryState;
 use crate::sidebar;
 use crate::start;
 use crate::util::{self, Doc};
-use crate::view::{CardView, View};
 use resources::Res;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
@@ -29,31 +27,31 @@ use web_sys::{Element, Event, HtmlButtonElement, HtmlElement};
 struct ButtonAttrs {
     /// Element ID
     id: String,
+    /// Data-res attribute
+    data_res: Option<String>,
     /// Data-link attribute
     data_link: Option<String>,
-    /// Data-type attribute
-    data_type: Option<String>,
 }
 
 impl ButtonAttrs {
     /// Create button attributes
     fn new(id: String, target: &Element) -> Self {
+        let mut data_res = None;
         let mut data_link = None;
-        let mut data_type = None;
         if let Some("go_link") = target.get_attribute("class").as_deref() {
+            data_res = target.get_attribute("data-res");
             data_link = target.get_attribute("data-link");
-            data_type = target.get_attribute("data-type");
         }
         ButtonAttrs {
             id,
+            data_res,
             data_link,
-            data_type,
         }
     }
 
     /// Check if data link
     fn is_link(&self) -> bool {
-        self.data_link.is_some() && self.data_type.is_some()
+        self.data_res.is_some() && self.data_link.is_some()
     }
 
     /// Handle button click event on an expanded card
@@ -64,11 +62,12 @@ impl ButtonAttrs {
             } else if eid::DELETE == self.id {
                 if app::delete_enabled() {
                     cv.handle_delete().await?;
-                    sidebar::replace_card(cv.with_view(View::Hidden), "")
-                        .await?;
+                    let query = QueryState::current_entry().with_sel("");
+                    sidebar::set_query(query).await?;
                 }
-            } else if let Some(v) = cv.handle_click(&self.id).await? {
-                sidebar::replace_card(cv.with_view(v), "").await?;
+            } else if let Some(_v) = cv.handle_click(&self.id).await? {
+                let query = QueryState::current_entry().with_sel(cv.name());
+                sidebar::set_query(query).await?;
             }
         }
         Ok(())
@@ -76,10 +75,10 @@ impl ButtonAttrs {
 
     /// Go to resource from target's `data-link` attribute
     async fn go_resource(self) -> Result<()> {
-        if let (Some(link), Some(rname)) = (self.data_link, self.data_type)
+        if let (Some(rname), Some(link)) = (self.data_res, self.data_link)
             && let Ok(res) = Res::try_from(rname.as_str())
         {
-            let query = QueryState::new().with_res(Some(res)).with_q(&link);
+            let query = QueryState::new().with_res(Some(res)).with_sel(&link);
             sidebar::set_query(query).await
         } else {
             Ok(())
@@ -160,31 +159,18 @@ async fn handle_show_sidebar(show: bool) -> Result<()> {
 
 /// Handle a `click` event within a card element
 fn handle_ev_card(el: &Element) {
-    if let Some(id) = el.get_attribute("id")
-        && let Some(name) = el.get_attribute("data-name")
-        && let Some(res) = sidebar::selected_resource()
-    {
-        let query = QueryState::new().with_res(Some(res)).with_sel(&name);
-        spawn_future(click_card(id, query));
+    if let Some(name) = el.get_attribute("data-name") {
+        let query = QueryState::current_entry().with_sel(&name);
+        if query.res().is_some() {
+            spawn_future(click_card(query));
+        }
     }
 }
 
 /// Handle a card click event
-pub async fn click_card(id: String, query: QueryState) -> Result<()> {
-    if let Some(cv) = app::expanded_view() {
-        let search = sidebar::search_value()?;
-        sidebar::replace_card(cv.compact(), &search).await?;
-    }
-    if let Some(res) = query.res() {
-        let view = if id.ends_with('_') && id.len() == res.as_str().len() + 1 {
-            View::Create
-        } else {
-            let edit = app::can_edit_card();
-            // Expand to the second view (1) for the resource
-            *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
-        };
-        let cv = CardView::new(res, query.sel(), view);
-        sidebar::replace_card(cv, "").await?;
+async fn click_card(query: QueryState) -> Result<()> {
+    if query.res().is_some() {
+        sidebar::set_query(query).await?;
     }
     Ok(())
 }

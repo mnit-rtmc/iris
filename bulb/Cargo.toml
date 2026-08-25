@@ -64,6 +64,7 @@ features = [
   'NavigateEvent',
   'Navigation',
   'NavigationDestination',
+  'NavigationHistoryEntry',
   'NavigationResult',
   'Navigator',
   'Request',

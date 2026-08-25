@@ -1056,7 +1056,7 @@ impl Dms {
                     .r#type("button")
                     .class("go_link")
                     .data_("link", &cfg.name)
-                    .data_("type", Res::SignConfig.as_str())
+                    .data_("res", Res::SignConfig.as_str())
                     .cdata(&cfg.name)
                     .close();
             }

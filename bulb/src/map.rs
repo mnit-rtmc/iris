@@ -13,7 +13,6 @@
 use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
 use crate::card::{self, CardList, CardState};
-use crate::click;
 use crate::eid;
 use crate::error::Result;
 use crate::fetch::Uri;
@@ -66,11 +65,12 @@ pub fn add_listeners() -> Result<()> {
     MapPane::new(MAP_PANE)
         .with_anchor(ANCHOR_X, ANCHOR_Y)
         .with_groups(GROUPS)
-        .with_zoom_handler(handle_zoom)
         .with_click_handler(handle_click)
         .with_contextmenu_handler(handle_contextmenu)
+        .with_zoom_handler(handle_zoom)
         .register();
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
+        // FIXME: use default map extent
         map_pane.set_position(10, -93.2, 44.95);
         set_zoom_level(10);
         spawn_future(update_layers_all(10));
@@ -82,38 +82,24 @@ pub fn add_listeners() -> Result<()> {
 /// Handle a `click` event on the map
 fn handle_click(me: MapEvent) {
     log::debug!("click: {me:?}");
-    if let Some((rname, nm)) = me.target.split_once('-') {
-        let res = Res::try_from(rname).ok();
-        let query = QueryState::new().with_res(res).with_sel(nm);
-        spawn_future(select_card_map(query));
+    spawn_future(set_query_map(build_query(&me)));
+}
+
+/// Build a query state from a map event
+fn build_query(me: &MapEvent) -> QueryState {
+    if let Some((rname, nm)) = me.target.split_once('-')
+        && let Ok(res) = Res::try_from(rname)
+    {
+        QueryState::current_entry().with_res(Some(res)).with_sel(nm)
+    } else {
+        QueryState::current_entry().with_sel("")
     }
 }
 
-/// Select a card from a map marker click
-async fn select_card_map(query: QueryState) -> Result<()> {
-    if should_clear(&query) {
-        set_selected_style(QueryState::new());
-        if let Some(cv) = app::expanded_view() {
-            let search = sidebar::search_value()?;
-            sidebar::replace_card(cv.compact(), &search).await?;
-        }
-        return Ok(());
-    }
-    if let Some(res) = query.res() {
-        if sidebar::selected_resource() != Some(res) {
-            sidebar::set_query(query.clone()).await?;
-        }
-        set_selected_style(query.clone());
-        let id = format!("{res}_{}", query.sel());
-        click::click_card(id, query).await?;
-    }
-    Ok(())
-}
-
-/// Check if style should be cleared
-fn should_clear(query: &QueryState) -> bool {
-    let sel = query.sel();
-    sel.is_empty() || query.res().is_none_or(|r| app::is_centered_item(r, sel))
+/// Set query state from a map marker click
+async fn set_query_map(query: QueryState) -> Result<()> {
+    set_selected_style(query.clone());
+    sidebar::set_query(query).await
 }
 
 /// Get zoom level for selected resource
@@ -372,7 +358,7 @@ async fn layer_style_css(
 ) -> Result<String> {
     let permitted = Permission::is_view_permitted(access, res);
     let displayed =
-        sidebar::selected_resource() == Some(res) || zoom >= selected_zoom(res);
+        app::query().res() == Some(res) || zoom >= selected_zoom(res);
     if permitted && displayed {
         let mut cards = CardList::new(res, access);
         cards.fetch_all().await?;
@@ -471,15 +457,11 @@ fn handle_contextmenu(me: MapEvent, x: i32, y: i32) {
 
 /// Handle a `contextmenu` event
 async fn do_handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
-    if let Some((rname, nm)) = me.target.split_once('-')
-        && let Ok(res) = Res::try_from(rname)
-    {
-        let query = QueryState::new().with_res(Some(res)).with_sel(nm);
-        select_card_map(query).await?;
-    } else {
-        select_card_map(QueryState::new()).await?;
+    let query = build_query(&me);
+    if query.res().is_none() {
         set_selected_style_layer(&me);
     }
+    set_query_map(query).await?;
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
         let title = menu_title(&me);
         let mut tree = Tree::new();

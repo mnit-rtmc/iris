@@ -152,7 +152,8 @@ pub async fn update_query(query: QueryState) -> Result<()> {
     let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
-    let rslt = do_update_query(doc, query).await;
+    let rslt = do_update_query(doc, query.clone()).await;
+    app::set_query(query);
     // Turn off "wait" style
     sidebar.set_class_name("");
     rslt
@@ -162,38 +163,55 @@ pub async fn update_query(query: QueryState) -> Result<()> {
 async fn do_update_query(doc: Doc, query: QueryState) -> Result<()> {
     let access: Vec<_> = Asset::Access.uri().get_val().await?;
     let res = query.res();
+    if res != app::query().res() {
+        update_resources(&doc, res, &access)?;
+        let sb_cards = doc.elem::<Element>(eid::CARDS)?;
+        sb_cards.set_inner_html("");
+        map::set_selected_style(query.clone());
+        fetch_and_populate_cards(query, &access).await?;
+        sse::post_req(res, &access).await
+    } else if let Some(res) = res {
+        shrink_card().await?;
+        expand_card(query, res).await
+    } else {
+        Ok(())
+    }
+}
+
+/// Update resource elements for a query
+fn update_resources(
+    doc: &Doc,
+    res: Option<Res>,
+    access: &[Permission],
+) -> Result<()> {
     let base = res.map(|r| r.base());
     let resource = doc.elem::<HtmlSelectElement>(eid::RESOURCE)?;
     resource.set_value(base.map(|r| r.as_str()).unwrap_or(""));
-    let sb_cards = doc.elem::<Element>(eid::CARDS)?;
-    sb_cards.set_inner_html("");
-    show_hide_res_row(&doc, base, Res::ActionPlan, &access);
-    show_hide_res_row(&doc, base, Res::Camera, &access);
-    show_hide_res_row(&doc, base, Res::Dms, &access);
-    show_hide_res_row(&doc, base, Res::Lcs, &access);
-    show_hide_res_row(&doc, base, Res::VideoMonitor, &access);
-    show_hide_res_row(&doc, base, Res::CommConfig, &access);
-    show_hide_res_row(&doc, base, Res::Road, &access);
-    show_hide_res_row(&doc, base, Res::Permission, &access);
-    show_hide_res_row(&doc, base, Res::SystemAttribute, &access);
-    show_hide_res_row(&doc, base, Res::TollZone, &access);
+    show_hide_res_row(doc, base, Res::ActionPlan, access);
+    show_hide_res_row(doc, base, Res::Camera, access);
+    show_hide_res_row(doc, base, Res::Dms, access);
+    show_hide_res_row(doc, base, Res::Lcs, access);
+    show_hide_res_row(doc, base, Res::VideoMonitor, access);
+    show_hide_res_row(doc, base, Res::CommConfig, access);
+    show_hide_res_row(doc, base, Res::Road, access);
+    show_hide_res_row(doc, base, Res::Permission, access);
+    show_hide_res_row(doc, base, Res::SystemAttribute, access);
+    show_hide_res_row(doc, base, Res::TollZone, access);
     if let Some(res) = res {
-        let id = format!("res_{res}");
+        let id = format!("res-{res}");
         if let Some(el) = doc.opt_elem::<HtmlInputElement>(&id) {
             el.set_checked(true);
         }
     }
     let sb_search = doc.elem::<HtmlInputElement>(eid::SEARCH)?;
-    sb_search.set_value(query.q());
+    sb_search.set_value("");
     let sb_state = doc.elem::<HtmlSelectElement>(eid::STATE)?;
     let html = match res {
-        Some(res) => card::item_states_html(res, !query.q().is_empty()),
+        Some(res) => card::item_states_html(res),
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
-    map::set_selected_style(query.clone());
-    fetch_and_populate_cards(query, &access).await?;
-    sse::post_req(res, &access).await
+    Ok(())
 }
 
 /// Show or hide a resource row
@@ -213,6 +231,29 @@ fn show_hide_res_row(
         };
         el.set_class_name(cls);
     }
+}
+
+/// Shrink selected card
+async fn shrink_card() -> Result<()> {
+    if let Some(cv) = app::expanded_view() {
+        let search = search_value()?;
+        replace_card(cv.compact(), &search).await?;
+    }
+    Ok(())
+}
+
+/// Expand selected card
+async fn expand_card(query: QueryState, res: Res) -> Result<()> {
+    let sel = query.sel();
+    let view = if sel.ends_with('_') && sel.len() == res.as_str().len() + 1 {
+        View::Create
+    } else {
+        let edit = app::can_edit_card();
+        // Expand to the second view (1) for the resource
+        *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
+    };
+    let cv = CardView::new(res, sel, view);
+    replace_card(cv, "").await
 }
 
 /// Fetch and populate card list
@@ -290,7 +331,7 @@ fn handle_res_change() {
 }
 
 /// Get the selected resource value
-pub fn selected_resource() -> Option<Res> {
+fn selected_resource() -> Option<Res> {
     let doc = Doc::get();
     let rname = doc.select_parse::<String>(eid::RESOURCE);
     let res = Res::try_from(rname?.as_str()).ok()?;
@@ -339,6 +380,11 @@ pub fn selected_resource() -> Option<Res> {
         }
         _ => Some(res),
     }
+}
+
+/// Set query state
+pub async fn set_query(query: QueryState) -> Result<()> {
+    change_query_state(query).await
 }
 
 /// Change query state
@@ -459,7 +505,7 @@ async fn handle_focus_events(
 }
 
 /// Replace a card view element with another view
-pub async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
+async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
     let cv_clone = cv.clone();
     let html = cv.fetch_one(search).await?;
     replace_card_html(&cv, &html);
@@ -488,11 +534,6 @@ fn replace_card_html(cv: &CardView, html: &str) {
         opt.set_block(ScrollLogicalPosition::Nearest);
         el.scroll_into_view_with_scroll_into_view_options(&opt);
     }
-}
-
-/// Set query state
-pub async fn set_query(query: QueryState) -> Result<()> {
-    change_query_state(query).await
 }
 
 /// Add transition event listener to an element
@@ -538,7 +579,7 @@ async fn do_handle_notification(
     _name: Option<String>,
 ) -> Result<()> {
     // Has the selected resource list updated?
-    if let Some(res) = selected_resource()
+    if let Some(res) = app::query().res()
         && res.as_str() == chan
         && update_card_list(res).await?
     {

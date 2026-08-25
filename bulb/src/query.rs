@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::util;
 use http::uri::{InvalidUri, Uri};
 use resources::Res;
 use std::fmt;
@@ -19,8 +20,6 @@ use std::fmt;
 pub struct QueryState {
     /// Resource type
     res: Option<Res>,
-    /// Search string
-    q: String,
     /// Selected item
     sel: String,
 }
@@ -31,7 +30,6 @@ impl std::str::FromStr for QueryState {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let uri = s.parse::<Uri>()?;
         let mut res = None;
-        let mut q = String::new();
         let mut sel = String::new();
         if let Some(query) = uri.query() {
             for part in query.split('&') {
@@ -40,34 +38,22 @@ impl std::str::FromStr for QueryState {
                 {
                     res = Some(rs);
                 }
-                if let Some(("q", val)) = part.split_once('=') {
-                    q = val.to_string();
-                }
                 if let Some(("sel", val)) = part.split_once('=') {
                     sel = val.to_string();
                 }
             }
         }
-        Ok(QueryState { res, q, sel })
+        Ok(QueryState { res, sel })
     }
 }
 
 impl fmt::Display for QueryState {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.res.is_some() || !self.q.is_empty() || !self.sel.is_empty() {
+        if self.res.is_some() || !self.sel.is_empty() {
             let mut first = true;
             write!(f, "?")?;
             if let Some(res) = self.res {
                 write!(f, "res={res}")?;
-                first = false;
-            }
-            if !self.q.is_empty() {
-                if first {
-                    write!(f, "?")?;
-                } else {
-                    write!(f, "&")?;
-                }
-                write!(f, "q={}", self.q)?;
                 first = false;
             }
             if !self.sel.is_empty() {
@@ -89,15 +75,23 @@ impl QueryState {
         Self::default()
     }
 
+    /// Get query state from Navigation API current entry
+    pub fn current_entry() -> Self {
+        if let Ok(window) = util::window() {
+            let navigation = window.navigation();
+            if let Some(ent) = navigation.current_entry()
+                && let Some(url) = ent.url()
+                && let Ok(qs) = url.parse::<QueryState>()
+            {
+                return qs;
+            }
+        }
+        Self::default()
+    }
+
     /// Set the resource type
     pub fn with_res(mut self, res: Option<Res>) -> Self {
         self.res = res;
-        self
-    }
-
-    /// Set the search item
-    pub fn with_q(mut self, q: &str) -> Self {
-        self.q = q.to_string();
         self
     }
 
@@ -110,11 +104,6 @@ impl QueryState {
     /// Get resource type
     pub fn res(&self) -> Option<Res> {
         self.res
-    }
-
-    /// Get search string
-    pub fn q(&self) -> &str {
-        &self.q
     }
 
     /// Get selected item

@@ -266,8 +266,8 @@ impl Io {
             span.button()
                 .r#type("button")
                 .class("go_link")
+                .data_("res", res.as_str())
                 .data_("link", &self.name)
-                .data_("type", res.as_str())
                 .cdata(&self.name)
                 .close();
             li.close();
@@ -331,8 +331,8 @@ impl Controller {
         button
             .r#type("button")
             .class("go_link")
-            .data_("link", self.link_drop())
-            .data_("type", Res::Controller.as_str())
+            .data_("res", Res::Controller.as_str())
+            .data_("link", self.name())
             .cdata(self.link_drop())
             .close();
     }
@@ -377,8 +377,8 @@ impl Controller {
         span.button()
             .r#type("button")
             .class("go_link")
+            .data_("res", Res::CommLink.as_str())
             .data_("link", opt_ref(&self.comm_link))
-            .data_("type", Res::CommLink.as_str())
             .cdata(opt_ref(&self.comm_link))
             .close();
         span.cdata(":").cdata(self.drop_id);
