@@ -163,13 +163,13 @@ pub async fn update_query(query: QueryState) -> Result<()> {
 
 /// Update controls to reflect query state (resource, selection, etc.)
 async fn do_update_query(doc: Doc, query: QueryState) -> Result<()> {
+    map::set_selected_style(query.clone());
     let access: Vec<_> = Asset::Access.uri().get_val().await?;
     let res = query.res();
     if res != app::query().res() {
         update_resources(&doc, res, &access)?;
         let sb_cards = doc.elem::<Element>(eid::CARDS)?;
         sb_cards.set_inner_html("");
-        map::set_selected_style(query.clone());
         fetch_and_populate_cards(query, &access).await?;
         sse::post_req(res, &access).await
     } else if let Some(res) = res {

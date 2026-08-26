@@ -98,7 +98,6 @@ fn build_query(me: &MapEvent) -> QueryState {
 
 /// Set query state from a map marker click
 async fn set_query_map(query: QueryState) -> Result<()> {
-    set_selected_style(query.clone());
     sidebar::set_query(query).await
 }
 
@@ -113,6 +112,7 @@ pub fn center_item(res: Res, name: &str, lon: f64, lat: f64) {
     if !app::is_centered_item(res, name) {
         let zoom = selected_zoom(res).max(12);
         spawn_future(do_center_item(zoom, lon, lat));
+        app::set_centered_item(res, name);
     }
 }
 
@@ -131,7 +131,6 @@ pub fn set_selected_style(query: QueryState) {
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
         match query.res_sel() {
             Some((res, name)) => {
-                app::set_centered_item(res, name);
                 let sel = Sel::cls(format!("{res}-{name}"));
                 let prop = Prop::new().stroke("white").stroke_width(2);
                 let css = Rule::new(sel, prop).to_string();
