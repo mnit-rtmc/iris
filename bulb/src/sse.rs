@@ -14,7 +14,7 @@ use crate::app::{self, DeferredAction};
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::permission::{AccessLevel, Permission};
-use crate::sidebar::{self, handle_notification};
+use crate::sidebar;
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
@@ -212,7 +212,7 @@ fn handle_notify(payload: JsString) {
         log::debug!("SSE message: {chan}");
         let mut chan = chan.to_string();
         let name = chan.find('$').map(|i| chan.split_off(i));
-        handle_notification(chan, name);
+        sidebar::handle_notification(chan, name);
     }
     app::defer_action(
         DeferredAction::SetNotifyState(NotifyState::Connected),

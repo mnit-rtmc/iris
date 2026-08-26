@@ -154,8 +154,7 @@ pub async fn update_query(query: QueryState) -> Result<()> {
     let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
-    let rslt = do_update_query(doc, query.clone()).await;
-    app::set_query(query);
+    let rslt = do_update_query(doc, query).await;
     // Turn off "wait" style
     sidebar.set_class_name("");
     rslt
@@ -164,20 +163,26 @@ pub async fn update_query(query: QueryState) -> Result<()> {
 /// Update controls to reflect query state (resource, selection, etc.)
 async fn do_update_query(doc: Doc, query: QueryState) -> Result<()> {
     map::set_selected_style(query.clone());
-    let access: Vec<_> = Asset::Access.uri().get_val().await?;
     let res = query.res();
-    if res != app::query().res() {
+    let res_change = res != app::query().res();
+    let sel_change = query.sel() != app::query().sel();
+    app::set_query(query.clone());
+    if res_change {
+        let access: Vec<_> = Asset::Access.uri().get_val().await?;
         update_resources(&doc, res, &access)?;
         let sb_cards = doc.elem::<Element>(eid::CARDS)?;
         sb_cards.set_inner_html("");
-        fetch_and_populate_cards(query, &access).await?;
-        sse::post_req(res, &access).await
-    } else if let Some(res) = res {
-        shrink_card().await?;
-        expand_card(query, res).await
-    } else {
-        Ok(())
+        fetch_and_populate_cards(query.clone(), &access).await?;
+        sse::post_req(res, &access).await?;
     }
+    if let Some(res) = res
+        && sel_change
+    {
+        let search = search_value()?;
+        shrink_card(&search).await?;
+        expand_card(query, res).await?;
+    }
+    Ok(())
 }
 
 /// Update resource elements for a query
@@ -236,10 +241,10 @@ fn show_hide_res_row(
 }
 
 /// Shrink selected card
-async fn shrink_card() -> Result<()> {
+async fn shrink_card(search: &str) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
-        let search = search_value()?;
-        replace_card(cv.compact(), &search).await?;
+        let cv = cv.compact();
+        replace_card(cv, search).await?;
     }
     Ok(())
 }
@@ -409,12 +414,10 @@ pub fn refresh_res_list() {
 
 /// Search card list for matching cards
 async fn handle_search() -> Result<()> {
+    let search = search_value()?;
+    shrink_card(&search).await?;
     match app::card_list(None) {
         Some(mut cards) => {
-            let search = search_value()?;
-            if let Some(cv) = cards.expanded_view() {
-                replace_card(cv.compact(), &search).await?
-            }
             let doc = Doc::new()?;
             for cv in cards.search_views(&search).await? {
                 let id = cv.id();
