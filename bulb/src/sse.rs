@@ -14,7 +14,7 @@ use crate::app::{self, DeferredAction};
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::permission::{AccessLevel, Permission};
-use crate::sidebar::handle_notification;
+use crate::sidebar::{self, handle_notification};
 use crate::util::Doc;
 use js_sys::JsString;
 use resources::Res;
@@ -188,6 +188,10 @@ pub fn set_notify_state(mut ns: NotifyState) {
                 ns = NotifyState::Reconnecting;
                 app::defer_action(DeferredAction::MakeEventSource, 5000);
                 app::set_connect_count(count);
+            } else {
+                if let Err(e) = sidebar::logout() {
+                    log::warn!("set_notify_state logout: {e:?}");
+                }
             }
         }
         NotifyState::Connected => {

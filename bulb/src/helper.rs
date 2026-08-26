@@ -42,6 +42,9 @@ async fn do_future(future: impl Future<Output = Result<()>>) {
                 log::warn!("source: {se}");
             }
             show_toast(&format!("Error: {e}"));
+            if let Err(e) = sidebar::logout() {
+                log::warn!("do_future logout: {e:?}");
+            }
         }
     }
 }
@@ -49,7 +52,7 @@ async fn do_future(future: impl Future<Output = Result<()>>) {
 /// Show auth panel shade
 fn show_auth() {
     if let Err(e) = sidebar::logout() {
-        log::warn!("show_auth: {e:?}");
+        log::warn!("show_auth logout: {e:?}");
     }
     util::show_elem("sb_auth_panel");
 }

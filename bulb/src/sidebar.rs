@@ -61,6 +61,8 @@ pub async fn login(user: String) -> Result<()> {
 /// Logout user and initialize elements
 pub fn logout() -> Result<()> {
     app::set_user(None);
+    app::set_connect_count(8);
+    app::set_query(QueryState::default());
     let access = Vec::new();
     initialize(None, &access)
 }
