@@ -12,7 +12,9 @@
 //
 use crate::app;
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, footer_html, uri_one, uri_one_direct};
+use crate::card::{
+    AncillaryData, Card, footer_html, uri_one, uri_one_direct, uri_one_mjpeg,
+};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::encodertype::EncoderType;
@@ -23,6 +25,7 @@ use crate::helper::spawn_future;
 use crate::item::{ItemState, ItemStates};
 use crate::joystick;
 use crate::map;
+use crate::mjpeg;
 use crate::permission::{AccessLevel, Permission};
 use crate::start::MouseEventTp;
 use crate::util::{
@@ -514,7 +517,7 @@ impl Camera {
         let access_level = anc.access_level(self);
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
-        self.render_switch_row(&mut tree.root::<html::Div>());
+        self.render_init_row(&mut tree.root::<html::Div>());
         self.render_state_row(anc, &mut tree.root::<html::Div>());
         self.render_location_row(&mut tree.root::<html::Div>());
         if access_level >= AccessLevel::View {
@@ -546,11 +549,11 @@ impl Camera {
         String::from(tree)
     }
 
-    /// Render hidden row to switch monitor as an HTML div element
-    fn render_switch_row<'p>(&self, div: &'p mut html::Div<'p>) {
+    /// Render hidden row to initialize control as an HTML div element
+    fn render_init_row<'p>(&self, div: &'p mut html::Div<'p>) {
         div.class("no-display");
-        div.button().id("switch-monitor").r#type("button");
-        spawn_future(dispatch_switch_monitor());
+        div.button().id("init-control").r#type("button");
+        spawn_future(dispatch_init_control());
         div.close();
     }
 
@@ -586,6 +589,21 @@ impl Camera {
         let mut actions = Vec::with_capacity(1);
         actions.push(Action::Patch(uri, value.into()));
         actions
+    }
+
+    /// Initialize the control card
+    fn init_control(&self) -> Vec<Action> {
+        self.start_mjpeg();
+        self.switch_monitor()
+    }
+
+    /// Start MJPEG stream
+    fn start_mjpeg(&self) {
+        let uri = uri_one_mjpeg(Res::Camera, &self.name);
+        let uri = uri.as_str();
+        if let Err(e) = mjpeg::start_stream(uri.to_owned(), 30) {
+            log::warn!("start_mjpeg failed: {e:?}");
+        }
     }
 
     /// Switch the selected monitor to this camera
@@ -715,9 +733,9 @@ impl Camera {
     }
 }
 
-/// Dispatch a click event from `switch-monitor` button
-async fn dispatch_switch_monitor() -> Result<()> {
-    if let Some(btn) = Doc::get().opt_elem::<HtmlElement>("switch-monitor") {
+/// Dispatch a click event from `init-control` button
+async fn dispatch_init_control() -> Result<()> {
+    if let Some(btn) = Doc::get().opt_elem::<HtmlElement>("init-control") {
         btn.click();
     }
     Ok(())
@@ -835,7 +853,7 @@ impl Card for Camera {
             }
         }
         match id {
-            "switch-monitor" => self.switch_monitor(),
+            "init-control" => self.init_control(),
             "focus-auto" => self.device_req(DeviceReq::CameraFocusAuto),
             "iris-auto" => self.device_req(DeviceReq::CameraIrisAuto),
             "camera-wiper" => self.device_req(DeviceReq::CameraWiperOneShot),

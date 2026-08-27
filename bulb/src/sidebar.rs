@@ -12,14 +12,13 @@
 //
 use crate::app;
 use crate::asset::Asset;
-use crate::card::{self, CardList, uri_one_mjpeg};
+use crate::card::{self, CardList};
 use crate::click;
 use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
 use crate::item::ItemState;
 use crate::map;
-use crate::mjpeg;
 use crate::permission::{AccessLevel, Permission};
 use crate::query::QueryParam;
 use crate::sse;
@@ -509,17 +508,9 @@ async fn handle_focus_events(
 
 /// Replace a card view element with another view
 async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
-    let cv_clone = cv.clone();
     let html = cv.fetch_one(search).await?;
     replace_card_html(&cv, &html);
     app::set_expanded_view(Some(cv));
-    let res = cv_clone.res;
-    let name = cv_clone.name();
-    if res == Res::Camera && cv_clone.view == View::Control {
-        let uri = uri_one_mjpeg(Res::Camera, name);
-        let uri = uri.as_str();
-        mjpeg::start_stream(uri.to_owned(), 30)?;
-    }
     Ok(())
 }
 
