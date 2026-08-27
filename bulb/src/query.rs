@@ -12,6 +12,9 @@
 //
 use crate::util;
 use http::uri::{InvalidUri, Uri};
+use percent_encoding::{
+    NON_ALPHANUMERIC, percent_decode_str, utf8_percent_encode,
+};
 use resources::Res;
 use std::fmt;
 
@@ -20,7 +23,7 @@ use std::fmt;
 pub struct QueryState {
     /// Resource type
     res: Option<Res>,
-    /// Selected item
+    /// Selected item (not percent-encoded)
     sel: String,
 }
 
@@ -39,7 +42,8 @@ impl std::str::FromStr for QueryState {
                     res = Some(rs);
                 }
                 if let Some(("sel", val)) = part.split_once('=') {
-                    sel = val.to_string();
+                    sel =
+                        percent_decode_str(val).decode_utf8_lossy().to_string();
                 }
             }
         }
@@ -62,7 +66,8 @@ impl fmt::Display for QueryState {
                 } else {
                     write!(f, "&")?;
                 }
-                write!(f, "sel={}", self.sel)?;
+                let sel = utf8_percent_encode(&self.sel, NON_ALPHANUMERIC);
+                write!(f, "sel={sel}")?;
             }
         }
         fmt::Result::Ok(())
