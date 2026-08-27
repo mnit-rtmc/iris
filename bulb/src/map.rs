@@ -149,17 +149,24 @@ pub fn set_selected_style(query: QueryParam) {
     }
 }
 
-/// Set selected style for a layer
-fn set_selected_style_layer(me: &MapEvent) {
-    if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
-        let prop = match me.layer.as_str() {
-            "motorway" | "trunk" | "primary" | "secondary" | "tertiary"
-            | "road" | "railway" | "path" => Prop::new().stroke("#96b"),
-            _ => Prop::new().fill("#96b"),
-        };
-        let sel = Sel::cls(&me.target);
-        let css = Rule::new(sel, prop).to_string();
-        el.set_inner_html(&css);
+/// Set context style for a layer
+fn set_context_style(me: Option<&MapEvent>) {
+    if let Some(el) = Doc::get().opt_elem::<Element>("context-style") {
+        match me {
+            Some(me) => {
+                let prop = match me.layer.as_str() {
+                    "motorway" | "trunk" | "primary" | "secondary"
+                    | "tertiary" | "road" | "railway" | "path" => {
+                        Prop::new().stroke("#96b")
+                    }
+                    _ => Prop::new().fill("#96b"),
+                };
+                let sel = Sel::cls(&me.target);
+                let css = Rule::new(sel, prop).to_string();
+                el.set_inner_html(&css);
+            }
+            None => el.set_inner_html(""),
+        }
     }
 }
 
@@ -462,9 +469,7 @@ fn handle_contextmenu(me: MapEvent, x: i32, y: i32) {
 /// Handle a `contextmenu` event
 async fn do_handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
     let query = build_query(&me);
-    if query.res().is_none() {
-        set_selected_style_layer(&me);
-    }
+    set_context_style(Some(&me));
     set_query_map(query).await?;
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
         let title = menu_title(&me);
@@ -503,4 +508,5 @@ pub fn dismiss_context_menu() {
         div.id(eid::MAP_MENU).class("no-display");
         el.set_outer_html(&String::from(tree));
     }
+    set_context_style(None);
 }
