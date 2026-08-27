@@ -253,15 +253,8 @@ async fn shrink_card(search: &str) -> Result<()> {
 async fn expand_card(query: QueryParam, res: Res) -> Result<()> {
     let sel = query.sel();
     if !sel.is_empty() {
-        let view = if sel.ends_with('_') && sel.len() == res.as_str().len() + 1
-        {
-            View::Create
-        } else {
-            let edit = app::can_edit_card();
-            // Expand to the second view (1) for the resource
-            *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
-        };
-        let cv = CardView::new(res, sel, view);
+        let edit = app::can_edit_card();
+        let cv = CardView::new(res, sel).expand(edit);
         replace_card(cv, "").await?;
     }
     Ok(())

@@ -15,7 +15,9 @@ use crate::alarm::Alarm;
 use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
 use crate::camera::Camera;
-use crate::card::{Card, Search, fetch_ancillary, footer_html, uri_one};
+use crate::card::{
+    Card, Search, fetch_ancillary, footer_html, res_views, uri_one,
+};
 use crate::commconfig::CommConfig;
 use crate::commlink::CommLink;
 use crate::controller::Controller;
@@ -168,18 +170,14 @@ pub struct CardView {
 
 impl CardView {
     /// Create a new card view
-    pub fn new<N: Into<String>>(res: Res, name: N, view: View) -> Self {
+    pub fn new<N: Into<String>>(res: Res, name: N) -> Self {
         let name = name.into();
-        let nm = match view {
-            View::CreateCompact | View::Create => "",
-            _ => &name,
-        };
-        let id = format!("{res}_{nm}");
+        let id = format!("{res}_{name}");
         CardView {
             res,
             id,
             name,
-            view,
+            view: View::Compact,
         }
     }
 
@@ -199,8 +197,26 @@ impl CardView {
         self
     }
 
+    /// Set the view to expanded
+    pub fn expand(mut self, edit: bool) -> Self {
+        let res = self.res;
+        // check for "create" id (res + '_')
+        self.view = if self.id.ends_with('_')
+            && self.id.len() == res.as_str().len() + 1
+        {
+            View::Create
+        } else {
+            // Expand to the second view (1) for the resource
+            *res_views(res, edit).get(1).unwrap_or(&View::Compact)
+        };
+        self
+    }
+
     /// Set the view
     pub fn with_view(mut self, v: View) -> Self {
+        if let View::CreateCompact | View::Create = v {
+            self.id = format!("{}_", self.res);
+        }
         self.view = v;
         self
     }

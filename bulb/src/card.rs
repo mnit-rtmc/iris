@@ -550,15 +550,15 @@ impl CardList {
         let res = C::res();
         let search = Search::new(search);
         let mut views = Vec::with_capacity(cards.len());
-        // "Create" card
-        let mut cv =
-            CardView::new(res, Self::next_name(&cards), View::CreateCompact);
+        // First card is always "create"
+        let mut cv = CardView::new(res, Self::next_name(&cards))
+            .with_view(View::CreateCompact);
         if !search.is_all() || !self.can_create::<C>() {
             cv = cv.with_view(View::Hidden);
         }
         views.push(cv);
         for pri in &cards {
-            let mut cv = CardView::new(res, pri.name(), View::Compact);
+            let mut cv = CardView::new(res, pri.name());
             if !search.is_match(pri, anc) {
                 cv = cv.with_view(View::Hidden);
             }
