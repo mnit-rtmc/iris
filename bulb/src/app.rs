@@ -47,8 +47,8 @@ struct AppState {
     query: QueryState,
     /// SSE connection count
     connect_count: u32,
-    /// Centered map item (resource / name)
-    centered_item: Option<(Res, String)>,
+    /// Presented map item (resource / name)
+    presented_item: Option<(Res, String)>,
     /// Card list
     cards: Option<CardList>,
     /// Selected video monitor name (+restricted)
@@ -99,22 +99,18 @@ pub fn connect_count() -> u32 {
     STATE.with(|rc| rc.borrow().connect_count)
 }
 
-/// Set centered map item in global app state
-pub fn set_centered_item(res: Res, name: &str) {
+/// Set presented map item in global app state
+pub fn present_item(item: Option<(Res, &str)>) {
     STATE.with(|rc| {
-        rc.borrow_mut().centered_item = Some((res, name.to_string()))
+        rc.borrow_mut().presented_item =
+            item.map(|(res, nm)| (res, nm.to_string()));
     });
 }
 
-/// Clear centered map item in global app state
-pub fn clear_centered_item() {
-    STATE.with(|rc| rc.borrow_mut().centered_item = None);
-}
-
-/// Check if a map item is centered
-pub fn is_centered_item(res: Res, name: &str) -> bool {
-    STATE.with(|rc| match &rc.borrow().centered_item {
-        Some((r, n)) => (r, n.as_str()) == (&res, name),
+/// Check if a map item is presented
+pub fn is_presented_item(res: Res, nm: &str) -> bool {
+    STATE.with(|rc| match &rc.borrow().presented_item {
+        Some((r, n)) => (r, n.as_str()) == (&res, nm),
         _ => false,
     })
 }

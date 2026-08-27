@@ -509,7 +509,7 @@ impl Camera {
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &CameraAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
-            map::center_item(Res::Camera, &self.name, lon, lat);
+            map::present_item(Res::Camera, &self.name, lon, lat);
         }
         let access_level = anc.access_level(self);
         let mut tree = Tree::new();

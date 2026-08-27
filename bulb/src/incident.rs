@@ -164,7 +164,7 @@ impl Incident {
     /// Convert to Control HTML
     fn to_html_control(&self, anc: &IncidentAnc) -> String {
         if let Some((lon, lat)) = self.lonlat() {
-            map::center_item(Res::Incident, &self.name, lon, lat);
+            map::present_item(Res::Incident, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.render_title(anc, View::Control, &mut tree.root::<html::Div>());

@@ -319,7 +319,7 @@ impl TagReader {
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &TagReaderAnc) -> String {
         if let Some((lon, lat)) = anc.loc.lonlat() {
-            map::center_item(Res::TagReader, &self.name, lon, lat);
+            map::present_item(Res::TagReader, &self.name, lon, lat);
         }
         let mut tree = Tree::new();
         self.title(View::Status, &mut tree.root::<html::Div>());

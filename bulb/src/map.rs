@@ -107,17 +107,17 @@ fn selected_zoom(res: Res) -> u32 {
     Doc::get().input_parse::<u32>(&id).unwrap_or(32)
 }
 
-/// Center item on map
-pub fn center_item(res: Res, name: &str, lon: f64, lat: f64) {
-    if !app::is_centered_item(res, name) {
+/// Present item on map
+pub fn present_item(res: Res, name: &str, lon: f64, lat: f64) {
+    if !app::is_presented_item(res, name) {
         let zoom = selected_zoom(res).max(12);
-        spawn_future(do_center_item(zoom, lon, lat));
-        app::set_centered_item(res, name);
+        spawn_future(do_present_item(zoom, lon, lat));
+        app::present_item(Some((res, name)));
     }
 }
 
-/// Center item on map
-async fn do_center_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
+/// Present item on map
+async fn do_present_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     if let Some(map_pane) = MapPane::get(MAP_PANE) {
         map_pane.set_position(zoom, lon, lat);
         set_zoom_level(zoom);
@@ -137,7 +137,7 @@ pub fn set_selected_style(query: QueryState) {
                 el.set_inner_html(&css);
             }
             None => {
-                app::clear_centered_item();
+                app::present_item(None);
                 el.set_inner_html("");
             }
         }
