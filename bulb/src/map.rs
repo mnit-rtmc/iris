@@ -98,6 +98,11 @@ fn build_query(me: &MapEvent) -> QueryState {
 
 /// Set query state from a map marker click
 async fn set_query_map(query: QueryState) -> Result<()> {
+    if let Some((res, name)) = query.res_sel()
+        && !name.is_empty()
+    {
+        app::present_item(Some((res, name)));
+    }
     sidebar::set_query(query).await
 }
 
@@ -130,13 +135,13 @@ async fn do_present_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
 pub fn set_selected_style(query: QueryState) {
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
         match query.res_sel() {
-            Some((res, name)) => {
+            Some((res, name)) if !name.is_empty() => {
                 let sel = Sel::cls(format!("{res}-{name}"));
                 let prop = Prop::new().stroke("white").stroke_width(2);
                 let css = Rule::new(sel, prop).to_string();
                 el.set_inner_html(&css);
             }
-            None => {
+            _ => {
                 app::present_item(None);
                 el.set_inner_html("");
             }
