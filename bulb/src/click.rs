@@ -24,6 +24,7 @@ use wasm_bindgen::closure::Closure;
 use web_sys::{Element, Event, HtmlButtonElement, HtmlElement};
 
 /// Button attributes
+#[derive(Debug)]
 struct ButtonAttrs {
     /// Element ID
     id: String,

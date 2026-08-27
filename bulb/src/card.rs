@@ -504,21 +504,6 @@ impl CardList {
         Ok(cards)
     }
 
-    /// Get expanded view (if any)
-    pub fn expanded_view(&self) -> Option<CardView> {
-        self.views.iter().find(|cv| cv.view.is_expanded()).cloned()
-    }
-
-    /// Set card view
-    pub fn set_view(&mut self, cv: CardView) {
-        for vv in &mut self.views {
-            if vv.id() == cv.id() {
-                vv.view = cv.view;
-                break;
-            }
-        }
-    }
-
     /// Fetch card list
     pub async fn fetch_all(&mut self) -> Result<()> {
         let json = uri_all(self.res).get().await?;

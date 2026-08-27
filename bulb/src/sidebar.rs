@@ -252,9 +252,7 @@ async fn shrink_card(search: &str) -> Result<()> {
 /// Expand selected card
 async fn expand_card(query: QueryParam, res: Res) -> Result<()> {
     let sel = query.sel();
-    if sel.is_empty() {
-        Ok(())
-    } else {
+    if !sel.is_empty() {
         let view = if sel.ends_with('_') && sel.len() == res.as_str().len() + 1
         {
             View::Create
@@ -264,8 +262,9 @@ async fn expand_card(query: QueryParam, res: Res) -> Result<()> {
             *card::res_views(res, edit).get(1).unwrap_or(&View::Compact)
         };
         let cv = CardView::new(res, sel, view);
-        replace_card(cv, "").await
+        replace_card(cv, "").await?;
     }
+    Ok(())
 }
 
 /// Fetch and populate card list
@@ -288,6 +287,7 @@ async fn fetch_and_populate_cards(
             app::card_list(None);
         }
     }
+    app::set_expanded_view(None);
     Ok(())
 }
 
@@ -519,7 +519,7 @@ async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
     let cv_clone = cv.clone();
     let html = cv.fetch_one(search).await?;
     replace_card_html(&cv, &html);
-    app::set_view(cv);
+    app::set_expanded_view(Some(cv));
     let res = cv_clone.res;
     let name = cv_clone.name();
     if res == Res::Camera && cv_clone.view == View::Control {
@@ -611,7 +611,7 @@ async fn update_card_list(res: Res) -> Result<bool> {
         return Ok(false);
     }
     let old_json = old_cards.json().to_string();
-    let expanded = old_cards.expanded_view();
+    let expanded = app::expanded_view();
     app::card_list(Some(old_cards));
     let access: Vec<_> = Asset::Access.uri().get_val().await?;
     let mut cards = CardList::new(res, &access).with_json(old_json);
@@ -626,9 +626,6 @@ async fn update_card_list(res: Res) -> Result<bool> {
         } else {
             replace_card_html(&cv, &html);
         }
-    }
-    if let Some(cv) = expanded {
-        cards.set_view(cv);
     }
     app::card_list(Some(cards));
     map::update_layer(res, &access).await?;

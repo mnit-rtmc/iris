@@ -43,14 +43,16 @@ pub enum DeferredAction {
 struct AppState {
     /// Logged-in user name
     user: Option<String>,
-    /// Query parameters
-    query: QueryParam,
     /// SSE connection count
     connect_count: u32,
+    /// Query parameters
+    query: QueryParam,
     /// Presented map item (resource / name)
     presented_item: Option<(Res, String)>,
     /// Card list
     cards: Option<CardList>,
+    /// Expanded card view
+    expanded_view: Option<CardView>,
     /// Selected video monitor name (+restricted)
     vid_mon: Option<(String, bool)>,
     /// Deferred actions (with tick number)
@@ -79,16 +81,6 @@ pub fn user() -> Option<String> {
     STATE.with(|rc| rc.borrow().user.clone())
 }
 
-/// Set query in global app state
-pub fn set_query(query: QueryParam) {
-    STATE.with(|rc| rc.borrow_mut().query = query);
-}
-
-/// Get query from global app state
-pub fn query() -> QueryParam {
-    STATE.with(|rc| rc.borrow().query.clone())
-}
-
 /// Set SSE connect count
 pub fn set_connect_count(count: u32) {
     STATE.with(|rc| rc.borrow_mut().connect_count = count);
@@ -97,6 +89,16 @@ pub fn set_connect_count(count: u32) {
 /// Get SSE connect count
 pub fn connect_count() -> u32 {
     STATE.with(|rc| rc.borrow().connect_count)
+}
+
+/// Set query in global app state
+pub fn set_query(query: QueryParam) {
+    STATE.with(|rc| rc.borrow_mut().query = query);
+}
+
+/// Get query from global app state
+pub fn query() -> QueryParam {
+    STATE.with(|rc| rc.borrow().query.clone())
 }
 
 /// Set presented map item in global app state
@@ -136,20 +138,11 @@ pub fn can_edit_card() -> bool {
     })
 }
 
-/// Set card view to global app state
-pub fn set_view(cv: CardView) {
+/// Set expanded card view to global app state
+pub fn set_expanded_view(view: Option<CardView>) {
     STATE.with(|rc| {
         let mut state = rc.borrow_mut();
-        let cards = state.cards.take();
-        match cards {
-            Some(mut cards) => {
-                cards.set_view(cv);
-                state.cards = Some(cards);
-            }
-            None => {
-                log::warn!("set_view: no cards for {}", cv.name());
-            }
-        }
+        state.expanded_view = view.filter(|cv| cv.view.is_expanded());
         // purge all deferred refresh list actions
         state
             .deferred
@@ -158,14 +151,9 @@ pub fn set_view(cv: CardView) {
     })
 }
 
-/// Get expanded view card from global app state
+/// Get expanded card view from global app state
 pub fn expanded_view() -> Option<CardView> {
-    STATE.with(|rc| {
-        rc.borrow()
-            .cards
-            .as_ref()
-            .and_then(|cards| cards.expanded_view())
-    })
+    STATE.with(|rc| rc.borrow().expanded_view.clone())
 }
 
 /// Set video monitor (+restricted) in global app state
