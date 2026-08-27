@@ -370,7 +370,7 @@ fn selected_resource() -> Option<Res> {
         //Res::Road if doc.input_bool("res-r_node") => Some(Res::Rnode),
         Res::Road if doc.input_bool("res-detector") => Some(Res::Detector),
         Res::Road if doc.input_bool("res-map_extent") => Some(Res::MapExtent),
-        Res::Permission if doc.input_bool("res-user") => Some(Res::User),
+        Res::Permission if doc.input_bool("res-user_id") => Some(Res::User),
         Res::Permission if doc.input_bool("res-role") => Some(Res::Role),
         Res::Permission if doc.input_bool("res-domain") => Some(Res::Domain),
         Res::Permission => Some(Res::User), // no permission cards
