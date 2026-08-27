@@ -417,7 +417,7 @@ async fn handle_search() -> Result<()> {
     let search = search_value()?;
     shrink_card(&search).await?;
     match app::card_list(None) {
-        Some(mut cards) => {
+        Some(cards) => {
             let doc = Doc::new()?;
             for cv in cards.search_views(&search).await? {
                 let id = cv.id();
