@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -130,18 +130,22 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Process a blank message source from the sign controller */
 	private Phase processMessageBlank() throws ControllerException {
-		SignMessage sm = dms.createMsgBlank(0);
 		/* Maybe the current msg just expired */
 		if (dms.isOperatorExpiring()) {
 			/* Lock just expired -- set it to null */
 			dms.setLockNotify(null, false);
+			SignMessage sm = dms.createMsgBlank(0);
 			int src = SignMessageHelper.sourceBits(sm);
 			String owner = SignMessageHelper.makeMsgOwner(src,
 				"expired");
 			dms.setBlankOwner(owner);
 			setMsgCurrent(sm, true);
-		} else
+		} else {
+			/* Probably a field controller reset... */
+			SignMessage sm = dms.createMsgBlank(
+				SignMsgSource.reset.bit());
 			setMsgCurrent(sm, false);
+		}
 		return null;
 	}
 
