@@ -12,7 +12,7 @@
 //
 use crate::card::CardList;
 use crate::permission::AccessLevel;
-use crate::query::QueryState;
+use crate::query::QueryParam;
 use crate::sse::NotifyState;
 use crate::util;
 use crate::view::CardView;
@@ -43,8 +43,8 @@ pub enum DeferredAction {
 struct AppState {
     /// Logged-in user name
     user: Option<String>,
-    /// Query state
-    query: QueryState,
+    /// Query parameters
+    query: QueryParam,
     /// SSE connection count
     connect_count: u32,
     /// Presented map item (resource / name)
@@ -80,12 +80,12 @@ pub fn user() -> Option<String> {
 }
 
 /// Set query in global app state
-pub fn set_query(query: QueryState) {
+pub fn set_query(query: QueryParam) {
     STATE.with(|rc| rc.borrow_mut().query = query);
 }
 
 /// Get query from global app state
-pub fn query() -> QueryState {
+pub fn query() -> QueryParam {
     STATE.with(|rc| rc.borrow().query.clone())
 }
 

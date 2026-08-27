@@ -18,16 +18,16 @@ use percent_encoding::{
 use resources::Res;
 use std::fmt;
 
-/// Query state (resource, search, selection)
+/// Query parameters (resource, selection)
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct QueryState {
+pub struct QueryParam {
     /// Resource type
     res: Option<Res>,
     /// Selected item (not percent-encoded)
     sel: String,
 }
 
-impl std::str::FromStr for QueryState {
+impl std::str::FromStr for QueryParam {
     type Err = InvalidUri;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -47,11 +47,11 @@ impl std::str::FromStr for QueryState {
                 }
             }
         }
-        Ok(QueryState { res, sel })
+        Ok(QueryParam { res, sel })
     }
 }
 
-impl fmt::Display for QueryState {
+impl fmt::Display for QueryParam {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.res.is_some() || !self.sel.is_empty() {
             let mut first = true;
@@ -74,19 +74,19 @@ impl fmt::Display for QueryState {
     }
 }
 
-impl QueryState {
-    /// Create a new query state
+impl QueryParam {
+    /// Create new query parameters
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Get query state from Navigation API current entry
+    /// Get query parameters from Navigation API current entry
     pub fn current_entry() -> Self {
         if let Ok(window) = util::window() {
             let navigation = window.navigation();
             if let Some(ent) = navigation.current_entry()
                 && let Some(url) = ent.url()
-                && let Ok(qs) = url.parse::<QueryState>()
+                && let Ok(qs) = url.parse::<QueryParam>()
             {
                 return qs;
             }

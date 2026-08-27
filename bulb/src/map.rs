@@ -18,7 +18,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::permission::Permission;
-use crate::query::QueryState;
+use crate::query::QueryParam;
 use crate::sidebar;
 use crate::util::Doc;
 use chrono::{DateTime, Local};
@@ -85,19 +85,19 @@ fn handle_click(me: MapEvent) {
     spawn_future(set_query_map(build_query(&me)));
 }
 
-/// Build a query state from a map event
-fn build_query(me: &MapEvent) -> QueryState {
+/// Build query parameters from a map event
+fn build_query(me: &MapEvent) -> QueryParam {
     if let Some((rname, nm)) = me.target.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
-        QueryState::current_entry().with_res(Some(res)).with_sel(nm)
+        QueryParam::current_entry().with_res(Some(res)).with_sel(nm)
     } else {
-        QueryState::current_entry().with_sel("")
+        QueryParam::current_entry().with_sel("")
     }
 }
 
-/// Set query state from a map marker click
-async fn set_query_map(query: QueryState) -> Result<()> {
+/// Set query parameters from a map marker click
+async fn set_query_map(query: QueryParam) -> Result<()> {
     if let Some((res, name)) = query.res_sel()
         && !name.is_empty()
     {
@@ -132,7 +132,7 @@ async fn do_present_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
 }
 
 /// Set selected style (CSS)
-pub fn set_selected_style(query: QueryState) {
+pub fn set_selected_style(query: QueryParam) {
     if let Some(el) = Doc::get().opt_elem::<Element>("selected-style") {
         match query.res_sel() {
             Some((res, name)) if !name.is_empty() => {

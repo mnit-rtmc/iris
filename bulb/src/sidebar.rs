@@ -21,7 +21,7 @@ use crate::item::ItemState;
 use crate::map;
 use crate::mjpeg;
 use crate::permission::{AccessLevel, Permission};
-use crate::query::QueryState;
+use crate::query::QueryParam;
 use crate::sse;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
@@ -62,7 +62,7 @@ pub async fn login(user: String) -> Result<()> {
 pub fn logout() -> Result<()> {
     app::set_user(None);
     app::set_connect_count(8);
-    app::set_query(QueryState::default());
+    app::set_query(QueryParam::default());
     let access = Vec::new();
     initialize(None, &access)
 }
@@ -149,8 +149,8 @@ fn set_fullscreen() {
     doc.request_fullscreen(checked);
 }
 
-/// Update controls to reflect query state (resource, selection, etc.)
-pub async fn update_query(query: QueryState) -> Result<()> {
+/// Update controls to reflect query parameters (resource, selection)
+pub async fn update_query(query: QueryParam) -> Result<()> {
     let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
     sidebar.set_class_name("wait");
@@ -160,8 +160,8 @@ pub async fn update_query(query: QueryState) -> Result<()> {
     rslt
 }
 
-/// Update controls to reflect query state (resource, selection, etc.)
-async fn do_update_query(doc: Doc, query: QueryState) -> Result<()> {
+/// Update controls to reflect query parameters (resource, selection)
+async fn do_update_query(doc: Doc, query: QueryParam) -> Result<()> {
     map::set_selected_style(query.clone());
     let res = query.res();
     let res_change = res != app::query().res();
@@ -250,7 +250,7 @@ async fn shrink_card(search: &str) -> Result<()> {
 }
 
 /// Expand selected card
-async fn expand_card(query: QueryState, res: Res) -> Result<()> {
+async fn expand_card(query: QueryParam, res: Res) -> Result<()> {
     let sel = query.sel();
     if sel.is_empty() {
         Ok(())
@@ -270,7 +270,7 @@ async fn expand_card(query: QueryState, res: Res) -> Result<()> {
 
 /// Fetch and populate card list
 async fn fetch_and_populate_cards(
-    query: QueryState,
+    query: QueryParam,
     access: &[Permission],
 ) -> Result<()> {
     match query.res() {
@@ -338,8 +338,8 @@ fn handle_input(id: String) {
 
 /// Handle selected resource change
 fn handle_res_change() {
-    let query = QueryState::new().with_res(selected_resource());
-    spawn_future(change_query_state(query));
+    let query = QueryParam::new().with_res(selected_resource());
+    spawn_future(change_query(query));
 }
 
 /// Get the selected resource value
@@ -394,13 +394,13 @@ fn selected_resource() -> Option<Res> {
     }
 }
 
-/// Set query state
-pub async fn set_query(query: QueryState) -> Result<()> {
-    change_query_state(query).await
+/// Set query parameters
+pub async fn set_query(query: QueryParam) -> Result<()> {
+    change_query(query).await
 }
 
-/// Change query state
-async fn change_query_state(query: QueryState) -> Result<()> {
+/// Change query parameters
+async fn change_query(query: QueryParam) -> Result<()> {
     let window = util::window()?;
     let navigation = window.navigation();
     navigation.navigate(&format!("/iris/{query}"));

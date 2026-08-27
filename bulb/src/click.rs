@@ -14,7 +14,7 @@ use crate::app;
 use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
-use crate::query::QueryState;
+use crate::query::QueryParam;
 use crate::sidebar;
 use crate::start;
 use crate::util::{self, Doc};
@@ -62,11 +62,11 @@ impl ButtonAttrs {
             } else if eid::DELETE == self.id {
                 if app::delete_enabled() {
                     cv.handle_delete().await?;
-                    let query = QueryState::current_entry().with_sel("");
+                    let query = QueryParam::current_entry().with_sel("");
                     sidebar::set_query(query).await?;
                 }
             } else if let Some(_v) = cv.handle_click(&self.id).await? {
-                let query = QueryState::current_entry().with_sel(cv.name());
+                let query = QueryParam::current_entry().with_sel(cv.name());
                 sidebar::set_query(query).await?;
             }
         }
@@ -78,7 +78,7 @@ impl ButtonAttrs {
         if let (Some(rname), Some(link)) = (self.data_res, self.data_link)
             && let Ok(res) = Res::try_from(rname.as_str())
         {
-            let query = QueryState::new().with_res(Some(res)).with_sel(&link);
+            let query = QueryParam::new().with_res(Some(res)).with_sel(&link);
             sidebar::set_query(query).await
         } else {
             Ok(())
@@ -134,7 +134,7 @@ fn handle_ev(target: &Element) {
         app::set_vid_mon(None);
         if let Ok(t) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
             t.set_inner_html("📺");
-            let query = QueryState::new().with_res(Some(Res::VideoMonitor));
+            let query = QueryParam::new().with_res(Some(Res::VideoMonitor));
             spawn_future(sidebar::set_query(query));
         }
     }
@@ -160,7 +160,7 @@ async fn handle_show_sidebar(show: bool) -> Result<()> {
 /// Handle a `click` event within a card element
 fn handle_ev_card(el: &Element) {
     if let Some(name) = el.get_attribute("data-name") {
-        let query = QueryState::current_entry().with_sel(&name);
+        let query = QueryParam::current_entry().with_sel(&name);
         if query.res().is_some() {
             spawn_future(click_card(query));
         }
@@ -168,7 +168,7 @@ fn handle_ev_card(el: &Element) {
 }
 
 /// Handle a card click event
-async fn click_card(query: QueryState) -> Result<()> {
+async fn click_card(query: QueryParam) -> Result<()> {
     if query.res().is_some() {
         sidebar::set_query(query).await?;
     }

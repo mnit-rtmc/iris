@@ -16,7 +16,7 @@ use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::joystick;
 use crate::map;
-use crate::query::QueryState;
+use crate::query::QueryParam;
 use crate::sidebar;
 use crate::sse;
 use crate::util::{self, Doc};
@@ -151,7 +151,7 @@ fn handle_navigate(ev: NavigateEvent) {
         let url = ev.destination().url();
         log::debug!("navigate to: {url}");
         let _ = ev.intercept();
-        if let Ok(query) = url.parse::<QueryState>() {
+        if let Ok(query) = url.parse::<QueryParam>() {
             spawn_future(sidebar::update_query(query));
         }
     }
