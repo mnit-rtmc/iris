@@ -193,7 +193,7 @@ fn add_change_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             let id = target.id();
-            if id == "sb_fullscreen" {
+            if id == eid::FULLSCREEN {
                 set_fullscreen();
             }
         }
@@ -210,7 +210,7 @@ fn add_change_listener(el: &Element) -> Result<()> {
 /// Set fullscreen mode
 fn set_fullscreen() {
     let doc = Doc::get();
-    let checked = doc.input_bool("sb_fullscreen");
+    let checked = doc.input_bool(eid::FULLSCREEN);
     doc.request_fullscreen(checked);
 }
 
@@ -393,7 +393,7 @@ fn handle_transition(ev: Event) {
 fn add_fullscreenchange_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
         let doc = Doc::get();
-        if let Some(btn) = doc.opt_elem::<HtmlInputElement>("sb_fullscreen") {
+        if let Some(btn) = doc.opt_elem::<HtmlInputElement>(eid::FULLSCREEN) {
             btn.set_checked(doc.is_fullscreen());
         }
     });

@@ -12,20 +12,26 @@
 //
 //! Element IDs
 
-/* General element IDs */
-pub const RESOURCE: &str = "sb_resource";
-pub const MONITOR: &str = "sb_monitor";
-pub const CARDS: &str = "sb_cards";
+/* Sidebar element IDs */
+pub const RESOURCE: &str = "sb-resource";
+pub const MONITOR: &str = "sb-monitor";
+pub const FULLSCREEN: &str = "sb-fullscreen";
+pub const SEARCH: &str = "sb-search";
+pub const STATE: &str = "sb-state";
+pub const CARDS: &str = "sb-cards";
+pub const TOAST: &str = "sb-toast";
+pub const NOTIFY: &str = "sb-notify";
+pub const AUTH: &str = "sb-auth";
+pub const LOGIN: &str = "sb-login";
+pub const LOGOUT: &str = "sb-logout";
+
+/* Card element IDs */
+pub const VIEW: &str = "ob_view";
+pub const NAME: &str = "ob_name";
 pub const CREATE: &str = "ob_create";
 pub const DELETE: &str = "ob_delete";
 pub const GEOLOC: &str = "ob_geoloc";
-pub const LOGIN: &str = "ob_login";
-pub const LOGOUT: &str = "ob_logout";
 pub const SAVE: &str = "ob_save";
-pub const SEARCH: &str = "sb_search";
-pub const STATE: &str = "sb_state";
-pub const VIEW: &str = "ob_view";
-pub const NAME: &str = "ob_name";
 
 /* Divider buttons */
 pub const SHOW_SIDEBAR: &str = "show_sidebar";

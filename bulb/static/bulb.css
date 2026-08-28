@@ -306,13 +306,13 @@ menu li {
   flex-wrap: wrap;
   justify-content: flex-start;
 }
-label:has(+ #sb_resource) {
+label:has(+ #sb-resource) {
   color: white;
   margin-top: auto;
   margin-bottom: auto;
   margin-left: 0;
 }
-#sb_resource {
+#sb-resource {
   margin-left: 0.1rem;
 }
 .sb_label {
@@ -324,11 +324,11 @@ label:has(+ #sb_resource) {
   padding: 0.2rem;
   border-radius: 0.5rem;
 }
-#sb_search {
+#sb-search {
   margin-left: 0;
 }
 
-#sb_cards {
+#sb-cards {
   flex: 1 0;
   margin-top: 0.1rem;
   overflow-y: auto;
@@ -370,7 +370,7 @@ label:has(+ #sb_resource) {
   left: 0;
 }
 
-#sb_toast {
+#sb-toast {
   visibility: hidden;
   position: absolute;
   z-index: 1;
@@ -385,7 +385,7 @@ label:has(+ #sb_resource) {
   background-color: #400;
   color: white;
 }
-#sb_toast.show {
+#sb-toast.show {
   visibility: visible;
   animation: fade_in 0.5s, fade_out 0.5s 2.5s;
 }
@@ -398,7 +398,7 @@ label:has(+ #sb_resource) {
   to { bottom: 0; opacity: 0; }
 }
 
-#sb_auth_panel {
+#sb-auth {
   visibility: hidden;
   position: absolute;
   z-index: 2;
@@ -408,7 +408,7 @@ label:has(+ #sb_resource) {
   left: 100%;
   background-color: rgba(238, 238, 238, 0.85);
 }
-#sb_auth_panel.show {
+#sb-auth.show {
   visibility: visible;
   left: 0;
   transition: left 100ms ease-in-out;

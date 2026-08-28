@@ -107,8 +107,8 @@
     <div id="side-pane">
       <div id="sidebar">
         <div class="sb_row">
-          <label for="sb_resource">Resource</label>
-          <select id="sb_resource">
+          <label for="sb-resource">Resource</label>
+          <select id="sb-resource">
             <option></option>
             <option id="opt-action_plan" class="no-display" value="action_plan">📋 Action Plan</option>
             <option id="opt-beacon" class="no-display" value="beacon">🔆 Beacon</option>
@@ -127,11 +127,11 @@
             <option id="opt-system_attribute" class="no-display" value="system_attribute">📃 System</option>
             <option id="opt-toll_zone" class="no-display" value="toll_zone">💲 Tolling</option>
           </select>
-          <label id="sb_monitor" class="sb_label">📺</label>
-          <label id="sb_notify" class="sb_label">⚪</label>
-          <button id="ob_logout">👋</button>
-          <input id="sb_fullscreen" class="toggle" type="checkbox" aria-label="Toggle fullscreen">
-          <label for="sb_fullscreen"> ⛶ </label>
+          <label id="sb-monitor" class="sb_label">📺</label>
+          <label id="sb-notify" class="sb_label">⚪</label>
+          <button id="sb-logout" aria-label="Logout">👋</button>
+          <input id="sb-fullscreen" class="toggle" type="checkbox" aria-label="Toggle fullscreen">
+          <label for="sb-fullscreen"> ⛶ </label>
         </div>
         <div id="row-action_plan" class="no-display">
           <input id="res-action_plan" class="toggle" type="radio" name="rdo-plan" checked>
@@ -220,12 +220,12 @@
           <label for="res-tag_reader">🏷️ Tag Reader</label>
         </div>
         <div class="sb_row">
-          <input id="sb_search" type="search" placeholder="🔍" size="16">
-          <select id="sb_state" aria-label="State"></select>
+          <input id="sb-search" type="search" placeholder="🔍" size="16">
+          <select id="sb-state" aria-label="State"></select>
         </div>
-        <div id="sb_cards"></div>
-        <div id="sb_toast" class="hidden"></div>
-        <div id="sb_auth_panel" class="hidden">
+        <div id="sb-cards"></div>
+        <div id="sb-toast" class="hidden"></div>
+        <div id="sb-auth" class="hidden">
           <div class="form">
             <div class="row center">
               <img src="bulb/iris.svg">
@@ -241,14 +241,14 @@
               <label for="login_pass">Password</label>
               <div style="position: relative;">
                 <input id="login_pass" type="password" name="password" autocomplete="current-password" required>
-                <div id="ob_login_loading_bar" class="loading_bar"></div>
+                <div id="login_loading_bar" class="loading_bar"></div>
               </div>
             </div>
             <div class="row end">
-              <button id="ob_login" type="button">Login</button>
+              <button id="sb-login" type="button">Login</button>
             </div>
           </div>
-          <div id="sb_shade"></div>
+          <div id="sb-shade"></div>
         </div>
       </div>
       <div id="divider">

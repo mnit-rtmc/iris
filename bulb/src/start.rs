@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction};
+use crate::eid;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
@@ -123,7 +124,7 @@ fn handle_tick_interval() {
     while let Some(action) = app::next_action() {
         match action {
             DeferredAction::FetchStationData => map::fetch_station_data(),
-            DeferredAction::HideToast => util::hide_elem("sb_toast"),
+            DeferredAction::HideToast => util::hide_elem(eid::TOAST),
             DeferredAction::RefreshList => sidebar::handle_res_change(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
@@ -315,7 +316,7 @@ pub async fn handle_login() -> Result<()> {
         doc.input_parse::<String>("login_user"),
         doc.input_parse::<String>("login_pass"),
     ) {
-        let loading_bar = doc.opt_elem::<HtmlElement>("ob_login_loading_bar");
+        let loading_bar = doc.opt_elem::<HtmlElement>("login_loading_bar");
         if let Some(l) = &loading_bar {
             l.set_class_name("loading_bar active")
         }
@@ -323,7 +324,7 @@ pub async fn handle_login() -> Result<()> {
         let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
         let el = doc.elem::<HtmlInputElement>("login_pass")?;
         el.set_value("");
-        util::hide_elem("sb_auth_panel");
+        util::hide_elem(eid::AUTH);
         uri.post(&js.into()).await?;
         // hide/deactivate loading bar
         if let Some(l) = &loading_bar {

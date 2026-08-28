@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction};
+use crate::eid;
 use crate::error::Result;
 use crate::fetch::Uri;
 use crate::permission::{AccessLevel, Permission};
@@ -199,7 +200,7 @@ pub fn set_notify_state(mut ns: NotifyState) {
         }
         _ => (),
     }
-    if let Some(sb_notify) = Doc::get().opt_elem::<HtmlElement>("sb_notify") {
+    if let Some(sb_notify) = Doc::get().opt_elem::<HtmlElement>(eid::NOTIFY) {
         sb_notify.set_inner_html(ns.symbol());
     }
 }

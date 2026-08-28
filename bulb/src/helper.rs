@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction};
+use crate::eid;
 use crate::error::{Error, Result};
 use crate::sidebar;
 use crate::util::{self, Doc};
@@ -54,13 +55,13 @@ fn show_auth() {
     if let Err(e) = sidebar::logout() {
         log::warn!("show_auth logout: {e:?}");
     }
-    util::show_elem("sb_auth_panel");
+    util::show_elem(eid::AUTH);
 }
 
 /// Show a toast message
 fn show_toast(msg: &str) {
     log::warn!("toast: {msg}");
-    if let Some(el) = Doc::get().opt_elem::<HtmlElement>("sb_toast") {
+    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::TOAST) {
         el.set_inner_html(msg);
         el.set_class_name("show");
     }
