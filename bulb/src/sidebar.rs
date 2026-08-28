@@ -105,23 +105,6 @@ fn show_hide_res_opt(doc: &Doc, res: Res, access: &[Permission]) {
     }
 }
 
-/// Add a "fullscreenchange" event listener to an element
-fn add_fullscreenchange_listener(el: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
-        let doc = Doc::get();
-        if let Some(btn) = doc.opt_elem::<HtmlInputElement>("sb_fullscreen") {
-            btn.set_checked(doc.is_fullscreen());
-        }
-    });
-    el.add_event_listener_with_callback(
-        "fullscreenchange",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    // can't drop closure, just forget it to make JS happy
-    closure.forget();
-    Ok(())
-}
-
 /// Add a "change" event listener to an element
 fn add_change_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
@@ -146,6 +129,198 @@ fn set_fullscreen() {
     let doc = Doc::get();
     let checked = doc.input_bool("sb_fullscreen");
     doc.request_fullscreen(checked);
+}
+
+/// Add an "input" event listener to an element
+fn add_input_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
+            handle_input(target.id());
+        }
+    });
+    el.add_event_listener_with_callback(
+        "input",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Handle an input event
+fn handle_input(id: String) {
+    match id.as_str() {
+        eid::SEARCH | eid::STATE => spawn_future(handle_search()),
+        eid::VIEW => handle_card_view_ev(),
+        eid::RESOURCE => handle_res_change(),
+        _ if let Some(("res", rname)) = id.split_once('-')
+            && Res::try_from(rname).is_ok() =>
+        {
+            handle_res_change()
+        }
+        _ => spawn_future(handle_input_other(id)),
+    }
+}
+
+/// Handle selected resource change
+pub fn handle_res_change() {
+    let query = QueryParam::new().with_res(selected_resource());
+    spawn_future(change_query(query));
+}
+
+/// Get the selected resource value
+fn selected_resource() -> Option<Res> {
+    let doc = Doc::get();
+    let rname = doc.select_parse::<String>(eid::RESOURCE);
+    let res = Res::try_from(rname?.as_str()).ok()?;
+    match res.base() {
+        Res::ActionPlan if doc.input_bool("res-plan_phase") => {
+            Some(Res::PlanPhase)
+        }
+        Res::ActionPlan if doc.input_bool("res-day_plan") => Some(Res::DayPlan),
+        Res::Camera if doc.input_bool("res-encoder_type") => {
+            Some(Res::EncoderType)
+        }
+        Res::Dms if doc.input_bool("res-msg_pattern") => Some(Res::MsgPattern),
+        Res::Dms if doc.input_bool("res-msg_line") => Some(Res::MsgLine),
+        Res::Dms if doc.input_bool("res-sign_config") => Some(Res::SignConfig),
+        Res::Dms if doc.input_bool("res-word") => Some(Res::Word),
+        Res::Lcs if doc.input_bool("res-lcs_state") => Some(Res::LcsState),
+        Res::VideoMonitor if doc.input_bool("res-monitor_style") => {
+            Some(Res::MonitorStyle)
+        }
+        Res::VideoMonitor if doc.input_bool("res-flow_stream") => {
+            Some(Res::FlowStream)
+        }
+        Res::CommConfig if doc.input_bool("res-comm_link") => {
+            Some(Res::CommLink)
+        }
+        Res::CommConfig if doc.input_bool("res-controller") => {
+            Some(Res::Controller)
+        }
+        Res::CommConfig if doc.input_bool("res-alarm") => Some(Res::Alarm),
+        Res::CommConfig if doc.input_bool("res-gps") => Some(Res::Gps),
+        //Res::Road if doc.input_bool("res-r_node") => Some(Res::Rnode),
+        Res::Road if doc.input_bool("res-detector") => Some(Res::Detector),
+        Res::Road if doc.input_bool("res-map_extent") => Some(Res::MapExtent),
+        Res::Permission if doc.input_bool("res-user_id") => Some(Res::User),
+        Res::Permission if doc.input_bool("res-role") => Some(Res::Role),
+        Res::Permission if doc.input_bool("res-domain") => Some(Res::Domain),
+        Res::Permission => Some(Res::User), // no permission cards
+        Res::SystemAttribute if doc.input_bool("res-event_config") => {
+            Some(Res::EventConfig)
+        }
+        Res::SystemAttribute if doc.input_bool("res-cabinet_style") => {
+            Some(Res::CabinetStyle)
+        }
+        Res::TollZone if doc.input_bool("res-tag_reader") => {
+            Some(Res::TagReader)
+        }
+        _ => Some(res),
+    }
+}
+
+/// Handle an input event on an expanded card
+async fn handle_input_other(id: String) -> Result<()> {
+    if let Some(cv) = app::expanded_view() {
+        cv.handle_input(&id).await?;
+    }
+    Ok(())
+}
+
+/// Add "focusin" / "focusout" event listeners to an element
+fn add_focus_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Some(Ok(input)) =
+            e.target().map(|e| e.dyn_into::<HtmlInputElement>())
+        {
+            spawn_future(handle_focus_events(input, e.type_()));
+        }
+    });
+    el.add_event_listener_with_callback(
+        "focusin",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
+        "focusout",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Handle focusin / focusout events
+async fn handle_focus_events(
+    input: HtmlInputElement,
+    tp: String,
+) -> Result<()> {
+    let id = input.id();
+    // DMS message composer line input
+    if id.as_str().starts_with("mc_line") {
+        match tp.as_str() {
+            "focusin" => input.set_value(""),
+            "focusout" => {
+                if input.value().is_empty()
+                    && let Some(ms) = input.get_attribute("data-cur")
+                {
+                    input.set_value(&ms);
+                    handle_input_other(id).await?;
+                }
+            }
+            _ => (),
+        }
+    }
+    Ok(())
+}
+
+/// Add transition event listener to an element
+fn add_transition_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(handle_transition);
+    el.add_event_listener_with_callback(
+        "transitionstart",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
+        "transitioncancel",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
+        "transitionend",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
+}
+
+/// Handle a `transition*` event
+fn handle_transition(ev: Event) {
+    if let Some(target) = ev.target()
+        && let Ok(target) = target.dyn_into::<Element>()
+        && let Ok(ev) = ev.dyn_into::<TransitionEvent>()
+    {
+        // delete slider is a "left" property transition
+        if target.id() == eid::DELETE && ev.property_name() == "left" {
+            app::set_delete_enabled(&ev.type_() == "transitionend");
+        }
+    }
+}
+
+/// Add a "fullscreenchange" event listener to an element
+fn add_fullscreenchange_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|_e: Event| {
+        let doc = Doc::get();
+        if let Some(btn) = doc.opt_elem::<HtmlInputElement>("sb_fullscreen") {
+            btn.set_checked(doc.is_fullscreen());
+        }
+    });
+    el.add_event_listener_with_callback(
+        "fullscreenchange",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
 }
 
 /// Update controls to reflect query parameters (resource, selection)
@@ -297,95 +472,6 @@ pub fn search_value() -> Result<String> {
     Ok(search)
 }
 
-/// Add an "input" event listener to an element
-fn add_input_listener(el: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
-            handle_input(target.id());
-        }
-    });
-    el.add_event_listener_with_callback(
-        "input",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    // can't drop closure, just forget it to make JS happy
-    closure.forget();
-    Ok(())
-}
-
-/// Handle an input event
-fn handle_input(id: String) {
-    match id.as_str() {
-        eid::SEARCH | eid::STATE => spawn_future(handle_search()),
-        eid::VIEW => handle_card_view_ev(),
-        eid::RESOURCE => handle_res_change(),
-        _ if let Some(("res", rname)) = id.split_once('-')
-            && Res::try_from(rname).is_ok() =>
-        {
-            handle_res_change()
-        }
-        _ => spawn_future(handle_input_other(id)),
-    }
-}
-
-/// Handle selected resource change
-fn handle_res_change() {
-    let query = QueryParam::new().with_res(selected_resource());
-    spawn_future(change_query(query));
-}
-
-/// Get the selected resource value
-fn selected_resource() -> Option<Res> {
-    let doc = Doc::get();
-    let rname = doc.select_parse::<String>(eid::RESOURCE);
-    let res = Res::try_from(rname?.as_str()).ok()?;
-    match res.base() {
-        Res::ActionPlan if doc.input_bool("res-plan_phase") => {
-            Some(Res::PlanPhase)
-        }
-        Res::ActionPlan if doc.input_bool("res-day_plan") => Some(Res::DayPlan),
-        Res::Camera if doc.input_bool("res-encoder_type") => {
-            Some(Res::EncoderType)
-        }
-        Res::Dms if doc.input_bool("res-msg_pattern") => Some(Res::MsgPattern),
-        Res::Dms if doc.input_bool("res-msg_line") => Some(Res::MsgLine),
-        Res::Dms if doc.input_bool("res-sign_config") => Some(Res::SignConfig),
-        Res::Dms if doc.input_bool("res-word") => Some(Res::Word),
-        Res::Lcs if doc.input_bool("res-lcs_state") => Some(Res::LcsState),
-        Res::VideoMonitor if doc.input_bool("res-monitor_style") => {
-            Some(Res::MonitorStyle)
-        }
-        Res::VideoMonitor if doc.input_bool("res-flow_stream") => {
-            Some(Res::FlowStream)
-        }
-        Res::CommConfig if doc.input_bool("res-comm_link") => {
-            Some(Res::CommLink)
-        }
-        Res::CommConfig if doc.input_bool("res-controller") => {
-            Some(Res::Controller)
-        }
-        Res::CommConfig if doc.input_bool("res-alarm") => Some(Res::Alarm),
-        Res::CommConfig if doc.input_bool("res-gps") => Some(Res::Gps),
-        //Res::Road if doc.input_bool("res-r_node") => Some(Res::Rnode),
-        Res::Road if doc.input_bool("res-detector") => Some(Res::Detector),
-        Res::Road if doc.input_bool("res-map_extent") => Some(Res::MapExtent),
-        Res::Permission if doc.input_bool("res-user_id") => Some(Res::User),
-        Res::Permission if doc.input_bool("res-role") => Some(Res::Role),
-        Res::Permission if doc.input_bool("res-domain") => Some(Res::Domain),
-        Res::Permission => Some(Res::User), // no permission cards
-        Res::SystemAttribute if doc.input_bool("res-event_config") => {
-            Some(Res::EventConfig)
-        }
-        Res::SystemAttribute if doc.input_bool("res-cabinet_style") => {
-            Some(Res::CabinetStyle)
-        }
-        Res::TollZone if doc.input_bool("res-tag_reader") => {
-            Some(Res::TagReader)
-        }
-        _ => Some(res),
-    }
-}
-
 /// Set query parameters
 pub async fn set_query(query: QueryParam) -> Result<()> {
     change_query(query).await
@@ -397,11 +483,6 @@ async fn change_query(query: QueryParam) -> Result<()> {
     let navigation = window.navigation();
     navigation.navigate(&format!("/iris/{query}"));
     Ok(())
-}
-
-/// Refresh resource list (after errors)
-pub fn refresh_res_list() {
-    handle_res_change();
 }
 
 /// Search card list for matching cards
@@ -452,60 +533,6 @@ fn card_view_value() -> Option<View> {
     }
 }
 
-/// Handle an input event on an expanded card
-async fn handle_input_other(id: String) -> Result<()> {
-    if let Some(cv) = app::expanded_view() {
-        cv.handle_input(&id).await?;
-    }
-    Ok(())
-}
-
-/// Add "focusin" / "focusout" event listeners to an element
-fn add_focus_listener(el: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Some(Ok(input)) =
-            e.target().map(|e| e.dyn_into::<HtmlInputElement>())
-        {
-            spawn_future(handle_focus_events(input, e.type_()));
-        }
-    });
-    el.add_event_listener_with_callback(
-        "focusin",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    el.add_event_listener_with_callback(
-        "focusout",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    // can't drop closure, just forget it to make JS happy
-    closure.forget();
-    Ok(())
-}
-
-/// Handle focusin / focusout events
-async fn handle_focus_events(
-    input: HtmlInputElement,
-    tp: String,
-) -> Result<()> {
-    let id = input.id();
-    // DMS message composer line input
-    if id.as_str().starts_with("mc_line") {
-        match tp.as_str() {
-            "focusin" => input.set_value(""),
-            "focusout" => {
-                if input.value().is_empty()
-                    && let Some(ms) = input.get_attribute("data-cur")
-                {
-                    input.set_value(&ms);
-                    handle_input_other(id).await?;
-                }
-            }
-            _ => (),
-        }
-    }
-    Ok(())
-}
-
 /// Replace a card view element with another view
 async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
     let html = cv.fetch_one(search).await?;
@@ -527,38 +554,6 @@ fn replace_card_html(cv: &CardView, html: &str) {
         opt.set_behavior(ScrollBehavior::Instant);
         opt.set_block(ScrollLogicalPosition::Nearest);
         el.scroll_into_view_with_scroll_into_view_options(&opt);
-    }
-}
-
-/// Add transition event listener to an element
-fn add_transition_listener(el: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(handle_transition);
-    el.add_event_listener_with_callback(
-        "transitionstart",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    el.add_event_listener_with_callback(
-        "transitioncancel",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    el.add_event_listener_with_callback(
-        "transitionend",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    closure.forget();
-    Ok(())
-}
-
-/// Handle a `transition*` event
-fn handle_transition(ev: Event) {
-    if let Some(target) = ev.target()
-        && let Ok(target) = target.dyn_into::<Element>()
-        && let Ok(ev) = ev.dyn_into::<TransitionEvent>()
-    {
-        // delete slider is a "left" property transition
-        if target.id() == eid::DELETE && ev.property_name() == "left" {
-            app::set_delete_enabled(&ev.type_() == "transitionend");
-        }
     }
 }
 

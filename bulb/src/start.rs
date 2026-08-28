@@ -124,7 +124,7 @@ fn handle_tick_interval() {
         match action {
             DeferredAction::FetchStationData => map::fetch_station_data(),
             DeferredAction::HideToast => util::hide_elem("sb_toast"),
-            DeferredAction::RefreshList => sidebar::refresh_res_list(),
+            DeferredAction::RefreshList => sidebar::handle_res_change(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
         }
