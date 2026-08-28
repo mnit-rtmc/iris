@@ -1052,11 +1052,8 @@ impl Dms {
         div.label().cdata("Sign Config").close();
         match anc.sign_config(self.sign_config.as_deref()) {
             Some(cfg) => {
-                div.button()
-                    .r#type("button")
-                    .class("go_link")
-                    .data_("link", &cfg.name)
-                    .data_("res", Res::SignConfig.as_str())
+                div.a()
+                    .href(format!("?res={}&sel={}", Res::SignConfig, cfg.name))
                     .cdata(&cfg.name)
                     .close();
             }

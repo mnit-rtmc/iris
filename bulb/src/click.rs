@@ -23,70 +23,6 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use web_sys::{Element, Event, HtmlButtonElement, HtmlElement};
 
-/// Button attributes
-#[derive(Debug)]
-struct ButtonAttrs {
-    /// Element ID
-    id: String,
-    /// Data-res attribute
-    data_res: Option<String>,
-    /// Data-link attribute
-    data_link: Option<String>,
-}
-
-impl ButtonAttrs {
-    /// Create button attributes
-    fn new(id: String, target: &Element) -> Self {
-        let mut data_res = None;
-        let mut data_link = None;
-        if let Some("go_link") = target.get_attribute("class").as_deref() {
-            data_res = target.get_attribute("data-res");
-            data_link = target.get_attribute("data-link");
-        }
-        ButtonAttrs {
-            id,
-            data_res,
-            data_link,
-        }
-    }
-
-    /// Check if data link
-    fn is_link(&self) -> bool {
-        self.data_res.is_some() && self.data_link.is_some()
-    }
-
-    /// Handle button click event on an expanded card
-    async fn handle_button_card(self) -> Result<()> {
-        if let Some(cv) = app::expanded_view() {
-            if self.is_link() {
-                self.go_resource().await?;
-            } else if eid::DELETE == self.id {
-                if app::delete_enabled() {
-                    cv.handle_delete().await?;
-                    let query = QueryParam::current_entry().with_sel("");
-                    sidebar::set_query(query).await?;
-                }
-            } else if let Some(_v) = cv.handle_click(&self.id).await? {
-                let query = QueryParam::current_entry().with_sel(cv.name());
-                sidebar::set_query(query).await?;
-            }
-        }
-        Ok(())
-    }
-
-    /// Go to resource from target's `data-link` attribute
-    async fn go_resource(self) -> Result<()> {
-        if let (Some(rname), Some(link)) = (self.data_res, self.data_link)
-            && let Ok(res) = Res::try_from(rname.as_str())
-        {
-            let query = QueryParam::new().with_res(Some(res)).with_sel(&link);
-            sidebar::set_query(query).await
-        } else {
-            Ok(())
-        }
-    }
-}
-
 /// Add a `click` event listener to an element
 pub fn add_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
@@ -122,10 +58,28 @@ fn handle_ev_button(target: &Element) {
         | "ptz-zoom-in" | "ptz-zoom-out" | "focus-near" | "focus-far"
         | "iris-open" | "iris-close" => (),
         _ => {
-            let attrs = ButtonAttrs::new(id, target);
-            spawn_future(attrs.handle_button_card());
+            spawn_future(handle_button_card(id));
         }
     }
+}
+
+/// Handle button click event on an expanded card
+async fn handle_button_card(id: String) -> Result<()> {
+    if let Some(cv) = app::expanded_view() {
+        if eid::DELETE == id {
+            if app::delete_enabled() {
+                cv.handle_delete().await?;
+                let query = QueryParam::current_entry().with_sel("");
+                sidebar::set_query(query).await?;
+            }
+        } else if let Some(v) = cv.handle_click(&id).await?
+            && !v.is_expanded()
+        {
+            let query = QueryParam::current_entry().with_sel("");
+            sidebar::set_query(query).await?;
+        }
+    }
+    Ok(())
 }
 
 /// Handle a `click` event for non-button target

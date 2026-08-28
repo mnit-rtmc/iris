@@ -63,10 +63,6 @@ button:disabled {
   background-color: #ccc;
   color: #888;
 }
-button.go_link {
-  font-size: smaller;
-  padding: 0 0.2rem;
-}
 table {
   border-collapse: collapse;
   padding: 0;

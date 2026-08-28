@@ -123,7 +123,7 @@ impl CommLinkAnc {
     /// Build controller links HTML
     fn controllers_html<'p>(&self, div: &'p mut html::Div<'p>) {
         for ctrl in &self.controllers {
-            ctrl.button_loc_html(&mut div.div());
+            ctrl.link_loc_html(&mut div.div());
         }
     }
 }

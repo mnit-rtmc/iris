@@ -248,7 +248,7 @@ impl ControllerAnc {
             let mut ul = div.ul();
             ul.class("pins");
             for cio in &self.controller_io {
-                cio.button_link_html(&mut ul.li());
+                cio.row_link_html(&mut ul.li());
             }
             ul.close();
         }
@@ -256,20 +256,17 @@ impl ControllerAnc {
 }
 
 impl Io {
-    /// Build controller IO link button HTML
-    fn button_link_html<'p>(&self, li: &'p mut html::Li<'p>) {
+    /// Build controller IO link row HTML
+    fn row_link_html<'p>(&self, li: &'p mut html::Li<'p>) {
         if let Ok(res) = Res::try_from(self.resource_n.as_str()) {
             li.class("row");
             li.span().cdata("#").cdata(self.pin).close();
             let mut span = li.span();
-            span.cdata(res.symbol());
-            span.button()
-                .r#type("button")
-                .class("go_link")
-                .data_("res", res.as_str())
-                .data_("link", &self.name)
+            span.a()
+                .href(format!("?res={res}&sel={}", self.name))
                 .cdata(&self.name)
                 .close();
+            span.cdata(res.symbol());
             li.close();
         }
     }
@@ -326,21 +323,17 @@ impl Controller {
         self.setup.as_ref().and_then(|s| s.serial_num.as_deref())
     }
 
-    /// Build controller button HTML
-    pub fn button_html<'p>(&self, button: &'p mut html::Button<'p>) {
-        button
-            .r#type("button")
-            .class("go_link")
-            .data_("res", Res::Controller.as_str())
-            .data_("link", self.name())
+    /// Build controller link HTML
+    pub fn link_html<'p>(&self, a: &'p mut html::A<'p>) {
+        a.href(format!("?res={}&sel={}", Res::Controller, self.name))
             .cdata(self.link_drop())
             .close();
     }
 
-    /// Build button and location HTML
-    pub fn button_loc_html<'p>(&self, div: &'p mut html::Div<'p>) {
+    /// Build link and location HTML
+    pub fn link_loc_html<'p>(&self, div: &'p mut html::Div<'p>) {
         div.class("row start");
-        self.button_html(&mut div.button());
+        self.link_html(&mut div.a());
         div.span()
             .class("info")
             .cdata_len(opt_ref(&self.location), 32)
@@ -374,11 +367,12 @@ impl Controller {
         self.item_states(Self::DEF_STATE).spans(&mut div.span());
         div.span().cdata(anc.condition(self)).close();
         let mut span = div.span();
-        span.button()
-            .r#type("button")
-            .class("go_link")
-            .data_("res", Res::CommLink.as_str())
-            .data_("link", opt_ref(&self.comm_link))
+        span.a()
+            .href(format!(
+                "?res={}&sel={}",
+                Res::CommLink,
+                opt_ref(&self.comm_link)
+            ))
             .cdata(opt_ref(&self.comm_link))
             .close();
         span.cdata(":").cdata(self.drop_id);

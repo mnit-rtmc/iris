@@ -62,7 +62,7 @@ where
         match self.controller(pri) {
             Some(c) => {
                 input.value(c.name());
-                c.button_html(&mut div.button());
+                c.link_html(&mut div.a());
             }
             None => {
                 div.span().close(); /* empty */
