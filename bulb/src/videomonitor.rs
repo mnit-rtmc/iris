@@ -153,17 +153,9 @@ impl VideoMonitor {
         states
     }
 
-    /// Set this card as the selected video monitor
-    fn set_selected(&self) {
-        app::set_vid_mon(Some((self.name.clone(), self.restricted)));
-        if let Ok(t) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
-            let num = format!("📺 #{}", self.mon_num);
-            t.set_inner_html(&num);
-        }
-    }
-
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
+        self.clear_selected();
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();
         div.class("title row")
@@ -172,6 +164,14 @@ impl VideoMonitor {
             .cdata(self.item_states(anc).to_string());
         div.span().class("info").cdata(format!("#{}", self.mon_num));
         String::from(tree)
+    }
+
+    /// Clear the selected video monitor
+    fn clear_selected(&self) {
+        app::set_vid_mon(None);
+        if let Ok(el) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
+            el.set_inner_html("📺");
+        }
     }
 
     /// Convert to Status HTML
@@ -186,6 +186,18 @@ impl VideoMonitor {
         self.item_states(anc).spans(&mut div.span());
         div.span().class("info").cdata(format!("#{}", self.mon_num));
         String::from(tree)
+    }
+
+    /// Set this card as the selected video monitor
+    fn set_selected(&self) {
+        app::set_vid_mon(Some((self.name.clone(), self.restricted)));
+        if let Ok(el) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
+            let mut tree = Tree::new();
+            let mut a = tree.root::<html::A>();
+            a.href(format!("?res={}&sel={}", Res::VideoMonitor, self.name))
+                .cdata(format!("📺 #{}", self.mon_num));
+            el.set_inner_html(&String::from(tree));
+        }
     }
 
     /// Convert to Setup HTML

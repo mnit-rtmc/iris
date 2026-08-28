@@ -113,8 +113,6 @@ pub fn add_click_listener(el: &Element) -> Result<()> {
                 handle_click_button(target.id());
             } else if let Ok(Some(cc)) = target.closest(".card-compact") {
                 handle_click_card(&cc);
-            } else {
-                handle_click_other(target.id());
             }
         }
     });
@@ -185,18 +183,6 @@ fn handle_click_card(el: &Element) {
     if let Some(name) = el.get_attribute("data-name") {
         let query = QueryParam::current_entry().with_sel(&name);
         if query.res().is_some() {
-            spawn_future(set_query(query));
-        }
-    }
-}
-
-/// Handle a `click` event for non-button target
-fn handle_click_other(id: String) {
-    if eid::MONITOR == id.as_str() {
-        app::set_vid_mon(None);
-        if let Ok(t) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
-            t.set_inner_html("📺");
-            let query = QueryParam::new().with_res(Some(Res::VideoMonitor));
             spawn_future(set_query(query));
         }
     }
