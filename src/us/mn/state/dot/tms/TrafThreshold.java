@@ -67,16 +67,24 @@ public class TrafThreshold {
 				Field f = parseField(lt[0]);
 				if (f != null) {
 					Integer t = parseValue(lt[1]);
-					return new TrafThreshold(i, f, false, t);
+					if (t != null) {
+						return new TrafThreshold(i, f,
+							false, t);
+					}
 				}
+				return null;
 			}
 			String[] gt = v[1].split(">", 2);
 			if (gt.length == 2) {
 				Field f = parseField(gt[0]);
 				if (f != null) {
 					Integer t = parseValue(gt[1]);
-					return new TrafThreshold(i, f, true, t);
+					if (t != null) {
+						return new TrafThreshold(i, f,
+							true, t);
+					}
 				}
+				return null;
 			}
 		}
 		return null;
