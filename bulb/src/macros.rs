@@ -12,6 +12,52 @@
 //
 
 /// Create a generic resource method for CardList or CardView
+macro_rules! cards_sync {
+    ($cards:ident, $meth:ident) => {
+        match $cards.res {
+            Res::ActionPlan => $cards.$meth::<ActionPlan>(),
+            Res::Alarm => $cards.$meth::<Alarm>(),
+            Res::Beacon => $cards.$meth::<Beacon>(),
+            Res::CabinetStyle => $cards.$meth::<CabinetStyle>(),
+            Res::Camera => $cards.$meth::<Camera>(),
+            Res::CommConfig => $cards.$meth::<CommConfig>(),
+            Res::CommLink => $cards.$meth::<CommLink>(),
+            Res::Controller => $cards.$meth::<Controller>(),
+            Res::DayPlan => $cards.$meth::<DayPlan>(),
+            Res::Detector => $cards.$meth::<Detector>(),
+            Res::Dms => $cards.$meth::<Dms>(),
+            Res::Domain => $cards.$meth::<Domain>(),
+            Res::EncoderType => $cards.$meth::<EncoderType>(),
+            Res::EventConfig => $cards.$meth::<EventConfig>(),
+            Res::FlowStream => $cards.$meth::<FlowStream>(),
+            Res::GateArm => $cards.$meth::<GateArm>(),
+            Res::Gps => $cards.$meth::<Gps>(),
+            Res::Incident => $cards.$meth::<Incident>(),
+            Res::Lcs => $cards.$meth::<Lcs>(),
+            Res::LcsState => $cards.$meth::<LcsState>(),
+            Res::MapExtent => $cards.$meth::<MapExtent>(),
+            Res::MonitorStyle => $cards.$meth::<MonitorStyle>(),
+            Res::MsgLine => $cards.$meth::<MsgLine>(),
+            Res::MsgPattern => $cards.$meth::<MsgPattern>(),
+            Res::PlanPhase => $cards.$meth::<PlanPhase>(),
+            Res::RampMeter => $cards.$meth::<RampMeter>(),
+            //Res::Rnode => $cards.$meth::<Rnode>(),
+            Res::Road => $cards.$meth::<Road>(),
+            Res::Role => $cards.$meth::<Role>(),
+            Res::SignConfig => $cards.$meth::<SignConfig>(),
+            Res::SystemAttribute => $cards.$meth::<SystemAttr>(),
+            Res::TagReader => $cards.$meth::<TagReader>(),
+            Res::TollZone => $cards.$meth::<TollZone>(),
+            Res::User => $cards.$meth::<User>(),
+            Res::VideoMonitor => $cards.$meth::<VideoMonitor>(),
+            Res::WeatherSensor => $cards.$meth::<WeatherSensor>(),
+            Res::Word => $cards.$meth::<Word>(),
+            _ => unreachable!(),
+        }
+    };
+}
+
+/// Create a generic resource method for CardList or CardView
 macro_rules! cards_meth {
     ($cards:ident, $meth:ident) => {
         match $cards.res {

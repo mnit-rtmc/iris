@@ -101,14 +101,6 @@ impl Search {
         }
     }
 
-    /// Check if item state all
-    fn is_all(&self) -> bool {
-        match self {
-            Search::Empty() => true,
-            _ => false,
-        }
-    }
-
     /// Test if a card matches the search
     pub fn is_match<C: Card>(&self, pri: &C, anc: &C::Ancillary) -> bool {
         match self {
@@ -535,11 +527,6 @@ impl CardList {
         Permission::access_level_max(&self.access, self.res)
     }
 
-    /// Check if new resource can be created
-    fn can_create<C: Card>(&self) -> bool {
-        C::res().has_create() && self.access_level() == AccessLevel::Configure
-    }
-
     /// Search card views
     async fn search_card_views<C: Card>(
         &self,
@@ -550,12 +537,8 @@ impl CardList {
         let res = C::res();
         let search = Search::new(search);
         let mut views = Vec::with_capacity(cards.len());
-        // First card is always "create"
-        let mut cv = CardView::new(res, Self::next_name(&cards))
-            .with_view(View::CreateCompact);
-        if !search.is_all() || !self.can_create::<C>() {
-            cv = cv.with_view(View::Hidden);
-        }
+        // First card is always "Create" (normally hidden)
+        let cv = CardView::new(res, "_").with_view(View::Create);
         views.push(cv);
         for pri in &cards {
             let mut cv = CardView::new(res, pri.name());
@@ -586,7 +569,7 @@ impl CardList {
             let mut li = ul.li();
             li.id(cv.id())
                 .data_("name", cv.name())
-                .class(cv.view.class_name());
+                .class(View::Hidden.class_name());
             li.span().class("create").cdata("Create 🆕").close();
             li.close();
         }
@@ -607,21 +590,27 @@ impl CardList {
     }
 
     /// Get next suggested name
-    fn next_name<C: Card>(obs: &[C]) -> String {
+    pub fn next_name(&self) -> Result<String> {
+        cards_sync!(self, next_name_x)
+    }
+
+    /// Get next suggested name
+    fn next_name_x<C: Card>(&self) -> Result<String> {
+        let cards = self.cards::<C>(false)?;
         let prefix = C::PREFIX;
         if prefix.is_empty() {
-            return String::new();
+            return Ok(String::new());
         }
         let mut num = 1;
-        for ob in obs {
-            if let Some((pre, suffix)) = ob.name().split_once('_')
+        for card in cards {
+            if let Some((pre, suffix)) = card.name().split_once('_')
                 && pre == prefix
                 && let Ok(n) = suffix.parse::<u32>()
             {
                 num = num.max(n + 1);
             }
         }
-        format!("{prefix}_{num}")
+        Ok(format!("{prefix}_{num}"))
     }
 
     /// Search for all card views

@@ -18,6 +18,7 @@ pub const MONITOR: &str = "sb-monitor";
 pub const FULLSCREEN: &str = "sb-fullscreen";
 pub const SEARCH: &str = "sb-search";
 pub const STATE: &str = "sb-state";
+pub const ADD: &str = "sb-add";
 pub const CARDS: &str = "sb-cards";
 pub const TOAST: &str = "sb-toast";
 pub const NOTIFY: &str = "sb-notify";

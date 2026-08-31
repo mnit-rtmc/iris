@@ -65,8 +65,6 @@ pub enum View {
     SearchEv,
     /// Save event "view"
     SaveEv,
-    /// Compact Create view
-    CreateCompact,
     /// Create view
     Create,
     /// Compact view
@@ -88,7 +86,7 @@ impl View {
     pub const fn class_name(self) -> &'static str {
         match self {
             View::Hidden | View::SearchEv | View::SaveEv => "no-display",
-            View::CreateCompact | View::Compact => "card-compact",
+            View::Compact => "card-compact",
             _ => "card-expanded",
         }
     }
@@ -109,7 +107,7 @@ impl View {
     /// Get compact view
     pub fn compact(self) -> Self {
         match self {
-            View::Create => View::CreateCompact,
+            View::Create => View::Hidden,
             _ => View::Compact,
         }
     }
@@ -121,7 +119,6 @@ impl View {
             Hidden => "Hidden",
             SearchEv => "Search",
             SaveEv => "🖍️ Save",
-            CreateCompact => "Create compact",
             Create => "🆕 Create",
             Compact => "⌄ Compact",
             Control => "🕹️ Control",
@@ -142,7 +139,6 @@ impl TryFrom<&str> for View {
             v if v == Hidden.as_str() => Ok(Hidden),
             v if v == SearchEv.as_str() => Ok(SearchEv),
             v if v == SaveEv.as_str() => Ok(SaveEv),
-            v if v == CreateCompact.as_str() => Ok(CreateCompact),
             v if v == Create.as_str() => Ok(Create),
             v if v == Compact.as_str() => Ok(Compact),
             v if v == Control.as_str() => Ok(Control),
@@ -191,6 +187,11 @@ impl CardView {
         &self.name
     }
 
+    /// Check for Create view
+    fn is_create(&self) -> bool {
+        View::Create == self.view || self.id.ends_with("__")
+    }
+
     /// Set the view to compact
     pub fn compact(mut self) -> Self {
         self.view = self.view.compact();
@@ -199,42 +200,31 @@ impl CardView {
 
     /// Set the view to expanded
     pub fn expand(mut self, edit: bool) -> Self {
-        let res = self.res;
-        // check for "create" id (res + '_')
-        self.view = if self.id.ends_with('_')
-            && self.id.len() == res.as_str().len() + 1
+        // Expand to the second view (1) for the resource
+        if let View::Hidden | View::Compact = self.view
+            && let Some(v) = res_views(self.res, edit).get(1)
         {
-            View::Create
-        } else {
-            // Expand to the second view (1) for the resource
-            *res_views(res, edit).get(1).unwrap_or(&View::Compact)
-        };
+            self.view = *v;
+        }
         self
     }
 
     /// Set the view
     pub fn with_view(mut self, v: View) -> Self {
-        if let View::CreateCompact | View::Create = v {
-            self.id = format!("{}_", self.res);
-        }
         self.view = v;
+        if self.is_create() {
+            self.id = format!("{}__", self.res);
+        }
         self
     }
 
     /// Fetch a card for a given view
     pub async fn fetch_one(&mut self, search: &str) -> Result<String> {
-        let html = match self.view {
-            View::CreateCompact => {
-                let mut tree = Tree::new();
-                let mut span = tree.root::<html::Span>();
-                span.class("create").cdata("Create 🆕");
-                String::from(tree)
-            }
-            View::Create => {
-                let html = self.fetch_one_res(search).await?;
-                html_card_create(self.res, &html)
-            }
-            _ => self.fetch_one_res(search).await?,
+        let html = if self.is_create() {
+            let html = self.fetch_one_res(search).await?;
+            html_card_create(self.res, &html)
+        } else {
+            self.fetch_one_res(search).await?
         };
         Ok(html)
     }
@@ -246,7 +236,7 @@ impl CardView {
 
     /// Fetch a card view
     async fn fetch_one_x<C: Card>(&mut self, search: &str) -> Result<String> {
-        let pri = if self.view == View::Create {
+        let pri = if self.is_create() {
             C::default().with_name(&self.name)
         } else {
             self.fetch_primary::<C>().await?
@@ -391,7 +381,7 @@ fn html_card_create(res: Res, create: &str) -> String {
     select.id(eid::VIEW);
     select
         .option()
-        .value(View::CreateCompact.as_str())
+        .value(View::Hidden.as_str())
         .cdata(View::Compact.as_str())
         .close();
     select

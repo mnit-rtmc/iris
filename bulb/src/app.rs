@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::CardList;
+use crate::error::Result;
 use crate::permission::AccessLevel;
 use crate::query::QueryParam;
 use crate::sse::NotifyState;
@@ -136,6 +137,11 @@ pub fn can_edit_card() -> bool {
             .map(|cl| cl.access_level() >= AccessLevel::Configure)
             .unwrap_or(false)
     })
+}
+
+/// Get the next suggested card name
+pub fn next_card_name() -> Option<Result<String>> {
+    STATE.with(|rc| rc.borrow().cards.as_ref().map(|cl| cl.next_name()))
 }
 
 /// Set expanded card view to global app state

@@ -132,6 +132,7 @@ fn handle_click_button(id: String) {
         eid::LOGOUT => spawn_future(start::handle_logout()),
         eid::SHOW_SIDEBAR => spawn_future(show_sidebar(true)),
         eid::HIDE_SIDEBAR => spawn_future(show_sidebar(false)),
+        eid::ADD => spawn_future(show_create_card()),
         // handled by mouse event listener, prevent click:
         "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up" | "ptz-tilt-down"
         | "ptz-zoom-in" | "ptz-zoom-out" | "focus-near" | "focus-far"
@@ -157,6 +158,15 @@ async fn show_sidebar(show: bool) -> Result<()> {
         util::show_elem("sidebar");
     } else {
         util::hide_elem("sidebar");
+    }
+    Ok(())
+}
+
+/// Show the create card
+async fn show_create_card() -> Result<()> {
+    let query = QueryParam::current_entry();
+    if query.res().is_some() && app::can_edit_card() {
+        set_query(query.with_sel("_")).await?;
     }
     Ok(())
 }
@@ -248,7 +258,7 @@ fn handle_input(id: String) {
 /// Handle selected resource change
 pub fn handle_res_change() {
     let query = QueryParam::new().with_res(selected_resource());
-    spawn_future(change_query(query));
+    spawn_future(set_query(query));
 }
 
 /// Get the selected resource value
@@ -511,8 +521,15 @@ async fn expand_card(query: QueryParam, res: Res) -> Result<()> {
     let sel = query.sel();
     if !sel.is_empty() {
         let edit = app::can_edit_card();
-        let cv = CardView::new(res, sel).expand(edit);
-        replace_card(cv, "").await?;
+        if "_" == sel {
+            if edit && let Some(Ok(nm)) = app::next_card_name() {
+                let cv = CardView::new(res, nm).with_view(View::Create);
+                replace_card(cv, "").await?;
+            }
+        } else {
+            let cv = CardView::new(res, sel).expand(edit);
+            replace_card(cv, "").await?;
+        }
     }
     Ok(())
 }
@@ -522,10 +539,13 @@ async fn fetch_and_populate_cards(
     query: QueryParam,
     access: &[Permission],
 ) -> Result<()> {
+    let mut can_create = false;
     match query.res() {
         Some(res) => {
             let mut cards = CardList::new(res, access);
             cards.fetch_all().await?;
+            can_create = res.has_create()
+                && cards.access_level() == AccessLevel::Configure;
             let search = search_value()?;
             let html = cards.build_html(&search).await?;
             let doc = Doc::new()?;
@@ -538,6 +558,10 @@ async fn fetch_and_populate_cards(
         }
     }
     app::set_expanded_view(None);
+    if let Ok(sb_add) = Doc::get().elem::<Element>(eid::ADD) {
+        let cls = if can_create { "" } else { "no-display" };
+        sb_add.set_class_name(cls);
+    }
     Ok(())
 }
 
@@ -557,11 +581,6 @@ pub fn search_value() -> Result<String> {
 
 /// Set query parameters
 pub async fn set_query(query: QueryParam) -> Result<()> {
-    change_query(query).await
-}
-
-/// Change query parameters
-async fn change_query(query: QueryParam) -> Result<()> {
     let window = util::window()?;
     let navigation = window.navigation();
     navigation.navigate(&format!("/iris/{query}"));
