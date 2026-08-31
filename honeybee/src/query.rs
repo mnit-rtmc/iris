@@ -739,6 +739,18 @@ pub const PERMISSION_ONE: &str = "\
   FROM iris.permission \
   WHERE name = $1";
 
+/// SQL query for all phase actions (primary)
+pub const PHASE_ACTION_ALL: &str = "\
+  SELECT name, action_plan, day_plan, from_phase, to_phase, condition, params \
+  FROM iris.phase_action \
+  ORDER BY action_plan, day_plan, from_phase, condition";
+
+/// SQL query for one phase action (secondary)
+pub const PHASE_ACTION_ONE: &str = "\
+  SELECT name, action_plan, day_plan, from_phase, to_phase, condition, params \
+  FROM iris.phase_action \
+  WHERE name = $1";
+
 /// SQL query for all plan phases (primary)
 pub const PLAN_PHASE_ALL: &str = "\
   SELECT name, selectable \

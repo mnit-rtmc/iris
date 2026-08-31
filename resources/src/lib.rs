@@ -73,6 +73,7 @@ pub enum Res {
     MsgPattern,
     ParkingArea,
     Permission,
+    PhaseAction,
     PlanPhase,
     PlayList,
     RampMeter,
@@ -173,6 +174,7 @@ impl Res {
             MsgPattern,
             ParkingArea,
             Permission,
+            PhaseAction,
             PlanPhase,
             PlayList,
             RampMeter,
@@ -261,6 +263,7 @@ impl Res {
             MsgPattern => "msg_pattern",
             ParkingArea => "parking_area",
             Permission => "permission",
+            PhaseAction => "phase_action",
             PlanPhase => "plan_phase",
             PlayList => "play_list",
             RampMeter => "ramp_meter",
@@ -325,6 +328,7 @@ impl Res {
             MsgLine => "💬",
             MsgPattern => "📑",
             Permission => "🗝️ ",
+            PhaseAction => "⏰",
             PlanPhase => "🌘",
             PlayList => "FIXME",
             RampMeter => "🚦",
@@ -372,10 +376,10 @@ impl Res {
             | GateArm | Gps | Hashtag | Incident | IncAdvice
             | IncDescriptor | IncDetail | IncLocator | Lcs | LcsState
             | MapExtent | MonitorStyle | MsgLine | MsgPattern | ParkingArea
-            | Permission | PlanPhase | PlayList | RampMeter | Rnode | Road
-            | RoadAffix | Role | SignConfig | SignDetail | SignMessage
-            | SystemAttribute | TagReader | TimeAction | TollZone | User
-            | VideoMonitor | WeatherSensor | Word => true,
+            | Permission | PhaseAction | PlanPhase | PlayList | RampMeter
+            | Rnode | Road | RoadAffix | Role | SignConfig | SignDetail
+            | SignMessage | SystemAttribute | TagReader | TimeAction
+            | TollZone | User | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -385,8 +389,8 @@ impl Res {
         use Res::*;
         match self {
             // Action plan resources
-            DayMatcher | DayPlan | DeviceAction | Hashtag | PlanPhase
-            | TimeAction => ActionPlan,
+            DayMatcher | DayPlan | DeviceAction | Hashtag | PhaseAction
+            | PlanPhase | TimeAction => ActionPlan,
             // Camera resources
             CameraPreset | EncoderStream | EncoderType => Camera,
             // Comm resources

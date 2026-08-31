@@ -1145,6 +1145,7 @@ const fn one_sql(res: Res) -> Option<&'static str> {
         MsgLine => query::MSG_LINE_ONE,
         MsgPattern => query::MSG_PATTERN_ONE,
         Permission => query::PERMISSION_ONE,
+        PhaseAction => query::PHASE_ACTION_ONE,
         PlanPhase => query::PLAN_PHASE_ONE,
         PlayList => query::PLAY_LIST_ONE,
         Road => query::ROAD_ONE,
