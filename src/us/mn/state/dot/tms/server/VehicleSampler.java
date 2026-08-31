@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2021  Minnesota Department of Transportation
+ * Copyright (C) 2016-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@ public interface VehicleSampler {
 
 	/** Get density (vehicles per mile) */
 	float getDensity(long stamp, int per_ms);
+
+	/** Get occupancy (percent) */
+	float getOccupancy(long stamp, int per_ms);
 
 	/** Get recorded speed (miles per hour) */
 	float getSpeed(long stamp, int per_ms);

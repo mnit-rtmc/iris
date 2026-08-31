@@ -105,7 +105,11 @@ public class SimpleCCSamplerSet implements VehicleSampler {
     public float getMaxOccupancy(long stamp, int per_ms) {
         return sampler.getMaxOccupancy(stamp, per_ms);
     }
-    
+
+    public float getOccupancy(long stamp, int per_ms) {
+        return sampler.getOccupancy(stamp, per_ms);
+    }
+
     public float getDensity(long stamp, int per_ms) {
         return sampler.getDensity(stamp, per_ms);
     }

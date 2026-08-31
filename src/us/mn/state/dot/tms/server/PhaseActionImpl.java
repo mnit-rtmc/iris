@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TollMode;
 import us.mn.state.dot.tms.TrafThreshold;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
 /**
@@ -62,16 +63,40 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Get the current traffic data value */
 	static private Integer dataValue(TrafThreshold tt) {
-		Detector det = DetectorHelper.lookup(tt.id);
-		if (det != null) {
-			// FIXME
-		} else {
-			Station st = StationHelper.lookup(tt.id);
-			if (st != null) {
-				// FIXME
+		VehicleSampler vs = getSampler(tt);
+		if (vs != null) {
+			long stamp = StationDataJob.getStamp();
+			float v = MISSING_DATA;
+			int per_ms = DetectorImpl.BIN_PERIOD_MS;
+			switch (tt.field) {
+				case SPEED:
+					v = vs.getSpeed(stamp, per_ms);
+					break;
+				case FLOW:
+					v = vs.getFlow(stamp, per_ms);
+					break;
+				case DENSITY:
+					v = vs.getDensity(stamp, per_ms);
+					break;
+				case OCCUPANCY:
+					v = vs.getOccupancy(stamp, per_ms);
+					break;
 			}
-		}
-		return null;
+			return Math.round(v);
+		} else
+			return null;
+	}
+
+	/** Get vehicle sampler by ID */
+	static private VehicleSampler getSampler(TrafThreshold tt) {
+		Detector d = DetectorHelper.lookup(tt.id);
+		if (d instanceof DetectorImpl)
+			return (DetectorImpl) d;
+		Station s = StationHelper.lookup(tt.id);
+		if (s instanceof StationImpl)
+			return (StationImpl) s;
+		else
+			return null;
 	}
 
 	/** Check if RWIS threshold is currently triggered */

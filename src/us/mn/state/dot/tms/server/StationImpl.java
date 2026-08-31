@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2024  Minnesota Department of Transportation
+ * Copyright (C) 2004-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,6 +127,12 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Current average station occupancy */
 	private float occupancy = MISSING_DATA;
+
+	/** Get the average station occupancy */
+	@Override
+	public float getOccupancy(long stamp, int per_ms) {
+		return occupancy;
+	}
 
 	/** Get a vehicle count */
 	@Override

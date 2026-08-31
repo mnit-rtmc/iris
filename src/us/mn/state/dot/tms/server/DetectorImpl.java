@@ -799,7 +799,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Get the occupancy for an interval */
-	protected float getOccupancy(long stamp, int per_ms) {
+	@Override
+	public float getOccupancy(long stamp, int per_ms) {
 		return getOccupancy(stamp, per_ms, false);
 	}
 

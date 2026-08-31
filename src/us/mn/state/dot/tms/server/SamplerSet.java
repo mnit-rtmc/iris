@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,6 +158,21 @@ public class SamplerSet implements VehicleSampler {
 			}
 		}
 		return (n_density > 0) ? (t_density / n_density) : MISSING_DATA;
+	}
+
+	/** Get the current occupancy (percent) */
+	@Override
+	public float getOccupancy(long stamp, int per_ms) {
+		float t_occ = 0;
+		int n_occ = 0;
+		for (VehicleSampler vs: samplers) {
+			float o = vs.getOccupancy(stamp, per_ms);
+			if (o >= 0) {
+				t_occ += o;
+				n_occ++;
+			}
+		}
+		return (n_occ > 0) ? (t_occ / n_occ) : MISSING_DATA;
 	}
 
 	/** Get the current average speed */

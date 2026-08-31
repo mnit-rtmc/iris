@@ -121,8 +121,6 @@ Condition triggers at a specific time of day, optionally on a specific date.
 <details>
 <summary>Traffic Threshold</summary>
 
-**WARNING: not implemented yet**
-
 Condition triggers when a [detector] or [station] field goes above or below a
 threshold value.
 

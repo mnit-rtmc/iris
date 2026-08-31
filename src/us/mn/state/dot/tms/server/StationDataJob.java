@@ -27,6 +27,14 @@ import static us.mn.state.dot.tms.server.MainServer.TIMER;
  */
 public class StationDataJob extends Job {
 
+	/** Most recent time stamp */
+	static private long stamp;
+
+	/** Get most recent time stamp */
+	static public long getStamp() {
+		return stamp;
+	}
+
 	/** Seconds to offset from start of interval.
 	 *
 	 * This must be *after* binned detector data has been collected, to
@@ -58,18 +66,19 @@ public class StationDataJob extends Job {
 	@Override
 	public void perform() {
 		try {
-			long stamp = DetectorImpl.calculateEndTime(per_ms);
+			long s = DetectorImpl.calculateEndTime(per_ms);
 			try {
 				// parse sensor data from pollinator
-				new LiveSensorParser(stamp);
+				new LiveSensorParser(s);
 			}
 			catch (Exception e) {
 				// ignore errors
 			}
-			station_manager.calculateData(stamp);
+			station_manager.calculateData(s);
 			// Perform flush job after station data calculated
 			flush.addJob(flush_job);
 			BaseObjectImpl.corridors.findBottlenecks();
+			stamp = s;
 		}
 		finally {
 			TIMER.addJob(new MeteringJob());
