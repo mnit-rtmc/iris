@@ -537,8 +537,10 @@ impl CardList {
         let res = C::res();
         let search = Search::new(search);
         let mut views = Vec::with_capacity(cards.len());
-        // First card is always "Create" (normally hidden)
-        let cv = CardView::new(res, "_").with_view(View::Create);
+        // First card is always "Create" (also Hidden)
+        let cv = CardView::new(res, "_")
+            .with_view(View::Create)
+            .with_view(View::Hidden);
         views.push(cv);
         for pri in &cards {
             let mut cv = CardView::new(res, pri.name());
