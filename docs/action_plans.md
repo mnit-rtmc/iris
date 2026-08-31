@@ -135,8 +135,6 @@ threshold value.
 <details>
 <summary>RWIS Threshold</summary>
 
-**WARNING: not implemented yet**
-
 Condition triggers when an [RWIS] field goes above or below a threshold value.
 
 - **Params**: Sensor ID, _field_ `<` or `>` value

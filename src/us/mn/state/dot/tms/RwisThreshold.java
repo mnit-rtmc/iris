@@ -67,16 +67,24 @@ public class RwisThreshold {
 				Field f = parseField(lt[0]);
 				if (f != null) {
 					Integer t = parseValue(lt[1]);
-					return new RwisThreshold(i, f, false, t);
+					if (t != null) {
+						return new RwisThreshold(i, f,
+							false, t);
+					}
 				}
+				return null;
 			}
 			String[] gt = v[1].split(">", 2);
 			if (gt.length == 2) {
 				Field f = parseField(gt[0]);
 				if (f != null) {
 					Integer t = parseValue(gt[1]);
-					return new RwisThreshold(i, f, true, t);
+					if (t != null) {
+						return new RwisThreshold(i, f,
+							true, t);
+					}
 				}
+				return null;
 			}
 		}
 		return null;

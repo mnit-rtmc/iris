@@ -39,6 +39,8 @@ import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TollMode;
 import us.mn.state.dot.tms.TrafThreshold;
+import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.WeatherSensorHelper;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.utils.UniqueNameCreator;
 
@@ -93,10 +95,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		if (d instanceof DetectorImpl)
 			return (DetectorImpl) d;
 		Station s = StationHelper.lookup(tt.id);
-		if (s instanceof StationImpl)
-			return (StationImpl) s;
-		else
-			return null;
+		return (s instanceof StationImpl) ? (StationImpl) s : null;
 	}
 
 	/** Check if RWIS threshold is currently triggered */
@@ -113,8 +112,30 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Get the current RWIS data value */
 	static private Integer dataValue(RwisThreshold rt) {
-		// FIXME
+		WeatherSensorImpl ws = getSensor(rt);
+		if (ws != null) {
+			switch (rt.field) {
+				case FRICTION:
+					return ws.getPvmtFriction();
+				case SURFACE_TEMP:
+					return ws.getSurfTemp();
+				case WIND_GUST:
+					return ws.getMaxWindGustSpeed();
+				case VISIBILITY:
+					return ws.getVisibility();
+				case PRECIPITATION:
+					return ws.getPrecipRate();
+			}
+		}
 		return null;
+	}
+
+	/** Get weather sensor by ID */
+	static private WeatherSensorImpl getSensor(RwisThreshold rt) {
+		WeatherSensor ws = WeatherSensorHelper.lookup(rt.id);
+		return (ws instanceof WeatherSensorImpl)
+		      ? (WeatherSensorImpl) ws
+		      : null;
 	}
 
 	/** Create a unique PhaseAction record name */
