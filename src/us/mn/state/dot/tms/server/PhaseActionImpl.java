@@ -113,7 +113,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 	/** Get the current RWIS data value */
 	static private Integer dataValue(RwisThreshold rt) {
 		WeatherSensorImpl ws = getSensor(rt);
-		if (ws != null) {
+		if (ws != null && !WeatherSensorHelper.isSampleExpired(ws)) {
 			switch (rt.field) {
 				case FRICTION:
 					return ws.getPvmtFriction();
