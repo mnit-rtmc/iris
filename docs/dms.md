@@ -14,7 +14,6 @@ The following features are supported:
 * Querying or sending [font]s
 * Sending [graphic] images to be displayed
 * [Travel time] estimation
-* Road weather information system ([RWIS]) messages
 * [Slow traffic] warnings
 * [Tolling] messages for congestion pricing
 * Free-form text entry with banned [word] checks
@@ -125,7 +124,6 @@ free-form text before sending the message to the sign.
 [message pattern]: message_patterns.html
 [permissions]: permissions.html
 [protocol]: protocols.html
-[rwis]: rwis.html
 [sign configuration]: sign_configuration.html
 [sign message]: sign_message.html
 [Slow traffic]: slow_warning.html

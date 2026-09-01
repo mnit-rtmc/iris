@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2025  Minnesota Department of Transportation
+ * Copyright (C) 2015-2026  Minnesota Department of Transportation
  * Copyright (C) 2021  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,8 +41,7 @@ public enum SignMsgSource {
 	speed_advisory, // 15 speed advisory with [vsa] tag
 	standby,        // 16 standby message with [standby] tag
 	tolling,        // 17 tolling with [tz...] tag
-	travel_time,    // 18 travel time with [tt...] tag
-	rwis;           // 19 RWIS subsystem
+	travel_time;    // 18 travel time with [tt...] tag
 
 	/** Values array */
 	static private final SignMsgSource[] VALUES = values();

@@ -133,11 +133,6 @@ public enum WTokenType {
 //	 * @param occ Occupancy threshold */
 	exitWarning(             "Exit Warning"),
 
-	/** Add an RWIS condition warning.
-	 * @param condition Weather condition.
-	 * @param level Warning level */
-	rwisCondition(           "RWIS Condition"),
-
 //	/** Add a feed message */
 	feedMsg(                 "Feed Message"),
 //

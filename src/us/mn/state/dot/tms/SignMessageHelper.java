@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2025  Minnesota Department of Transportation
+ * Copyright (C) 2008-2026  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  * Copyright (C) 2021  Iteris Inc.
  *
@@ -217,12 +217,5 @@ public class SignMessageHelper extends BaseHelper {
 			throw new InvalidMsgException(
 				"Adjacent stuck on pixels: " + n_on, true);
 		}
-	}
-
-	/** Check if a message came from RWIS subsystem.
-	 * @param sm The sign message. */
-	static public boolean isRwis(SignMessage sm) {
-		return (!isBlank(sm)) &&
-			SignMsgSource.rwis.checkBit(sourceBits(sm));
 	}
 }

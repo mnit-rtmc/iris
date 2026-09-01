@@ -222,7 +222,6 @@ Tag              | Description                      | Tag Mode            | Sour
 `[exit` *…* `]`  | [Exit ramp backup]               | Condition           | `exit_warning`
 `[feed` *…* `]`  | Msg-Feed [protocol] message      | Replace             | N/A
 `[pa` *…* `]`    | [Parking area] availability      | Replace             | `parking`
-`[rwis_` *…* `]` | [RWIS] weather conditions        | Condition           | `rwis`
 `[slow` *…* `]`  | [Slow traffic] warning           | Condition + Replace | `slow_warning`
 `[standby]`      | Standby messages                 | Standby             | `standby`
 `[ta` *…* `]`    | [Time actions](#time-action-tag) | Replace             | N/A
