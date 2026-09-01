@@ -147,21 +147,6 @@ Condition triggers when an [RWIS] field goes above or below a threshold value.
 </details>
 
 <details>
-<summary>Alert Period</summary>
-
-**WARNING: not implemented yet**
-
-Condition triggers in a specific [alert] period.
-
-- **Params**: Alert ID, _period_
-
-- **Period** keywords: `before`, `during`, `after`, `expired`
-
-- **Example**: `ai_20260113183503938,during`
-
-</details>
-
-<details>
 <summary>Alarm</summary>
 
 Condition triggers when an [alarm] is triggered or cleared.

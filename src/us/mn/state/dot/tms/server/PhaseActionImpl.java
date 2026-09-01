@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.AlarmCondition;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.AlarmHelper;
-import us.mn.state.dot.tms.AlertCondition;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Detector;
@@ -382,8 +381,6 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 				return checkTrafficThreshold();
 			case RWIS_THRESHOLD:
 				return checkRwisThreshold();
-			case ALERT_PERIOD:
-				return checkAlertPeriod();
 			case ALARM:
 				return checkAlarm();
 			default:
@@ -452,18 +449,6 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 			return trigger;
 		} else {
 			logMsg("RWIS_THRESHOLD invalid: " + params);
-			return false;
-		}
-	}
-
-	/** Check ALERT_PERIOD condition */
-	private boolean checkAlertPeriod() {
-		AlertCondition ac = PhaseActionHelper.getAlertCondition(this);
-		if (ac != null) {
-			// FIXME
-			return false;
-		} else {
-			logMsg("ALERT_PERIOD invalid: " + params);
 			return false;
 		}
 	}
