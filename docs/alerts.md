@@ -165,7 +165,7 @@ deployment when reviewed in the deployment dialog.
 An alert message defines an *alert period* and a [message pattern].  The period
 can be `BEFORE`, `DURING` or `AFTER`, and selects the time relative to the
 start and end of the alert.  The message pattern will be displayed on signs
-with a matching **restrict** [hashtag] during the associated period.
+with a matching [hashtag] during the associated period.
 
 A message pattern can contain DMS [action tags], since alerts are deployed as
 action plans.  Specifically, the [time action tag] is useful for displaying the
