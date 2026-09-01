@@ -53,10 +53,16 @@ public class PhaseActionHelper extends BaseHelper {
 			PhaseAction.SONAR_TYPE));
 	}
 
+	/** Get phase action parameters */
+	static private String getParams(PhaseAction pa) {
+		String p = pa.getParams();
+		return (p != null) ? p.replaceAll(" ", "") : null;
+	}
+
 	/** Get HOLD_TIME seconds */
 	static public Integer getHoldSecs(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.HOLD_TIME.ordinal()) {
-			String p = pa.getParams();
+			String p = getParams(pa);
 			if (p != null)
 				return parseHoldTime(p);
 		}
@@ -96,7 +102,7 @@ public class PhaseActionHelper extends BaseHelper {
 	/** Get CLOCK_TIME minute-of-day (0-1440) */
 	static public Integer getClockTime(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.CLOCK_TIME.ordinal()) {
-			String p = pa.getParams();
+			String p = getParams(pa);
 			if (p != null) {
 				Date d = parseClockTime(p);
 				if (null == d)
@@ -118,7 +124,7 @@ public class PhaseActionHelper extends BaseHelper {
 	/** Get CLOCK_TIME calendar date */
 	static public Calendar getClockDate(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.CLOCK_TIME.ordinal()) {
-			String p = pa.getParams();
+			String p = getParams(pa);
 			if (p != null) {
 				Date d = parseClockDateTime(p);
 				if (d != null) {
@@ -156,7 +162,7 @@ public class PhaseActionHelper extends BaseHelper {
 		if (pa.getCondition() == ActCondition.TRAFFIC_THRESHOLD
 			.ordinal())
 		{
-			String p = pa.getParams();
+			String p = getParams(pa);
 			if (p != null)
 				return TrafThreshold.parse(p);
 		}
@@ -168,7 +174,7 @@ public class PhaseActionHelper extends BaseHelper {
 		if (pa.getCondition() == ActCondition.RWIS_THRESHOLD
 			.ordinal())
 		{
-			String p = pa.getParams();
+			String p = getParams(pa);
 			if (p != null)
 				return RwisThreshold.parse(p);
 		}
@@ -178,7 +184,7 @@ public class PhaseActionHelper extends BaseHelper {
 	/** Get ALARM condition */
 	static public AlarmCondition getAlarmCondition(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.ALARM.ordinal()) {
-			String p = pa.getParams();
+			String p = getParams(pa);
 			if (p != null)
 				return AlarmCondition.parse(p);
 		}
