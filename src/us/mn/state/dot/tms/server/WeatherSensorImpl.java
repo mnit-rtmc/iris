@@ -317,14 +317,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 	/** Get the max wind gust speed in KPH (null if missing) */
 	@Override
 	public Integer getMaxWindGustSpeed() {
-		switch (test_rwis) {
-		case 1:
-			return SystemAttrEnum.RWIS_WINDY_1_KPH.getInt() + 1;
-		case 2:
-			return SystemAttrEnum.RWIS_WINDY_2_KPH.getInt() + 1;
-		default:
-			return max_wind_gust_speed;
-		}
+		return max_wind_gust_speed;
 	}
 
 	/** Set the max wind gust speed in KPH
@@ -517,14 +510,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 	/** Get precipitation 1h in mm (null for missing) */
 	@Override
 	public Integer getPrecipOneHour() {
-		switch (test_rwis) {
-		case 1:
-			return SystemAttrEnum.RWIS_FLOODING_1_MM.getInt() + 1;
-		case 2:
-			return SystemAttrEnum.RWIS_FLOODING_2_MM.getInt() + 1;
-		default:
-			return precip_one_hour;
-		}
+		return precip_one_hour;
 	}
 
 	/** Set precipitation 1h in mm (null for missing) */
@@ -541,14 +527,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 	/** Get visibility in meters (null for missing) */
 	@Override
 	public Integer getVisibility() {
-		switch (test_rwis) {
-		case 1:
-			return SystemAttrEnum.RWIS_VISIBILITY_1_M.getInt() - 1;
-		case 2:
-			return SystemAttrEnum.RWIS_VISIBILITY_2_M.getInt() - 1;
-		default:
-			return visibility_m;
-		}
+		return visibility_m;
 	}
 
 	/** Set visibility in meters (null for missing) */
@@ -667,13 +646,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 	/** Get pavement friction (null for missing) */
 	@Override
 	public Integer getPvmtFriction() {
-		switch (test_rwis) {
-		case 1:
-		case 2:
-			return SystemAttrEnum.RWIS_SLIPPERY_1_PERCENT.getInt() - 1;
-		default:
-			return pvmt_friction;
-		}
+		return pvmt_friction;
 	}
 
 	/** Set pavement friction (null for missing) */
@@ -836,13 +809,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 	 * @return Time as long */
 	@Override
 	public Long getStamp() {
-		switch (test_rwis) {
-			case 1:
-			case 2:
-				return TimeSteward.currentTimeMillis();
-			default:
-				return stamp;
-		}
+		return stamp;
 	}
 
 	/** Get the time stamp as a string */
@@ -853,7 +820,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 
 	/** Set the time stamp for the current sample */
 	public void setStampNotify(Long s) {
-		test_rwis = 0;
 		try {
 			store.update(this, "sample_time", asTimestamp(s));
 			stamp = s;
@@ -865,9 +831,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 		}
 	}
 
-	/** Test RWIS conditions level */
-	private transient int test_rwis = 0;
-
 	/** Get a weather sensor poller */
 	private WeatherPoller getWeatherPoller() {
 		DevicePoller dp = getPoller();
@@ -877,14 +840,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 	/** Send a device request operation */
 	@Override
 	protected void sendDeviceRequest(DeviceRequest dr) {
-		if (dr == DeviceRequest.TEST_RWIS_1) {
-			test_rwis = 1;
-			return;
-		}
-		if (dr == DeviceRequest.TEST_RWIS_2) {
-			test_rwis = 2;
-			return;
-		}
 		WeatherPoller p = getWeatherPoller();
 		if (p != null)
 			p.sendRequest(this, dr);

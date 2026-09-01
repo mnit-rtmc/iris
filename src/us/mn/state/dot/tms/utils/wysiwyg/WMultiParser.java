@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2019-2025  SRF Consulting Group
- * Copyright (C) 2021-2024  Minnesota Department of Transportation
+ * Copyright (C) 2021-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -236,14 +236,6 @@ public class WMultiParser implements Multi {
 		int min, int max, String mode, int idx)
 	{
 		// TODO
-	}
-
-	/* (non-Javadoc)
-	 * @see us.mn.state.dot.tms.utils.Multi#addRwis()
-	 */
-	@Override
-	public void addRwis(String condition, int level) {
-		page.addToken(new WtRwisCondition(condition, level));
 	}
 
 	/* (non-Javadoc)

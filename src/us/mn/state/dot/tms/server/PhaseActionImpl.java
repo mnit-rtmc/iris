@@ -122,7 +122,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 				case VISIBILITY:
 					return ws.getVisibility();
 				case PRECIPITATION:
-					return ws.getPrecipRate();
+					return ws.getPrecipOneHour();
 			}
 		}
 		return null;

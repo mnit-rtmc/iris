@@ -1,81 +1,30 @@
 # RWIS
 
-Road weather information system (RWIS) messages can be displayed on [DMS],
+Road weather information system (RWIS) messages can be activated on [DMS],
 using data collected from [weather sensor]s.
 
-## RWIS Action Tags
+[Phase actions] can change the phase of an action plan based on conditions
+at an RWIS station.
 
-Warning indications for road weather conditions can be activated using
-[device actions].  An `[rwis_` *…* `]` **condition** [action tag] in the
-[message pattern] will cause a message to be displayed when the specified
-weather condition is detected.  The tag has the following format:
+## Condition Fields
 
-`[rwis_` *condition*,*level* `]`
-
-Condition    | Level | Field Threshold †    | Meaning
--------------|-------|----------------------|----------------
-`slippery`   | 1     | `friction` < 70      | SLIPPERY
-`slippery`   | 2     | + `surface_temp` < 0 | VERY SLIPPERY
-`slippery`   | 3     | + `friction` < 60    | ICE DETECTED
-`windy`      | 1     | `wind_gust` > 64     | WIND GUSTS
-`windy`      | 2     | + `wind_gust` > 96   | HIGH WINDS
-`visibility` | 1     | `visibility` < 1609  | REDUCED VISIBILITY
-`visibility` | 2     | + `visibility` < 402 | LOW VISIBILITY
-`flooding`   | 1     | `precip` > 6         | FLOODING POSSIBLE
-`flooding`   | 2     | + `precip` > 8       | FLASH FLOODING
-
-† *Thresholds configurable with [system attributes](#system-attributes)*
-
-## Weather Fields
-
-There are five weather data fields used for condition calculations:
+There are five weather data fields used for triggering conditions:
 
 1. `friction`: pavement friction coefficient in percent
 2. `surface_temp`: temperature in degrees celcius
 3. `wind_gust`: gusting wind speed in kilometers per hour (kph)
 4. `visibility`: distance in meters (m)
-5. `precip`: one hour precipitation accumulation (mm)
+5. `precipitation`: one hour precipitation accumulation (mm)
 
 ## System Attributes
 
-These [system attributes] can be used to adjust thresholds for RWIS conditions.
-
-Attribute Name            | Field          | Default Threshold
---------------------------|----------------|------------------
-`rwis_slippery_1_percent` | `friction`     | 70
-`rwis_slippery_2_degrees` | `surface_temp` | 0
-`rwis_slippery_3_percent` | `friction`     | 60
-`rwis_windy_1_kph`        | `wind_gust`    | 64
-`rwis_windy_2_kph`        | `wind_gust`    | 96
-`rwis_visibility_1_m`     | `visibility`   | 1609
-`rwis_visibility_2_m`     | `visibility`   | 402
-`rwis_flooding_1_mm`      | `precip`       | 6
-`rwis_flooding_2_mm`      | `precip`       | 8
-
-Attribute Name             | Description
----------------------------|------------------------------------------
-`rwis_auto_max_dist_miles` | Maximum distance to auto-associate device
-`rwis_obs_age_limit_secs`  | Maximum valid age for an observation
-
-## DMS Weather Sensors
-
-An RWIS action tag can use data from one or more weather sensors.  Each DMS can
-have its own set of sensors configured.  A sign with no associated weather
-sensors will use the nearest weather sensor, as long as it is not further than
-`rwis_auto_max_dist_miles` away.
-
-## Testing Condition Levels
-
-The weather sensor properties form has buttons to test RWIS message automation.
-If the "Level 1" button is pressed, then all RWIS conditions from that weather
-sensor will report level 1 conditions.  Similarly, the "Level 2" button causes
-each condition to report level 2.  The testing mode will clear automatically
-the next time the sensor records an observation.
+The `rwis_obs_age_limit_secs` [system attribute] can be used to adjust the
+maximum valid age for an observation.
 
 
-[action tag]: action_plans.html#action-tags
 [device actions]: action_plans.html#device-actions
 [DMS]: dms.html
 [message pattern]: message_patterns.html
-[system attributes]: system_attributes.html
+[phase actions]: action_plans.html#phase-actions
+[system attribute]: system_attributes.html
 [weather sensor]: weather_sensors.html

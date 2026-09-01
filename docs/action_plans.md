@@ -142,7 +142,18 @@ Condition triggers when an [RWIS] field goes above or below a threshold value.
 - **Field** keywords: `friction`, `surface_temp`, `wind_gust`, `visibility`,
   `precipitation`
 
-- **Example**: `WS0123,fric<70` (station WS0123 friction less than 70)
+- **Examples**:
+  | Params            | Station | Meaning              | Suggested Message    |
+  |-------------------|---------|----------------------|----------------------|
+  | `WS0123,fric<70`  | WS0123  | friction below 70    | `SLIPPERY`           |
+  | `WS0123,surf<0`   | WS0123  | surface temp below 0 | `VERY SLIPPERY`      |
+  | `WS0123,fric<60`  | WS0123  | friction below 60    | `ICY`                |
+  | `WS0001,wind>64`  | WS0001  | gusts above 64       | `WIND GUSTS`         |
+  | `WS0001,wind>96`  | WS0001  | gusts above 96       | `HIGH WINDS`         |
+  | `WS0666,vis<1609` | WS0666  | vis. below 1 mi      | `REDUCED VISIBILITY` |
+  | `WS0666,vis<402`  | WS0666  | vis. below 1/4 mi    | `LOW VISIBILITY`     |
+  | `WS0012,precip>6` | WS0012  | hour rain above 6 mm | `FLOODING POSSIBLE`  |
+  | `WS0012,precip>8` | WS0012  | hour rain above 8 mm | `FLASH FLOODING`     |
 
 </details>
 

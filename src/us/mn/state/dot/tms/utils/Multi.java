@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  * Copyright (C) 2009  AHMCT, University of California
  * Copyright (C) 2019-2020  SRF Consulting Group
  * Copyright (C) 2021  Iteris Inc.
@@ -189,11 +189,6 @@ public interface Multi {
 	 * @param l_txt Text for low availability.
 	 * @param c_txt Text for closed area. */
 	void addParking(String pid, String l_txt, String c_txt);
-
-	/** Add RWIS condition warning.
-	 * @param condition Weather condition.
-	 * @param level Warning level. */
-	void addRwis(String condition, int level);
 
 	/** Add a slow traffic warning.
 	 * @param spd Highest speed to activate warning.

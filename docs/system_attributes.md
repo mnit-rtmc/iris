@@ -74,17 +74,7 @@ System Attribute                 | Description
 `msg_feed_verify`                | Require [DMS] messages from msg_feed to exist in message library
 `route_max_legs`                 | Maximum number of corridors for route finding
 `route_max_miles`                | Maximum distance (miles) for route finding
-`rwis_auto_max_dist_miles`       | Maximum distance to auto-associate a weather sensor to a device
-`rwis_flooding_1_mm`             | Accumulation threshold for flooding 1 condition
-`rwis_flooding_2_mm`             | Accumulation threshold for flooding 2 condition
 `rwis_obs_age_limit_secs`        | Weather sensor observations with an age greater than this value will be ignored
-`rwis_slippery_1_percent`        | Friction threshold for slippery 1 condition
-`rwis_slippery_2_degrees`        | Temperature threshold for slippery 2 condition
-`rwis_slippery_3_percent`        | Friction threshold for slippery 3 condition
-`rwis_visibility_1_m`            | Distance threshold for visibility 1 condition
-`rwis_visibility_2_m`            | Distance threshold for visibility 2 condition
-`rwis_windy_1_kph`               | Gust speed threshold for windy 1 condition
-`rwis_windy_2_kph`               | Gust speed threshold for windy 2 condition
 `speed_limit_default_mph`        | Default roadway speed limit
 `speed_limit_max_mph`            | Maximum roadway speed limit
 `speed_limit_min_mph`            | Minimum roadway speed limit

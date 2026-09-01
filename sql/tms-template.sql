@@ -107,17 +107,7 @@ meter_yellow_secs	0.7
 msg_feed_verify	true
 route_max_legs	8
 route_max_miles	16
-rwis_auto_max_dist_miles	1.0
 rwis_obs_age_limit_secs	900
-rwis_slippery_1_percent	70
-rwis_slippery_2_degrees	0
-rwis_slippery_3_percent	60
-rwis_windy_1_kph	64
-rwis_windy_2_kph	96
-rwis_visibility_1_m	1609
-rwis_visibility_2_m	402
-rwis_flooding_1_mm	6
-rwis_flooding_2_mm	8
 speed_limit_min_mph	45
 speed_limit_default_mph	55
 speed_limit_max_mph	75
@@ -3351,52 +3341,7 @@ INSERT INTO iris.msg_pattern (
     ('.2_LINE', '#TwoLine', '[np]', false, false),
     ('.3_LINE', '#ThreeLine', '', false, false),
     ('.4_LINE', '#FourLine', '', false, false),
-    ('.2_PAGE', '#TwoPage', '[np]', false, false),
-    ('RWIS_slippery_1',
-        NULL,
-        '[rwis_slippery,1]SLIPPERY[nl]ROAD[nl]DETECTED[np]USE[nl]CAUTION',
-        false,
-        false),
-    ('RWIS_slippery_2',
-        NULL,
-        '[rwis_slippery,2]SLIPPERY[nl]ROAD[nl]DETECTED[np]REDUCE[nl]SPEED',
-        false,
-        false),
-    ('RWIS_slippery_3',
-        NULL,
-        '[rwis_slippery,3]ICE[nl]DETECTED[np]REDUCE[nl]SPEED',
-        false,
-        false),
-    ('RWIS_windy_1',
-        NULL,
-        '[rwis_windy,1]WIND GST[nl]>40 MPH[nl]DETECTED[np]USE[nl]CAUTION',
-        false,
-        false),
-    ('RWIS_windy_2',
-        NULL,
-        '[rwis_windy,2]WIND GST[nl]>60 MPH[nl]DETECTED[np]REDUCE[nl]SPEED',
-        false,
-        false),
-    ('RWIS_visibility_1',
-        NULL,
-        '[rwis_visibility,1]REDUCED[nl]VISBLITY[nl]DETECTED[np]USE[nl]CAUTION',
-        false,
-        false),
-    ('RWIS_visibility_2',
-        NULL,
-        '[rwis_visibility,2]LOW[nl]VISBLITY[nl]DETECTED[np]REDUCE[nl]SPEED',
-        false,
-        false),
-    ('RWIS_flooding_1',
-        NULL,
-        '[rwis_flooding,1]FLOODING[nl]POSSIBLE[np]USE[nl]CAUTION',
-        false,
-        false),
-    ('RWIS_flooding_2',
-        NULL,
-        '[rwis_flooding,2]FLASH[nl]FLOODING[np]USE[nl]CAUTION',
-        false,
-        false);
+    ('.2_PAGE', '#TwoPage', '[np]', false, false);
 
 CREATE TRIGGER msg_pattern_notify_trig
     AFTER INSERT OR UPDATE OR DELETE ON iris.msg_pattern
