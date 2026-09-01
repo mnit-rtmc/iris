@@ -66,8 +66,6 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgPriority;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.WeatherSensor;
-import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
@@ -88,9 +86,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author John L. Stanley - SRF Consulting
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
-
-	/** DMS / weather sensor mapping */
-	static private TableMapping ess_map;
 
 	/** Test if a sign message is from a specified source */
 	static private boolean isMsgSource(SignMessage sm, SignMsgSource src) {
@@ -118,8 +113,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
-		ess_map = new TableMapping(store, "iris", SONAR_TYPE,
-			WeatherSensor.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"static_graphic, preset, sign_config, sign_detail, " +
 			"msg_sched, msg_current, lock, status, " +
@@ -218,20 +211,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		lock = lk;
 		status = st;
 		pixel_failures = pf;
-		weather_sensors = lookupEssMapping();
 		initTransients();
-	}
-
-	/** Lookup mapping of RWIS sensors configured to the sign */
-	private WeatherSensorImpl[] lookupEssMapping() throws TMSException {
-		TreeSet<WeatherSensorImpl> ws_set =
-			new TreeSet<WeatherSensorImpl>();
-		for (String o: ess_map.lookup(this)) {
-			WeatherSensor ws = WeatherSensorHelper.lookup(o);
-			if (ws instanceof WeatherSensorImpl)
-				ws_set.add((WeatherSensorImpl) ws);
-		}
-		return ws_set.toArray(new WeatherSensorImpl[0]);
 	}
 
 	/** Destroy an object */
@@ -414,49 +394,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public CameraPreset getPreset() {
 		return preset;
-	}
-
-	/** RWIS sensors configured to the sign */
-	private WeatherSensorImpl[] weather_sensors = new WeatherSensorImpl[0];
-
-	/** Set the RWIS sensors configured to the sign */
-	@Override
-	public void setWeatherSensors(WeatherSensor[] ess) {
-		weather_sensors = makeWeatherSensorArray(ess);
-	}
-
-	/** Make an ordered array of weather sensors */
-	private WeatherSensorImpl[] makeWeatherSensorArray(
-		WeatherSensor[] ess)
-	{
-		TreeSet<WeatherSensorImpl> ws_set =
-			new TreeSet<WeatherSensorImpl>();
-		for (WeatherSensor ws: ess) {
-			if (ws instanceof WeatherSensorImpl)
-				ws_set.add((WeatherSensorImpl) ws);
-		}
-		return ws_set.toArray(new WeatherSensorImpl[0]);
-	}
-
-	/** Set the RWIS sensors configured to the sign */
-	public void doSetWeatherSensors(WeatherSensor[] ess)
-		throws TMSException
-	{
-		TreeSet<Storable> ws_set = new TreeSet<Storable>();
-		for (WeatherSensor ws: ess) {
-			if (ws instanceof WeatherSensorImpl)
-				ws_set.add((WeatherSensorImpl) ws);
-			else
-				throw new ChangeVetoException("Invalid ESS");
-		}
-		ess_map.update(this, ws_set);
-		setWeatherSensors(ess);
-	}
-
-	/** Get the RWIS sensors configured to the sign */
-	@Override
-	public WeatherSensor[] getWeatherSensors() {
-		return weather_sensors;
 	}
 
 	/** Sign configuration */

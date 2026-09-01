@@ -45,12 +45,6 @@ public interface DMS extends Device {
 	/** Get verification camera preset */
 	CameraPreset getPreset();
 
-	/** Set the RWIS sensors configured for the sign */
-	void setWeatherSensors(WeatherSensor[] ess);
-
-	/** Get the RWIS sensors configured for the sign */
-	WeatherSensor[] getWeatherSensors();
-
 	/** Get the sign configuration */
 	SignConfig getSignConfig();
 

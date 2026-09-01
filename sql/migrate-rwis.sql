@@ -17,4 +17,7 @@ DELETE FROM iris.system_attribute WHERE name IN (
     'rwis_flooding_2_mm'
 );
 
+DROP VIEW dms_weather_sensor_view;
+DROP TABLE iris.dms_weather_sensor;
+
 COMMIT;
