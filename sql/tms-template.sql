@@ -2109,7 +2109,7 @@ VALUES
     (1, 'clock time'),
     (2, 'traffic threshold'),
     (3, 'RWIS threshold'),
-    (4, 'toll mode'),
+    (4, '*unused*'),
     (5, 'alert period'),
     (6, 'alarm');
 

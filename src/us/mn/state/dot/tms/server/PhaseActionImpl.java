@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.RwisThreshold;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TollMode;
 import us.mn.state.dot.tms.TrafThreshold;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
@@ -136,6 +135,21 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		return (ws instanceof WeatherSensorImpl)
 		      ? (WeatherSensorImpl) ws
 		      : null;
+	}
+
+	/** Check if alarm condition is currently triggered */
+	static private boolean isTriggered(AlarmCondition ac) {
+		Alarm a = AlarmHelper.lookup(ac.id);
+		if (a instanceof AlarmImpl) {
+			AlarmImpl alarm = (AlarmImpl) a;
+			switch (ac.field) {
+				case TRIGGERED:
+					return alarm.getState();
+				case CLEARED:
+					return !alarm.getState();
+			}
+		}
+		return false;
 	}
 
 	/** Create a unique PhaseAction record name */
@@ -368,8 +382,6 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 				return checkTrafficThreshold();
 			case RWIS_THRESHOLD:
 				return checkRwisThreshold();
-			case TOLL_MODE:
-				return checkTollMode();
 			case ALERT_PERIOD:
 				return checkAlertPeriod();
 			case ALARM:
@@ -444,18 +456,6 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		}
 	}
 
-	/** Check TOLL_MODE condition */
-	private boolean checkTollMode() {
-		TollMode tm = PhaseActionHelper.getTollMode(this);
-		if (tm != null) {
-			// FIXME: add mode to toll zone
-			return false;
-		} else {
-			logMsg("TOLL_MODE invalid: " + params);
-			return false;
-		}
-	}
-
 	/** Check ALERT_PERIOD condition */
 	private boolean checkAlertPeriod() {
 		AlertCondition ac = PhaseActionHelper.getAlertCondition(this);
@@ -472,18 +472,10 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 	private boolean checkAlarm() {
 		AlarmCondition ac = PhaseActionHelper.getAlarmCondition(this);
 		if (ac != null) {
-			Alarm a = AlarmHelper.lookup(ac.id);
-			if (a instanceof AlarmImpl) {
-				AlarmImpl alarm = (AlarmImpl) a;
-				switch (ac.field) {
-					case TRIGGERED:
-						return alarm.getState();
-					case CLEARED:
-						return !alarm.getState();
-				}
-			}
-			logMsg("ALARM unknown ID: " + ac);
-			return false;
+			boolean trigger = isTriggered(ac);
+			if (trigger)
+				logMsg("ALARM " + ac);
+			return trigger;
 		} else {
 			logMsg("ALARM invalid: " + params);
 			return false;

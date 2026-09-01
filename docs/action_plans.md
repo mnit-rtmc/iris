@@ -147,21 +147,6 @@ Condition triggers when an [RWIS] field goes above or below a threshold value.
 </details>
 
 <details>
-<summary>Toll Mode</summary>
-
-**WARNING: not implemented yet**
-
-Condition triggers when a [toll zone] mode changes.
-
-- **Params**: Toll zone ID, _mode_
-
-- **Mode** keywords: `priced`, `open`, `closed`
-
-- **Example**: `Z394W01,priced` (when zone Z394W01 is priced)
-
-</details>
-
-<details>
 <summary>Alert Period</summary>
 
 **WARNING: not implemented yet**

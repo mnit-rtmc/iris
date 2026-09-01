@@ -175,16 +175,6 @@ public class PhaseActionHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Get TOLL_MODE condition */
-	static public TollMode getTollMode(PhaseAction pa) {
-		if (pa.getCondition() == ActCondition.TOLL_MODE.ordinal()) {
-			String p = pa.getParams();
-			if (p != null)
-				return TollMode.parse(p);
-		}
-		return null;
-	}
-
 	/** Get ALERT_PERIOD condition */
 	static public AlertCondition getAlertCondition(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.ALERT_PERIOD.ordinal()) {
