@@ -25,7 +25,7 @@ public enum ActCondition {
 	CLOCK_TIME,        // 1
 	TRAFFIC_THRESHOLD, // 2
 	RWIS_THRESHOLD,    // 3
-	TOLL_MODE,         // 4
+	UNUSED,            // 4
 	ALERT_PERIOD,      // 5
 	ALARM;             // 6
 
@@ -45,7 +45,7 @@ public enum ActCondition {
 			CLOCK_TIME,
 			TRAFFIC_THRESHOLD,
 			RWIS_THRESHOLD,
-			TOLL_MODE,
+			/* UNUSED, */
 			ALERT_PERIOD,
 			ALARM,
 		};
