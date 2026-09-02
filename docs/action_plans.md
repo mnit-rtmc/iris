@@ -252,18 +252,18 @@ the specified phase.
 
 ## Time Action Tag
 
-The time of a scheduled **phase action** can be displayed in DMS messages using
-[device actions](#device-actions) within the same action plan.  A `[ta` *…* `]`
-[action tag](#action-tags) in the [message pattern] will be replaced with the
-appropriate value.  It has the following format:
+The time of a phase action with a **Clock Time** condition can be displayed in
+DMS messages using [device actions](#device-actions) within the same action
+plan.  A `[ta` *…* `]` [action tag](#action-tags) in the [message pattern]
+will be replaced with the appropriate value.  It has the following format:
 
 `[ta` *dir*,*format* `]`
 
 **Parameters**
 
 1. `dir`: Chronological direction
-   - `n`: **Next** scheduled *time action* after the current time
-   - `p`: **Previous** scheduled *time action* before the current time
+   - `n`: **Next** phase action with **Clock Time** after the current time
+   - `p`: **Previous** phase action **Clock Time** before the current time
 2. `format`: Time format pattern (`h a` if omitted)
 
 The format parameter is specified using a Java [DateTimeFormatter] pattern,
@@ -291,7 +291,7 @@ To include minutes, `h:mm a` could be used instead.
 ROAD WORK[nl]STARTING AT [tan,h:mm a]
 ```
 
-If next scheduled time action is at 2:30 AM, the resulting message will be:
+If next scheduled action is at 2:30 AM, the resulting message will be:
 
 ```
 ROAD WORK
@@ -304,8 +304,8 @@ STARTING AT 2:30 AM
 BLIZZARD WARNING[nl]FROM [tap][nl]UNTIL [tan]
 ```
 
-If the time is between two scheduled time actions, 4 AM to 10 PM, the message
-will be:
+If the time is between two scheduled actions, 4 AM to 10 PM, the message will
+be:
 
 ```
 BLIZZARD WARNING

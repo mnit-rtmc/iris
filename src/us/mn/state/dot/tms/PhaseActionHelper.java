@@ -190,4 +190,134 @@ public class PhaseActionHelper extends BaseHelper {
 		}
 		return null;
 	}
+
+	/** Interface to filter dates */
+	static private interface DateFilter {
+		boolean check(Date date, PhaseAction pa);
+	}
+
+	/** Get most recent action before now from an action plan */
+	static public PhaseAction getMostRecentAction(ActionPlan plan, Date now)
+	{
+		final Date[] best = new Date[1];
+		final PhaseAction[] act = new PhaseAction[1];
+		filterSchedule(plan, new DateFilter() {
+			@Override
+			public boolean check(Date dt, PhaseAction pa) {
+				// Most recent time before now
+				boolean res = dt.before(now) &&
+				    (best[0] == null || dt.after(best[0]));
+				if (res) {
+					best[0] = dt;
+					act[0] = pa;
+				}
+				return res;
+			}
+		});
+		return act[0];
+	}
+
+	/** Get most recent scheduled date from an action plan */
+	static public Date getMostRecent(ActionPlan plan, Date now) {
+		final Date[] best = new Date[1];
+		filterSchedule(plan, new DateFilter() {
+			@Override
+			public boolean check(Date dt, PhaseAction pa) {
+				// Most recent time before now
+				boolean res = dt.before(now) &&
+				    (best[0] == null || dt.after(best[0]));
+				if (res)
+					best[0] = dt;
+				return res;
+			}
+		});
+		return best[0];
+	}
+
+	/** Get soonest scheduled date from an action plan */
+	static public Date getSoonest(ActionPlan plan, Date now) {
+		final Date[] best = new Date[1];
+		filterSchedule(plan, new DateFilter() {
+			@Override
+			public boolean check(Date dt, PhaseAction pa) {
+				// Soonest time after now
+				boolean res = dt.after(now) &&
+				    (best[0] == null || dt.before(best[0]));
+				if (res)
+					best[0] = dt;
+				return res;
+			}
+		});
+		return best[0];
+	}
+
+	/** Filter scheduled times in an action plan */
+	static private void filterSchedule(ActionPlan plan, DateFilter filter){
+		Iterator<PhaseAction> it = iterator();
+		while (it.hasNext()) {
+			PhaseAction pa = it.next();
+			if (pa.getActionPlan() == plan)
+				filterSchedule(pa, filter);
+		}
+	}
+
+	/** Filter scheduled phase action */
+	static private void filterSchedule(PhaseAction pa, DateFilter filter) {
+		Integer mod = getClockTime(pa);
+		if (mod != null) {
+			DayPlan dp = pa.getDayPlan();
+			Calendar cd = getClockDate(pa);
+			if (cd != null) {
+				// Check only the specified clock date
+				Date sched = cd.getTime();
+				sched = getScheduledDate(sched, mod);
+				if (checkDayPlan(dp, sched))
+					filter.check(sched, pa);
+			} else {
+				// Check all dates in day plan
+				filterSchedule(pa, dp, mod, filter);
+			}
+		}
+	}
+
+	/** Get scheduled date and time */
+	static private Date getScheduledDate(Date doy, int mod) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(doy);
+		cal.set(Calendar.HOUR_OF_DAY, mod % 60);
+		cal.set(Calendar.MINUTE, mod / 60);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
+	}
+
+	/** Check if a date is valid for a day plan */
+	static private boolean checkDayPlan(DayPlan dp, Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return (dp == null) || !DayPlanHelper.isHoliday(dp, cal);
+	}
+
+	/** Filter scheduled day plan / minute-of-day */
+	static private void filterSchedule(PhaseAction pa, DayPlan dp, int mod,
+		DateFilter filter)
+	{
+		Calendar fut = Calendar.getInstance();
+		Calendar pst = Calendar.getInstance();
+		fut.setTime(getScheduledDate(fut.getTime(), mod));
+		pst.setTime(fut.getTime());
+		if (checkDayPlan(dp, fut.getTime()))
+			filter.check(fut.getTime(), pa);
+		// Check a week in both directions
+		for (int i = 0; i < 7; i++) {
+			// Another day in the future
+			fut.add(Calendar.DATE, 1);
+			if (checkDayPlan(dp, fut.getTime()))
+				filter.check(fut.getTime(), pa);
+			// Another day in the past
+			pst.add(Calendar.DATE, -1);
+			if (checkDayPlan(dp, pst.getTime()))
+				filter.check(pst.getTime(), pa);
+		}
+	}
 }

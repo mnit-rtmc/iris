@@ -38,12 +38,12 @@ import us.mn.state.dot.tms.MsgPattern;
 import us.mn.state.dot.tms.MsgPatternHelper;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.ParkingAreaHelper;
+import us.mn.state.dot.tms.PhaseActionHelper;
 import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
@@ -820,7 +820,7 @@ public class TagProcessor {
 	private Date getDateDir(String dir) {
 		Date now = TimeSteward.getDateInstance();
 		return ("p".equals(dir))
-			? TimeActionHelper.getMostRecent(plan, now)
-			: TimeActionHelper.getSoonest(plan, now);
+			? PhaseActionHelper.getMostRecent(plan, now)
+			: PhaseActionHelper.getSoonest(plan, now);
 	}
 }

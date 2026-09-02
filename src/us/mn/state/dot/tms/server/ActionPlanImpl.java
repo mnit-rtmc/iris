@@ -42,12 +42,12 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.Hashtags;
+import us.mn.state.dot.tms.PhaseAction;
+import us.mn.state.dot.tms.PhaseActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.TimeAction;
-import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.TIMER;
 import us.mn.state.dot.tms.server.event.ActionPlanEvent;
@@ -334,11 +334,11 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Get the currently scheduled phase */
 	private PlanPhase getScheduledPhase() {
-		// Use time in thirty seconds to avoid missing time actions
+		// Use time in thirty seconds to avoid missing phase actions
 		long now = TimeSteward.currentTimeMillis() + 30 * 1000;
-		TimeAction ta = TimeActionHelper.getMostRecentAction(this,
+		PhaseAction pa = PhaseActionHelper.getMostRecentAction(this,
 			new Date(now));
-		return (ta != null) ? ta.getPhase() : default_phase;
+		return (pa != null) ? pa.getToPhase() : default_phase;
 	}
 
 	/** Get the active status */
