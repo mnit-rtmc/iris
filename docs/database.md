@@ -77,7 +77,6 @@ update, and is caused by one of these conditions:
 `sign_message`     |     |     |     |
 `system_attribute` |     |     |     |
 `tag_reader`       | ☑️   | ☑️   |     |
-`time_action`      |     |     |     |
 `toll_zone`        |     |     |     |
 `user_id`          |     |     |     |
 `video_monitor`    |     | ☑️   |     |

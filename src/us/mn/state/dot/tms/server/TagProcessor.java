@@ -813,7 +813,7 @@ public class TagProcessor {
 				ZoneId.systemDefault()).toLocalDateTime();
 			return ldt.format(DateTimeFormatter.ofPattern(format));
 		} else
-			return fail("Scheduled time action not found");
+			return fail("Scheduled action not found");
 	}
 
 	/** Get scheduled date that's most recent or soonest from now */

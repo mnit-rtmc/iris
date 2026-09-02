@@ -127,7 +127,7 @@ public class Name {
 	/** Write/create/delete access exceptions for MANAGE level */
 	static final String[] TYPE_MANAGE = {
 		"action_plan", "device_action", "msg_pattern", "msg_line",
-		"time_action"
+		"phase_action"
 	};
 
 	/** Write access exceptions for OPERATE level */

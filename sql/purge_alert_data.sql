@@ -11,7 +11,7 @@ BEGIN;
 
 SELECT action_plan
   INTO TEMP purge_alert_action_plan
-  FROM iris.time_action
+  FROM iris.phase_action
   WHERE action_plan LIKE 'ALERT_%'
     AND sched_date + make_interval(weeks => 2) < CURRENT_DATE
   GROUP BY action_plan;
@@ -36,7 +36,7 @@ DELETE FROM iris.dms_action
   WHERE action_plan IN (SELECT action_plan FROM purge_alert_action_plan);
 DELETE FROM cap.alert_info
   WHERE action_plan IN (SELECT action_plan FROM purge_alert_action_plan);
-DELETE FROM iris.time_action
+DELETE FROM iris.phase_action
   WHERE action_plan IN (SELECT action_plan FROM purge_alert_action_plan);
 DELETE FROM iris.action_plan
   WHERE name IN (SELECT action_plan FROM purge_alert_action_plan);
