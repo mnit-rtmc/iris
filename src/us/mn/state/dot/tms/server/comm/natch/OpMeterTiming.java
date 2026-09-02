@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2024  Minnesota Department of Transportation
+ * Copyright (C) 2021-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Hashtags;
-import us.mn.state.dot.tms.TimeActionHelper;
+import us.mn.state.dot.tms.PhaseActionHelper;
 import us.mn.state.dot.tms.TimingTable;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -69,7 +69,7 @@ public class OpMeterTiming extends OpNatch {
 
 	/** Get the target release rate for a time of day */
 	private int getTarget(int min) {
-		switch (TimeActionHelper.getPeriod(min)) {
+		switch (PhaseActionHelper.getPeriod(min)) {
 		case Calendar.AM:
 			return meter.getAmTarget();
 		case Calendar.PM:

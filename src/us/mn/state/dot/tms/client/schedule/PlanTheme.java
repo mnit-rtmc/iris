@@ -38,11 +38,8 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	/** Legend color */
 	static private final Color COLOR = new Color(255, 255, 0, 128);
 
-	/** Color to display schedule icon */
-	static private final Color COLOR_SCHEDULE = new Color(208, 0, 208);
-
 	/** Color to display phase icon */
-	static private final Color COLOR_PHASE = new Color(192, 208, 128);
+	static private final Color COLOR_PHASE = new Color(208, 0, 208);
 
 	/** Color for active camera style */
 	static private final Color COLOR_CAMERA = new Color(0, 192, 255);
@@ -70,10 +67,6 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	static private final VectorSymbol SYM_METER = new VectorSymbol(
 		new MeterMarker());
 
-	/** Symbol for time actions */
-	static private final VectorSymbol SYM_TIME = new VectorSymbol(
-		new TimeMarker());
-
 	/** Symbol for phase actions */
 	static private final VectorSymbol SYM_PHASE = new VectorSymbol(
 		new PhaseMarker());
@@ -87,7 +80,6 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 		addStyle(ItemStyle.CAMERA, COLOR_CAMERA);
 		addStyle(ItemStyle.GATE_ARM, COLOR_DEPLOYED);
 		addStyle(ItemStyle.METER, MeterTheme.COLOR_METERING);
-		addStyle(ItemStyle.TIME, COLOR_SCHEDULE);
 		addStyle(ItemStyle.PHASE, COLOR_PHASE);
 		addStyle(ItemStyle.ACTIVE, COLOR);
 		addStyle(ItemStyle.UNDEPLOYED, COLOR_UNDEPLOYED);
@@ -109,8 +101,6 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 			return SYM_GATE_ARM.getLegend(sty);
 		case METER:
 			return SYM_METER.getLegend(sty);
-		case TIME:
-			return SYM_TIME.getLegend(sty);
 		case PHASE:
 			return SYM_PHASE.getLegend(sty);
 		default:

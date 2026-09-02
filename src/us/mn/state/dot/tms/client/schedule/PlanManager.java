@@ -25,8 +25,6 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.PhaseAction;
 import us.mn.state.dot.tms.PhaseActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
-import us.mn.state.dot.tms.TimeAction;
-import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -92,8 +90,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 			       ActionPlanHelper.countRampMeters(proxy) > 0;
 		case PHASE:
 			return proxy.getActive() && hasPhaseAction(proxy);
-		case TIME:
-			return proxy.getActive() && hasTimeAction(proxy);
 		case ACTIVE:
 			return proxy.getActive();
 		case UNDEPLOYED:
@@ -121,17 +117,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		while (it.hasNext()) {
 			PhaseAction pa = it.next();
 			if (pa.getActionPlan() == p)
-				return true;
-		}
-		return false;
-	}
-
-	/** Test if an action plan has time actions */
-	private boolean hasTimeAction(ActionPlan p) {
-		Iterator<TimeAction> it = TimeActionHelper.iterator();
-		while (it.hasNext()) {
-			TimeAction ta = it.next();
-			if (ta.getActionPlan() == p)
 				return true;
 		}
 		return false;

@@ -203,8 +203,8 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 	}
 
 	/** Create a new phase action */
-	private PhaseActionImpl(String n, String a, String dp, String fp,
-		String tp, int c, String p)
+	PhaseActionImpl(String n, String a, String dp, String fp, String tp,
+		int c, String p)
 	{
 		this(n);
 		action_plan = lookupActionPlan(a);

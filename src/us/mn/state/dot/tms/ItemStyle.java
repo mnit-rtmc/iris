@@ -67,7 +67,6 @@ public enum ItemStyle {
 	CAMERA,
 	GATE_ARM,
 	METER,
-	TIME,
 	PHASE,
 	/* Alert styles */
 	PENDING;

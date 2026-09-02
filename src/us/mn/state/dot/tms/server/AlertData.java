@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2025  Minnesota Department of Transportation
+ * Copyright (C) 2021-2026  Minnesota Department of Transportation
  * Copyright (C) 2020  SRF Consulting Group, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -115,6 +115,10 @@ public class AlertData {
 	/** Date formatter for formatting/parsing CAP dates */
 	static private final SimpleDateFormat CAP_DATE =
 		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+
+	/** Date formatter for formatting phase action */
+	static private final SimpleDateFormat PA_DATE =
+		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
 	/** Get the start date/time.  Checks onset time first, then effective
 	 *  time, and finally sent time (which is required). */
@@ -596,7 +600,7 @@ public class AlertData {
 			PlanPhase.UNDEPLOYED, cur_phase);
 		log("created plan " + pname);
 		plan.notifyCreate();
-		createTimeActions(cfg, plan);
+		createPhaseActions(cfg, plan);
 		int num = 1;
 		for (Map.Entry<MsgPattern, TreeSet<AlertMessage>> ent:
 		     patMsgs(msgs))
@@ -675,8 +679,8 @@ public class AlertData {
 		return PlanPhase.UNDEPLOYED;
 	}
 
-	/** Create the time actions for an action plan */
-	private void createTimeActions(AlertConfig cfg, ActionPlanImpl plan)
+	/** Create the phase actions for an action plan */
+	private void createPhaseActions(AlertConfig cfg, ActionPlanImpl plan)
 		throws SonarException
 	{
 		// Create "before" action
@@ -684,32 +688,33 @@ public class AlertData {
 		if (before_hours > 0) {
 			long sd = start_date.getTime();
 			Date before = new Date(sd - before_hours * HOUR_MS);
-			createTimeAction(plan, before, PlanPhase.ALERT_BEFORE);
+			createPhaseAction(plan, before, PlanPhase.ALERT_BEFORE);
 		}
 		// Create "during" action
-		createTimeAction(plan, start_date, PlanPhase.ALERT_DURING);
+		createPhaseAction(plan, start_date, PlanPhase.ALERT_DURING);
 		// Create "after" action
 		int after_hours = cfg.getAfterPeriodHours();
 		if (after_hours > 0)
-			createTimeAction(plan, end_date, PlanPhase.ALERT_AFTER);
-		// Create final time action
+			createPhaseAction(plan, end_date, PlanPhase.ALERT_AFTER);
+		// Create final phase action
 		long ed = end_date.getTime();
 		Date after = new Date(ed + after_hours * HOUR_MS);
-		createTimeAction(plan, after, PlanPhase.UNDEPLOYED);
+		createPhaseAction(plan, after, PlanPhase.UNDEPLOYED);
 	}
 
-	/** Create a time action for an action plan */
-	private void createTimeAction(ActionPlanImpl plan, Date dt, String ph)
+	/** Create a phase action for an action plan */
+	private void createPhaseAction(ActionPlanImpl plan, Date dt, String ph)
 		throws SonarException
 	{
 		String pname = plan.getName();
-		String tname = TimeActionImpl.createUniqueName(pname + "_%d");
-		TimeActionImpl ta = new TimeActionImpl(tname, pname, null, dt,
-			dt, ph);
-		if (ta.getPhase() == null)
+		String name = PhaseActionImpl.createUniqueName(pname + "_%d");
+		String params = PA_DATE.format(dt);
+		PhaseActionImpl pa = new PhaseActionImpl(name, pname, null,
+			null, ph, 1, params);
+		if (pa.getToPhase() == null)
 			log("plan phase not found, " + ph);
-		log("created time action " + tname);
-		ta.notifyCreate();
+		log("created phase action " + name);
+		pa.notifyCreate();
 	}
 
 	/** Create hashtags for a set of DMS in an action plan */

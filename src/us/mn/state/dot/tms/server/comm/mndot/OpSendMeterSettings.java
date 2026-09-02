@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2025  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.MeterAlgorithm;
-import us.mn.state.dot.tms.TimeActionHelper;
+import us.mn.state.dot.tms.PhaseActionHelper;
 import us.mn.state.dot.tms.TimingTable;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -92,10 +92,10 @@ public class OpSendMeterSettings extends Op170Device {
 		}
 	}
 
-	/** Update one timing table with a time action */
+	/** Update one timing table with a phase action */
 	private void updateTable(int start, int stop) {
-		int p = TimeActionHelper.getPeriod(start);
-		if (TimeActionHelper.getPeriod(stop) != p)
+		int p = PhaseActionHelper.getPeriod(start);
+		if (PhaseActionHelper.getPeriod(stop) != p)
 			return;
 		int hhmm = minuteHHMM(start);
 		table_start[p] = Math.min(table_start[p], hhmm);

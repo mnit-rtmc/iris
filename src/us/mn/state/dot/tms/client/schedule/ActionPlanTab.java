@@ -20,7 +20,6 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DeviceAction;
 import us.mn.state.dot.tms.PhaseAction;
-import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -45,9 +44,6 @@ public class ActionPlanTab extends JPanel {
 	/** Action plan panel */
 	private final ActionPlanPanel plan_pnl;
 
-	/** Time action table panel */
-	private final ProxyTablePanel<TimeAction> t_panel;
-
 	/** Phase action table panel */
 	private final ProxyTablePanel<PhaseAction> pa_panel;
 
@@ -63,7 +59,6 @@ public class ActionPlanTab extends JPanel {
 				selectActionPlan();
 			}
 		};
-		t_panel = new TimeActionPanel(s);
 		pa_panel = new PhaseActionPanel(s);
 		d_panel = new ProxyTablePanel<DeviceAction>(
 			new DeviceActionModel(s, null));
@@ -72,11 +67,9 @@ public class ActionPlanTab extends JPanel {
 	/** Initializze the widgets on the panel */
 	public void initialize() {
 		plan_pnl.initialize();
-		t_panel.initialize();
 		pa_panel.initialize();
 		d_panel.initialize();
 		JTabbedPane tab = new JTabbedPane();
-		tab.add(I18N.get("action.plan.schedule"), t_panel);
 		tab.add(I18N.get("phase.action"), pa_panel);
 		tab.add(I18N.get("action.plan.device"), d_panel);
 		GroupLayout gl = new GroupLayout(this);
@@ -95,7 +88,6 @@ public class ActionPlanTab extends JPanel {
 	/** Dispose of the form */
 	public void dispose() {
 		plan_pnl.dispose();
-		t_panel.dispose();
 		pa_panel.dispose();
 		d_panel.dispose();
 	}
@@ -103,7 +95,6 @@ public class ActionPlanTab extends JPanel {
 	/** Change the selected action plan */
 	private void selectActionPlan() {
 		ActionPlan ap = plan_pnl.getSelectedProxy();
-		t_panel.setModel(new TimeActionModel(session, ap));
 		pa_panel.setModel(new PhaseActionModel(session, ap));
 		d_panel.setModel(new DeviceActionModel(session, ap));
 	}

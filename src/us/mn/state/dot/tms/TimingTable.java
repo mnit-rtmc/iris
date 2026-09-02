@@ -43,15 +43,6 @@ public class TimingTable {
 			if (ap.getActive() && min != null)
 				createEvent(pa, min);
 		}
-		// FIXME: remove Time Actions
-		ArrayList<TimeAction> time_actions =
-			TimeActionHelper.find(dev_actions);
-		for (TimeAction ta : time_actions) {
-			ActionPlan ap = ta.getActionPlan();
-			Integer min = TimeActionHelper.getMinuteOfDay(ta);
-			if (ap.getActive() && min != null)
-				createEvent(ta, min);
-		}
 	}
 
 	/** Create an event from a phase action */
@@ -61,17 +52,6 @@ public class TimingTable {
 		for (DeviceAction da: dev_actions) {
 			if (da.getActionPlan() == ap)
 				start |= (pa.getToPhase() == da.getPhase());
-		}
-		events.put(min, start);
-	}
-
-	/** Create an event from a time action */
-	private void createEvent(TimeAction ta, Integer min) {
-		boolean start = false;
-		ActionPlan ap = ta.getActionPlan();
-		for (DeviceAction da: dev_actions) {
-			if (da.getActionPlan() == ap)
-				start |= (ta.getPhase() == da.getPhase());
 		}
 		events.put(min, start);
 	}

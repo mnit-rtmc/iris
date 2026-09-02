@@ -101,6 +101,14 @@ public class PhaseActionHelper extends BaseHelper {
 		}
 	}
 
+	/** Minute of 12 Noon in day */
+	static public final int NOON = 12 * 60;
+
+	/** Get the peak period for a minute-of-day */
+	static public int getPeriod(int min) {
+		return (min < NOON) ? Calendar.AM : Calendar.PM;
+	}
+
 	/** Get CLOCK_TIME minute-of-day (0-1440) */
 	static public Integer getClockTime(PhaseAction pa) {
 		if (pa.getCondition() == ActCondition.CLOCK_TIME.ordinal()) {

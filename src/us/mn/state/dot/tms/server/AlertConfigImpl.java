@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2020  SRF Consulting Group, Inc.
- * Copyright (C) 2021-2024  Minnesota Department of Transportation
+ * Copyright (C) 2021-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -804,7 +804,7 @@ public class AlertConfigImpl extends BaseObjectImpl implements AlertConfig {
 
 	/** Lookup the current plan phase name */
 	public String getCurrentPhase(Date start_date, Date end_date) {
-		// Use time in thirty seconds to avoid missing time actions
+		// Use time in thirty seconds to avoid missing phase actions
 		long now = TimeSteward.currentTimeMillis() + 30 * 1000;
 		long sd = start_date.getTime();
 		long bfr_ms = getBeforePeriodHours() * HOUR_MS;

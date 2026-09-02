@@ -58,7 +58,6 @@ import us.mn.state.dot.tms.Role;
 import us.mn.state.dot.tms.RptConduit;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TagReader;
-import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.User;
 import us.mn.state.dot.tms.VidSourceTemplate;
@@ -424,15 +423,6 @@ public class SonarState extends Client {
 		return plan_model;
 	}
 
-	/** Cache of time actions */
-	private final TypeCache<TimeAction> time_actions =
-		new TypeCache<TimeAction>(TimeAction.class, this);
-
-	/** Get the time action cache */
-	public TypeCache<TimeAction> getTimeActions() {
-		return time_actions;
-	}
-
 	/** Cache of phase actions */
 	private final TypeCache<PhaseAction> phase_actions =
 		new TypeCache<PhaseAction>(PhaseAction.class, this);
@@ -639,7 +629,6 @@ public class SonarState extends Client {
 		if (canRead(GateArm.SONAR_TYPE))
 			gate_arms.ignoreAttribute("operation");
 		populateReadable(parking_areas);
-		populateReadable(time_actions);
 		populateReadable(phase_actions);
 		populateReadable(device_actions);
 		populateReadable(gpses);

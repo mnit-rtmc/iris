@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterAlgorithm;
 import us.mn.state.dot.tms.MeterLock;
 import us.mn.state.dot.tms.MeterQueueState;
+import us.mn.state.dot.tms.PhaseActionHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeter;
@@ -45,7 +46,6 @@ import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TimingTable;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
@@ -348,10 +348,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			int min = table.lookupStop(e);
 			if (min <= 0)
 				break;
-			if (TimeActionHelper.getPeriod(min) == period)
+			if (PhaseActionHelper.getPeriod(min) == period)
 				return min;
 		}
-		return TimeActionHelper.NOON;
+		return PhaseActionHelper.NOON;
 	}
 
 	/** Update advance warning beacons */

@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
  */
 public class PhaseActionPanel extends ProxyTablePanel<PhaseAction> {
 
-	/** Create a new time action panel */
+	/** Create a new phase action panel */
 	public PhaseActionPanel(Session s) {
 		super(new PhaseActionModel(s, null));
 	}
@@ -39,7 +39,7 @@ public class PhaseActionPanel extends ProxyTablePanel<PhaseAction> {
 			mdl.createObject();
 	}
 
-	/** Get the time action model */
+	/** Get the phase action model */
 	private PhaseActionModel getPhaseActionModel() {
 		ProxyTableModel<PhaseAction> mdl = model;
 		return (mdl instanceof PhaseActionModel)

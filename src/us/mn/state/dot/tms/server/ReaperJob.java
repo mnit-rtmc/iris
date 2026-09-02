@@ -35,12 +35,12 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Hashtags;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.PhaseAction;
+import us.mn.state.dot.tms.PhaseActionHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TimeAction;
-import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -347,13 +347,13 @@ public class ReaperJob extends Job {
 	/** Reap an action plan */
 	private void reapActionPlan(ActionPlan ap) {
 		logMsg(ap, "reapActionPlan");
-		Iterator<TimeAction> it = TimeActionHelper.iterator();
+		Iterator<PhaseAction> it = PhaseActionHelper.iterator();
 		while (it.hasNext()) {
-			TimeAction ta = it.next();
-			if (ta instanceof TimeActionImpl) {
-				TimeActionImpl tai = (TimeActionImpl) ta;
-				if (tai.getActionPlan() == ap)
-					tai.notifyRemove();
+			PhaseAction pa = it.next();
+			if (pa instanceof PhaseActionImpl) {
+				PhaseActionImpl pai = (PhaseActionImpl) pa;
+				if (pai.getActionPlan() == ap)
+					pai.notifyRemove();
 			}
 		}
 		Iterator<DeviceAction> dit = DeviceActionHelper.iterator(ap);
