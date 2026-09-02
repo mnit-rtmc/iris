@@ -241,7 +241,7 @@ will be replaced with the appropriate value.  It has the following format:
 
 1. `dir`: Chronological direction
    - `n`: **Next** phase action with **Clock Time** after the current time
-   - `p`: **Previous** phase action **Clock Time** before the current time
+   - `p`: **Previous** phase action with **Clock Time** before the current time
 2. `format`: Time format pattern (`h a` if omitted)
 
 The format parameter is specified using a Java [DateTimeFormatter] pattern,

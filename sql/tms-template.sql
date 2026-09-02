@@ -171,7 +171,6 @@ day_plan	action_plan
 device_action	action_plan
 phase_action	action_plan
 plan_phase	action_plan
-time_action	action_plan
 beacon	\N
 camera	\N
 camera_preset	camera
@@ -2052,41 +2051,6 @@ CREATE VIEW day_plan_view AS
     FROM iris.day_plan p
     JOIN iris.day_matcher m ON m.day_plan = p.name;
 GRANT SELECT ON day_plan_view TO PUBLIC;
-
-CREATE TABLE iris.time_action (
-    name VARCHAR(30) PRIMARY KEY,
-    action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-    day_plan VARCHAR(10) REFERENCES iris.day_plan,
-    sched_date DATE,
-    time_of_day TIME WITHOUT TIME ZONE NOT NULL,
-    phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-
-    CONSTRAINT time_action_date CHECK (
-        ((day_plan IS NULL) OR (sched_date IS NULL)) AND
-        ((day_plan IS NOT NULL) OR (sched_date IS NOT NULL))
-    )
-);
-
-CREATE FUNCTION iris.time_action_notify() RETURNS TRIGGER AS
-    $time_action_notify$
-BEGIN
-    PERFORM pg_notify('time_action', NEW.name);
-    RETURN NULL; -- AFTER trigger return is ignored
-END;
-$time_action_notify$ LANGUAGE plpgsql;
-
-CREATE TRIGGER time_action_notify_trig
-    AFTER UPDATE ON iris.time_action
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.time_action_notify();
-
-CREATE TRIGGER time_action_table_notify_trig
-    AFTER INSERT OR DELETE ON iris.time_action
-    FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
-
-CREATE VIEW time_action_view AS
-    SELECT name, action_plan, day_plan, sched_date, time_of_day, phase
-    FROM iris.time_action;
-GRANT SELECT ON time_action_view TO PUBLIC;
 
 CREATE TABLE iris.action_condition (
     id INTEGER PRIMARY KEY,
@@ -4456,14 +4420,15 @@ CREATE VIEW ramp_meter_view AS
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW meter_action_view AS
-    SELECT h.name AS ramp_meter, da.action_plan, ta.phase, h.hashtag,
-           msg_pattern, time_of_day, day_plan, sched_date
+    SELECT h.name AS ramp_meter, da.action_plan, pa.to_phase, h.hashtag,
+           msg_pattern, day_plan, params AS clock_time
     FROM iris.device_action da
     JOIN iris.hashtag h ON h.hashtag = da.hashtag AND resource_n = 'ramp_meter'
     JOIN iris.action_plan ap ON da.action_plan = ap.name
-    LEFT JOIN iris.time_action ta ON ta.action_plan = ap.name
+    LEFT JOIN iris.phase_action pa ON pa.action_plan = ap.name
     WHERE active = true
-    ORDER BY ramp_meter, time_of_day;
+    AND pa.condition = 1
+    ORDER BY ramp_meter, params;
 GRANT SELECT ON meter_action_view TO PUBLIC;
 
 CREATE TABLE iris.metering_phase (
