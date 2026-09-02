@@ -114,7 +114,7 @@ public class PhaseActionModel extends ProxyTableModel<PhaseAction> {
 			}
 		});
 		cols.add(new ProxyColumn<PhaseAction>("phase.action.condition",
-			120)
+			120, ActCondition.class)
 		{
 			public Object getValueAt(PhaseAction pa) {
 				int c = pa.getCondition();
