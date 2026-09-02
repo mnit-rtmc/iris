@@ -47,7 +47,7 @@ resource, at the same access level.
 
 | Base Resource      | Dependent Resources                               |
 |--------------------|---------------------------------------------------|
-| [action plan]      | day matcher, [day plan], [device action], [plan phase], [time action], hashtag |
+| [action plan]      | day matcher, [day plan], [device action], [plan phase], [phase action], hashtag |
 | [beacon]           |                                                   |
 | [camera]           | [camera preset], [encoder stream], [encoder type] |
 | [comm config]      | [comm link], [controller], [alarm], [gps]         |
@@ -110,6 +110,7 @@ resource.  These include:
 [message pattern]: message_patterns.html
 [monitor style]: video.html#style
 [parking area]: parking_areas.html
+[phase action]: action_plans.html#phase-actions
 [plan phase]: action_plans.html#plan-phases
 [play list]: video.html#play-lists
 [preset]: cameras.html#presets
@@ -124,7 +125,6 @@ resource.  These include:
 [sign message]: sign_message.html
 [system attribute]: system_attributes.html
 [tag reader]: tolling.html#tag-readers
-[time action]: action_plans.html#time-actions
 [toll zone]: tolling.html#toll-zones
 [user id]: users.html#user-ids
 [video monitor]: video.html

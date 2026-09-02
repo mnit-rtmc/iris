@@ -216,39 +216,18 @@ estimated travel time.  These tags can be used only on DMS devices.
 condition is met.  These tags can be used with any device type, such as a
 flashing [beacon].
 
-Tag              | Description                      | Tag Mode            | Source
------------------|----------------------------------|---------------------|-------------
-`[cg` *…* `]`    | [ClearGuide] data                | Condition + Replace | `clearguide`
-`[exit` *…* `]`  | [Exit ramp backup]               | Condition           | `exit_warning`
-`[feed` *…* `]`  | Msg-Feed [protocol] message      | Replace             | N/A
-`[pa` *…* `]`    | [Parking area] availability      | Replace             | `parking`
-`[slow` *…* `]`  | [Slow traffic] warning           | Condition + Replace | `slow_warning`
-`[standby]`      | Standby messages                 | Standby             | `standby`
-`[ta` *…* `]`    | [Time actions](#time-action-tag) | Replace             | N/A
-`[tt` *…* `]`    | [Travel time] estimation         | Replace             | `travel_time`
-`[tz` *…* `]`    | [Toll zone] pricing              | Replace             | `tolling`
-`[vsa]`          | [Variable speed advisory]        | Condition + Replace | `speed_advisory`
-
-## Time Actions
-
-A *time action* automatically changes the phase at specified dates and times.
-These events are scheduled using either a [day plan](#day-plans) or a specific
-date (but not both).  A time of day must also be specified (HH:MM in 24-hour
-format).  Whenever the scheduled time occurs, the action plan will be changed to
-the specified phase.
-
-<details>
-<summary>API Resources 🕵️ </summary>
-
-* `iris/api/time_action` (primary)
-* `iris/api/time_action/{name}`
-
-| Access       | Primary                                                   |
-|--------------|-----------------------------------------------------------|
-| 👁️  View      | name, action\_plan, day\_plan, sched\_date, time\_of\_day |
-| 💡 Manage    | phase                                                     |
-
-</details>
+Tag              | Description                     | Tag Mode            | Source
+-----------------|---------------------------------|---------------------|-------------
+`[cg` *…* `]`    | [ClearGuide] data               | Condition + Replace | `clearguide`
+`[exit` *…* `]`  | [Exit ramp backup]              | Condition           | `exit_warning`
+`[feed` *…* `]`  | Msg-Feed [protocol] message     | Replace             | N/A
+`[pa` *…* `]`    | [Parking area] availability     | Replace             | `parking`
+`[slow` *…* `]`  | [Slow traffic] warning          | Condition + Replace | `slow_warning`
+`[standby]`      | Standby messages                | Standby             | `standby`
+`[ta` *…* `]`    | [Time action](#time-action-tag) | Replace             | N/A
+`[tt` *…* `]`    | [Travel time] estimation        | Replace             | `travel_time`
+`[tz` *…* `]`    | [Toll zone] pricing             | Replace             | `tolling`
+`[vsa]`          | [Variable speed advisory]       | Condition + Replace | `speed_advisory`
 
 ## Time Action Tag
 
