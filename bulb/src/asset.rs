@@ -53,6 +53,7 @@ pub enum Asset {
     MsgLines,
     MsgPatterns,
     Permissions,
+    PhaseActions,
     PlanPhases,
     ResourceTypes,
     RoadClasses,
@@ -61,7 +62,6 @@ pub enum Asset {
     Roles,
     SignConfigs,
     SignMessages,
-    TimeActions,
     Words,
 }
 
@@ -125,6 +125,7 @@ impl Asset {
             MsgLines => "/iris/api/msg_line".into(),
             MsgPatterns => "/iris/api/msg_pattern".into(),
             Permissions => "/iris/api/permission".into(),
+            PhaseActions => "/iris/api/phase_action".into(),
             PlanPhases => "/iris/api/plan_phase".into(),
             ResourceTypes => "/iris/lut/resource_type".into(),
             RoadClasses => "/iris/lut/road_class".into(),
@@ -133,7 +134,6 @@ impl Asset {
             Roles => "/iris/api/role".into(),
             SignConfigs => "/iris/api/sign_config".into(),
             SignMessages => "/iris/sign_message".into(),
-            TimeActions => "/iris/api/time_action".into(),
             Words => "/iris/api/word".into(),
         }
     }

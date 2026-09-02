@@ -80,11 +80,10 @@ limited to specific days using a [day plan](#day-plans).  Also, if
 * `iris/api/phase_action` (primary)
 * `iris/api/phase_action/{name}`
 
-| Access       | Primary                      |
-|--------------|------------------------------|
-| 👁️  View      | name, action\_plan           |
-| 💡 Manage    | day\_plan, condition, params |
-| 🔧 Configure | from\_phase, to\_phase       |
+| Access       | Primary                                              |
+|--------------|------------------------------------------------------|
+| 👁️  View      | name, action\_plan                                   |
+| 💡 Manage    | day\_plan, condition, params, from\_phase, to\_phase |
 
 </details>
 

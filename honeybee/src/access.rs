@@ -129,13 +129,13 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::Domain, "enabled")
         | (Res::MsgLine, _)
         | (Res::MsgPattern, _)
+        | (Res::PhaseAction, _)
         | (Res::RampMeter, "storage")
         | (Res::RampMeter, "max_wait")
         | (Res::RampMeter, "algorithm")
         | (Res::RampMeter, "am_target")
         | (Res::RampMeter, "pm_target")
         | (Res::Role, "enabled")
-        | (Res::TimeAction, _)
         | (Res::TollZone, _)
         | (Res::User, "enabled")
         | (Res::User, "password")
@@ -160,7 +160,7 @@ fn required_post_operate(res: Res) -> bool {
 fn required_post_manage(res: Res) -> bool {
     use Res::*;
     match res {
-        ActionPlan | DeviceAction | MsgPattern | MsgLine | TimeAction
+        ActionPlan | DeviceAction | MsgPattern | MsgLine | PhaseAction
         | TollZone => true,
         _ => false,
     }

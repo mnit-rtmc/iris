@@ -993,18 +993,6 @@ pub const TAG_READER_ONE: &str = "\
   LEFT JOIN geo_loc_view gl ON t.geo_loc = gl.name \
   WHERE t.name = $1";
 
-/// SQL query for all time actions (primary)
-pub const TIME_ACTION_ALL: &str = "\
-  SELECT name, action_plan, day_plan, sched_date, time_of_day, phase \
-  FROM iris.time_action \
-  ORDER BY action_plan, day_plan, sched_date, time_of_day, name";
-
-/// SQL query for one time action (secondary)
-pub const TIME_ACTION_ONE: &str = "\
-  SELECT name, action_plan, day_plan, sched_date, time_of_day, phase \
-  FROM iris.time_action \
-  WHERE name = $1";
-
 /// SQL query for all toll zones (primary)
 pub const TOLL_ZONE_ALL: &str = "\
   SELECT name, tollway, start_id, end_id \

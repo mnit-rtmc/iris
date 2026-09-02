@@ -91,7 +91,6 @@ pub enum Res {
     SignMessage,
     SystemAttribute,
     TagReader,
-    TimeAction,
     TollZone,
     User,
     VideoMonitor,
@@ -192,7 +191,6 @@ impl Res {
             SignMessage,
             SystemAttribute,
             TagReader,
-            TimeAction,
             TollZone,
             User,
             VideoMonitor,
@@ -281,7 +279,6 @@ impl Res {
             SignMessage => "sign_message",
             SystemAttribute => "system_attribute",
             TagReader => "tag_reader",
-            TimeAction => "time_action",
             TollZone => "toll_zone",
             User => "user_id",
             VideoMonitor => "video_monitor",
@@ -339,7 +336,6 @@ impl Res {
             SignConfig => "📐",
             SystemAttribute => "📃",
             TagReader => "🏷️ ",
-            TimeAction => "⏰",
             TollZone => "💲",
             User => "👤",
             VideoMonitor => "📺",
@@ -378,8 +374,8 @@ impl Res {
             | MapExtent | MonitorStyle | MsgLine | MsgPattern | ParkingArea
             | Permission | PhaseAction | PlanPhase | PlayList | RampMeter
             | Rnode | Road | RoadAffix | Role | SignConfig | SignDetail
-            | SignMessage | SystemAttribute | TagReader | TimeAction
-            | TollZone | User | VideoMonitor | WeatherSensor | Word => true,
+            | SignMessage | SystemAttribute | TagReader | TollZone | User
+            | VideoMonitor | WeatherSensor | Word => true,
             _ => false,
         }
     }
@@ -390,7 +386,7 @@ impl Res {
         match self {
             // Action plan resources
             DayMatcher | DayPlan | DeviceAction | Hashtag | PhaseAction
-            | PlanPhase | TimeAction => ActionPlan,
+            | PlanPhase => ActionPlan,
             // Camera resources
             CameraPreset | EncoderStream | EncoderType => Camera,
             // Comm resources

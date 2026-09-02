@@ -48,28 +48,31 @@ pub struct HashtagResource {
     pub resource_n: String,
 }
 
-/// Time action
+/// Phase action
 #[derive(Debug, Default, Deserialize, PartialEq)]
-pub struct TimeAction {
+pub struct PhaseAction {
     pub name: String,
     pub action_plan: String,
     pub day_plan: Option<String>,
-    pub sched_date: Option<String>,
-    pub time_of_day: String,
-    pub phase: String,
+    pub condition: u32,
+    pub params: Option<String>,
+    pub from_phase: Option<String>,
+    pub to_phase: String,
 }
 
-impl TimeAction {
+impl PhaseAction {
     /// Make HTML table row
     fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
         if let Some(day_plan) = &self.day_plan {
             tr.td().cdata(day_plan).close();
         }
+        /*
         if let Some(sched_date) = &self.sched_date {
             tr.td().cdata(sched_date).close();
         }
         tr.td().cdata(&self.time_of_day).close();
-        tr.td().cdata("⇨ ").cdata(&self.phase).close();
+        */
+        tr.td().cdata("⇨ ").cdata(&self.to_phase).close();
     }
 }
 
@@ -94,7 +97,7 @@ pub struct ActionPlanAnc {
     pub phases: Vec<PlanPhase>,
     pub device_actions: Vec<DeviceAction>,
     pub hashtag_resources: Vec<HashtagResource>,
-    pub time_actions: Vec<TimeAction>,
+    pub phase_actions: Vec<PhaseAction>,
 }
 
 impl AncillaryData for ActionPlanAnc {
@@ -108,7 +111,7 @@ impl AncillaryData for ActionPlanAnc {
             }
             View::Control => {
                 vec![
-                    Asset::TimeActions,
+                    Asset::PhaseActions,
                     Asset::HashtagResources,
                     Asset::DeviceActions,
                     Asset::PlanPhases,
@@ -120,13 +123,13 @@ impl AncillaryData for ActionPlanAnc {
         let phases = Vec::new();
         let device_actions = Vec::new();
         let hashtag_resources = Vec::new();
-        let time_actions = Vec::new();
+        let phase_actions = Vec::new();
         ActionPlanAnc {
             assets,
             phases,
             device_actions,
             hashtag_resources,
-            time_actions,
+            phase_actions,
         }
     }
 
@@ -152,11 +155,11 @@ impl AncillaryData for ActionPlanAnc {
             Asset::HashtagResources => {
                 self.hashtag_resources = serde_wasm_bindgen::from_value(value)?;
             }
-            Asset::TimeActions => {
-                let mut actions: Vec<TimeAction> =
+            Asset::PhaseActions => {
+                let mut actions: Vec<PhaseAction> =
                     serde_wasm_bindgen::from_value(value)?;
-                actions.retain(|ta| ta.action_plan == pri.name);
-                self.time_actions = actions;
+                actions.retain(|pa| pa.action_plan == pri.name);
+                self.phase_actions = actions;
             }
             _ => unreachable!(),
         }
@@ -313,12 +316,12 @@ impl ActionPlan {
             details.span().class("info").cdata(tags);
             details.close();
         }
-        if !anc.time_actions.is_empty() {
+        if !anc.phase_actions.is_empty() {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("🗓️ Schedule").close();
             let mut table = details.table();
-            for ta in &anc.time_actions {
-                ta.table_row(&mut table.tr());
+            for pa in &anc.phase_actions {
+                pa.table_row(&mut table.tr());
             }
             details.close();
         }
