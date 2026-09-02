@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2021-2024  Minnesota Department of Transportation
+ * Copyright (C) 2021-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,15 @@ public class TimingTable {
 	/** Create a timing table for a device with the given hashtags */
 	public TimingTable(Hashtags tags) {
 		dev_actions = DeviceActionHelper.find(tags);
+		ArrayList<PhaseAction> phase_actions =
+			PhaseActionHelper.find(dev_actions);
+		for (PhaseAction pa : phase_actions) {
+			ActionPlan ap = pa.getActionPlan();
+			Integer min = PhaseActionHelper.getClockTime(pa);
+			if (ap.getActive() && min != null)
+				createEvent(pa, min);
+		}
+		// FIXME: remove Time Actions
 		ArrayList<TimeAction> time_actions =
 			TimeActionHelper.find(dev_actions);
 		for (TimeAction ta : time_actions) {
@@ -43,6 +52,17 @@ public class TimingTable {
 			if (ap.getActive() && min != null)
 				createEvent(ta, min);
 		}
+	}
+
+	/** Create an event from a phase action */
+	private void createEvent(PhaseAction pa, Integer min) {
+		boolean start = false;
+		ActionPlan ap = pa.getActionPlan();
+		for (DeviceAction da: dev_actions) {
+			if (da.getActionPlan() == ap)
+				start |= (pa.getToPhase() == da.getPhase());
+		}
+		events.put(min, start);
 	}
 
 	/** Create an event from a time action */

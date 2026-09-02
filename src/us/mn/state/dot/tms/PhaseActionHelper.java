@@ -17,8 +17,10 @@ package us.mn.state.dot.tms;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 
 /**
@@ -319,5 +321,23 @@ public class PhaseActionHelper extends BaseHelper {
 			if (checkDayPlan(dp, pst.getTime()))
 				filter.check(pst.getTime(), pa);
 		}
+	}
+
+	/** Find all phase actions from a list of device actions */
+	static public ArrayList<PhaseAction> find(
+		ArrayList<DeviceAction> dev_actions)
+	{
+		HashSet<ActionPlan> plans = new HashSet<ActionPlan>();
+		for (DeviceAction da : dev_actions) {
+			plans.add(da.getActionPlan());
+		}
+		ArrayList<PhaseAction> actions = new ArrayList<PhaseAction>();
+		Iterator<PhaseAction> it = iterator();
+		while (it.hasNext()) {
+			PhaseAction pa = it.next();
+			if (plans.contains(pa.getActionPlan()))
+				actions.add(pa);
+		}
+		return actions;
 	}
 }
