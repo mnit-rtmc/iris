@@ -30,6 +30,7 @@ pub enum Asset {
     // For all CIO pins for one controller
     ControllerIo(String),
     Controllers,
+    DayMatchers,
     DeviceActions,
     Directions,
     Domains,
@@ -85,6 +86,7 @@ impl Asset {
                 uri
             }
             Controllers => "/iris/api/controller".into(),
+            DayMatchers => "/iris/api/day_matcher".into(),
             DeviceActions => "/iris/api/device_action".into(),
             Directions => "/iris/lut/direction".into(),
             Domains => "/iris/api/domain".into(),

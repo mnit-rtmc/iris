@@ -300,6 +300,18 @@ impl Fields {
         self.insert(id, Value::Number(val.into()));
     }
 
+    /// Insert an optional number value into mapping
+    pub fn insert_opt_num<T: Into<Number>>(
+        &mut self,
+        id: &str,
+        val: Option<T>,
+    ) {
+        match val {
+            Some(val) => self.insert_num(id, val),
+            None => self.insert(id, Value::Null),
+        }
+    }
+
     /// Insert a bool value into mapping
     pub fn insert_bool(&mut self, id: &str, val: bool) {
         self.insert(id, Value::Bool(val));

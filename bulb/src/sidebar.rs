@@ -202,10 +202,7 @@ fn handle_click_card(el: &Element) {
 fn add_change_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
-            let id = target.id();
-            if id == eid::FULLSCREEN {
-                set_fullscreen();
-            }
+            handle_change(target.id());
         }
     });
     el.add_event_listener_with_callback(
@@ -217,11 +214,13 @@ fn add_change_listener(el: &Element) -> Result<()> {
     Ok(())
 }
 
-/// Set fullscreen mode
-fn set_fullscreen() {
-    let doc = Doc::get();
-    let checked = doc.input_bool(eid::FULLSCREEN);
-    doc.request_fullscreen(checked);
+/// Handle a change event
+fn handle_change(id: String) {
+    if id.as_str() == eid::FULLSCREEN {
+        let doc = Doc::get();
+        let checked = doc.input_bool(eid::FULLSCREEN);
+        doc.request_fullscreen(checked);
+    }
 }
 
 /// Add an "input" event listener to an element

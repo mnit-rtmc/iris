@@ -306,6 +306,9 @@ impl CardView {
             (Res::ActionPlan, View::Control) => {
                 self.handle_input_x::<ActionPlan>(id).await
             }
+            (Res::DayPlan, View::Setup(true)) => {
+                self.handle_input_x::<DayPlan>(id).await
+            }
             (Res::Dms, View::Control) => self.handle_input_x::<Dms>(id).await,
             (Res::Domain, View::Control) => {
                 self.handle_input_x::<Domain>(id).await
