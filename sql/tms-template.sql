@@ -2009,9 +2009,11 @@ CREATE TABLE iris.day_matcher (
     shift INTEGER CHECK (shift >= -2 AND shift <= 2 AND shift != 0),
 
     CONSTRAINT day_matcher_valid CHECK (
-        (COALESCE(month, day, weekday, week) IS NOT NULL) AND
-        (day IS NULL OR week IS NULL) AND
-        (shift IS NULL OR (weekday IS NOT NULL AND week IS NOT NULL))
+        (month IS NOT NULL OR day IS NOT NULL OR weekday IS NOT NULL) AND
+        (week IS NULL OR (day IS NULL AND weekday IS NOT NULL)) AND
+        (shift IS NULL OR
+            (day IS NULL AND weekday IS NOT NULL AND week IS NOT NULL)
+        )
     )
 );
 
