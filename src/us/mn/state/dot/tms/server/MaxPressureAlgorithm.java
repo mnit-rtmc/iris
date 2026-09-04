@@ -255,6 +255,39 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             return false;
         }
     }
+    
+    static public void processAllStates() {
+        long stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
+        Iterator<MaxPressureAlgorithm> it =
+            ALL_ALGS.values().iterator();
+        while (it.hasNext()) {
+            MaxPressureAlgorithm alg = it.next();
+            alg.updateStations(stamp);
+            if (alg.isDone()) {
+                alg.log("isDone: removing");
+                it.remove();
+            }
+        }
+    }
+    
+    private boolean isDone(){
+        // this should trigger even if the meter is operating at 8pm. 
+        // If so, then validate() calls getMeterState() which removes the MeterState from meter_states due to the Corridor instance changing
+        // That causes this loop to become valid.
+        for (MeterState ms : meter_states.values()) {
+            if (ms.meter.isOperating())
+                return false;
+        }
+        return true;
+    }
+    
+    /** Update the station nodes for the current interval */
+    private void updateStations(long stamp) {
+        // this runs the simulation that keeps track of vehicle densities
+        for(String name : meter_states.keySet()){
+            meter_states.get(name).updateStations(stamp);
+        }
+    }
 
     /** Create one node */
     private Node createNode(R_NodeImpl rnode, float mile) {
@@ -287,14 +320,6 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
     public void validate(RampMeterImpl meter) {
         MeterState ms = getMeterState(meter);
         
-        // if ms = null persists, it appears to be fixed by creating a new MeterState
-        if(ms == null){
-            log("Creating new state for " + meter.getName()+" stored meter="+meter_states.get(meter.getName())+" corridor="+meter.getCorridor()+"|"+corridor);
-            createMeterState(meter);
-            ms = getMeterState(meter);
-        }
-        
-        
         if (ms != null) {
             ms.validate();
 
@@ -318,9 +343,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
     private MeterState getMeterState(RampMeterImpl meter) {
         if (meter.getCorridor() == corridor){
             MeterState output = null;
-            synchronized(meter_states){
-                output = meter_states.get(meter.getName());
-            }
+            output = meter_states.get(meter.getName());
             return output;
         }
         else {
@@ -337,9 +360,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         EntranceNode en = findEntranceNode(meter);
         if (en != null) {
             MeterState ms = new MeterState(meter, en);
-            synchronized(meter_states){
-                meter_states.put(meter.getName(), ms);
-            }
+            meter_states.put(meter.getName(), ms);
             return true;
         } else
             return false;
@@ -851,6 +872,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
             try {
                 // these are copied by k-adaptive and used to determine the minimum metering rate
+                // NOTE: these must happen in proper order (according to KAdaptive)
                 checkQueueBackedUp();
                 checkQueueEmpty();
                 updatePassageState();
@@ -866,6 +888,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
                 log(ex.toString());
             }
         }
+        
         
         /** Update ramp passage output state */
         private void updatePassageState() {
@@ -1286,10 +1309,14 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         private int calculateMaximumRate() {
             return RampMeterHelper.getMaxRelease();
         }
+        
+        private void updateStations(long stamp){
+            network.simulateLastTimestep(stamp, PERIOD_MS);
+        }
 
         /** Calculate the metering rate */
         private void calculateMeteringRate() {
-            network.simulateLastTimestep(stamp, PERIOD_MS);
+            
             
             long stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
 
