@@ -63,7 +63,7 @@ pub struct PhaseAction {
 }
 
 /// Action conditions
-const CONDITIONS: &[&str] = &["HOLD", "CLOCK", "TRAFFIC", "RWIS", "ALARM"];
+const CONDITIONS: &[&str] = &["⏳", "⏰", "🚗", "🌦️", "📢"];
 
 impl PhaseAction {
     /// Make HTML table row
@@ -72,8 +72,10 @@ impl PhaseAction {
         // FIXME: strip off date for CLOCK condition actions
         let params = self.params.as_deref().unwrap_or("");
         tr.td().cdata(params).close();
-        let from_phase = self.from_phase.as_deref().unwrap_or("");
-        tr.td().cdata(from_phase).close();
+        match &self.from_phase {
+            Some(from_phase) => tr.td().cdata(from_phase).close(),
+            None => tr.td().class("info").cdata("*any*").close(),
+        };
         tr.td().cdata("⇨").close();
         tr.td().cdata(&self.to_phase).close();
     }
