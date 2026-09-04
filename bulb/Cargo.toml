@@ -17,6 +17,7 @@ gift.workspace = true
 hatmil = "1.5.0"
 http.workspace = true
 humantime = "2.1"
+jiff.workspace = true
 js-sys = "0.3"
 log.workspace = true
 mag.workspace = true

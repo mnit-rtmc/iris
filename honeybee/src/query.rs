@@ -743,7 +743,7 @@ pub const PERMISSION_ONE: &str = "\
 pub const PHASE_ACTION_ALL: &str = "\
   SELECT name, action_plan, day_plan, from_phase, to_phase, condition, params \
   FROM iris.phase_action \
-  ORDER BY action_plan, day_plan, from_phase, condition, params";
+  ORDER BY action_plan, condition, params, day_plan, from_phase";
 
 /// SQL query for one phase action (secondary)
 pub const PHASE_ACTION_ONE: &str = "\

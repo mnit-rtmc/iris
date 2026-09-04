@@ -31,6 +31,7 @@ pub enum Asset {
     ControllerIo(String),
     Controllers,
     DayMatchers,
+    DayPlans,
     DeviceActions,
     Directions,
     Domains,
@@ -87,6 +88,7 @@ impl Asset {
             }
             Controllers => "/iris/api/controller".into(),
             DayMatchers => "/iris/api/day_matcher".into(),
+            DayPlans => "/iris/api/day_plan".into(),
             DeviceActions => "/iris/api/device_action".into(),
             Directions => "/iris/lut/direction".into(),
             Domains => "/iris/api/domain".into(),

@@ -12,6 +12,7 @@
 //
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
+use crate::dayplan::{DayMatcher, DayPlan};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
@@ -22,6 +23,7 @@ use crate::util::{
 };
 use crate::view::View;
 use hatmil::{Tree, html};
+use jiff::Zoned;
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -60,19 +62,20 @@ pub struct PhaseAction {
     pub to_phase: String,
 }
 
+/// Action conditions
+const CONDITIONS: &[&str] = &["HOLD", "CLOCK", "TRAFFIC", "RWIS", "ALARM"];
+
 impl PhaseAction {
     /// Make HTML table row
     fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
-        if let Some(day_plan) = &self.day_plan {
-            tr.td().cdata(day_plan).close();
-        }
-        /*
-        if let Some(sched_date) = &self.sched_date {
-            tr.td().cdata(sched_date).close();
-        }
-        tr.td().cdata(&self.time_of_day).close();
-        */
-        tr.td().cdata("⇨ ").cdata(&self.to_phase).close();
+        tr.td().cdata(CONDITIONS[self.condition as usize]).close();
+        // FIXME: strip off date for CLOCK condition actions
+        let params = self.params.as_deref().unwrap_or("");
+        tr.td().cdata(params).close();
+        let from_phase = self.from_phase.as_deref().unwrap_or("");
+        tr.td().cdata(from_phase).close();
+        tr.td().cdata("⇨").close();
+        tr.td().cdata(&self.to_phase).close();
     }
 }
 
@@ -95,6 +98,8 @@ pub struct ActionPlan {
 pub struct ActionPlanAnc {
     assets: Vec<Asset>,
     pub phases: Vec<PlanPhase>,
+    pub day_plans: Vec<DayPlan>,
+    pub day_matchers: Vec<DayMatcher>,
     pub device_actions: Vec<DeviceAction>,
     pub hashtag_resources: Vec<HashtagResource>,
     pub phase_actions: Vec<PhaseAction>,
@@ -111,25 +116,22 @@ impl AncillaryData for ActionPlanAnc {
             }
             View::Control => {
                 vec![
-                    Asset::PhaseActions,
-                    Asset::HashtagResources,
+                    Asset::DayPlans,
+                    Asset::DayMatchers,
                     Asset::DeviceActions,
+                    Asset::HashtagResources,
+                    Asset::PhaseActions,
                     Asset::PlanPhases,
                 ]
             }
-            View::Setup(_edit) => vec![Asset::DeviceActions, Asset::PlanPhases],
+            View::Setup(_edit) => {
+                vec![Asset::DeviceActions, Asset::PlanPhases]
+            }
             _ => vec![],
         };
-        let phases = Vec::new();
-        let device_actions = Vec::new();
-        let hashtag_resources = Vec::new();
-        let phase_actions = Vec::new();
         ActionPlanAnc {
             assets,
-            phases,
-            device_actions,
-            hashtag_resources,
-            phase_actions,
+            ..Default::default()
         }
     }
 
@@ -148,6 +150,12 @@ impl AncillaryData for ActionPlanAnc {
         match asset {
             Asset::PlanPhases => {
                 self.phases = serde_wasm_bindgen::from_value(value)?;
+            }
+            Asset::DayPlans => {
+                self.day_plans = serde_wasm_bindgen::from_value(value)?;
+            }
+            Asset::DayMatchers => {
+                self.day_matchers = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::DeviceActions => {
                 self.device_actions = serde_wasm_bindgen::from_value(value)?;
@@ -168,6 +176,26 @@ impl AncillaryData for ActionPlanAnc {
 }
 
 impl ActionPlanAnc {
+    /// Check if a day plan is active today (not holiday)
+    fn is_active(&self, nm: &str) -> bool {
+        let today = Zoned::now().date();
+        for dp in &self.day_plans {
+            if dp.name == nm {
+                for dm in &self.day_matchers {
+                    if dm.day_plan == nm {
+                        if dm.matches(&today) {
+                            return !dp.holidays;
+                        } else {
+                            return dp.holidays;
+                        }
+                    }
+                }
+                return dp.holidays;
+            }
+        }
+        false
+    }
+
     /// Get action plan phases
     fn phases<'a>(
         &'a self,
@@ -318,9 +346,15 @@ impl ActionPlan {
         }
         if !anc.phase_actions.is_empty() {
             let mut details = tree.root::<html::Details>();
-            details.summary().cdata("🗓️ Today's Schedule").close();
+            details.open().summary().cdata("🗓️ Today's Schedule").close();
             let mut table = details.table();
             for pa in &anc.phase_actions {
+                if let Some(dp) = &pa.day_plan
+                    && !anc.is_active(dp)
+                {
+                    continue;
+                }
+                // FIXME: check CLOCK_TIME dates
                 pa.table_row(&mut table.tr());
             }
             details.close();

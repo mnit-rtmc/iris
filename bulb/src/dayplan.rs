@@ -19,6 +19,7 @@ use crate::item::ItemState;
 use crate::util::{ContainsLower, Doc, Fields};
 use crate::view::View;
 use hatmil::{Tree, html};
+use jiff::civil::{Date, Weekday};
 use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
@@ -125,6 +126,53 @@ fn next_matcher_name(matchers: &[DayMatcher]) -> String {
 }
 
 impl DayMatcher {
+    /// Check if a time stamp matches
+    pub fn matches(&self, date: &Date) -> bool {
+        if !self.is_valid() {
+            return false;
+        }
+        if let Some(month) = self.month
+            && i32::from(date.month()) != month
+        {
+            return false;
+        }
+        if let Some(day) = self.day
+            && i32::from(date.day()) != day
+        {
+            return false;
+        }
+        match (self.weekday, self.week) {
+            (Some(weekday), None) => {
+                i32::from(date.weekday().to_sunday_one_offset()) == weekday
+            }
+            (Some(weekday), Some(week)) => {
+                // shift only allowed with both weekday *AND* week
+                let shift = self.shift.unwrap_or(0);
+                if let Ok(weekday) =
+                    Weekday::from_sunday_one_offset(weekday as i8)
+                    && let Ok(mut dt) =
+                        date.nth_weekday_of_month(week as i8, weekday)
+                {
+                    for _ in 0..shift.abs() {
+                        if shift > 0 {
+                            dt = dt.tomorrow().unwrap_or(dt);
+                        } else {
+                            dt = dt.yesterday().unwrap_or(dt);
+                        }
+                    }
+                    dt == *date
+                } else {
+                    false
+                }
+            }
+            (None, Some(_week)) => {
+                // invalid combination
+                false
+            }
+            (None, None) => true,
+        }
+    }
+
     /// Get ID for month `<select>`
     fn id_month(&self) -> String {
         format!("{}-month", self.name)
