@@ -189,7 +189,7 @@ impl CardView {
 
     /// Check for Create view
     fn is_create(&self) -> bool {
-        View::Create == self.view || self.id.ends_with("__")
+        View::Create == self.view || (self.id == format!("{}__", self.res))
     }
 
     /// Set the view to compact
