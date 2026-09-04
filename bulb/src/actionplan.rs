@@ -346,7 +346,11 @@ impl ActionPlan {
         }
         if !anc.phase_actions.is_empty() {
             let mut details = tree.root::<html::Details>();
-            details.open().summary().cdata("🗓️ Today's Schedule").close();
+            details
+                .open()
+                .summary()
+                .cdata("🗓️ Today's Schedule")
+                .close();
             let mut table = details.table();
             for pa in &anc.phase_actions {
                 if let Some(dp) = &pa.day_plan
