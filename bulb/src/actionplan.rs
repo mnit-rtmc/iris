@@ -318,7 +318,7 @@ impl ActionPlan {
         }
         if !anc.phase_actions.is_empty() {
             let mut details = tree.root::<html::Details>();
-            details.summary().cdata("🗓️ Schedule").close();
+            details.summary().cdata("🗓️ Today's Schedule").close();
             let mut table = details.table();
             for pa in &anc.phase_actions {
                 pa.table_row(&mut table.tr());
@@ -401,6 +401,8 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
+        // FIXME: add device action table
+        // FIXME: add phase action table
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
