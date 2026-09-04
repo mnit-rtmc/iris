@@ -40,6 +40,7 @@ public class MeteringJob extends Job {
 	/** Validate all metering algorithms */
 	private void validateMetering() {
 		KAdaptiveAlgorithm.processAllStates();
+		MaxPressureAlgorithm.processAllStates();
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
 		while (it.hasNext()) {
 			RampMeter rm = it.next();
