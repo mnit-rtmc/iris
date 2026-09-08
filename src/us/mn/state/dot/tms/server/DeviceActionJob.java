@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.Calendar;
 import java.util.Iterator;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.ActionPlan;
@@ -44,6 +45,9 @@ import us.mn.state.dot.tms.RampMeterHelper;
  */
 public class DeviceActionJob extends Job {
 
+	/** Seconds to offset each poll from start of interval */
+	static private final int OFFSET_SECS = 14;
+
 	/** Single action plan to process (null for all) */
 	private final ActionPlanImpl plan;
 
@@ -55,7 +59,8 @@ public class DeviceActionJob extends Job {
 
 	/** Create a new device action job */
 	public DeviceActionJob() {
-		this(null);
+		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
+		plan = null;
 	}
 
 	/** Perform device actions */
