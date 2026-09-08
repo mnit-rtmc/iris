@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.89.0 (8 Sep 2026)
+ - Web UI: improve UI for reduced-permission roles
+ - Web UI: use Navigation API to handle address bar, back button, etc.
+ - Web UI: update device control cards on SSE notify
+ - Web UI: reworked Day Plan setup card
+ - Web UI: reworked Action Plan control card ("Today's Schedule")
+ - Web UI: add video playback to camera control card
+ - Removed `time_action` (replaced by `phase_action` w/CLOCK_TIME condition)
+ - Removed RWIS action tag (now use `phase_action` w/RWIS condition)
+ - Fixed problems with Max-Pressure algorithm
+
 5.88.0 (10 Aug 2026)
  - Web UI: add direct ONVIF camera PTZ driver, through honeybee
  - Web UI: add camera switching for selected video monitor
