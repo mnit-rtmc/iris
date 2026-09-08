@@ -23,7 +23,7 @@ use crate::util::{
 };
 use crate::view::View;
 use hatmil::{Tree, html};
-use jiff::Zoned;
+use jiff::{Zoned, civil::Date};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
@@ -66,12 +66,33 @@ pub struct PhaseAction {
 const CONDITIONS: &[&str] = &["⏳", "⏰", "🚗", "🌦️", "📢"];
 
 impl PhaseAction {
+    /// Check if a phase action is active on a given day
+    fn is_active(&self, day: &Date) -> bool {
+        if 1 == self.condition
+            && let Some(params) = &self.params
+            && let Ok(dt) = params.parse::<Date>()
+        {
+            dt == *day
+        } else {
+            true
+        }
+    }
+
     /// Make HTML table row
     fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
-        tr.td().cdata(CONDITIONS[self.condition as usize]).close();
-        // FIXME: strip off date for CLOCK condition actions
         let params = self.params.as_deref().unwrap_or("");
-        tr.td().cdata(params).close();
+        match self.condition {
+            0 => {
+                tr.td().cdata(params).cdata(" sec").close();
+            }
+            1 if let Some((_d, t)) = params.split_once('T') => {
+                tr.td().cdata(t).close();
+            }
+            _ => {
+                tr.td().cdata(params).close();
+            }
+        };
+        tr.td().cdata(CONDITIONS[self.condition as usize]).close();
         match &self.from_phase {
             Some(from_phase) => tr.td().cdata(from_phase).close(),
             None => tr.td().class("info").cdata("*any*").close(),
@@ -178,14 +199,13 @@ impl AncillaryData for ActionPlanAnc {
 }
 
 impl ActionPlanAnc {
-    /// Check if a day plan is active today (not holiday)
-    fn is_active(&self, nm: &str) -> bool {
-        let today = Zoned::now().date();
+    /// Check if a day plan is active on a day (not holiday)
+    fn is_day_plan_active(&self, nm: &str, day: &Date) -> bool {
         for dp in &self.day_plans {
             if dp.name == nm {
                 for dm in &self.day_matchers {
                     if dm.day_plan == nm {
-                        if dm.matches(&today) {
+                        if dm.matches(day) {
                             return !dp.holidays;
                         } else {
                             return dp.holidays;
@@ -196,6 +216,23 @@ impl ActionPlanAnc {
             }
         }
         false
+    }
+
+    /// Check if a phase action is active on a given day
+    fn is_phase_action_active(&self, pa: &PhaseAction, day: &Date) -> bool {
+        if let Some(dp) = &pa.day_plan
+            && !self.is_day_plan_active(dp, day)
+        {
+            return false;
+        }
+        pa.is_active(day)
+    }
+
+    /// Check if any phase actions are active for a given daay
+    fn has_active_phase_actions(&self, day: &Date) -> bool {
+        self.phase_actions
+            .iter()
+            .any(|pa| self.is_phase_action_active(pa, day))
     }
 
     /// Get action plan phases
@@ -346,7 +383,8 @@ impl ActionPlan {
             details.span().class("info").cdata(tags);
             details.close();
         }
-        if !anc.phase_actions.is_empty() {
+        let today = Zoned::now().date();
+        if anc.has_active_phase_actions(&today) {
             let mut details = tree.root::<html::Details>();
             details
                 .open()
@@ -355,13 +393,9 @@ impl ActionPlan {
                 .close();
             let mut table = details.table();
             for pa in &anc.phase_actions {
-                if let Some(dp) = &pa.day_plan
-                    && !anc.is_active(dp)
-                {
-                    continue;
+                if anc.is_phase_action_active(pa, &today) {
+                    pa.table_row(&mut table.tr());
                 }
-                // FIXME: check CLOCK_TIME dates
-                pa.table_row(&mut table.tr());
             }
             details.close();
         }
