@@ -346,6 +346,22 @@ impl ActionPlan {
             option.cdata(p).close();
         }
         div.close();
+        let today = Zoned::now().date();
+        if anc.has_active_phase_actions(&today) {
+            let mut details = tree.root::<html::Details>();
+            details
+                .open()
+                .summary()
+                .cdata("🗓️ Today's Schedule")
+                .close();
+            let mut table = details.table();
+            for pa in &anc.phase_actions {
+                if anc.is_phase_action_active(pa, &today) {
+                    pa.table_row(&mut table.tr());
+                }
+            }
+            details.close();
+        }
         let tags = anc
             .hashtags(self, Res::Beacon)
             .collect::<Vec<_>>()
@@ -381,22 +397,6 @@ impl ActionPlan {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("🚦 Ramp Meter Hashtags").close();
             details.span().class("info").cdata(tags);
-            details.close();
-        }
-        let today = Zoned::now().date();
-        if anc.has_active_phase_actions(&today) {
-            let mut details = tree.root::<html::Details>();
-            details
-                .open()
-                .summary()
-                .cdata("🗓️ Today's Schedule")
-                .close();
-            let mut table = details.table();
-            for pa in &anc.phase_actions {
-                if anc.is_phase_action_active(pa, &today) {
-                    pa.table_row(&mut table.tr());
-                }
-            }
             details.close();
         }
         String::from(tree)
