@@ -41,6 +41,7 @@ pub struct DeviceAction {
     // secondary attributes
     pub msg_pattern: Option<String>,
     pub msg_priority: Option<u8>,
+    pub sticky: Option<bool>,
 }
 
 /// Hashtag resource
@@ -112,7 +113,6 @@ pub struct ActionPlan {
     pub phase: String,
     // secondary attributes
     pub sync_actions: Option<bool>,
-    pub sticky: Option<bool>,
     pub ignore_auto_fail: Option<bool>,
 }
 
@@ -456,15 +456,6 @@ impl ActionPlan {
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("sticky").cdata("Sticky").close();
-        input = div.input();
-        input.id("sticky").r#type("checkbox");
-        if let Some(true) = self.sticky {
-            input.checked();
-        }
-        div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
         div.label()
             .r#for("ignore_auto_fail")
             .cdata("Ignore Auto-Fail")
@@ -550,7 +541,6 @@ impl Card for ActionPlan {
         fields.changed_input("active", self.active);
         fields.changed_select("default_phase", &self.default_phase);
         fields.changed_input("sync_actions", self.sync_actions);
-        fields.changed_input("sticky", self.sticky);
         fields.changed_input("ignore_auto_fail", self.ignore_auto_fail);
         fields.into_value().to_string()
     }

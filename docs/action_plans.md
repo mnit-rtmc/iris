@@ -24,7 +24,7 @@ as [DMS]s and [ramp meter]s.
 |--------------|-------------------------------|-----------|
 | 👁️  View      | name                          |           |
 | 👉 Operate   | phase                         |           |
-| 💡 Manage    | default\_phase, notes, active | sync\_actions, sticky, ignore\_auto\_fail |
+| 💡 Manage    | default\_phase, notes, active | sync\_actions, ignore\_auto\_fail |
 
 </details>
 
@@ -194,10 +194,10 @@ camera actions, instead this indicates:
 * `iris/api/device_action` (primary)
 * `iris/api/device_action/{name}`
 
-| Access       | Primary            | Secondary                   |
-|--------------|--------------------|-----------------------------|
-| 👁️  View      | name, action\_plan |                             |
-| 💡 Manage    | hashtag, phase     | msg\_priority, msg\_pattern |
+| Access       | Primary            | Secondary                           |
+|--------------|--------------------|-------------------------------------|
+| 👁️  View      | name, action\_plan |                                     |
+| 💡 Manage    | hashtag, phase     | msg\_pattern, msg\_priority, sticky |
 
 </details>
 
