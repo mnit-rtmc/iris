@@ -1936,7 +1936,6 @@ CREATE TABLE iris.action_plan (
     name VARCHAR(16) PRIMARY KEY,
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     sync_actions BOOLEAN NOT NULL,
-    sticky BOOLEAN NOT NULL,
     ignore_auto_fail BOOLEAN NOT NULL,
     active BOOLEAN NOT NULL,
     default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
@@ -1970,8 +1969,8 @@ CREATE TRIGGER action_plan_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW action_plan_view AS
-    SELECT name, notes, sync_actions, sticky, ignore_auto_fail, active,
-           default_phase, phase
+    SELECT name, notes, sync_actions, ignore_auto_fail, active, default_phase,
+           phase
     FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
@@ -3347,6 +3346,7 @@ CREATE TABLE iris.device_action (
     msg_pattern VARCHAR(20) REFERENCES iris.msg_pattern,
     msg_priority INTEGER NOT NULL
         CHECK (msg_priority >= 1 AND msg_priority <= 15),
+    sticky BOOLEAN NOT NULL,
 
     CONSTRAINT hashtag_ck CHECK (hashtag ~ '^#[A-Za-z0-9]+$')
 );
@@ -3372,13 +3372,14 @@ CREATE TRIGGER device_action_table_notify_trig
     FOR EACH STATEMENT EXECUTE FUNCTION iris.table_notify();
 
 CREATE VIEW device_action_view AS
-    SELECT name, action_plan, phase, hashtag, msg_pattern, msg_priority
+    SELECT name, action_plan, phase, hashtag, msg_pattern, msg_priority,
+           sticky
     FROM iris.device_action;
 GRANT SELECT ON device_action_view TO PUBLIC;
 
 CREATE VIEW dms_action_view AS
     SELECT h.name AS dms, action_plan, phase, h.hashtag, msg_pattern,
-           msg_priority
+           msg_priority, sticky
     FROM iris.device_action da
     JOIN iris.hashtag h ON h.hashtag = da.hashtag AND resource_n = 'dms';
 GRANT SELECT ON dms_action_view TO PUBLIC;
