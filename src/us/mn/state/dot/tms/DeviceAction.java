@@ -71,4 +71,10 @@ public interface DeviceAction extends SonarObject {
 
 	/** Get the sticky flag */
 	boolean getSticky();
+
+	/** Set ignore auto-fail flag */
+	void setIgnoreAutoFail(boolean ig);
+
+	/** Get ignore auto-fail flag */
+	boolean getIgnoreAutoFail();
 }

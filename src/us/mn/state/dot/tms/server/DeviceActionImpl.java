@@ -44,8 +44,9 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	/** Load all the device actions */
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, action_plan, phase, hashtag," +
-			"msg_pattern, msg_priority, sticky FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"msg_pattern, msg_priority, sticky, " +
+			"ignore_auto_fail FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DeviceActionImpl(row));
@@ -64,6 +65,7 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 		map.put("msg_pattern", msg_pattern);
 		map.put("msg_priority", msg_priority);
 		map.put("sticky", sticky);
+		map.put("ignore_auto_fail", ignore_auto_fail);
 		return map;
 	}
 
@@ -80,21 +82,22 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 		     row.getString(4),  // hashtag
 		     row.getString(5),  // msg_pattern
 		     row.getInt(6),     // msg_priority
-		     row.getBoolean(7)  // sticky
+		     row.getBoolean(7), // sticky
+		     row.getBoolean(8)  // ignore_auto_fail
 		);
 	}
 
 	/** Create a device action */
 	private DeviceActionImpl(String n, String a, String p, String ht,
-		String pat, int pr, boolean st)
+		String pat, int pr, boolean st, boolean ig)
 	{
 		this(n, lookupActionPlan(a), lookupPlanPhase(p), ht,
-		     lookupMsgPattern(pat), pr, st);
+		     lookupMsgPattern(pat), pr, st, ig);
 	}
 
 	/** Create a device action */
 	public DeviceActionImpl(String n, ActionPlanImpl a, PlanPhase p,
-		String ht, MsgPattern pat, int pr, boolean st)
+		String ht, MsgPattern pat, int pr, boolean st, boolean ig)
 	{
 		this(n);
 		action_plan = a;
@@ -103,6 +106,7 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 		msg_pattern = pat;
 		msg_priority = pr;
 		sticky = st;
+		ignore_auto_fail = ig;
 	}
 
 	/** Action plan */
@@ -171,6 +175,7 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	/** Set the message pattern */
 	@Override
 	public void setMsgPattern(MsgPattern pat) {
+		action_plan.testGateArmDisable(name, "msg_pattern");
 		msg_pattern = pat;
 	}
 
@@ -238,5 +243,28 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	@Override
 	public boolean getSticky() {
 		return sticky;
+	}
+
+	/** Ignore auto-fail flag */
+	private boolean ignore_auto_fail;
+
+	/** Set ignore auto-fail flag */
+	@Override
+	public void setIgnoreAutoFail(boolean ig) {
+		ignore_auto_fail = ig;
+	}
+
+	/** Set ignore auto-fail flag */
+	public void doSetIgnoreAutoFail(boolean ig) throws TMSException {
+		if (ig != ignore_auto_fail) {
+			store.update(this, "ignore_auto_fail", ig);
+			setIgnoreAutoFail(ig);
+		}
+	}
+
+	/** Get ignore auto-fail flag */
+	@Override
+	public boolean getIgnoreAutoFail() {
+		return ignore_auto_fail;
 	}
 }

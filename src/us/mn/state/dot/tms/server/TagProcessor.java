@@ -422,7 +422,7 @@ public class TagProcessor {
 	private String exitWarningSpan(DetectorImpl det, int occ) {
 		float o = det.getOccupancy(
 			DetectorImpl.BIN_PERIOD_MS * 3,
-			plan.getIgnoreAutoFail()
+			action.getIgnoreAutoFail()
 		);
 		return (o > occ) ? EMPTY_SPAN : fail("Occupancy too low");
 	}
@@ -481,7 +481,7 @@ public class TagProcessor {
 	private String slowWarningSpan(Speed spd, Distance dist, String mode,
 		Corridor cor, float m)
 	{
-		boolean ig = plan.getIgnoreAutoFail();
+		boolean ig = action.getIgnoreAutoFail();
 		BackupFinder bf = new BackupFinder(spd, dist, m, ig);
 		cor.findStation(bf);
 		if (!bf.isBackedUp())

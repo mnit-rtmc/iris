@@ -46,7 +46,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	@Override
 	protected ArrayList<ProxyColumn<ActionPlan>> createColumns() {
 		ArrayList<ProxyColumn<ActionPlan>> cols =
-			new ArrayList<ProxyColumn<ActionPlan>>(6);
+			new ArrayList<ProxyColumn<ActionPlan>>(5);
 		cols.add(new ProxyColumn<ActionPlan>("action.plan.name", 120) {
 			public Object getValueAt(ActionPlan ap) {
 				return ap.getName();
@@ -77,20 +77,6 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 			public void setValueAt(ActionPlan ap, Object value) {
 				if (value instanceof Boolean)
 					ap.setSyncActions((Boolean)value);
-			}
-		});
-		cols.add(new ProxyColumn<ActionPlan>(
-			"action.plan.ignore.auto.fail", 140, Boolean.class)
-		{
-			public Object getValueAt(ActionPlan ap) {
-				return ap.getIgnoreAutoFail();
-			}
-			public boolean isEditable(ActionPlan ap) {
-				return canWrite(ap, "ignore_auto_fail");
-			}
-			public void setValueAt(ActionPlan ap, Object value) {
-				if (value instanceof Boolean)
-					ap.setIgnoreAutoFail((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<ActionPlan>("action.plan.active", 80,

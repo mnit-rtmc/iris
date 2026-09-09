@@ -116,9 +116,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Load all the action plans */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, notes, sync_actions, " +
-			"ignore_auto_fail, active, default_phase, phase " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, notes, sync_actions, active, " +
+			"default_phase, phase FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ActionPlanImpl(row));
@@ -133,7 +133,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		map.put("name", name);
 		map.put("notes", notes);
 		map.put("sync_actions", sync_actions);
-		map.put("ignore_auto_fail", ignore_auto_fail);
 		map.put("active", active);
 		map.put("default_phase", default_phase);
 		map.put("phase", phase);
@@ -155,21 +154,19 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		this(row.getString(1),  // name
 		     row.getString(2),  // notes
 		     row.getBoolean(3), // sync_actions
-		     row.getBoolean(4), // ignore_auto_fail
-		     row.getBoolean(5), // active
-		     row.getString(6),  // default_phase
-		     row.getString(7)   // phase
+		     row.getBoolean(4), // active
+		     row.getString(5),  // default_phase
+		     row.getString(6)   // phase
 		);
 	}
 
 	/** Create an action plan */
 	protected ActionPlanImpl(String n, String nt, boolean sa,
-		boolean ig, boolean a, String dp, String p)
+		 boolean a, String dp, String p)
 	{
 		this(n);
 		notes = nt;
 		sync_actions = sa;
-		ignore_auto_fail = ig;
 		active = a;
 		default_phase = lookupPlanPhase(dp);
 		phase = lookupPlanPhase(p);
@@ -239,29 +236,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	@Override
 	public boolean getSyncActions() {
 		return sync_actions;
-	}
-
-	/** Ignore auto-fail flag */
-	private boolean ignore_auto_fail;
-
-	/** Set ignore auto-fail flag */
-	@Override
-	public void setIgnoreAutoFail(boolean ig) {
-		ignore_auto_fail = ig;
-	}
-
-	/** Set ignore auto-fail flag */
-	public void doSetIgnoreAutoFail(boolean ig) throws TMSException {
-		if (ig != ignore_auto_fail) {
-			store.update(this, "ignore_auto_fail", ig);
-			setIgnoreAutoFail(ig);
-		}
-	}
-
-	/** Get ignore auto-fail flag */
-	@Override
-	public boolean getIgnoreAutoFail() {
-		return ignore_auto_fail;
 	}
 
 	/** Active status */

@@ -596,8 +596,8 @@ public class AlertData {
 		String notes = "#Alert " + event.description;
 		String cur_phase = lookupCurrentPhase(cfg);
 		ActionPlanImpl plan = new ActionPlanImpl(pname, notes,
-			false, false, cfg.getAutoDeploy(),
-			PlanPhase.UNDEPLOYED, cur_phase);
+			false, cfg.getAutoDeploy(), PlanPhase.UNDEPLOYED,
+			cur_phase);
 		log("created plan " + pname);
 		plan.notifyCreate();
 		createPhaseActions(cfg, plan);
@@ -745,7 +745,7 @@ public class AlertData {
 		String dname = DeviceActionImpl.createUniqueName(tmpl);
 		int mp = SignMsgPriority.low_4.ordinal();
 		DeviceActionImpl da = new DeviceActionImpl(dname, plan, phase,
-			ht, pat, mp, false);
+			ht, pat, mp, false, false);
 		log("created DMS action " + dname);
 		da.notifyCreate();
 	}

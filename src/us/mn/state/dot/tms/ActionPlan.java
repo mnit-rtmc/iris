@@ -41,12 +41,6 @@ public interface ActionPlan extends SonarObject {
 	/** Get the sync actions flag */
 	boolean getSyncActions();
 
-	/** Set ignore auto-fail flag */
-	void setIgnoreAutoFail(boolean ig);
-
-	/** Get ignore auto-fail flag */
-	boolean getIgnoreAutoFail();
-
 	/** Set the active status */
 	void setActive(boolean a);
 

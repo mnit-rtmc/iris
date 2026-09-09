@@ -72,7 +72,7 @@ public class DeviceActionModel extends ProxyTableModel<DeviceAction> {
 	@Override
 	protected ArrayList<ProxyColumn<DeviceAction>> createColumns() {
 		ArrayList<ProxyColumn<DeviceAction>> cols =
-			new ArrayList<ProxyColumn<DeviceAction>>(5);
+			new ArrayList<ProxyColumn<DeviceAction>>(6);
 		cols.add(new ProxyColumn<DeviceAction>("hashtag", 120) {
 			public Object getValueAt(DeviceAction da) {
 				return da.getHashtag();
@@ -155,6 +155,20 @@ public class DeviceActionModel extends ProxyTableModel<DeviceAction> {
 			public void setValueAt(DeviceAction da, Object value) {
 				if (value instanceof Boolean)
 					da.setSticky((Boolean) value);
+			}
+		});
+		cols.add(new ProxyColumn<DeviceAction>(
+			"action.plan.ignore.auto.fail", 140, Boolean.class)
+		{
+			public Object getValueAt(DeviceAction da) {
+				return da.getIgnoreAutoFail();
+			}
+			public boolean isEditable(DeviceAction da) {
+				return canWrite(da, "ignore_auto_fail");
+			}
+			public void setValueAt(DeviceAction da, Object value) {
+				if (value instanceof Boolean)
+					da.setIgnoreAutoFail((Boolean) value);
 			}
 		});
 		return cols;
