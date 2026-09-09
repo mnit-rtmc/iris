@@ -116,7 +116,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Load all the action plans */
 	static protected void loadAll() throws TMSException {
-		store.query("SELECT name, notes, sync_actions, sticky, " +
+		store.query("SELECT name, notes, sync_actions, " +
 			"ignore_auto_fail, active, default_phase, phase " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
@@ -133,7 +133,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		map.put("name", name);
 		map.put("notes", notes);
 		map.put("sync_actions", sync_actions);
-		map.put("sticky", sticky);
 		map.put("ignore_auto_fail", ignore_auto_fail);
 		map.put("active", active);
 		map.put("default_phase", default_phase);
@@ -156,22 +155,20 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		this(row.getString(1),  // name
 		     row.getString(2),  // notes
 		     row.getBoolean(3), // sync_actions
-		     row.getBoolean(4), // sticky
-		     row.getBoolean(5), // ignore_auto_fail
-		     row.getBoolean(6), // active
-		     row.getString(7),  // default_phase
-		     row.getString(8)   // phase
+		     row.getBoolean(4), // ignore_auto_fail
+		     row.getBoolean(5), // active
+		     row.getString(6),  // default_phase
+		     row.getString(7)   // phase
 		);
 	}
 
 	/** Create an action plan */
-	protected ActionPlanImpl(String n, String nt, boolean sa, boolean st,
+	protected ActionPlanImpl(String n, String nt, boolean sa,
 		boolean ig, boolean a, String dp, String p)
 	{
 		this(n);
 		notes = nt;
 		sync_actions = sa;
-		sticky = st;
 		ignore_auto_fail = ig;
 		active = a;
 		default_phase = lookupPlanPhase(dp);
@@ -242,30 +239,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	@Override
 	public boolean getSyncActions() {
 		return sync_actions;
-	}
-
-	/** Sticky flag */
-	private boolean sticky;
-
-	/** Set the sticky flag */
-	@Override
-	public void setSticky(boolean s) {
-		testGateArmDisable(name, "set sticky");
-		sticky = s;
-	}
-
-	/** Set the sticky flag */
-	public void doSetSticky(boolean s) throws TMSException {
-		if (s != sticky) {
-			store.update(this, "sticky", s);
-			setSticky(s);
-		}
-	}
-
-	/** Get the sticky flag */
-	@Override
-	public boolean getSticky() {
-		return sticky;
 	}
 
 	/** Ignore auto-fail flag */

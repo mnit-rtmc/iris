@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2024  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class DeviceActionModel extends ProxyTableModel<DeviceAction> {
 	@Override
 	protected ArrayList<ProxyColumn<DeviceAction>> createColumns() {
 		ArrayList<ProxyColumn<DeviceAction>> cols =
-			new ArrayList<ProxyColumn<DeviceAction>>(4);
+			new ArrayList<ProxyColumn<DeviceAction>>(5);
 		cols.add(new ProxyColumn<DeviceAction>("hashtag", 120) {
 			public Object getValueAt(DeviceAction da) {
 				return da.getHashtag();
@@ -141,6 +141,20 @@ public class DeviceActionModel extends ProxyTableModel<DeviceAction> {
 				JComboBox<SignMsgPriority> cbx = new JComboBox
 					<SignMsgPriority>(PRIORITIES);
 				return new DefaultCellEditor(cbx);
+			}
+		});
+		cols.add(new ProxyColumn<DeviceAction>("action.plan.sticky", 80,
+			Boolean.class)
+		{
+			public Object getValueAt(DeviceAction da) {
+				return da.getSticky();
+			}
+			public boolean isEditable(DeviceAction da) {
+				return canWrite(da, "sticky");
+			}
+			public void setValueAt(DeviceAction da, Object value) {
+				if (value instanceof Boolean)
+					da.setSticky((Boolean) value);
 			}
 		});
 		return cols;

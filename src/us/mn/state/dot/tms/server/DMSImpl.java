@@ -493,7 +493,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String owner = SignMessageHelper.makeMsgOwner(src,
 			ap.getName());
 		MsgPattern pat = da.getMsgPattern();
-		boolean st = ap.getSticky();
+		boolean st = da.getSticky();
 		boolean fb = (pat != null) && pat.getFlashBeacon();
 		boolean ps = (pat != null) && pat.getPixelService();
 		SignMsgPriority mp = SignMsgPriority.fromOrdinal(

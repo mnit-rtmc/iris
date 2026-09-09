@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2025  Minnesota Department of Transportation
+ * Copyright (C) 2009-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	/** Load all the device actions */
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, action_plan, phase, hashtag," +
-			"msg_pattern, msg_priority FROM iris." + SONAR_TYPE +
-			";", new ResultFactory()
+			"msg_pattern, msg_priority, sticky FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DeviceActionImpl(row));
@@ -63,6 +63,7 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 		map.put("hashtag", hashtag);
 		map.put("msg_pattern", msg_pattern);
 		map.put("msg_priority", msg_priority);
+		map.put("sticky", sticky);
 		return map;
 	}
 
@@ -78,21 +79,22 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 		     row.getString(3),  // phase
 		     row.getString(4),  // hashtag
 		     row.getString(5),  // msg_pattern
-		     row.getInt(6)      // msg_priority
+		     row.getInt(6),     // msg_priority
+		     row.getBoolean(7)  // sticky
 		);
 	}
 
 	/** Create a device action */
 	private DeviceActionImpl(String n, String a, String p, String ht,
-		String pat, int pr)
+		String pat, int pr, boolean st)
 	{
 		this(n, lookupActionPlan(a), lookupPlanPhase(p), ht,
-		     lookupMsgPattern(pat), pr);
+		     lookupMsgPattern(pat), pr, st);
 	}
 
 	/** Create a device action */
 	public DeviceActionImpl(String n, ActionPlanImpl a, PlanPhase p,
-		String ht, MsgPattern pat, int pr)
+		String ht, MsgPattern pat, int pr, boolean st)
 	{
 		this(n);
 		action_plan = a;
@@ -100,6 +102,7 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 		hashtag = ht;
 		msg_pattern = pat;
 		msg_priority = pr;
+		sticky = st;
 	}
 
 	/** Action plan */
@@ -211,5 +214,29 @@ public class DeviceActionImpl extends BaseObjectImpl implements DeviceAction {
 	@Override
 	public int getMsgPriority() {
 		return msg_priority;
+	}
+
+	/** Sticky flag */
+	private boolean sticky;
+
+	/** Set the sticky flag */
+	@Override
+	public void setSticky(boolean s) {
+		action_plan.testGateArmDisable(name, "set sticky");
+		sticky = s;
+	}
+
+	/** Set the sticky flag */
+	public void doSetSticky(boolean s) throws TMSException {
+		if (s != sticky) {
+			store.update(this, "sticky", s);
+			setSticky(s);
+		}
+	}
+
+	/** Get the sticky flag */
+	@Override
+	public boolean getSticky() {
+		return sticky;
 	}
 }
