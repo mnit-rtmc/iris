@@ -36,12 +36,11 @@ public class PhaseActionHelper extends BaseHelper {
 	}
 
 	/** Clock time (no date) condition format */
-	static private final DateFormat CLOCK_FORMAT =
-		new SimpleDateFormat("HH:mm");
+	static private final String CLOCK_FORMAT = new String("HH:mm");
 
 	/** Clock time (with date) condition format */
-	static private final DateFormat CLOCK_DATE_FORMAT =
-		new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+	static private final String CLOCK_DATE_FORMAT =
+		new String("yyyy-MM-dd'T'HH:mm");
 
 	/** Lookup the phase action with the specified name */
 	static public PhaseAction lookup(String name) {
@@ -150,7 +149,7 @@ public class PhaseActionHelper extends BaseHelper {
 	/** Parse a clock time param */
 	static private Date parseClockTime(String p) {
 		try {
-			return CLOCK_FORMAT.parse(p);
+			return new SimpleDateFormat(CLOCK_FORMAT).parse(p);
 		}
 		catch (ParseException e) {
 			return null;
@@ -160,7 +159,7 @@ public class PhaseActionHelper extends BaseHelper {
 	/** Parse a clock date / time param */
 	static private Date parseClockDateTime(String p) {
 		try {
-			return CLOCK_DATE_FORMAT.parse(p);
+			return new SimpleDateFormat(CLOCK_DATE_FORMAT).parse(p);
 		}
 		catch (ParseException e) {
 			return null;
