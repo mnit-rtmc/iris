@@ -412,19 +412,10 @@ impl ActionPlan {
         div.textarea()
             .id("notes")
             .maxlength(128)
-            .rows(3)
+            .rows(2)
             .cols(22)
             .cdata(opt_ref(&self.notes))
             .close();
-        div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.label().r#for("active").cdata("Active").close();
-        let mut input = div.input();
-        input.id("active").r#type("checkbox");
-        if self.active {
-            input.checked();
-        }
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
@@ -444,6 +435,12 @@ impl ActionPlan {
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
+        div.label().r#for("active").cdata("Active").close();
+        let mut input = div.input();
+        input.id("active").r#type("checkbox");
+        if self.active {
+            input.checked();
+        }
         div.label()
             .r#for("sync_actions")
             .cdata("Sync Actions")
