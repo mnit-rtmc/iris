@@ -20,11 +20,11 @@ as [DMS]s and [ramp meter]s.
 * `iris/api/action_plan` (primary)
 * `iris/api/action_plan/{name}`
 
-| Access       | Primary                       | Secondary |
-|--------------|-------------------------------|-----------|
-| 👁️  View      | name                          |           |
-| 👉 Operate   | phase                         |           |
-| 💡 Manage    | default\_phase, notes, active | sync\_actions, ignore\_auto\_fail |
+| Access       | Primary                       | Secondary     |
+|--------------|-------------------------------|---------------|
+| 👁️  View      | name                          |               |
+| 👉 Operate   | phase                         |               |
+| 💡 Manage    | default\_phase, notes, active | sync\_actions |
 
 </details>
 
@@ -197,7 +197,7 @@ camera actions, instead this indicates:
 | Access       | Primary            | Secondary                           |
 |--------------|--------------------|-------------------------------------|
 | 👁️  View      | name, action\_plan |                                     |
-| 💡 Manage    | hashtag, phase     | msg\_pattern, msg\_priority, sticky |
+| 💡 Manage    | hashtag, phase     | msg\_pattern, msg\_priority, sticky, ignore\_auto\_fail |
 
 </details>
 

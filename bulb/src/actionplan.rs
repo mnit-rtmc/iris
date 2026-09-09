@@ -42,6 +42,7 @@ pub struct DeviceAction {
     pub msg_pattern: Option<String>,
     pub msg_priority: Option<u8>,
     pub sticky: Option<bool>,
+    pub ignore_auto_fail: Option<bool>,
 }
 
 /// Hashtag resource
@@ -113,7 +114,6 @@ pub struct ActionPlan {
     pub phase: String,
     // secondary attributes
     pub sync_actions: Option<bool>,
-    pub ignore_auto_fail: Option<bool>,
 }
 
 /// Action plan ancillary data
@@ -454,18 +454,6 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("row");
-        div.label()
-            .r#for("ignore_auto_fail")
-            .cdata("Ignore Auto-Fail")
-            .close();
-        input = div.input();
-        input.id("ignore_auto_fail").r#type("checkbox");
-        if let Some(true) = self.ignore_auto_fail {
-            input.checked();
-        }
-        div.close();
         // FIXME: add device action table
         // FIXME: add phase action table
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
@@ -541,7 +529,6 @@ impl Card for ActionPlan {
         fields.changed_input("active", self.active);
         fields.changed_select("default_phase", &self.default_phase);
         fields.changed_input("sync_actions", self.sync_actions);
-        fields.changed_input("ignore_auto_fail", self.ignore_auto_fail);
         fields.into_value().to_string()
     }
 

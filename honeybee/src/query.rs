@@ -21,8 +21,7 @@ pub const ACTION_PLAN_ALL: &str = "\
 
 /// SQL query for one action plan (secondary)
 pub const ACTION_PLAN_ONE: &str = "\
-  SELECT name, notes, active, sync_actions, ignore_auto_fail, default_phase, \
-         phase \
+  SELECT name, notes, active, sync_actions, default_phase, phase \
   FROM iris.action_plan \
   WHERE name = $1";
 
@@ -261,7 +260,8 @@ pub const DEVICE_ACTION_ALL: &str = "\
 
 /// SQL query for one device action (secondary)
 pub const DEVICE_ACTION_ONE: &str = "\
-  SELECT name, action_plan, hashtag, phase, msg_pattern, msg_priority, sticky \
+  SELECT name, action_plan, hashtag, phase, msg_pattern, msg_priority, \
+         sticky, ignore_auto_fail \
   FROM iris.device_action \
   WHERE name = $1";
 
