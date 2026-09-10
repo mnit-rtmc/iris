@@ -181,7 +181,10 @@ impl AncillaryData for ActionPlanAnc {
                 self.day_matchers = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::DeviceActions => {
-                self.device_actions = serde_wasm_bindgen::from_value(value)?;
+                let mut actions: Vec<DeviceAction> =
+                    serde_wasm_bindgen::from_value(value)?;
+                actions.retain(|da| da.action_plan == pri.name);
+                self.device_actions = actions;
             }
             Asset::HashtagResources => {
                 self.hashtag_resources = serde_wasm_bindgen::from_value(value)?;
@@ -243,24 +246,16 @@ impl ActionPlanAnc {
         let mut phases = BTreeSet::new();
         phases.insert(&pri.default_phase[..]);
         for da in &self.device_actions {
-            if da.action_plan == pri.name {
-                phases.insert(&da.phase[..]);
-            }
+            phases.insert(&da.phase[..]);
         }
         phases.into_iter()
     }
 
     /// Get device hashtags for a resource type
-    fn hashtags<'a>(
-        &'a self,
-        pri: &'a ActionPlan,
-        res: Res,
-    ) -> impl Iterator<Item = &'a str> {
+    fn hashtags(&self, res: Res) -> impl Iterator<Item = &str> {
         let mut tags = BTreeSet::new();
         for da in &self.device_actions {
-            if da.action_plan == pri.name
-                && self.has_hashtag_res(&da.hashtag, res)
-            {
+            if self.has_hashtag_res(&da.hashtag, res) {
                 tags.insert(&da.hashtag[..]);
             }
         }
@@ -290,16 +285,16 @@ impl ActionPlan {
             } else {
                 states = states.with(ItemState::Deployed, "");
             }
-            if anc.hashtags(self, Res::Beacon).next().is_some() {
+            if anc.hashtags(Res::Beacon).next().is_some() {
                 states = states.with(ItemState::Beacon, "");
             }
-            if anc.hashtags(self, Res::Camera).next().is_some() {
+            if anc.hashtags(Res::Camera).next().is_some() {
                 states = states.with(ItemState::Camera, "");
             }
-            if anc.hashtags(self, Res::Dms).next().is_some() {
+            if anc.hashtags(Res::Dms).next().is_some() {
                 states = states.with(ItemState::Dms, "");
             }
-            if anc.hashtags(self, Res::RampMeter).next().is_some() {
+            if anc.hashtags(Res::RampMeter).next().is_some() {
                 states = states.with(ItemState::RampMeter, "");
             }
         } else {
@@ -362,37 +357,28 @@ impl ActionPlan {
             }
             details.close();
         }
-        let tags = anc
-            .hashtags(self, Res::Beacon)
-            .collect::<Vec<_>>()
-            .join(" ");
+        let tags = anc.hashtags(Res::Beacon).collect::<Vec<_>>().join(" ");
         if !tags.is_empty() {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("🔆 Beacon Hashtags").close();
             details.span().class("info").cdata(tags);
             details.close();
         }
-        let tags = anc
-            .hashtags(self, Res::Camera)
-            .collect::<Vec<_>>()
-            .join(" ");
+        let tags = anc.hashtags(Res::Camera).collect::<Vec<_>>().join(" ");
         if !tags.is_empty() {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("🎥 Camera Hashtags").close();
             details.span().class("info").cdata(tags);
             details.close();
         }
-        let tags = anc.hashtags(self, Res::Dms).collect::<Vec<_>>().join(" ");
+        let tags = anc.hashtags(Res::Dms).collect::<Vec<_>>().join(" ");
         if !tags.is_empty() {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("⬛ DMS Hashtags").close();
             details.span().class("info").cdata(tags);
             details.close();
         }
-        let tags = anc
-            .hashtags(self, Res::RampMeter)
-            .collect::<Vec<_>>()
-            .join(" ");
+        let tags = anc.hashtags(Res::RampMeter).collect::<Vec<_>>().join(" ");
         if !tags.is_empty() {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("🚦 Ramp Meter Hashtags").close();
