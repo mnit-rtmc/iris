@@ -55,6 +55,7 @@ mod mjpeg;
 mod monitorstyle;
 mod msgline;
 mod msgpattern;
+mod msgpriority;
 mod notes;
 mod panic;
 mod permission;

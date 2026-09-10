@@ -22,9 +22,15 @@ span {
   margin-left: 0.1rem;
   margin-right: 0.1rem;
 }
+details[open] {
+  border: 2px inset;
+}
 details summary {
   padding-left: 0.2rem;
   cursor: pointer;
+}
+details div {
+  padding-left: 1rem;
 }
 textarea {
   resize: none;

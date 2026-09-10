@@ -16,6 +16,8 @@ use crate::dayplan::{DayMatcher, DayPlan};
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
+use crate::msgpattern::MsgPattern;
+use crate::msgpriority::MsgPriority;
 use crate::notes::contains_hashtag;
 use crate::planphase::PlanPhase;
 use crate::util::{
@@ -38,11 +40,10 @@ pub struct DeviceAction {
     pub action_plan: String,
     pub hashtag: String,
     pub phase: String,
-    // secondary attributes
     pub msg_pattern: Option<String>,
-    pub msg_priority: Option<u8>,
-    pub sticky: Option<bool>,
-    pub ignore_auto_fail: Option<bool>,
+    pub msg_priority: u8,
+    pub sticky: bool,
+    pub ignore_auto_fail: bool,
 }
 
 /// Hashtag resource
@@ -62,6 +63,168 @@ pub struct PhaseAction {
     pub params: Option<String>,
     pub from_phase: Option<String>,
     pub to_phase: String,
+}
+
+impl DeviceAction {
+    /// Get ID for hashtag `<input>`
+    fn id_hashtag(&self) -> String {
+        format!("{}-hashtag", self.name)
+    }
+
+    /// Get ID for phase `<select>`
+    fn id_phase(&self) -> String {
+        format!("{}-phase", self.name)
+    }
+
+    /// Get ID for msg_pattern `<select>`
+    fn id_msg_pattern(&self) -> String {
+        format!("{}-msg_pattern", self.name)
+    }
+
+    /// Get ID for msg_priority `<input>`
+    fn id_msg_priority(&self) -> String {
+        format!("{}-msg_priority", self.name)
+    }
+
+    /// Get ID for sticky `<input>`
+    fn id_sticky(&self) -> String {
+        format!("{}-sticky", self.name)
+    }
+
+    /// Get ID for ignore_auto_fail `<input>`
+    fn id_ignore_auto_fail(&self) -> String {
+        format!("{}-ignore_auto_fail", self.name)
+    }
+
+    /// Check if device action is valid
+    fn is_valid(&self) -> bool {
+        // FIXME
+        true
+    }
+
+    /// Get row element class name
+    fn class_name(&self) -> &'static str {
+        if self.is_valid() { "" } else { "invalid" }
+    }
+
+    /// Build HTML hashtag row
+    fn hashtag_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let id = self.id_hashtag();
+        div.label().r#for(&id).cdata("Device #Tag").close();
+        let mut input = div.input();
+        input.id(id).maxlength(16).value(&self.hashtag);
+        div.close();
+    }
+
+    /// Build HTML phase row
+    fn phase_row<'p>(&self, anc: &ActionPlanAnc, div: &'p mut html::Div<'p>) {
+        let id = self.id_phase();
+        div.label().r#for(&id).cdata("Phase").close();
+        let mut select = div.select();
+        select.id(id);
+        for p in &anc.phases {
+            let mut option = select.option();
+            if p.name == self.phase {
+                option.selected();
+            }
+            option.cdata(&p.name).close();
+        }
+        select.close();
+        div.close();
+    }
+
+    /// Build HTML msg_pattern row
+    fn msg_pattern_row<'p>(
+        &self,
+        anc: &ActionPlanAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        let id = self.id_msg_pattern();
+        div.label().r#for(&id).cdata("Msg Pattern").close();
+        let mut select = div.select();
+        select.id(id);
+        let mut option = select.option();
+        if self.msg_pattern.is_none() {
+            option.selected();
+        }
+        option.close();
+        for p in &anc.msg_patterns {
+            let mut option = select.option();
+            if Some(p.name.as_str()) == self.msg_pattern.as_deref() {
+                option.selected();
+            }
+            option.cdata(&p.name).close();
+        }
+        select.close();
+        div.close();
+    }
+
+    /// Build HTML msg_priority row
+    fn msg_priority_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let prio = MsgPriority::try_from(self.msg_priority)
+            .unwrap_or(MsgPriority::Medium1);
+        let id = self.id_msg_priority();
+        div.label().r#for(&id).cdata("Priority").close();
+        let mut select = div.select();
+        select.id(id);
+        for p in 1..=15 {
+            if let Ok(p) = MsgPriority::try_from(p) {
+                let mut option = select.option();
+                if p == prio {
+                    option.selected();
+                }
+                option.cdata(p.as_str()).close();
+            }
+        }
+        select.close();
+        div.close();
+    }
+
+    /// Build HTML sticky row
+    fn sticky_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let id = self.id_sticky();
+        div.label().r#for(&id).cdata("Sticky").close();
+        let mut input = div.input();
+        input.id(id).r#type("checkbox");
+        if self.sticky {
+            input.checked();
+        }
+        div.close();
+    }
+
+    /// Build HTML ignore_auto_fail row
+    fn ignore_auto_fail_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let id = self.id_ignore_auto_fail();
+        div.label().r#for(&id).cdata("Ignore Auto-Fail").close();
+        let mut input = div.input();
+        input.id(id).r#type("checkbox");
+        if self.ignore_auto_fail {
+            input.checked();
+        }
+        div.close();
+    }
+
+    /// Make HTML details
+    fn details<'p>(
+        &self,
+        anc: &ActionPlanAnc,
+        details: &'p mut html::Details<'p>,
+    ) {
+        details.id(&self.name).class(self.class_name());
+        let mut summary = details.summary();
+        summary.span().class("info").cdata(&self.hashtag).close();
+        if let Some(msg_pattern) = &self.msg_pattern {
+            summary.cdata(": ").cdata(msg_pattern);
+        }
+        summary.close();
+        self.hashtag_row(&mut details.div());
+        self.phase_row(anc, &mut details.div());
+        self.msg_pattern_row(anc, &mut details.div());
+        self.msg_priority_row(&mut details.div());
+        self.sticky_row(&mut details.div());
+        self.ignore_auto_fail_row(&mut details.div());
+        details.close();
+    }
 }
 
 /// Action conditions
@@ -126,6 +289,7 @@ pub struct ActionPlanAnc {
     pub device_actions: Vec<DeviceAction>,
     pub hashtag_resources: Vec<HashtagResource>,
     pub phase_actions: Vec<PhaseAction>,
+    pub msg_patterns: Vec<MsgPattern>,
 }
 
 impl AncillaryData for ActionPlanAnc {
@@ -148,7 +312,11 @@ impl AncillaryData for ActionPlanAnc {
                 ]
             }
             View::Setup(_edit) => {
-                vec![Asset::DeviceActions, Asset::PlanPhases]
+                vec![
+                    Asset::DeviceActions,
+                    Asset::PlanPhases,
+                    Asset::MsgPatterns,
+                ]
             }
             _ => vec![],
         };
@@ -194,6 +362,12 @@ impl AncillaryData for ActionPlanAnc {
                     serde_wasm_bindgen::from_value(value)?;
                 actions.retain(|pa| pa.action_plan == pri.name);
                 self.phase_actions = actions;
+            }
+            Asset::MsgPatterns => {
+                let mut patterns: Vec<MsgPattern> =
+                    serde_wasm_bindgen::from_value(value)?;
+                patterns.sort();
+                self.msg_patterns = patterns;
             }
             _ => unreachable!(),
         }
@@ -437,7 +611,14 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
-        // FIXME: add device action table
+        if !anc.device_actions.is_empty() {
+            div = tree.root::<html::Div>();
+            div.class("row").cdata("Device Actions").close();
+        }
+        for da in &anc.device_actions {
+            let mut details = tree.root::<html::Details>();
+            da.details(anc, &mut details);
+        }
         // FIXME: add phase action table
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
