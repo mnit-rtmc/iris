@@ -194,10 +194,10 @@ camera actions, instead this indicates:
 * `iris/api/device_action` (primary)
 * `iris/api/device_action/{name}`
 
-| Access       | Primary            | Secondary                           |
-|--------------|--------------------|-------------------------------------|
-| 👁️  View      | name, action\_plan |                                     |
-| 💡 Manage    | hashtag, phase     | msg\_pattern, msg\_priority, sticky, ignore\_auto\_fail |
+| Access       | Primary            |
+|--------------|--------------------|
+| 👁️  View      | name, action\_plan |
+| 💡 Manage    | hashtag, phase, msg\_pattern, msg\_priority, sticky, ignore\_auto\_fail |
 
 </details>
 
