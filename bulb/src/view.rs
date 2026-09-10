@@ -303,7 +303,7 @@ impl CardView {
     /// Handle input event for an element owned by the resource
     pub async fn handle_input(&self, id: &str) -> Result<()> {
         match (self.res, self.view) {
-            (Res::ActionPlan, View::Control) => {
+            (Res::ActionPlan, View::Control | View::Setup(true)) => {
                 self.handle_input_x::<ActionPlan>(id).await
             }
             (Res::DayPlan, View::Setup(true)) => {

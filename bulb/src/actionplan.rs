@@ -31,10 +31,10 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::collections::BTreeSet;
 use wasm_bindgen::JsValue;
-use web_sys::HtmlSelectElement;
+use web_sys::{HtmlElement, HtmlSelectElement};
 
 /// Device action
-#[derive(Debug, Default, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq)]
 pub struct DeviceAction {
     pub name: String,
     pub action_plan: String,
@@ -66,6 +66,20 @@ pub struct PhaseAction {
 }
 
 impl DeviceAction {
+    /// Create a new device action
+    fn new(name: &str, ap: &str, phase: &str) -> Self {
+        DeviceAction {
+            name: name.to_string(),
+            action_plan: ap.to_string(),
+            hashtag: String::new(),
+            phase: phase.to_string(),
+            msg_pattern: None,
+            msg_priority: MsgPriority::Medium1 as u8,
+            sticky: false,
+            ignore_auto_fail: false,
+        }
+    }
+
     /// Get ID for hashtag `<input>`
     fn id_hashtag(&self) -> String {
         format!("{}-hashtag", self.name)
@@ -96,10 +110,45 @@ impl DeviceAction {
         format!("{}-ignore_auto_fail", self.name)
     }
 
+    /// Update from input elements
+    fn update_inputs(&mut self) {
+        let doc = Doc::get();
+        self.hashtag = doc
+            .input_parse::<String>(&self.id_hashtag())
+            .unwrap_or_default();
+        self.phase = doc
+            .select_parse::<String>(&self.id_phase())
+            .unwrap_or_default();
+        self.msg_pattern = doc
+            .select_parse::<String>(&self.id_msg_pattern())
+            .filter(|p| !p.is_empty());
+        self.msg_priority =
+            doc.select_parse::<u8>(&self.id_msg_priority()).unwrap_or(6);
+        self.sticky = doc
+            .input_parse::<bool>(&self.id_sticky())
+            .unwrap_or_default();
+        self.ignore_auto_fail = doc
+            .input_parse::<bool>(&self.id_ignore_auto_fail())
+            .unwrap_or_default();
+    }
+
     /// Check if device action is valid
     fn is_valid(&self) -> bool {
-        // FIXME
-        true
+        self.hashtag.len() > 1
+            && self.hashtag.starts_with('#')
+            && self.hashtag[1..].chars().all(|c| c.is_alphanumeric())
+    }
+
+    /// Update table row class with valid state
+    fn update_valid(&self, id: &str) -> bool {
+        if id == self.id_hashtag() {
+            if let Some(el) = Doc::get().opt_elem::<HtmlElement>(&self.name) {
+                el.set_class_name(self.class_name());
+            }
+            true
+        } else {
+            false
+        }
     }
 
     /// Get row element class name
@@ -290,6 +339,7 @@ pub struct ActionPlanAnc {
     pub hashtag_resources: Vec<HashtagResource>,
     pub phase_actions: Vec<PhaseAction>,
     pub msg_patterns: Vec<MsgPattern>,
+    pub next_name: String,
 }
 
 impl AncillaryData for ActionPlanAnc {
@@ -351,6 +401,7 @@ impl AncillaryData for ActionPlanAnc {
             Asset::DeviceActions => {
                 let mut actions: Vec<DeviceAction> =
                     serde_wasm_bindgen::from_value(value)?;
+                self.next_name = pri.next_action_name(&actions);
                 actions.retain(|da| da.action_plan == pri.name);
                 self.device_actions = actions;
             }
@@ -450,6 +501,21 @@ impl ActionPlanAnc {
 }
 
 impl ActionPlan {
+    /// Create next available device action name
+    fn next_action_name(&self, actions: &[DeviceAction]) -> String {
+        let nm = &self.name;
+        let mut num = 1;
+        for da in actions {
+            if let Some((pre, suffix)) = da.name.split_once('_')
+                && pre == nm
+                && let Ok(n) = suffix.parse::<u32>()
+            {
+                num = num.max(n + 1);
+            }
+        }
+        format!("{nm}_{num}")
+    }
+
     /// Get item state
     fn item_states(&self, anc: &ActionPlanAnc) -> ItemStates<'_> {
         let mut states = ItemStates::default();
@@ -619,6 +685,10 @@ impl ActionPlan {
             let mut details = tree.root::<html::Details>();
             da.details(anc, &mut details);
         }
+        let da =
+            DeviceAction::new(&anc.next_name, &self.name, &self.default_phase);
+        let mut details = tree.root::<html::Details>();
+        da.details(anc, &mut details);
         // FIXME: add phase action table
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
@@ -697,7 +767,9 @@ impl Card for ActionPlan {
     }
 
     /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: ActionPlanAnc, id: &str) -> Vec<Action> {
+    #[allow(clippy::field_reassign_with_default)]
+    fn handle_input(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
+        // Control card only
         if "phase" == id
             && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
         {
@@ -708,6 +780,18 @@ impl Card for ActionPlan {
             let val = fields.into_value().to_string();
             return vec![Action::Patch(uri, val.into())];
         }
+        // Setup card only
+        for da in &anc.device_actions {
+            let mut nda = da.clone();
+            nda.update_inputs();
+            if nda.update_valid(id) {
+                break;
+            }
+        }
+        let mut da =
+            DeviceAction::new(&anc.next_name, &self.name, &self.default_phase);
+        da.update_inputs();
+        da.update_valid(id);
         Vec::new()
     }
 }
