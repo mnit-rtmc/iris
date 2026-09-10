@@ -295,6 +295,14 @@ impl Fields {
         self.insert(id, Value::String(val.into()));
     }
 
+    /// Insert an optional string value into mapping
+    pub fn insert_opt_str(&mut self, id: &str, val: Option<&str>) {
+        match val {
+            Some(val) => self.insert_str(id, val),
+            None => self.insert(id, Value::Null),
+        }
+    }
+
     /// Insert a number value into mapping
     pub fn insert_num<T: Into<Number>>(&mut self, id: &str, val: T) {
         self.insert(id, Value::Number(val.into()));

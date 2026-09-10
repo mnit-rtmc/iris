@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, footer_html, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_all, uri_one};
 use crate::dayplan::{DayMatcher, DayPlan};
 use crate::error::Result;
 use crate::fetch::Action;
@@ -28,6 +28,8 @@ use hatmil::{Tree, html};
 use jiff::{Zoned, civil::Date};
 use resources::Res;
 use serde::Deserialize;
+use serde_json::Value;
+use serde_json::map::Map;
 use std::borrow::Cow;
 use std::collections::BTreeSet;
 use wasm_bindgen::JsValue;
@@ -80,6 +82,11 @@ impl DeviceAction {
         }
     }
 
+    /// Get ID for summary
+    fn id_summary(&self) -> String {
+        format!("{}-summary", self.name)
+    }
+
     /// Get ID for hashtag `<input>`
     fn id_hashtag(&self) -> String {
         format!("{}-hashtag", self.name)
@@ -130,6 +137,16 @@ impl DeviceAction {
         self.ignore_auto_fail = doc
             .input_parse::<bool>(&self.id_ignore_auto_fail())
             .unwrap_or_default();
+        if let Ok(el) = Doc::get().elem::<HtmlElement>(&self.id_summary()) {
+            let mut tree = Tree::new();
+            let mut summary = tree.root::<html::Summary>();
+            summary.id(self.id_summary());
+            summary.span().class("info").cdata(&self.hashtag).close();
+            if let Some(msg_pattern) = &self.msg_pattern {
+                summary.cdata(": ").cdata(msg_pattern);
+            }
+            el.set_outer_html(&String::from(tree));
+        }
     }
 
     /// Check if device action is valid
@@ -261,6 +278,7 @@ impl DeviceAction {
     ) {
         details.id(&self.name).class(self.class_name());
         let mut summary = details.summary();
+        summary.id(self.id_summary());
         summary.span().class("info").cdata(&self.hashtag).close();
         if let Some(msg_pattern) = &self.msg_pattern {
             summary.cdata(": ").cdata(msg_pattern);
@@ -273,6 +291,41 @@ impl DeviceAction {
         self.sticky_row(&mut details.div());
         self.ignore_auto_fail_row(&mut details.div());
         details.close();
+    }
+
+    /// Get set of changed fields
+    fn changed_fields(&self, da: &Self) -> Fields {
+        let mut fields = Fields::new();
+        if self.hashtag != da.hashtag {
+            fields.insert_str("hashtag", &self.hashtag);
+        }
+        if self.phase != da.phase {
+            fields.insert_str("phase", &self.phase);
+        }
+        if self.msg_pattern != da.msg_pattern {
+            fields.insert_opt_str("msg_pattern", self.msg_pattern.as_deref());
+        }
+        if self.msg_priority != da.msg_priority {
+            fields.insert_num("msg_priority", self.msg_priority);
+        }
+        if self.sticky != da.sticky {
+            fields.insert_bool("sticky", self.sticky);
+        }
+        if self.ignore_auto_fail != da.ignore_auto_fail {
+            fields.insert_bool("ignore_auto_fail", self.ignore_auto_fail);
+        }
+        fields
+    }
+
+    /// Convert to JSON value (for POST)
+    fn value(&self) -> Value {
+        let mut obj = Map::new();
+        obj.insert("name".to_string(), Value::String(self.name.to_string()));
+        obj.insert(
+            "action_plan".to_string(),
+            Value::String(self.action_plan.to_string()),
+        );
+        Value::Object(obj)
     }
 }
 
@@ -506,7 +559,7 @@ impl ActionPlan {
         let nm = &self.name;
         let mut num = 1;
         for da in actions {
-            if let Some((pre, suffix)) = da.name.split_once('_')
+            if let Some((pre, suffix)) = da.name.rsplit_once('_')
                 && pre == nm
                 && let Ok(n) = suffix.parse::<u32>()
             {
@@ -793,5 +846,41 @@ impl Card for ActionPlan {
         da.update_inputs();
         da.update_valid(id);
         Vec::new()
+    }
+
+    /// Handle click event for the save button
+    #[allow(clippy::field_reassign_with_default)]
+    fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
+        let mut actions = Vec::new();
+        for da in &anc.device_actions {
+            let mut nda = da.clone();
+            nda.update_inputs();
+            if !nda.is_valid() {
+                let uri = uri_one(Res::DeviceAction, &da.name);
+                actions.push(Action::Delete(uri));
+                continue;
+            }
+            if nda != *da {
+                let fields = nda.changed_fields(da);
+                let uri = uri_one(Res::DeviceAction, &da.name);
+                let val = fields.into_value().to_string();
+                actions.push(Action::Patch(uri, val.into()));
+            }
+        }
+        let da =
+            DeviceAction::new(&anc.next_name, &self.name, &self.default_phase);
+        let mut nda = da.clone();
+        nda.update_inputs();
+        if nda.is_valid() {
+            let post_uri = uri_all(Res::DeviceAction);
+            let patch_uri = uri_one(Res::DeviceAction, &nda.name);
+            let mut fields = nda.changed_fields(&da);
+            fields.insert_str("name", &nda.name);
+            let value = nda.value().to_string();
+            actions.push(Action::Post(post_uri, value.into()));
+            let changed = fields.into_value().to_string();
+            actions.push(Action::Patch(patch_uri, changed.into()));
+        }
+        actions
     }
 }
