@@ -385,6 +385,7 @@ pub struct ActionPlan {
 #[derive(Default)]
 pub struct ActionPlanAnc {
     assets: Vec<Asset>,
+    view: Option<View>,
     pub phases: Vec<PlanPhase>,
     pub day_plans: Vec<DayPlan>,
     pub day_matchers: Vec<DayMatcher>,
@@ -425,6 +426,7 @@ impl AncillaryData for ActionPlanAnc {
         };
         ActionPlanAnc {
             assets,
+            view: Some(view),
             ..Default::default()
         }
     }
@@ -454,8 +456,10 @@ impl AncillaryData for ActionPlanAnc {
             Asset::DeviceActions => {
                 let mut actions: Vec<DeviceAction> =
                     serde_wasm_bindgen::from_value(value)?;
-                self.next_name = pri.next_action_name(&actions);
-                actions.retain(|da| da.action_plan == pri.name);
+                if let Some(View::Control) | Some(View::Setup(_)) = self.view {
+                    actions.retain(|da| da.action_plan == pri.name);
+                    self.next_name = pri.next_action_name(&actions);
+                }
                 self.device_actions = actions;
             }
             Asset::HashtagResources => {
@@ -517,7 +521,7 @@ impl ActionPlanAnc {
     }
 
     /// Get action plan phases
-    fn phases<'a>(
+    fn plan_phases<'a>(
         &'a self,
         pri: &'a ActionPlan,
     ) -> impl Iterator<Item = &'a str> {
@@ -530,7 +534,7 @@ impl ActionPlanAnc {
     }
 
     /// Get device hashtags for a resource type
-    fn hashtags(&self, res: Res) -> impl Iterator<Item = &str> {
+    fn res_hashtags(&self, res: Res) -> impl Iterator<Item = &str> {
         let mut tags = BTreeSet::new();
         for da in &self.device_actions {
             if self.has_hashtag_res(&da.hashtag, res) {
@@ -569,6 +573,18 @@ impl ActionPlan {
         format!("{nm}_{num}")
     }
 
+    /// Get device hashtags for a resource type
+    fn has_device_hashtag(&self, anc: &ActionPlanAnc, res: Res) -> bool {
+        for da in &anc.device_actions {
+            if da.action_plan == self.name
+                && anc.has_hashtag_res(&da.hashtag, res)
+            {
+                return true;
+            }
+        }
+        false
+    }
+
     /// Get item state
     fn item_states(&self, anc: &ActionPlanAnc) -> ItemStates<'_> {
         let mut states = ItemStates::default();
@@ -578,16 +594,19 @@ impl ActionPlan {
             } else {
                 states = states.with(ItemState::Deployed, "");
             }
-            if anc.hashtags(Res::Beacon).next().is_some() {
+            if self.has_device_hashtag(anc, Res::Beacon) {
                 states = states.with(ItemState::Beacon, "");
             }
-            if anc.hashtags(Res::Camera).next().is_some() {
+            if self.has_device_hashtag(anc, Res::Camera) {
                 states = states.with(ItemState::Camera, "");
             }
-            if anc.hashtags(Res::Dms).next().is_some() {
+            if self.has_device_hashtag(anc, Res::Dms) {
                 states = states.with(ItemState::Dms, "");
             }
-            if anc.hashtags(Res::RampMeter).next().is_some() {
+            if self.has_device_hashtag(anc, Res::GateArm) {
+                states = states.with(ItemState::GateArm, "");
+            }
+            if self.has_device_hashtag(anc, Res::RampMeter) {
                 states = states.with(ItemState::RampMeter, "");
             }
         } else {
@@ -626,7 +645,7 @@ impl ActionPlan {
         div.label().r#for("phase").cdata("Phase").close();
         let mut select = div.select();
         select.id("phase");
-        for p in anc.phases(self) {
+        for p in anc.plan_phases(self) {
             let mut option = select.option();
             if p == self.phase {
                 option.selected();
@@ -650,28 +669,38 @@ impl ActionPlan {
             }
             details.close();
         }
-        let tags = anc.hashtags(Res::Beacon).collect::<Vec<_>>().join(" ");
+        let tags = anc.res_hashtags(Res::Beacon).collect::<Vec<_>>().join(" ");
         if !tags.is_empty() {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("🔆 Beacon Hashtags").close();
             details.span().class("info").cdata(tags);
             details.close();
         }
-        let tags = anc.hashtags(Res::Camera).collect::<Vec<_>>().join(" ");
+        let tags = anc.res_hashtags(Res::Camera).collect::<Vec<_>>().join(" ");
         if !tags.is_empty() {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("🎥 Camera Hashtags").close();
             details.span().class("info").cdata(tags);
             details.close();
         }
-        let tags = anc.hashtags(Res::Dms).collect::<Vec<_>>().join(" ");
+        let tags = anc.res_hashtags(Res::Dms).collect::<Vec<_>>().join(" ");
         if !tags.is_empty() {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("⬛ DMS Hashtags").close();
             details.span().class("info").cdata(tags);
             details.close();
         }
-        let tags = anc.hashtags(Res::RampMeter).collect::<Vec<_>>().join(" ");
+        let tags = anc.res_hashtags(Res::GateArm).collect::<Vec<_>>().join(" ");
+        if !tags.is_empty() {
+            let mut details = tree.root::<html::Details>();
+            details.summary().cdata("⫬ Gate Arm Hashtags").close();
+            details.span().class("info").cdata(tags);
+            details.close();
+        }
+        let tags = anc
+            .res_hashtags(Res::RampMeter)
+            .collect::<Vec<_>>()
+            .join(" ");
         if !tags.is_empty() {
             let mut details = tree.root::<html::Details>();
             details.summary().cdata("🚦 Ramp Meter Hashtags").close();
@@ -764,6 +793,7 @@ impl Card for ActionPlan {
             ItemState::Beacon,
             ItemState::Camera,
             ItemState::Dms,
+            ItemState::GateArm,
             ItemState::RampMeter,
             ItemState::Inactive,
         ]

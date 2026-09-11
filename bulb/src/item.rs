@@ -66,6 +66,8 @@ pub enum ItemState {
     Camera,
     /// DMS device actions
     Dms,
+    /// Gate arm actions
+    GateArm,
     /// Ramp meter device actions
     RampMeter,
     /// Crash incident
@@ -121,6 +123,7 @@ impl ItemState {
             "🔆" => Some(Self::Beacon),
             "🎥" => Some(Self::Camera),
             "⬛" => Some(Self::Dms),
+            "⫬" => Some(Self::GateArm),
             "🚦" => Some(Self::RampMeter),
             "💥" => Some(Self::Crash),
             "⛽" => Some(Self::Stall),
@@ -159,6 +162,7 @@ impl ItemState {
             Self::Beacon => "🔆",
             Self::Camera => "🎥",
             Self::Dms => "⬛",
+            Self::GateArm => "⫬",
             Self::RampMeter => "🚦",
             Self::Crash => "💥",
             Self::Stall => "⛽",
@@ -220,6 +224,7 @@ impl ItemState {
             Self::Beacon => "beacons",
             Self::Camera => "cameras",
             Self::Dms => "dms",
+            Self::GateArm => "gate arms",
             Self::RampMeter => "ramp meters",
             Self::Crash => "crash",
             Self::Stall => "stall",
