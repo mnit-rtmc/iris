@@ -10,11 +10,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::msgpattern::MsgPattern;
 use crate::msgpriority::MsgPriority;
-use crate::util::Fields;
+use crate::planphase::PlanPhase;
+use crate::util::{Doc, Fields};
+use hatmil::{Tree, html};
 use serde::Deserialize;
 use serde_json::Value;
 use serde_json::map::Map;
+use web_sys::HtmlElement;
 
 /// Device action
 #[derive(Clone, Debug, Deserialize, PartialEq)]
@@ -84,5 +88,212 @@ impl DeviceAction {
             Value::String(self.action_plan.to_string()),
         );
         Value::Object(obj)
+    }
+
+    /// Get ID for summary
+    fn id_summary(&self) -> String {
+        format!("{}-summary", self.name)
+    }
+
+    /// Get ID for hashtag `<input>`
+    fn id_hashtag(&self) -> String {
+        format!("{}-hashtag", self.name)
+    }
+
+    /// Get ID for phase `<select>`
+    fn id_phase(&self) -> String {
+        format!("{}-phase", self.name)
+    }
+
+    /// Get ID for msg_pattern `<select>`
+    fn id_msg_pattern(&self) -> String {
+        format!("{}-msg_pattern", self.name)
+    }
+
+    /// Get ID for msg_priority `<input>`
+    fn id_msg_priority(&self) -> String {
+        format!("{}-msg_priority", self.name)
+    }
+
+    /// Get ID for sticky `<input>`
+    fn id_sticky(&self) -> String {
+        format!("{}-sticky", self.name)
+    }
+
+    /// Get ID for ignore_auto_fail `<input>`
+    fn id_ignore_auto_fail(&self) -> String {
+        format!("{}-ignore_auto_fail", self.name)
+    }
+
+    /// Update from input elements
+    pub fn update_from_inputs(&mut self) {
+        let doc = Doc::get();
+        if let Some(hashtag) = doc.input_parse::<String>(&self.id_hashtag()) {
+            self.hashtag = hashtag;
+        }
+        if let Some(phase) = doc.select_parse::<String>(&self.id_phase()) {
+            self.phase = phase;
+        }
+        if let Some(pat) = doc.select_parse::<String>(&self.id_msg_pattern()) {
+            self.msg_pattern = Some(pat).filter(|p| !p.is_empty());
+        }
+        if let Some(prio) = doc.select_parse::<u8>(&self.id_msg_priority()) {
+            self.msg_priority = prio;
+        }
+        if let Some(sticky) = doc.input_parse::<bool>(&self.id_sticky()) {
+            self.sticky = sticky;
+        }
+        if let Some(iaf) = doc.input_parse::<bool>(&self.id_ignore_auto_fail())
+        {
+            self.ignore_auto_fail = iaf;
+        }
+        if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_summary()) {
+            let mut tree = Tree::new();
+            let mut summary = tree.root::<html::Summary>();
+            summary.id(self.id_summary());
+            summary.span().class("info").cdata(&self.hashtag).close();
+            if let Some(msg_pattern) = &self.msg_pattern {
+                summary.cdata(": ").cdata(msg_pattern);
+            }
+            el.set_outer_html(&String::from(tree));
+        }
+    }
+
+    /// Update table row class with valid state
+    pub fn update_class(&self, id: &str) -> bool {
+        if id == self.id_hashtag() {
+            if let Some(el) = Doc::get().opt_elem::<HtmlElement>(&self.name) {
+                el.set_class_name(self.class_name());
+            }
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Get row element class name
+    fn class_name(&self) -> &'static str {
+        if self.is_valid() { "" } else { "invalid" }
+    }
+
+    /// Build HTML hashtag row
+    fn hashtag_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let id = self.id_hashtag();
+        div.label().r#for(&id).cdata("Device #Tag").close();
+        let mut input = div.input();
+        input.id(id).maxlength(16).value(&self.hashtag);
+        div.close();
+    }
+
+    /// Build HTML phase row
+    fn phase_row<'p>(&self, phases: &[PlanPhase], div: &'p mut html::Div<'p>) {
+        let id = self.id_phase();
+        div.label().r#for(&id).cdata("Phase").close();
+        let mut select = div.select();
+        select.id(id);
+        for p in phases {
+            let mut option = select.option();
+            if p.name == self.phase {
+                option.selected();
+            }
+            option.cdata(&p.name).close();
+        }
+        select.close();
+        div.close();
+    }
+
+    /// Build HTML msg_pattern row
+    fn msg_pattern_row<'p>(
+        &self,
+        msg_patterns: &[MsgPattern],
+        div: &'p mut html::Div<'p>,
+    ) {
+        let id = self.id_msg_pattern();
+        div.label().r#for(&id).cdata("Msg Pattern").close();
+        let mut select = div.select();
+        select.id(id);
+        let mut option = select.option();
+        if self.msg_pattern.is_none() {
+            option.selected();
+        }
+        option.close();
+        for p in msg_patterns {
+            let mut option = select.option();
+            if Some(p.name.as_str()) == self.msg_pattern.as_deref() {
+                option.selected();
+            }
+            option.cdata(&p.name).close();
+        }
+        select.close();
+        div.close();
+    }
+
+    /// Build HTML msg_priority row
+    fn msg_priority_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let prio = MsgPriority::try_from(self.msg_priority)
+            .unwrap_or(MsgPriority::Medium1);
+        let id = self.id_msg_priority();
+        div.label().r#for(&id).cdata("Priority").close();
+        let mut select = div.select();
+        select.id(id);
+        for p in 1..=15 {
+            if let Ok(p) = MsgPriority::try_from(p) {
+                let mut option = select.option();
+                if p == prio {
+                    option.selected();
+                }
+                option.cdata(p.as_str()).close();
+            }
+        }
+        select.close();
+        div.close();
+    }
+
+    /// Build HTML sticky row
+    fn sticky_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let id = self.id_sticky();
+        div.label().r#for(&id).cdata("Sticky").close();
+        let mut input = div.input();
+        input.id(id).r#type("checkbox");
+        if self.sticky {
+            input.checked();
+        }
+        div.close();
+    }
+
+    /// Build HTML ignore_auto_fail row
+    fn ignore_auto_fail_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let id = self.id_ignore_auto_fail();
+        div.label().r#for(&id).cdata("Ignore Auto-Fail").close();
+        let mut input = div.input();
+        input.id(id).r#type("checkbox");
+        if self.ignore_auto_fail {
+            input.checked();
+        }
+        div.close();
+    }
+
+    /// Make HTML details
+    pub fn details_html<'p>(
+        &self,
+        phases: &[PlanPhase],
+        msg_patterns: &[MsgPattern],
+        details: &'p mut html::Details<'p>,
+    ) {
+        details.id(&self.name).class(self.class_name());
+        let mut summary = details.summary();
+        summary.id(self.id_summary());
+        summary.span().class("info").cdata(&self.hashtag).close();
+        if let Some(msg_pattern) = &self.msg_pattern {
+            summary.cdata(": ").cdata(msg_pattern);
+        }
+        summary.close();
+        self.hashtag_row(&mut details.div());
+        self.phase_row(phases, &mut details.div());
+        self.msg_pattern_row(msg_patterns, &mut details.div());
+        self.msg_priority_row(&mut details.div());
+        self.sticky_row(&mut details.div());
+        self.ignore_auto_fail_row(&mut details.div());
+        details.close();
     }
 }

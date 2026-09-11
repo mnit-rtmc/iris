@@ -18,7 +18,6 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::msgpattern::MsgPattern;
-use crate::msgpriority::MsgPriority;
 use crate::notes::contains_hashtag;
 use crate::phaseaction::PhaseAction;
 use crate::planphase::PlanPhase;
@@ -33,221 +32,13 @@ use serde::Deserialize;
 use std::borrow::Cow;
 use std::collections::BTreeSet;
 use wasm_bindgen::JsValue;
-use web_sys::{HtmlElement, HtmlSelectElement};
+use web_sys::HtmlSelectElement;
 
 /// Hashtag resource
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct HashtagResource {
     pub hashtag: String,
     pub resource_n: String,
-}
-
-impl DeviceAction {
-    /// Get ID for summary
-    fn id_summary(&self) -> String {
-        format!("{}-summary", self.name)
-    }
-
-    /// Get ID for hashtag `<input>`
-    fn id_hashtag(&self) -> String {
-        format!("{}-hashtag", self.name)
-    }
-
-    /// Get ID for phase `<select>`
-    fn id_phase(&self) -> String {
-        format!("{}-phase", self.name)
-    }
-
-    /// Get ID for msg_pattern `<select>`
-    fn id_msg_pattern(&self) -> String {
-        format!("{}-msg_pattern", self.name)
-    }
-
-    /// Get ID for msg_priority `<input>`
-    fn id_msg_priority(&self) -> String {
-        format!("{}-msg_priority", self.name)
-    }
-
-    /// Get ID for sticky `<input>`
-    fn id_sticky(&self) -> String {
-        format!("{}-sticky", self.name)
-    }
-
-    /// Get ID for ignore_auto_fail `<input>`
-    fn id_ignore_auto_fail(&self) -> String {
-        format!("{}-ignore_auto_fail", self.name)
-    }
-
-    /// Update from input elements
-    fn update_from_inputs(&mut self) {
-        let doc = Doc::get();
-        if let Some(hashtag) = doc.input_parse::<String>(&self.id_hashtag()) {
-            self.hashtag = hashtag;
-        }
-        if let Some(phase) = doc.select_parse::<String>(&self.id_phase()) {
-            self.phase = phase;
-        }
-        if let Some(pat) = doc.select_parse::<String>(&self.id_msg_pattern()) {
-            self.msg_pattern = Some(pat).filter(|p| !p.is_empty());
-        }
-        if let Some(prio) = doc.select_parse::<u8>(&self.id_msg_priority()) {
-            self.msg_priority = prio;
-        }
-        if let Some(sticky) = doc.input_parse::<bool>(&self.id_sticky()) {
-            self.sticky = sticky;
-        }
-        if let Some(iaf) = doc.input_parse::<bool>(&self.id_ignore_auto_fail())
-        {
-            self.ignore_auto_fail = iaf;
-        }
-        if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_summary()) {
-            let mut tree = Tree::new();
-            let mut summary = tree.root::<html::Summary>();
-            summary.id(self.id_summary());
-            summary.span().class("info").cdata(&self.hashtag).close();
-            if let Some(msg_pattern) = &self.msg_pattern {
-                summary.cdata(": ").cdata(msg_pattern);
-            }
-            el.set_outer_html(&String::from(tree));
-        }
-    }
-
-    /// Update table row class with valid state
-    fn update_valid(&self, id: &str) -> bool {
-        if id == self.id_hashtag() {
-            if let Some(el) = Doc::get().opt_elem::<HtmlElement>(&self.name) {
-                el.set_class_name(self.class_name());
-            }
-            true
-        } else {
-            false
-        }
-    }
-
-    /// Get row element class name
-    fn class_name(&self) -> &'static str {
-        if self.is_valid() { "" } else { "invalid" }
-    }
-
-    /// Build HTML hashtag row
-    fn hashtag_row<'p>(&self, div: &'p mut html::Div<'p>) {
-        let id = self.id_hashtag();
-        div.label().r#for(&id).cdata("Device #Tag").close();
-        let mut input = div.input();
-        input.id(id).maxlength(16).value(&self.hashtag);
-        div.close();
-    }
-
-    /// Build HTML phase row
-    fn phase_row<'p>(&self, anc: &ActionPlanAnc, div: &'p mut html::Div<'p>) {
-        let id = self.id_phase();
-        div.label().r#for(&id).cdata("Phase").close();
-        let mut select = div.select();
-        select.id(id);
-        for p in &anc.phases {
-            let mut option = select.option();
-            if p.name == self.phase {
-                option.selected();
-            }
-            option.cdata(&p.name).close();
-        }
-        select.close();
-        div.close();
-    }
-
-    /// Build HTML msg_pattern row
-    fn msg_pattern_row<'p>(
-        &self,
-        anc: &ActionPlanAnc,
-        div: &'p mut html::Div<'p>,
-    ) {
-        let id = self.id_msg_pattern();
-        div.label().r#for(&id).cdata("Msg Pattern").close();
-        let mut select = div.select();
-        select.id(id);
-        let mut option = select.option();
-        if self.msg_pattern.is_none() {
-            option.selected();
-        }
-        option.close();
-        for p in &anc.msg_patterns {
-            let mut option = select.option();
-            if Some(p.name.as_str()) == self.msg_pattern.as_deref() {
-                option.selected();
-            }
-            option.cdata(&p.name).close();
-        }
-        select.close();
-        div.close();
-    }
-
-    /// Build HTML msg_priority row
-    fn msg_priority_row<'p>(&self, div: &'p mut html::Div<'p>) {
-        let prio = MsgPriority::try_from(self.msg_priority)
-            .unwrap_or(MsgPriority::Medium1);
-        let id = self.id_msg_priority();
-        div.label().r#for(&id).cdata("Priority").close();
-        let mut select = div.select();
-        select.id(id);
-        for p in 1..=15 {
-            if let Ok(p) = MsgPriority::try_from(p) {
-                let mut option = select.option();
-                if p == prio {
-                    option.selected();
-                }
-                option.cdata(p.as_str()).close();
-            }
-        }
-        select.close();
-        div.close();
-    }
-
-    /// Build HTML sticky row
-    fn sticky_row<'p>(&self, div: &'p mut html::Div<'p>) {
-        let id = self.id_sticky();
-        div.label().r#for(&id).cdata("Sticky").close();
-        let mut input = div.input();
-        input.id(id).r#type("checkbox");
-        if self.sticky {
-            input.checked();
-        }
-        div.close();
-    }
-
-    /// Build HTML ignore_auto_fail row
-    fn ignore_auto_fail_row<'p>(&self, div: &'p mut html::Div<'p>) {
-        let id = self.id_ignore_auto_fail();
-        div.label().r#for(&id).cdata("Ignore Auto-Fail").close();
-        let mut input = div.input();
-        input.id(id).r#type("checkbox");
-        if self.ignore_auto_fail {
-            input.checked();
-        }
-        div.close();
-    }
-
-    /// Make HTML details
-    fn details<'p>(
-        &self,
-        anc: &ActionPlanAnc,
-        details: &'p mut html::Details<'p>,
-    ) {
-        details.id(&self.name).class(self.class_name());
-        let mut summary = details.summary();
-        summary.id(self.id_summary());
-        summary.span().class("info").cdata(&self.hashtag).close();
-        if let Some(msg_pattern) = &self.msg_pattern {
-            summary.cdata(": ").cdata(msg_pattern);
-        }
-        summary.close();
-        self.hashtag_row(&mut details.div());
-        self.phase_row(anc, &mut details.div());
-        self.msg_pattern_row(anc, &mut details.div());
-        self.msg_priority_row(&mut details.div());
-        self.sticky_row(&mut details.div());
-        self.ignore_auto_fail_row(&mut details.div());
-        details.close();
-    }
 }
 
 /// Action plan
@@ -274,7 +65,7 @@ pub struct ActionPlanAnc {
     pub hashtag_resources: Vec<HashtagResource>,
     pub phase_actions: Vec<PhaseAction>,
     pub msg_patterns: Vec<MsgPattern>,
-    pub next_name: String,
+    pub next_device_action: String,
 }
 
 impl AncillaryData for ActionPlanAnc {
@@ -339,7 +130,8 @@ impl AncillaryData for ActionPlanAnc {
                     serde_wasm_bindgen::from_value(value)?;
                 if let Some(View::Control) | Some(View::Setup(_)) = self.view {
                     actions.retain(|da| da.action_plan == pri.name);
-                    self.next_name = pri.next_action_name(&actions);
+                    self.next_device_action =
+                        pri.next_device_action_name(&actions);
                 }
                 self.device_actions = actions;
             }
@@ -440,7 +232,7 @@ impl ActionPlanAnc {
 
 impl ActionPlan {
     /// Create next available device action name
-    fn next_action_name(&self, actions: &[DeviceAction]) -> String {
+    fn next_device_action_name(&self, actions: &[DeviceAction]) -> String {
         let nm = &self.name;
         let mut num = 1;
         for da in actions {
@@ -646,13 +438,15 @@ impl ActionPlan {
         }
         for da in &anc.device_actions {
             let mut details = tree.root::<html::Details>();
-            da.details(anc, &mut details);
+            da.details_html(&anc.phases, &anc.msg_patterns, &mut details);
         }
-        let da =
-            DeviceAction::new(&anc.next_name, &self.name, &self.default_phase);
+        let da = DeviceAction::new(
+            &anc.next_device_action,
+            &self.name,
+            &self.default_phase,
+        );
         let mut details = tree.root::<html::Details>();
-        da.details(anc, &mut details);
-        // FIXME: add phase action table
+        da.details_html(&anc.phases, &anc.msg_patterns, &mut details);
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
@@ -748,14 +542,17 @@ impl Card for ActionPlan {
         for da in &anc.device_actions {
             let mut nda = da.clone();
             nda.update_from_inputs();
-            if nda.update_valid(id) {
+            if nda.update_class(id) {
                 break;
             }
         }
-        let mut da =
-            DeviceAction::new(&anc.next_name, &self.name, &self.default_phase);
+        let mut da = DeviceAction::new(
+            &anc.next_device_action,
+            &self.name,
+            &self.default_phase,
+        );
         da.update_from_inputs();
-        da.update_valid(id);
+        da.update_class(id);
         Vec::new()
     }
 
@@ -778,8 +575,11 @@ impl Card for ActionPlan {
                 actions.push(Action::Patch(uri, val.into()));
             }
         }
-        let da =
-            DeviceAction::new(&anc.next_name, &self.name, &self.default_phase);
+        let da = DeviceAction::new(
+            &anc.next_device_action,
+            &self.name,
+            &self.default_phase,
+        );
         let mut nda = da.clone();
         nda.update_from_inputs();
         if nda.is_valid() {
