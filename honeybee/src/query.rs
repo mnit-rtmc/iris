@@ -246,7 +246,9 @@ pub const DETECTOR_ONE: &str = "\
 
 /// SQL query for all detectors (public)
 pub const DETECTOR_PUB: &str = "\
-  SELECT d.name, r_node, cor_id, lane_number, lane_code, speed_limit \
+  SELECT d.name, r_node, cor_id, lane_number, lane_code, speed_limit, \
+         to_char(lat, 'FM999.99999')::numeric AS lat, \
+         to_char(lon, 'FM999.99999')::numeric AS lon \
   FROM detector_view d
   JOIN r_node_view r ON d.r_node = r.name
   ORDER BY regexp_replace(d.name, '[0-9]', '', 'g'), \
