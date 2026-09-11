@@ -29,6 +29,7 @@ mod commlink;
 mod controller;
 mod dayplan;
 mod detector;
+mod devaction;
 mod device;
 mod dms;
 mod domain;

@@ -10,10 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::actionplan::{ActionPlan, DeviceAction};
+use crate::actionplan::ActionPlan;
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::devaction::DeviceAction;
 use crate::device::DeviceReq;
 use crate::error::Result;
 use crate::fetch::{Action, Uri};

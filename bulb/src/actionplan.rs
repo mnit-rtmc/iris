@@ -13,6 +13,7 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_all, uri_one};
 use crate::dayplan::{DayMatcher, DayPlan};
+use crate::devaction::DeviceAction;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
@@ -28,25 +29,10 @@ use hatmil::{Tree, html};
 use jiff::{Zoned, civil::Date};
 use resources::Res;
 use serde::Deserialize;
-use serde_json::Value;
-use serde_json::map::Map;
 use std::borrow::Cow;
 use std::collections::BTreeSet;
 use wasm_bindgen::JsValue;
 use web_sys::{HtmlElement, HtmlSelectElement};
-
-/// Device action
-#[derive(Clone, Debug, Deserialize, PartialEq)]
-pub struct DeviceAction {
-    pub name: String,
-    pub action_plan: String,
-    pub hashtag: String,
-    pub phase: String,
-    pub msg_pattern: Option<String>,
-    pub msg_priority: u8,
-    pub sticky: bool,
-    pub ignore_auto_fail: bool,
-}
 
 /// Hashtag resource
 #[derive(Debug, Default, Deserialize, PartialEq)]
@@ -68,20 +54,6 @@ pub struct PhaseAction {
 }
 
 impl DeviceAction {
-    /// Create a new device action
-    fn new(name: &str, ap: &str, phase: &str) -> Self {
-        DeviceAction {
-            name: name.to_string(),
-            action_plan: ap.to_string(),
-            hashtag: String::new(),
-            phase: phase.to_string(),
-            msg_pattern: None,
-            msg_priority: MsgPriority::Medium1 as u8,
-            sticky: false,
-            ignore_auto_fail: false,
-        }
-    }
-
     /// Get ID for summary
     fn id_summary(&self) -> String {
         format!("{}-summary", self.name)
@@ -118,26 +90,28 @@ impl DeviceAction {
     }
 
     /// Update from input elements
-    fn update_inputs(&mut self) {
+    fn update_from_inputs(&mut self) {
         let doc = Doc::get();
-        self.hashtag = doc
-            .input_parse::<String>(&self.id_hashtag())
-            .unwrap_or_default();
-        self.phase = doc
-            .select_parse::<String>(&self.id_phase())
-            .unwrap_or_default();
-        self.msg_pattern = doc
-            .select_parse::<String>(&self.id_msg_pattern())
-            .filter(|p| !p.is_empty());
-        self.msg_priority =
-            doc.select_parse::<u8>(&self.id_msg_priority()).unwrap_or(6);
-        self.sticky = doc
-            .input_parse::<bool>(&self.id_sticky())
-            .unwrap_or_default();
-        self.ignore_auto_fail = doc
-            .input_parse::<bool>(&self.id_ignore_auto_fail())
-            .unwrap_or_default();
-        if let Ok(el) = Doc::get().elem::<HtmlElement>(&self.id_summary()) {
+        if let Some(hashtag) = doc.input_parse::<String>(&self.id_hashtag()) {
+            self.hashtag = hashtag;
+        }
+        if let Some(phase) = doc.select_parse::<String>(&self.id_phase()) {
+            self.phase = phase;
+        }
+        if let Some(pat) = doc.select_parse::<String>(&self.id_msg_pattern()) {
+            self.msg_pattern = Some(pat).filter(|p| !p.is_empty());
+        }
+        if let Some(prio) = doc.select_parse::<u8>(&self.id_msg_priority()) {
+            self.msg_priority = prio;
+        }
+        if let Some(sticky) = doc.input_parse::<bool>(&self.id_sticky()) {
+            self.sticky = sticky;
+        }
+        if let Some(iaf) = doc.input_parse::<bool>(&self.id_ignore_auto_fail())
+        {
+            self.ignore_auto_fail = iaf;
+        }
+        if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_summary()) {
             let mut tree = Tree::new();
             let mut summary = tree.root::<html::Summary>();
             summary.id(self.id_summary());
@@ -147,13 +121,6 @@ impl DeviceAction {
             }
             el.set_outer_html(&String::from(tree));
         }
-    }
-
-    /// Check if device action is valid
-    fn is_valid(&self) -> bool {
-        self.hashtag.len() > 1
-            && self.hashtag.starts_with('#')
-            && self.hashtag[1..].chars().all(|c| c.is_alphanumeric())
     }
 
     /// Update table row class with valid state
@@ -291,41 +258,6 @@ impl DeviceAction {
         self.sticky_row(&mut details.div());
         self.ignore_auto_fail_row(&mut details.div());
         details.close();
-    }
-
-    /// Get set of changed fields
-    fn changed_fields(&self, da: &Self) -> Fields {
-        let mut fields = Fields::new();
-        if self.hashtag != da.hashtag {
-            fields.insert_str("hashtag", &self.hashtag);
-        }
-        if self.phase != da.phase {
-            fields.insert_str("phase", &self.phase);
-        }
-        if self.msg_pattern != da.msg_pattern {
-            fields.insert_opt_str("msg_pattern", self.msg_pattern.as_deref());
-        }
-        if self.msg_priority != da.msg_priority {
-            fields.insert_num("msg_priority", self.msg_priority);
-        }
-        if self.sticky != da.sticky {
-            fields.insert_bool("sticky", self.sticky);
-        }
-        if self.ignore_auto_fail != da.ignore_auto_fail {
-            fields.insert_bool("ignore_auto_fail", self.ignore_auto_fail);
-        }
-        fields
-    }
-
-    /// Convert to JSON value (for POST)
-    fn value(&self) -> Value {
-        let mut obj = Map::new();
-        obj.insert("name".to_string(), Value::String(self.name.to_string()));
-        obj.insert(
-            "action_plan".to_string(),
-            Value::String(self.action_plan.to_string()),
-        );
-        Value::Object(obj)
     }
 }
 
@@ -866,14 +798,14 @@ impl Card for ActionPlan {
         // Setup card only
         for da in &anc.device_actions {
             let mut nda = da.clone();
-            nda.update_inputs();
+            nda.update_from_inputs();
             if nda.update_valid(id) {
                 break;
             }
         }
         let mut da =
             DeviceAction::new(&anc.next_name, &self.name, &self.default_phase);
-        da.update_inputs();
+        da.update_from_inputs();
         da.update_valid(id);
         Vec::new()
     }
@@ -884,7 +816,7 @@ impl Card for ActionPlan {
         let mut actions = Vec::new();
         for da in &anc.device_actions {
             let mut nda = da.clone();
-            nda.update_inputs();
+            nda.update_from_inputs();
             if !nda.is_valid() {
                 let uri = uri_one(Res::DeviceAction, &da.name);
                 actions.push(Action::Delete(uri));
@@ -900,7 +832,7 @@ impl Card for ActionPlan {
         let da =
             DeviceAction::new(&anc.next_name, &self.name, &self.default_phase);
         let mut nda = da.clone();
-        nda.update_inputs();
+        nda.update_from_inputs();
         if nda.is_valid() {
             let post_uri = uri_all(Res::DeviceAction);
             let patch_uri = uri_one(Res::DeviceAction, &nda.name);
