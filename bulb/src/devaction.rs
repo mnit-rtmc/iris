@@ -140,30 +140,32 @@ impl DeviceAction {
         if let Some(prio) = doc.select_parse::<u8>(&self.id_msg_priority()) {
             self.msg_priority = prio;
         }
-        if let Some(sticky) = doc.input_parse::<bool>(&self.id_sticky()) {
-            self.sticky = sticky;
-        }
-        if let Some(iaf) = doc.input_parse::<bool>(&self.id_ignore_auto_fail())
-        {
-            self.ignore_auto_fail = iaf;
-        }
-        if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_summary()) {
-            let mut tree = Tree::new();
-            let mut summary = tree.root::<html::Summary>();
-            summary.id(self.id_summary());
-            summary.span().class("info").cdata(&self.hashtag).close();
-            if let Some(msg_pattern) = &self.msg_pattern {
-                summary.cdata(": ").cdata(msg_pattern);
-            }
-            el.set_outer_html(&String::from(tree));
-        }
+        self.sticky = doc.input_bool(&self.id_sticky());
+        self.ignore_auto_fail = doc.input_bool(&self.id_ignore_auto_fail());
+    }
+
+    /// Check ID for input element of this device action
+    fn is_input_id(&self, id: &str) -> bool {
+        id == self.id_hashtag()
+            || id == self.id_phase()
+            || id == self.id_msg_pattern()
+            || id == self.id_msg_priority()
+            || id == self.id_sticky()
+            || id == self.id_ignore_auto_fail()
     }
 
     /// Update table row class with valid state
-    pub fn update_class(&self, id: &str) -> bool {
-        if id == self.id_hashtag() {
-            if let Some(el) = Doc::get().opt_elem::<HtmlElement>(&self.name) {
-                el.set_class_name(self.class_name());
+    pub fn update_class(&self, changed: bool, id: &str) -> bool {
+        if self.is_input_id(id) {
+            let doc = Doc::get();
+            if let Some(el) = doc.opt_elem::<HtmlElement>(&self.name) {
+                el.set_class_name(self.class_name(changed));
+            }
+            if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_summary()) {
+                let mut tree = Tree::new();
+                let mut summary = tree.root::<html::Summary>();
+                self.summary_html(&mut summary, changed);
+                el.set_outer_html(&String::from(tree));
             }
             true
         } else {
@@ -172,8 +174,12 @@ impl DeviceAction {
     }
 
     /// Get row element class name
-    fn class_name(&self) -> &'static str {
-        if self.is_valid() { "" } else { "invalid" }
+    fn class_name(&self, changed: bool) -> &'static str {
+        if self.is_valid() {
+            if changed { "changed" } else { "" }
+        } else {
+            "invalid"
+        }
     }
 
     /// Build HTML hashtag row
@@ -239,6 +245,7 @@ impl DeviceAction {
         for p in 1..=15 {
             if let Ok(p) = MsgPriority::try_from(p) {
                 let mut option = select.option();
+                option.value(p as u8);
                 if p == prio {
                     option.selected();
                 }
@@ -273,6 +280,27 @@ impl DeviceAction {
         div.close();
     }
 
+    /// Make HTML summary
+    fn summary_html<'p>(
+        &self,
+        summary: &'p mut html::Summary<'p>,
+        changed: bool,
+    ) {
+        summary.id(self.id_summary());
+        let hashtag = if self.is_valid() {
+            &self.hashtag
+        } else if changed {
+            "*Invalid*"
+        } else {
+            "*New*"
+        };
+        summary.span().class("info").cdata(hashtag).close();
+        if let Some(msg_pattern) = &self.msg_pattern {
+            summary.cdata(": ").cdata(msg_pattern);
+        }
+        summary.close();
+    }
+
     /// Make HTML details
     pub fn details_html<'p>(
         &self,
@@ -280,14 +308,8 @@ impl DeviceAction {
         msg_patterns: &[MsgPattern],
         details: &'p mut html::Details<'p>,
     ) {
-        details.id(&self.name).class(self.class_name());
-        let mut summary = details.summary();
-        summary.id(self.id_summary());
-        summary.span().class("info").cdata(&self.hashtag).close();
-        if let Some(msg_pattern) = &self.msg_pattern {
-            summary.cdata(": ").cdata(msg_pattern);
-        }
-        summary.close();
+        details.id(&self.name).class(self.class_name(false));
+        self.summary_html(&mut details.summary(), false);
         self.hashtag_row(&mut details.div());
         self.phase_row(phases, &mut details.div());
         self.msg_pattern_row(msg_patterns, &mut details.div());

@@ -89,6 +89,7 @@ impl AncillaryData for ActionPlanAnc {
             }
             View::Setup(_edit) => {
                 vec![
+                    Asset::DayPlans,
                     Asset::DeviceActions,
                     Asset::PlanPhases,
                     Asset::MsgPatterns,
@@ -432,10 +433,8 @@ impl ActionPlan {
             input.checked();
         }
         div.close();
-        if !anc.device_actions.is_empty() {
-            div = tree.root::<html::Div>();
-            div.class("row").cdata("Device Actions").close();
-        }
+        div = tree.root::<html::Div>();
+        div.class("row").cdata("Device Actions").close();
         for da in &anc.device_actions {
             let mut details = tree.root::<html::Details>();
             da.details_html(&anc.phases, &anc.msg_patterns, &mut details);
@@ -527,7 +526,7 @@ impl Card for ActionPlan {
     /// Handle input event for an element on the card
     #[allow(clippy::field_reassign_with_default)]
     fn handle_input(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
-        // Control card only
+        // FIXME: Control card only
         if "phase" == id
             && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
         {
@@ -538,21 +537,22 @@ impl Card for ActionPlan {
             let val = fields.into_value().to_string();
             return vec![Action::Patch(uri, val.into())];
         }
-        // Setup card only
+        // FIXME: Setup card only
         for da in &anc.device_actions {
             let mut nda = da.clone();
             nda.update_from_inputs();
-            if nda.update_class(id) {
+            if nda.update_class(*da != nda, id) {
                 break;
             }
         }
-        let mut da = DeviceAction::new(
+        let da = DeviceAction::new(
             &anc.next_device_action,
             &self.name,
             &self.default_phase,
         );
-        da.update_from_inputs();
-        da.update_class(id);
+        let mut nda = da.clone();
+        nda.update_from_inputs();
+        nda.update_class(da != nda, id);
         Vec::new()
     }
 

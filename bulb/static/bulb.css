@@ -25,16 +25,20 @@ span {
 details[open] {
   border: 2px inset;
 }
-details.invalid summary,
-details.invalid input {
-  background-color: #fdd;
-}
 details summary {
   padding-left: 0.2rem;
   cursor: pointer;
 }
 details div {
   padding-left: 1rem;
+}
+details.invalid summary,
+details.invalid input {
+  background-color: #fdd;
+}
+details.changed summary,
+details.changed input {
+  background-color: #ffd;
 }
 textarea {
   resize: none;

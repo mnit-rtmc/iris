@@ -245,7 +245,7 @@ impl DayMatcher {
     }
 
     /// Update table row class with valid state
-    fn update_valid(&self, id: &str) -> bool {
+    fn update_class(&self, id: &str) -> bool {
         if self.is_input_id(id) {
             if let Some(el) = Doc::get().opt_elem::<HtmlElement>(&self.name) {
                 el.set_class_name(self.class_name());
@@ -487,7 +487,7 @@ impl Card for DayPlan {
         for dm in &anc.day_matchers {
             let mut ndm = dm.clone();
             ndm.update_from_inputs();
-            if ndm.update_valid(id) {
+            if ndm.update_class(id) {
                 break;
             }
         }
@@ -495,7 +495,7 @@ impl Card for DayPlan {
         dm.name = anc.next_name.clone();
         dm.day_plan = self.name.clone();
         dm.update_from_inputs();
-        dm.update_valid(id);
+        dm.update_class(id);
         Vec::new()
     }
 
