@@ -199,7 +199,7 @@ impl DayMatcher {
     }
 
     /// Update from input elements
-    fn update_inputs(&mut self) {
+    fn update_from_inputs(&mut self) {
         let doc = Doc::get();
         self.month =
             doc.select_parse::<i32>(&self.id_month()).filter(|m| *m > 0);
@@ -486,7 +486,7 @@ impl Card for DayPlan {
     fn handle_input(&self, anc: DayPlanAnc, id: &str) -> Vec<Action> {
         for dm in &anc.day_matchers {
             let mut ndm = dm.clone();
-            ndm.update_inputs();
+            ndm.update_from_inputs();
             if ndm.update_valid(id) {
                 break;
             }
@@ -494,7 +494,7 @@ impl Card for DayPlan {
         let mut dm = DayMatcher::default();
         dm.name = anc.next_name.clone();
         dm.day_plan = self.name.clone();
-        dm.update_inputs();
+        dm.update_from_inputs();
         dm.update_valid(id);
         Vec::new()
     }
@@ -505,7 +505,7 @@ impl Card for DayPlan {
         let mut actions = Vec::new();
         for dm in &anc.day_matchers {
             let mut ndm = dm.clone();
-            ndm.update_inputs();
+            ndm.update_from_inputs();
             if !ndm.is_valid() {
                 let uri = uri_one(Res::DayMatcher, &dm.name);
                 actions.push(Action::Delete(uri));
@@ -522,7 +522,7 @@ impl Card for DayPlan {
         dm.name = anc.next_name.clone();
         dm.day_plan = self.name.clone();
         let mut ndm = dm.clone();
-        ndm.update_inputs();
+        ndm.update_from_inputs();
         if ndm.is_valid() {
             let post_uri = uri_all(Res::DayMatcher);
             let patch_uri = uri_one(Res::DayMatcher, &ndm.name);
