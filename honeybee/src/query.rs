@@ -13,6 +13,12 @@
 // GNU General Public License for more details.
 //
 
+/// SQL query for action conditions (LUT)
+pub const ACTION_CONDITION_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.action_condition \
+  ORDER BY id";
+
 /// SQL query for all action plans (primary)
 pub const ACTION_PLAN_ALL: &str = "\
   SELECT name, notes, active, default_phase, phase \

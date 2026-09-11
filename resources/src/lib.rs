@@ -17,6 +17,7 @@ use std::fmt;
 /// Enumeration of resource types
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Res {
+    ActionCondition,
     ActionPlan,
     Alarm,
     Beacon,
@@ -117,6 +118,7 @@ impl Res {
     pub fn iter() -> impl Iterator<Item = Res> {
         use Res::*;
         [
+            ActionCondition,
             ActionPlan,
             Alarm,
             Beacon,
@@ -205,6 +207,7 @@ impl Res {
     pub const fn as_str(self) -> &'static str {
         use Res::*;
         match self {
+            ActionCondition => "action_condition",
             ActionPlan => "action_plan",
             Alarm => "alarm",
             Beacon => "beacon",
@@ -350,12 +353,12 @@ impl Res {
         use Res::*;
         #[allow(clippy::match_like_matches_macro)]
         match self {
-            BeaconState | CommProtocol | CommState | Condition | Direction
-            | Encoding | EventDescription | Font | GateArmInterlock
-            | GateArmState | Graphic | IncImpact | IncRange | LaneCode
-            | LcsIndication | LcsType | MeterAlgorithm | MeterType
-            | ResourceType | RnodeTransition | RnodeType | RoadClass
-            | RoadModifier => true,
+            ActionCondition | BeaconState | CommProtocol | CommState
+            | Condition | Direction | Encoding | EventDescription | Font
+            | GateArmInterlock | GateArmState | Graphic | IncImpact
+            | IncRange | LaneCode | LcsIndication | LcsType
+            | MeterAlgorithm | MeterType | ResourceType | RnodeTransition
+            | RnodeType | RoadClass | RoadModifier => true,
             _ => false,
         }
     }

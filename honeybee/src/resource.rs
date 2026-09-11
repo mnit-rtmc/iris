@@ -28,6 +28,7 @@ use tokio_postgres::Client;
 /// A resource which can be queried from a database connection.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Resource {
+    ActionCondition,
     ActionPlan,
     Alarm,
     Beacon,
@@ -122,6 +123,7 @@ impl Resource {
     pub fn iter() -> impl Iterator<Item = Resource> {
         use Resource::*;
         [
+            ActionCondition,
             ActionPlan,
             Alarm,
             Beacon,
@@ -218,6 +220,7 @@ impl Resource {
     const fn res_type(self) -> Res {
         use Resource::*;
         match self {
+            ActionCondition => Res::ActionCondition,
             ActionPlan => Res::ActionPlan,
             Alarm => Res::Alarm,
             Beacon => Res::Beacon,
@@ -304,6 +307,7 @@ impl Resource {
     const fn path(self) -> &'static str {
         use Resource::*;
         match self {
+            ActionCondition => "lut/action_condition",
             ActionPlan => "api/action_plan",
             Alarm => "api/alarm",
             Beacon => "api/beacon",
@@ -408,6 +412,7 @@ impl Resource {
     const fn all_sql(self) -> &'static str {
         use Resource::*;
         match self {
+            ActionCondition => query::ACTION_CONDITION_LUT,
             ActionPlan => query::ACTION_PLAN_ALL,
             Alarm => query::ALARM_ALL,
             Beacon => query::BEACON_ALL,
