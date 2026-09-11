@@ -66,6 +66,7 @@ pub struct ActionPlanAnc {
     pub phase_actions: Vec<PhaseAction>,
     pub msg_patterns: Vec<MsgPattern>,
     pub next_device_action: String,
+    pub next_phase_action: String,
 }
 
 impl AncillaryData for ActionPlanAnc {
@@ -143,6 +144,7 @@ impl AncillaryData for ActionPlanAnc {
                 let mut actions: Vec<PhaseAction> =
                     serde_wasm_bindgen::from_value(value)?;
                 actions.retain(|pa| pa.action_plan == pri.name);
+                self.next_phase_action = pri.next_phase_action_name(&actions);
                 self.phase_actions = actions;
             }
             Asset::MsgPatterns => {
@@ -238,6 +240,21 @@ impl ActionPlan {
         let mut num = 1;
         for da in actions {
             if let Some((pre, suffix)) = da.name.rsplit_once('_')
+                && pre == nm
+                && let Ok(n) = suffix.parse::<u32>()
+            {
+                num = num.max(n + 1);
+            }
+        }
+        format!("{nm}_{num}")
+    }
+
+    /// Create next available phase action name
+    fn next_phase_action_name(&self, actions: &[PhaseAction]) -> String {
+        let nm = &self.name;
+        let mut num = 1;
+        for pa in actions {
+            if let Some((pre, suffix)) = pa.name.rsplit_once('_')
                 && pre == nm
                 && let Ok(n) = suffix.parse::<u32>()
             {
@@ -446,6 +463,19 @@ impl ActionPlan {
         );
         let mut details = tree.root::<html::Details>();
         da.details_html(&anc.phases, &anc.msg_patterns, &mut details);
+        div = tree.root::<html::Div>();
+        div.class("row").cdata("Phase Actions").close();
+        for pa in &anc.phase_actions {
+            let mut details = tree.root::<html::Details>();
+            pa.details_html(&anc.day_plans, &mut details);
+        }
+        let pa = PhaseAction::new(
+            &anc.next_phase_action,
+            &self.name,
+            &self.default_phase,
+        );
+        let mut details = tree.root::<html::Details>();
+        pa.details_html(&anc.day_plans, &mut details);
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
