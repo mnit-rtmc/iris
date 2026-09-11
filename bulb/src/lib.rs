@@ -60,6 +60,7 @@ mod msgpriority;
 mod notes;
 mod panic;
 mod permission;
+mod phaseaction;
 mod planphase;
 mod query;
 mod rampmeter;

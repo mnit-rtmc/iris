@@ -20,6 +20,7 @@ use crate::item::{ItemState, ItemStates};
 use crate::msgpattern::MsgPattern;
 use crate::msgpriority::MsgPriority;
 use crate::notes::contains_hashtag;
+use crate::phaseaction::PhaseAction;
 use crate::planphase::PlanPhase;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
@@ -39,18 +40,6 @@ use web_sys::{HtmlElement, HtmlSelectElement};
 pub struct HashtagResource {
     pub hashtag: String,
     pub resource_n: String,
-}
-
-/// Phase action
-#[derive(Debug, Default, Deserialize, PartialEq)]
-pub struct PhaseAction {
-    pub name: String,
-    pub action_plan: String,
-    pub day_plan: Option<String>,
-    pub condition: u32,
-    pub params: Option<String>,
-    pub from_phase: Option<String>,
-    pub to_phase: String,
 }
 
 impl DeviceAction {
@@ -258,46 +247,6 @@ impl DeviceAction {
         self.sticky_row(&mut details.div());
         self.ignore_auto_fail_row(&mut details.div());
         details.close();
-    }
-}
-
-/// Action conditions
-const CONDITIONS: &[&str] = &["⏳", "⏰", "🚗", "🌦️", "📢"];
-
-impl PhaseAction {
-    /// Check if a phase action is active on a given day
-    fn is_active(&self, day: &Date) -> bool {
-        if 1 == self.condition
-            && let Some(params) = &self.params
-            && let Ok(dt) = params.parse::<Date>()
-        {
-            dt == *day
-        } else {
-            true
-        }
-    }
-
-    /// Make HTML table row
-    fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
-        let params = self.params.as_deref().unwrap_or("");
-        match self.condition {
-            0 => {
-                tr.td().cdata(params).cdata(" sec").close();
-            }
-            1 if let Some((_d, t)) = params.split_once('T') => {
-                tr.td().cdata(t).close();
-            }
-            _ => {
-                tr.td().cdata(params).close();
-            }
-        };
-        tr.td().cdata(CONDITIONS[self.condition as usize]).close();
-        match &self.from_phase {
-            Some(from_phase) => tr.td().cdata(from_phase).close(),
-            None => tr.td().class("info").cdata("*any*").close(),
-        };
-        tr.td().cdata("⇨").close();
-        tr.td().cdata(&self.to_phase).close();
     }
 }
 
