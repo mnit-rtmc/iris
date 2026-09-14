@@ -65,11 +65,15 @@ fn is_condition_valid(condition: u32, params: Option<&str>) -> bool {
 
 /// Check if hold time condition is valid
 fn is_hold_time_valid(params: &str) -> bool {
-    for p in params.splitn(3, ':') {
-        // FIXME: p < 24 for HH:mm:ss
-        match p.parse::<u8>() {
-            Ok(p) if p < 60 => (),
-            _ => return false,
+    let params: Vec<_> = params
+        .splitn(3, ':')
+        .map(|p| p.parse::<u8>().ok())
+        .collect();
+    for p in params {
+        match p {
+            None => return false,
+            Some(p) if p > 59 => return false,
+            _ => (),
         }
     }
     true
@@ -108,7 +112,7 @@ fn is_threshold_valid(fields: &[&str], params: &str) -> bool {
 
 /// Check if threshold field/value is valid
 fn is_field_val_valid(fields: &[&str], f: &str, val: &str) -> bool {
-    if val.parse::<u8>().is_err() {
+    if f.is_empty() || val.parse::<u8>().is_err() {
         return false;
     }
     for field in fields {
@@ -122,7 +126,9 @@ fn is_field_val_valid(fields: &[&str], f: &str, val: &str) -> bool {
 /// Check if alarm condition is valid
 fn is_alarm_valid(params: &str) -> bool {
     if let Some((_aid, state)) = params.split_once(',') {
-        return "triggered".starts_with(state) || "cleared".starts_with(state);
+        return !state.is_empty()
+            && ("triggered".starts_with(state)
+                || "cleared".starts_with(state));
     }
     false
 }
@@ -433,8 +439,9 @@ impl PhaseAction {
         summary.cdata(sym);
         let params = self.params.as_deref().unwrap_or("");
         summary.cdata(params);
-        let fp = if self.from_phase.is_some() { "_" } else { "*" };
-        summary.span().class("info").cdata(fp).close();
+        if self.from_phase.is_some() {
+            summary.span().class("info").cdata("…").close();
+        }
         summary.cdata("⇨").cdata(&self.to_phase).close();
     }
 
