@@ -19,6 +19,7 @@ use wasm_bindgen::JsValue;
 #[derive(Clone, Debug, PartialEq)]
 pub enum Asset {
     Access,
+    ActConditions,
     ActionPlans,
     BeaconStates,
     CabinetStyles,
@@ -73,6 +74,7 @@ impl Asset {
         use Asset::*;
         match self {
             Access => "/iris/api/access".into(),
+            ActConditions => "/iris/lut/action_condition".into(),
             ActionPlans => "/iris/api/action_plan".into(),
             BeaconStates => "/iris/lut/beacon_state".into(),
             CabinetStyles => "/iris/api/cabinet_style".into(),

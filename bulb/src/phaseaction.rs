@@ -15,6 +15,14 @@ use hatmil::html;
 use jiff::civil::Date;
 use serde::Deserialize;
 
+/// Action conditions
+#[derive(Debug, Deserialize, PartialEq)]
+pub struct ActCondition {
+    pub id: u32,
+    pub description: String,
+    pub symbol: String,
+}
+
 /// Phase action
 #[derive(Debug, Default, Deserialize, PartialEq)]
 pub struct PhaseAction {
@@ -26,9 +34,6 @@ pub struct PhaseAction {
     pub from_phase: Option<String>,
     pub to_phase: String,
 }
-
-/// Action conditions
-const CONDITIONS: &[&str] = &["⏳", "⏰", "🚗", "🌦️", "📢"];
 
 impl PhaseAction {
     /// Create a new phase action
@@ -43,13 +48,14 @@ impl PhaseAction {
 
     /// Check if phase action is valid
     pub fn is_valid(&self) -> bool {
-        // FIXME
+        // FIXME: check if params can be parsed for condition
         true
     }
 
     /// Check if a phase action is active on a given day
     pub fn is_active(&self, day: &Date) -> bool {
-        if 1 == self.condition
+        // condition 2 is "date-time"
+        if 2 == self.condition
             && let Some(params) = &self.params
             && let Ok(dt) = params.parse::<Date>()
         {
@@ -60,20 +66,33 @@ impl PhaseAction {
     }
 
     /// Make HTML table row
-    pub fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
+    pub fn table_row<'p>(
+        &self,
+        conditions: &[ActCondition],
+        tr: &'p mut html::Tr<'p>,
+    ) {
         let params = self.params.as_deref().unwrap_or("");
         match self.condition {
             0 => {
                 tr.td().cdata(params).cdata(" sec").close();
             }
-            1 if let Some((_d, t)) = params.split_once('T') => {
-                tr.td().cdata(t).close();
+            1 => {
+                // FIXME
+                tr.td().cdata(params).close();
+            }
+            2 => {
+                // FIXME
+                tr.td().cdata(params).close();
             }
             _ => {
                 tr.td().cdata(params).close();
             }
         };
-        tr.td().cdata(CONDITIONS[self.condition as usize]).close();
+        let sym = conditions
+            .iter()
+            .find(|c| c.id == self.condition)
+            .map_or("❓", |c| &c.symbol);
+        tr.td().cdata(sym).close();
         match &self.from_phase {
             Some(from_phase) => tr.td().cdata(from_phase).close(),
             None => tr.td().class("info").cdata("*any*").close(),
@@ -90,6 +109,11 @@ impl PhaseAction {
     /// Get ID for day_plan `<select>`
     fn id_day_plan(&self) -> String {
         format!("{}-day_plan", self.name)
+    }
+
+    /// Get ID for condition `<select>`
+    fn id_condition(&self) -> String {
+        format!("{}-condition", self.name)
     }
 
     /// Get row element class name
@@ -123,38 +147,65 @@ impl PhaseAction {
         div.close();
     }
 
+    /// Build HTML condition row
+    fn condition_row<'p>(
+        &self,
+        conditions: &[ActCondition],
+        div: &'p mut html::Div<'p>,
+    ) {
+        let id = self.id_condition();
+        div.label().r#for(&id).cdata("Condition").close();
+        let mut select = div.select();
+        select.id(id);
+        for ac in conditions {
+            let mut option = select.option();
+            if self.condition == ac.id {
+                option.selected();
+            }
+            option
+                .value(ac.id)
+                .cdata(&ac.symbol)
+                .cdata(&ac.description)
+                .close();
+        }
+        select.close();
+        div.close();
+    }
+
     /// Make HTML summary
     fn summary_html<'p>(
         &self,
+        conditions: &[ActCondition],
         summary: &'p mut html::Summary<'p>,
-        update: bool,
+        changed: bool,
     ) {
         summary.id(self.id_summary());
-        let (cond, label) = if self.is_valid() {
-            ("?", self.params.as_deref().unwrap_or(""))
-        } else if update {
-            ("", "*Invalid*")
+        if self.is_valid() {
+            let sym = conditions
+                .iter()
+                .find(|c| c.id == self.condition)
+                .map_or("❓", |c| &c.symbol);
+            let label = self.params.as_deref().unwrap_or("");
+            summary.cdata(sym).span().class("info").cdata(label).close();
+            summary.close();
+        } else if changed {
+            summary.class("info").cdata("*Invalid*").close();
         } else {
-            ("", "*New*")
+            summary.class("info").cdata("*New*").close();
         };
-        summary
-            .cdata(cond)
-            .span()
-            .class("info")
-            .cdata(label)
-            .close();
-        summary.close();
     }
 
     /// Make HTML details
     pub fn details_html<'p>(
         &self,
         day_plans: &[DayPlan],
+        conditions: &[ActCondition],
         details: &'p mut html::Details<'p>,
     ) {
         details.id(&self.name).class(self.class_name());
-        self.summary_html(&mut details.summary(), false);
+        self.summary_html(conditions, &mut details.summary(), false);
         self.day_plan_row(day_plans, &mut details.div());
+        self.condition_row(conditions, &mut details.div());
         // FIXME: the rest
         details.close();
     }

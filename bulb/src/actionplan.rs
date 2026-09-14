@@ -19,7 +19,7 @@ use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::msgpattern::MsgPattern;
 use crate::notes::contains_hashtag;
-use crate::phaseaction::PhaseAction;
+use crate::phaseaction::{ActCondition, PhaseAction};
 use crate::planphase::PlanPhase;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
@@ -58,6 +58,7 @@ pub struct ActionPlan {
 pub struct ActionPlanAnc {
     assets: Vec<Asset>,
     view: Option<View>,
+    pub action_conditions: Vec<ActCondition>,
     pub phases: Vec<PlanPhase>,
     pub day_plans: Vec<DayPlan>,
     pub day_matchers: Vec<DayMatcher>,
@@ -80,6 +81,7 @@ impl AncillaryData for ActionPlanAnc {
             }
             View::Control => {
                 vec![
+                    Asset::ActConditions,
                     Asset::DayPlans,
                     Asset::DayMatchers,
                     Asset::DeviceActions,
@@ -90,8 +92,10 @@ impl AncillaryData for ActionPlanAnc {
             }
             View::Setup(_edit) => {
                 vec![
+                    Asset::ActConditions,
                     Asset::DayPlans,
                     Asset::DeviceActions,
+                    Asset::PhaseActions,
                     Asset::PlanPhases,
                     Asset::MsgPatterns,
                 ]
@@ -118,6 +122,9 @@ impl AncillaryData for ActionPlanAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::ActConditions => {
+                self.action_conditions = serde_wasm_bindgen::from_value(value)?;
+            }
             Asset::PlanPhases => {
                 self.phases = serde_wasm_bindgen::from_value(value)?;
             }
@@ -355,7 +362,7 @@ impl ActionPlan {
             let mut table = details.table();
             for pa in &anc.phase_actions {
                 if anc.is_phase_action_active(pa, &today) {
-                    pa.table_row(&mut table.tr());
+                    pa.table_row(&anc.action_conditions, &mut table.tr());
                 }
             }
             details.close();
@@ -467,7 +474,11 @@ impl ActionPlan {
         div.class("row").cdata("Phase Actions").close();
         for pa in &anc.phase_actions {
             let mut details = tree.root::<html::Details>();
-            pa.details_html(&anc.day_plans, &mut details);
+            pa.details_html(
+                &anc.day_plans,
+                &anc.action_conditions,
+                &mut details,
+            );
         }
         let pa = PhaseAction::new(
             &anc.next_phase_action,
@@ -475,7 +486,7 @@ impl ActionPlan {
             &self.default_phase,
         );
         let mut details = tree.root::<html::Details>();
-        pa.details_html(&anc.day_plans, &mut details);
+        pa.details_html(&anc.day_plans, &anc.action_conditions, &mut details);
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
