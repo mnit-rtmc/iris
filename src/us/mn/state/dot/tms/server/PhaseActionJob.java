@@ -37,7 +37,7 @@ public class PhaseActionJob extends Job {
 	@Override
 	public void perform() {
 		Calendar cal = TimeSteward.getCalendarInstance();
-		int min = TimeSteward.currentMinuteOfDayInt();
+		int min = PhaseActionHelper.getMinuteOfDay(cal.getTime());
 		Iterator<PhaseAction> it = PhaseActionHelper.iterator();
 		while (it.hasNext()) {
 			PhaseAction pa = it.next();
