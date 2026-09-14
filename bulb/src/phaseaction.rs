@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::dayplan::DayPlan;
+use crate::planphase::PlanPhase;
 use hatmil::html;
 use jiff::civil::Date;
 use serde::Deserialize;
@@ -163,12 +164,13 @@ impl PhaseAction {
         conditions: &[ActCondition],
         tr: &'p mut html::Tr<'p>,
     ) {
+        let sym = conditions
+            .iter()
+            .find(|c| c.id == self.condition)
+            .map_or("❓", |c| &c.symbol);
+        tr.td().cdata(sym).close();
         let params = self.params.as_deref().unwrap_or("");
         match self.condition {
-            // hold time
-            0 => {
-                tr.td().cdata(params).cdata(" sec").close();
-            }
             // clock time
             1 => {
                 let mut td = tr.td();
@@ -185,11 +187,6 @@ impl PhaseAction {
                 tr.td().cdata(params).close();
             }
         };
-        let sym = conditions
-            .iter()
-            .find(|c| c.id == self.condition)
-            .map_or("❓", |c| &c.symbol);
-        tr.td().cdata(sym).close();
         match &self.from_phase {
             Some(from_phase) => tr.td().cdata(from_phase).close(),
             None => tr.td().class("info").cdata("*any*").close(),
@@ -216,6 +213,16 @@ impl PhaseAction {
     /// Get ID for params input
     fn id_params(&self) -> String {
         format!("{}-params", self.name)
+    }
+
+    /// Get ID for from_phase `<select>`
+    fn id_from_phase(&self) -> String {
+        format!("{}-from_phase", self.name)
+    }
+
+    /// Get ID for to_phase `<select>`
+    fn id_to_phase(&self) -> String {
+        format!("{}-to_phase", self.name)
     }
 
     /// Get row element class name
@@ -288,6 +295,53 @@ impl PhaseAction {
         div.close();
     }
 
+    /// Build HTML from_phase row
+    fn _from_phase_row<'p>(
+        &self,
+        phases: &[PlanPhase],
+        div: &'p mut html::Div<'p>,
+    ) {
+        let id = self.id_from_phase();
+        div.label().r#for(&id).cdata("From Phase").close();
+        let mut select = div.select();
+        select.id(id);
+        let mut option = select.option();
+        if self.from_phase.is_none() {
+            option.selected();
+        }
+        option.close();
+        for p in phases {
+            let mut option = select.option();
+            if Some(p.name.as_str()) == self.from_phase.as_deref() {
+                option.selected();
+            }
+            option.cdata(&p.name).close();
+        }
+        select.close();
+        div.close();
+    }
+
+    /// Build HTML to_phase row
+    fn to_phase_row<'p>(
+        &self,
+        phases: &[PlanPhase],
+        div: &'p mut html::Div<'p>,
+    ) {
+        let id = self.id_to_phase();
+        div.label().r#for(&id).cdata("To Phase").close();
+        let mut select = div.select();
+        select.id(id);
+        for p in phases {
+            let mut option = select.option();
+            if p.name == self.to_phase {
+                option.selected();
+            }
+            option.cdata(&p.name).close();
+        }
+        select.close();
+        div.close();
+    }
+
     /// Make HTML summary
     fn summary_html<'p>(
         &self,
@@ -297,13 +351,7 @@ impl PhaseAction {
     ) {
         summary.id(self.id_summary());
         if self.is_valid() {
-            let sym = conditions
-                .iter()
-                .find(|c| c.id == self.condition)
-                .map_or("❓", |c| &c.symbol);
-            let label = self.params.as_deref().unwrap_or("");
-            summary.cdata(sym).span().class("info").cdata(label).close();
-            summary.close();
+            self.summary_html_valid(conditions, summary);
         } else if changed {
             summary.class("info").cdata("*Invalid*").close();
         } else {
@@ -311,11 +359,30 @@ impl PhaseAction {
         };
     }
 
+    /// Make HTML summary (valid)
+    fn summary_html_valid<'p>(
+        &self,
+        conditions: &[ActCondition],
+        summary: &'p mut html::Summary<'p>,
+    ) {
+        let sym = conditions
+            .iter()
+            .find(|c| c.id == self.condition)
+            .map_or("❓", |c| &c.symbol);
+        summary.cdata(sym);
+        let params = self.params.as_deref().unwrap_or("");
+        summary.cdata(params);
+        let fp = if self.from_phase.is_some() { "_" } else { "*" };
+        summary.span().class("info").cdata(fp).close();
+        summary.cdata("⇨").cdata(&self.to_phase).close();
+    }
+
     /// Make HTML details
     pub fn details_html<'p>(
         &self,
-        day_plans: &[DayPlan],
         conditions: &[ActCondition],
+        day_plans: &[DayPlan],
+        phases: &[PlanPhase],
         details: &'p mut html::Details<'p>,
     ) {
         details.id(&self.name).class(self.class_name(false));
@@ -323,7 +390,8 @@ impl PhaseAction {
         self.day_plan_row(day_plans, &mut details.div());
         self.condition_row(conditions, &mut details.div());
         self.params_row(&mut details.div());
-        // FIXME: the rest
+        self._from_phase_row(phases, &mut details.div());
+        self.to_phase_row(phases, &mut details.div());
         details.close();
     }
 }

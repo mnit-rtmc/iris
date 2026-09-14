@@ -475,8 +475,9 @@ impl ActionPlan {
         for pa in &anc.phase_actions {
             let mut details = tree.root::<html::Details>();
             pa.details_html(
-                &anc.day_plans,
                 &anc.action_conditions,
+                &anc.day_plans,
+                &anc.phases,
                 &mut details,
             );
         }
@@ -486,7 +487,12 @@ impl ActionPlan {
             &self.default_phase,
         );
         let mut details = tree.root::<html::Details>();
-        pa.details_html(&anc.day_plans, &anc.action_conditions, &mut details);
+        pa.details_html(
+            &anc.action_conditions,
+            &anc.day_plans,
+            &anc.phases,
+            &mut details,
+        );
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
