@@ -12,9 +12,11 @@
 //
 use crate::dayplan::DayPlan;
 use crate::planphase::PlanPhase;
-use hatmil::html;
+use crate::util::Doc;
+use hatmil::{Tree, html};
 use jiff::civil::Date;
 use serde::Deserialize;
+use web_sys::HtmlElement;
 
 /// Action conditions
 #[derive(Debug, Deserialize, PartialEq)]
@@ -25,7 +27,7 @@ pub struct ActCondition {
 }
 
 /// Phase action
-#[derive(Debug, Default, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq)]
 pub struct PhaseAction {
     pub name: String,
     pub action_plan: String,
@@ -195,9 +197,14 @@ impl PhaseAction {
         tr.td().cdata(&self.to_phase).close();
     }
 
+    /// Get ID for details
+    fn id_details(&self) -> String {
+        format!("pa-{}", self.name)
+    }
+
     /// Get ID for summary
     fn id_summary(&self) -> String {
-        format!("{}-summary", self.name)
+        format!("pa-{}-summary", self.name)
     }
 
     /// Get ID for day_plan `<select>`
@@ -223,6 +230,60 @@ impl PhaseAction {
     /// Get ID for to_phase `<select>`
     fn id_to_phase(&self) -> String {
         format!("{}-to_phase", self.name)
+    }
+
+    /// Update from input elements
+    pub fn update_from_inputs(&mut self) {
+        let doc = Doc::get();
+        if let Some(dp) = doc.input_parse::<String>(&self.id_day_plan()) {
+            self.day_plan = Some(dp).filter(|dp| !dp.is_empty());
+        }
+        if let Some(condition) = doc.select_parse::<u32>(&self.id_condition()) {
+            self.condition = condition;
+        }
+        if let Some(p) = doc.input_parse::<String>(&self.id_params()) {
+            self.params = Some(p).filter(|p| !p.is_empty());
+        }
+        if let Some(p) = doc.select_parse::<String>(&self.id_from_phase()) {
+            self.from_phase = Some(p).filter(|p| !p.is_empty());
+        }
+        if let Some(to_phase) = doc.select_parse::<String>(&self.id_to_phase())
+        {
+            self.to_phase = to_phase;
+        }
+    }
+
+    /// Check ID for input element of this phase action
+    fn is_input_id(&self, id: &str) -> bool {
+        id == self.id_day_plan()
+            || id == self.id_condition()
+            || id == self.id_params()
+            || id == self.id_from_phase()
+            || id == self.id_to_phase()
+    }
+
+    /// Update class with valid state
+    pub fn update_class(
+        &self,
+        conditions: &[ActCondition],
+        changed: bool,
+        id: &str,
+    ) -> bool {
+        if self.is_input_id(id) {
+            let doc = Doc::get();
+            if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_details()) {
+                el.set_class_name(self.class_name(changed));
+            }
+            if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_summary()) {
+                let mut tree = Tree::new();
+                let mut summary = tree.root::<html::Summary>();
+                self.summary_html(conditions, &mut summary, changed);
+                el.set_outer_html(&String::from(tree));
+            }
+            true
+        } else {
+            false
+        }
     }
 
     /// Get row element class name
@@ -385,7 +446,7 @@ impl PhaseAction {
         phases: &[PlanPhase],
         details: &'p mut html::Details<'p>,
     ) {
-        details.id(&self.name).class(self.class_name(false));
+        details.id(self.id_details()).class(self.class_name(false));
         self.summary_html(conditions, &mut details.summary(), false);
         self.day_plan_row(day_plans, &mut details.div());
         self.condition_row(conditions, &mut details.div());

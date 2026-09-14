@@ -90,6 +90,11 @@ impl DeviceAction {
         Value::Object(obj)
     }
 
+    /// Get ID for details
+    fn id_details(&self) -> String {
+        format!("da-{}", self.name)
+    }
+
     /// Get ID for summary
     fn id_summary(&self) -> String {
         format!("{}-summary", self.name)
@@ -158,7 +163,7 @@ impl DeviceAction {
     pub fn update_class(&self, changed: bool, id: &str) -> bool {
         if self.is_input_id(id) {
             let doc = Doc::get();
-            if let Some(el) = doc.opt_elem::<HtmlElement>(&self.name) {
+            if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_details()) {
                 el.set_class_name(self.class_name(changed));
             }
             if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_summary()) {
@@ -311,7 +316,7 @@ impl DeviceAction {
         msg_patterns: &[MsgPattern],
         details: &'p mut html::Details<'p>,
     ) {
-        details.id(&self.name).class(self.class_name(false));
+        details.id(self.id_details()).class(self.class_name(false));
         self.summary_html(&mut details.summary(), false);
         self.phase_row(phases, &mut details.div());
         self.hashtag_row(&mut details.div());

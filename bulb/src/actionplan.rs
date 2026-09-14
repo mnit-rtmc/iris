@@ -496,6 +496,44 @@ impl ActionPlan {
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
+
+    /// Update device actions from elements
+    fn update_device_actions(&self, anc: &ActionPlanAnc, id: &str) {
+        for da in &anc.device_actions {
+            let mut nda = da.clone();
+            nda.update_from_inputs();
+            if nda.update_class(*da != nda, id) {
+                return;
+            }
+        }
+        let da = DeviceAction::new(
+            &anc.next_device_action,
+            &self.name,
+            &self.default_phase,
+        );
+        let mut nda = da.clone();
+        nda.update_from_inputs();
+        nda.update_class(da != nda, id);
+    }
+
+    /// Update phase actions from elements
+    fn update_phase_actions(&self, anc: &ActionPlanAnc, id: &str) {
+        for pa in &anc.phase_actions {
+            let mut npa = pa.clone();
+            npa.update_from_inputs();
+            if npa.update_class(&anc.action_conditions, *pa != npa, id) {
+                return;
+            }
+        }
+        let pa = PhaseAction::new(
+            &anc.next_phase_action,
+            &self.name,
+            &self.default_phase,
+        );
+        let mut npa = pa.clone();
+        npa.update_from_inputs();
+        npa.update_class(&anc.action_conditions, pa != npa, id);
+    }
 }
 
 impl Card for ActionPlan {
@@ -585,21 +623,8 @@ impl Card for ActionPlan {
             return vec![Action::Patch(uri, val.into())];
         }
         // FIXME: Setup card only
-        for da in &anc.device_actions {
-            let mut nda = da.clone();
-            nda.update_from_inputs();
-            if nda.update_class(*da != nda, id) {
-                break;
-            }
-        }
-        let da = DeviceAction::new(
-            &anc.next_device_action,
-            &self.name,
-            &self.default_phase,
-        );
-        let mut nda = da.clone();
-        nda.update_from_inputs();
-        nda.update_class(da != nda, id);
+        self.update_device_actions(&anc, id);
+        self.update_phase_actions(&anc, id);
         Vec::new()
     }
 
