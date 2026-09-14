@@ -265,7 +265,7 @@ pub const DEVICE_ACTION_ALL: &str = "\
   SELECT name, action_plan, hashtag, phase, msg_pattern, msg_priority,
          sticky, ignore_auto_fail \
   FROM iris.device_action \
-  ORDER BY action_plan, hashtag, phase, name";
+  ORDER BY action_plan, phase, hashtag, msg_pattern, name";
 
 /// SQL query for one device action (secondary)
 pub const DEVICE_ACTION_ONE: &str = "\

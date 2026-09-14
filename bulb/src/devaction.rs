@@ -25,8 +25,8 @@ use web_sys::HtmlElement;
 pub struct DeviceAction {
     pub name: String,
     pub action_plan: String,
-    pub hashtag: String,
     pub phase: String,
+    pub hashtag: String,
     pub msg_pattern: Option<String>,
     pub msg_priority: u8,
     pub sticky: bool,
@@ -182,15 +182,6 @@ impl DeviceAction {
         }
     }
 
-    /// Build HTML hashtag row
-    fn hashtag_row<'p>(&self, div: &'p mut html::Div<'p>) {
-        let id = self.id_hashtag();
-        div.label().r#for(&id).cdata("Device #Tag").close();
-        let mut input = div.input();
-        input.id(id).maxlength(16).value(&self.hashtag);
-        div.close();
-    }
-
     /// Build HTML phase row
     fn phase_row<'p>(&self, phases: &[PlanPhase], div: &'p mut html::Div<'p>) {
         let id = self.id_phase();
@@ -205,6 +196,15 @@ impl DeviceAction {
             option.cdata(&p.name).close();
         }
         select.close();
+        div.close();
+    }
+
+    /// Build HTML hashtag row
+    fn hashtag_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let id = self.id_hashtag();
+        div.label().r#for(&id).cdata("Device #Tag").close();
+        let mut input = div.input();
+        input.id(id).maxlength(16).value(&self.hashtag);
         div.close();
     }
 
@@ -286,7 +286,7 @@ impl DeviceAction {
         summary: &'p mut html::Summary<'p>,
         changed: bool,
     ) {
-        summary.id(self.id_summary());
+        summary.id(self.id_summary()).cdata(&self.phase);
         let hashtag = if self.is_valid() {
             &self.hashtag
         } else if changed {
@@ -310,8 +310,8 @@ impl DeviceAction {
     ) {
         details.id(&self.name).class(self.class_name(false));
         self.summary_html(&mut details.summary(), false);
-        self.hashtag_row(&mut details.div());
         self.phase_row(phases, &mut details.div());
+        self.hashtag_row(&mut details.div());
         self.msg_pattern_row(msg_patterns, &mut details.div());
         self.msg_priority_row(&mut details.div());
         self.sticky_row(&mut details.div());
