@@ -35,6 +35,95 @@ pub struct PhaseAction {
     pub to_phase: String,
 }
 
+/// Fields allowed for traffic threshold condition
+const TRAFFIC_FIELDS: &[&str] = &["speed", "flow", "density", "occupancy"];
+
+/// Fields allowed for RWIS threshold condition
+const RWIS_FIELDS: &[&str] = &[
+    "friction",
+    "surface_temp",
+    "wind_gust",
+    "visibility",
+    "precipitation",
+];
+
+/// Check if an action condition is valid
+fn is_condition_valid(condition: u32, params: Option<&str>) -> bool {
+    match (condition, params) {
+        (0, Some(params)) => is_hold_time_valid(params),
+        (1, Some(params)) => is_clock_time_valid(params),
+        (2, Some(params)) => is_date_time_valid(params),
+        (3, Some(params)) => is_threshold_valid(TRAFFIC_FIELDS, params),
+        (4, Some(params)) => is_threshold_valid(RWIS_FIELDS, params),
+        (5, Some(params)) => is_alarm_valid(params),
+        _ => false,
+    }
+}
+
+/// Check if hold time condition is valid
+fn is_hold_time_valid(params: &str) -> bool {
+    for p in params.splitn(3, ':') {
+        // FIXME: p < 24 for HH:mm:ss
+        match p.parse::<u8>() {
+            Ok(p) if p < 60 => (),
+            _ => return false,
+        }
+    }
+    true
+}
+
+/// Check if clock time condition is valid
+fn is_clock_time_valid(params: &str) -> bool {
+    if let Some((hh, mm)) = params.split_once(':')
+        && let (Ok(h), Ok(m)) = (hh.parse::<u8>(), mm.parse::<u8>())
+        && h < 24
+        && m < 60
+    {
+        return true;
+    }
+    false
+}
+
+/// Check if date-time condition is valid
+fn is_date_time_valid(params: &str) -> bool {
+    // FIXME: is it in the past?
+    params.parse::<Date>().is_ok()
+}
+
+/// Check if threshold condition is valid
+fn is_threshold_valid(fields: &[&str], params: &str) -> bool {
+    if let Some((_sid, fval)) = params.split_once(',') {
+        if let Some((f, val)) = fval.split_once('<') {
+            return is_field_val_valid(fields, f, val);
+        }
+        if let Some((f, val)) = fval.split_once('>') {
+            return is_field_val_valid(fields, f, val);
+        }
+    }
+    false
+}
+
+/// Check if threshold field/value is valid
+fn is_field_val_valid(fields: &[&str], f: &str, val: &str) -> bool {
+    if val.parse::<u8>().is_err() {
+        return false;
+    }
+    for field in fields {
+        if field.starts_with(f) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Check if alarm condition is valid
+fn is_alarm_valid(params: &str) -> bool {
+    if let Some((_aid, state)) = params.split_once(',') {
+        return "triggered".starts_with(state) || "cleared".starts_with(state);
+    }
+    false
+}
+
 impl PhaseAction {
     /// Create a new phase action
     pub fn new(name: &str, ap: &str, phase: &str) -> Self {
@@ -48,8 +137,11 @@ impl PhaseAction {
 
     /// Check if phase action is valid
     pub fn is_valid(&self) -> bool {
-        // FIXME: check if params can be parsed for condition
-        true
+        // Don't allow both day_plan and date-time condition
+        if self.day_plan.is_some() && 2 == self.condition {
+            return false;
+        }
+        is_condition_valid(self.condition, self.params.as_deref())
     }
 
     /// Check if a phase action is active on a given day
@@ -73,16 +165,21 @@ impl PhaseAction {
     ) {
         let params = self.params.as_deref().unwrap_or("");
         match self.condition {
+            // hold time
             0 => {
                 tr.td().cdata(params).cdata(" sec").close();
             }
+            // clock time
             1 => {
-                // FIXME
-                tr.td().cdata(params).close();
+                let mut td = tr.td();
+                td.input().r#type("time").value(params).readonly();
+                td.close();
             }
+            // date-time
             2 => {
-                // FIXME
-                tr.td().cdata(params).close();
+                let mut td = tr.td();
+                td.input().r#type("datetime-local").value(params).readonly();
+                td.close();
             }
             _ => {
                 tr.td().cdata(params).close();
@@ -116,9 +213,18 @@ impl PhaseAction {
         format!("{}-condition", self.name)
     }
 
+    /// Get ID for params input
+    fn id_params(&self) -> String {
+        format!("{}-params", self.name)
+    }
+
     /// Get row element class name
-    fn class_name(&self) -> &'static str {
-        if self.is_valid() { "" } else { "invalid" }
+    fn class_name(&self, changed: bool) -> &'static str {
+        if self.is_valid() {
+            if changed { "changed" } else { "" }
+        } else {
+            "invalid"
+        }
     }
 
     /// Build HTML day_plan row
@@ -172,6 +278,16 @@ impl PhaseAction {
         div.close();
     }
 
+    /// Build HTML params row
+    fn params_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        let id = self.id_params();
+        div.label().r#for(&id).cdata("Params").close();
+        let params = self.params.as_deref().unwrap_or("");
+        let mut input = div.input();
+        input.id(id).maxlength(16).value(params);
+        div.close();
+    }
+
     /// Make HTML summary
     fn summary_html<'p>(
         &self,
@@ -202,10 +318,11 @@ impl PhaseAction {
         conditions: &[ActCondition],
         details: &'p mut html::Details<'p>,
     ) {
-        details.id(&self.name).class(self.class_name());
+        details.id(&self.name).class(self.class_name(false));
         self.summary_html(conditions, &mut details.summary(), false);
         self.day_plan_row(day_plans, &mut details.div());
         self.condition_row(conditions, &mut details.div());
+        self.params_row(&mut details.div());
         // FIXME: the rest
         details.close();
     }

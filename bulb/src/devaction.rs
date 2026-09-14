@@ -286,7 +286,7 @@ impl DeviceAction {
         summary: &'p mut html::Summary<'p>,
         changed: bool,
     ) {
-        summary.id(self.id_summary()).cdata(&self.phase);
+        summary.id(self.id_summary());
         let hashtag = if self.is_valid() {
             &self.hashtag
         } else if changed {
@@ -294,6 +294,9 @@ impl DeviceAction {
         } else {
             "*New*"
         };
+        if hashtag != "*New*" {
+            summary.cdata(&self.phase);
+        }
         summary.span().class("info").cdata(hashtag).close();
         if let Some(msg_pattern) = &self.msg_pattern {
             summary.cdata(": ").cdata(msg_pattern);
