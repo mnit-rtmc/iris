@@ -126,6 +126,15 @@ fn next_matcher_name(matchers: &[DayMatcher]) -> String {
 }
 
 impl DayMatcher {
+    /// Create a new day matcher
+    fn new(name: &str, dp: &str) -> Self {
+        DayMatcher {
+            name: name.to_string(),
+            day_plan: dp.to_string(),
+            ..Default::default()
+        }
+    }
+
     /// Check if a time stamp matches
     pub fn matches(&self, date: &Date) -> bool {
         if !self.is_valid() {
@@ -245,10 +254,10 @@ impl DayMatcher {
     }
 
     /// Update table row class with valid state
-    fn update_class(&self, id: &str) -> bool {
+    fn update_class(&self, changed: bool, id: &str) -> bool {
         if self.is_input_id(id) {
             if let Some(el) = Doc::get().opt_elem::<HtmlElement>(&self.name) {
-                el.set_class_name(self.class_name());
+                el.set_class_name(self.class_name(changed));
             }
             true
         } else {
@@ -257,8 +266,12 @@ impl DayMatcher {
     }
 
     /// Get row element class name
-    fn class_name(&self) -> &'static str {
-        if self.is_valid() { "" } else { "invalid" }
+    fn class_name(&self, changed: bool) -> &'static str {
+        if self.is_valid() {
+            if changed { "changed" } else { "" }
+        } else {
+            "invalid"
+        }
     }
 
     /// Build HTML month `<select>`
@@ -322,7 +335,7 @@ impl DayMatcher {
     /// Build HTML table row
     fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
         tr.id(self.name.to_string());
-        tr.class(self.class_name());
+        tr.class(self.class_name(false));
         let mut td = tr.td();
         self.month_select(&mut td.select());
         td = tr.td();
@@ -403,9 +416,7 @@ impl DayPlan {
         for dm in &anc.day_matchers {
             dm.table_row(&mut table.tr());
         }
-        let mut dm = DayMatcher::default();
-        dm.name = anc.next_name.clone();
-        dm.day_plan = self.name.clone();
+        let dm = DayMatcher::new(&anc.next_name, &self.name);
         dm.table_row(&mut table.tr());
         div.close();
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
@@ -487,15 +498,14 @@ impl Card for DayPlan {
         for dm in &anc.day_matchers {
             let mut ndm = dm.clone();
             ndm.update_from_inputs();
-            if ndm.update_class(id) {
+            if ndm.update_class(*dm != ndm, id) {
                 break;
             }
         }
-        let mut dm = DayMatcher::default();
-        dm.name = anc.next_name.clone();
-        dm.day_plan = self.name.clone();
-        dm.update_from_inputs();
-        dm.update_class(id);
+        let dm = DayMatcher::new(&anc.next_name, &self.name);
+        let mut ndm = dm.clone();
+        ndm.update_from_inputs();
+        ndm.update_class(dm != ndm, id);
         Vec::new()
     }
 
@@ -518,9 +528,7 @@ impl Card for DayPlan {
                 actions.push(Action::Patch(uri, val.into()));
             }
         }
-        let mut dm = DayMatcher::default();
-        dm.name = anc.next_name.clone();
-        dm.day_plan = self.name.clone();
+        let dm = DayMatcher::new(&anc.next_name, &self.name);
         let mut ndm = dm.clone();
         ndm.update_from_inputs();
         if ndm.is_valid() {

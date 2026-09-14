@@ -36,8 +36,7 @@ details.invalid summary,
 details.invalid input {
   background-color: #fdd;
 }
-details.changed summary,
-details.changed input {
+details.changed summary {
   background-color: #ffd;
 }
 textarea {
@@ -89,11 +88,13 @@ tr {
 tr:nth-child(odd) {
   background-color: rgb(0 0 0 / 10%);
 }
-tr.invalid input {
-  background-color: #fdd;
-}
+tr.invalid input,
 tr.invalid select {
   background-color: #fdd;
+}
+tr.changed input,
+tr.changed select {
+  background-color: #ffd;
 }
 th, td {
   padding: 0.1rem;
