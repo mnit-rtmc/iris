@@ -377,6 +377,8 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 				return checkHoldTime(cal);
 			case CLOCK_TIME:
 				return checkClockTime(cal, min);
+			case DATE_TIME:
+				return checkDateTime(cal, min);
 			case TRAFFIC_THRESHOLD:
 				return checkTrafficThreshold();
 			case RWIS_THRESHOLD:
@@ -406,13 +408,6 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check CLOCK_TIME condition */
 	private boolean checkClockTime(Calendar cal, int min) {
-		Calendar dt = PhaseActionHelper.getClockDate(this);
-		if (dt != null) {
-			if (dt.get(Calendar.YEAR) != cal.get(Calendar.YEAR) ||
-			    dt.get(Calendar.MONTH) != cal.get(Calendar.MONTH) ||
-			    dt.get(Calendar.DATE) != cal.get(Calendar.DATE))
-				return false;
-		}
 		Integer mn = PhaseActionHelper.getClockTime(this);
 		if (mn != null) {
 			boolean trigger = (mn == min);
@@ -421,6 +416,24 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 			return trigger;
 		} else {
 			logMsg("CLOCK_TIME invalid: " + params);
+			return false;
+		}
+	}
+
+	/** Check DATE_TIME condition */
+	private boolean checkDateTime(Calendar cal, int min) {
+		Calendar dt = PhaseActionHelper.getDateTime(this);
+		if (dt != null) {
+			int mn = PhaseActionHelper.getMinuteOfDay(dt.getTime());
+			boolean trigger = (mn == min)
+			    && dt.get(Calendar.YEAR) == cal.get(Calendar.YEAR)
+			    && dt.get(Calendar.MONTH) == cal.get(Calendar.MONTH)
+			    && dt.get(Calendar.DATE) == cal.get(Calendar.DATE);
+			if (trigger)
+				logMsg("DATE_TIME at " + min);
+			return trigger;
+		} else {
+			logMsg("DATE_TIME invalid: " + params);
 			return false;
 		}
 	}

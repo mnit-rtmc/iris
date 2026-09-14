@@ -23,9 +23,10 @@ package us.mn.state.dot.tms;
 public enum ActCondition {
 	HOLD_TIME,         // 0
 	CLOCK_TIME,        // 1
-	TRAFFIC_THRESHOLD, // 2
-	RWIS_THRESHOLD,    // 3
-	ALARM;             // 4
+	DATE_TIME,         // 2
+	TRAFFIC_THRESHOLD, // 3
+	RWIS_THRESHOLD,    // 4
+	ALARM;             // 5
 
 	/** Get an action condition from an ordinal value */
 	static public ActCondition fromOrdinal(int o) {
@@ -41,6 +42,7 @@ public enum ActCondition {
 			null,
 			HOLD_TIME,
 			CLOCK_TIME,
+			DATE_TIME,
 			TRAFFIC_THRESHOLD,
 			RWIS_THRESHOLD,
 			ALARM,

@@ -15,7 +15,7 @@
 
 /// SQL query for action conditions (LUT)
 pub const ACTION_CONDITION_LUT: &str = "\
-  SELECT id, description \
+  SELECT id, description, symbol \
   FROM iris.action_condition \
   ORDER BY id";
 

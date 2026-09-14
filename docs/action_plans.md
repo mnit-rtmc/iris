@@ -109,9 +109,20 @@ hold time.
 <details>
 <summary>Clock Time</summary>
 
-Condition triggers at a specific time of day, optionally on a specific date.
+Condition triggers at a specific time of day.
 
-- **Params**: `HH:mm` or `yyyy-MM-dd'T'HH:mm`
+- **Params**: `HH:mm`
+
+- **Example**: `15:05` (at 3:05 PM)
+
+</details>
+
+<details>
+<summary>Date-Time</summary>
+
+Condition triggers at a specific date and time.
+
+- **Params**: `yyyy-MM-dd'T'HH:mm`
 
 - **Example**: `2026-05-01T14:00` (at 2 PM on May 1, 2026)
 

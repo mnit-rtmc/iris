@@ -35,11 +35,11 @@ public class PhaseActionHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Clock time (no date) condition format */
+	/** Clock time condition format */
 	static private final String CLOCK_FORMAT = new String("HH:mm");
 
-	/** Clock time (with date) condition format */
-	static private final String CLOCK_DATE_FORMAT =
+	/** Date-time condition format */
+	static private final String DATE_TIME_FORMAT =
 		new String("yyyy-MM-dd'T'HH:mm");
 
 	/** Lookup the phase action with the specified name */
@@ -114,8 +114,6 @@ public class PhaseActionHelper extends BaseHelper {
 			String p = getParams(pa);
 			if (p != null) {
 				Date d = parseClockTime(p);
-				if (null == d)
-					d = parseClockDateTime(p);
 				return (d != null) ? getMinuteOfDay(d) : null;
 			}
 		}
@@ -123,19 +121,19 @@ public class PhaseActionHelper extends BaseHelper {
 	}
 
 	/** Get the minute-of-day (0-1440) */
-	static private int getMinuteOfDay(Date d) {
+	static public int getMinuteOfDay(Date d) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(d);
 		return cal.get(Calendar.HOUR_OF_DAY) * 60 +
 		       cal.get(Calendar.MINUTE);
 	}
 
-	/** Get CLOCK_TIME calendar date */
-	static public Calendar getClockDate(PhaseAction pa) {
-		if (pa.getCondition() == ActCondition.CLOCK_TIME.ordinal()) {
+	/** Get DATE_TIME calendar date */
+	static public Calendar getDateTime(PhaseAction pa) {
+		if (pa.getCondition() == ActCondition.DATE_TIME.ordinal()) {
 			String p = getParams(pa);
 			if (p != null) {
-				Date d = parseClockDateTime(p);
+				Date d = parseDateTime(p);
 				if (d != null) {
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(d);
@@ -156,10 +154,10 @@ public class PhaseActionHelper extends BaseHelper {
 		}
 	}
 
-	/** Parse a clock date / time param */
-	static private Date parseClockDateTime(String p) {
+	/** Parse a date-time param */
+	static private Date parseDateTime(String p) {
 		try {
-			return new SimpleDateFormat(CLOCK_DATE_FORMAT).parse(p);
+			return new SimpleDateFormat(DATE_TIME_FORMAT).parse(p);
 		}
 		catch (ParseException e) {
 			return null;
@@ -275,48 +273,45 @@ public class PhaseActionHelper extends BaseHelper {
 		Integer mod = getClockTime(pa);
 		if (mod != null) {
 			DayPlan dp = pa.getDayPlan();
-			Calendar cd = getClockDate(pa);
-			if (cd != null) {
-				// Check only the specified clock date
-				Date sched = cd.getTime();
-				sched = getScheduledDate(sched, mod);
-				if (checkDayPlan(dp, sched))
-					filter.check(sched, pa);
-			} else {
-				// Check all dates in day plan
-				filterSchedule(pa, dp, mod, filter);
-			}
+			// Get specified clock time for today's date
+			Calendar cal = Calendar.getInstance();
+			cal.set(Calendar.HOUR_OF_DAY, mod % 60);
+			cal.set(Calendar.MINUTE, mod / 60);
+			cal.set(Calendar.SECOND, 0);
+			cal.set(Calendar.MILLISECOND, 0);
+			// Check all dates in day plan
+			filterSchedule(pa, dp, cal.getTime(), filter);
+			return;
 		}
-	}
-
-	/** Get scheduled date and time */
-	static private Date getScheduledDate(Date doy, int mod) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(doy);
-		cal.set(Calendar.HOUR_OF_DAY, mod % 60);
-		cal.set(Calendar.MINUTE, mod / 60);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-		return cal.getTime();
+		Calendar dt = getDateTime(pa);
+		if (dt != null) {
+			Date sched = dt.getTime();
+			// Check only the specified date and time
+			filter.check(sched, pa);
+			return;
+		}
 	}
 
 	/** Check if a date is valid for a day plan */
 	static private boolean checkDayPlan(DayPlan dp, Date date) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		return (dp == null) || !DayPlanHelper.isHoliday(dp, cal);
+		if (dp != null) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+			return !DayPlanHelper.isHoliday(dp, cal);
+		} else
+			return true;
 	}
 
 	/** Filter scheduled day plan / minute-of-day */
-	static private void filterSchedule(PhaseAction pa, DayPlan dp, int mod,
-		DateFilter filter)
+	static private void filterSchedule(PhaseAction pa, DayPlan dp,
+		Date sched, DateFilter filter)
 	{
 		Calendar fut = Calendar.getInstance();
+		fut.setTime(sched);
 		Calendar pst = Calendar.getInstance();
-		fut.setTime(getScheduledDate(fut.getTime(), mod));
-		pst.setTime(fut.getTime());
-		if (checkDayPlan(dp, fut.getTime()))
-			filter.check(fut.getTime(), pa);
+		pst.setTime(sched);
+		if (checkDayPlan(dp, sched))
+			filter.check(sched, pa);
 		// Check a week in both directions
 		for (int i = 0; i < 7; i++) {
 			// Another day in the future

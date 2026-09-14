@@ -2053,16 +2053,18 @@ GRANT SELECT ON day_plan_view TO PUBLIC;
 
 CREATE TABLE iris.action_condition (
     id INTEGER PRIMARY KEY,
-    description VARCHAR NOT NULL
+    description VARCHAR NOT NULL,
+    symbol VARCHAR NOT NULL
 );
 
-INSERT INTO iris.action_condition (id, description)
+INSERT INTO iris.action_condition (id, description, symbol)
 VALUES
-    (0, 'hold time'),
-    (1, 'clock time'),
-    (2, 'traffic threshold'),
-    (3, 'RWIS threshold'),
-    (4, 'alarm');
+    (0, 'hold time', '⏳'),
+    (1, 'clock time', '⏰'),
+    (2, 'date-time', '🗓️'),
+    (3, 'traffic threshold', '🚗'),
+    (4, 'RWIS threshold', '🌦️'),
+    (5, 'alarm', '📢');
 
 CREATE TABLE iris.phase_action (
     name VARCHAR(30) PRIMARY KEY,
@@ -2072,6 +2074,8 @@ CREATE TABLE iris.phase_action (
     to_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
     condition INTEGER NOT NULL REFERENCES iris.action_condition,
     params VARCHAR(32)
+
+    CONSTRAINT day_ck CHECK ((day_plan IS NULL) OR (condition != 2))
 );
 
 CREATE FUNCTION iris.phase_action_notify() RETURNS TRIGGER AS
