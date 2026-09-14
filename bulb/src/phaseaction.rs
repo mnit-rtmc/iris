@@ -196,11 +196,11 @@ impl PhaseAction {
             }
         };
         match &self.from_phase {
-            Some(from_phase) => tr.td().cdata(from_phase).close(),
-            None => tr.td().class("info").cdata("*any*").close(),
+            Some(from_phase) => tr.td().class("info").cdata(from_phase).close(),
+            None => tr.td().close(),
         };
-        tr.td().cdata("⇨").close();
-        tr.td().cdata(&self.to_phase).close();
+        tr.td().cdata("🡆").close();
+        tr.td().class("info").cdata(&self.to_phase).close();
     }
 
     /// Get ID for details
@@ -442,7 +442,12 @@ impl PhaseAction {
         if self.from_phase.is_some() {
             summary.span().class("info").cdata("…").close();
         }
-        summary.cdata("⇨").cdata(&self.to_phase).close();
+        summary
+            .cdata("🡆")
+            .span()
+            .class("info")
+            .cdata(&self.to_phase);
+        summary.close();
     }
 
     /// Make HTML details
