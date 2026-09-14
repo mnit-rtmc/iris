@@ -241,7 +241,7 @@ impl PhaseAction {
     /// Update from input elements
     pub fn update_from_inputs(&mut self) {
         let doc = Doc::get();
-        if let Some(dp) = doc.input_parse::<String>(&self.id_day_plan()) {
+        if let Some(dp) = doc.select_parse::<String>(&self.id_day_plan()) {
             self.day_plan = Some(dp).filter(|dp| !dp.is_empty());
         }
         if let Some(condition) = doc.select_parse::<u32>(&self.id_condition()) {

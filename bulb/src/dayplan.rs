@@ -182,6 +182,11 @@ impl DayMatcher {
         }
     }
 
+    /// Get ID from `<tr>`
+    fn id_tr(&self) -> String {
+        format!("dm-{}", self.name)
+    }
+
     /// Get ID for month `<select>`
     fn id_month(&self) -> String {
         format!("{}-month", self.name)
@@ -256,7 +261,8 @@ impl DayMatcher {
     /// Update table row class with valid state
     fn update_class(&self, changed: bool, id: &str) -> bool {
         if self.is_input_id(id) {
-            if let Some(el) = Doc::get().opt_elem::<HtmlElement>(&self.name) {
+            if let Some(el) = Doc::get().opt_elem::<HtmlElement>(&self.id_tr())
+            {
                 el.set_class_name(self.class_name(changed));
             }
             true
@@ -334,7 +340,7 @@ impl DayMatcher {
 
     /// Build HTML table row
     fn table_row<'p>(&self, tr: &'p mut html::Tr<'p>) {
-        tr.id(self.name.to_string());
+        tr.id(self.id_tr());
         tr.class(self.class_name(false));
         let mut td = tr.td();
         self.month_select(&mut td.select());
