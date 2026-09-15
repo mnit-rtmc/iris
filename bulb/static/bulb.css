@@ -39,6 +39,11 @@ details.invalid input {
 details.changed summary {
   background-color: #ffd;
 }
+details input[type=time],
+details input[type=datetime-local] {
+  padding: 0;
+  font-size: smaller;
+}
 textarea {
   resize: none;
 }
@@ -561,6 +566,12 @@ label:has(+ #sb-resource) {
 .title {
   font-weight: bold;
   font-size: smaller;
+  color: #404;
+}
+.subtitle {
+  font-weight: bold;
+  font-size: larger;
+  color: #404;
 }
 .info {
   font-style: italic;

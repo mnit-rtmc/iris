@@ -418,7 +418,7 @@ impl ActionPlan {
         div.textarea()
             .id("notes")
             .maxlength(128)
-            .rows(2)
+            .rows(3)
             .cols(22)
             .cdata(opt_ref(&self.notes))
             .close();
@@ -458,7 +458,7 @@ impl ActionPlan {
         }
         div.close();
         div = tree.root::<html::Div>();
-        div.class("row").cdata("Device Actions").close();
+        div.class("subtitle").cdata("Device Actions").close();
         for da in &anc.device_actions {
             let mut details = tree.root::<html::Details>();
             da.details_html(&anc.phases, &anc.msg_patterns, &mut details);
@@ -471,7 +471,7 @@ impl ActionPlan {
         let mut details = tree.root::<html::Details>();
         da.details_html(&anc.phases, &anc.msg_patterns, &mut details);
         div = tree.root::<html::Div>();
-        div.class("row").cdata("Phase Actions").close();
+        div.class("subtitle").cdata("Phase Actions").close();
         for pa in &anc.phase_actions {
             let mut details = tree.root::<html::Details>();
             pa.details_html(
