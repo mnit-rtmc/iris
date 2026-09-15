@@ -358,22 +358,18 @@ impl From<Fields> for String {
     }
 }
 
+impl From<Fields> for Mapping {
+    fn from(fields: Fields) -> Mapping {
+        fields.obj
+    }
+}
+
 impl Fields {
     /// Create a new fields mapping
     pub fn new() -> Self {
         let doc = Doc::get();
         let obj = Mapping::new();
         Fields { doc, obj }
-    }
-
-    /// Check if empty
-    pub fn is_empty(&self) -> bool {
-        self.obj.is_empty()
-    }
-
-    /// Insert an array value into mapping
-    pub fn insert_arr<T: Into<Value>>(&mut self, id: &str, val: Vec<T>) {
-        self.obj.insert_arr(id, val);
     }
 }
 

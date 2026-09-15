@@ -478,11 +478,12 @@ impl Role {
     fn changed_setup_x(&self, anc: &RoleAnc) -> Option<String> {
         let mut fields = Fields::new();
         fields.changed_input("enabled", self.enabled);
+        let mut mapping = Mapping::from(fields);
         if let Some(domains) = anc.domains_changed(self) {
-            fields.insert_arr("domains", domains);
+            mapping.insert_arr("domains", domains);
         }
-        if !fields.is_empty() {
-            Some(fields.into())
+        if !mapping.is_empty() {
+            Some(mapping.into())
         } else {
             None
         }
