@@ -42,7 +42,8 @@ details.changed summary {
 details input[type=time],
 details input[type=datetime-local] {
   padding: 0;
-  font-size: smaller;
+  border: none;
+  font-size: 65%;
 }
 textarea {
   resize: none;

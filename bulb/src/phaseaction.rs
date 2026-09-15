@@ -457,7 +457,23 @@ impl PhaseAction {
             .map_or("❓", |c| &c.symbol);
         summary.cdata(sym);
         let params = self.params.as_deref().unwrap_or("");
-        summary.cdata(params);
+        match self.condition {
+            // clock time
+            1 => {
+                summary.input().r#type("time").value(params).readonly();
+            }
+            // date-time
+            2 => {
+                summary
+                    .input()
+                    .r#type("datetime-local")
+                    .value(params)
+                    .readonly();
+            }
+            _ => {
+                summary.span().cdata(params).close();
+            }
+        }
         if self.from_phase.is_some() {
             summary.span().class("info").cdata("…").close();
         }
