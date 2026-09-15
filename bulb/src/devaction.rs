@@ -19,8 +19,6 @@ use crate::util::{Doc, Mapping};
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
-use serde_json::Value;
-use serde_json::map::Map;
 use web_sys::HtmlElement;
 
 /// Device action
@@ -61,27 +59,18 @@ impl DeviceAction {
     /// Make a Post action
     pub fn action_post(&self) -> Action {
         let post_uri = uri_all(Res::DeviceAction);
-        let mut obj = Map::new();
-        obj.insert("name".to_string(), Value::String(self.name.clone()));
-        obj.insert(
-            "action_plan".to_string(),
-            Value::String(self.action_plan.clone()),
-        );
-        obj.insert("phase".to_string(), Value::String(self.phase.clone()));
-        obj.insert("hashtag".to_string(), Value::String(self.hashtag.clone()));
+        let mut mapping = Mapping::new();
+        mapping.insert_str("name", &self.name);
+        mapping.insert_str("action_plan", &self.action_plan);
+        mapping.insert_str("phase", &self.phase);
+        mapping.insert_str("hashtag", &self.hashtag);
         if let Some(mp) = &self.msg_pattern {
-            obj.insert("msg_pattern".to_string(), Value::String(mp.into()));
+            mapping.insert_str("msg_pattern", mp);
         }
-        obj.insert(
-            "msg_priority".to_string(),
-            Value::Number(self.msg_priority.into()),
-        );
-        obj.insert("sticky".to_string(), Value::Bool(self.sticky));
-        obj.insert(
-            "ignore_auto_fail".to_string(),
-            Value::Bool(self.ignore_auto_fail),
-        );
-        let value = Value::Object(obj).to_string();
+        mapping.insert_num("msg_priority", self.msg_priority);
+        mapping.insert_bool("sticky", self.sticky);
+        mapping.insert_bool("ignore_auto_fail", self.ignore_auto_fail);
+        let value = String::from(mapping);
         Action::Post(post_uri, value.into())
     }
 
@@ -95,24 +84,24 @@ impl DeviceAction {
     }
 
     /// Get mapping of changed fields
-    fn changed_fields(&self, da: &Self) -> Mapping {
+    fn changed_fields(&self, prev: &Self) -> Mapping {
         let mut mapping = Mapping::new();
-        if self.hashtag != da.hashtag {
+        if self.hashtag != prev.hashtag {
             mapping.insert_str("hashtag", &self.hashtag);
         }
-        if self.phase != da.phase {
+        if self.phase != prev.phase {
             mapping.insert_str("phase", &self.phase);
         }
-        if self.msg_pattern != da.msg_pattern {
+        if self.msg_pattern != prev.msg_pattern {
             mapping.insert_opt_str("msg_pattern", self.msg_pattern.as_deref());
         }
-        if self.msg_priority != da.msg_priority {
+        if self.msg_priority != prev.msg_priority {
             mapping.insert_num("msg_priority", self.msg_priority);
         }
-        if self.sticky != da.sticky {
+        if self.sticky != prev.sticky {
             mapping.insert_bool("sticky", self.sticky);
         }
-        if self.ignore_auto_fail != da.ignore_auto_fail {
+        if self.ignore_auto_fail != prev.ignore_auto_fail {
             mapping.insert_bool("ignore_auto_fail", self.ignore_auto_fail);
         }
         mapping

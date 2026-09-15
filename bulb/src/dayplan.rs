@@ -22,8 +22,6 @@ use hatmil::{Tree, html};
 use jiff::civil::{Date, Weekday};
 use resources::Res;
 use serde::Deserialize;
-use serde_json::Value;
-use serde_json::map::Map;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
@@ -355,36 +353,48 @@ impl DayMatcher {
         tr.close();
     }
 
-    /// Get mapping of changed fields
-    fn changed_fields(&self, dm: &Self) -> Mapping {
+    /// Make a Post action
+    fn action_post(&self) -> Action {
         let mut mapping = Mapping::new();
-        if self.month != dm.month {
+        mapping.insert_str("name", &self.name);
+        mapping.insert_opt_num("month", self.month);
+        mapping.insert_opt_num("day", self.day);
+        mapping.insert_opt_num("weekday", self.weekday);
+        mapping.insert_opt_num("week", self.week);
+        mapping.insert_opt_num("shift", self.shift);
+        let post_uri = uri_all(Res::DayMatcher);
+        let value = String::from(mapping);
+        Action::Post(post_uri, value.into())
+    }
+
+    /// Make a Patch action from previous state
+    fn action_patch(&self, prev: &Self) -> Action {
+        assert_eq!(&self.name, &prev.name);
+        let mapping = self.changed_fields(prev);
+        let uri = uri_one(Res::DayMatcher, &self.name);
+        let val = String::from(mapping);
+        Action::Patch(uri, val.into())
+    }
+
+    /// Get mapping of changed fields
+    fn changed_fields(&self, prev: &Self) -> Mapping {
+        let mut mapping = Mapping::new();
+        if self.month != prev.month {
             mapping.insert_opt_num("month", self.month);
         }
-        if self.day != dm.day {
+        if self.day != prev.day {
             mapping.insert_opt_num("day", self.day);
         }
-        if self.weekday != dm.weekday {
+        if self.weekday != prev.weekday {
             mapping.insert_opt_num("weekday", self.weekday);
         }
-        if self.week != dm.week {
+        if self.week != prev.week {
             mapping.insert_opt_num("week", self.week);
         }
-        if self.shift != dm.shift {
+        if self.shift != prev.shift {
             mapping.insert_opt_num("shift", self.shift);
         }
         mapping
-    }
-
-    /// Convert to JSON value (for POST)
-    fn value(&self) -> Value {
-        let mut obj = Map::new();
-        obj.insert("name".to_string(), Value::String(self.name.to_string()));
-        obj.insert(
-            "day_plan".to_string(),
-            Value::String(self.day_plan.to_string()),
-        );
-        Value::Object(obj)
     }
 }
 
@@ -528,24 +538,13 @@ impl Card for DayPlan {
                 continue;
             }
             if ndm != *dm {
-                let mapping = ndm.changed_fields(dm);
-                let uri = uri_one(Res::DayMatcher, &dm.name);
-                let val = String::from(mapping);
-                actions.push(Action::Patch(uri, val.into()));
+                actions.push(ndm.action_patch(dm));
             }
         }
-        let dm = DayMatcher::new(&anc.next_name, &self.name);
-        let mut ndm = dm.clone();
-        ndm.update_from_inputs();
-        if ndm.is_valid() {
-            let post_uri = uri_all(Res::DayMatcher);
-            let patch_uri = uri_one(Res::DayMatcher, &ndm.name);
-            let mut fields = ndm.changed_fields(&dm);
-            fields.insert_str("name", &ndm.name);
-            let value = ndm.value().to_string();
-            actions.push(Action::Post(post_uri, value.into()));
-            let changed = fields.into_value().to_string();
-            actions.push(Action::Patch(patch_uri, changed.into()));
+        let mut dm = DayMatcher::new(&anc.next_name, &self.name);
+        dm.update_from_inputs();
+        if dm.is_valid() {
+            actions.push(dm.action_post());
         }
         actions
     }
