@@ -14,7 +14,8 @@ use crate::dayplan::DayPlan;
 use crate::planphase::PlanPhase;
 use crate::util::Doc;
 use hatmil::{Tree, html};
-use jiff::civil::Date;
+use jiff::Zoned;
+use jiff::civil::{Date, DateTime};
 use serde::Deserialize;
 use web_sys::HtmlElement;
 
@@ -93,8 +94,10 @@ fn is_clock_time_valid(params: &str) -> bool {
 
 /// Check if date-time condition is valid
 fn is_date_time_valid(params: &str) -> bool {
-    // FIXME: is it in the past?
-    params.parse::<Date>().is_ok()
+    if let Ok(dt) = params.parse::<DateTime>() {
+        return dt >= Zoned::now().datetime();
+    }
+    false
 }
 
 /// Check if threshold condition is valid
@@ -147,16 +150,32 @@ impl PhaseAction {
     /// Check if phase action is valid
     pub fn is_valid(&self) -> bool {
         // Don't allow both day_plan and date-time condition
-        if self.day_plan.is_some() && 2 == self.condition {
+        if self.day_plan.is_some() && self.is_condition_date_time() {
             return false;
         }
         is_condition_valid(self.condition, self.params.as_deref())
     }
 
+    /// Check if condition is date-time
+    fn is_condition_date_time(&self) -> bool {
+        // condition 2 is "date-time"
+        2 == self.condition
+    }
+
+    /// Check if date-time condition is expired
+    fn is_date_time_expired(&self) -> bool {
+        if self.is_condition_date_time()
+            && let Some(params) = &self.params
+            && let Ok(dt) = params.parse::<DateTime>()
+        {
+            return dt < Zoned::now().datetime();
+        }
+        false
+    }
+
     /// Check if a phase action is active on a given day
     pub fn is_active(&self, day: &Date) -> bool {
-        // condition 2 is "date-time"
-        if 2 == self.condition
+        if self.is_condition_date_time()
             && let Some(params) = &self.params
             && let Ok(dt) = params.parse::<Date>()
         {
@@ -417,7 +436,7 @@ impl PhaseAction {
         changed: bool,
     ) {
         summary.id(self.id_summary());
-        if self.is_valid() {
+        if self.is_valid() || self.is_date_time_expired() {
             self.summary_html_valid(conditions, summary);
         } else if changed {
             summary.class("info").cdata("*Invalid*").close();
