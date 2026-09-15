@@ -865,7 +865,7 @@ impl Card for RampMeter {
         fields.changed_input("max_wait", self.max_wait);
         fields.changed_input("am_target", self.am_target);
         fields.changed_input("pm_target", self.pm_target);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Get changed fields on Location view

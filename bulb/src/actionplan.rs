@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, footer_html, uri_all, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::dayplan::{DayMatcher, DayPlan};
 use crate::devaction::DeviceAction;
 use crate::error::Result;
@@ -22,7 +22,7 @@ use crate::notes::contains_hashtag;
 use crate::phaseaction::{ActCondition, PhaseAction};
 use crate::planphase::PlanPhase;
 use crate::util::{
-    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
+    ContainsLower, Doc, Fields, Input, Mapping, Select, TextArea, opt_ref,
 };
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -605,7 +605,7 @@ impl Card for ActionPlan {
         fields.changed_input("active", self.active);
         fields.changed_select("default_phase", &self.default_phase);
         fields.changed_input("sync_actions", self.sync_actions);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Handle input event for an element on the card
@@ -616,10 +616,10 @@ impl Card for ActionPlan {
             && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
         {
             let phase = el.value();
-            let mut fields = Fields::new();
-            fields.insert_str("phase", &phase.to_string());
+            let mut mapping = Mapping::new();
+            mapping.insert_str("phase", &phase.to_string());
             let uri = uri_one(Res::ActionPlan, &self.name);
-            let val = fields.into_value().to_string();
+            let val = String::from(mapping);
             return vec![Action::Patch(uri, val.into())];
         }
         // FIXME: Setup card only
@@ -641,28 +641,17 @@ impl Card for ActionPlan {
                 continue;
             }
             if nda != *da {
-                let fields = nda.changed_fields(da);
-                let uri = uri_one(Res::DeviceAction, &da.name);
-                let val = fields.into_value().to_string();
-                actions.push(Action::Patch(uri, val.into()));
+                actions.push(nda.action_patch(da));
             }
         }
-        let da = DeviceAction::new(
+        let mut da = DeviceAction::new(
             &anc.next_device_action,
             &self.name,
             &self.default_phase,
         );
-        let mut nda = da.clone();
-        nda.update_from_inputs();
-        if nda.is_valid() {
-            let post_uri = uri_all(Res::DeviceAction);
-            let patch_uri = uri_one(Res::DeviceAction, &nda.name);
-            let mut fields = nda.changed_fields(&da);
-            fields.insert_str("name", &nda.name);
-            let value = nda.value().to_string();
-            actions.push(Action::Post(post_uri, value.into()));
-            let changed = fields.into_value().to_string();
-            actions.push(Action::Patch(patch_uri, changed.into()));
+        da.update_from_inputs();
+        if da.is_valid() {
+            actions.push(da.action_post());
         }
         actions
     }

@@ -297,7 +297,7 @@ impl Card for GateArm {
         fields.changed_input("pin", self.pin);
         fields.changed_input("opposing", self.opposing);
         fields.changed_input("downstream_hashtag", &self.downstream_hashtag);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Handle updating a card in response to an SSE notification

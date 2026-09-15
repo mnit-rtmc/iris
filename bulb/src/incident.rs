@@ -284,7 +284,7 @@ impl Card for Incident {
     fn changed_setup(&self) -> String {
         let fields = Fields::new();
         // FIXME
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Handle updating a card in response to an SSE notification

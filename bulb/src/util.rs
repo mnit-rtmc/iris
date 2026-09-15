@@ -253,10 +253,15 @@ impl Doc {
     }
 }
 
-/// Mapping of fields on an Setup view
+/// Mapping of fields for an object
+pub struct Mapping {
+    obj: Map<String, Value>,
+}
+
+/// Mapping of fields on a Setup view
 pub struct Fields {
     doc: Doc,
-    obj: Map<String, Value>,
+    obj: Mapping,
 }
 
 /// Check if an `input` element field has changed
@@ -277,12 +282,18 @@ pub trait Select<T> {
     fn changed_select(&mut self, id: &str, val: T);
 }
 
-impl Fields {
+impl From<Mapping> for String {
+    fn from(mapping: Mapping) -> String {
+        mapping.into_value().to_string()
+    }
+}
+
+impl Mapping {
     /// Create a new fields mapping
     pub fn new() -> Self {
-        let doc = Doc::get();
-        let obj = Map::default();
-        Fields { doc, obj }
+        Mapping {
+            obj: Map::default(),
+        }
     }
 
     /// Insert a value into mapping
@@ -341,12 +352,37 @@ impl Fields {
     }
 }
 
+impl From<Fields> for String {
+    fn from(fields: Fields) -> String {
+        fields.obj.into()
+    }
+}
+
+impl Fields {
+    /// Create a new fields mapping
+    pub fn new() -> Self {
+        let doc = Doc::get();
+        let obj = Mapping::new();
+        Fields { doc, obj }
+    }
+
+    /// Check if empty
+    pub fn is_empty(&self) -> bool {
+        self.obj.is_empty()
+    }
+
+    /// Insert an array value into mapping
+    pub fn insert_arr<T: Into<Value>>(&mut self, id: &str, val: Vec<T>) {
+        self.obj.insert_arr(id, val);
+    }
+}
+
 impl Input<&String> for Fields {
     fn changed_input(&mut self, id: &str, val: &String) {
         if let Some(parsed) = self.doc.input_parse::<String>(id)
             && &parsed != val
         {
-            self.insert_str(id, &parsed);
+            self.obj.insert_str(id, &parsed);
         }
     }
 }
@@ -355,7 +391,7 @@ impl Input<&Option<String>> for Fields {
     fn changed_input(&mut self, id: &str, val: &Option<String>) {
         let parsed = self.doc.input_option_string(id);
         if parsed.as_deref() != val.as_deref() {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }
@@ -365,7 +401,7 @@ impl Input<u16> for Fields {
         if let Some(parsed) = self.doc.input_parse::<u16>(id)
             && parsed != val
         {
-            self.insert(id, Value::Number(parsed.into()));
+            self.obj.insert(id, Value::Number(parsed.into()));
         }
     }
 }
@@ -375,7 +411,7 @@ impl Input<u32> for Fields {
         if let Some(parsed) = self.doc.input_parse::<u32>(id)
             && parsed != val
         {
-            self.insert(id, Value::Number(parsed.into()));
+            self.obj.insert(id, Value::Number(parsed.into()));
         }
     }
 }
@@ -386,7 +422,7 @@ impl Input<f32> for Fields {
             && parsed != val
             && let Some(val) = Number::from_f64(parsed.into())
         {
-            self.insert(id, Value::Number(val));
+            self.obj.insert(id, Value::Number(val));
         }
     }
 }
@@ -397,7 +433,7 @@ impl Input<f64> for Fields {
             && parsed != val
             && let Some(val) = Number::from_f64(parsed)
         {
-            self.insert(id, Value::Number(val));
+            self.obj.insert(id, Value::Number(val));
         }
     }
 }
@@ -406,7 +442,7 @@ impl Input<bool> for Fields {
     fn changed_input(&mut self, id: &str, val: bool) {
         let parsed = self.doc.input_bool(id);
         if parsed != val {
-            self.insert_bool(id, parsed);
+            self.obj.insert_bool(id, parsed);
         }
     }
 }
@@ -415,7 +451,7 @@ impl Input<Option<bool>> for Fields {
     fn changed_input(&mut self, id: &str, val: Option<bool>) {
         let parsed = Some(self.doc.input_bool(id));
         if parsed != val {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }
@@ -424,7 +460,7 @@ impl Input<Option<u16>> for Fields {
     fn changed_input(&mut self, id: &str, val: Option<u16>) {
         let parsed = self.doc.input_parse::<u16>(id);
         if parsed != val {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }
@@ -433,7 +469,7 @@ impl Input<Option<u32>> for Fields {
     fn changed_input(&mut self, id: &str, val: Option<u32>) {
         let parsed = self.doc.input_parse::<u32>(id);
         if parsed != val {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }
@@ -442,7 +478,7 @@ impl Input<Option<f32>> for Fields {
     fn changed_input(&mut self, id: &str, val: Option<f32>) {
         let parsed = self.doc.input_parse::<f32>(id);
         if parsed != val {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }
@@ -451,7 +487,7 @@ impl Input<Option<f64>> for Fields {
     fn changed_input(&mut self, id: &str, val: Option<f64>) {
         let parsed = self.doc.input_parse::<f64>(id);
         if parsed != val {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }
@@ -461,7 +497,7 @@ impl TextArea<&String> for Fields {
         if let Some(parsed) = self.doc.text_area_parse::<String>(id)
             && &parsed != val
         {
-            self.insert_str(id, &parsed);
+            self.obj.insert_str(id, &parsed);
         }
     }
 }
@@ -470,7 +506,7 @@ impl TextArea<&Option<String>> for Fields {
     fn changed_text_area(&mut self, id: &str, val: &Option<String>) {
         let parsed = self.doc.text_area_parse::<String>(id);
         if &parsed != val {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }
@@ -480,7 +516,7 @@ impl Select<&String> for Fields {
         if let Some(parsed) = self.doc.select_parse::<String>(id)
             && &parsed != val
         {
-            self.insert_str(id, &parsed);
+            self.obj.insert_str(id, &parsed);
         }
     }
 }
@@ -489,7 +525,7 @@ impl Select<&Option<String>> for Fields {
     fn changed_select(&mut self, id: &str, val: &Option<String>) {
         let parsed = self.doc.select_parse::<String>(id);
         if &parsed != val {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }
@@ -499,7 +535,7 @@ impl Select<u8> for Fields {
         if let Some(parsed) = self.doc.select_parse::<u8>(id)
             && parsed != val
         {
-            self.insert(id, Value::Number(parsed.into()));
+            self.obj.insert(id, Value::Number(parsed.into()));
         }
     }
 }
@@ -509,7 +545,7 @@ impl Select<u16> for Fields {
         if let Some(parsed) = self.doc.select_parse::<u16>(id)
             && parsed != val
         {
-            self.insert(id, Value::Number(parsed.into()));
+            self.obj.insert(id, Value::Number(parsed.into()));
         }
     }
 }
@@ -519,7 +555,7 @@ impl Select<u32> for Fields {
         if let Some(parsed) = self.doc.select_parse::<u32>(id)
             && parsed != val
         {
-            self.insert(id, Value::Number(parsed.into()));
+            self.obj.insert(id, Value::Number(parsed.into()));
         }
     }
 }
@@ -528,7 +564,7 @@ impl Select<Option<u32>> for Fields {
     fn changed_select(&mut self, id: &str, val: Option<u32>) {
         let parsed = self.doc.select_parse::<u32>(id);
         if parsed != val {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }
@@ -537,7 +573,7 @@ impl Select<Option<i32>> for Fields {
     fn changed_select(&mut self, id: &str, val: Option<i32>) {
         let parsed = self.doc.select_parse::<i32>(id);
         if parsed != val {
-            self.insert(id, OptVal(parsed).into());
+            self.obj.insert(id, OptVal(parsed).into());
         }
     }
 }

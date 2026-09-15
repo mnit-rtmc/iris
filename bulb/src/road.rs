@@ -241,6 +241,6 @@ impl Card for Road {
         fields.changed_input("abbrev", &self.abbrev);
         fields.changed_input("r_class", self.r_class);
         fields.changed_input("direction", self.direction);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

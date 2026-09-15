@@ -222,6 +222,6 @@ impl Card for User {
         fields.changed_select("role", &self.role);
         fields.changed_input("password", &self.password);
         fields.changed_input("enabled", self.enabled);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

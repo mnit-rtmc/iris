@@ -10,11 +10,14 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{uri_all, uri_one};
+use crate::fetch::Action;
 use crate::msgpattern::MsgPattern;
 use crate::msgpriority::MsgPriority;
 use crate::planphase::PlanPhase;
-use crate::util::{Doc, Fields};
+use crate::util::{Doc, Mapping};
 use hatmil::{Tree, html};
+use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
 use serde_json::map::Map;
@@ -55,39 +58,64 @@ impl DeviceAction {
             && self.hashtag[1..].chars().all(|c| c.is_alphanumeric())
     }
 
-    /// Get set of changed fields
-    pub fn changed_fields(&self, da: &Self) -> Fields {
-        let mut fields = Fields::new();
-        if self.hashtag != da.hashtag {
-            fields.insert_str("hashtag", &self.hashtag);
-        }
-        if self.phase != da.phase {
-            fields.insert_str("phase", &self.phase);
-        }
-        if self.msg_pattern != da.msg_pattern {
-            fields.insert_opt_str("msg_pattern", self.msg_pattern.as_deref());
-        }
-        if self.msg_priority != da.msg_priority {
-            fields.insert_num("msg_priority", self.msg_priority);
-        }
-        if self.sticky != da.sticky {
-            fields.insert_bool("sticky", self.sticky);
-        }
-        if self.ignore_auto_fail != da.ignore_auto_fail {
-            fields.insert_bool("ignore_auto_fail", self.ignore_auto_fail);
-        }
-        fields
-    }
-
-    /// Convert to JSON value (for POST)
-    pub fn value(&self) -> Value {
+    /// Make a Post action
+    pub fn action_post(&self) -> Action {
+        let post_uri = uri_all(Res::DeviceAction);
         let mut obj = Map::new();
-        obj.insert("name".to_string(), Value::String(self.name.to_string()));
+        obj.insert("name".to_string(), Value::String(self.name.clone()));
         obj.insert(
             "action_plan".to_string(),
-            Value::String(self.action_plan.to_string()),
+            Value::String(self.action_plan.clone()),
         );
-        Value::Object(obj)
+        obj.insert("phase".to_string(), Value::String(self.phase.clone()));
+        obj.insert("hashtag".to_string(), Value::String(self.hashtag.clone()));
+        if let Some(mp) = &self.msg_pattern {
+            obj.insert("msg_pattern".to_string(), Value::String(mp.into()));
+        }
+        obj.insert(
+            "msg_priority".to_string(),
+            Value::Number(self.msg_priority.into()),
+        );
+        obj.insert("sticky".to_string(), Value::Bool(self.sticky));
+        obj.insert(
+            "ignore_auto_fail".to_string(),
+            Value::Bool(self.ignore_auto_fail),
+        );
+        let value = Value::Object(obj).to_string();
+        Action::Post(post_uri, value.into())
+    }
+
+    /// Make a Patch action from previous state
+    pub fn action_patch(&self, prev: &Self) -> Action {
+        assert_eq!(&self.name, &prev.name);
+        let uri = uri_one(Res::DeviceAction, &prev.name);
+        let mapping = self.changed_fields(prev);
+        let val = String::from(mapping);
+        Action::Patch(uri, val.into())
+    }
+
+    /// Get mapping of changed fields
+    fn changed_fields(&self, da: &Self) -> Mapping {
+        let mut mapping = Mapping::new();
+        if self.hashtag != da.hashtag {
+            mapping.insert_str("hashtag", &self.hashtag);
+        }
+        if self.phase != da.phase {
+            mapping.insert_str("phase", &self.phase);
+        }
+        if self.msg_pattern != da.msg_pattern {
+            mapping.insert_opt_str("msg_pattern", self.msg_pattern.as_deref());
+        }
+        if self.msg_priority != da.msg_priority {
+            mapping.insert_num("msg_priority", self.msg_priority);
+        }
+        if self.sticky != da.sticky {
+            mapping.insert_bool("sticky", self.sticky);
+        }
+        if self.ignore_auto_fail != da.ignore_auto_fail {
+            mapping.insert_bool("ignore_auto_fail", self.ignore_auto_fail);
+        }
+        mapping
     }
 
     /// Get ID for details

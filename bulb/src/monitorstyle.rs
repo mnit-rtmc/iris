@@ -182,6 +182,6 @@ impl Card for MonitorStyle {
         fields.changed_input("auto_expand", self.auto_expand);
         fields.changed_input("hgap", self.hgap);
         fields.changed_input("vgap", self.vgap);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

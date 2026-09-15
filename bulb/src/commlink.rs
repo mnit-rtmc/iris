@@ -272,6 +272,6 @@ impl Card for CommLink {
         fields.changed_input("uri", &self.uri);
         fields.changed_select("comm_config", &self.comm_config);
         fields.changed_input("poll_enabled", self.poll_enabled);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

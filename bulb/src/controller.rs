@@ -573,7 +573,7 @@ impl Card for Controller {
         fields.changed_select("condition", self.condition);
         fields.changed_text_area("notes", &self.notes);
         fields.changed_input("password", &self.password);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Get changed fields on Location view

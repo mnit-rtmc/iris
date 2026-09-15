@@ -334,6 +334,6 @@ impl Card for VideoMonitor {
         fields.changed_select("monitor_style", &self.monitor_style);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

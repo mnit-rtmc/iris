@@ -169,6 +169,6 @@ impl Card for Alarm {
         fields.changed_input("description", &self.description);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

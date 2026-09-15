@@ -307,6 +307,6 @@ impl Card for Detector {
         fields.changed_input("lane_number", self.lane_number);
         fields.changed_input("abandoned", self.abandoned);
         fields.changed_input("force_fail", self.force_fail);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

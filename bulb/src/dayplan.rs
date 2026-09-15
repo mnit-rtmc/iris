@@ -16,7 +16,7 @@ use crate::eid;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::ItemState;
-use crate::util::{ContainsLower, Doc, Fields};
+use crate::util::{ContainsLower, Doc, Mapping};
 use crate::view::View;
 use hatmil::{Tree, html};
 use jiff::civil::{Date, Weekday};
@@ -355,25 +355,25 @@ impl DayMatcher {
         tr.close();
     }
 
-    /// Get set of changed fields
-    fn changed_fields(&self, dm: &Self) -> Fields {
-        let mut fields = Fields::new();
+    /// Get mapping of changed fields
+    fn changed_fields(&self, dm: &Self) -> Mapping {
+        let mut mapping = Mapping::new();
         if self.month != dm.month {
-            fields.insert_opt_num("month", self.month);
+            mapping.insert_opt_num("month", self.month);
         }
         if self.day != dm.day {
-            fields.insert_opt_num("day", self.day);
+            mapping.insert_opt_num("day", self.day);
         }
         if self.weekday != dm.weekday {
-            fields.insert_opt_num("weekday", self.weekday);
+            mapping.insert_opt_num("weekday", self.weekday);
         }
         if self.week != dm.week {
-            fields.insert_opt_num("week", self.week);
+            mapping.insert_opt_num("week", self.week);
         }
         if self.shift != dm.shift {
-            fields.insert_opt_num("shift", self.shift);
+            mapping.insert_opt_num("shift", self.shift);
         }
-        fields
+        mapping
     }
 
     /// Convert to JSON value (for POST)
@@ -528,9 +528,9 @@ impl Card for DayPlan {
                 continue;
             }
             if ndm != *dm {
-                let fields = ndm.changed_fields(dm);
+                let mapping = ndm.changed_fields(dm);
                 let uri = uri_one(Res::DayMatcher, &dm.name);
-                let val = fields.into_value().to_string();
+                let val = String::from(mapping);
                 actions.push(Action::Patch(uri, val.into()));
             }
         }

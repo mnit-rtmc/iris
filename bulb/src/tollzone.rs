@@ -187,6 +187,6 @@ impl Card for TollZone {
         fields.changed_input("alpha", self.alpha);
         fields.changed_input("beta", self.beta);
         fields.changed_input("max_price", self.max_price);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

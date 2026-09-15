@@ -379,6 +379,6 @@ impl Card for CommConfig {
             "no_response_disconnect_sec",
             self.no_response_disconnect_sec,
         );
-        fields.into_value().to_string()
+        fields.into()
     }
 }

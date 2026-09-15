@@ -143,6 +143,6 @@ impl Card for EncoderType {
         fields.changed_input("make", &self.make);
         fields.changed_input("model", &self.model);
         fields.changed_input("config", &self.config);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

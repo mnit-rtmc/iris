@@ -29,7 +29,8 @@ use crate::mjpeg;
 use crate::permission::{AccessLevel, Permission};
 use crate::start::MouseEventTp;
 use crate::util::{
-    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
+    ContainsLower, Doc, Fields, Input, Mapping, Select, TextArea, opt_ref,
+    opt_str,
 };
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -195,18 +196,18 @@ impl Camera {
     /// recall action
     fn recall_preset(&self, preset_num: u32) -> Vec<Action> {
         let uri = uri_one(Res::Camera, &self.name);
-        let mut fields = Fields::new();
-        fields.insert_num("recall_preset", preset_num);
-        let value = fields.into_value().to_string();
+        let mut mapping = Mapping::new();
+        mapping.insert_num("recall_preset", preset_num);
+        let value = String::from(mapping);
         vec![Action::Patch(uri, value.into())]
     }
 
     /// store action
     fn store_preset(&self, preset_num: u32) -> Vec<Action> {
         let uri = uri_one(Res::Camera, &self.name);
-        let mut fields = Fields::new();
-        fields.insert_num("store_preset", preset_num);
-        let value = fields.into_value().to_string();
+        let mut mapping = Mapping::new();
+        mapping.insert_num("store_preset", preset_num);
+        let value = String::from(mapping);
         vec![Action::Patch(uri, value.into())]
     }
 
@@ -232,10 +233,11 @@ impl Camera {
             speed = s;
         }
         let uri = self.enc_address.as_deref().unwrap_or("No enc_address");
-        let mut fields = Fields::new();
-        fields.insert_arr("ptz", vec![pan * speed, tilt * speed, zoom * speed]);
-        fields.insert_str("uri", uri);
-        let value = fields.into_value().to_string();
+        let mut mapping = Mapping::new();
+        mapping
+            .insert_arr("ptz", vec![pan * speed, tilt * speed, zoom * speed]);
+        mapping.insert_str("uri", uri);
+        let value = String::from(mapping);
         vec![Action::Patch(
             uri_one_direct(Res::Camera, &self.name),
             value.into(),
@@ -505,7 +507,7 @@ impl Camera {
         let uri = uri_one(Res::Camera, &self.name);
         let mut fields = Fields::new();
         fields.changed_input("publish", self.publish);
-        let value = fields.into_value().to_string();
+        let value = String::from(fields);
         vec![Action::Patch(uri, value.into())]
     }
 
@@ -583,9 +585,9 @@ impl Camera {
     #[allow(clippy::vec_init_then_push)]
     fn device_req(&self, req: DeviceReq) -> Vec<Action> {
         let uri = uri_one(Res::Camera, &self.name);
-        let mut fields = Fields::new();
-        fields.insert_num("device_request", req as u32);
-        let value = fields.into_value().to_string();
+        let mut mapping = Mapping::new();
+        mapping.insert_num("device_request", req as u32);
+        let value = String::from(mapping);
         let mut actions = Vec::with_capacity(1);
         actions.push(Action::Patch(uri, value.into()));
         actions
@@ -613,9 +615,9 @@ impl Camera {
             && (self.publish || !restricted)
         {
             let uri = uri_one(Res::VideoMonitor, &nm);
-            let mut fields = Fields::new();
-            fields.insert_str("camera", &self.name);
-            let value = fields.into_value().to_string();
+            let mut mapping = Mapping::new();
+            mapping.insert_str("camera", &self.name);
+            let value = String::from(mapping);
             actions.push(Action::Patch(uri, value.into()));
         }
         actions
@@ -833,7 +835,7 @@ impl Card for Camera {
         fields.changed_input("enc_port", self.enc_port);
         fields.changed_input("enc_mcast", &self.enc_mcast);
         fields.changed_input("enc_channel", self.enc_channel);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Get changed fields on Location view

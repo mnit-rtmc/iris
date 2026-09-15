@@ -394,7 +394,7 @@ impl Card for MsgLine {
         fields.changed_input("line", self.line);
         fields.changed_input("rank", self.rank);
         fields.changed_input("multi", &self.multi);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Handle input event for an element on the card

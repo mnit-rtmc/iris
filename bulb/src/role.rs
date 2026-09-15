@@ -17,7 +17,7 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::ItemState;
 use crate::permission::{AccessLevel, Permission};
-use crate::util::{ContainsLower, Doc, Fields, Input};
+use crate::util::{ContainsLower, Doc, Fields, Input, Mapping};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
@@ -165,32 +165,32 @@ impl RolePerm {
                 if perm.access_level() == AccessLevel::None {
                     actions.push(Action::Delete(uri));
                 } else {
-                    let mut fields = Fields::new();
-                    fields.insert_num("access_level", perm.access_level);
-                    let changed = fields.into_value().to_string();
+                    let mut mapping = Mapping::new();
+                    mapping.insert_num("access_level", perm.access_level);
+                    let changed: String = mapping.into();
                     actions.push(Action::Patch(uri, changed.into()));
                 }
             }
             PermState::Missing => {
                 let post_uri = uri_all(Res::Permission);
                 let patch_uri = uri_one(Res::Permission, &perm.name);
-                let mut fields = Fields::new();
-                fields.insert_num("access_level", perm.access_level);
+                let mut mapping = Mapping::new();
+                mapping.insert_num("access_level", perm.access_level);
                 let value = perm.value().to_string();
                 actions.push(Action::Post(post_uri, value.into()));
-                let changed = fields.into_value().to_string();
+                let changed = String::from(mapping);
                 actions.push(Action::Patch(patch_uri, changed.into()));
             }
             PermState::Hashtag => {
                 if let Some(hashtag) = self.input_hashtag() {
                     let post_uri = uri_all(Res::Permission);
                     let patch_uri = uri_one(Res::Permission, &perm.name);
-                    let mut fields = Fields::new();
-                    fields.insert_str("hashtag", &hashtag);
-                    fields.insert_num("access_level", perm.access_level);
+                    let mut mapping = Mapping::new();
+                    mapping.insert_str("hashtag", &hashtag);
+                    mapping.insert_num("access_level", perm.access_level);
                     let value = perm.value().to_string();
                     actions.push(Action::Post(post_uri, value.into()));
-                    let changed = fields.into_value().to_string();
+                    let changed = String::from(mapping);
                     actions.push(Action::Patch(patch_uri, changed.into()));
                 }
             }
@@ -482,7 +482,7 @@ impl Role {
             fields.insert_arr("domains", domains);
         }
         if !fields.is_empty() {
-            Some(fields.into_value().to_string())
+            Some(fields.into())
         } else {
             None
         }

@@ -1026,7 +1026,7 @@ impl Card for WeatherSensor {
         fields.changed_text_area("notes", &self.notes);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Get changed fields on Location view

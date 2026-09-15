@@ -444,7 +444,7 @@ impl Card for TagReader {
         fields.changed_input("toll_zone", &self.toll_zone);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Get changed fields on Location view

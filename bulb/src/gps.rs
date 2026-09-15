@@ -144,6 +144,6 @@ impl Card for Gps {
         fields.changed_input("geo_loc", &self.geo_loc);
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

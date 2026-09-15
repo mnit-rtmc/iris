@@ -144,6 +144,6 @@ impl Card for Word {
         let mut fields = Fields::new();
         fields.changed_input("allowed", self.allowed);
         fields.changed_input("abbr", &self.abbr);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

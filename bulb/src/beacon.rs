@@ -20,7 +20,7 @@ use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::map;
 use crate::util::{
-    ContainsLower, Doc, Fields, Input, TextArea, opt_ref, opt_str,
+    ContainsLower, Doc, Fields, Input, Mapping, TextArea, opt_ref, opt_str,
 };
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -395,7 +395,7 @@ impl Card for Beacon {
         fields.changed_input("verify_pin", self.verify_pin);
         fields.changed_input("device", &self.device);
         fields.changed_input("ext_mode", self.ext_mode);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Get changed fields on Location view
@@ -406,16 +406,16 @@ impl Card for Beacon {
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: BeaconAnc, id: &str) -> Vec<Action> {
         if eid::BCN_FLASHING == id {
-            let mut fields = Fields::new();
+            let mut mapping = Mapping::new();
             match self.state {
                 // DARK (2) => FLASHING_REQ (3)
-                2 => fields.insert_num("state", 3),
+                2 => mapping.insert_num("state", 3),
                 // FLASHING (4) or FAULT_NO_VERIFY (5) => DARK_REQ (1)
-                4 | 5 => fields.insert_num("state", 1),
+                4 | 5 => mapping.insert_num("state", 1),
                 _ => (),
             }
             let uri = uri_one(Res::Beacon, &self.name);
-            let val = fields.into_value().to_string();
+            let val = String::from(mapping);
             vec![Action::Patch(uri, val.into())]
         } else {
             self.handle_click_common(anc, id)

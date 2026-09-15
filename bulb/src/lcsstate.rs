@@ -250,6 +250,6 @@ impl Card for LcsState {
         fields.changed_select("indication", self.indication);
         fields.changed_input("msg_pattern", &self.msg_pattern);
         fields.changed_select("msg_num", self.msg_num);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

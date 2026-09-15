@@ -506,7 +506,7 @@ impl Card for MsgPattern {
         fields.changed_input("compose_hashtag", &self.compose_hashtag);
         fields.changed_input("flash_beacon", self.flash_beacon);
         fields.changed_input("pixel_service", self.pixel_service);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Handle input event for an element on the card

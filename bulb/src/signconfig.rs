@@ -399,6 +399,6 @@ impl Card for SignConfig {
         fields.changed_select("module_width", self.module_width);
         fields.changed_select("module_height", self.module_height);
         fields.changed_select("default_font", self.default_font);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

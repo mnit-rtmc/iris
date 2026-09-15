@@ -123,6 +123,6 @@ impl Card for PlanPhase {
     fn changed_setup(&self) -> String {
         let mut fields = Fields::new();
         fields.changed_input("selectable", self.selectable);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

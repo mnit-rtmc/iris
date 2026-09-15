@@ -144,6 +144,6 @@ impl Card for MapExtent {
         fields.changed_input("lon", self.lon);
         fields.changed_input("lat", self.lat);
         fields.changed_input("zoom", self.zoom);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

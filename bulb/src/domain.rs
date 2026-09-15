@@ -137,7 +137,7 @@ impl Card for Domain {
         let mut fields = Fields::new();
         fields.changed_input("block", &self.block);
         fields.changed_input("enabled", self.enabled);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Handle input event for an element on the card

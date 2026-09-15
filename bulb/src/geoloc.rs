@@ -264,6 +264,6 @@ impl GeoLoc {
         fields.changed_input("landmark", &self.landmark);
         fields.changed_input("lat", self.lat);
         fields.changed_input("lon", self.lon);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

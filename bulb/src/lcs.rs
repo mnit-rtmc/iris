@@ -634,7 +634,7 @@ impl Card for Lcs {
         fields.changed_input("pin", self.pin);
         fields.changed_select("lcs_type", self.lcs_type);
         fields.changed_input("shift", self.shift);
-        fields.into_value().to_string()
+        fields.into()
     }
 
     /// Get changed fields on Location view

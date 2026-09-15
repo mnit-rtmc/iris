@@ -137,6 +137,6 @@ impl Card for EventConfig {
         fields.changed_input("enable_store", self.enable_store);
         fields.changed_input("enable_purge", self.enable_purge);
         fields.changed_input("purge_days", self.purge_days);
-        fields.into_value().to_string()
+        fields.into()
     }
 }

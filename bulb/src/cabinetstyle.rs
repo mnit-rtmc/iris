@@ -155,6 +155,6 @@ impl Card for CabinetStyle {
         fields.changed_input("watchdog_reset_pin_1", self.watchdog_reset_pin_1);
         fields.changed_input("watchdog_reset_pin_2", self.watchdog_reset_pin_2);
         fields.changed_input("dip", self.dip);
-        fields.into_value().to_string()
+        fields.into()
     }
 }
