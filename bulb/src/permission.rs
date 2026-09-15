@@ -10,12 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::{uri_all, uri_one};
+use crate::fetch::Action;
 use crate::item::ItemState;
 use crate::notes::contains_hashtag;
+use crate::util::Mapping;
 use resources::Res;
 use serde::Deserialize;
-use serde_json::Value;
-use serde_json::map::Map;
 use std::cmp::Ordering;
 
 /// Permission access level for a resource type
@@ -109,18 +110,6 @@ impl Permission {
         }
     }
 
-    /// Convert to JSON value (for POST)
-    pub fn value(&self) -> Value {
-        let mut obj = Map::new();
-        obj.insert("name".to_string(), Value::String(self.name.to_string()));
-        obj.insert("role".to_string(), Value::String(self.role.to_string()));
-        obj.insert(
-            "base_resource".to_string(),
-            Value::String(self.base_resource.to_string()),
-        );
-        Value::Object(obj)
-    }
-
     /// Get access level
     pub fn access_level(&self) -> AccessLevel {
         self.access_level.into()
@@ -178,5 +167,44 @@ impl Permission {
             _ => AccessLevel::View,
         };
         Self::access_level_max(perms, res) >= threshold
+    }
+
+    /// Make a Post action
+    pub fn action_post(&self) -> Action {
+        let mut mapping = Mapping::new();
+        mapping.insert_str("name", &self.name);
+        mapping.insert_str("role", &self.role);
+        mapping.insert_str("base_resource", &self.base_resource);
+        mapping.insert_opt_str("hashtag", self.hashtag.as_deref());
+        mapping.insert_num("access_level", self.access_level);
+        let post_uri = uri_all(Res::Permission);
+        let value = String::from(mapping);
+        Action::Post(post_uri, value.into())
+    }
+
+    /// Make a Patch action from previous state
+    pub fn action_patch(&self, prev: &Self) -> Action {
+        assert_eq!(&self.name, &prev.name);
+        let mapping = self.changed_fields(prev);
+        let uri = uri_one(Res::Permission, &self.name);
+        let val = String::from(mapping);
+        Action::Patch(uri, val.into())
+    }
+
+    /// Get mapping of changed fields
+    fn changed_fields(&self, prev: &Self) -> Mapping {
+        let mut mapping = Mapping::new();
+        if self.hashtag != prev.hashtag {
+            mapping.insert_opt_str("hashtag", self.hashtag.as_deref());
+        }
+        if self.access_level != prev.access_level {
+            mapping.insert_num("access_level", self.access_level);
+        }
+        mapping
+    }
+
+    /// Make a Delete action
+    pub fn action_delete(&self) -> Action {
+        Action::Delete(uri_one(Res::Permission, &self.name))
     }
 }

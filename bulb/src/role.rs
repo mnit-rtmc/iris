@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
-use crate::card::{AncillaryData, Card, footer_html, uri_all, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::domain::Domain;
 use crate::error::Result;
 use crate::fetch::Action;
@@ -155,43 +155,25 @@ impl RolePerm {
     /// Make actions to update role permission
     fn actions(&mut self) -> Vec<Action> {
         let mut actions = Vec::new();
+        let prev = self.perm.clone();
         if !self.update_access() {
             return actions;
         }
-        let perm = &self.perm;
         match self.state {
             PermState::Existing => {
-                let uri = uri_one(Res::Permission, &perm.name);
-                if perm.access_level() == AccessLevel::None {
-                    actions.push(Action::Delete(uri));
+                if self.perm.access_level() == AccessLevel::None {
+                    actions.push(self.perm.action_delete());
                 } else {
-                    let mut mapping = Mapping::new();
-                    mapping.insert_num("access_level", perm.access_level);
-                    let changed: String = mapping.into();
-                    actions.push(Action::Patch(uri, changed.into()));
+                    actions.push(self.perm.action_patch(&prev));
                 }
             }
             PermState::Missing => {
-                let post_uri = uri_all(Res::Permission);
-                let patch_uri = uri_one(Res::Permission, &perm.name);
-                let mut mapping = Mapping::new();
-                mapping.insert_num("access_level", perm.access_level);
-                let value = perm.value().to_string();
-                actions.push(Action::Post(post_uri, value.into()));
-                let changed = String::from(mapping);
-                actions.push(Action::Patch(patch_uri, changed.into()));
+                actions.push(self.perm.action_post());
             }
             PermState::Hashtag => {
                 if let Some(hashtag) = self.input_hashtag() {
-                    let post_uri = uri_all(Res::Permission);
-                    let patch_uri = uri_one(Res::Permission, &perm.name);
-                    let mut mapping = Mapping::new();
-                    mapping.insert_str("hashtag", &hashtag);
-                    mapping.insert_num("access_level", perm.access_level);
-                    let value = perm.value().to_string();
-                    actions.push(Action::Post(post_uri, value.into()));
-                    let changed = String::from(mapping);
-                    actions.push(Action::Patch(patch_uri, changed.into()));
+                    self.perm.hashtag = Some(hashtag);
+                    actions.push(self.perm.action_post());
                 }
             }
         }
@@ -475,7 +457,7 @@ impl Role {
     }
 
     /// Get changed fields from Setup form
-    fn changed_setup_x(&self, anc: &RoleAnc) -> Option<String> {
+    fn changed_fields(&self, anc: &RoleAnc) -> Option<String> {
         let mut fields = Fields::new();
         fields.changed_input("enabled", self.enabled);
         let mut mapping = Mapping::from(fields);
@@ -531,7 +513,7 @@ impl Card for Role {
     /// Handle click event for the save button
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
         let mut actions = Vec::new();
-        if let Some(changed) = self.changed_setup_x(&anc) {
+        if let Some(changed) = self.changed_fields(&anc) {
             let uri = uri_one(Self::res(), &self.name());
             actions.push(Action::Patch(uri, changed.into()));
         }
