@@ -147,8 +147,8 @@ impl DeviceAction {
         format!("{}-ignore_auto_fail", self.name)
     }
 
-    /// Update from input elements
-    pub fn update_from_inputs(&mut self) {
+    /// Update from DOM
+    pub fn update_from_dom(&mut self) {
         let doc = Doc::get();
         if let Some(hashtag) = doc.input_parse::<String>(&self.id_hashtag()) {
             self.hashtag = hashtag;

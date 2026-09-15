@@ -497,11 +497,11 @@ impl ActionPlan {
         String::from(tree)
     }
 
-    /// Update device actions from elements
+    /// Update device actions from DOM
     fn update_device_actions(&self, anc: &ActionPlanAnc, id: &str) {
         for da in &anc.device_actions {
             let mut nda = da.clone();
-            nda.update_from_inputs();
+            nda.update_from_dom();
             if nda.update_class(*da != nda, id) {
                 return;
             }
@@ -512,15 +512,15 @@ impl ActionPlan {
             &self.default_phase,
         );
         let mut nda = da.clone();
-        nda.update_from_inputs();
+        nda.update_from_dom();
         nda.update_class(da != nda, id);
     }
 
-    /// Update phase actions from elements
+    /// Update phase actions from DOM
     fn update_phase_actions(&self, anc: &ActionPlanAnc, id: &str) {
         for pa in &anc.phase_actions {
             let mut npa = pa.clone();
-            npa.update_from_inputs();
+            npa.update_from_dom();
             if npa.update_class(&anc.action_conditions, *pa != npa, id) {
                 return;
             }
@@ -531,7 +531,7 @@ impl ActionPlan {
             &self.default_phase,
         );
         let mut npa = pa.clone();
-        npa.update_from_inputs();
+        npa.update_from_dom();
         npa.update_class(&anc.action_conditions, pa != npa, id);
     }
 }
@@ -634,7 +634,7 @@ impl Card for ActionPlan {
         let mut actions = Vec::new();
         for da in &anc.device_actions {
             let mut nda = da.clone();
-            nda.update_from_inputs();
+            nda.update_from_dom();
             if !nda.is_valid() {
                 let uri = uri_one(Res::DeviceAction, &da.name);
                 actions.push(Action::Delete(uri));
@@ -649,7 +649,7 @@ impl Card for ActionPlan {
             &self.name,
             &self.default_phase,
         );
-        da.update_from_inputs();
+        da.update_from_dom();
         if da.is_valid() {
             actions.push(da.action_post());
         }

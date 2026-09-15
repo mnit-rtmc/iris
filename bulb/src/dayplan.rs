@@ -210,8 +210,8 @@ impl DayMatcher {
         format!("{}-shift", self.name)
     }
 
-    /// Update from input elements
-    fn update_from_inputs(&mut self) {
+    /// Update from DOM
+    fn update_from_dom(&mut self) {
         let doc = Doc::get();
         self.month =
             doc.select_parse::<i32>(&self.id_month()).filter(|m| *m > 0);
@@ -513,14 +513,14 @@ impl Card for DayPlan {
     fn handle_input(&self, anc: DayPlanAnc, id: &str) -> Vec<Action> {
         for dm in &anc.day_matchers {
             let mut ndm = dm.clone();
-            ndm.update_from_inputs();
+            ndm.update_from_dom();
             if ndm.update_class(*dm != ndm, id) {
                 break;
             }
         }
         let dm = DayMatcher::new(&anc.next_name, &self.name);
         let mut ndm = dm.clone();
-        ndm.update_from_inputs();
+        ndm.update_from_dom();
         ndm.update_class(dm != ndm, id);
         Vec::new()
     }
@@ -531,7 +531,7 @@ impl Card for DayPlan {
         let mut actions = Vec::new();
         for dm in &anc.day_matchers {
             let mut ndm = dm.clone();
-            ndm.update_from_inputs();
+            ndm.update_from_dom();
             if !ndm.is_valid() {
                 let uri = uri_one(Res::DayMatcher, &dm.name);
                 actions.push(Action::Delete(uri));
@@ -542,7 +542,7 @@ impl Card for DayPlan {
             }
         }
         let mut dm = DayMatcher::new(&anc.next_name, &self.name);
-        dm.update_from_inputs();
+        dm.update_from_dom();
         if dm.is_valid() {
             actions.push(dm.action_post());
         }

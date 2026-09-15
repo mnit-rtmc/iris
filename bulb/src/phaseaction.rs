@@ -238,8 +238,8 @@ impl PhaseAction {
         format!("{}-to_phase", self.name)
     }
 
-    /// Update from input elements
-    pub fn update_from_inputs(&mut self) {
+    /// Update from DOM
+    pub fn update_from_dom(&mut self) {
         let doc = Doc::get();
         if let Some(dp) = doc.select_parse::<String>(&self.id_day_plan()) {
             self.day_plan = Some(dp).filter(|dp| !dp.is_empty());
