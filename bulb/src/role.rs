@@ -11,13 +11,14 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
+use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::domain::Domain;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::ItemState;
 use crate::permission::{AccessLevel, Permission};
-use crate::util::{ContainsLower, Doc, Fields, Input, Mapping};
+use crate::util::{ContainsLower, Doc, Fields, Input};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
@@ -456,19 +457,15 @@ impl Role {
         String::from(tree)
     }
 
-    /// Get changed fields from Setup form
-    fn changed_fields(&self, anc: &RoleAnc) -> Option<String> {
+    /// Get changed attributes from Setup form
+    fn changed_attr(&self, anc: &RoleAnc) -> Option<Attr> {
         let mut fields = Fields::new();
         fields.changed_input("enabled", self.enabled);
-        let mut mapping = Mapping::from(fields);
+        let mut attr = Attr::from(fields);
         if let Some(domains) = anc.domains_changed(self) {
-            mapping.insert_arr("domains", domains);
+            attr.array("domains", domains);
         }
-        if !mapping.is_empty() {
-            Some(mapping.into())
-        } else {
-            None
-        }
+        if !attr.is_empty() { Some(attr) } else { None }
     }
 }
 
@@ -513,7 +510,7 @@ impl Card for Role {
     /// Handle click event for the save button
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
         let mut actions = Vec::new();
-        if let Some(changed) = self.changed_fields(&anc) {
+        if let Some(changed) = self.changed_attr(&anc) {
             let uri = uri_one(Self::res(), &self.name());
             actions.push(Action::Patch(uri, changed.into()));
         }

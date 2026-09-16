@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
+use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::dayplan::{DayMatcher, DayPlan};
 use crate::devaction::DeviceAction;
@@ -22,7 +23,7 @@ use crate::notes::contains_hashtag;
 use crate::phaseaction::{ActCondition, PhaseAction};
 use crate::planphase::PlanPhase;
 use crate::util::{
-    ContainsLower, Doc, Fields, Input, Mapping, Select, TextArea, opt_ref,
+    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
 };
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -616,11 +617,10 @@ impl Card for ActionPlan {
             && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
         {
             let phase = el.value();
-            let mut mapping = Mapping::new();
-            mapping.insert_str("phase", &phase.to_string());
+            let mut attr = Attr::new();
+            attr.str("phase", &phase.to_string());
             let uri = uri_one(Res::ActionPlan, &self.name);
-            let val = String::from(mapping);
-            return vec![Action::Patch(uri, val.into())];
+            return vec![Action::Patch(uri, attr.into())];
         }
         // FIXME: Setup card only
         self.update_device_actions(&anc, id);

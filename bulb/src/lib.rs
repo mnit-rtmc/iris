@@ -19,6 +19,7 @@ mod actionplan;
 mod alarm;
 mod app;
 mod asset;
+mod attr;
 mod beacon;
 mod cabinetstyle;
 mod camera;

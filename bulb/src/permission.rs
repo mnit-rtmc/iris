@@ -10,11 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::attr::Attr;
 use crate::card::{uri_all, uri_one};
 use crate::fetch::Action;
 use crate::item::ItemState;
 use crate::notes::contains_hashtag;
-use crate::util::Mapping;
 use resources::Res;
 use serde::Deserialize;
 use std::cmp::Ordering;
@@ -171,36 +171,28 @@ impl Permission {
 
     /// Make a Post action
     pub fn action_post(&self) -> Action {
-        let mut mapping = Mapping::new();
-        mapping.insert_str("name", &self.name);
-        mapping.insert_str("role", &self.role);
-        mapping.insert_str("base_resource", &self.base_resource);
-        mapping.insert_opt_str("hashtag", self.hashtag.as_deref());
-        mapping.insert_num("access_level", self.access_level);
+        let mut attr = Attr::new();
+        attr.str("name", &self.name);
+        attr.str("role", &self.role);
+        attr.str("base_resource", &self.base_resource);
+        attr.opt_str("hashtag", self.hashtag.as_deref());
+        attr.num("access_level", self.access_level);
         let post_uri = uri_all(Res::Permission);
-        let value = String::from(mapping);
-        Action::Post(post_uri, value.into())
+        Action::Post(post_uri, attr.into())
     }
 
     /// Make a Patch action from previous state
     pub fn action_patch(&self, prev: &Self) -> Action {
         assert_eq!(&self.name, &prev.name);
-        let mapping = self.changed_fields(prev);
+        let mut attr = Attr::new();
+        attr.opt_str2(
+            "hashtag",
+            prev.hashtag.as_deref(),
+            self.hashtag.as_deref(),
+        );
+        attr.num2("access_level", prev.access_level, self.access_level);
         let uri = uri_one(Res::Permission, &self.name);
-        let val = String::from(mapping);
-        Action::Patch(uri, val.into())
-    }
-
-    /// Get mapping of changed fields
-    fn changed_fields(&self, prev: &Self) -> Mapping {
-        let mut mapping = Mapping::new();
-        if self.hashtag != prev.hashtag {
-            mapping.insert_opt_str("hashtag", self.hashtag.as_deref());
-        }
-        if self.access_level != prev.access_level {
-            mapping.insert_num("access_level", self.access_level);
-        }
-        mapping
+        Action::Patch(uri, attr.into())
     }
 
     /// Make a Delete action

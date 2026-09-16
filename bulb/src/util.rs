@@ -10,8 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::attr::Attr;
 use crate::error::{Error, Result};
-use serde_json::map::Map;
 use serde_json::{Number, Value};
 use std::fmt;
 use std::str::FromStr;
@@ -253,15 +253,10 @@ impl Doc {
     }
 }
 
-/// Mapping of fields for an object
-pub struct Mapping {
-    obj: Map<String, Value>,
-}
-
 /// Mapping of fields on a Setup view
 pub struct Fields {
     doc: Doc,
-    obj: Mapping,
+    obj: Attr,
 }
 
 /// Check if an `input` element field has changed
@@ -282,84 +277,14 @@ pub trait Select<T> {
     fn changed_select(&mut self, id: &str, val: T);
 }
 
-impl From<Mapping> for String {
-    fn from(mapping: Mapping) -> String {
-        mapping.into_value().to_string()
-    }
-}
-
-impl Mapping {
-    /// Create a new fields mapping
-    pub fn new() -> Self {
-        Mapping {
-            obj: Map::default(),
-        }
-    }
-
-    /// Insert a value into mapping
-    fn insert(&mut self, id: &str, val: Value) {
-        self.obj.insert(id.to_string(), val);
-    }
-
-    /// Insert a string value into mapping
-    pub fn insert_str(&mut self, id: &str, val: &str) {
-        self.insert(id, Value::String(val.into()));
-    }
-
-    /// Insert an optional string value into mapping
-    pub fn insert_opt_str(&mut self, id: &str, val: Option<&str>) {
-        match val {
-            Some(val) => self.insert_str(id, val),
-            None => self.insert(id, Value::Null),
-        }
-    }
-
-    /// Insert a number value into mapping
-    pub fn insert_num<T: Into<Number>>(&mut self, id: &str, val: T) {
-        self.insert(id, Value::Number(val.into()));
-    }
-
-    /// Insert an optional number value into mapping
-    pub fn insert_opt_num<T: Into<Number>>(
-        &mut self,
-        id: &str,
-        val: Option<T>,
-    ) {
-        match val {
-            Some(val) => self.insert_num(id, val),
-            None => self.insert(id, Value::Null),
-        }
-    }
-
-    /// Insert a bool value into mapping
-    pub fn insert_bool(&mut self, id: &str, val: bool) {
-        self.insert(id, Value::Bool(val));
-    }
-
-    /// Insert an array value into mapping
-    pub fn insert_arr<T: Into<Value>>(&mut self, id: &str, val: Vec<T>) {
-        self.insert(id, val.into());
-    }
-
-    /// Convert fields into a JSON value
-    pub fn into_value(self) -> Value {
-        Value::Object(self.obj)
-    }
-
-    /// Check if empty
-    pub fn is_empty(&self) -> bool {
-        self.obj.is_empty()
-    }
-}
-
 impl From<Fields> for String {
     fn from(fields: Fields) -> String {
         fields.obj.into()
     }
 }
 
-impl From<Fields> for Mapping {
-    fn from(fields: Fields) -> Mapping {
+impl From<Fields> for Attr {
+    fn from(fields: Fields) -> Attr {
         fields.obj
     }
 }
@@ -368,7 +293,7 @@ impl Fields {
     /// Create a new fields mapping
     pub fn new() -> Self {
         let doc = Doc::get();
-        let obj = Mapping::new();
+        let obj = Attr::new();
         Fields { doc, obj }
     }
 }
@@ -378,7 +303,7 @@ impl Input<&String> for Fields {
         if let Some(parsed) = self.doc.input_parse::<String>(id)
             && &parsed != val
         {
-            self.obj.insert_str(id, &parsed);
+            self.obj.str(id, &parsed);
         }
     }
 }
@@ -438,7 +363,7 @@ impl Input<bool> for Fields {
     fn changed_input(&mut self, id: &str, val: bool) {
         let parsed = self.doc.input_bool(id);
         if parsed != val {
-            self.obj.insert_bool(id, parsed);
+            self.obj.bool(id, parsed);
         }
     }
 }
@@ -493,7 +418,7 @@ impl TextArea<&String> for Fields {
         if let Some(parsed) = self.doc.text_area_parse::<String>(id)
             && &parsed != val
         {
-            self.obj.insert_str(id, &parsed);
+            self.obj.str(id, &parsed);
         }
     }
 }
@@ -512,7 +437,7 @@ impl Select<&String> for Fields {
         if let Some(parsed) = self.doc.select_parse::<String>(id)
             && &parsed != val
         {
-            self.obj.insert_str(id, &parsed);
+            self.obj.str(id, &parsed);
         }
     }
 }

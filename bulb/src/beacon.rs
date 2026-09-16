@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
+use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::eid;
@@ -20,7 +21,7 @@ use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::map;
 use crate::util::{
-    ContainsLower, Doc, Fields, Input, Mapping, TextArea, opt_ref, opt_str,
+    ContainsLower, Doc, Fields, Input, TextArea, opt_ref, opt_str,
 };
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -406,17 +407,16 @@ impl Card for Beacon {
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: BeaconAnc, id: &str) -> Vec<Action> {
         if eid::BCN_FLASHING == id {
-            let mut mapping = Mapping::new();
+            let mut attr = Attr::new();
             match self.state {
                 // DARK (2) => FLASHING_REQ (3)
-                2 => mapping.insert_num("state", 3),
+                2 => attr.num("state", 3),
                 // FLASHING (4) or FAULT_NO_VERIFY (5) => DARK_REQ (1)
-                4 | 5 => mapping.insert_num("state", 1),
+                4 | 5 => attr.num("state", 1),
                 _ => (),
             }
             let uri = uri_one(Res::Beacon, &self.name);
-            let val = String::from(mapping);
-            vec![Action::Patch(uri, val.into())]
+            vec![Action::Patch(uri, attr.into())]
         } else {
             self.handle_click_common(anc, id)
         }

@@ -12,6 +12,7 @@
 //
 use crate::app;
 use crate::asset::Asset;
+use crate::attr::Attr;
 use crate::card::{
     AncillaryData, Card, footer_html, uri_one, uri_one_direct, uri_one_mjpeg,
 };
@@ -29,8 +30,7 @@ use crate::mjpeg;
 use crate::permission::{AccessLevel, Permission};
 use crate::start::MouseEventTp;
 use crate::util::{
-    ContainsLower, Doc, Fields, Input, Mapping, Select, TextArea, opt_ref,
-    opt_str,
+    ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -196,19 +196,17 @@ impl Camera {
     /// recall action
     fn recall_preset(&self, preset_num: u32) -> Vec<Action> {
         let uri = uri_one(Res::Camera, &self.name);
-        let mut mapping = Mapping::new();
-        mapping.insert_num("recall_preset", preset_num);
-        let value = String::from(mapping);
-        vec![Action::Patch(uri, value.into())]
+        let mut attr = Attr::new();
+        attr.num("recall_preset", preset_num);
+        vec![Action::Patch(uri, attr.into())]
     }
 
     /// store action
     fn store_preset(&self, preset_num: u32) -> Vec<Action> {
         let uri = uri_one(Res::Camera, &self.name);
-        let mut mapping = Mapping::new();
-        mapping.insert_num("store_preset", preset_num);
-        let value = String::from(mapping);
-        vec![Action::Patch(uri, value.into())]
+        let mut attr = Attr::new();
+        attr.num("store_preset", preset_num);
+        vec![Action::Patch(uri, attr.into())]
     }
 
     /// toggle the class of the preset mode button
@@ -233,14 +231,12 @@ impl Camera {
             speed = s;
         }
         let uri = self.enc_address.as_deref().unwrap_or("No enc_address");
-        let mut mapping = Mapping::new();
-        mapping
-            .insert_arr("ptz", vec![pan * speed, tilt * speed, zoom * speed]);
-        mapping.insert_str("uri", uri);
-        let value = String::from(mapping);
+        let mut attr = Attr::new();
+        attr.array("ptz", vec![pan * speed, tilt * speed, zoom * speed]);
+        attr.str("uri", uri);
         vec![Action::Patch(
             uri_one_direct(Res::Camera, &self.name),
-            value.into(),
+            attr.into(),
         )]
     }
 
@@ -585,11 +581,10 @@ impl Camera {
     #[allow(clippy::vec_init_then_push)]
     fn device_req(&self, req: DeviceReq) -> Vec<Action> {
         let uri = uri_one(Res::Camera, &self.name);
-        let mut mapping = Mapping::new();
-        mapping.insert_num("device_request", req as u32);
-        let value = String::from(mapping);
+        let mut attr = Attr::new();
+        attr.num("device_request", req as u32);
         let mut actions = Vec::with_capacity(1);
-        actions.push(Action::Patch(uri, value.into()));
+        actions.push(Action::Patch(uri, attr.into()));
         actions
     }
 
@@ -615,10 +610,9 @@ impl Camera {
             && (self.publish || !restricted)
         {
             let uri = uri_one(Res::VideoMonitor, &nm);
-            let mut mapping = Mapping::new();
-            mapping.insert_str("camera", &self.name);
-            let value = String::from(mapping);
-            actions.push(Action::Patch(uri, value.into()));
+            let mut attr = Attr::new();
+            attr.str("camera", &self.name);
+            actions.push(Action::Patch(uri, attr.into()));
         }
         actions
     }

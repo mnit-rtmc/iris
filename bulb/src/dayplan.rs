@@ -11,12 +11,13 @@
 // GNU General Public License for more details.
 //
 use crate::asset::Asset;
+use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_all, uri_one};
 use crate::eid;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::ItemState;
-use crate::util::{ContainsLower, Doc, Mapping};
+use crate::util::{ContainsLower, Doc};
 use crate::view::View;
 use hatmil::{Tree, html};
 use jiff::civil::{Date, Weekday};
@@ -355,46 +356,28 @@ impl DayMatcher {
 
     /// Make a Post action
     fn action_post(&self) -> Action {
-        let mut mapping = Mapping::new();
-        mapping.insert_str("name", &self.name);
-        mapping.insert_opt_num("month", self.month);
-        mapping.insert_opt_num("day", self.day);
-        mapping.insert_opt_num("weekday", self.weekday);
-        mapping.insert_opt_num("week", self.week);
-        mapping.insert_opt_num("shift", self.shift);
+        let mut attr = Attr::new();
+        attr.str("name", &self.name);
+        attr.opt_num("month", self.month);
+        attr.opt_num("day", self.day);
+        attr.opt_num("weekday", self.weekday);
+        attr.opt_num("week", self.week);
+        attr.opt_num("shift", self.shift);
         let post_uri = uri_all(Res::DayMatcher);
-        let value = String::from(mapping);
-        Action::Post(post_uri, value.into())
+        Action::Post(post_uri, attr.into())
     }
 
     /// Make a Patch action from previous state
     fn action_patch(&self, prev: &Self) -> Action {
         assert_eq!(&self.name, &prev.name);
-        let mapping = self.changed_fields(prev);
+        let mut attr = Attr::new();
+        attr.opt_num2("month", prev.month, self.month);
+        attr.opt_num2("day", prev.day, self.day);
+        attr.opt_num2("weekday", prev.weekday, self.weekday);
+        attr.opt_num2("week", prev.week, self.week);
+        attr.opt_num2("shift", prev.shift, self.shift);
         let uri = uri_one(Res::DayMatcher, &self.name);
-        let val = String::from(mapping);
-        Action::Patch(uri, val.into())
-    }
-
-    /// Get mapping of changed fields
-    fn changed_fields(&self, prev: &Self) -> Mapping {
-        let mut mapping = Mapping::new();
-        if self.month != prev.month {
-            mapping.insert_opt_num("month", self.month);
-        }
-        if self.day != prev.day {
-            mapping.insert_opt_num("day", self.day);
-        }
-        if self.weekday != prev.weekday {
-            mapping.insert_opt_num("weekday", self.weekday);
-        }
-        if self.week != prev.week {
-            mapping.insert_opt_num("week", self.week);
-        }
-        if self.shift != prev.shift {
-            mapping.insert_opt_num("shift", self.shift);
-        }
-        mapping
+        Action::Patch(uri, attr.into())
     }
 }
 

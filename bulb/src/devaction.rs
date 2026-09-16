@@ -10,12 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::attr::Attr;
 use crate::card::{uri_all, uri_one};
 use crate::fetch::Action;
 use crate::msgpattern::MsgPattern;
 use crate::msgpriority::MsgPriority;
 use crate::planphase::PlanPhase;
-use crate::util::{Doc, Mapping};
+use crate::util::Doc;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
@@ -59,52 +60,40 @@ impl DeviceAction {
     /// Make a Post action
     pub fn action_post(&self) -> Action {
         let post_uri = uri_all(Res::DeviceAction);
-        let mut mapping = Mapping::new();
-        mapping.insert_str("name", &self.name);
-        mapping.insert_str("action_plan", &self.action_plan);
-        mapping.insert_str("phase", &self.phase);
-        mapping.insert_str("hashtag", &self.hashtag);
+        let mut attr = Attr::new();
+        attr.str("name", &self.name);
+        attr.str("action_plan", &self.action_plan);
+        attr.str("phase", &self.phase);
+        attr.str("hashtag", &self.hashtag);
         if let Some(mp) = &self.msg_pattern {
-            mapping.insert_str("msg_pattern", mp);
+            attr.str("msg_pattern", mp);
         }
-        mapping.insert_num("msg_priority", self.msg_priority);
-        mapping.insert_bool("sticky", self.sticky);
-        mapping.insert_bool("ignore_auto_fail", self.ignore_auto_fail);
-        let value = String::from(mapping);
-        Action::Post(post_uri, value.into())
+        attr.num("msg_priority", self.msg_priority);
+        attr.bool("sticky", self.sticky);
+        attr.bool("ignore_auto_fail", self.ignore_auto_fail);
+        Action::Post(post_uri, attr.into())
     }
 
     /// Make a Patch action from previous state
     pub fn action_patch(&self, prev: &Self) -> Action {
         assert_eq!(&self.name, &prev.name);
         let uri = uri_one(Res::DeviceAction, &prev.name);
-        let mapping = self.changed_fields(prev);
-        let val = String::from(mapping);
-        Action::Patch(uri, val.into())
-    }
-
-    /// Get mapping of changed fields
-    fn changed_fields(&self, prev: &Self) -> Mapping {
-        let mut mapping = Mapping::new();
-        if self.hashtag != prev.hashtag {
-            mapping.insert_str("hashtag", &self.hashtag);
-        }
-        if self.phase != prev.phase {
-            mapping.insert_str("phase", &self.phase);
-        }
-        if self.msg_pattern != prev.msg_pattern {
-            mapping.insert_opt_str("msg_pattern", self.msg_pattern.as_deref());
-        }
-        if self.msg_priority != prev.msg_priority {
-            mapping.insert_num("msg_priority", self.msg_priority);
-        }
-        if self.sticky != prev.sticky {
-            mapping.insert_bool("sticky", self.sticky);
-        }
-        if self.ignore_auto_fail != prev.ignore_auto_fail {
-            mapping.insert_bool("ignore_auto_fail", self.ignore_auto_fail);
-        }
-        mapping
+        let mut attr = Attr::new();
+        attr.str2("hashtag", &prev.hashtag, &self.hashtag);
+        attr.str2("phase", &prev.phase, &self.phase);
+        attr.opt_str2(
+            "msg_pattern",
+            prev.msg_pattern.as_deref(),
+            self.msg_pattern.as_deref(),
+        );
+        attr.num2("msg_priority", prev.msg_priority, self.msg_priority);
+        attr.bool2("sticky", prev.sticky, self.sticky);
+        attr.bool2(
+            "ignore_auto_fail",
+            prev.ignore_auto_fail,
+            self.ignore_auto_fail,
+        );
+        Action::Patch(uri, attr.into())
     }
 
     /// Get ID for details
