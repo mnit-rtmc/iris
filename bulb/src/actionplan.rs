@@ -91,7 +91,7 @@ impl AncillaryData for ActionPlanAnc {
                     Asset::PlanPhases,
                 ]
             }
-            View::Setup(_edit) => {
+            View::Setup(_) | View::SaveEv => {
                 vec![
                     Asset::ActConditions,
                     Asset::DayPlans,
@@ -138,8 +138,12 @@ impl AncillaryData for ActionPlanAnc {
             Asset::DeviceActions => {
                 let mut actions: Vec<DeviceAction> =
                     serde_wasm_bindgen::from_value(value)?;
-                if let Some(View::Control) | Some(View::Setup(_)) = self.view {
+                if let Some(View::Control) | Some(View::Setup(_))
+                | Some(View::SaveEv) = self.view
+                {
                     actions.retain(|da| da.action_plan == pri.name);
+                }
+                if let Some(View::Setup(_)) | Some(View::SaveEv) = self.view {
                     self.next_device_action =
                         pri.next_device_action_name(&actions);
                 }
@@ -632,6 +636,11 @@ impl Card for ActionPlan {
     #[allow(clippy::field_reassign_with_default)]
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
         let mut actions = Vec::new();
+        let changed = self.changed_setup();
+        if !changed.is_empty() {
+            let uri = uri_one(Self::res(), &self.name());
+            actions.push(Action::Patch(uri, changed.into()));
+        }
         for da in &anc.device_actions {
             let mut nda = da.clone();
             nda.update_from_dom();
