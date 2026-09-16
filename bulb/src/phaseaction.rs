@@ -196,24 +196,9 @@ impl PhaseAction {
             .find(|c| c.id == self.condition)
             .map_or("❓", |c| &c.symbol);
         tr.td().cdata(sym).close();
-        let params = self.params.as_deref().unwrap_or("");
-        match self.condition {
-            // clock time
-            1 => {
-                let mut td = tr.td();
-                td.input().r#type("time").value(params).readonly();
-                td.close();
-            }
-            // date-time
-            2 => {
-                let mut td = tr.td();
-                td.input().r#type("datetime-local").value(params).readonly();
-                td.close();
-            }
-            _ => {
-                tr.td().cdata(params).close();
-            }
-        };
+        let mut td = tr.td();
+        self.params_input(&mut td.input(), true);
+        td.close();
         match &self.from_phase {
             Some(from_phase) => tr.td().class("info").cdata(from_phase).close(),
             None => tr.td().close(),
@@ -290,9 +275,10 @@ impl PhaseAction {
     pub fn update_class(
         &self,
         conditions: &[ActCondition],
-        changed: bool,
+        prev: &Self,
         id: &str,
     ) -> bool {
+        let changed = prev != self;
         if self.is_input_id(id) {
             let doc = Doc::get();
             if let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_details()) {
@@ -302,6 +288,14 @@ impl PhaseAction {
                 let mut tree = Tree::new();
                 let mut summary = tree.root::<html::Summary>();
                 self.summary_html(conditions, &mut summary, changed);
+                el.set_outer_html(&String::from(tree));
+            }
+            if self.id_condition() == id
+                && let Some(el) = doc.opt_elem::<HtmlElement>(&self.id_params())
+            {
+                let mut tree = Tree::new();
+                let mut input = tree.root::<html::Input>();
+                self.params_input(&mut input, false);
                 el.set_outer_html(&String::from(tree));
             }
             true
@@ -372,11 +366,8 @@ impl PhaseAction {
 
     /// Build HTML params row
     fn params_row<'p>(&self, div: &'p mut html::Div<'p>) {
-        let id = self.id_params();
-        div.label().r#for(&id).cdata("Params").close();
-        let params = self.params.as_deref().unwrap_or("");
-        let mut input = div.input();
-        input.id(id).maxlength(16).value(params);
+        div.label().r#for(self.id_params()).cdata("Params").close();
+        self.params_input(&mut div.input(), false);
         div.close();
     }
 
@@ -455,24 +446,7 @@ impl PhaseAction {
             .find(|c| c.id == self.condition)
             .map_or("❓", |c| &c.symbol);
         summary.cdata(sym);
-        let params = self.params.as_deref().unwrap_or("");
-        match self.condition {
-            // clock time
-            1 => {
-                summary.input().r#type("time").value(params).readonly();
-            }
-            // date-time
-            2 => {
-                summary
-                    .input()
-                    .r#type("datetime-local")
-                    .value(params)
-                    .readonly();
-            }
-            _ => {
-                summary.span().cdata(params).close();
-            }
-        }
+        self.params_input(&mut summary.input(), true);
         if self.from_phase.is_some() {
             summary.span().class("info").cdata("…").close();
         }
@@ -482,6 +456,38 @@ impl PhaseAction {
             .class("info")
             .cdata(&self.to_phase);
         summary.close();
+    }
+
+    /// Make params input HTML
+    fn params_input<'p>(&self, input: &'p mut html::Input<'p>, readonly: bool) {
+        if !readonly {
+            input.id(self.id_params());
+        }
+        match self.condition {
+            // clock time
+            1 => input.r#type("time"),
+            // date-time
+            2 => {
+                match Zoned::now()
+                    .datetime()
+                    .with()
+                    .second(0)
+                    .subsec_nanosecond(0)
+                    .build()
+                {
+                    Ok(min) => {
+                        input.r#type("datetime-local").min(min.to_string())
+                    }
+                    _ => input,
+                }
+            }
+            _ => input,
+        };
+        let params = self.params.as_deref().unwrap_or("");
+        input.value(params);
+        if readonly {
+            input.readonly().disabled();
+        }
     }
 
     /// Make HTML details

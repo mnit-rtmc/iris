@@ -522,7 +522,7 @@ impl ActionPlan {
         for pa in &anc.phase_actions {
             let mut npa = pa.clone();
             npa.update_from_dom();
-            if npa.update_class(&anc.action_conditions, *pa != npa, id) {
+            if npa.update_class(&anc.action_conditions, pa, id) {
                 return;
             }
         }
@@ -533,7 +533,7 @@ impl ActionPlan {
         );
         let mut npa = pa.clone();
         npa.update_from_dom();
-        npa.update_class(&anc.action_conditions, pa != npa, id);
+        npa.update_class(&anc.action_conditions, &pa, id);
     }
 }
 
