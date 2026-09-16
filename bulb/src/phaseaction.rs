@@ -10,12 +10,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::attr::Attr;
+use crate::card::{uri_all, uri_one};
 use crate::dayplan::DayPlan;
+use crate::fetch::Action;
 use crate::planphase::PlanPhase;
 use crate::util::Doc;
 use hatmil::{Tree, html};
 use jiff::Zoned;
 use jiff::civil::{Date, DateTime};
+use resources::Res;
 use serde::Deserialize;
 use web_sys::HtmlElement;
 
@@ -336,6 +340,7 @@ impl PhaseAction {
             option.cdata(&dp.name).close();
         }
         select.close();
+        div.span().class("info").cdata("(blank for all)").close();
         div.close();
     }
 
@@ -481,7 +486,7 @@ impl PhaseAction {
                     _ => input,
                 }
             }
-            _ => input,
+            _ => input.maxlength(16).size(16),
         };
         let params = self.params.as_deref().unwrap_or("");
         input.value(params);
@@ -506,5 +511,52 @@ impl PhaseAction {
         self._from_phase_row(phases, &mut details.div());
         self.to_phase_row(phases, &mut details.div());
         details.close();
+    }
+
+    /// Make a Post action
+    pub fn action_post(&self) -> Action {
+        let post_uri = uri_all(Res::PhaseAction);
+        let mut attr = Attr::new();
+        attr.str("name", &self.name);
+        attr.str("action_plan", &self.action_plan);
+        if let Some(dp) = &self.day_plan {
+            attr.str("day_plan", dp);
+        }
+        attr.num("condition", self.condition);
+        if let Some(params) = &self.params {
+            attr.str("params", params);
+        }
+        if let Some(fp) = &self.from_phase {
+            attr.str("from_phase", fp);
+        }
+        attr.str("to_phase", &self.to_phase);
+        Action::Post(post_uri, attr.into())
+    }
+
+    /// Make a Patch action from previous state
+    pub fn action_patch(&self, prev: &Self) -> Action {
+        assert_eq!(&self.name, &prev.name);
+        let uri = uri_one(Res::PhaseAction, &self.name);
+        let mut attr = Attr::new();
+        attr.str2("action_plan", &prev.action_plan, &self.action_plan);
+        attr.opt_str2(
+            "day_plan",
+            prev.day_plan.as_deref(),
+            self.day_plan.as_deref(),
+        );
+        attr.num2("condition", prev.condition, self.condition);
+        attr.opt_str2("params", prev.params.as_deref(), self.params.as_deref());
+        attr.opt_str2(
+            "from_phase",
+            prev.from_phase.as_deref(),
+            self.from_phase.as_deref(),
+        );
+        attr.str2("to_phase", &prev.to_phase, &self.to_phase);
+        Action::Patch(uri, attr.into())
+    }
+
+    /// Make a Delete action
+    pub fn action_delete(&self) -> Action {
+        Action::Delete(uri_one(Res::PhaseAction, &self.name))
     }
 }

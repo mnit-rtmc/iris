@@ -636,11 +636,8 @@ impl Card for ActionPlan {
             let mut nda = da.clone();
             nda.update_from_dom();
             if !nda.is_valid() {
-                let uri = uri_one(Res::DeviceAction, &da.name);
-                actions.push(Action::Delete(uri));
-                continue;
-            }
-            if nda != *da {
+                actions.push(nda.action_delete());
+            } else if nda != *da {
                 actions.push(nda.action_patch(da));
             }
         }
@@ -652,6 +649,24 @@ impl Card for ActionPlan {
         da.update_from_dom();
         if da.is_valid() {
             actions.push(da.action_post());
+        }
+        for pa in &anc.phase_actions {
+            let mut npa = pa.clone();
+            npa.update_from_dom();
+            if !npa.is_valid() {
+                actions.push(npa.action_delete());
+            } else if npa != *pa {
+                actions.push(npa.action_patch(pa));
+            }
+        }
+        let mut pa = PhaseAction::new(
+            &anc.next_phase_action,
+            &self.name,
+            &self.default_phase,
+        );
+        pa.update_from_dom();
+        if pa.is_valid() {
+            actions.push(pa.action_post());
         }
         actions
     }

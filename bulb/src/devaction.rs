@@ -57,45 +57,6 @@ impl DeviceAction {
             && self.hashtag[1..].chars().all(|c| c.is_alphanumeric())
     }
 
-    /// Make a Post action
-    pub fn action_post(&self) -> Action {
-        let post_uri = uri_all(Res::DeviceAction);
-        let mut attr = Attr::new();
-        attr.str("name", &self.name);
-        attr.str("action_plan", &self.action_plan);
-        attr.str("phase", &self.phase);
-        attr.str("hashtag", &self.hashtag);
-        if let Some(mp) = &self.msg_pattern {
-            attr.str("msg_pattern", mp);
-        }
-        attr.num("msg_priority", self.msg_priority);
-        attr.bool("sticky", self.sticky);
-        attr.bool("ignore_auto_fail", self.ignore_auto_fail);
-        Action::Post(post_uri, attr.into())
-    }
-
-    /// Make a Patch action from previous state
-    pub fn action_patch(&self, prev: &Self) -> Action {
-        assert_eq!(&self.name, &prev.name);
-        let uri = uri_one(Res::DeviceAction, &prev.name);
-        let mut attr = Attr::new();
-        attr.str2("hashtag", &prev.hashtag, &self.hashtag);
-        attr.str2("phase", &prev.phase, &self.phase);
-        attr.opt_str2(
-            "msg_pattern",
-            prev.msg_pattern.as_deref(),
-            self.msg_pattern.as_deref(),
-        );
-        attr.num2("msg_priority", prev.msg_priority, self.msg_priority);
-        attr.bool2("sticky", prev.sticky, self.sticky);
-        attr.bool2(
-            "ignore_auto_fail",
-            prev.ignore_auto_fail,
-            self.ignore_auto_fail,
-        );
-        Action::Patch(uri, attr.into())
-    }
-
     /// Get ID for details
     fn id_details(&self) -> String {
         format!("da-{}", self.name)
@@ -331,5 +292,49 @@ impl DeviceAction {
         self.sticky_row(&mut details.div());
         self.ignore_auto_fail_row(&mut details.div());
         details.close();
+    }
+
+    /// Make a Post action
+    pub fn action_post(&self) -> Action {
+        let post_uri = uri_all(Res::DeviceAction);
+        let mut attr = Attr::new();
+        attr.str("name", &self.name);
+        attr.str("action_plan", &self.action_plan);
+        attr.str("phase", &self.phase);
+        attr.str("hashtag", &self.hashtag);
+        if let Some(mp) = &self.msg_pattern {
+            attr.str("msg_pattern", mp);
+        }
+        attr.num("msg_priority", self.msg_priority);
+        attr.bool("sticky", self.sticky);
+        attr.bool("ignore_auto_fail", self.ignore_auto_fail);
+        Action::Post(post_uri, attr.into())
+    }
+
+    /// Make a Patch action from previous state
+    pub fn action_patch(&self, prev: &Self) -> Action {
+        assert_eq!(&self.name, &prev.name);
+        let uri = uri_one(Res::DeviceAction, &self.name);
+        let mut attr = Attr::new();
+        attr.str2("hashtag", &prev.hashtag, &self.hashtag);
+        attr.str2("phase", &prev.phase, &self.phase);
+        attr.opt_str2(
+            "msg_pattern",
+            prev.msg_pattern.as_deref(),
+            self.msg_pattern.as_deref(),
+        );
+        attr.num2("msg_priority", prev.msg_priority, self.msg_priority);
+        attr.bool2("sticky", prev.sticky, self.sticky);
+        attr.bool2(
+            "ignore_auto_fail",
+            prev.ignore_auto_fail,
+            self.ignore_auto_fail,
+        );
+        Action::Patch(uri, attr.into())
+    }
+
+    /// Make a Delete action
+    pub fn action_delete(&self) -> Action {
+        Action::Delete(uri_one(Res::DeviceAction, &self.name))
     }
 }
