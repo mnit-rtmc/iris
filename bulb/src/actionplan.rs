@@ -610,7 +610,12 @@ impl Card for ActionPlan {
         fields.changed_input("active", self.active);
         fields.changed_select("default_phase", &self.default_phase);
         fields.changed_input("sync_actions", self.sync_actions);
-        fields.into()
+        let attr = Attr::from(fields);
+        if attr.is_empty() {
+            String::new()
+        } else {
+            attr.into()
+        }
     }
 
     /// Handle input event for an element on the card
