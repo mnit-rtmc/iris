@@ -139,16 +139,16 @@ impl DeviceAction {
     /// Update from DOM
     pub fn update_from_dom(&mut self) {
         let doc = Doc::get();
-        if let Some(hashtag) = doc.input_parse::<String>(&self.id_hashtag()) {
+        if let Some(hashtag) = doc.input_parse(&self.id_hashtag()) {
             self.hashtag = hashtag;
         }
-        if let Some(phase) = doc.select_parse::<String>(&self.id_phase()) {
+        if let Some(phase) = doc.select_parse(&self.id_phase()) {
             self.phase = phase;
         }
-        if let Some(pat) = doc.select_parse::<String>(&self.id_msg_pattern()) {
-            self.msg_pattern = Some(pat).filter(|p| !p.is_empty());
-        }
-        if let Some(prio) = doc.select_parse::<u8>(&self.id_msg_priority()) {
+        self.msg_pattern = doc
+            .select_parse::<String>(&self.id_msg_pattern())
+            .filter(|p| !p.is_empty());
+        if let Some(prio) = doc.select_parse(&self.id_msg_priority()) {
             self.msg_priority = prio;
         }
         self.sticky = doc.input_bool(&self.id_sticky());

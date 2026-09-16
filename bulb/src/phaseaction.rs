@@ -263,7 +263,7 @@ impl PhaseAction {
         if let Some(dp) = doc.select_parse::<String>(&self.id_day_plan()) {
             self.day_plan = Some(dp).filter(|dp| !dp.is_empty());
         }
-        if let Some(condition) = doc.select_parse::<u32>(&self.id_condition()) {
+        if let Some(condition) = doc.select_parse(&self.id_condition()) {
             self.condition = condition;
         }
         if let Some(p) = doc.input_parse::<String>(&self.id_params()) {
@@ -272,8 +272,7 @@ impl PhaseAction {
         if let Some(p) = doc.select_parse::<String>(&self.id_from_phase()) {
             self.from_phase = Some(p).filter(|p| !p.is_empty());
         }
-        if let Some(to_phase) = doc.select_parse::<String>(&self.id_to_phase())
-        {
+        if let Some(to_phase) = doc.select_parse(&self.id_to_phase()) {
             self.to_phase = to_phase;
         }
     }

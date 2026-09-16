@@ -214,18 +214,13 @@ impl DayMatcher {
     /// Update from DOM
     fn update_from_dom(&mut self) {
         let doc = Doc::get();
-        self.month =
-            doc.select_parse::<i32>(&self.id_month()).filter(|m| *m > 0);
+        self.month = doc.select_parse(&self.id_month()).filter(|m| *m > 0);
         self.day = doc
-            .input_parse::<i32>(&self.id_day())
+            .input_parse(&self.id_day())
             .filter(|d| *d >= 1 && *d <= 31);
-        self.weekday = doc
-            .select_parse::<i32>(&self.id_weekday())
-            .filter(|d| *d > 0);
-        self.week =
-            doc.select_parse::<i32>(&self.id_week()).filter(|w| *w != 0);
-        self.shift =
-            doc.input_parse::<i32>(&self.id_shift()).filter(|s| *s != 0);
+        self.weekday = doc.select_parse(&self.id_weekday()).filter(|d| *d > 0);
+        self.week = doc.select_parse(&self.id_week()).filter(|w| *w != 0);
+        self.shift = doc.input_parse(&self.id_shift()).filter(|s| *s != 0);
     }
 
     /// Check ID for input element of this day matcher
