@@ -179,7 +179,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		map.put("day_plan", day_plan);
 		map.put("from_phase", from_phase);
 		map.put("to_phase", to_phase);
-		map.put("condition", condition.ordinal());
+		map.put("condition", condition);
 		map.put("params", params);
 		return map;
 	}
@@ -187,7 +187,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 	/** Create a new phase action */
 	public PhaseActionImpl(String n) {
 		super(n);
-		condition = ActCondition.fromOrdinal(0);
+		condition = ActCondition.HOLD_TIME.ordinal();
 	}
 
 	/** Create a new phase action */
@@ -203,15 +203,15 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 	}
 
 	/** Create a new phase action */
-	PhaseActionImpl(String n, String a, String dp, String fp, String tp,
+	PhaseActionImpl(String n, String ap, String dp, String fp, String tp,
 		int c, String p)
 	{
 		this(n);
-		action_plan = lookupActionPlan(a);
+		action_plan = lookupActionPlan(ap);
 		day_plan = lookupDayPlan(dp);
 		from_phase = lookupPlanPhase(fp);
 		to_phase = lookupPlanPhase(tp);
-		condition = ActCondition.fromOrdinal(c);
+		condition = c;
 		params = p;
 	}
 
@@ -293,18 +293,18 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 		return to_phase;
 	}
 
-	/** Action condition */
-	private ActCondition condition;
+	/** Action condition ordinal */
+	private int condition;
 
 	/** Set the action condition */
 	@Override
 	public void setCondition(int c) {
-		condition = ActCondition.fromOrdinal(c);
+		condition = c;
 	}
 
 	/** Set the action condition */
 	public void doSetCondition(int c) throws TMSException {
-		if (c != condition.ordinal()) {
+		if (c != condition) {
 			store.update(this, "condition", c);
 			setCondition(c);
 		}
@@ -313,7 +313,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 	/** Get the action condition */
 	@Override
 	public int getCondition() {
-		return condition.ordinal();
+		return condition;
 	}
 
 	/** Condition parameters */
@@ -372,7 +372,7 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check phase action condition */
 	private boolean checkCondition(Calendar cal, int min) {
-		switch (condition) {
+		switch (ActCondition.fromOrdinal(condition)) {
 			case HOLD_TIME:
 				return checkHoldTime(cal);
 			case CLOCK_TIME:
@@ -392,10 +392,10 @@ public class PhaseActionImpl extends BaseObjectImpl implements PhaseAction {
 
 	/** Check HOLD_TIME condition */
 	private boolean checkHoldTime(Calendar cal) {
-		Integer hs = PhaseActionHelper.getHoldSecs(this);
 		if (action_plan instanceof ActionPlanImpl) {
 			ActionPlanImpl ap = (ActionPlanImpl) action_plan;
 			int ht = ap.phaseSecs(cal.getTimeInMillis());
+			Integer hs = PhaseActionHelper.getHoldSecs(this);
 			boolean trigger = (hs != null) && (ht >= hs);
 			if (trigger)
 				logMsg("HOLD_TIME " + hs);
