@@ -53,7 +53,7 @@ public class PermissionImpl extends BaseObjectImpl implements Permission,
 		map.put("role", role);
 		map.put("base_resource", base_resource);
 		map.put("hashtag", hashtag);
-		map.put("access_level", access_level.ordinal());
+		map.put("access_level", access_level);
 		return map;
 	}
 
@@ -78,7 +78,7 @@ public class PermissionImpl extends BaseObjectImpl implements Permission,
 		role = lookupRole(r);
 		base_resource = br;
 		hashtag = h;
-		access_level = AccessLevel.fromOrdinal(al);
+		access_level = al;
 	}
 
 	/** Compare to another permission */
@@ -142,18 +142,17 @@ public class PermissionImpl extends BaseObjectImpl implements Permission,
 	}
 
 	/** Access level */
-	private AccessLevel access_level = AccessLevel.VIEW;
+	private int access_level = AccessLevel.VIEW.ordinal();
 
 	/** Set the access level */
 	@Override
 	public void setAccessLevel(int al) {
-		access_level = AccessLevel.fromOrdinal(al);
+		access_level = al;
 	}
 
 	/** Set the access level */
 	public void doSetAccessLevel(int al) throws TMSException {
-		AccessLevel a = AccessLevel.fromOrdinal(al);
-		if (a != access_level) {
+		if (al != access_level) {
 			store.update(this, "access_level", al);
 			setAccessLevel(al);
 		}
@@ -162,6 +161,6 @@ public class PermissionImpl extends BaseObjectImpl implements Permission,
 	/** Get the access level */
 	@Override
 	public int getAccessLevel() {
-		return access_level.ordinal();
+		return access_level;
 	}
 }
