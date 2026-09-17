@@ -130,9 +130,9 @@ async fn parse_response(mut res: Response<Incoming>) -> Result<Vec<u8>> {
 }
 
 /// Build Hyper client
-fn build_client<B: Body + std::marker::Send>()
--> HyperClient<HttpsConnector<HttpConnector>, B>
+fn build_client<B>() -> HyperClient<HttpsConnector<HttpConnector>, B>
 where
+    B: Body + std::marker::Send,
     <B as Body>::Data: std::marker::Send,
 {
     let https = HttpsConnectorBuilder::new()
