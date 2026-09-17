@@ -35,6 +35,7 @@ const RECORD_SEP: u8 = b'\x1E';
 
 /// Parse a SHOW message received from server
 fn parse_show(msg: &str) -> Error {
+    log::trace!("SONAR parse_show {msg}");
     // gross, but no point in changing SHOW messages now!
     let msg = msg.to_lowercase();
     if msg.starts_with("permission") {
@@ -137,27 +138,28 @@ impl Name {
         self.obj_name.as_deref()
     }
 
-    /// Make an attribute name (with validation)
-    pub fn attr_n(&self, att: &str) -> Result<String> {
+    /// Make an attribute name for POST (with validation)
+    pub fn attr_post(&self, att: &str) -> Result<String> {
         if att.len() > 64 || att.contains(name_invalid_char) {
             Err(Error::InvalidValue)?
         } else if self.res_type == Res::Controller && att == "drop_id" {
             Ok(format!("{self}/drop"))
-        } else if attr_snake(self.res_type, att) {
-            Ok(format!("{self}/{att}"))
         } else {
-            // most IRIS attributes are in camel case (Java)
-            Ok(format!("{self}/{}", att.to_lower_camel_case()))
+            // POST: "Object" msg uses snake_case (Java reflection)
+            Ok(format!("{self}/{att}"))
         }
     }
-}
 
-/// Check if an attribute is in snake case
-fn attr_snake(res_type: Res, att: &str) -> bool {
-    match (res_type, att) {
-        (Res::SignMessage, _) => true,
-        (Res::Permission, "base_resource") => true,
-        _ => false,
+    /// Make an attribute name for PATCH (with validation)
+    pub fn attr_patch(&self, att: &str) -> Result<String> {
+        if att.len() > 64 || att.contains(name_invalid_char) {
+            Err(Error::InvalidValue)?
+        } else if self.res_type == Res::Controller && att == "drop_id" {
+            Ok(format!("{self}/drop"))
+        } else {
+            // PATCH: "Attribute" msg uses camel case (Java interface)
+            Ok(format!("{self}/{}", att.to_lower_camel_case()))
+        }
     }
 }
 
@@ -451,6 +453,7 @@ impl Messenger {
 
     /// Create an object
     pub async fn create_object(&mut self, nm: &str) -> Result<()> {
+        log::trace!("SONAR create_object {nm}");
         let mut buf = Vec::with_capacity(32);
         Message::Object(nm).encode(&mut buf);
         self.check_error(10).await?;
@@ -465,6 +468,7 @@ impl Messenger {
         nm: &str,
         value: &Value,
     ) -> Result<()> {
+        log::trace!("SONAR update_object {nm}");
         let mut buf = Vec::with_capacity(32);
         let value = attr_json(value)?;
         Message::Attribute(nm, &value).encode(&mut buf);
@@ -476,6 +480,7 @@ impl Messenger {
 
     /// Remove an object
     pub async fn remove_object(&mut self, nm: &str) -> Result<()> {
+        log::trace!("SONAR remove_object {nm}");
         let mut buf = Vec::with_capacity(32);
         Message::Remove(nm).encode(&mut buf);
         self.check_error(10).await?;
@@ -493,6 +498,7 @@ impl Messenger {
     where
         F: FnMut(&str, &str) -> Result<()>,
     {
+        log::trace!("SONAR enumerate_object {nm}");
         let mut buf = Vec::with_capacity(32);
         Message::Enumerate(nm).encode(&mut buf);
         self.check_error(10).await?;

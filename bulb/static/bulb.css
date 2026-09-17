@@ -32,12 +32,12 @@ details summary {
 details div {
   padding-left: 1rem;
 }
+details.changed summary {
+  background-color: #ffd;
+}
 details.invalid summary,
 details.invalid input {
   background-color: #fdd;
-}
-details.changed summary {
-  background-color: #ffd;
 }
 details input[type=time],
 details input[type=datetime-local] {

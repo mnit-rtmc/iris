@@ -725,7 +725,7 @@ fn other_resource(honey: Honey) -> Router {
                     for (key, value) in attrs.iter() {
                         let attr = &key[..];
                         if attr != "name" {
-                            let anm = name.attr_n(attr)?;
+                            let anm = name.attr_post(attr)?;
                             log::trace!("{anm} = {value} (phantom)");
                             msn.update_object(&anm, value).await?;
                         }
@@ -883,7 +883,7 @@ fn other_object(honey: Honey) -> Router {
             for (key, value) in attrs.iter() {
                 let attr = &key[..];
                 if patch_first_pass(nm.res_type, attr) {
-                    let anm = nm.attr_n(attr)?;
+                    let anm = nm.attr_patch(attr)?;
                     log::trace!("{anm} = {value}");
                     msn.update_object(&anm, value).await?;
                 }
@@ -892,7 +892,7 @@ fn other_object(honey: Honey) -> Router {
             for (key, value) in attrs.iter() {
                 let attr = &key[..];
                 if !patch_first_pass(nm.res_type, attr) {
-                    let anm = nm.attr_n(attr)?;
+                    let anm = nm.attr_patch(attr)?;
                     log::trace!("{anm} = {value}");
                     msn.update_object(&anm, value).await?;
                 }

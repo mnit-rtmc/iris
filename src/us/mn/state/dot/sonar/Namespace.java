@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2025  Minnesota Department of Transportation
+ * Copyright (C) 2006-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,11 +134,15 @@ abstract public class Namespace {
 				return new MultiPolygon(p);
 		}
 		catch (NumberFormatException|SQLException|ParseException e) {
+			System.err.println("SONAR: unmarshall, type: " + t +
+				" \"" + p + "\": " + e.getMessage());
 			throw ProtocolError.invalidParameter(p);
 		}
 		if (SonarObject.class.isAssignableFrom(t))
 			return unmarshallObject(t, p);
 		else {
+			System.err.println("SONAR: unmarshall2, type: " + t +
+				" \"" + p + "\"");
 			throw ProtocolError.invalidParameter(p);
 		}
 	}
