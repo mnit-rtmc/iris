@@ -571,7 +571,7 @@ impl CardList {
             let mut li = ul.li();
             li.id(cv.id())
                 .data_("name", cv.name())
-                .class(View::Hidden.class_name());
+                .class(View::Hidden.class_name(false));
             li.span().class("create").cdata("Create 🆕").close();
             li.close();
         }
@@ -583,7 +583,7 @@ impl CardList {
             let mut li = ul.li();
             li.id(cv.id())
                 .data_("name", cv.name())
-                .class(cv.view.class_name());
+                .class(cv.view.class_name(false));
             li.raw(pri.to_html(cv.view, &anc));
             li.close();
         }

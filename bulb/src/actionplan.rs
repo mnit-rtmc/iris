@@ -641,11 +641,6 @@ impl Card for ActionPlan {
     #[allow(clippy::field_reassign_with_default)]
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
         let mut actions = Vec::new();
-        let changed = self.changed_setup();
-        if !changed.is_empty() {
-            let uri = uri_one(Self::res(), &self.name());
-            actions.push(Action::Patch(uri, changed.into()));
-        }
         for da in &anc.device_actions {
             let mut nda = da.clone();
             nda.update_from_dom();
@@ -681,6 +676,11 @@ impl Card for ActionPlan {
         pa.update_from_dom();
         if pa.is_valid() {
             actions.push(pa.action_post());
+        }
+        let changed = self.changed_setup();
+        if !changed.is_empty() {
+            let uri = uri_one(Self::res(), &self.name());
+            actions.push(Action::Patch(uri, changed.into()));
         }
         actions
     }

@@ -596,7 +596,7 @@ async fn handle_search() -> Result<()> {
             for cv in cards.search_views(&search).await? {
                 let id = cv.id();
                 if let Some(el) = doc.opt_elem::<Element>(id) {
-                    el.set_class_name(cv.view.class_name());
+                    el.set_class_name(cv.view.class_name(false));
                 }
             }
             app::card_list(Some(cards));
@@ -649,7 +649,7 @@ fn replace_card_html(cv: &CardView, html: &str) {
         return;
     };
     el.set_inner_html(html);
-    el.set_class_name(cv.view.class_name());
+    el.set_class_name(cv.view.class_name(false));
     if cv.view.is_expanded() {
         let opt = ScrollIntoViewOptions::new();
         opt.set_behavior(ScrollBehavior::Instant);

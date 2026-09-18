@@ -50,11 +50,13 @@ use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::tollzone::TollZone;
 use crate::user::User;
+use crate::util::Doc;
 use crate::videomonitor::VideoMonitor;
 use crate::weathersensor::WeatherSensor;
 use crate::word::Word;
 use hatmil::{Tree, html};
 use resources::Res;
+use web_sys::HtmlElement;
 
 /// Card element view
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -83,11 +85,17 @@ pub enum View {
 
 impl View {
     /// Get view class name
-    pub const fn class_name(self) -> &'static str {
+    pub const fn class_name(self, wait: bool) -> &'static str {
         match self {
             View::Hidden | View::SearchEv | View::SaveEv => "no-display",
             View::Compact => "card-compact",
-            _ => "card-expanded",
+            _ => {
+                if wait {
+                    "card-expanded wait"
+                } else {
+                    "card-expanded"
+                }
+            }
         }
     }
 
@@ -269,13 +277,23 @@ impl CardView {
             return Ok(Some(self.view.compact()));
         }
         let view = match id {
-            eid::SAVE => View::SaveEv,
+            eid::SAVE => {
+                if let Ok(el) = Doc::get().elem::<HtmlElement>(&self.id) {
+                    el.set_class_name(self.view.class_name(true));
+                }
+                View::SaveEv
+            }
             _ => self.view,
         };
         let pri = self.fetch_primary::<C>().await?;
         let anc = fetch_ancillary(&pri, view).await?;
         for action in pri.handle_click(anc, id) {
             action.perform().await?;
+        }
+        if eid::SAVE == id
+            && let Ok(el) = Doc::get().elem::<HtmlElement>(&self.id)
+        {
+            el.set_class_name(self.view.class_name(false));
         }
         if let View::SaveEv | View::Location(_) = view {
             Ok(Some(self.view.compact()))
