@@ -178,7 +178,10 @@ impl AncillaryData for LcsAnc {
         let mut cio = ControllerIoAnc::new(pri, view);
         match view {
             View::Control => cio.assets.push(Asset::LcsStates),
-            View::Setup(_edit) => cio.assets.push(Asset::LcsTypes),
+            View::Setup(_edit) => {
+                cio.assets.push(Asset::LcsStates);
+                cio.assets.push(Asset::LcsTypes);
+            }
             _ => (),
         }
         let loc = LocAnc::new(pri, view);
@@ -550,7 +553,12 @@ impl Lcs {
             .size(2)
             .value(opt_str(self.shift));
         div.close();
-        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
+        let can_delete = anc.lcs_states.is_empty();
+        footer_html(
+            View::Setup(edit),
+            can_delete,
+            &mut tree.root::<html::Div>(),
+        );
         String::from(tree)
     }
 }

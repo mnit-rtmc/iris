@@ -240,7 +240,8 @@ fn to_html_setup(sc: &SignConfig, anc: &SignConfigAnc, edit: bool) -> String {
         .close();
     anc.select_fonts_html(sc.default_font, &mut div.select());
     div.close();
-    footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
+    let can_delete = 0 == sc.sign_count;
+    footer_html(View::Setup(edit), can_delete, &mut tree.root::<html::Div>());
     String::from(tree)
 }
 

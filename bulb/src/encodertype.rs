@@ -96,6 +96,7 @@ impl EncoderType {
             .size(8)
             .value(&self.config);
         div.close();
+        // FIXME: disable delete when used
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }

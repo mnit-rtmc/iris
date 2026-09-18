@@ -453,7 +453,12 @@ impl Role {
         anc.permissions_html(self, &mut div);
         div = tree.root::<html::Div>();
         anc.domains_html(self, &mut div);
-        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
+        let can_delete = anc.permissions.is_empty() && anc.domains.is_empty();
+        footer_html(
+            View::Setup(edit),
+            can_delete,
+            &mut tree.root::<html::Div>(),
+        );
         String::from(tree)
     }
 

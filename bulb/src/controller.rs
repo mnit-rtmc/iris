@@ -120,6 +120,7 @@ impl AncillaryData for ControllerAnc {
             View::Setup(_edit) => {
                 loc.assets.push(Asset::Conditions);
                 loc.assets.push(Asset::CabinetStyles);
+                loc.assets.push(Asset::ControllerIo(pri.name.to_string()));
             }
             _ => (),
         };
@@ -481,7 +482,12 @@ impl Controller {
             .size(26)
             .value(opt_ref(&self.password));
         div.close();
-        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
+        let can_delete = anc.controller_io.is_empty();
+        footer_html(
+            View::Setup(edit),
+            can_delete,
+            &mut tree.root::<html::Div>(),
+        );
         String::from(tree)
     }
 }

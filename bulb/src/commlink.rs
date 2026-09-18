@@ -50,7 +50,9 @@ impl AncillaryData for CommLinkAnc {
     fn new(_pri: &CommLink, view: View) -> Self {
         let assets = match view {
             View::SaveEv => Vec::new(),
-            View::Status => vec![Asset::Controllers, Asset::CommConfigs],
+            View::Status | View::Setup(_) => {
+                vec![Asset::Controllers, Asset::CommConfigs]
+            }
             _ => vec![Asset::CommConfigs],
         };
         let controllers = Vec::new();
@@ -214,7 +216,12 @@ impl CommLink {
             input.checked();
         }
         div.close();
-        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
+        let can_delete = anc.controllers.is_empty();
+        footer_html(
+            View::Setup(edit),
+            can_delete,
+            &mut tree.root::<html::Div>(),
+        );
         String::from(tree)
     }
 }
