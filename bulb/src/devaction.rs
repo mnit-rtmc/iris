@@ -147,10 +147,10 @@ impl DeviceAction {
 
     /// Get row element class name
     fn class_name(&self, changed: bool) -> &'static str {
-        if self.is_valid() {
-            if changed { "changed" } else { "" }
-        } else {
-            "invalid"
+        match (changed, self.is_valid()) {
+            (true, true) => "changed",
+            (true, false) => "invalid",
+            _ => "",
         }
     }
 

@@ -310,10 +310,10 @@ impl PhaseAction {
 
     /// Get row element class name
     fn class_name(&self, changed: bool) -> &'static str {
-        if self.is_valid() {
-            if changed { "changed" } else { "" }
-        } else {
-            "invalid"
+        match (changed, self.is_valid(), self.is_date_time_expired()) {
+            (true, true, false) => "changed",
+            (true, false, _) | (_, _, true) => "invalid",
+            _ => "",
         }
     }
 
