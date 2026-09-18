@@ -20,7 +20,7 @@ use crate::util::Doc;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
-use web_sys::HtmlElement;
+use web_sys::{HtmlElement, HtmlInputElement};
 
 /// Device action
 #[derive(Clone, Debug, Deserialize, PartialEq)]
@@ -72,6 +72,11 @@ impl DeviceAction {
         format!("{}-hashtag", self.name)
     }
 
+    /// Get ID for hashtag clear button
+    fn id_hashtag_clear(&self) -> String {
+        format!("{}-hashtag-clear", self.name)
+    }
+
     /// Get ID for phase `<select>`
     fn id_phase(&self) -> String {
         format!("{}-phase", self.name)
@@ -95,6 +100,21 @@ impl DeviceAction {
     /// Get ID for ignore_auto_fail `<input>`
     fn id_ignore_auto_fail(&self) -> String {
         format!("{}-ignore_auto_fail", self.name)
+    }
+
+    /// Clear the hashtag input
+    pub fn clear_hashtag(&mut self, name: &str) -> bool {
+        let id = self.id_hashtag();
+        if name == self.name
+            && let Some(el) = Doc::get().opt_elem::<HtmlInputElement>(&id)
+        {
+            el.set_value("");
+            self.hashtag = String::new();
+            self.update_class(true, &id);
+            true
+        } else {
+            false
+        }
     }
 
     /// Update from DOM
@@ -177,6 +197,10 @@ impl DeviceAction {
         div.label().r#for(&id).cdata("Device #Tag").close();
         let mut input = div.input();
         input.id(id).maxlength(16).value(&self.hashtag);
+        div.button()
+            .id(self.id_hashtag_clear())
+            .r#type("button")
+            .cdata("🗑️");
         div.close();
     }
 

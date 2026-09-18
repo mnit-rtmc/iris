@@ -32,6 +32,9 @@ details summary {
 details div {
   padding-left: 1rem;
 }
+details input {
+  max-width: 10rem;
+}
 details.changed summary {
   background-color: #ffd;
 }

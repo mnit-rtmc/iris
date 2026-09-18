@@ -624,6 +624,21 @@ impl Card for ActionPlan {
         }
     }
 
+    /// Handle click event for a button on the card
+    fn handle_click(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
+        if let Some((name, "hashtag-clear")) = id.split_once('-') {
+            for da in &anc.device_actions {
+                let mut da = da.clone();
+                if da.clear_hashtag(name) {
+                    break;
+                }
+            }
+            Vec::new()
+        } else {
+            self.handle_click_common(anc, id)
+        }
+    }
+
     /// Handle input event for an element on the card
     #[allow(clippy::field_reassign_with_default)]
     fn handle_input(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
