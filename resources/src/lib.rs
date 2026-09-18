@@ -295,7 +295,7 @@ impl Res {
         use Res::*;
         match self {
             ActionPlan => "📋",
-            Alarm => "📢",
+            Alarm => "🔔",
             Beacon => "🔆",
             CabinetStyle => "🗄️ ",
             Camera => "🎥",

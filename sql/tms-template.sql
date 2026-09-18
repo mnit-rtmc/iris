@@ -2064,7 +2064,7 @@ VALUES
     (2, 'date-time', '🗓️'),
     (3, 'traffic threshold', '🚗'),
     (4, 'RWIS threshold', '🌦️'),
-    (5, 'alarm', '📢');
+    (5, 'alarm', '🔔');
 
 CREATE TABLE iris.phase_action (
     name VARCHAR(30) PRIMARY KEY,

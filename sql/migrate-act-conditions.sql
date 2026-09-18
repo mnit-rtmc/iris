@@ -25,7 +25,7 @@ UPDATE iris.action_condition SET symbol = '⏰' WHERE id = 1;
 UPDATE iris.action_condition SET symbol = '🗓️' WHERE id = 2;
 UPDATE iris.action_condition SET symbol = '🚗' WHERE id = 3;
 UPDATE iris.action_condition SET symbol = '🌦️' WHERE id = 4;
-UPDATE iris.action_condition SET symbol = '📢' WHERE id = 5;
+UPDATE iris.action_condition SET symbol = '🔔' WHERE id = 5;
 ALTER TABLE iris.action_condition ALTER COLUMN symbol SET NOT NULL;
 
 COMMIT;
