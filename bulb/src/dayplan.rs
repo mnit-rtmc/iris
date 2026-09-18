@@ -413,7 +413,12 @@ impl DayPlan {
         let dm = DayMatcher::new(&anc.next_name, &self.name);
         dm.table_row(&mut table.tr());
         div.close();
-        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
+        let can_delete = anc.day_matchers.is_empty();
+        footer_html(
+            View::Setup(edit),
+            can_delete,
+            &mut tree.root::<html::Div>(),
+        );
         String::from(tree)
     }
 }

@@ -498,7 +498,13 @@ impl ActionPlan {
             &anc.phases,
             &mut details,
         );
-        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
+        let can_delete =
+            anc.device_actions.is_empty() && anc.phase_actions.is_empty();
+        footer_html(
+            View::Setup(edit),
+            can_delete,
+            &mut tree.root::<html::Div>(),
+        );
         String::from(tree)
     }
 
