@@ -547,10 +547,15 @@ impl RampMeter {
         select.id("lk_reason");
         for r in LockReason::all_meter() {
             let mut option = select.option();
+            option.value(r.as_str());
             if *r == reason {
                 option.selected();
             }
-            option.cdata(r.as_str()).close();
+            option.cdata(r.as_str());
+            if *r != LockReason::Unlocked {
+                option.cdata(r.duration().map_or(" (off)", |_d| " (on)"));
+            }
+            option.close();
         }
         select.close();
         span.close();
