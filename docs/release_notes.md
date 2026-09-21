@@ -1,5 +1,14 @@
 # IRIS 5.x Release Notes
 
+5.90.0 (21 Sep 2026)
+ - Web UI: implemented ActionPlan Setup card (w/ device + phase actions)
+ - Move `sticky` from `action_plan` to `device_action`
+ - Move `ignore_auto_fail` from `action_plan` to `device_action`
+ - Split "date time" action condition from "clock time"
+ - Web UI: improve day plan change feedback
+ - Add lat/lon to `detector_pub` JSON file
+ - Fixed minor threading bug
+
 5.89.0 (8 Sep 2026)
  - Web UI: improve UI for reduced-permission roles
  - Web UI: use Navigation API to handle address bar, back button, etc.
