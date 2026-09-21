@@ -69,7 +69,7 @@ camera_ptz_blind	true
 camera_stream_controls_enable	false
 cap_save_enable	true
 client_units_si	true
-database_version	5.89.0
+database_version	5.90.0
 detector_auto_fail_enable	true
 detector_data_archive_enable	true
 detector_occ_spike_secs	60
@@ -1979,7 +1979,6 @@ CREATE TABLE iris.day_plan (
 
 INSERT INTO iris.day_plan (name, holidays)
 VALUES
-    ('ALL_DAYS', true),
     ('WEEKDAYS', true),
     ('METER_AM', true),
     ('METER_PM', true);
