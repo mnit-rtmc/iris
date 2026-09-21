@@ -18,8 +18,8 @@ headers = "0.4"
 heck = "0.5"
 http.workspace = true
 http-body-util = "0.1"
-hyper-util = { version = "0.1", features = ["http1", "client-legacy", "tokio"] }
 hyper.workspace = true
+hyper-util.workspace = true
 jiff.workspace = true
 loam = "0.7"
 log.workspace = true

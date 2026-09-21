@@ -9,7 +9,7 @@ edition.workspace = true
 bb8.workspace = true
 bb8-postgres.workspace = true
 hyper.workspace = true
-hyper-util = { version = "0.1", features = ["client-legacy"] }
+hyper-util.workspace = true
 jiff.workspace = true
 log.workspace = true
 mag.workspace = true
