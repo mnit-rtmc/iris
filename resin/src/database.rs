@@ -1,6 +1,7 @@
 // database.rs
 //
 // Copyright (C) 2021-2026  Minnesota Department of Transportation
+// Copyright (C) 2026       Alaska DOT&PF
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@ use crate::error;
 use bb8::{CustomizeConnection, Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;
 use std::env;
+use std::fs;
 use std::pin::Pin;
 use tokio_postgres::tls::NoTlsStream;
 use tokio_postgres::{Client, Config, Connection, NoTls, Socket};
@@ -31,9 +33,30 @@ pub struct Database {
 
 /// Make database configuration
 fn make_config(db: &str) -> error::Result<Config> {
-    let username = whoami::username()?;
-    // Format path for unix domain socket -- not worth using percent_encode
-    let uds = format!("postgres://{username}@%2Frun%2Fpostgresql/{db}");
+    let pass_file = match env::var("PGPASSFILE") {
+        Ok(file) => Some(file),
+        Err(env::VarError::NotPresent) => None,
+        Err(env::VarError::NotUnicode(_)) => None,
+    };
+    let uds: String;
+    if let Some(pf) = pass_file {
+        // PGPASS format -> hostname:port:database:username:password
+        let pg_pass_str = fs::read_to_string(pf)?;
+        let parts: Vec<&str> = pg_pass_str.trim().split(":").collect();
+        if parts.len() != 5 {
+            return Err(error::Error::InvalidConfig(
+                "Invalid PGPASS file format",
+            ));
+        }
+        uds = format!(
+            "host={} port={} dbname={} user={} password='{}'",
+            parts[0], parts[1], parts[2], parts[3], parts[4]
+        );
+    } else {
+        let username = whoami::username()?;
+        // Format path for unix domain socket -- not worth using percent_encode
+        uds = format!("postgres://{username}@%2Frun%2Fpostgresql/{db}");
+    }
     Ok(uds.parse()?)
 }
 
