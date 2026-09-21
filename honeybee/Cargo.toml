@@ -11,7 +11,6 @@ axum.workspace = true
 base64 = "0.22"
 bb8.workspace = true
 bb8-postgres.workspace = true
-chrono.workspace = true
 cidr.workspace = true
 env_logger.workspace = true
 futures.workspace = true
@@ -21,6 +20,7 @@ http.workspace = true
 http-body-util = "0.1"
 hyper-util = { version = "0.1", features = ["http1", "client-legacy", "tokio"] }
 hyper.workspace = true
+jiff.workspace = true
 loam = "0.7"
 log.workspace = true
 ntcip.workspace = true

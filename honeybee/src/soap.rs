@@ -13,13 +13,12 @@
 //
 use crate::error::Result;
 use crate::xml::XmlWriter;
-
 use base64::{Engine as _, engine::general_purpose::STANDARD as b64};
-use chrono::{SecondsFormat, Utc};
 use http_body_util::BodyExt;
 use hyper::body::Incoming;
 use hyper::{Request, Response};
 use hyper_util::rt::TokioIo;
+use jiff::Timestamp;
 use sha1::{Digest, Sha1};
 use std::io;
 use tokio::net::TcpStream;
@@ -39,7 +38,7 @@ fn get_digest(pass: &str) -> Option<(String, String, String)> {
     rand::fill(&mut nonce_bytes[..]);
     let pass_bytes = pass.as_bytes();
     let mut hasher = Sha1::new();
-    let created = Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true);
+    let created = format!("{:.3}", Timestamp::now());
     hasher.update(nonce_bytes);
     hasher.update(created.as_bytes());
     hasher.update(pass_bytes);
