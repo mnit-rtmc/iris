@@ -9,6 +9,7 @@ edition = "2024"
 
 [workspace.dependencies]
 argh = "0.1"
+base64 = "0.23"
 bb8 = "0.9"
 bb8-postgres = "0.9"
 chrono = "0.4"
