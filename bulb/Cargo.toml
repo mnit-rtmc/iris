@@ -22,7 +22,7 @@ js-sys = "0.3"
 log.workspace = true
 mag.workspace = true
 ntcip.workspace = true
-percent-encoding = "2"
+percent-encoding.workspace = true
 pix.workspace = true
 rendzina = { path = "../rendzina" }
 resources = { path = "../resources" }

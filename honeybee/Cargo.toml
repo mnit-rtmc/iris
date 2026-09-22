@@ -24,7 +24,7 @@ jiff.workspace = true
 loam = "0.7"
 log.workspace = true
 ntcip.workspace = true
-percent-encoding = "2"
+percent-encoding.workspace = true
 pointy = "0.9"
 rand = "0.10.1"
 rendzina = { path = "../rendzina" }
