@@ -25,12 +25,12 @@ use crate::start;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use resources::Res;
-use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
     HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
-    ScrollLogicalPosition, TransitionEvent,
+    ScrollLogicalPosition, ToggleEvent, TransitionEvent,
 };
 
 /// Add event listeners
@@ -110,7 +110,7 @@ pub fn add_click_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             if target.is_instance_of::<HtmlButtonElement>() {
-                handle_click_button(target.id());
+                handle_click_button(target.id(), target.get_attribute("class"));
             } else if let Ok(Some(cc)) = target.closest(".card-compact") {
                 handle_click_card(&cc);
             }
@@ -125,8 +125,55 @@ pub fn add_click_listener(el: &Element) -> Result<()> {
     Ok(())
 }
 
+fn clear_card_layout(el: &HtmlElement) -> Result<()> {
+    el.class_list().remove(
+        &["max", "fit", "docked"]
+            .iter()
+            .map(|&s| JsValue::from_str(s))
+            .collect(),
+    )?;
+    Ok(())
+}
+
+fn set_card_layout(id: &str) -> Result<()> {
+    if let Some((mode, id)) = id.split_once("_")
+        && let Some(card) = Doc::get().opt_elem::<HtmlElement>(id)
+    {
+        clear_card_layout(&card)?;
+        if mode != "fit" {
+            card.remove_attribute("style")?;
+        } else {
+            card.style().remove_property("width")?;
+            card.style().remove_property("height")?;
+            if card
+                .style()
+                .get_property_value("top")
+                .unwrap_or("".to_owned())
+                .is_empty()
+            {
+                card.style().set_property("top", "8%")?;
+            }
+            if card
+                .style()
+                .get_property_value("left")
+                .unwrap_or("".to_owned())
+                .is_empty()
+            {
+                card.style().set_property("left", "62%")?;
+            }
+        }
+        match mode {
+            "maximize" => card.class_list().add_1("max")?,
+            "fit" => card.class_list().add_1("fit")?,
+            "dock" => card.class_list().add_1("docked")?,
+            _ => (),
+        }
+    }
+    Ok(())
+}
+
 /// Handle a `click` event with a button target
-fn handle_click_button(id: String) {
+fn handle_click_button(id: String, cname: Option<String>) {
     match id.as_str() {
         eid::LOGIN => spawn_future(start::handle_login()),
         eid::LOGOUT => spawn_future(start::handle_logout()),
@@ -137,9 +184,16 @@ fn handle_click_button(id: String) {
         "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up" | "ptz-tilt-down"
         | "ptz-zoom-in" | "ptz-zoom-out" | "focus-near" | "focus-far"
         | "iris-open" | "iris-close" => (),
+        id if matches!(
+            id.split_once("_"),
+            Some(("maximize", _)) | Some(("fit", _)) | Some(("dock", _))
+        ) =>
+        {
+            let _ = set_card_layout(id);
+        }
         _ => {
             if let Some(cv) = app::expanded_view() {
-                spawn_future(handle_button_card(cv, id));
+                spawn_future(handle_button_card(cv, id, cname));
             }
         }
     }
@@ -172,16 +226,23 @@ async fn show_create_card() -> Result<()> {
 }
 
 /// Handle button click event on an expanded card
-async fn handle_button_card(cv: CardView, id: String) -> Result<()> {
+async fn handle_button_card(
+    cv: CardView,
+    id: String,
+    cname: Option<String>,
+) -> Result<()> {
     if eid::DELETE == id {
         if app::delete_enabled() {
             cv.handle_delete().await?;
             let query = QueryParam::current_entry().with_sel("");
             set_query(query).await?;
         }
-    } else if let Some(v) = cv.handle_click(&id).await?
+    } else if (!cname.as_deref().unwrap_or("").contains("long-press")
+        || app::click_enabled())
+        && let Some(v) = cv.handle_click(&id).await?
         && !v.is_expanded()
     {
+        app::set_click_enabled(false);
         let query = QueryParam::current_entry().with_sel("");
         set_query(query).await?;
     }
@@ -394,6 +455,13 @@ fn handle_transition(ev: Event) {
         // delete slider is a "left" property transition
         if target.id() == eid::DELETE && ev.property_name() == "left" {
             app::set_delete_enabled(&ev.type_() == "transitionend");
+        } else if target
+            .get_attribute("class")
+            .unwrap_or("".to_owned())
+            .contains("long-press")
+            && ev.property_name() == "left"
+        {
+            app::set_click_enabled(&ev.type_() == "transitionend");
         }
     }
 }
@@ -642,6 +710,17 @@ async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
     Ok(())
 }
 
+/// Insert a card placeholder before an element
+fn prepend_placeholder(el: &HtmlElement, id: &str) {
+    if let Ok(placeholder) = Doc::get().0.create_element("li")
+        && let Ok(placeholder) = placeholder.dyn_into::<HtmlElement>()
+    {
+        placeholder.set_id(&format!("{}_placeholder", id));
+        placeholder.set_class_name("placeholder card-compact");
+        let _ = el.before_with_node_1(&placeholder);
+    }
+}
+
 /// Replace a card with provided HTML
 fn replace_card_html(cv: &CardView, html: &str) {
     let Some(el) = Doc::get().opt_elem::<HtmlElement>(cv.id()) else {
@@ -655,6 +734,40 @@ fn replace_card_html(cv: &CardView, html: &str) {
         opt.set_behavior(ScrollBehavior::Instant);
         opt.set_block(ScrollLogicalPosition::Nearest);
         el.scroll_into_view_with_scroll_into_view_options(&opt);
+
+        prepend_placeholder(&el, cv.id());
+
+        let _ = el.set_popover(Some("auto"));
+        let _ = el.show_popover();
+
+        // Docked layout by default
+        let _ = set_card_layout(&format!("dock_{}", cv.id()));
+
+        let c: Closure<dyn Fn(_)> = Closure::new(|e: ToggleEvent| {
+            if let Some(Ok(target)) =
+                e.target().map(|e| e.dyn_into::<Element>())
+                && let Some(nm) = target.get_attribute("data-name")
+            {
+                if e.new_state() == "closed" {
+                    let _ = target.remove_attribute("style");
+                    let query = QueryParam::current_entry().with_sel("");
+                    spawn_future(set_query(query));
+                } else if e.new_state() == "open" {
+                    let query = QueryParam::current_entry().with_sel(&nm);
+                    spawn_future(set_query(query));
+                }
+            }
+        });
+        el.set_ontoggle(Some(c.as_ref().unchecked_ref()));
+        c.forget();
+    } else {
+        // Must remove attribute to position compact card again
+        let _ = el.remove_attribute("popover");
+        if let Some(el) = Doc::get()
+            .opt_elem::<HtmlElement>(&format!("{}_placeholder", cv.id()))
+        {
+            el.remove();
+        }
     }
 }
 

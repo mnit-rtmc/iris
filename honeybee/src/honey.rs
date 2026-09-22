@@ -934,8 +934,9 @@ fn route_mjpeg(honey: Honey) -> Router {
         session: Session,
         State(honey): State<Honey>,
         AxumPath((type_n, obj_n)): AxumPath<(String, String)>,
+        params: Query<HashMap<String, String>>,
     ) -> impl IntoResponse {
-        log::info!("GET mjpeg/{type_n}/{obj_n}");
+        log::info!("GET mjpeg/{type_n}/{obj_n} {params:?}");
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
         if nm.res_type != Res::Camera {
             // Only allow direct routing for cameras
@@ -962,7 +963,7 @@ fn route_mjpeg(honey: Honey) -> Router {
                     .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?
             }
             Err(e) => {
-                log::debug!("Error getting camera URIs from session: {e}");
+                log::warn!("Error getting camera URIs from session: {e}");
                 session
                     .insert(CAMERA_URI_KEY, camera_uris)
                     .await
@@ -975,8 +976,13 @@ fn route_mjpeg(honey: Honey) -> Router {
             }
         };
 
+        let stream_name = if let Some(stream) = params.get("stream") {
+            stream
+        } else {
+            "0"
+        };
         // If there is a URI already, use it, otherwise fetch from DB
-        let uri_str = if let Some(u) = camera_uris.get(&obj_n) {
+        let base_uri = if let Some(u) = camera_uris.get(&obj_n) {
             u
         } else {
             let cam_str =
@@ -986,18 +992,17 @@ fn route_mjpeg(honey: Honey) -> Router {
             let uri = camera["enc_address"]
                 .as_str()
                 .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
-
             // Update session store with URI to avoid extra queries
-            let uri_str = format!("http://{}/jpegpull/0", uri);
-            camera_uris.insert(obj_n.clone(), uri_str);
+            camera_uris.insert(obj_n.clone(), uri.to_owned());
             match session.insert(CAMERA_URI_KEY, camera_uris.clone()).await {
                 Ok(_) => (),
-                Err(e) => log::debug!("Error inserting camera URI map: {e}"),
+                Err(e) => log::warn!("Error inserting camera URI map: {e}"),
             }
             camera_uris
                 .get(&obj_n)
                 .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?
         };
+        let uri_str = format!("http://{}/jpegpull/{}", base_uri, stream_name);
 
         let uri =
             Uri::try_from(uri_str).map_err(|_| StatusCode::BAD_REQUEST)?;
@@ -1039,15 +1044,10 @@ fn route_direct(honey: Honey) -> Router {
         let ck_nm = check_name(&type_n, &obj_n, &params.0)?;
         let obj_n = nm.object_n().ok_or(Error::InvalidValue)?;
         let cred = Credentials::load(&session).await?;
-        // At least Operate access needed
-        let access = honey
+        // Not updating DB so no need for attrs check; only Operate needed
+        honey
             .name_access(cred.user(), &ck_nm, Access::Operate)
             .await?;
-        for key in attrs.keys() {
-            let attr = &key[..];
-            let required = Access::required_patch(ck_nm.res_type, attr);
-            access.check(required)?;
-        }
 
         // TODO: store connection in State? (or Session?)
         if let (Some(Value::Array(ptz_val)), Some(Value::String(uri))) =

@@ -70,3 +70,5 @@ inherits = "web"
 opt-level = 1
 lto = "off"
 codegen-units = 16
+strip = "none"
+debug = true

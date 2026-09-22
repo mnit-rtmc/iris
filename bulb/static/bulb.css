@@ -377,15 +377,18 @@ label:has(+ #sb-resource) {
 }
 
 /* Delete button sliding "confirmation" animation */
-#ob_delete {
+#ob_delete,
+.long-press {
   position: relative; /* add position context for ::before pseudo-element */
   z-index: 1;
   overflow: hidden;
 }
-#ob_delete:active {
+#ob_delete:active,
+.long-press:active {
   background: none; /* clear background to make slider visible */
 }
-#ob_delete::before {
+#ob_delete::before,
+.long-press::before {
   position: absolute;
   z-index: -1;
   width: 100%;
@@ -395,10 +398,12 @@ label:has(+ #sb-resource) {
   content: "";
   background-color: #5bd;
 }
-#ob_delete:active::before {
+#ob_delete:active::before,
+.long-press:active::before {
   transition: left 1s;
   left: 0;
 }
+
 
 #sb-toast {
   visibility: hidden;
@@ -551,26 +556,59 @@ label:has(+ #sb-resource) {
   background-color: #eee;
   border-radius: 0.1rem;
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.2);
+  min-height: 2rem;
 }
 .card-compact:hover {
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.5);
   background-color: #ccc;
 }
 .card-expanded {
-  flex: 0 1 100%;
-  display: flex;
-  flex-direction: column;
+  position: fixed;
   background-color: #eee;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: scroll;
+  resize: both;
+
   padding: 0.1rem 0.2rem;
   margin: 0.1rem;
-  border-radius: 0.1rem;
+
+  border: 0.1rem solid black;
+  border-radius: 0.2rem;
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.2);
+}
+.card-expanded.fit {
+  height: fit-content;
+  width: fit-content;
+}
+.card-expanded.max {
+  top: 5%;
+  min-height: 90%;
+  left: 25%;
+  width: 50%;
+  box-shadow: rgba(0, 0, 0, 0.6) 0px 0px 0px 10000px;
+}
+.card-expanded.docked {
+  top: 8%;
+  height: fit-content;
+  left: 62%;
+  width: 37%;
+}
+
+.drag-handle {
+  width: 100%;
+  padding: .1rem;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='50%'>░</text></svg>");
+  background-size: .9em;
+  cursor: grab;
+}
+.drag-handle:active {
+  cursor: grabbing;
 }
 .title {
   font-weight: bold;
   font-size: smaller;
   color: #404;
+  text-wrap: nowrap;
 }
 .subtitle {
   font-weight: bold;
@@ -792,11 +830,11 @@ label:has(+ #sb-resource) {
 /* -------
  * Cameras
  * ------- */
-.video_player, .mjpeg_player {
+.video_player {
   margin-left: auto;
   margin-right: auto;
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
   opacity: 100%;
   transition: max-height .5s, opacity .5s;
 
@@ -810,7 +848,10 @@ label:has(+ #sb-resource) {
 @starting-style {
   .video_player {
     opacity: 0%;
-    max-height: 0px;
+    max-height: 0%;
+  }
+  .card-expanded {
+    max-height: 0%;
   }
 }
 
@@ -845,6 +886,14 @@ label:has(+ #sb-resource) {
 }
 #preset-mode-toggle.active {
   box-shadow: inset 0 0 1em #448;
+}
+
+li.placeholder {
+  box-shadow:
+    inset 0 0 1em #448,
+    inset 0px 0px 0px 10000px rgba(0, 0, 0, 0.2),
+    0px 0px 0px 10000px rgba(0, 0, 0, 0.6);
+  position: relative;
 }
 
 #ptz-controls #ptz-joystick {

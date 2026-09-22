@@ -12,13 +12,14 @@
 //
 use crate::attr::Attr;
 use crate::error::{Error, Result};
+use js_sys::Promise;
 use serde_json::{Number, Value};
 use std::fmt;
 use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::{
     Document, Element, HtmlElement, HtmlInputElement, HtmlSelectElement,
-    HtmlTextAreaElement, Window,
+    HtmlTextAreaElement, MouseEvent, Window,
 };
 
 /// Check for items containing a search string (lower case)
@@ -153,6 +154,22 @@ pub fn window() -> Result<Window> {
     web_sys::window()
         .ok_or(Error::NoWindow())
         .inspect_err(|e| log::error!("window: {e:?}"))
+}
+
+/// Async sleep for ms milliseconds
+pub async fn sleep(ms: i32) {
+    if let Err(e) = Promise::new(&mut |res, _r| {
+        if let Ok(window) = window()
+            && let Err(e) = window
+                .set_timeout_with_callback_and_timeout_and_arguments_0(&res, ms)
+        {
+            log::error!("Couldn't set timeout: {e:?}");
+        }
+    })
+    .await
+    {
+        log::error!("Couldn't await sleep promise: {e:?}");
+    }
 }
 
 /// Wrapper for web_sys Document
@@ -511,4 +528,13 @@ pub fn hide_elem(id: &str) {
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(id) {
         el.set_class_name("hidden");
     }
+}
+
+/// Get mouse event coordinates relative to element, not event target
+pub fn relative_coords(target: &Element, me: &MouseEvent) -> (i32, i32) {
+    let bounds = target.get_bounding_client_rect();
+    (
+        me.client_x() - bounds.left() as i32,
+        me.client_y() - bounds.top() as i32,
+    )
 }
