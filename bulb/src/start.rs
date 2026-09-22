@@ -67,6 +67,7 @@ fn add_listeners() -> Result<()> {
     sidebar::add_listeners()?;
     let doc = Doc::new()?;
     let body = doc.body()?;
+    add_card_drag_listener(&doc)?;
     add_mouse_listener(&body)?;
     add_joystick_listener(&body)?;
     add_gamepad_listener()?;
@@ -181,6 +182,85 @@ fn add_mouse_listener(el: &Element) -> Result<()> {
     Ok(())
 }
 
+/// Add a card drag listener to an element
+fn add_card_drag_listener(doc: &Doc) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Ok(me) = e.dyn_into::<MouseEvent>()
+            && let Ok(tp) = MouseEventTp::try_from(&me)
+            && (tp == MouseEventTp::Up || me.buttons() & 1 == 1)
+        {
+            if let Some(Ok(target)) =
+                me.target().map(|e| e.dyn_into::<Element>())
+                && target.get_attribute("class").as_deref()
+                    == Some("drag-handle")
+                && let Some(Ok(card)) =
+                    target.parent_element().map(|e| e.dyn_into::<HtmlElement>())
+                && let Some(Ok(card)) =
+                    card.parent_element().map(|e| e.dyn_into::<HtmlElement>())
+            {
+                me.prevent_default();
+                handle_drag_ev(card, tp, &me);
+            } else {
+                if let Ok(Some(el)) =
+                    Doc::get().0.query_selector("li[data-dragging]")
+                    && let Ok(el) = el.dyn_into::<HtmlElement>()
+                {
+                    me.prevent_default();
+                    if tp == MouseEventTp::Down {
+                        // Down on different element, so release current
+                        handle_drag_ev(el, MouseEventTp::Up, &me);
+                    } else {
+                        handle_drag_ev(el, tp, &me);
+                    }
+                }
+            }
+        }
+    });
+    doc.0.add_event_listener_with_callback(
+        "mousedown",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    doc.0.add_event_listener_with_callback(
+        "mousemove",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    doc.0.add_event_listener_with_callback(
+        "mouseup",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
+}
+
+/// Handle a drag event to reposition an element
+fn handle_drag_ev(drag_target: HtmlElement, tp: MouseEventTp, ev: &MouseEvent) {
+    match tp {
+        MouseEventTp::Down => {
+            let (x, y) = util::relative_coords(&drag_target, ev);
+            let _ = drag_target
+                .set_attribute("data-dragging", &format!("{},{}", x, y));
+        }
+        MouseEventTp::Move => {
+            // Move the element
+            if let Some(d) = drag_target.get_attribute("data-dragging")
+                && let Some((x, y)) = d.split_once(",")
+                && let Ok(x) = x.parse::<i32>()
+                && let Ok(y) = y.parse::<i32>()
+            {
+                let _ = drag_target
+                    .style()
+                    .set_property("top", &format!("{}px", ev.client_y() - y));
+                let _ = drag_target
+                    .style()
+                    .set_property("left", &format!("{}px", ev.client_x() - x));
+            }
+        }
+        MouseEventTp::Up => {
+            let _ = drag_target.remove_attribute("data-dragging");
+        }
+    };
+}
+
 /// Handle a mouse event
 fn handle_mouse_ev(target: &Element, tp: MouseEventTp, button: i16) {
     if MouseEventTp::Down == tp {
@@ -203,7 +283,8 @@ async fn handle_mouse_card(id: String, tp: MouseEventTp) -> Result<()> {
 fn add_joystick_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
-            && mouse_event.button() == 0
+            && let Ok(tp) = MouseEventTp::try_from(&mouse_event)
+            && (tp == MouseEventTp::Up || mouse_event.buttons() & 1 == 1)
             && let Some(Ok(target)) =
                 mouse_event.target().map(|e| e.dyn_into::<Element>())
         {

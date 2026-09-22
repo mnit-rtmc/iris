@@ -62,6 +62,8 @@ struct AppState {
     tick: i32,
     /// Delete action enabled (slider transition finished)
     delete_enabled: bool,
+    /// Click action enabled (slider transition finished)
+    click_enabled: bool,
     /// Active joystick interval IDs
     joystick_intervals: HashMap<u32, i32>,
     /// Active stream interval IDs
@@ -154,6 +156,7 @@ pub fn set_expanded_view(view: Option<CardView>) {
             .deferred
             .retain(|(_, a)| *a != DeferredAction::RefreshList);
         state.delete_enabled = false;
+        state.click_enabled = false;
     })
 }
 
@@ -220,6 +223,16 @@ pub fn set_delete_enabled(enabled: bool) {
 /// Get delete enabled from global app state
 pub fn delete_enabled() -> bool {
     STATE.with(|rc| rc.borrow().delete_enabled)
+}
+
+/// Set click enabled/disabled in global app state
+pub fn set_click_enabled(enabled: bool) {
+    STATE.with(|rc| rc.borrow_mut().click_enabled = enabled)
+}
+
+/// Get click enabled from global app state
+pub fn click_enabled() -> bool {
+    STATE.with(|rc| rc.borrow().click_enabled)
 }
 
 /// Add a joystick interval ID

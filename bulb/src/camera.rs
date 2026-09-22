@@ -10,12 +10,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::app;
 use crate::asset::Asset;
 use crate::attr::Attr;
-use crate::card::{
-    AncillaryData, Card, footer_html, uri_one, uri_one_direct, uri_one_mjpeg,
-};
+use crate::card::{AncillaryData, Card, footer_html, uri_one, uri_one_direct};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
 use crate::encodertype::EncoderType;
@@ -26,13 +23,13 @@ use crate::helper::spawn_future;
 use crate::item::{ItemState, ItemStates};
 use crate::joystick;
 use crate::map;
-use crate::mjpeg;
 use crate::permission::{AccessLevel, Permission};
 use crate::start::MouseEventTp;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
 use crate::view::View;
+use crate::{app, video};
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
@@ -392,7 +389,7 @@ impl Camera {
     }
 
     /// Add lens controls to tree
-    fn to_html_lens_controls(
+    fn to_html_misc_controls(
         &self,
         _anc: &CameraAnc,
         parent_row: &mut html::Div,
@@ -455,6 +452,16 @@ impl Camera {
             .id("camera-wiper")
             .r#type("button")
             .cdata("Send");
+        row.close();
+
+        row = div.div();
+        row.class("row");
+        row.span().cdata("Reset/Reboot").close();
+        row.button()
+            .id("rq_reset")
+            .class("long-press")
+            .r#type("button")
+            .cdata("Reboot");
         div.close();
     }
 
@@ -521,15 +528,36 @@ impl Camera {
         if access_level >= AccessLevel::View {
             let mut div = tree.root::<html::Div>();
             div.class("row");
-            div.img().class("mjpeg_player").id("mjpeg_player").close();
-            div.video().class("video_player").id("video_player").close();
+            div.img()
+                .class("video_player")
+                .id(format!("video_player_{}", self.name))
+                .close();
+            div.close();
+
+            div = tree.root::<html::Div>();
+            div.class("row");
+            div.input().id("video_baseurl").r#type("text");
+
+            let mut proto = div.select();
+            proto.id("video_protocol");
+            proto.option().value("none").close();
+            proto
+                .option()
+                .value("mjpeg")
+                .selected()
+                .cdata("MJPEG")
+                .close();
+            proto.option().value("hls").cdata("HLS").close();
+            proto.close();
+
+            div.button().id("video_update").cdata("Update Stream");
             div.close();
         }
         if access_level >= AccessLevel::Operate {
             let mut div = tree.root::<html::Div>();
             div.class("row");
             self.to_html_ptz_controls(anc, &mut div);
-            self.to_html_lens_controls(anc, &mut div);
+            self.to_html_misc_controls(anc, &mut div);
             self.to_html_ptz_presets(anc, &mut div);
             div.close();
         }
@@ -596,11 +624,10 @@ impl Camera {
 
     /// Start MJPEG stream
     fn start_mjpeg(&self) {
-        let uri = uri_one_mjpeg(Res::Camera, &self.name);
-        let uri = uri.as_str();
-        if let Err(e) = mjpeg::start_stream(uri.to_owned(), 30) {
-            log::warn!("start_mjpeg failed: {e:?}");
+        if let Err(e) = video::add_update_listener(self.name.to_owned()) {
+            log::warn!("Failed to add listener for video update button: {e:?}");
         }
+        spawn_future(video::start_stream(self.name.to_owned(), "mjpeg"));
     }
 
     /// Switch the selected monitor to this camera
@@ -615,17 +642,6 @@ impl Camera {
             actions.push(Action::Patch(uri, attr.into()));
         }
         actions
-    }
-
-    /// Convert to Request HTML
-    fn to_html_request(&self, _anc: &CameraAnc) -> String {
-        let mut tree = Tree::new();
-        self.title(View::Request, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("row");
-        div.span().cdata("Reset/Reboot").close();
-        div.button().id("rq_reset").r#type("button").cdata("Reboot");
-        String::from(tree)
     }
 
     /// Convert to Setup HTML
@@ -810,7 +826,6 @@ impl Card for Camera {
         match view {
             View::Create => self.to_html_create(20),
             View::Control => self.to_html_control(anc),
-            View::Request => self.to_html_request(anc),
             View::Setup(edit) => self.to_html_setup(anc, edit),
             View::Location(edit) => anc.loc.to_html_loc(self, edit),
             _ => self.to_html_compact(anc),
