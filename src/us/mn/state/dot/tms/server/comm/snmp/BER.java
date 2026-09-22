@@ -1,6 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2023  Minnesota Department of Transportation
+ * Copyright (C) 2023  		Iteris Inc.
+ * Copyright (C) 2026  		Alaska DOT&PF
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +26,8 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * Basic Encoding Rules for ASN.1
  *
  * @author Douglas Lau
+ * @author Michael Darter
+ * @author Darren Jaeckel, Wostmann & Associates
  */
 abstract public class BER extends ASN1 {
 
@@ -137,20 +141,52 @@ abstract public class BER extends ASN1 {
 
 	/** Encode an object identifier */
 	protected void encodeObjectIdentifier(int[] oid) throws IOException {
-		ByteArrayOutputStream bs = new ByteArrayOutputStream();
-		bs.write(oid[0] * 40 + oid[1]);
-		for (int i = 2; i < oid.length; i++) {
-			int subid = oid[i];
-			if (subid > SEVEN_BITS) {
-				bs.write(HIGH_BIT | (subid >> 7));
-				subid &= SEVEN_BITS;
-			}
-			bs.write(subid);
-		}
-		byte[] buffer = bs.toByteArray();
+		byte[] buffer = encodeOid(oid);
 		encodeIdentifier(ASN1Tag.OBJECT_IDENTIFIER);
 		encodeLength(buffer.length);
 		encoder.write(buffer);
+	}
+
+	/** Encode an object identifier and return as byte array */
+	static protected byte[] encodeOid(int[] oid) {
+		ByteArrayOutputStream bs = new ByteArrayOutputStream();
+		bs.write(oid[0] * 40 + oid[1]);
+		for (int i = 2; i < oid.length; i++)
+			encodeSubId(bs, oid[i]);
+		return bs.toByteArray();
+	}
+
+	/** Encode a sub id, handling large values */
+	static protected void encodeSubId(ByteArrayOutputStream os, int isid)
+	{
+		long subid = (isid & 0xFFFFFFFFL);
+		if (subid < 127) {
+			os.write((int)subid & 0xFF);
+			return;
+		}
+
+		// testmask must be of an unsigned type
+		long mask = 0x7F; // handle subid == 0 case
+		long bits = 0;
+		for (long testmask=0x7F, testbits = 0;
+			 testmask!=0; testmask<<=7, testbits += 7)
+		{
+			// if any bits set
+			if ((subid & testmask) > 0) {
+				mask = testmask;
+				bits = testbits;
+			}
+		}
+
+		// mask can not be zero
+		for (; mask != 0x7F; mask >>= 7, bits -= 7) {
+			// fix a mask that got truncated above
+			if (mask == 0x1E00000)
+				mask = 0xFE00000;
+			int iw = (int)(((subid & mask) >> bits) | (byte)0x80);
+			os.write(iw);
+		}
+		os.write((int)(subid & mask));
 	}
 
 	/** Encode a sequence (or sequence-of) */
