@@ -406,7 +406,6 @@ fn res_states_css(res: Res, card_states: &[CardState]) -> String {
             css.push_str(&Rule::new(sel, prop).to_string());
         }
     }
-    // FIXME: add wayfinding
     if let Some(rule) =
         purpose_style_css(res, card_states, DedicatedPurpose::Tolling)
     {
@@ -414,6 +413,11 @@ fn res_states_css(res: Res, card_states: &[CardState]) -> String {
     }
     if let Some(rule) =
         purpose_style_css(res, card_states, DedicatedPurpose::Parking)
+    {
+        css.push_str(&rule.to_string());
+    }
+    if let Some(rule) =
+        purpose_style_css(res, card_states, DedicatedPurpose::Wayfinding)
     {
         css.push_str(&rule.to_string());
     }

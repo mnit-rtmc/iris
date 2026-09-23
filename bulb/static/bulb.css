@@ -192,6 +192,11 @@ menu li {
   fill: #224;
   stroke: none;
 }
+.wayfinding {
+  display: var(--wayfinding-display);
+  fill: #222;
+  stroke: none;
+}
 
 /* Checkbox toggle buttons:
  *
@@ -233,6 +238,7 @@ menu li {
   cursor: pointer;
   --tolling-display: none;
   --parking-display: none;
+  --wayfinding-display: none;
 }
 
 #layer-zoom {
