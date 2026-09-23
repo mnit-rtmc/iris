@@ -712,6 +712,12 @@ async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
 
 /// Insert a card placeholder before an element
 fn prepend_placeholder(el: &HtmlElement, id: &str) {
+    if Doc::get()
+        .opt_elem::<Element>(&format!("{}_placeholder", id))
+        .is_some()
+    {
+        return;
+    }
     if let Ok(placeholder) = Doc::get().0.create_element("li")
         && let Ok(placeholder) = placeholder.dyn_into::<HtmlElement>()
     {

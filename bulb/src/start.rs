@@ -246,6 +246,9 @@ fn handle_drag_ev(drag_target: HtmlElement, tp: MouseEventTp, ev: &MouseEvent) {
                 && let Some((x, y)) = d.split_once(",")
                 && let Ok(x) = x.parse::<i32>()
                 && let Ok(y) = y.parse::<i32>()
+                && let Some(doc) = Doc::get().doc_elem()
+                && (0..doc.client_width()).contains(&ev.client_x())
+                && (0..doc.client_height()).contains(&ev.client_y())
             {
                 let _ = drag_target
                     .style()

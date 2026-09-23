@@ -575,8 +575,12 @@ label:has(+ #sb-resource) {
   background-color: #ccc;
 }
 .card-expanded {
+  display: flex;
+  flex-direction: column;
+
   position: fixed;
-  background-color: #eee;
+  max-height: 95%;
+  max-width: 95%;
   overflow-x: clip;
   overflow-y: scroll;
   resize: both;
@@ -584,30 +588,74 @@ label:has(+ #sb-resource) {
   padding: 0.1rem 0.2rem;
   margin: 0.1rem;
 
+  background-color: #eee;
   border: 0.1rem solid black;
   border-radius: 0.2rem;
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.2);
 }
 .card-expanded.fit {
-  height: fit-content;
   width: fit-content;
+  height: fit-content;
+  max-height: 90%;
 }
 .card-expanded.max {
   top: 5%;
-  min-height: 90%;
+  height: 90%;
   left: 25%;
   width: 50%;
   box-shadow: rgba(0, 0, 0, 0.6) 0px 0px 0px 10000px;
 }
 .card-expanded.docked {
-  top: 8%;
-  height: fit-content;
   left: 62%;
   width: 37%;
+  top: 8%;
+  height: fit-content;
+  max-height: 90%;
+}
+.card-expanded[style*="width"] {
+  max-width: unset;
+}
+.card-expanded[style*="height"] {
+  max-height: unset;
+}
+
+.card-expanded > .title.row {
+  position: sticky;
+  top: 0;
+  left: 0;
+
+  background-color: #eee;
+  box-shadow: 0rem -1rem 0.2rem 1.2rem #bbb;
+  margin-bottom: .5rem;
+  padding-top: .2rem;
+}
+
+.card-expanded > .row:has(#ob_save),
+.card-expanded > .row:has(#ob_delete),
+.card-expanded > .row:has(#ob_geoloc) {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+
+  background-color: #eee;
+  box-shadow: 0rem 1rem 0.2rem 1.2rem #bbb;
+  margin-top: auto;
+  padding-bottom: .2rem;
+}
+
+.card-expanded > .title.row,
+.card-expanded > .row:has(#ob_save),
+.card-expanded > .row:has(#ob_delete),
+.card-expanded > .row:has(#ob_geoloc) {
+  margin-left: -.2rem;
+  margin-right: -.2rem;
+  padding-left: .2rem;
+  padding-right: .2rem;
 }
 
 .drag-handle {
   width: 100%;
+  min-width: 1rem;
   padding: .1rem;
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='50%'>░</text></svg>");
   background-size: .9em;
@@ -904,7 +952,8 @@ li.placeholder {
   box-shadow:
     inset 0 0 1em #448,
     inset 0px 0px 0px 10000px rgba(0, 0, 0, 0.2),
-    0px 0px 0px 10000px rgba(0, 0, 0, 0.6);
+    0px 0px 0px 10000px rgba(0, 0, 0, 0.6)
+    !important;
   position: relative;
 }
 
