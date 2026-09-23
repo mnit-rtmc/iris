@@ -42,6 +42,7 @@ use crate::msgline::MsgLine;
 use crate::msgpattern::MsgPattern;
 use crate::permission::{AccessLevel, Permission};
 use crate::planphase::PlanPhase;
+use crate::purpose::DedicatedPurpose;
 use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;
@@ -75,6 +76,8 @@ pub struct CardState {
     pub name: String,
     /// Item state
     pub state: ItemState,
+    /// Dedicated purpose
+    pub purpose: Option<DedicatedPurpose>,
 }
 
 /// Search term
@@ -180,6 +183,11 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Get the main item state
     fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
         ItemState::Unknown
+    }
+
+    /// Get dedicated purpose (if any)
+    fn purpose(&self) -> Option<DedicatedPurpose> {
+        None
     }
 
     /// Check if a search string matches
@@ -530,6 +538,7 @@ impl CardList {
                 res,
                 name: pri.name().to_string(),
                 state: pri.item_state_main(&anc),
+                purpose: pri.purpose(),
             });
         }
         Ok(states)

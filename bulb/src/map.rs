@@ -18,6 +18,7 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::permission::Permission;
+use crate::purpose::DedicatedPurpose;
 use crate::query::QueryParam;
 use crate::sidebar;
 use crate::util::Doc;
@@ -388,7 +389,7 @@ async fn layer_style_css(
 /// Build resource style CSS from card item states
 fn res_states_css(res: Res, card_states: &[CardState]) -> String {
     let states_all = card::item_states_all(res);
-    let mut css = String::with_capacity(32 * card_states.len());
+    let mut css = String::new();
     for st in states_all {
         let mut sel: Option<Sel> = None;
         for cs in card_states {
@@ -405,7 +406,31 @@ fn res_states_css(res: Res, card_states: &[CardState]) -> String {
             css.push_str(&Rule::new(sel, prop).to_string());
         }
     }
+    if let Some(rule) =
+        purpose_style_css(res, card_states, DedicatedPurpose::Tolling)
+    {
+        css.push_str(&rule.to_string());
+    }
     css
+}
+
+/// Build a CSS selector for all cards of a given dedicated purpose
+fn purpose_style_css(
+    res: Res,
+    card_states: &[CardState],
+    purpose: DedicatedPurpose,
+) -> Option<Rule> {
+    let mut sel: Option<Sel> = None;
+    for cs in card_states {
+        if Some(purpose) == cs.purpose {
+            let s = Sel::cls(format!("{res}-{}", cs.name));
+            sel = Some(match sel {
+                Some(sel) => sel.list(s),
+                None => s,
+            });
+        }
+    }
+    sel.map(|s| Rule::new(s, Prop::new().custom("tolling-display", "inline")))
 }
 
 /// Update map OSM style

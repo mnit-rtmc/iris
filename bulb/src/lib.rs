@@ -64,6 +64,7 @@ mod panic;
 mod permission;
 mod phaseaction;
 mod planphase;
+mod purpose;
 mod query;
 mod rampmeter;
 mod rend;

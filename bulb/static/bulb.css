@@ -182,6 +182,16 @@ menu li {
 .invalid {
   border-color: red;
 }
+@property --tolling-display {
+  syntax: "<display-box>";
+  inherits: true;
+  initial-value: none;
+}
+.tolling {
+  display: var(--tolling-display);
+  fill: #242;
+  stroke: none;
+}
 
 /* Checkbox toggle buttons:
  *
@@ -221,6 +231,7 @@ menu li {
   margin: 0;
   padding: 0;
   cursor: pointer;
+  --tolling-display: none;
 }
 
 #layer-zoom {

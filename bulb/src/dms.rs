@@ -26,6 +26,7 @@ use crate::msgline::MsgLine;
 use crate::msgpattern::{FontName, GraphicName, MsgPattern};
 use crate::notes::contains_hashtag;
 use crate::permission::{AccessLevel, Permission};
+use crate::purpose::DedicatedPurpose;
 use crate::rend::Renderer;
 use crate::rle::Table;
 use crate::signconfig::NtcipDms;
@@ -543,18 +544,6 @@ impl DmsAnc {
     }
 }
 
-/// All hashtags for dedicated purpose
-const DEDICATED: &[&str] = &[
-    "#LaneUse",
-    "#Parking",
-    "#Tolling",
-    "#TravelTime",
-    "#Wayfinding",
-    "#Safety",
-    "#Vsl",
-    "#Hidden",
-];
-
 impl Dms {
     /// Get multi of lock message
     fn lock_multi(&self) -> &str {
@@ -595,11 +584,6 @@ impl Dms {
         }
     }
 
-    /// Get one dedicated hashtag, if defined
-    fn dedicated(&self) -> Option<&'static str> {
-        DEDICATED.iter().find(|tag| self.has_hashtag(tag)).copied()
-    }
-
     /// Get faults, if any
     fn faults(&self) -> Option<&str> {
         if let Some(true) = self.has_faults {
@@ -622,8 +606,8 @@ impl Dms {
             if states.contains(ItemState::Available) {
                 states = anc.msg_states(self.msg_current.as_deref());
             }
-            if let Some(dedicated) = self.dedicated() {
-                states = states.with(ItemState::Dedicated, dedicated);
+            if let Some(purpose) = self.purpose() {
+                states = states.with(ItemState::Dedicated, purpose.hashtag());
             }
             if let Some(faults) = self.faults() {
                 states = states.with(ItemState::Fault, faults);
@@ -1282,6 +1266,11 @@ impl Card for Dms {
         } else {
             ItemState::Available
         }
+    }
+
+    /// Get a dedicated purpose from hashtag, if defined
+    fn purpose(&self) -> Option<DedicatedPurpose> {
+        DedicatedPurpose::iter().find(|p| self.has_hashtag(p.hashtag()))
     }
 
     /// Check if a search string matches
