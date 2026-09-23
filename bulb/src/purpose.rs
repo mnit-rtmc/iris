@@ -58,4 +58,19 @@ impl DedicatedPurpose {
             Hidden => "#Hidden",
         }
     }
+
+    /// Get CSS variable name
+    pub fn css_var(self) -> &'static str {
+        use DedicatedPurpose::*;
+        match self {
+            LaneUse => "lane-use-display",
+            Parking => "parking-display",
+            Tolling => "tolling-display",
+            TravelTime => "travel-time-display",
+            Wayfinding => "wayfinding-display",
+            Safety => "safety-display",
+            Vsl => "vsl-display",
+            Hidden => "hidden-display",
+        }
+    }
 }

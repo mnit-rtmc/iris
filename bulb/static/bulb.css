@@ -182,14 +182,14 @@ menu li {
 .invalid {
   border-color: red;
 }
-@property --tolling-display {
-  syntax: "<display-box>";
-  inherits: true;
-  initial-value: none;
-}
 .tolling {
   display: var(--tolling-display);
   fill: #242;
+  stroke: none;
+}
+.parking {
+  display: var(--parking-display);
+  fill: #224;
   stroke: none;
 }
 
@@ -232,6 +232,7 @@ menu li {
   padding: 0;
   cursor: pointer;
   --tolling-display: none;
+  --parking-display: none;
 }
 
 #layer-zoom {

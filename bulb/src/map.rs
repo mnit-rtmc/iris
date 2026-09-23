@@ -406,9 +406,14 @@ fn res_states_css(res: Res, card_states: &[CardState]) -> String {
             css.push_str(&Rule::new(sel, prop).to_string());
         }
     }
-    // FIXME: add wayfinding and parking markers
+    // FIXME: add wayfinding
     if let Some(rule) =
         purpose_style_css(res, card_states, DedicatedPurpose::Tolling)
+    {
+        css.push_str(&rule.to_string());
+    }
+    if let Some(rule) =
+        purpose_style_css(res, card_states, DedicatedPurpose::Parking)
     {
         css.push_str(&rule.to_string());
     }
@@ -431,7 +436,7 @@ fn purpose_style_css(
             });
         }
     }
-    sel.map(|s| Rule::new(s, Prop::new().custom("tolling-display", "inline")))
+    sel.map(|s| Rule::new(s, Prop::new().custom(purpose.css_var(), "inline")))
 }
 
 /// Update map OSM style
