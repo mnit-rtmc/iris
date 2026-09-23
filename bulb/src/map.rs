@@ -406,6 +406,7 @@ fn res_states_css(res: Res, card_states: &[CardState]) -> String {
             css.push_str(&Rule::new(sel, prop).to_string());
         }
     }
+    // FIXME: add wayfinding and parking markers
     if let Some(rule) =
         purpose_style_css(res, card_states, DedicatedPurpose::Tolling)
     {
