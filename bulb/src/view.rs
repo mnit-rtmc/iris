@@ -295,11 +295,7 @@ impl CardView {
         {
             el.set_class_name(self.view.class_name(false));
         }
-        if let View::SaveEv | View::Location(_) = view {
-            Ok(Some(self.view.compact()))
-        } else {
-            Ok(None)
-        }
+        Ok(None)
     }
 
     /// Handle mouse event for a card
