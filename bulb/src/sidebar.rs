@@ -765,6 +765,7 @@ fn replace_card_html(cv: &CardView, html: &str) {
             }
         });
         el.set_ontoggle(Some(c.as_ref().unchecked_ref()));
+        // FIXME: memory leak
         c.forget();
     } else {
         // Must remove attribute to position compact card again

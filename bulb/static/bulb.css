@@ -574,7 +574,6 @@ label:has(+ #sb-resource) {
   background-color: #eee;
   border-radius: 0.1rem;
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.2);
-  min-height: 2rem;
 }
 .card-compact:hover {
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.5);
