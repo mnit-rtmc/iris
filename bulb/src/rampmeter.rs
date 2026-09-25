@@ -580,19 +580,19 @@ impl RampMeter {
 
     /// Build queue HTML
     fn queue_html<'p>(&self, span: &'p mut html::Span<'p>) {
-        let value = self.status.as_ref().and_then(|s| {
-            s.queue.as_ref().and_then(|q| match q.as_str() {
-                "empty" => Some(8),
-                "exists" => Some(50),
-                "full" => Some(100),
-                _ => None,
-            })
-        });
-        if value.is_none() {
-            span.class("hidden");
-        }
         span.cdata("🚗 queue ");
-        let value = value.unwrap_or(0);
+        let value = if let Some(s) = &self.status
+            && let Some(q) = &s.queue
+        {
+            match q.as_str() {
+                "empty" => 8,
+                "exists" => 50,
+                "full" => 100,
+                _ => 0, // invalid
+            }
+        } else {
+            0 // unknown
+        };
         span.meter()
             .min(0)
             .optimum(0)
