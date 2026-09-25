@@ -164,6 +164,11 @@ impl MsgLine {
         ItemState::Available.into()
     }
 
+    /// Get entered line number
+    fn line(&self) -> u16 {
+        Doc::get().input_parse("line").unwrap_or(0)
+    }
+
     /// Get entered MULTI string
     fn multi_string(&self) -> String {
         match Doc::get().opt_elem::<HtmlInputElement>("multi") {
@@ -203,13 +208,14 @@ impl MsgLine {
             && let Some(dms) = &anc.make_dms(cfg)
         {
             let n_lines = MessagePattern::new(dms, "").widths().count();
-            let line = if self.line > 1 && n_lines > 0 {
-                (usize::from(self.line) - 1) % n_lines
+            let line = self.line();
+            let gaps = if line > 1 && n_lines > 0 {
+                (usize::from(line) - 1) % n_lines
             } else {
                 0
             };
             let mut multi = self.multi();
-            for _ in 0..line {
+            for _ in 0..gaps {
                 multi.insert_str(0, "[nl]");
             }
             let mut rend =
@@ -399,7 +405,7 @@ impl Card for MsgLine {
 
     /// Handle input event for an element on the card
     fn handle_input(&self, anc: MsgLineAnc, id: &str) -> Vec<Action> {
-        if "ml_config" == id || "multi" == id {
+        if ["line", "multi", "ml_config"].contains(&id) {
             self.replace_preview(&anc);
         }
         Vec::new()
