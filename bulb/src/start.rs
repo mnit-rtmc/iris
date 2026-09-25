@@ -26,7 +26,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
     Element, Event, GamepadEvent, HtmlElement, HtmlInputElement, KeyboardEvent,
-    MouseEvent, NavigateEvent,
+    MouseEvent, NavigateEvent, ToggleEvent,
 };
 
 /// Mouse event type
@@ -72,6 +72,7 @@ fn add_listeners() -> Result<()> {
     add_joystick_listener(&body)?;
     add_gamepad_listener()?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
+    add_toggle_listener(&body)?;
     spawn_future(finish_init());
     Ok(())
 }
@@ -364,6 +365,31 @@ fn add_gamepad_listener() -> Result<()> {
         closure.as_ref().unchecked_ref(),
     )?;
     closure.forget();
+    Ok(())
+}
+
+/// Add a `toggle` event listener to an element
+fn add_toggle_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Ok(te) = e.dyn_into::<ToggleEvent>()
+            && let Some(Ok(target)) =
+                te.target().map(|el| el.dyn_into::<Element>())
+            && te.new_state() == "closed"
+        {
+            // Remove style so compact card isn't a different size
+            let _ = target.remove_attribute("style");
+            let query = QueryParam::current_entry().with_sel("");
+            spawn_future(sidebar::set_query(query));
+        }
+    });
+
+    el.add_event_listener_with_callback_and_bool(
+        "beforetoggle",
+        closure.as_ref().unchecked_ref(),
+        true,
+    )?;
+    closure.forget();
+
     Ok(())
 }
 

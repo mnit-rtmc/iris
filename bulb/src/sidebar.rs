@@ -30,7 +30,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
     HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
-    ScrollLogicalPosition, ToggleEvent, TransitionEvent,
+    ScrollLogicalPosition, TransitionEvent,
 };
 
 /// Add event listeners
@@ -748,25 +748,6 @@ fn replace_card_html(cv: &CardView, html: &str) {
 
         // Docked layout by default
         let _ = set_card_layout(&format!("dock_{}", cv.id()));
-
-        let c: Closure<dyn Fn(_)> = Closure::new(|e: ToggleEvent| {
-            if let Some(Ok(target)) =
-                e.target().map(|e| e.dyn_into::<Element>())
-                && let Some(nm) = target.get_attribute("data-name")
-            {
-                if e.new_state() == "closed" {
-                    let _ = target.remove_attribute("style");
-                    let query = QueryParam::current_entry().with_sel("");
-                    spawn_future(set_query(query));
-                } else if e.new_state() == "open" {
-                    let query = QueryParam::current_entry().with_sel(&nm);
-                    spawn_future(set_query(query));
-                }
-            }
-        });
-        el.set_ontoggle(Some(c.as_ref().unchecked_ref()));
-        // FIXME: memory leak
-        c.forget();
     } else {
         // Must remove attribute to position compact card again
         let _ = el.remove_attribute("popover");
