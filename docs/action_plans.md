@@ -95,7 +95,7 @@ has parameters which may include keywords for **Field**, **Mode** or
 (_e.g._ `occupancy` could be shortened to `occ`).
 
 <details>
-<summary>Hold Time</summary>
+<summary>⏳ Hold Time</summary>
 
 Condition triggers when the plan has been in `from_phase` for longer than the
 hold time.
@@ -107,7 +107,7 @@ hold time.
 </details>
 
 <details>
-<summary>Clock Time</summary>
+<summary>⏰ Clock Time</summary>
 
 Condition triggers at a specific time of day.
 
@@ -118,7 +118,7 @@ Condition triggers at a specific time of day.
 </details>
 
 <details>
-<summary>Date-Time</summary>
+<summary>🗓️ Date-Time</summary>
 
 Condition triggers at a specific date and time.
 
@@ -129,7 +129,7 @@ Condition triggers at a specific date and time.
 </details>
 
 <details>
-<summary>Traffic Threshold</summary>
+<summary>🚗 Traffic Threshold</summary>
 
 Condition triggers when a [detector] or [station] field goes above or below a
 threshold value.
@@ -143,7 +143,7 @@ threshold value.
 </details>
 
 <details>
-<summary>RWIS Threshold</summary>
+<summary>🌦️ RWIS Threshold</summary>
 
 Condition triggers when an [RWIS] field goes above or below a threshold value.
 
@@ -168,7 +168,7 @@ Condition triggers when an [RWIS] field goes above or below a threshold value.
 </details>
 
 <details>
-<summary>Alarm</summary>
+<summary>🔔 Alarm</summary>
 
 Condition triggers when an [alarm] is triggered or cleared.
 
