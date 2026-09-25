@@ -393,7 +393,7 @@ fn res_states_css(res: Res, card_states: &[CardState]) -> String {
     for st in states_all {
         let mut sel: Option<Sel> = None;
         for cs in card_states {
-            if cs.state == *st {
+            if cs.state == *st && cs.purpose != Some(DedicatedPurpose::Hidden) {
                 let s = Sel::cls(format!("{res}-{}", cs.name));
                 sel = Some(match sel {
                     Some(sel) => sel.list(s),

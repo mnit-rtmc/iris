@@ -28,7 +28,7 @@ pub enum DedicatedPurpose {
     Safety,
     /// Variable Speed Limit / Advisory
     Vsl,
-    /// Hidden (not shown in UI)
+    /// Hidden (not shown on map)
     Hidden,
 }
 

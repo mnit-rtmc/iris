@@ -121,19 +121,19 @@
   stroke-width: 0.2;
 }
 .wyrm-controller {
-  fill: #88bbff;
+  fill: #f0f1;
   stroke-width: 0.5;
 }
 .wyrm-tag_reader {
-  fill: #88bbff;
+  fill: #f0f1;
   stroke-width: 0.5;
 }
 .wyrm-weather_sensor {
-  fill: #88bbff;
+  fill: #f0f1;
   stroke-width: 0.5;
 }
 .wyrm-beacon {
-  fill: #4488ee;
+  fill: #f0f1;
   stroke-width: 0.5;
 }
 .wyrm-gate_arm {
@@ -141,19 +141,19 @@
   stroke-width: 0.5;
 }
 .wyrm-ramp_meter {
-  fill: #4488ee;
+  fill: #f0f1;
   stroke-width: 0.5;
 }
 .wyrm-camera {
-  fill: #88bbff;
+  fill: #f0f1;
   stroke-width: 0.5;
 }
 .wyrm-lcs {
-  fill: #4488ee;
+  fill: #f0f1;
   stroke-width: 0.5;
 }
 .wyrm-dms {
-  fill: #4488ee;
+  fill: #f0f1;
   stroke-width: 0.5;
 }
 .wyrm-incident {
