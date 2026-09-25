@@ -804,6 +804,15 @@ impl Card for RampMeter {
         ]
     }
 
+    /// Get additional marker name (if any)
+    fn marker(&self, anc: &RampMeterAnc) -> Option<&'static str> {
+        if !self.item_states(anc).contains(ItemState::Inactive) {
+            self.lock.as_ref().and(Some("locked-display"))
+        } else {
+            None
+        }
+    }
+
     /// Get the name
     fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)

@@ -97,7 +97,7 @@ fn build_query(me: &MapEvent) -> QueryParam {
     }
 }
 
-/// Set query parameters from a map marker click
+/// Set query parameters from a map icon click
 async fn set_query_map(query: QueryParam) -> Result<()> {
     if let Some((res, name)) = query.res_sel()
         && !name.is_empty()
@@ -184,7 +184,7 @@ fn set_zoom_level(zoom: u32) {
     }
 }
 
-/// Get marker scale for a zoom level
+/// Get icon scale for a zoom level
 fn zoom_scale(zoom: u32) -> &'static str {
     match zoom {
         1 => "0.003",
@@ -393,7 +393,9 @@ fn res_states_css(res: Res, card_states: &[CardState]) -> String {
     for st in states_all {
         let mut sel: Option<Sel> = None;
         for cs in card_states {
-            if cs.state == *st && cs.purpose != Some(DedicatedPurpose::Hidden) {
+            if cs.state == *st
+                && cs.marker != Some(DedicatedPurpose::Hidden.css_var())
+            {
                 let s = Sel::cls(format!("{res}-{}", cs.name));
                 sel = Some(match sel {
                     Some(sel) => sel.list(s),
@@ -406,33 +408,28 @@ fn res_states_css(res: Res, card_states: &[CardState]) -> String {
             css.push_str(&Rule::new(sel, prop).to_string());
         }
     }
-    if let Some(rule) =
-        purpose_style_css(res, card_states, DedicatedPurpose::Tolling)
-    {
-        css.push_str(&rule.to_string());
-    }
-    if let Some(rule) =
-        purpose_style_css(res, card_states, DedicatedPurpose::Parking)
-    {
-        css.push_str(&rule.to_string());
-    }
-    if let Some(rule) =
-        purpose_style_css(res, card_states, DedicatedPurpose::Wayfinding)
-    {
-        css.push_str(&rule.to_string());
+    for marker in [
+        DedicatedPurpose::Tolling.css_var(),
+        DedicatedPurpose::Parking.css_var(),
+        DedicatedPurpose::Wayfinding.css_var(),
+        "locked-display",
+    ] {
+        if let Some(rule) = marker_style_css(res, card_states, marker) {
+            css.push_str(&rule.to_string());
+        }
     }
     css
 }
 
-/// Build a CSS selector for all cards of a given dedicated purpose
-fn purpose_style_css(
+/// Build a CSS selector for all cards with a given marker
+fn marker_style_css(
     res: Res,
     card_states: &[CardState],
-    purpose: DedicatedPurpose,
+    marker: &'static str,
 ) -> Option<Rule> {
     let mut sel: Option<Sel> = None;
     for cs in card_states {
-        if Some(purpose) == cs.purpose {
+        if Some(marker) == cs.marker {
             let s = Sel::cls(format!("{res}-{}", cs.name));
             sel = Some(match sel {
                 Some(sel) => sel.list(s),
@@ -440,7 +437,7 @@ fn purpose_style_css(
             });
         }
     }
-    sel.map(|s| Rule::new(s, Prop::new().custom(purpose.css_var(), "inline")))
+    sel.map(|s| Rule::new(s, Prop::new().custom(marker, "inline")))
 }
 
 /// Update map OSM style

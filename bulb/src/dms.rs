@@ -545,6 +545,11 @@ impl DmsAnc {
 }
 
 impl Dms {
+    /// Get a dedicated purpose from hashtag, if defined
+    fn purpose(&self) -> Option<DedicatedPurpose> {
+        DedicatedPurpose::iter().find(|p| self.has_hashtag(p.hashtag()))
+    }
+
     /// Get multi of lock message
     fn lock_multi(&self) -> &str {
         if let Some(lock) = &self.lock
@@ -1268,9 +1273,9 @@ impl Card for Dms {
         }
     }
 
-    /// Get a dedicated purpose from hashtag, if defined
-    fn purpose(&self) -> Option<DedicatedPurpose> {
-        DedicatedPurpose::iter().find(|p| self.has_hashtag(p.hashtag()))
+    /// Get additional marker name (if any)
+    fn marker(&self, _anc: &DmsAnc) -> Option<&'static str> {
+        self.purpose().map(|p| p.css_var())
     }
 
     /// Check if a search string matches

@@ -197,6 +197,12 @@ menu li {
   fill: #222;
   stroke: none;
 }
+.locked {
+  display: var(--locked-display);
+  fill: #a44;
+  stroke: white;
+  stroke-width: 0.5;
+}
 
 /* Checkbox toggle buttons:
  *
@@ -239,6 +245,7 @@ menu li {
   --tolling-display: none;
   --parking-display: none;
   --wayfinding-display: none;
+  --locked-display: none;
 }
 
 #layer-zoom {
