@@ -142,7 +142,7 @@ pub async fn post_req(res: Option<Res>, access: &[Permission]) -> Result<()> {
 /// Build resource list for notifications
 fn build_list(res: Option<Res>, access: &[Permission]) -> String {
     let mut resources = String::from("[\"");
-    // Always listen for resources with map markers
+    // Always listen for resources with map icons
     for r in [
         Res::Beacon,
         Res::Camera,
