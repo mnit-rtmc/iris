@@ -819,6 +819,19 @@ label:has(+ #sb-resource) {
   margin: 0;
 }
 
+/* Ramp Meters */
+
+#lk-cycle {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+input + datalist {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 /* --------------------
  * Lane Control Signals
  * -------------------- */

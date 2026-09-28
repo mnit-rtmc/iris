@@ -424,41 +424,18 @@ impl RampMeter {
         actions
     }
 
-    /// Is shrinking queue allowed?
-    fn is_shrink_allowed(&self) -> bool {
-        self.lock_reason().is_deployable()
-            && (self.lock_rate().is_some() || self.status_rate().is_some())
-    }
-
-    /// Is growing queue allowed?
-    fn is_grow_allowed(&self) -> bool {
-        self.lock_reason().is_deployable()
-    }
-
-    /// Make lock shrink action
-    fn lock_shrink(&self) -> Vec<Action> {
-        if let Some(rate) = self.lock_rate().or(self.status_rate()) {
-            // FIXME: use system attributes
-            let rt = (rate + 50).min(1714);
+    /// Make lock cycle action
+    fn lock_cycle(&self) -> Vec<Action> {
+        if let Some(rate) = self.lock_rate()
+            && let Some(cycle) = Doc::get().input_parse::<f32>("lk-cycle")
+        {
+            let rt = (3_600.0 / cycle).round() as u32;
             if rt != rate {
                 let reason = self.lock_reason();
                 return self.make_lock_action(reason, Some(rt));
             }
         }
         Vec::new()
-    }
-
-    /// Make lock grow action
-    fn lock_grow(&self) -> Vec<Action> {
-        // FIXME: use system attributes
-        let rate = self.lock_rate().or(self.status_rate()).unwrap_or(1714);
-        let rt = (rate - 50).max(240);
-        if rt != rate {
-            let reason = self.lock_reason();
-            self.make_lock_action(reason, Some(rt))
-        } else {
-            Vec::new()
-        }
     }
 
     /// Create action to handle click on a device request button
@@ -522,20 +499,6 @@ impl RampMeter {
         }
     }
 
-    /// Build metering rate HTML
-    fn rate_html<'p>(&self, span: &'p mut html::Span<'p>) {
-        match self.status_rate() {
-            Some(r) => {
-                let c = 3_600.0 / (r as f32);
-                span.cdata(format!("⏱️ {c:.1} s ({r} veh/hr)"));
-            }
-            None => {
-                span.class("hidden").cdata("⏱️ 0.0 s (N/A veh/hr)");
-            }
-        }
-        span.close();
-    }
-
     /// Build lock reason HTML
     fn lock_reason_html<'p>(&self, span: &'p mut html::Span<'p>) {
         let reason = self.lock_reason();
@@ -561,20 +524,53 @@ impl RampMeter {
         span.close();
     }
 
-    /// Build shrink/grow buttons HTML
-    fn shrink_grow_html<'p>(&self, span: &'p mut html::Span<'p>) {
-        let mut button = span.button();
-        button.id("lk_shrink").r#type("button");
-        if !self.is_shrink_allowed() {
-            button.disabled();
+    /// Build cycle input range HTML
+    fn cycle_html<'p>(&self, span: &'p mut html::Span<'p>) {
+        let mut input = span.input();
+        input
+            .id("lk-cycle")
+            .r#type("range")
+            .min(2.1)
+            .max(15)
+            .step(0.1)
+            .list("cycle-values");
+        let r = self.lock_rate().or(self.status_rate()).unwrap_or(1714);
+        let c = format!("{:.1}", 3_600.0 / (r as f32));
+        input.value(c);
+        if self.lock.is_none() {
+            input.disabled();
         }
-        button.cdata("Shrink ↩").close();
-        button = span.button();
-        button.id("lk_grow").r#type("button");
-        if !self.is_grow_allowed() {
-            button.disabled();
+        let mut datalist = span.datalist();
+        datalist.id("cycle-values");
+        datalist.option().value(2.1).label("2.1").close();
+        datalist.option().value(3).close();
+        datalist.option().value(4).close();
+        datalist.option().value(5).label("5").close();
+        datalist.option().value(6).close();
+        datalist.option().value(7).close();
+        datalist.option().value(8).close();
+        datalist.option().value(9).close();
+        datalist.option().value(10).label("10").close();
+        datalist.option().value(11).close();
+        datalist.option().value(12).close();
+        datalist.option().value(13).close();
+        datalist.option().value(14).close();
+        datalist.option().value(15).label("15").close();
+        datalist.close();
+        span.close();
+    }
+
+    /// Build metering rate HTML
+    fn rate_html<'p>(&self, span: &'p mut html::Span<'p>) {
+        match self.status_rate() {
+            Some(r) => {
+                let c = 3_600.0 / (r as f32);
+                span.cdata(format!("⏱️ {c:.1} s ({r} veh/hr)"));
+            }
+            None => {
+                span.class("hidden").cdata("⏱️ 0.0 s (N/A veh/hr)");
+            }
         }
-        button.cdata("Grow ↪").close();
         span.close();
     }
 
@@ -664,9 +660,9 @@ impl RampMeter {
         self.meter_image_html(1, &mut div.img());
         let mut div2 = div.div();
         div2.class("column");
-        self.rate_html(&mut div2.span());
         self.lock_reason_html(&mut div2.span());
-        self.shrink_grow_html(&mut div2.span());
+        self.cycle_html(&mut div2.span());
+        self.rate_html(&mut div2.span());
         self.queue_html(&mut div2.span());
         div2.close();
         self.meter_image_html(2, &mut div.img());
@@ -890,8 +886,6 @@ impl Card for RampMeter {
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: RampMeterAnc, id: &str) -> Vec<Action> {
         match id {
-            "lk_shrink" => self.lock_shrink(),
-            "lk_grow" => self.lock_grow(),
             "rq_settings" => self.device_req(DeviceReq::SendSettings),
             _ => self.handle_click_common(anc, id),
         }
@@ -899,16 +893,19 @@ impl Card for RampMeter {
 
     /// Handle input event for an element on the card
     fn handle_input(&self, _anc: RampMeterAnc, id: &str) -> Vec<Action> {
-        if "lk_reason" == id {
-            let reason = self.selected_lock_reason();
-            let rate = if reason.duration().is_some() {
-                self.lock_rate().or(self.status_rate()).or(Some(1714))
-            } else {
-                None
-            };
-            return self.make_lock_action(reason, rate);
+        match id {
+            "lk-cycle" => self.lock_cycle(),
+            "lk_reason" => {
+                let reason = self.selected_lock_reason();
+                let rate = if reason.duration().is_some() {
+                    self.lock_rate().or(self.status_rate()).or(Some(1714))
+                } else {
+                    None
+                };
+                self.make_lock_action(reason, rate)
+            }
+            _ => Vec::new(),
         }
-        Vec::new()
     }
 
     /// Handle updating a card in response to an SSE notification
