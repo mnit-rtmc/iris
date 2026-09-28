@@ -826,7 +826,7 @@ label:has(+ #sb-resource) {
   width: 100%;
 }
 
-input + datalist {
+#lk-cycle + datalist {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
