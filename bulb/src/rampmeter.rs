@@ -537,7 +537,7 @@ impl RampMeter {
         let r = self.lock_rate().or(self.status_rate()).unwrap_or(1714);
         let c = format!("{:.1}", 3_600.0 / (r as f32));
         input.value(c);
-        if self.lock.is_none() {
+        if self.lock.is_none() || !self.lock_reason().is_deployable() {
             input.disabled();
         }
         let mut datalist = span.datalist();
