@@ -401,18 +401,15 @@ label:has(+ #sb-resource) {
   }
 }
 
-/* Delete button sliding "confirmation" animation */
-#ob_delete,
+/* Long-press button sliding "confirmation" animation */
 .long-press {
   position: relative; /* add position context for ::before pseudo-element */
   z-index: 1;
   overflow: hidden;
 }
-#ob_delete:active,
 .long-press:active {
   background: none; /* clear background to make slider visible */
 }
-#ob_delete::before,
 .long-press::before {
   position: absolute;
   z-index: -1;
@@ -423,12 +420,10 @@ label:has(+ #sb-resource) {
   content: "";
   background-color: #5bd;
 }
-#ob_delete:active::before,
 .long-press:active::before {
   transition: left 1s;
   left: 0;
 }
-
 
 #sb-toast {
   visibility: hidden;
@@ -642,8 +637,8 @@ label:has(+ #sb-resource) {
   padding-top: .2rem;
 }
 
+.card-expanded > .row:has(#ob-delete),
 .card-expanded > .row:has(#ob_save),
-.card-expanded > .row:has(#ob_delete),
 .card-expanded > .row:has(#ob_geoloc) {
   position: sticky;
   bottom: 0;
@@ -656,8 +651,8 @@ label:has(+ #sb-resource) {
 }
 
 .card-expanded > .title.row,
+.card-expanded > .row:has(#ob-delete),
 .card-expanded > .row:has(#ob_save),
-.card-expanded > .row:has(#ob_delete),
 .card-expanded > .row:has(#ob_geoloc) {
   margin-left: -.2rem;
   margin-right: -.2rem;

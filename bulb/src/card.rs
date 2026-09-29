@@ -727,6 +727,7 @@ pub fn footer_html<'p>(view: View, delete: bool, div: &'p mut html::Div<'p>) {
     if delete {
         div.button()
             .id(eid::DELETE)
+            .class("long-press")
             .r#type("button")
             .cdata("🗑️ Delete")
             .close();

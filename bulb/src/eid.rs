@@ -30,7 +30,7 @@ pub const LOGOUT: &str = "sb-logout";
 pub const VIEW: &str = "ob_view";
 pub const NAME: &str = "ob_name";
 pub const CREATE: &str = "ob_create";
-pub const DELETE: &str = "ob_delete";
+pub const DELETE: &str = "ob-delete";
 pub const GEOLOC: &str = "ob_geoloc";
 pub const SAVE: &str = "ob_save";
 

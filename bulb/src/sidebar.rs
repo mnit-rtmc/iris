@@ -110,7 +110,11 @@ pub fn add_click_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             if target.is_instance_of::<HtmlButtonElement>() {
-                handle_click_button(target.id(), target.get_attribute("class"));
+                let long_press = match target.get_attribute("class") {
+                    Some(cls) => cls.contains("long-press"),
+                    None => false,
+                };
+                handle_click_button(target.id(), long_press);
             } else if let Ok(Some(cc)) = target.closest(".card-compact") {
                 handle_click_card(&cc);
             }
@@ -173,7 +177,7 @@ fn set_card_layout(id: &str) -> Result<()> {
 }
 
 /// Handle a `click` event with a button target
-fn handle_click_button(id: String, cname: Option<String>) {
+fn handle_click_button(id: String, long_press: bool) {
     match id.as_str() {
         eid::LOGIN => spawn_future(start::handle_login()),
         eid::LOGOUT => spawn_future(start::handle_logout()),
@@ -193,7 +197,7 @@ fn handle_click_button(id: String, cname: Option<String>) {
         }
         _ => {
             if let Some(cv) = app::expanded_view() {
-                spawn_future(handle_button_card(cv, id, cname));
+                spawn_future(handle_button_card(cv, id, long_press));
             }
         }
     }
@@ -229,23 +233,22 @@ async fn show_create_card() -> Result<()> {
 async fn handle_button_card(
     cv: CardView,
     id: String,
-    cname: Option<String>,
+    long_press: bool,
 ) -> Result<()> {
-    if eid::DELETE == id {
-        if app::delete_enabled() {
-            cv.handle_delete().await?;
-            let query = QueryParam::current_entry().with_sel("");
-            set_query(query).await?;
-        }
-    } else if (!cname.as_deref().unwrap_or("").contains("long-press")
-        || app::click_enabled())
-        && let Some(v) = cv.handle_click(&id).await?
-        && !v.is_expanded()
-    {
-        app::set_click_enabled(false);
+    let finished = app::long_press_finished();
+    if finished && eid::DELETE == id {
+        cv.handle_delete().await?;
         let query = QueryParam::current_entry().with_sel("");
         set_query(query).await?;
     }
+    if (finished || !long_press)
+        && let Some(v) = cv.handle_click(&id).await?
+        && !v.is_expanded()
+    {
+        let query = QueryParam::current_entry().with_sel("");
+        set_query(query).await?;
+    }
+    app::set_long_press_finished(false);
     Ok(())
 }
 
@@ -448,21 +451,15 @@ fn add_transition_listener(el: &Element) -> Result<()> {
 
 /// Handle a `transition*` event
 fn handle_transition(ev: Event) {
-    if let Some(target) = ev.target()
+    // long-press slider is a "left" property transition
+    if let Ok(ev) = ev.dyn_into::<TransitionEvent>()
+        && ev.property_name() == "left"
+        && let Some(target) = ev.target()
         && let Ok(target) = target.dyn_into::<Element>()
-        && let Ok(ev) = ev.dyn_into::<TransitionEvent>()
+        && let Some(cls) = target.get_attribute("class")
+        && cls.contains("long-press")
     {
-        // delete slider is a "left" property transition
-        if target.id() == eid::DELETE && ev.property_name() == "left" {
-            app::set_delete_enabled(&ev.type_() == "transitionend");
-        } else if target
-            .get_attribute("class")
-            .unwrap_or("".to_owned())
-            .contains("long-press")
-            && ev.property_name() == "left"
-        {
-            app::set_click_enabled(&ev.type_() == "transitionend");
-        }
+        app::set_long_press_finished(&ev.type_() == "transitionend");
     }
 }
 

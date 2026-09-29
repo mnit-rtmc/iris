@@ -60,10 +60,8 @@ struct AppState {
     deferred: Vec<(i32, DeferredAction)>,
     /// Timer tick count
     tick: i32,
-    /// Delete action enabled (slider transition finished)
-    delete_enabled: bool,
-    /// Click action enabled (slider transition finished)
-    click_enabled: bool,
+    /// Long-press transition "finished" (enables button action)
+    long_press_finished: bool,
     /// Active joystick interval IDs
     joystick_intervals: HashMap<u32, i32>,
     /// Active stream interval IDs
@@ -155,8 +153,7 @@ pub fn set_expanded_view(view: Option<CardView>) {
         state
             .deferred
             .retain(|(_, a)| *a != DeferredAction::RefreshList);
-        state.delete_enabled = false;
-        state.click_enabled = false;
+        state.long_press_finished = false;
     })
 }
 
@@ -215,24 +212,14 @@ pub fn next_action() -> Option<DeferredAction> {
     })
 }
 
-/// Set delete enabled/disabled in global app state
-pub fn set_delete_enabled(enabled: bool) {
-    STATE.with(|rc| rc.borrow_mut().delete_enabled = enabled);
+/// Set long-press "finished" in global app state
+pub fn set_long_press_finished(finished: bool) {
+    STATE.with(|rc| rc.borrow_mut().long_press_finished = finished);
 }
 
-/// Get delete enabled from global app state
-pub fn delete_enabled() -> bool {
-    STATE.with(|rc| rc.borrow().delete_enabled)
-}
-
-/// Set click enabled/disabled in global app state
-pub fn set_click_enabled(enabled: bool) {
-    STATE.with(|rc| rc.borrow_mut().click_enabled = enabled)
-}
-
-/// Get click enabled from global app state
-pub fn click_enabled() -> bool {
-    STATE.with(|rc| rc.borrow().click_enabled)
+/// Get long-press "finished" from global app state
+pub fn long_press_finished() -> bool {
+    STATE.with(|rc| rc.borrow().long_press_finished)
 }
 
 /// Add a joystick interval ID
