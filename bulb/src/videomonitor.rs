@@ -155,7 +155,6 @@ impl VideoMonitor {
 
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &VideoMonitorAnc) -> String {
-        self.clear_selected();
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();
         div.class("title row")
@@ -167,7 +166,9 @@ impl VideoMonitor {
     }
 
     /// Clear the selected video monitor
+    #[allow(dead_code)]
     fn clear_selected(&self) {
+        // FIXME: when should this be called?
         app::set_vid_mon(None);
         if let Ok(el) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
             el.set_inner_html("📺");
