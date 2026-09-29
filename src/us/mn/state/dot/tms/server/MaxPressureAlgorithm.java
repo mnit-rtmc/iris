@@ -1211,6 +1211,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
                 limit_control = MinimumRateLimit.target_min;
                 return calculateMinimumRate(targetMinRate());
             } else {
+                limit_control = MinimumRateLimit.passage_fail;
                 return tracking_demand;
             }
         }
@@ -1403,9 +1404,9 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
 
             if (phase == MeteringPhase.metering || phase == MeteringPhase.flushing) {
                 // it's ok for rate to exceed max_rate
-                // it is possible that best_rate = Q_r indicating meter off
+                // it is possible that best_rate = Q_r (best_rate > max_rate) indicating meter off
                 // this will cause the meter to start flushing
-                new_max_rate = Math.min(max_rate, Math.min((int) Q_r, (int) (release_rate * (1 + smoothing_factor))));
+                new_max_rate = Math.min((int) Q_r, (int) (release_rate * (1 + smoothing_factor)));
                 new_min_rate = Math.max(min_rate, (int) (release_rate * (1 - smoothing_factor)));
             }
             // if the meter is off, then turn it on slowly
