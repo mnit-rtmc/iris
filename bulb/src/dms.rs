@@ -992,6 +992,7 @@ impl Dms {
         span = div.span();
         span.button()
             .id("rq_config_reset")
+            .class("long-press")
             .r#type("button")
             .cdata("Reset")
             .close();
