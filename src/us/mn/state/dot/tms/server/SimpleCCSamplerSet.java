@@ -12,10 +12,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.maxpressure;
+package us.mn.state.dot.tms.server;
 
 import java.io.PrintStream;
 import java.util.TreeMap;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.MaxPressureAlgorithm;
 import us.mn.state.dot.tms.server.SamplerSet;
 import us.mn.state.dot.tms.server.VehicleSampler;
@@ -54,7 +55,7 @@ public class SimpleCCSamplerSet implements VehicleSampler {
         if(stamp > last_update){
             while(stamp - last_update > 0){
                 last_update += per_ms;
-                int passed = sampler.getVehCount(last_update, per_ms);
+                int passed = getVehCount(last_update, per_ms);
                 
                 if(passed < 0){
                     passed = 0;
@@ -70,7 +71,16 @@ public class SimpleCCSamplerSet implements VehicleSampler {
     }
     
     public int getVehCount(long stamp, int per_ms) {
-        return sampler.getVehCount(stamp, per_ms);
+        int count = 0;
+        int n_count = 0;
+        for (VehicleSampler vs: sampler.samplers) {
+            int c = vs.getVehCount(stamp, per_ms);
+            if (c >= 0) {
+                count += c;
+                n_count++;
+            } 
+        }
+        return (n_count > 0) ? (int)Math.round(count * (sampler.samplers.size() / n_count)) : MISSING_DATA;
     }
     
     public float getSpeed(long stamp, int per_ms) {

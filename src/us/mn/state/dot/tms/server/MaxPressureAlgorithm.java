@@ -36,6 +36,7 @@ import static us.mn.state.dot.tms.RampMeterHelper.getMaxRelease;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
+import us.mn.state.dot.tms.server.event.MaxPressureMeterEvent;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
 import us.mn.state.dot.tms.server.event.MeterEvent;
@@ -48,7 +49,6 @@ import us.mn.state.dot.tms.server.maxpressure.SimLink;
 import us.mn.state.dot.tms.server.maxpressure.MergeNode;
 import us.mn.state.dot.tms.server.maxpressure.SeriesNode;
 import us.mn.state.dot.tms.server.maxpressure.SimNode;
-import us.mn.state.dot.tms.server.maxpressure.SimpleCCSamplerSet;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
 
 /**
@@ -552,13 +552,13 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         }
 
         /** Minimum metering rate (vehicles / hour) */
-        private int min_rate = 0;
+        private int min_rate;
 
         /** Current metering rate (vehicles / hour) */
         private int release_rate = 0;
 
         /** Maximum metering rate (vehicles / hour) */
-        private int max_rate = 0;
+        private int max_rate;
 
         private boolean smoothing = true;
         private double smoothing_factor = 0.2;
@@ -634,6 +634,11 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
 
         // point queue model for ramp, this is number of vehicles in queue
         private double ramp_queue;
+        
+        // store weights so that I can output them
+        private double upstream_weight, ramp_weight, downstream_weight;
+        private double pressure_ud, pressure_rd;
+        private double R_d, S_ud, S_rd;
 
         /** Create a new meter state */
         public MeterState(RampMeterImpl mtr, EntranceNode en) {
@@ -684,6 +689,9 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             ramp_queue = 0;
             stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
             long max_lookback_r = STEP_SECONDS * 10 * 1000;
+            
+            min_rate = (int)MIN_RATE;
+            max_rate = (int)Q_r;
 
             // I want cumulative counts to obtain queue counts
             queue = new SimpleCCSamplerSet(meter.getSamplerSet(LaneCode.QUEUE), stamp);
@@ -737,6 +745,8 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             SimNode curr_build = new SeriesNode(upstream.rnode, upstream_link);
             simlinks.add(upstream_link);
             simnodes.add(curr_build);
+            
+            
 
             double length = 0;
 
@@ -878,9 +888,9 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
                 updatePassageState();
                 updateDemandState();
 
-                min_rate = filterRate((int)MIN_RATE);
                 max_rate = filterRate(calculateMaximumRate());
-
+                min_rate = filterRate(Math.min(max_rate, Math.max(calculateMinimumRate(), (int)MIN_RATE))); // if min rate is less than max rate for some reason, use max rate
+                
                 if (s_node != null)
                     calculateMeteringRate();
             }
@@ -1201,7 +1211,6 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
                 limit_control = MinimumRateLimit.target_min;
                 return calculateMinimumRate(targetMinRate());
             } else {
-                limit_control = MinimumRateLimit.passage_fail;
                 return tracking_demand;
             }
         }
@@ -1324,9 +1333,9 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             int numlanes = upstream.rnode.getLanes();
 
             // I need sending flow, receiving flow for mainline and ramp
-            double S_rd = getRampSendingFlow(stamp); // units of veh
-            double S_ud = network.getUpstreamSendingFlow(); // units of veh
-            double R_d = network.getDownstreamReceivingFlow(); // units of veh
+            S_rd = getRampSendingFlow(stamp); // units of veh
+            S_ud = network.getUpstreamSendingFlow(); // units of veh
+            R_d = network.getDownstreamReceivingFlow(); // units of veh
 
             // these are weighting factors
             double c_u = 1.0 / network.getUpstreamLanes();
@@ -1335,21 +1344,19 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             double c_d = 1.0 / network.getDownstreamLanes();
             
             // these are the position weights
-            double downstream_weight = c_d * network.getDownstreamWeight(false);
-            double ramp_weight = c_r * getRampWeight(stamp);
-            double upstream_weight = c_u * network.getUpstreamWeight(false);
+            downstream_weight = c_d * network.getDownstreamWeight(false);
+            ramp_weight = c_r * getRampWeight(stamp);
+            upstream_weight = c_u * network.getUpstreamWeight(false);
             
-            double weight_ud = upstream_weight - downstream_weight;
-            double weight_rd = ramp_weight - downstream_weight;
+            pressure_ud = upstream_weight - downstream_weight;
+            pressure_rd = ramp_weight - downstream_weight;
             
-            int max_rate = getMaximumRate();
-            int min_rate = Math.min(max_rate, Math.max(calculateMinimumRate(), getMinimumRate())); // if min rate is less than max rate for some reason, use max rate
-         
-            int new_rate = calcBestRate(S_ud, S_rd, R_d, weight_ud, weight_rd, min_rate, max_rate);
+            
+            int new_rate = calcBestRate(S_ud, S_rd, R_d, pressure_ud, pressure_rd, min_rate, max_rate);
             
             // added logging so if anything breaks, we have some idea of what was going on.
             log(stamp+" "+meter.getName()+" weights: "+upstream_weight+" "+ramp_weight+" "+downstream_weight);
-            log("\t rate="+new_rate+" "+weight_ud+" "+weight_rd);
+            log("\t rate="+new_rate+" "+pressure_ud+" "+pressure_rd);
             
             if (smoothing) {
                 new_rate = smoothRate(new_rate, release_rate, min_rate, max_rate);
@@ -1398,7 +1405,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
                 // it's ok for rate to exceed max_rate
                 // it is possible that best_rate = Q_r indicating meter off
                 // this will cause the meter to start flushing
-                new_max_rate = Math.min((int) Q_r, (int) (release_rate * (1 + smoothing_factor)));
+                new_max_rate = Math.min(max_rate, Math.min((int) Q_r, (int) (release_rate * (1 + smoothing_factor))));
                 new_min_rate = Math.max(min_rate, (int) (release_rate * (1 - smoothing_factor)));
             }
             // if the meter is off, then turn it on slowly
@@ -1470,14 +1477,14 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
         }
 
         private double getRampWeight(long stamp) {
-            double ramp_n = getQueueLength(stamp);
+            ramp_queue = getQueueLength(stamp);
 
             // assume density is equal to K_r, so queue is at end of ramp
             // density behind queue is assumed to be 0
             // evaluate integral from 0 to L of x/L * k
             // integral is piecewise with k either K_r, 0
             double end = ramp_length;
-            double start = ramp_length - ramp_n / K_r;
+            double start = ramp_length - ramp_queue / K_r;
 
             double integral = (end*end / 2 - start * start / 2) / ramp_length * K_r;
 
@@ -1512,13 +1519,22 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             long stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
 
             String dns = meter.getName();
-            float seg_den = (float)network.getDownstreamAvgDensity();
-            MeterEvent ev = new MeterEvent(EventType.METER_EVENT,
+            float ds_den_detected = downstream.station.getDensity(stamp, PERIOD_MS);
+            float ds_den_estimated = (float)network.getDownstreamAvgDensity();
+            float us_den_detected = upstream.station.getDensity(stamp, PERIOD_MS);
+            float us_den_estimated = (float)network.getUpstreamAvgDensity();
+            double ramp_queue_from_cc = ramp_queue;
+            
+            MaxPressureMeterEvent ev = new MaxPressureMeterEvent(EventType.METER_EVENT,
                 meter.name, phase.ordinal(),
-                getQueueState().ordinal(), estimateQueueLength(),
+                getQueueState().ordinal(), estimateQueueLength(), (float)ramp_queue_from_cc,
                 demand_adj, estimateWaitSecs(),
                 limit_control.ordinal(), min_rate, release_rate,
-                max_rate, dns, seg_den
+                max_rate, dns, 
+                us_den_detected, us_den_estimated, ds_den_detected, ds_den_estimated,
+                (float)upstream_weight, (float)downstream_weight, (float)ramp_weight,
+                (float)pressure_ud, (float)pressure_rd,
+                (float)R_d, (float)S_ud, (float)S_rd
             );
             BaseObjectImpl.logEvent(ev);
         }
