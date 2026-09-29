@@ -240,8 +240,7 @@ async fn handle_button_card(
         cv.handle_delete().await?;
         let query = QueryParam::current_entry().with_sel("");
         set_query(query).await?;
-    }
-    if (finished || !long_press)
+    } else if (finished || !long_press)
         && let Some(v) = cv.handle_click(&id).await?
         && !v.is_expanded()
     {
