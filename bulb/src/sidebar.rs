@@ -595,6 +595,12 @@ async fn expand_card(query: QueryParam, res: Res) -> Result<()> {
             }
         } else {
             let cv = CardView::new(res, sel).expand(edit);
+            if let Some(el) = Doc::get().opt_elem::<HtmlElement>(cv.id()) {
+                let opt = ScrollIntoViewOptions::new();
+                opt.set_behavior(ScrollBehavior::Instant);
+                opt.set_block(ScrollLogicalPosition::Nearest);
+                el.scroll_into_view_with_scroll_into_view_options(&opt);
+            }
             replace_card(cv, "").await?;
         }
     }
@@ -736,16 +742,9 @@ fn replace_card_html(cv: &CardView, html: &str) {
     el.set_inner_html(html);
     el.set_class_name(cv.view.class_name(false));
     if cv.view.is_expanded() {
-        let opt = ScrollIntoViewOptions::new();
-        opt.set_behavior(ScrollBehavior::Instant);
-        opt.set_block(ScrollLogicalPosition::Nearest);
-        el.scroll_into_view_with_scroll_into_view_options(&opt);
-
         prepend_placeholder(&el, cv.id());
-
         let _ = el.set_popover(Some("auto"));
         let _ = el.show_popover();
-
         // Docked layout by default
         let _ = set_card_layout(&format!("dock_{}", cv.id()));
     } else {
