@@ -353,6 +353,7 @@ impl DayMatcher {
     fn action_post(&self) -> Action {
         let mut attr = Attr::new();
         attr.str("name", &self.name);
+        attr.str("day_plan", &self.day_plan);
         attr.opt_num("month", self.month);
         attr.opt_num("day", self.day);
         attr.opt_num("weekday", self.weekday);
