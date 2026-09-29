@@ -50,6 +50,30 @@ impl DeviceAction {
         }
     }
 
+    /// Make HTML list item
+    pub fn item_html<'p>(
+        &self,
+        phase: &str,
+        rs: &str,
+        li: &'p mut html::Li<'p>,
+    ) {
+        if phase == self.phase {
+            li.class("current");
+        }
+        li.span().cdata(&self.phase).close();
+        if !rs.is_empty() {
+            li.span().cdata(rs).close();
+        }
+        li.span().class("info").cdata(&self.hashtag).close();
+        if let Some(msg_pattern) = &self.msg_pattern {
+            li.cdata(": ");
+            li.a()
+                .href(format!("?res={}&sel={}", Res::MsgPattern, msg_pattern))
+                .cdata(msg_pattern);
+        }
+        li.close();
+    }
+
     /// Check if device action is valid
     pub fn is_valid(&self) -> bool {
         self.hashtag.len() > 1

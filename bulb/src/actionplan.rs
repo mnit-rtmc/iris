@@ -221,15 +221,21 @@ impl ActionPlanAnc {
         phases.into_iter()
     }
 
-    /// Get device hashtags for a resource type
-    fn res_hashtags(&self, res: Res) -> impl Iterator<Item = &str> {
-        let mut tags = BTreeSet::new();
-        for da in &self.device_actions {
-            if self.has_hashtag_res(&da.hashtag, res) {
-                tags.insert(&da.hashtag[..]);
+    /// Get resource types for a hashtag
+    fn hashtag_res(&self, hashtag: &str) -> impl Iterator<Item = Res> {
+        let mut rs = Vec::new();
+        for res in [
+            Res::Beacon,
+            Res::Camera,
+            Res::Dms,
+            Res::GateArm,
+            Res::RampMeter,
+        ] {
+            if self.has_hashtag_res(hashtag, res) {
+                rs.push(res);
             }
         }
-        tags.into_iter()
+        rs.into_iter()
     }
 
     /// Check a device hashtag for a resource type
@@ -356,44 +362,20 @@ impl ActionPlan {
             option.cdata(p).close();
         }
         div.close();
-        let tags = anc.res_hashtags(Res::Beacon).collect::<Vec<_>>().join(" ");
-        if !tags.is_empty() {
-            let mut details = tree.root::<html::Details>();
-            details.summary().cdata("🔆 Beacon Hashtags").close();
-            details.span().class("info").cdata(tags);
-            details.close();
+        let mut details = tree.root::<html::Details>();
+        details.summary().cdata("Actions").close();
+        let mut ul = details.ul();
+        ul.class("minimal");
+        for da in &anc.device_actions {
+            let rs = anc
+                .hashtag_res(&da.hashtag)
+                .map(|r| r.symbol())
+                .collect::<Vec<_>>()
+                .join(" ");
+            da.item_html(&self.phase, &rs, &mut ul.li());
         }
-        let tags = anc.res_hashtags(Res::Camera).collect::<Vec<_>>().join(" ");
-        if !tags.is_empty() {
-            let mut details = tree.root::<html::Details>();
-            details.summary().cdata("🎥 Camera Hashtags").close();
-            details.span().class("info").cdata(tags);
-            details.close();
-        }
-        let tags = anc.res_hashtags(Res::Dms).collect::<Vec<_>>().join(" ");
-        if !tags.is_empty() {
-            let mut details = tree.root::<html::Details>();
-            details.summary().cdata("⬛ DMS Hashtags").close();
-            details.span().class("info").cdata(tags);
-            details.close();
-        }
-        let tags = anc.res_hashtags(Res::GateArm).collect::<Vec<_>>().join(" ");
-        if !tags.is_empty() {
-            let mut details = tree.root::<html::Details>();
-            details.summary().cdata("⫬ Gate Arm Hashtags").close();
-            details.span().class("info").cdata(tags);
-            details.close();
-        }
-        let tags = anc
-            .res_hashtags(Res::RampMeter)
-            .collect::<Vec<_>>()
-            .join(" ");
-        if !tags.is_empty() {
-            let mut details = tree.root::<html::Details>();
-            details.summary().cdata("🚦 Ramp Meter Hashtags").close();
-            details.span().class("info").cdata(tags);
-            details.close();
-        }
+        ul.close();
+        details.close();
         let today = Zoned::now().date();
         if anc.has_active_phase_actions(&today) {
             let mut details = tree.root::<html::Details>();

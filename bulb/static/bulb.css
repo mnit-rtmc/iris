@@ -126,6 +126,14 @@ menu li {
   white-space: nowrap;
   padding: 0.1rem;
 }
+.minimal {
+  list-style: none;
+  padding-left: 0;
+  white-space: nowrap;
+}
+.current {
+  background-color: #ada;
+}
 
 .packed {
   table-layout: fixed;
