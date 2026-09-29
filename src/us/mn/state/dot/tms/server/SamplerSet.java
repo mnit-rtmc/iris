@@ -33,7 +33,7 @@ public class SamplerSet implements VehicleSampler {
 	}
 
 	/** Set of samplers */
-	private final HashSet<VehicleSampler> samplers =
+	protected final HashSet<VehicleSampler> samplers =
 		new HashSet<VehicleSampler>();
 
 	/** Create an empty sampler set */
