@@ -357,6 +357,7 @@ impl CardView {
             return Ok(());
         }
         match self.res {
+            Res::ActionPlan => self.handle_update_x::<ActionPlan>().await,
             Res::Beacon => self.handle_update_x::<Beacon>().await,
             Res::Camera => self.handle_update_x::<Camera>().await,
             Res::Dms => self.handle_update_x::<Dms>().await,
