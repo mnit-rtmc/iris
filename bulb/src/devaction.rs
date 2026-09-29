@@ -295,7 +295,11 @@ impl DeviceAction {
         }
         summary.span().class("info").cdata(hashtag).close();
         if let Some(msg_pattern) = &self.msg_pattern {
-            summary.cdata(": ").cdata(msg_pattern);
+            summary.cdata(": ");
+            summary
+                .a()
+                .href(format!("?res={}&sel={}", Res::MsgPattern, msg_pattern))
+                .cdata(msg_pattern);
         }
         summary.close();
     }
