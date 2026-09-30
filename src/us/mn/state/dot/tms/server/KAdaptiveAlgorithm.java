@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2025  Minnesota Department of Transportation
+ * Copyright (C) 2001-2026  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterQueueState;
@@ -1445,12 +1444,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			String dns = (dn != null) ? dn.station.getName() : null;
 			Double sd = getSegmentDensity();
 			float seg_den = (sd != null) ? sd.floatValue() : 0;
-			MeterEvent ev = new MeterEvent(EventType.METER_EVENT,
+			MeterEvent ev = new MeterEvent(
 				meter.name, phase.ordinal(),
 				getQueueState().ordinal(), queueLength(),
 				demand_adj, estimateWaitSecs(),
 				limit_control.ordinal(), min_rate, release_rate,
-				max_rate, dns, seg_den);
+				max_rate, dns, seg_den
+			);
 			BaseObjectImpl.logEvent(ev);
 		}
 

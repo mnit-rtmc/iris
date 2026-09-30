@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2024  Minnesota Department of Transportation
+ * Copyright (C) 2014-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,12 +64,10 @@ public class MeterEvent extends BaseEvent {
 	private final float seg_density;
 
 	/** Create a new meter event */
-	public MeterEvent(EventType e, String mid, int p, int qs, float ql,
-		float da, int ws, int lc, int mn, int rr, int mx, String dn,
-		float sd)
+	public MeterEvent(String mid, int p, int qs, float ql, float da,
+		int ws, int lc, int mn, int rr, int mx, String dn, float sd)
 	{
-		super(e);
-		assert e == EventType.METER_EVENT;
+		super(EventType.METER_EVENT);
 		ramp_meter = mid;
 		phase = p;
 		q_state = qs;
