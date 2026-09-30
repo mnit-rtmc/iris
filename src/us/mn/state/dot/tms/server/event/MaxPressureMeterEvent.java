@@ -84,16 +84,18 @@ public class MaxPressureMeterEvent extends BaseEvent {
 	private final float sending_flow_ramp;
 
 	/** Create a new meter event */
-	public MaxPressureMeterEvent(EventType e, String mid, int p, int qs, float ql, float q_len_from_cc,
-		float da, int ws, int lc, int mn, int rr, int mx, String dn,
-		float upstream_density_detected, float upstream_density_estimated,
-		float downstream_density_detected, float downstream_density_estimated,
-		float upstream_weight, float downstream_weight, float ramp_weight,
-		float pressure_ud, float pressure_rd,
-		float receiving_flow, float sending_flow_upstream, float sending_flow_ramp)
+	public MaxPressureMeterEvent(String mid, int p, int qs, float ql,
+		float q_len_from_cc, float da, int ws, int lc, int mn, int rr,
+		int mx, String dn, float upstream_density_detected,
+		float upstream_density_estimated,
+		float downstream_density_detected,
+		float downstream_density_estimated,
+		float upstream_weight, float downstream_weight,
+		float ramp_weight, float pressure_ud, float pressure_rd,
+		float receiving_flow, float sending_flow_upstream,
+		float sending_flow_ramp)
 	{
-		super(e);
-		assert e == EventType.METER_EVENT;
+		super(EventType.MAX_PRESSURE_EVENT);
 		ramp_meter = mid;
 		phase = p;
 		q_state = qs;

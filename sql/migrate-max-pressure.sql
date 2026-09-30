@@ -3,6 +3,10 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+-- Add max-pressure meter event type
+INSERT INTO event.event_description (event_desc_id, description)
+    VALUES (403, 'Max-Pressure event');
+
 -- Add max-pressure event table
 CREATE TABLE event.max_pressure_event (
     id SERIAL PRIMARY KEY,

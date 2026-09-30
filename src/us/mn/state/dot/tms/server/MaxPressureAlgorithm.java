@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneCode;
 import us.mn.state.dot.tms.MeterQueueState;
@@ -39,7 +38,6 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.event.MaxPressureMeterEvent;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
-import us.mn.state.dot.tms.server.event.MeterEvent;
 import us.mn.state.dot.tms.server.maxpressure.CTMLink;
 import us.mn.state.dot.tms.server.maxpressure.CTMNetwork;
 import us.mn.state.dot.tms.server.maxpressure.DivergeNode;
@@ -1520,16 +1518,15 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             float us_den_estimated = (float)network.getUpstreamAvgDensity();
             double ramp_queue_from_cc = ramp_queue;
 
-            MaxPressureMeterEvent ev = new MaxPressureMeterEvent(EventType.METER_EVENT,
-                meter.name, phase.ordinal(),
-                getQueueState().ordinal(), estimateQueueLength(), (float)ramp_queue_from_cc,
-                demand_adj, estimateWaitSecs(),
-                limit_control.ordinal(), min_rate, release_rate,
-                max_rate, dns, 
-                us_den_detected, us_den_estimated, ds_den_detected, ds_den_estimated,
-                (float)upstream_weight, (float)downstream_weight, (float)ramp_weight,
-                (float)pressure_ud, (float)pressure_rd,
-                (float)R_d, (float)S_ud, (float)S_rd
+            MaxPressureMeterEvent ev = new MaxPressureMeterEvent(
+                meter.name, phase.ordinal(), getQueueState().ordinal(),
+                estimateQueueLength(), (float) ramp_queue_from_cc, demand_adj,
+                estimateWaitSecs(), limit_control.ordinal(), min_rate,
+                release_rate, max_rate, dns, us_den_detected, us_den_estimated,
+                ds_den_detected, ds_den_estimated, (float) upstream_weight,
+                (float) downstream_weight, (float) ramp_weight,
+                (float) pressure_ud, (float) pressure_rd,
+                (float) R_d, (float) S_ud, (float) S_rd
             );
             BaseObjectImpl.logEvent(ev);
         }

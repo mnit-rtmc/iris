@@ -371,6 +371,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 308	Gate Arm SYSTEM
 401	Meter event
 402	Meter LOCK
+403	Max-Pressure event
 501	Beacon STATE
 601	Tag Read
 651	Price DEPLOYED
