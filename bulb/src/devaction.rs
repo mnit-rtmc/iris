@@ -68,7 +68,7 @@ impl DeviceAction {
         li.span().class("info").cdata(&self.hashtag).close();
         if let Some(msg_pattern) = &self.msg_pattern {
             let query = QueryParam::new()
-                .with_res(Some(Res::MsgPattern))
+                .with_res(Res::MsgPattern)
                 .with_sel(msg_pattern);
             li.cdata(": ");
             li.a().href(query.to_string()).cdata(msg_pattern);
@@ -322,7 +322,7 @@ impl DeviceAction {
         summary.span().class("info").cdata(hashtag).close();
         if let Some(msg_pattern) = &self.msg_pattern {
             let query = QueryParam::new()
-                .with_res(Some(Res::MsgPattern))
+                .with_res(Res::MsgPattern)
                 .with_sel(msg_pattern);
             summary.cdata(": ");
             summary.a().href(query.to_string()).cdata(msg_pattern);

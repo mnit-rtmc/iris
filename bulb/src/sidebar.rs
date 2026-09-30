@@ -319,7 +319,10 @@ fn handle_input(id: String) {
 
 /// Handle selected resource change
 pub fn handle_res_change() {
-    let query = QueryParam::new().with_res(selected_resource());
+    let query = match selected_resource() {
+        Some(res) => QueryParam::new().with_res(res),
+        None => QueryParam::new(),
+    };
     spawn_future(set_query(query));
 }
 

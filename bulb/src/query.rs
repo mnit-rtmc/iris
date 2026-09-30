@@ -93,8 +93,8 @@ impl QueryParam {
     }
 
     /// Set the resource type
-    pub fn with_res(mut self, res: Option<Res>) -> Self {
-        self.res = res;
+    pub fn with_res(mut self, res: Res) -> Self {
+        self.res = Some(res);
         self
     }
 

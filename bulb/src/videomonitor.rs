@@ -197,7 +197,7 @@ impl VideoMonitor {
             let mut tree = Tree::new();
             let mut a = tree.root::<html::A>();
             let query = QueryParam::new()
-                .with_res(Some(Res::VideoMonitor))
+                .with_res(Res::VideoMonitor)
                 .with_sel(&self.name);
             a.href(query.to_string())
                 .cdata(format!("📺 #{}", self.mon_num));

@@ -263,8 +263,7 @@ impl Io {
         if let Ok(res) = Res::try_from(self.resource_n.as_str()) {
             li.class("row");
             li.span().cdata("#").cdata(self.pin).close();
-            let query =
-                QueryParam::new().with_res(Some(res)).with_sel(&self.name);
+            let query = QueryParam::new().with_res(res).with_sel(&self.name);
             let mut span = li.span();
             span.a().href(query.to_string()).cdata(&self.name).close();
             span.cdata(res.symbol());
@@ -327,7 +326,7 @@ impl Controller {
     /// Build controller link HTML
     pub fn link_html<'p>(&self, a: &'p mut html::A<'p>) {
         let query = QueryParam::new()
-            .with_res(Some(Res::Controller))
+            .with_res(Res::Controller)
             .with_sel(&self.name);
         a.href(query.to_string()).cdata(self.link_drop()).close();
     }

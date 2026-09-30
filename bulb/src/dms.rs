@@ -1045,7 +1045,7 @@ impl Dms {
         match anc.sign_config(self.sign_config.as_deref()) {
             Some(cfg) => {
                 let query = QueryParam::new()
-                    .with_res(Some(Res::SignConfig))
+                    .with_res(Res::SignConfig)
                     .with_sel(&cfg.name);
                 div.a().href(query.to_string()).cdata(&cfg.name).close();
             }
