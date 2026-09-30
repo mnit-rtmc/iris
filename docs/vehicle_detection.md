@@ -142,6 +142,14 @@ If the `detector_auto_fail_enable` [system attribute] is `true`, the **auto
 fail** flag for each detector will be set and cleared automatically whenever
 these conditions change.
 
+| Condition | Trigger Threshold   | Clear Threshold |
+|-----------|---------------------|-----------------|
+| No Hits   | 4 hours - 2 weeks   | immediate       |
+| Chatter   | 30 seconds          | 24 hours        |
+| Locked On | 2 minutes - 2 weeks | 24 hours        |
+| No Change | 24 hours - 2 weeks  | immediate       |
+| Occ Spike | 1 minute            | 24 hours        |
+
 ### No Hits
 
 This failure condition occurs if no vehicles are counted for a duration
