@@ -1509,7 +1509,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             return max_rate;
         }
 
-        /** Log a meter event */
+        /** Log a max-pressure meter event */
         protected void logMeterEvent() {
             long stamp = DetectorImpl.calculateEndTime(PERIOD_MS);
 

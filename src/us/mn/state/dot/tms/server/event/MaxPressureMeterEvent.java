@@ -123,13 +123,13 @@ public class MaxPressureMeterEvent extends BaseEvent {
 	/** Get the event config name */
 	@Override
 	protected String eventConfigName() {
-		return "meter_event";
+		return "max_pressure_event";
 	}
 
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return "event.meter_event";
+		return "event.max_pressure_event";
 	}
 
 	/** Get a mapping of the columns */
