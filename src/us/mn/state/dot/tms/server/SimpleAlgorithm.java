@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2024  Minnesota Department of Transportation
+ * Copyright (C) 2000-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.MeterQueueState;
 import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.server.event.SimpleMeterEvent;
 
 /**
  * Simple metering algorithm state
@@ -35,16 +36,26 @@ public class SimpleAlgorithm implements MeterAlgorithmState {
 
 	/** Validate a ramp meter */
 	public void validate(RampMeterImpl meter) {
-		if(demand != null) {
+		if (demand != null) {
 			int diff = meter.getTarget() - demand;
 			demand += Math.round(diff / 2.0f);
 		} else
 			demand = getMaxRelease();
 		meter.setRatePlanned(demand);
+		logMeterEvent(meter);
 	}
 
 	/** Get the meter queue state */
 	public MeterQueueState getQueueState(RampMeterImpl meter) {
 		return MeterQueueState.UNKNOWN;
+	}
+
+	/** Log a simple meter event */
+	private void logMeterEvent(RampMeterImpl meter) {
+		SimpleMeterEvent ev = new SimpleMeterEvent(
+			meter.name,
+			demand
+		);
+		BaseObjectImpl.logEvent(ev);
 	}
 }

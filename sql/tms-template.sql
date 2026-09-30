@@ -314,6 +314,7 @@ VALUES
     ('meter_lock_event', true, false, 0),
     ('price_message_event', true, false, 0),
     ('sign_event', true, false, 0),
+    ('simple_meter_event', true, true, 14),
     ('tag_read_event', true, false, 0),
     ('travel_time_event', true, true, 1),
     ('weather_sensor_sample', true, true, 90),
@@ -372,6 +373,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 401	Meter event
 402	Meter LOCK
 403	Max-Pressure event
+404	Simple meter event
 501	Beacon STATE
 601	Tag Read
 651	Price DEPLOYED
@@ -4437,6 +4439,24 @@ CREATE VIEW meter_action_view AS
     AND pa.condition = 1
     ORDER BY ramp_meter, params;
 GRANT SELECT ON meter_action_view TO PUBLIC;
+
+CREATE TABLE event.simple_meter_event (
+    id SERIAL PRIMARY KEY,
+    event_date TIMESTAMP WITH time zone DEFAULT NOW() NOT NULL,
+    event_desc INTEGER NOT NULL REFERENCES event.event_description,
+    ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
+        ON DELETE CASCADE,
+    rel_rate INTEGER NOT NULL
+);
+
+-- DELETE of iris.ramp_meter *very* slow without this index
+CREATE INDEX ON event.simple_meter_event (ramp_meter);
+
+CREATE VIEW simple_meter_event_view AS
+    SELECT me.id, event_date, ed.description, ramp_meter, rel_rate
+    FROM event.simple_meter_event me
+    JOIN event.event_description ed ON me.event_desc = ed.event_desc_id;
+GRANT SELECT ON simple_meter_event_view TO PUBLIC;
 
 CREATE TABLE iris.metering_phase (
     id INTEGER PRIMARY KEY,
