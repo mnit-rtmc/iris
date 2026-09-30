@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author Douglas Lau
  */
-public class MaxPressureMeterEvent extends BaseEvent {
+public class MaxPressureEvent extends BaseEvent {
 
 	/** Ramp meter ID */
 	private final String ramp_meter;
@@ -83,8 +83,8 @@ public class MaxPressureMeterEvent extends BaseEvent {
 	private final float sending_flow_upstream;
 	private final float sending_flow_ramp;
 
-	/** Create a new meter event */
-	public MaxPressureMeterEvent(String mid, int p, int qs, float ql,
+	/** Create a new max-pressure event */
+	public MaxPressureEvent(String mid, int p, int qs, float ql,
 		float q_len_from_cc, float da, int ws, int lc, int mn, int rr,
 		int mx, String dn, float upstream_density_detected,
 		float upstream_density_estimated,

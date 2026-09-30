@@ -35,7 +35,7 @@ import static us.mn.state.dot.tms.RampMeterHelper.getMaxRelease;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
-import us.mn.state.dot.tms.server.event.MaxPressureMeterEvent;
+import us.mn.state.dot.tms.server.event.MaxPressureEvent;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
 import us.mn.state.dot.tms.server.maxpressure.CTMLink;
@@ -1518,7 +1518,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             float us_den_estimated = (float)network.getUpstreamAvgDensity();
             double ramp_queue_from_cc = ramp_queue;
 
-            MaxPressureMeterEvent ev = new MaxPressureMeterEvent(
+            MaxPressureEvent ev = new MaxPressureEvent(
                 meter.name, phase.ordinal(), getQueueState().ordinal(),
                 estimateQueueLength(), (float) ramp_queue_from_cc, demand_adj,
                 estimateWaitSecs(), limit_control.ordinal(), min_rate,
