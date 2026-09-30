@@ -65,6 +65,7 @@ pub enum Asset {
     Roles,
     SignConfigs,
     SignMessages,
+    SystemAttrs,
     Words,
 }
 
@@ -140,6 +141,7 @@ impl Asset {
             Roles => "/iris/api/role".into(),
             SignConfigs => "/iris/api/sign_config".into(),
             SignMessages => "/iris/sign_message".into(),
+            SystemAttrs => "/iris/api/system_attribute".into(),
             Words => "/iris/api/word".into(),
         }
     }

@@ -20,6 +20,7 @@ use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
 use crate::map;
+use crate::systemattr::SystemAttr;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -113,6 +114,7 @@ pub struct RampMeterAnc {
     loc: LocAnc<RampMeter>,
     meter_types: Vec<MeterType>,
     algorithms: Vec<MeterAlgorithm>,
+    sys_attrs: Vec<SystemAttr>,
 }
 
 impl RampMeterAnc {
@@ -151,6 +153,36 @@ impl RampMeterAnc {
         }
         select.close();
     }
+
+    /// Get minimum meter cycle time (seconds)
+    fn cycle_secs_min(&self) -> f32 {
+        let mut cycle = 0.0;
+        for sa in &self.sys_attrs {
+            if (sa.name == "meter_green_secs"
+                || sa.name == "meter_min_red_secs"
+                || sa.name == "meter_yellow_secs")
+                && let Ok(v) = sa.value.parse::<f32>()
+            {
+                cycle += v;
+            }
+        }
+        if cycle > 0.0 { cycle } else { 2.1 }
+    }
+
+    /// Get maximum meter cycle time (seconds)
+    fn cycle_secs_max(&self) -> f32 {
+        let mut cycle = 0.0;
+        for sa in &self.sys_attrs {
+            if (sa.name == "meter_green_secs"
+                || sa.name == "meter_max_red_secs"
+                || sa.name == "meter_yellow_secs")
+                && let Ok(v) = sa.value.parse::<f32>()
+            {
+                cycle += v;
+            }
+        }
+        if cycle > 0.0 { cycle } else { 15.0 }
+    }
 }
 
 impl AncillaryData for RampMeterAnc {
@@ -159,9 +191,15 @@ impl AncillaryData for RampMeterAnc {
     /// Construct ancillary ramp meter data
     fn new(pri: &RampMeter, view: View) -> Self {
         let mut cio = ControllerIoAnc::new(pri, view);
-        if let View::Setup(_edit) = view {
-            cio.assets.push(Asset::MeterAlgorithms);
-            cio.assets.push(Asset::MeterTypes);
+        match view {
+            View::Control | View::Request => {
+                cio.assets.push(Asset::SystemAttrs);
+            }
+            View::Setup(_edit) => {
+                cio.assets.push(Asset::MeterAlgorithms);
+                cio.assets.push(Asset::MeterTypes);
+            }
+            _ => (),
         }
         let loc = LocAnc::new(pri, view);
         RampMeterAnc {
@@ -169,6 +207,7 @@ impl AncillaryData for RampMeterAnc {
             loc,
             meter_types: Vec::new(),
             algorithms: Vec::new(),
+            sys_attrs: Vec::new(),
         }
     }
 
@@ -192,6 +231,10 @@ impl AncillaryData for RampMeterAnc {
             }
             Asset::MeterTypes => {
                 self.meter_types = serde_wasm_bindgen::from_value(value)?;
+                Ok(())
+            }
+            Asset::SystemAttrs => {
+                self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
                 Ok(())
             }
             _ => self.loc.set_asset(pri, asset, value),
@@ -525,37 +568,44 @@ impl RampMeter {
     }
 
     /// Build cycle input range HTML
-    fn cycle_html<'p>(&self, span: &'p mut html::Span<'p>) {
+    fn cycle_html<'p>(&self, anc: &RampMeterAnc, span: &'p mut html::Span<'p>) {
+        let cycle_min = anc.cycle_secs_min();
+        let cycle_max = anc.cycle_secs_max();
         let mut input = span.input();
         input
             .id("lk-cycle")
             .r#type("range")
-            .min(2.1)
-            .max(15)
+            .min(cycle_min)
+            .max(cycle_max)
             .step(0.1)
             .list("cycle-values");
-        let r = self.lock_rate().or(self.status_rate()).unwrap_or(1714);
-        let c = format!("{:.1}", 3_600.0 / (r as f32));
-        input.value(c);
+        input.value(match self.lock_rate().or(self.status_rate()) {
+            Some(r) => format!("{:.1}", 3_600.0 / (r as f32)),
+            None => format!("{cycle_min:.1}"),
+        });
         if self.lock.is_none() || !self.lock_reason().is_deployable() {
             input.disabled();
         }
         let mut datalist = span.datalist();
         datalist.id("cycle-values");
-        datalist.option().value(2.1).label("2.1").close();
-        datalist.option().value(3).close();
-        datalist.option().value(4).close();
-        datalist.option().value(5).label("5").close();
-        datalist.option().value(6).close();
-        datalist.option().value(7).close();
-        datalist.option().value(8).close();
-        datalist.option().value(9).close();
-        datalist.option().value(10).label("10").close();
-        datalist.option().value(11).close();
-        datalist.option().value(12).close();
-        datalist.option().value(13).close();
-        datalist.option().value(14).close();
-        datalist.option().value(15).label("15").close();
+        datalist
+            .option()
+            .value(cycle_min)
+            .label(format!("{cycle_min:.1}"))
+            .close();
+        for s in cycle_min.ceil() as usize..cycle_max.floor() as usize {
+            let mut option = datalist.option();
+            option.value(s);
+            if s % 5 == 0 {
+                option.label(s);
+            }
+            option.close();
+        }
+        datalist
+            .option()
+            .value(cycle_max)
+            .label(format!("{cycle_max:.1}"))
+            .close();
         datalist.close();
         span.close();
     }
@@ -624,7 +674,7 @@ impl RampMeter {
         self.title(View::Control, &mut tree.root::<html::Div>());
         self.render_state_row(anc, &mut tree.root::<html::Div>());
         self.render_location_row(&mut tree.root::<html::Div>());
-        self.render_lock_row(&mut tree.root::<html::Div>());
+        self.render_lock_row(anc, &mut tree.root::<html::Div>());
         String::from(tree)
     }
 
@@ -655,13 +705,17 @@ impl RampMeter {
     }
 
     /// Render meter lock row as an HTML div element
-    fn render_lock_row<'p>(&self, div: &'p mut html::Div<'p>) {
+    fn render_lock_row<'p>(
+        &self,
+        anc: &RampMeterAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
         div.id("lock-row").class("row center");
         self.meter_image_html(1, &mut div.img());
         let mut div2 = div.div();
         div2.class("column");
         self.lock_reason_html(&mut div2.span());
-        self.cycle_html(&mut div2.span());
+        self.cycle_html(anc, &mut div2.span());
         self.rate_html(&mut div2.span());
         self.queue_html(&mut div2.span());
         div2.close();
@@ -923,7 +977,7 @@ impl Card for RampMeter {
         }
         if let Some(row) = doc.opt_elem::<HtmlElement>("lock-row") {
             let mut tree = Tree::new();
-            self.render_lock_row(&mut tree.root::<html::Div>());
+            self.render_lock_row(&anc, &mut tree.root::<html::Div>());
             row.set_outer_html(&String::from(tree));
         }
     }
