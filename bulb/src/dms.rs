@@ -27,6 +27,7 @@ use crate::msgpattern::{FontName, GraphicName, MsgPattern};
 use crate::notes::contains_hashtag;
 use crate::permission::{AccessLevel, Permission};
 use crate::purpose::DedicatedPurpose;
+use crate::query::QueryParam;
 use crate::rend::Renderer;
 use crate::rle::Table;
 use crate::signconfig::NtcipDms;
@@ -1043,10 +1044,10 @@ impl Dms {
         div.label().cdata("Sign Config").close();
         match anc.sign_config(self.sign_config.as_deref()) {
             Some(cfg) => {
-                div.a()
-                    .href(format!("?res={}&sel={}", Res::SignConfig, cfg.name))
-                    .cdata(&cfg.name)
-                    .close();
+                let query = QueryParam::new()
+                    .with_res(Some(Res::SignConfig))
+                    .with_sel(&cfg.name);
+                div.a().href(query.to_string()).cdata(&cfg.name).close();
             }
             None => {
                 div.span().close(); /* empty */

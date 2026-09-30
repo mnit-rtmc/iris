@@ -16,6 +16,7 @@ use crate::fetch::Action;
 use crate::msgpattern::MsgPattern;
 use crate::msgpriority::MsgPriority;
 use crate::planphase::PlanPhase;
+use crate::query::QueryParam;
 use crate::util::Doc;
 use hatmil::{Tree, html};
 use resources::Res;
@@ -66,10 +67,11 @@ impl DeviceAction {
         }
         li.span().class("info").cdata(&self.hashtag).close();
         if let Some(msg_pattern) = &self.msg_pattern {
+            let query = QueryParam::new()
+                .with_res(Some(Res::MsgPattern))
+                .with_sel(msg_pattern);
             li.cdata(": ");
-            li.a()
-                .href(format!("?res={}&sel={}", Res::MsgPattern, msg_pattern))
-                .cdata(msg_pattern);
+            li.a().href(query.to_string()).cdata(msg_pattern);
         }
         li.close();
     }
@@ -319,11 +321,11 @@ impl DeviceAction {
         }
         summary.span().class("info").cdata(hashtag).close();
         if let Some(msg_pattern) = &self.msg_pattern {
+            let query = QueryParam::new()
+                .with_res(Some(Res::MsgPattern))
+                .with_sel(msg_pattern);
             summary.cdata(": ");
-            summary
-                .a()
-                .href(format!("?res={}&sel={}", Res::MsgPattern, msg_pattern))
-                .cdata(msg_pattern);
+            summary.a().href(query.to_string()).cdata(msg_pattern);
         }
         summary.close();
     }

@@ -19,6 +19,7 @@ use crate::error::Result;
 use crate::item::{ItemState, ItemStates};
 use crate::monitorstyle::MonitorStyle;
 use crate::permission::{AccessLevel, Permission};
+use crate::query::QueryParam;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref,
 };
@@ -195,7 +196,10 @@ impl VideoMonitor {
         if let Ok(el) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
             let mut tree = Tree::new();
             let mut a = tree.root::<html::A>();
-            a.href(format!("?res={}&sel={}", Res::VideoMonitor, self.name))
+            let query = QueryParam::new()
+                .with_res(Some(Res::VideoMonitor))
+                .with_sel(&self.name);
+            a.href(query.to_string())
                 .cdata(format!("📺 #{}", self.mon_num));
             el.set_inner_html(&String::from(tree));
         }

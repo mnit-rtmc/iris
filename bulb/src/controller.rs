@@ -19,6 +19,7 @@ use crate::error::Result;
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::map;
+use crate::query::QueryParam;
 use crate::util::{ContainsLower, Fields, Input, Select, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -262,11 +263,10 @@ impl Io {
         if let Ok(res) = Res::try_from(self.resource_n.as_str()) {
             li.class("row");
             li.span().cdata("#").cdata(self.pin).close();
+            let query =
+                QueryParam::new().with_res(Some(res)).with_sel(&self.name);
             let mut span = li.span();
-            span.a()
-                .href(format!("?res={res}&sel={}", self.name))
-                .cdata(&self.name)
-                .close();
+            span.a().href(query.to_string()).cdata(&self.name).close();
             span.cdata(res.symbol());
             li.close();
         }
@@ -326,9 +326,10 @@ impl Controller {
 
     /// Build controller link HTML
     pub fn link_html<'p>(&self, a: &'p mut html::A<'p>) {
-        a.href(format!("?res={}&sel={}", Res::Controller, self.name))
-            .cdata(self.link_drop())
-            .close();
+        let query = QueryParam::new()
+            .with_res(Some(Res::Controller))
+            .with_sel(&self.name);
+        a.href(query.to_string()).cdata(self.link_drop()).close();
     }
 
     /// Build link and location HTML

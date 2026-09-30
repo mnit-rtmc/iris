@@ -54,16 +54,14 @@ impl std::str::FromStr for QueryParam {
 impl fmt::Display for QueryParam {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.res.is_some() || !self.sel.is_empty() {
-            let mut first = true;
             write!(f, "?")?;
+            let mut first = true;
             if let Some(res) = self.res {
                 write!(f, "res={res}")?;
                 first = false;
             }
             if !self.sel.is_empty() {
-                if first {
-                    write!(f, "?")?;
-                } else {
+                if !first {
                     write!(f, "&")?;
                 }
                 let sel = utf8_percent_encode(&self.sel, NON_ALPHANUMERIC);
