@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2024  Minnesota Department of Transportation
+ * Copyright (C) 2014-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,10 @@ public class MaxPressureMeterEvent extends BaseEvent {
 	private final int q_state;
 
 	/** Queue length */
-        /** The first one is K-adaptive, the 2nd one is from cumulative counts */
-	private final float q_len, q_len_from_cc;
+	private final float q_len;
+
+	/** Queue length from cumulative counts */
+	private final float q_len_from_cc;
 
 	/** Demand adjustment */
 	private final float dem_adj;
@@ -62,23 +64,33 @@ public class MaxPressureMeterEvent extends BaseEvent {
 	private final String d_node;
 
 	/** Segment density */
-	private final float upstream_density_detected, upstream_density_estimated, downstream_density_detected, downstream_density_estimated;
-        
-        /** Weights used in max-pressure calculation **/
-        private final float upstream_weight, downstream_weight, ramp_weight;
-        private final float pressure_ud, pressure_rd;
-        
-        /** Used to compute rate in max-pressure calculation */
-        private final float receiving_flow, sending_flow_upstream, sending_flow_ramp;
+	private final float upstream_density_detected;
+	private final float upstream_density_estimated;
+	private final float downstream_density_detected;
+	private final float downstream_density_estimated;
+
+	/** Weights used in max-pressure calculation **/
+	private final float upstream_weight;
+	private final float downstream_weight;
+	private final float ramp_weight;
+
+	/** Pressure calculations */
+	private final float pressure_ud;
+	private final float pressure_rd;
+
+	/** Used to compute rate in max-pressure calculation */
+	private final float receiving_flow;
+	private final float sending_flow_upstream;
+	private final float sending_flow_ramp;
 
 	/** Create a new meter event */
 	public MaxPressureMeterEvent(EventType e, String mid, int p, int qs, float ql, float q_len_from_cc,
 		float da, int ws, int lc, int mn, int rr, int mx, String dn,
 		float upstream_density_detected, float upstream_density_estimated,
-                float downstream_density_detected, float downstream_density_estimated,
-                float upstream_weight, float downstream_weight, float ramp_weight,
-                float pressure_ud, float pressure_rd,
-                float receiving_flow, float sending_flow_upstream, float sending_flow_ramp)
+		float downstream_density_detected, float downstream_density_estimated,
+		float upstream_weight, float downstream_weight, float ramp_weight,
+		float pressure_ud, float pressure_rd,
+		float receiving_flow, float sending_flow_upstream, float sending_flow_ramp)
 	{
 		super(e);
 		assert e == EventType.METER_EVENT;
@@ -93,23 +105,19 @@ public class MaxPressureMeterEvent extends BaseEvent {
 		rel_rate = rr;
 		max_rate = mx;
 		d_node = dn;
-                
-                this.q_len_from_cc = q_len_from_cc;
-                
+		this.q_len_from_cc = q_len_from_cc;
 		this.upstream_density_detected = upstream_density_detected;
-                this.upstream_density_estimated = upstream_density_estimated;
-                this.downstream_density_detected = downstream_density_detected;
-                this.downstream_density_estimated = upstream_density_estimated;
-                
-                this.upstream_weight = upstream_weight;
-                this.downstream_weight = downstream_weight;
-                this.ramp_weight = ramp_weight;
-                this.pressure_ud = pressure_ud;
-                this.pressure_rd = pressure_rd;
-                
-                this.receiving_flow = receiving_flow;
-                this.sending_flow_upstream = sending_flow_upstream;
-                this.sending_flow_ramp = sending_flow_ramp;
+		this.upstream_density_estimated = upstream_density_estimated;
+		this.downstream_density_detected = downstream_density_detected;
+		this.downstream_density_estimated = upstream_density_estimated;
+		this.upstream_weight = upstream_weight;
+		this.downstream_weight = downstream_weight;
+		this.ramp_weight = ramp_weight;
+		this.pressure_ud = pressure_ud;
+		this.pressure_rd = pressure_rd;
+		this.receiving_flow = receiving_flow;
+		this.sending_flow_upstream = sending_flow_upstream;
+		this.sending_flow_ramp = sending_flow_ramp;
 	}
 
 	/** Get the event config name */
@@ -134,7 +142,7 @@ public class MaxPressureMeterEvent extends BaseEvent {
 		map.put("phase", phase);
 		map.put("q_state", q_state);
 		map.put("q_len", q_len);
-                map.put("q_len_from_cc", q_len_from_cc);
+		map.put("q_len_from_cc", q_len_from_cc);
 		map.put("dem_adj", dem_adj);
 		map.put("wait_secs", wait_secs);
 		map.put("limit_ctrl", limit_ctrl);
@@ -143,21 +151,18 @@ public class MaxPressureMeterEvent extends BaseEvent {
 		map.put("max_rate", max_rate);
 		if (d_node != null)
 			map.put("d_node", d_node);
-                
 		map.put("us_density_detected", upstream_density_detected);
-                map.put("us_density_detected", upstream_density_estimated);
-                map.put("ds_density_detected", downstream_density_detected);
-                map.put("ds_density_detected", downstream_density_estimated);
-                
-                map.put("us_weight", upstream_weight);
-                map.put("ds_weight", downstream_weight);
-                map.put("rmp_weight", ramp_weight);
-                map.put("pressure_ud", pressure_ud);
-                map.put("pressure_rd", pressure_rd);
-                
-                map.put("receiving_flow", receiving_flow);
-                map.put("sending_flow_us", sending_flow_upstream);
-                map.put("sending_flow_rmp", sending_flow_ramp);
+		map.put("us_density_detected", upstream_density_estimated);
+		map.put("ds_density_detected", downstream_density_detected);
+		map.put("ds_density_detected", downstream_density_estimated);
+		map.put("us_weight", upstream_weight);
+		map.put("ds_weight", downstream_weight);
+		map.put("rmp_weight", ramp_weight);
+		map.put("pressure_ud", pressure_ud);
+		map.put("pressure_rd", pressure_rd);
+		map.put("receiving_flow", receiving_flow);
+		map.put("sending_flow_us", sending_flow_upstream);
+		map.put("sending_flow_rmp", sending_flow_ramp);
 		return map;
 	}
 }

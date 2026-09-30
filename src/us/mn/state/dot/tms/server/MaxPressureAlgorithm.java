@@ -1038,18 +1038,17 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
          */
         private float getQueueLength(long stamp){
             float output = getCCQueueLength(stamp);
-
-            if(output >= 0){
+            if (output >= 0) {
                 return output;
-            }
-            else{
+            } else {
                 return estimateQueueLength();
             }
         }
 
         /** Estimate the length of queue (vehicles).
          * This is copied from KAdaptive queueLength().
-         * I am relabeling it as "estimate queue length" because calculating the queue length from cumulative counts is preferred.
+         * I am relabeling it as "estimate queue length" because calculating
+         * the queue length from cumulative counts is preferred.
          * @return Queue length (may be negative). */
         private float estimateQueueLength() {
             return (passage_good)
@@ -1064,14 +1063,13 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             I will return -1 if I do not have good data here.
          */
         private float getCCQueueLength(long stamp) {
-            if(queue.isPerfect()){
+            if (queue.isPerfect()) {
                 double queuein = queue.getCumulativeCount(stamp, PERIOD_MS);
                 double queueout = -1;
 
                 // based on k-adaptive, I believe that MERGE count = PASSAGE count + BYPASS count = GREEN count + BYPASS count
                 if (passage.isPerfect()) {
                     queueout = passage.getCumulativeCount(stamp, PERIOD_MS);
-                    
                     if (bypass.isPerfect()) {
                         queueout += bypass.getCumulativeCount(stamp, PERIOD_MS);
                     }
@@ -1081,19 +1079,15 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
                 }
                 else if (green.isPerfect()) {
                     queueout = green.getCumulativeCount(stamp, PERIOD_MS);
-
                     if (bypass.isPerfect()) {
                         queueout += bypass.getCumulativeCount(stamp, PERIOD_MS);
                     }
                 }
-                
-                if(queueout >= 0){
-                    return (float)(queuein - queueout);
+                if (queueout >= 0) {
+                    return (float) (queuein - queueout);
                 }
             }
-
             return -1;
-            
         }
 
         /** Get the default target metering rate (vehicles / hour) */
@@ -1525,7 +1519,7 @@ public class MaxPressureAlgorithm implements MeterAlgorithmState {
             float us_den_detected = upstream.station.getDensity(stamp, PERIOD_MS);
             float us_den_estimated = (float)network.getUpstreamAvgDensity();
             double ramp_queue_from_cc = ramp_queue;
-            
+
             MaxPressureMeterEvent ev = new MaxPressureMeterEvent(EventType.METER_EVENT,
                 meter.name, phase.ordinal(),
                 getQueueState().ordinal(), estimateQueueLength(), (float)ramp_queue_from_cc,

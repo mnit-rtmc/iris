@@ -26,50 +26,40 @@ import us.mn.state.dot.tms.server.VehicleSampler;
  * @author Michael Levin
  */
 public class SimpleCCSamplerSet implements VehicleSampler {
-    
+
     private SamplerSet sampler;
 
-
-    
     private int count;
     private long last_update;
-    
-    
+
     public SimpleCCSamplerSet(SamplerSet s, long stamp){
         sampler = s;
-        
         count = 0;
         last_update = stamp;
     }
-    
-    
+
     public void log(long stamp, int per_ms){
         if(MaxPressureAlgorithm.ALG_LOG.isOpen()){
             MaxPressureAlgorithm.ALG_LOG.log(stamp+" "+count);
         }
     }
-    
+
     // this may be asked for historical counts, and those counts need to be stored and retrieved
     // this may be non-integer due to interpolation
     public double getCumulativeCount(long stamp, int per_ms){
-        if(stamp > last_update){
-            while(stamp - last_update > 0){
+        if (stamp > last_update){
+            while (stamp - last_update > 0){
                 last_update += per_ms;
                 int passed = getVehCount(last_update, per_ms);
-                
-                if(passed < 0){
+                if (passed < 0) {
                     passed = 0;
                 }
-                
                 count += passed;
-
             }
         }
-        
         return count;
-        
     }
-    
+
     public int getVehCount(long stamp, int per_ms) {
         int count = 0;
         int n_count = 0;
@@ -80,33 +70,35 @@ public class SimpleCCSamplerSet implements VehicleSampler {
                 n_count++;
             } 
         }
-        return (n_count > 0) ? (int)Math.round(count * (sampler.samplers.size() / n_count)) : MISSING_DATA;
+        return (n_count > 0)
+              ? Math.round(count * (sampler.samplers.size() / n_count))
+              : MISSING_DATA;
     }
-    
+
     public float getSpeed(long stamp, int per_ms) {
         return sampler.getSpeed(stamp, per_ms);
     }
-    
+
     public float getMaxOccupancy(long stamp, int per_ms) {
         return sampler.getMaxOccupancy(stamp, per_ms);
     }
-    
+
     public float getOccupancy(long stamp, int per_ms) {
         return sampler.getOccupancy(stamp, per_ms);
     }
-    
+
     public float getDensity(long stamp, int per_ms) {
         return sampler.getDensity(stamp, per_ms);
     }
-    
+
     public int getFlow(long stamp, int per_ms) {
         return sampler.getFlow(stamp, per_ms);
     }
-    
+
     public boolean isPerfect() {
         return sampler.isPerfect();
     }
-    
+
     public String toString(){
         return sampler.toString();
     }
