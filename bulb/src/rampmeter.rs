@@ -154,6 +154,32 @@ impl RampMeterAnc {
         select.close();
     }
 
+    /// Get meter green time (centiseconds)
+    fn green_cs(&self) -> u16 {
+        for sa in &self.sys_attrs {
+            if sa.name == "meter_green_secs"
+                && let Ok(v) = sa.value.parse::<f32>()
+            {
+                return centiseconds(v);
+            }
+        }
+        log::warn!("meter_green_secs not found");
+        130
+    }
+
+    /// Get meter yellow time (centiseconds)
+    fn yellow_cs(&self) -> u16 {
+        for sa in &self.sys_attrs {
+            if sa.name == "meter_yellow_secs"
+                && let Ok(v) = sa.value.parse::<f32>()
+            {
+                return centiseconds(v);
+            }
+        }
+        log::warn!("meter_yellow_secs not found");
+        70
+    }
+
     /// Get minimum meter cycle time (seconds)
     fn cycle_secs_min(&self) -> f32 {
         let mut cycle = 0.0;
@@ -326,21 +352,37 @@ fn encode_meter_off<W: Write>(enc: Encoder<W>) -> Result<()> {
 }
 
 /// Encode a GIF of meter 1 (left) cycling
-fn encode_meter_1<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
+fn encode_meter_1<W: Write>(
+    enc: Encoder<W>,
+    green_cs: u16,
+    yellow_cs: u16,
+    red_cs: u16,
+) -> Result<()> {
     let mut enc = enc.into_step_enc().with_loop_count(0);
-    enc.encode_step(&make_step(MeterState::Green, 130)?)?;
-    enc.encode_step(&make_step(MeterState::Yellow, 70)?)?;
+    enc.encode_step(&make_step(MeterState::Green, green_cs)?)?;
+    enc.encode_step(&make_step(MeterState::Yellow, yellow_cs)?)?;
     enc.encode_step(&make_step(MeterState::Red, red_cs)?)?;
-    enc.encode_step(&make_step(MeterState::Red, 200 + red_cs)?)?;
+    enc.encode_step(&make_step(
+        MeterState::Red,
+        green_cs + yellow_cs + red_cs,
+    )?)?;
     Ok(())
 }
 
 /// Encode a GIF of meter 2 (right) cycling
-fn encode_meter_2<W: Write>(enc: Encoder<W>, red_cs: u16) -> Result<()> {
+fn encode_meter_2<W: Write>(
+    enc: Encoder<W>,
+    green_cs: u16,
+    yellow_cs: u16,
+    red_cs: u16,
+) -> Result<()> {
     let mut enc = enc.into_step_enc().with_loop_count(0);
-    enc.encode_step(&make_step(MeterState::Red, 200 + red_cs)?)?;
-    enc.encode_step(&make_step(MeterState::Green, 130)?)?;
-    enc.encode_step(&make_step(MeterState::Yellow, 70)?)?;
+    enc.encode_step(&make_step(
+        MeterState::Red,
+        green_cs + yellow_cs + red_cs,
+    )?)?;
+    enc.encode_step(&make_step(MeterState::Green, green_cs)?)?;
+    enc.encode_step(&make_step(MeterState::Yellow, yellow_cs)?)?;
     enc.encode_step(&make_step(MeterState::Red, red_cs)?)?;
     Ok(())
 }
@@ -404,6 +446,11 @@ impl MeterLock {
         }
         None
     }
+}
+
+/// Convert seconds to centiseconds, rounded to nearest 0.1 s
+fn centiseconds(s: f32) -> u16 {
+    (s * 10.0).round() as u16 * 10
 }
 
 impl RampMeter {
@@ -513,18 +560,34 @@ impl RampMeter {
     }
 
     /// Build meter image HTML
-    fn meter_image_html<'p>(&self, num: u32, img: &'p mut html::Img<'p>) {
+    fn meter_image_html<'p>(
+        &self,
+        num: u32,
+        green_cs: u16,
+        yellow_cs: u16,
+        img: &'p mut html::Img<'p>,
+    ) {
         if let Some(r) = self.status_rate() {
-            let c = 3_600.0 / (r as f32);
-            let ds = (c * 10.0).round() as i32;
-            // between 0.1 and 50.0 seconds
-            if ds > 0 && ds < 500 {
-                let red_cs = ds as u16 * 10;
+            let cycle_s = 3_600.0 / (r as f32);
+            let cycle_cs = centiseconds(cycle_s);
+            // 50 seconds is too long
+            if cycle_cs > green_cs + yellow_cs && cycle_cs < 5000 {
+                let red_cs = cycle_cs - green_cs - yellow_cs;
                 let mut buf = Vec::with_capacity(4096);
                 let res = if num == 1 {
-                    encode_meter_1(Encoder::new(&mut buf), red_cs)
+                    encode_meter_1(
+                        Encoder::new(&mut buf),
+                        green_cs,
+                        yellow_cs,
+                        red_cs,
+                    )
                 } else {
-                    encode_meter_2(Encoder::new(&mut buf), red_cs)
+                    encode_meter_2(
+                        Encoder::new(&mut buf),
+                        green_cs,
+                        yellow_cs,
+                        red_cs,
+                    )
                 };
                 match res {
                     Ok(()) => {
@@ -711,7 +774,9 @@ impl RampMeter {
         div: &'p mut html::Div<'p>,
     ) {
         div.id("lock-row").class("row center");
-        self.meter_image_html(1, &mut div.img());
+        let green_cs = anc.green_cs();
+        let yellow_cs = anc.yellow_cs();
+        self.meter_image_html(1, green_cs, yellow_cs, &mut div.img());
         let mut div2 = div.div();
         div2.class("column");
         self.lock_reason_html(&mut div2.span());
@@ -719,7 +784,7 @@ impl RampMeter {
         self.rate_html(&mut div2.span());
         self.queue_html(&mut div2.span());
         div2.close();
-        self.meter_image_html(2, &mut div.img());
+        self.meter_image_html(2, green_cs, yellow_cs, &mut div.img());
         div.close();
     }
 
