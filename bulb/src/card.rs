@@ -42,6 +42,7 @@ use crate::msgline::MsgLine;
 use crate::msgpattern::MsgPattern;
 use crate::permission::{AccessLevel, Permission};
 use crate::planphase::PlanPhase;
+use crate::playlist::PlayList;
 use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;
@@ -384,6 +385,7 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::MsgLine => MsgLine::item_states_all(),
         Res::MsgPattern => MsgPattern::item_states_all(),
         Res::PlanPhase => PlanPhase::item_states_all(),
+        Res::PlayList => PlayList::item_states_all(),
         Res::RampMeter => RampMeter::item_states_all(),
         Res::Road => Road::item_states_all(),
         Res::Role => Role::item_states_all(),

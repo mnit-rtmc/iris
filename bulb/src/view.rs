@@ -41,6 +41,7 @@ use crate::monitorstyle::MonitorStyle;
 use crate::msgline::MsgLine;
 use crate::msgpattern::MsgPattern;
 use crate::planphase::PlanPhase;
+use crate::playlist::PlayList;
 use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;

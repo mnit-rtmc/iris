@@ -21,7 +21,7 @@ use js_sys::JsString;
 use resources::Res;
 use std::cell::RefCell;
 use wasm_bindgen::JsCast;
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::closure::Closure;
 use web_sys::{Event, EventSource, HtmlElement, MessageEvent};
 
 /// Notification button state

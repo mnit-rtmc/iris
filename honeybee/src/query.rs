@@ -774,7 +774,7 @@ pub const PLAN_PHASE_ONE: &str = "\
 
 /// SQL query for all play lists (primary)
 pub const PLAY_LIST_ALL: &str = "\
-  SELECT name, seq_num, notes \
+  SELECT name, meta, seq_num, notes \
   FROM iris.play_list \
   ORDER BY name";
 

@@ -78,6 +78,10 @@ pub enum ItemState {
     Hazard,
     /// Roadwork incident
     Roadwork,
+    /// Simple play list
+    Simple,
+    /// Meta play list
+    Meta,
     /// State not known
     Unknown,
 }
@@ -129,6 +133,8 @@ impl ItemState {
             "⛽" => Some(Self::Stall),
             "🪨" => Some(Self::Hazard), // 🫟  maybe?
             "🚧" => Some(Self::Roadwork),
+            "🗒️" => Some(Self::Simple),
+            "🗒️🗒️" => Some(Self::Meta),
             "❓" => Some(Self::Unknown),
             _ => None,
         }
@@ -168,6 +174,8 @@ impl ItemState {
             Self::Stall => "⛽",
             Self::Hazard => "🪨", // 🫟  maybe?
             Self::Roadwork => "🚧",
+            Self::Simple => "🗒️",
+            Self::Meta => "🗒️🗒️",
             Self::Unknown => "❓",
         }
     }
@@ -190,6 +198,8 @@ impl ItemState {
             Self::Stall => "#ff80ff",
             Self::Hazard => "#ffff80",
             Self::Roadwork => "#ffd080",
+            Self::Simple => "#88d",
+            Self::Meta => "#d8f",
             Self::Inactive => "#fff2",
             Self::Triggered => "#884",
             _ => "none",
@@ -230,6 +240,8 @@ impl ItemState {
             Self::Stall => "stall",
             Self::Hazard => "hazard",
             Self::Roadwork => "road work",
+            Self::Simple => "simple",
+            Self::Meta => "meta",
             Self::Unknown => "unknown",
         }
     }

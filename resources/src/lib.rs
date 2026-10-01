@@ -330,7 +330,7 @@ impl Res {
             Permission => "🗝️ ",
             PhaseAction => "⏰",
             PlanPhase => "🌘",
-            PlayList => "FIXME",
+            PlayList => "▶︎ ",
             RampMeter => "🚦",
             Rnode => "⍿",
             Road => "🛣️ ",
