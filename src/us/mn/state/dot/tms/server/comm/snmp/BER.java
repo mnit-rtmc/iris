@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2023  Minnesota Department of Transportation
+ * Copyright (C) 2026		Alaska DOT&PF
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * Basic Encoding Rules for ASN.1
  *
  * @author Douglas Lau
+ * @author Darren Jaeckel, Wostmann & Associates
  */
 abstract public class BER extends ASN1 {
 
@@ -138,14 +140,25 @@ abstract public class BER extends ASN1 {
 	/** Encode an object identifier */
 	protected void encodeObjectIdentifier(int[] oid) throws IOException {
 		ByteArrayOutputStream bs = new ByteArrayOutputStream();
+		// The first octet is always value 1 * 40 + value 2
 		bs.write(oid[0] * 40 + oid[1]);
 		for (int i = 2; i < oid.length; i++) {
+			// Numbers are encoded base 128 (2^7), with the
+			//  most significant digit first. The most significant
+			//  digit of each octet is set to "1" _except_ the last.
 			int subid = oid[i];
 			if (subid > SEVEN_BITS) {
-				bs.write(HIGH_BIT | (subid >> 7));
-				subid &= SEVEN_BITS;
+				int numBytes = 1;
+				while (subid > (Math.pow(2, numBytes * 7) - 1)) {
+					numBytes += 1;
+				}
+				for (int j = numBytes-1; j > 0; j--) {
+					bs.write(HIGH_BIT | (subid >> (7*j)));
+				}
+				bs.write(subid & SEVEN_BITS);
+			} else {
+				bs.write(subid);
 			}
-			bs.write(subid);
 		}
 		byte[] buffer = bs.toByteArray();
 		encodeIdentifier(ASN1Tag.OBJECT_IDENTIFIER);
