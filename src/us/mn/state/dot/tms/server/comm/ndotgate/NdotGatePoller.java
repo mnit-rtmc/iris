@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2026  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ndorv5;
+package us.mn.state.dot.tms.server.comm.ndotgate;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
@@ -24,23 +24,28 @@ import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
- * A Poller to communicate with an NDOR (Nebraska Department
- * of Roads) Gate Control Controller using their v5 protocol.
- * Note:  Code updated in August 2016 to include multi-arm
- * gate protocol referred to as v5.
+ * A Poller to communicate with Nebraska and North Dakota
+ *  gate controllers using the NDOTv6 gate control protocol.
+ * (This code is backwards compatible with the NDORv5 gate
+ *  control protocol.)
+ *
+ * Note1:  Updated in August 2016 to include multi-arm
+ *  gate protocol referred to as NDORv5.
+ * Note2:  Updated in January 2026 to include the NDOTv6
+ *  MODBUS error reporting extension for North Dakota.
  *
  * @author John L. Stanley - SRF Consulting
  */
-public class GateNdorV5Poller extends ThreadedPoller<GateNdorV5Property>
+public class NdotGatePoller extends ThreadedPoller<NdotGateProperty>
 	implements GateArmPoller
 {
 	/** Debug log */
-	static protected final DebugLog GATENDORv5_LOG =
-			new DebugLog("gatendorv5");
+	static protected final DebugLog NDOTGATE_LOG =
+			new DebugLog("ndotgate");
 
-	/** Create a new NDORv5 Gate poller */
-	public GateNdorV5Poller(CommLink link) {
-		super(link, TCP, GATENDORv5_LOG);
+	/** Create a new NDOT Gate poller */
+	public NdotGatePoller(CommLink link) {
+		super(link, TCP, NDOTGATE_LOG);
 	}
 
 	/** Send a device request */

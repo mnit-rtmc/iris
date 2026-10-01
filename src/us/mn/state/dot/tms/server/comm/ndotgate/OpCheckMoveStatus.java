@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2026  SRF Consulting Group
  * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ndorv5;
+package us.mn.state.dot.tms.server.comm.ndotgate;
 
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
@@ -28,11 +28,14 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Operation to see if gate-arm has finished
  * moving to the correct position.
  *
+ * Note:  Updated in January 2026 to include the
+ *  shorter v6 gate-fault message strings.
+ *
  * @author John L. Stanley - SRF Consulting
  * @author Douglas Lau
  */
 @SuppressWarnings("rawtypes")
-public class OpCheckMoveStatus extends OpGateNdorV5 {
+public class OpCheckMoveStatus extends OpNdotGate {
 
 	/** Requested gate arm state */
 	private final GateArmState target_state;
@@ -60,8 +63,8 @@ public class OpCheckMoveStatus extends OpGateNdorV5 {
 			antitarget_state = GateArmState.CLOSED;
 
 		if (sGateArm != null) {
-			// NDORv5 "Retrieve Gate Status" command
-			prop = new GateNdorV5Property("*S"+sGateArm+"#\r\n");
+			// NDORv5/NDOTv6 "Retrieve Gate Status" command
+			prop = new NdotGateProperty("*S"+sGateArm+"#\r\n");
 
 			long started = TimeSteward.currentTimeMillis();
 			maxEndTime = started + ((delaySec + 220) * 1000L);
@@ -97,9 +100,9 @@ public class OpCheckMoveStatus extends OpGateNdorV5 {
 			// Detect manual override condition.
 			if (new_state == antitarget_state) {
 				if (target_state == GateArmState.CLOSED)
-					prop.statusOfGate = StatusOfGate.TIMEOUT_CLOSING_FAILED;
+					prop.statusOfGate = StatusOfGate.TIMEOUT_CLOSE_FAILED;
 				else
-					prop.statusOfGate = StatusOfGate.TIMEOUT_OPENING_FAILED;
+					prop.statusOfGate = StatusOfGate.TIMEOUT_OPEN_FAILED;
 				return null;
 			}
 			// Detect gate-motion error-responses from
@@ -117,9 +120,9 @@ public class OpCheckMoveStatus extends OpGateNdorV5 {
 
 			// Operation monitoring timed out without gate motion completing.
 			if (target_state == GateArmState.CLOSED)
-				prop.statusOfGate = StatusOfGate.TIMEOUT_CLOSING_FAILED;
+				prop.statusOfGate = StatusOfGate.TIMEOUT_CLOSE_FAILED;
 			else
-				prop.statusOfGate = StatusOfGate.TIMEOUT_OPENING_FAILED;
+				prop.statusOfGate = StatusOfGate.TIMEOUT_OPEN_FAILED;
 			return null;
 		}
 	}

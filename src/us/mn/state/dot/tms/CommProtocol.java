@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2025  Minnesota Department of Transportation
  * Copyright (C) 2012-2021  Iteris Inc.
- * Copyright (C) 2015-2023  SRF Consulting Group
+ * Copyright (C) 2015-2026  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,8 +137,8 @@ public enum CommProtocol {
 	/** MonStream video switching (35) */
 	MON_STREAM("MonStream", false),
 
-	/** (Nebraska Department of Roads) NDOR GateArm v5 (36) */
-	GATE_NDOR5("GATE NDORv5"),
+	/** Nebraska GateArm (NDOTv6) (36) */
+	NDOT_GATE("NDOT Gate"),
 
 	/** GPS using TAIP protocol (37) */
 	@Deprecated
@@ -198,7 +198,7 @@ public enum CommProtocol {
 	/** Test if a comm protocol supports gate arm control */
 	public boolean isGateArm() {
 		return this == CommProtocol.HYSECURITY_STC ||
-		       this == CommProtocol.GATE_NDOR5;
+		       this == CommProtocol.NDOT_GATE;
 	}
 
 	/** Values array */

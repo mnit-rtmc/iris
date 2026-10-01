@@ -31,7 +31,7 @@ _comm link_.
 | [MonStream]      | `udp`          | 1               | [video]             |
 | Msg-Feed         | `http`         | 1               | [external]          |
 | Natch            | `tcp`          | 1               | [MnDOT devices]     |
-| NDORv5           | `tcp`          | 1               | [gate arm]          |
+| NDOT Gate        | `tcp`          | 1               | [gate arm]          |
 | NDOT Beacon      | `tcp`          | 1               | [beacon]            |
 | [NTCIP] A        | `udp`          | 1               | [NTCIP devices]     |
 | [NTCIP] B        | `tcp`          | 1-8191          | [NTCIP devices]     |

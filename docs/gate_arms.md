@@ -13,7 +13,7 @@ The gate arm must be associated with a [controller] on an appropriate
 | Protocol       | [IO Pin]s |
 |----------------|-----------|
 | HySecurity STC | 1         |
-| NDORv5         | 1-8       |
+| NDOT Gate      | 1-8       |
 
 The gate arm properties form has setup information.
 

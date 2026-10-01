@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011-2013	Minnesota Department of Transportation
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2026  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ndorv5;
+package us.mn.state.dot.tms.server.comm.ndotgate;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -23,24 +23,24 @@ import us.mn.state.dot.tms.utils.LineReader;
 /**
  *  This class is here to deal with the odd "<CR><LF>"
  *  (Literally those EIGHT characters) end-of-line
- *  marker that the NDOR v5 gate-controller sends.
+ *  marker that some NDOR gate-controllers send.
  *  Derived from Doug Lau's LineReader class.
  *
  * @author John L. Stanley - SRF Consulting
  */
-public class LineReaderNdorGate extends LineReader {
+public class NdotGateLineReader extends LineReader {
 
 	/** Create a new line reader.
 	 * @param r Reader to read.
 	 * @param max_chars Maximum number of characters on a line. */
-	public LineReaderNdorGate(Reader r, int max_chars) {
+	public NdotGateLineReader(Reader r, int max_chars) {
 		super(r, max_chars);
 	}
 
 	/** Create a new line reader.
 	 * @param is Input stream to read.
 	 * @param max_chars Maximum number of characters on a line. */
-	public LineReaderNdorGate(InputStream is, int max_chars)
+	public NdotGateLineReader(InputStream is, int max_chars)
 			throws IOException {
 		super(is, max_chars);
 	}
@@ -60,8 +60,8 @@ public class LineReaderNdorGate extends LineReader {
 			} else {
 				n_chars += n;
 
-				// process odd EOL marker
-				// from NDOR gate controller
+				// Process odd EOL marker sent by
+				// some NDORv5/NDOTv6 gate controllers.
 				String s1 = new String(buffer, 0, n_chars);
 				String s2 = s1.replace("<CR><LF>", "\n\r");
 				if (!s1.equals(s2)) {
