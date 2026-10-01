@@ -120,17 +120,15 @@ for switching.
 
 Select `View ➔ Video ➔ Play Lists` menu item
 
-Play lists can be created to quickly cycle through [camera]s.  Selecting a
-play list on a monitor will cause the cameras to automatically switch after
-a short dwell time, specified by the `camera_playlist_dwell_sec`
-[system attribute].  A **seq num** is a unique number to select the list.
+Play lists can be created to quickly cycle through [camera] entries.
+Selecting a play list on a monitor will cause the displayed camera to switch
+automatically after a short dwell time, specified by the
+`camera_playlist_dwell_sec` [system attribute].  A **seq num** is an optional
+unique number to select the list.
 
-A **meta** play list consists of (non-meta) sub-lists.  This allows lists to
-be broken up and shared with other meta lists.
-
-Each role can have one _scratch_ play list:
-* Must have 💡 Manage [permissions] for `video_monitor`, with a [hashtag]
-* Exactly one play list must have that hashtag
+A **meta** play list contains other play lists (instead of cameras) as
+*sub-list* entries.  This allows large lists to be broken up and shared with
+other meta lists.  NOTE: Meta lists can only contain regular (non-meta) lists.
 
 <details>
 <summary>API Resources 🕵️ </summary>
@@ -145,6 +143,12 @@ Each role can have one _scratch_ play list:
 | 🔧 Configure | seq\_num, notes | meta      |
 
 </details>
+
+### Scratch Lists
+
+Each role can have one _scratch_ play list:
+* Must have 💡 Manage [permissions] for `video_monitor`, with a [hashtag]
+* Exactly one play list must have that hashtag
 
 
 [camera]: cameras.html
