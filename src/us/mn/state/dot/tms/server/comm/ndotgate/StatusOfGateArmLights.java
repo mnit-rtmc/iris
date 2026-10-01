@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2026  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ndorv5;
+package us.mn.state.dot.tms.server.comm.ndotgate;
 
 /**
- * Status for NdorGateV5 gatearm lights.
+ * Status for NdotGateV6 gate-arm lights.
  *
  * @author John L. Stanley - SRF Consulting
  */

@@ -1266,7 +1266,7 @@ VALUES
     (33, 'CBW'),
     (34, 'Incident Feed'),
     (35, 'MonStream'),
-    (36, 'Gate NDORv5'),
+    (36, 'NDOT Gate'),
     (37, 'GPS TAIP'),
     (38, 'SierraGX'),
     (39, 'GPS RedLion'),

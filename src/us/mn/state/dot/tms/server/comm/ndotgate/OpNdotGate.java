@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2026  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,9 @@
  * Derived in part from MNDOT's IRIS code for controlling their
  * HySecurity STC gates.
  */
-package us.mn.state.dot.tms.server.comm.ndorv5;
+package us.mn.state.dot.tms.server.comm.ndotgate;
+
+import static us.mn.state.dot.tms.server.comm.ndotgate.NdotGatePoller.NDOTGATE_LOG;
 
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.User;
@@ -23,40 +25,39 @@ import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import static us.mn.state.dot.tms.server.comm.ndorv5.GateNdorV5Poller.GATENDORv5_LOG;
 
 /**
- * Operation for NDOR Gate v5 device
+ * Operation for NDORv5/NDOTv6 Gate controller
  * Note:  Code updated in August 2016 to include
  * multi-arm gate protocol referred to as v5.
  *
  * @author John L. Stanley - SRF Consulting
  */
-abstract public class OpGateNdorV5<T extends ControllerProperty>
+abstract public class OpNdotGate<T extends ControllerProperty>
 	extends OpDevice<T>
 {
 	/** Log an error msg */
 	protected void logError(String msg) {
-		if (GATENDORv5_LOG.isOpen())
-			GATENDORv5_LOG.log(controller.getName() + "! " + msg);
+		if (NDOTGATE_LOG.isOpen())
+			NDOTGATE_LOG.log(controller.getName() + "! " + msg);
 	}
 
 	/** Gate arm device */
 	protected final GateArmImpl gate_arm;
 
 	// String representation of the controller's gate-arm number
-	// using NDOR gate-protocol v5 (with multi-gate extension)
-	// (IRIS controller pin number) == (NDORv5 controller gate arm number)
+	// using NDORv5/NDOTv6 gate-protocol (with multi-gate extension)
+	// (IRIS controller pin number) == (controller gate arm number)
 	//   pin 1 --> ""
 	//   pin 2-8 --> "2"-"8"
 	//   all other gate numbers --> null
 	protected final String sGateArm;
 
 	/** Status property */
-	protected GateNdorV5Property prop;
+	protected NdotGateProperty prop;
 
-	/** Create a new NDOR Gate v5 operation */
-	protected OpGateNdorV5(PriorityLevel p, GateArmImpl ga, boolean ex) {
+	/** Create a new NDOT Gate operation */
+	protected OpNdotGate(PriorityLevel p, GateArmImpl ga, boolean ex) {
 		super(p, ga, ex);
 		gate_arm = ga;
 		int pin = gate_arm.getPin();

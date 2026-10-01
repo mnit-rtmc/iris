@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2026  SRF Consulting Group
  * Copyright (C) 2021-2022  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ndorv5;
+package us.mn.state.dot.tms.server.comm.ndotgate;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.GateArmImpl;
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 @SuppressWarnings("rawtypes")
-public class OpQueryGateStatus extends OpGateNdorV5 {
+public class OpQueryGateStatus extends OpNdotGate {
 
 	/** Create a new gate arm query status operation */
 	@SuppressWarnings("unchecked")
@@ -39,8 +39,8 @@ public class OpQueryGateStatus extends OpGateNdorV5 {
 			prop = null;
 			return;
 		}
-		// NDORv5 "Retrieve Gate Status" command
-		prop = new GateNdorV5Property("*S"+sGateArm+"#\r\n");
+		// NDORv5/NDOTv6 "Retrieve Gate Status" command
+		prop = new NdotGateProperty("*S"+sGateArm+"#\r\n");
 	}
 
 	/** Create the second phase of the operation */

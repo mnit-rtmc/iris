@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2026  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,13 +12,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ndorv5;
+package us.mn.state.dot.tms.server.comm.ndotgate;
 
 /**
- * Gate status for NdorGateV5 gate arms.
+ * Gate status for NdotGateV6 gate arms.
  *
  * Note:  Updated in August 2016 to include
- * multi-arm gate protocol referred to as v5.
+ *  multi-arm gate protocol referred to as v5.
+ * Note2:  Updated in January 2026 to use shorter
+ *  gate-status fault-message strings.
  *
  * @author John L. Stanley - SRF Consulting
  */
@@ -31,9 +33,9 @@ public enum StatusOfGate {
 	UNKNOWN_4,
 	UNKNOWN_5,
 	TIMEOUT_STILL_CLOSED,   //  6 - Error - Timed out and never moved from Closed
-	TIMEOUT_OPENING_FAILED, //  7 - Error - Timed out moving from Closed to Open
-	TIMEOUT_STILL_OPENED,   //  8 - Error - Timed out and never moved from Open
-	TIMEOUT_CLOSING_FAILED, //  9 - Error - Timed out moving from Open to Closed
+	TIMEOUT_OPEN_FAILED,    //  7 - Error - Timed out moving from Closed to Open
+	TIMEOUT_STILL_OPEN,     //  8 - Error - Timed out and never moved from Open
+	TIMEOUT_CLOSE_FAILED,   //  9 - Error - Timed out moving from Open to Closed
 
 	// Following error state is from v5 protocol extension....
 	GATE_NOT_CONFIGURED;    // 10 - Error - Requested gate-arm number not configured

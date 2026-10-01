@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2022  SRF Consulting Group
+ * Copyright (C) 2015-2026  SRF Consulting Group
  * Copyright (C) 2021-2025  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ndorv5;
+package us.mn.state.dot.tms.server.comm.ndotgate;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.GateArmState;
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 @SuppressWarnings("rawtypes")
-public class OpMoveGateArm extends OpGateNdorV5 {
+public class OpMoveGateArm extends OpNdotGate {
 
 	/** Requested gate arm state */
 	private GateArmState target_state = GateArmState.UNKNOWN;
@@ -45,13 +45,13 @@ public class OpMoveGateArm extends OpGateNdorV5 {
 			return;
 		}
 		if (gas == GateArmState.OPENING) {
-			// NDORv5 "Raise Gate" command
-			prop = new GateNdorV5Property("*R"+sGateArm+"#\r\n");
+			// NDORv5/NDOTv6 "Raise Gate" command
+			prop = new NdotGateProperty("*R"+sGateArm+"#\r\n");
 			target_state = GateArmState.OPEN;
 		}
 		else if (gas == GateArmState.CLOSING) {
-			// NDORv5 "Lower Gate" command
-			prop = new GateNdorV5Property("*L"+sGateArm+"#\r\n");
+			// NDORv5/NDOTv6 "Lower Gate" command
+			prop = new NdotGateProperty("*L"+sGateArm+"#\r\n");
 			target_state = GateArmState.CLOSED;
 		}
 		else {
@@ -84,7 +84,7 @@ public class OpMoveGateArm extends OpGateNdorV5 {
 			if (!prop.gotValidResponse())
 				throw new ParsingException("NO RESPONSE");
 
-			// queue a lower priority operation to monitor state
+			// queue a lower priority op to monitor gate motion
 			switch (target_state) {
 				case CLOSED:
 					checkClosing();
