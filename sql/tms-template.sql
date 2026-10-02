@@ -5022,6 +5022,7 @@ CREATE TABLE iris.play_list_entry (
     camera VARCHAR(20) REFERENCES iris._camera,
     sub_list VARCHAR(20) REFERENCES iris.play_list,
 
+    CONSTRAINT ordinal_ck CHECK (ordinal >= 0 AND ordinal <= 300),
     CONSTRAINT camera_ck CHECK (
         iris.play_list_is_meta(play_list) = (camera IS NULL)
     ) NOT VALID,

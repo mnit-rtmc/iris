@@ -175,7 +175,7 @@ cameras, respectively.
 Pressing the `.` key (on the numpad) changes to [video monitor] selection mode —
 the icon will change to a monitor.  Pressing the `*` key (on the numpad) changes
 to [play list] selection mode — the icon will change to a play list.  Enter a
-**seq num** to select the corresponding play list.
+**sequence num** to select the corresponding play list.
 
 ## Camera Keyboards
 

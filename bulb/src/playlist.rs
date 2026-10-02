@@ -16,7 +16,8 @@ use crate::camera::Camera;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::error::Result;
 use crate::fetch::Action;
-use crate::item::ItemState;
+use crate::item::{ItemState, ItemStates};
+use crate::permission::{AccessLevel, Permission};
 use crate::util::{ContainsLower, Fields, Input, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -40,6 +41,7 @@ pub struct PlayList {
 #[derive(Debug, Default)]
 pub struct PlayListAnc {
     assets: Vec<Asset>,
+    access: Vec<Permission>,
     cameras: Vec<Camera>,
 }
 
@@ -49,11 +51,12 @@ impl AncillaryData for PlayListAnc {
     /// Construct ancillary role data
     fn new(_pri: &PlayList, view: View) -> Self {
         let assets = match view {
-            View::Setup(_) => vec![Asset::Cameras],
-            _ => Vec::new(),
+            View::Setup(_) => vec![Asset::Access, Asset::Cameras],
+            _ => vec![Asset::Access],
         };
         PlayListAnc {
             assets,
+            access: Vec::new(),
             cameras: Vec::new(),
         }
     }
@@ -71,6 +74,9 @@ impl AncillaryData for PlayListAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::Access => {
+                self.access = serde_wasm_bindgen::from_value(value)?;
+            }
             Asset::Cameras => {
                 self.cameras = serde_wasm_bindgen::from_value(value)?;
             }
@@ -80,7 +86,57 @@ impl AncillaryData for PlayListAnc {
     }
 }
 
+impl PlayListAnc {
+    /// Get permission access level
+    fn access_level(&self, pri: &PlayList) -> AccessLevel {
+        Permission::access_level_notes(
+            self.access.as_slice(),
+            Res::VideoMonitor,
+            Some(&pri.notes),
+        )
+    }
+
+    /// Check if entries are different
+    fn compare_entries(&self, entries: &[String], sel: &[String]) -> bool {
+        if entries.len() != sel.len() {
+            return true;
+        }
+        for ent in sel {
+            if !entries.contains(ent) {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Get selected entries
+    fn entries_selected(&self) -> Vec<String> {
+        // FIXME
+        Vec::new()
+    }
+
+    /// Get actions to update entries
+    fn entries_changed(&self, pri: &PlayList) -> Option<Vec<String>> {
+        let entries = pri.entries.as_ref()?;
+        let sel = self.entries_selected();
+        self.compare_entries(&entries[..], &sel[..]).then_some(sel)
+    }
+}
+
 impl PlayList {
+    /// Get item states
+    fn item_states<'a>(&'a self, anc: &'a PlayListAnc) -> ItemStates<'a> {
+        let mut states = if self.meta {
+            ItemStates::from(ItemState::Meta)
+        } else {
+            ItemStates::from(ItemState::Simple)
+        };
+        if anc.access_level(self) <= AccessLevel::View {
+            states = states.with(ItemState::Prohibited, "");
+        }
+        states
+    }
+
     /// Search for sequence number
     fn check_number(&self, search: &str) -> bool {
         match self.seq_num {
@@ -102,7 +158,7 @@ impl PlayList {
         div.class("title row")
             .cdata(self.name())
             .cdata(" ")
-            .cdata(self.item_state_main(anc).to_string());
+            .cdata(self.item_states(anc).to_string());
         if let Some(sn) = &self.seq_num {
             div.span().class("info").cdata(format!("#{sn}")).close();
         }
@@ -123,13 +179,13 @@ impl PlayList {
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");
-        div.label().r#for("seq_num").cdata("Seq Num").close();
+        div.label().r#for("seq_num").cdata("Sequence Num").close();
         div.input()
             .id("seq_num")
             .r#type("number")
             .min(0)
             .max(9999)
-            .size(6)
+            .size(5)
             .value(opt_str(self.seq_num));
         div.close();
         div = tree.root::<html::Div>();
@@ -138,7 +194,7 @@ impl PlayList {
         div.textarea()
             .id("notes")
             .maxlength(63)
-            .rows(3)
+            .rows(2)
             .cols(22)
             .cdata(&self.notes)
             .close();
@@ -156,15 +212,14 @@ impl PlayList {
     }
 
     /// Get changed attributes from Setup form
-    fn changed_attr(&self, _anc: &PlayListAnc) -> Option<Attr> {
+    fn changed_attr(&self, anc: &PlayListAnc) -> Option<Attr> {
         let mut fields = Fields::new();
         fields.changed_input("seq_num", self.seq_num);
         fields.changed_input("notes", &self.notes);
-        let attr = Attr::from(fields);
-        /*
+        let mut attr = Attr::from(fields);
         if let Some(entries) = anc.entries_changed(self) {
             attr.array("entries", entries);
-        }*/
+        }
         if !attr.is_empty() { Some(attr) } else { None }
     }
 }
@@ -179,7 +234,7 @@ impl Card for PlayList {
 
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
-        &[ItemState::Simple, ItemState::Meta]
+        &[ItemState::Simple, ItemState::Meta, ItemState::Prohibited]
     }
 
     /// Get the name
@@ -194,8 +249,11 @@ impl Card for PlayList {
     }
 
     /// Get the main item state
-    fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
-        if self.meta {
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let states = self.item_states(anc);
+        if states.contains(ItemState::Prohibited) {
+            ItemState::Prohibited
+        } else if states.contains(ItemState::Meta) {
             ItemState::Meta
         } else {
             ItemState::Simple
@@ -206,7 +264,7 @@ impl Card for PlayList {
     fn is_match(&self, search: &str, anc: &PlayListAnc) -> bool {
         self.name.contains_lower(search)
             || self.check_number(search)
-            || self.item_state_main(anc).is_match(search)
+            || self.item_states(anc).is_match(search)
     }
 
     /// Convert to HTML view
