@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2025  Minnesota Department of Transportation
+ * Copyright (C) 2026  Alaska DOT&PF
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +17,19 @@ package us.mn.state.dot.sched;
 
 import junit.framework.TestCase;
 
+import java.util.TimeZone;
+
 /** 
  * Time steward tests
  *
  * @author Doug Lau
+ * @author Darren Jaeckel, Wostmann & Associates
  */
 public class TimeStewardTest extends TestCase {
 
 	public TimeStewardTest(String name) {
 		super(name);
+		TimeZone.setDefault(TimeZone.getTimeZone("America/Chicago"));
 	}
 
 	public void test8601() {
