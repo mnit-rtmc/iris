@@ -66,9 +66,8 @@ fn add_listeners() -> Result<()> {
     map::add_listeners()?;
     sidebar::add_listeners()?;
     let doc = Doc::new()?;
+    add_mouse_listener(&doc)?;
     let body = doc.body()?;
-    add_card_drag_listener(&doc)?;
-    add_mouse_listener(&body)?;
     add_joystick_listener(&body)?;
     add_gamepad_listener()?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
@@ -161,60 +160,13 @@ fn handle_navigate(ev: NavigateEvent) {
 }
 
 /// Add a mouse event listener to an element
-fn add_mouse_listener(el: &Element) -> Result<()> {
+fn add_mouse_listener(doc: &Doc) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Ok(me) = e.dyn_into::<MouseEvent>()
             && let Some(Ok(target)) =
                 me.target().map(|e| e.dyn_into::<Element>())
-            && let Ok(tp) = MouseEventTp::try_from(&me)
         {
-            handle_mouse_ev(&target, tp, me.button());
-        }
-    });
-    el.add_event_listener_with_callback(
-        "mousedown",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    el.add_event_listener_with_callback(
-        "mouseup",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    closure.forget();
-    Ok(())
-}
-
-/// Add a card drag listener to an element
-fn add_card_drag_listener(doc: &Doc) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Ok(me) = e.dyn_into::<MouseEvent>()
-            && let Ok(tp) = MouseEventTp::try_from(&me)
-            && (tp == MouseEventTp::Up || me.buttons() & 1 == 1)
-        {
-            if let Some(Ok(target)) =
-                me.target().map(|e| e.dyn_into::<Element>())
-                && target.get_attribute("class").as_deref()
-                    == Some("drag-handle")
-                && let Some(Ok(card)) =
-                    target.parent_element().map(|e| e.dyn_into::<HtmlElement>())
-                && let Some(Ok(card)) =
-                    card.parent_element().map(|e| e.dyn_into::<HtmlElement>())
-            {
-                me.prevent_default();
-                handle_drag_ev(card, tp, &me);
-            } else {
-                if let Ok(Some(el)) =
-                    Doc::get().0.query_selector("li[data-dragging]")
-                    && let Ok(el) = el.dyn_into::<HtmlElement>()
-                {
-                    me.prevent_default();
-                    if tp == MouseEventTp::Down {
-                        // Down on different element, so release current
-                        handle_drag_ev(el, MouseEventTp::Up, &me);
-                    } else {
-                        handle_drag_ev(el, tp, &me);
-                    }
-                }
-            }
+            handle_mouse_ev(me, &target);
         }
     });
     doc.0.add_event_listener_with_callback(
@@ -233,11 +185,49 @@ fn add_card_drag_listener(doc: &Doc) -> Result<()> {
     Ok(())
 }
 
+/// Handle a mouse event
+fn handle_mouse_ev(me: MouseEvent, target: &Element) {
+    let Ok(tp) = MouseEventTp::try_from(&me) else {
+        log::error!("handle_mouse_ev, unknown event: {me:?}");
+        return;
+    };
+    if MouseEventTp::Down == tp {
+        map::dismiss_context_menu();
+    }
+    // check for drag events
+    if me.buttons() & 1 == 1 || tp == MouseEventTp::Up {
+        if let Some("drag-handle") = target.get_attribute("class").as_deref()
+            && let Some(Ok(parent)) =
+                target.parent_element().map(|e| e.dyn_into::<HtmlElement>())
+            && let Some(Ok(card)) =
+                parent.parent_element().map(|e| e.dyn_into::<HtmlElement>())
+        {
+            handle_drag_ev(card, tp, &me);
+        } else {
+            if let Ok(Some(el)) =
+                Doc::get().0.query_selector("li[data-dragging]")
+                && let Ok(el) = el.dyn_into::<HtmlElement>()
+            {
+                if tp == MouseEventTp::Down {
+                    // Down on different element, so release current
+                    handle_drag_ev(el, MouseEventTp::Up, &me);
+                } else {
+                    handle_drag_ev(el, tp, &me);
+                }
+            }
+        }
+    }
+    if me.buttons() == 1 && MouseEventTp::Move != tp {
+        spawn_future(handle_mouse_card(target.id(), tp));
+    }
+}
+
 /// Handle a drag event to reposition an element
-fn handle_drag_ev(drag_target: HtmlElement, tp: MouseEventTp, ev: &MouseEvent) {
+fn handle_drag_ev(drag_target: HtmlElement, tp: MouseEventTp, me: &MouseEvent) {
+    me.prevent_default();
     match tp {
         MouseEventTp::Down => {
-            let (x, y) = util::relative_coords(&drag_target, ev);
+            let (x, y) = util::relative_coords(&drag_target, me);
             let _ = drag_target
                 .set_attribute("data-dragging", &format!("{},{}", x, y));
         }
@@ -248,31 +238,21 @@ fn handle_drag_ev(drag_target: HtmlElement, tp: MouseEventTp, ev: &MouseEvent) {
                 && let Ok(x) = x.parse::<i32>()
                 && let Ok(y) = y.parse::<i32>()
                 && let Some(doc) = Doc::get().doc_elem()
-                && (0..doc.client_width()).contains(&ev.client_x())
-                && (0..doc.client_height()).contains(&ev.client_y())
+                && (0..doc.client_width()).contains(&me.client_x())
+                && (0..doc.client_height()).contains(&me.client_y())
             {
                 let _ = drag_target
                     .style()
-                    .set_property("top", &format!("{}px", ev.client_y() - y));
+                    .set_property("top", &format!("{}px", me.client_y() - y));
                 let _ = drag_target
                     .style()
-                    .set_property("left", &format!("{}px", ev.client_x() - x));
+                    .set_property("left", &format!("{}px", me.client_x() - x));
             }
         }
         MouseEventTp::Up => {
             let _ = drag_target.remove_attribute("data-dragging");
         }
     };
-}
-
-/// Handle a mouse event
-fn handle_mouse_ev(target: &Element, tp: MouseEventTp, button: i16) {
-    if MouseEventTp::Down == tp {
-        map::dismiss_context_menu();
-    }
-    if button == 0 {
-        spawn_future(handle_mouse_card(target.id(), tp));
-    }
 }
 
 /// Handle a mouse event on an expanded card
