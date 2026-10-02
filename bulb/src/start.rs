@@ -196,29 +196,47 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
     }
     // check for drag events
     if me.buttons() & 1 == 1 || tp == MouseEventTp::Up {
-        if let Some("drag-handle") = target.get_attribute("class").as_deref()
-            && let Some(Ok(parent)) =
-                target.parent_element().map(|e| e.dyn_into::<HtmlElement>())
-            && let Some(Ok(card)) =
-                parent.parent_element().map(|e| e.dyn_into::<HtmlElement>())
-        {
+        if let Some(card) = drag_handle_card(target) {
             handle_drag_ev(card, tp, &me);
-        } else {
-            if let Ok(Some(el)) =
-                Doc::get().0.query_selector("li[data-dragging]")
-                && let Ok(el) = el.dyn_into::<HtmlElement>()
-            {
-                if tp == MouseEventTp::Down {
-                    // Down on different element, so release current
-                    handle_drag_ev(el, MouseEventTp::Up, &me);
-                } else {
-                    handle_drag_ev(el, tp, &me);
-                }
+            return;
+        } else if let Some(el) = dragging_element() {
+            if tp == MouseEventTp::Down {
+                // Down on different element, so release current
+                handle_drag_ev(el, MouseEventTp::Up, &me);
+            } else {
+                handle_drag_ev(el, tp, &me);
             }
+            return;
         }
     }
     if me.buttons() == 1 && MouseEventTp::Move != tp {
         spawn_future(handle_mouse_card(target.id(), tp));
+    }
+}
+
+/// Get card associated with a drag handle
+fn drag_handle_card(target: &Element) -> Option<HtmlElement> {
+    // check for "grandparent" element of drag-handle
+    if let Some("drag-handle") = target.get_attribute("class").as_deref()
+        && let Some(Ok(parent)) =
+            target.parent_element().map(|e| e.dyn_into::<HtmlElement>())
+        && let Some(Ok(card)) =
+            parent.parent_element().map(|e| e.dyn_into::<HtmlElement>())
+    {
+        Some(card)
+    } else {
+        None
+    }
+}
+
+/// Get current dragging (`data-dragging`) element
+fn dragging_element() -> Option<HtmlElement> {
+    if let Ok(Some(el)) = Doc::get().0.query_selector("li[data-dragging]")
+        && let Ok(el) = el.dyn_into::<HtmlElement>()
+    {
+        Some(el)
+    } else {
+        None
     }
 }
 
