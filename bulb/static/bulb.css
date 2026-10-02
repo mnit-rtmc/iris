@@ -131,6 +131,12 @@ menu li {
   padding-left: 0;
   white-space: nowrap;
 }
+.drag-item {
+  list-style-type: disc;
+  padding-left: 1rem;
+  white-space: nowrap;
+  cursor: grab;
+}
 .current {
   background-color: #db6;
 }

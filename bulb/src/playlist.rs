@@ -18,7 +18,8 @@ use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::permission::{AccessLevel, Permission};
-use crate::util::{ContainsLower, Fields, Input, opt_str};
+use crate::query::QueryParam;
+use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
@@ -96,6 +97,11 @@ impl PlayListAnc {
         )
     }
 
+    /// Find a camera
+    fn camera(&self, nm: &str) -> Option<&Camera> {
+        self.cameras.iter().find(|c| c.name == *nm)
+    }
+
     /// Check if entries are different
     fn compare_entries(&self, entries: &[String], sel: &[String]) -> bool {
         if entries.len() != sel.len() {
@@ -151,6 +157,36 @@ impl PlayList {
         }
     }
 
+    /// Build HTML entries list
+    fn entries_html<'p>(&self, anc: &PlayListAnc, div: &'p mut html::Div<'p>) {
+        if let Some(entries) = &self.entries {
+            let mut ul = div.ul();
+            ul.class("drag-item");
+            for ent in entries {
+                let mut li = ul.li();
+                li.draggable(true);
+                match anc.camera(ent) {
+                    Some(c) => {
+                        if let Some(num) = c.cam_num {
+                            li.span()
+                                .class("info")
+                                .cdata(format!("#{num} "))
+                                .close();
+                        }
+                        let query = QueryParam::new()
+                            .with_res(Res::Camera)
+                            .with_sel(&c.name);
+                        li.a().href(query.to_string()).cdata(&c.name).close();
+                        li.cdata(" ").cdata_len(opt_ref(&c.location), 64);
+                    }
+                    None => {
+                        li.cdata(ent);
+                    }
+                }
+            }
+        }
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self, anc: &PlayListAnc) -> String {
         let mut tree = Tree::new();
@@ -166,7 +202,7 @@ impl PlayList {
     }
 
     /// Convert to Setup HTML
-    fn to_html_setup(&self, _anc: &PlayListAnc, edit: bool) -> String {
+    fn to_html_setup(&self, anc: &PlayListAnc, edit: bool) -> String {
         let mut tree = Tree::new();
         self.title(View::Setup(edit), &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
@@ -199,6 +235,7 @@ impl PlayList {
             .cdata(&self.notes)
             .close();
         div.close();
+        self.entries_html(anc, &mut tree.root::<html::Div>());
         let can_delete = match &self.entries {
             Some(entries) => entries.is_empty(),
             None => false,
