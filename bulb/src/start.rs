@@ -68,7 +68,6 @@ fn add_listeners() -> Result<()> {
     let doc = Doc::new()?;
     add_mouse_listener(&doc)?;
     let body = doc.body()?;
-    add_joystick_listener(&body)?;
     add_gamepad_listener()?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
     add_toggle_listener(&body)?;
@@ -209,8 +208,40 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
             return;
         }
     }
-    if me.buttons() == 1 && MouseEventTp::Move != tp {
+    // card events
+    if me.buttons() & 1 == 1 {
         spawn_future(handle_mouse_card(target.id(), tp));
+    }
+    // "joystick" events
+    if me.buttons() & 1 == 1 || tp == MouseEventTp::Up {
+        match tp {
+            MouseEventTp::Up | MouseEventTp::Move => {
+                let sticks =
+                    Doc::get().0.get_elements_by_class_name("joystick");
+                for i in 0..sticks.length() {
+                    if let Some(stick) = sticks.item(i) {
+                        // x and y ignored by mouseup, but not mousemove
+                        spawn_future(joystick::handle_mouse_event(
+                            stick.id(),
+                            tp,
+                            me.x(),
+                            me.y(),
+                        ));
+                    }
+                }
+            }
+            MouseEventTp::Down => {
+                if Some("joystick") == target.get_attribute("class").as_deref()
+                {
+                    spawn_future(joystick::handle_mouse_event(
+                        target.id(),
+                        tp,
+                        me.x(),
+                        me.y(),
+                    ));
+                }
+            }
+        }
     }
 }
 
@@ -275,61 +306,11 @@ fn handle_drag_ev(drag_target: HtmlElement, tp: MouseEventTp, me: &MouseEvent) {
 
 /// Handle a mouse event on an expanded card
 async fn handle_mouse_card(id: String, tp: MouseEventTp) -> Result<()> {
-    if let Some(cv) = app::expanded_view() {
+    if MouseEventTp::Move != tp
+        && let Some(cv) = app::expanded_view()
+    {
         cv.handle_mouse(id.as_str(), tp).await?;
     }
-    Ok(())
-}
-
-/// Add a joystick event listener to an element
-fn add_joystick_listener(el: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Ok(mouse_event) = e.dyn_into::<MouseEvent>()
-            && let Ok(tp) = MouseEventTp::try_from(&mouse_event)
-            && (tp == MouseEventTp::Up || mouse_event.buttons() & 1 == 1)
-            && let Some(Ok(target)) =
-                mouse_event.target().map(|e| e.dyn_into::<Element>())
-        {
-            let type_ = mouse_event.type_();
-            if type_ == "mouseup" || type_ == "mousemove" {
-                let sticks =
-                    Doc::get().0.get_elements_by_class_name("joystick");
-                for i in 0..sticks.length() {
-                    if let Some(stick) = sticks.item(i) {
-                        // x and y ignored by mouseup, but not mousemove
-                        spawn_future(joystick::handle_mouse_event(
-                            stick.id(),
-                            type_.clone(),
-                            mouse_event.x(),
-                            mouse_event.y(),
-                        ));
-                    }
-                }
-            } else if Some("joystick")
-                == target.get_attribute("class").as_deref()
-            {
-                spawn_future(joystick::handle_mouse_event(
-                    target.id(),
-                    type_,
-                    mouse_event.x(),
-                    mouse_event.y(),
-                ));
-            }
-        }
-    });
-    el.add_event_listener_with_callback(
-        "mousedown",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    el.add_event_listener_with_callback(
-        "mouseup",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    el.add_event_listener_with_callback(
-        "mousemove",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    closure.forget();
     Ok(())
 }
 

@@ -15,6 +15,7 @@ use crate::card::{uri_one, uri_one_direct};
 use crate::error::{Error, Result};
 use crate::fetch::Action;
 use crate::helper::spawn_future;
+use crate::start::MouseEventTp;
 use crate::util::{self, Doc};
 use hatmil::html;
 use resources::Res;
@@ -233,16 +234,15 @@ fn handle_mouse_move(
 /// Handle mouse move event for a joystick
 pub async fn handle_mouse_event(
     id: String,
-    type_: String,
+    tp: MouseEventTp,
     x: i32,
     y: i32,
 ) -> Result<()> {
     if let Some(target) = Doc::get().opt_elem::<HtmlElement>(&id) {
-        let actions = match type_.as_str() {
-            "mouseup" => handle_mouse_up(&target),
-            "mousedown" => handle_mouse_down(&target, x, y),
-            "mousemove" => handle_mouse_move(&target, x, y, false),
-            _ => Vec::new(),
+        let actions = match tp {
+            MouseEventTp::Up => handle_mouse_up(&target),
+            MouseEventTp::Down => handle_mouse_down(&target, x, y),
+            MouseEventTp::Move => handle_mouse_move(&target, x, y, false),
         };
         for action in actions {
             action.perform().await?;
