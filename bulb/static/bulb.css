@@ -674,7 +674,7 @@ label:has(+ #sb-resource) {
   padding-right: .2rem;
 }
 
-.drag-handle {
+.grab-handle {
   width: 100%;
   min-width: 1rem;
   padding: .1rem;
@@ -682,7 +682,7 @@ label:has(+ #sb-resource) {
   background-size: .9em;
   cursor: grab;
 }
-.drag-handle:active {
+.grab-handle:active {
   cursor: grabbing;
 }
 .title {

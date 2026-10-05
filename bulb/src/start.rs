@@ -193,26 +193,17 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
     if MouseEventTp::Down == tp {
         map::dismiss_context_menu();
     }
-    // check for drag events
-    if me.buttons() & 1 == 1 || tp == MouseEventTp::Up {
-        if let Some(card) = drag_handle_card(target) {
-            handle_drag_ev(card, tp, &me);
-            return;
-        } else if let Some(el) = dragging_element() {
-            if tp == MouseEventTp::Down {
-                // Down on different element, so release current
-                handle_drag_ev(el, MouseEventTp::Up, &me);
-            } else {
-                handle_drag_ev(el, tp, &me);
-            }
-            return;
-        }
+    // check for "grab" events
+    if (me.buttons() & 1 == 1 || tp == MouseEventTp::Up)
+        && handle_grab(&me, tp, target)
+    {
+        return;
     }
-    // card events
+    // check for card events
     if me.buttons() & 1 == 1 {
         spawn_future(handle_mouse_card(target.id(), tp));
     }
-    // "joystick" events
+    // check for "joystick" events
     if me.buttons() & 1 == 1 || tp == MouseEventTp::Up {
         match tp {
             MouseEventTp::Up | MouseEventTp::Move => {
@@ -245,44 +236,44 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
     }
 }
 
-/// Get card associated with a drag handle
-fn drag_handle_card(target: &Element) -> Option<HtmlElement> {
-    // check for "grandparent" element of drag-handle
-    if let Some("drag-handle") = target.get_attribute("class").as_deref()
+/// Handle "grab" events
+fn handle_grab(me: &MouseEvent, tp: MouseEventTp, target: &Element) -> bool {
+    // check for "grandparent" element of grab-handle
+    if let Some("grab-handle") = target.get_attribute("class").as_deref()
         && let Some(Ok(parent)) =
             target.parent_element().map(|e| e.dyn_into::<HtmlElement>())
         && let Some(Ok(card)) =
             parent.parent_element().map(|e| e.dyn_into::<HtmlElement>())
     {
-        Some(card)
-    } else {
-        None
-    }
-}
-
-/// Get current dragging (`data-dragging`) element
-fn dragging_element() -> Option<HtmlElement> {
-    if let Ok(Some(el)) = Doc::get().0.query_selector("li[data-dragging]")
+        do_handle_grab(me, tp, card);
+        true
+    } else if let Ok(Some(el)) = Doc::get().0.query_selector("li[data-grabbed]")
         && let Ok(el) = el.dyn_into::<HtmlElement>()
     {
-        Some(el)
+        if tp == MouseEventTp::Down {
+            // Down on different element, so release current
+            do_handle_grab(me, MouseEventTp::Up, el);
+        } else {
+            do_handle_grab(me, tp, el);
+        }
+        true
     } else {
-        None
+        false
     }
 }
 
-/// Handle a drag event to reposition an element
-fn handle_drag_ev(drag_target: HtmlElement, tp: MouseEventTp, me: &MouseEvent) {
+/// Handle a "grab" event to reposition an element
+fn do_handle_grab(me: &MouseEvent, tp: MouseEventTp, target: HtmlElement) {
     me.prevent_default();
     match tp {
         MouseEventTp::Down => {
-            let (x, y) = util::relative_coords(&drag_target, me);
-            let _ = drag_target
-                .set_attribute("data-dragging", &format!("{},{}", x, y));
+            let (x, y) = util::relative_coords(&target, me);
+            let _ =
+                target.set_attribute("data-grabbed", &format!("{},{}", x, y));
         }
         MouseEventTp::Move => {
             // Move the element
-            if let Some(d) = drag_target.get_attribute("data-dragging")
+            if let Some(d) = target.get_attribute("data-grabbed")
                 && let Some((x, y)) = d.split_once(",")
                 && let Ok(x) = x.parse::<i32>()
                 && let Ok(y) = y.parse::<i32>()
@@ -290,16 +281,16 @@ fn handle_drag_ev(drag_target: HtmlElement, tp: MouseEventTp, me: &MouseEvent) {
                 && (0..doc.client_width()).contains(&me.client_x())
                 && (0..doc.client_height()).contains(&me.client_y())
             {
-                let _ = drag_target
+                let _ = target
                     .style()
                     .set_property("top", &format!("{}px", me.client_y() - y));
-                let _ = drag_target
+                let _ = target
                     .style()
                     .set_property("left", &format!("{}px", me.client_x() - x));
             }
         }
         MouseEventTp::Up => {
-            let _ = drag_target.remove_attribute("data-dragging");
+            let _ = target.remove_attribute("data-grabbed");
         }
     };
 }

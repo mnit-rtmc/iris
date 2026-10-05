@@ -167,7 +167,7 @@ fn handle_mouse_up(stick: &HtmlElement) -> Vec<Action> {
 fn handle_mouse_down(stick: &HtmlElement, x: i32, y: i32) -> Vec<Action> {
     stick.style().set_property("transition", "0s").ok();
 
-    // Set start coords to see that user is dragging stick
+    // Set start coords to see that user is grabbing stick
     stick.set_attribute("data-start-x", &x.to_string()).ok();
     stick.set_attribute("data-start-y", &y.to_string()).ok();
     Vec::new()

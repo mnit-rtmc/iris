@@ -297,7 +297,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
             .cdata(" ")
             .cdata(self.name())
             .close();
-        div.span().class("drag-handle").close();
+        div.span().class("grab-handle").close();
         div.button()
             .id(format!("fit_{}_{}", Self::res(), self.name()))
             .cdata("»«")
