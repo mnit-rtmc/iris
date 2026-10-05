@@ -99,6 +99,21 @@ async fn recall_extent(name: String) -> Result<()> {
     Ok(())
 }
 
+/// Gets the map anchor based on the sidebar side
+pub fn get_anchor() -> (f64, f64) {
+    if let Some(sidebar) = Doc::get().opt_elem::<HtmlElement>("sidebar")
+        && sidebar.class_list().contains("hidden")
+    {
+        return (0.5, ANCHOR_Y);
+    }
+    if let Some(side_pane) = Doc::get().opt_elem::<HtmlElement>("side-pane")
+        && side_pane.class_list().contains("left")
+    {
+        return (1.0 - ANCHOR_X, ANCHOR_Y);
+    }
+    (ANCHOR_X, ANCHOR_Y)
+}
+
 /// Handle a `click` event on the map
 fn handle_click(me: MapEvent) {
     log::debug!("click: {me:?}");
@@ -144,7 +159,9 @@ pub fn present_item(res: Res, name: &str, lon: f64, lat: f64) {
 /// Set map extent
 async fn set_extent(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     let map_pane = MapPane::get(MAP_PANE).ok_or(Error::NoMap())?;
-    map_pane.set_position(zoom, lon, lat);
+    let (ax, ay) = get_anchor();
+    map_pane.with_anchor(ax, ay).set_position(zoom, lon, lat);
+    //do_handle_zoom(zoom.into()).await
     set_zoom_level(zoom);
     update_layers_all(zoom).await
 }
@@ -242,17 +259,13 @@ async fn add_extent_buttons() -> Result<()> {
     let doc = Doc::get();
     let extents: Vec<MapExtent> =
         serde_wasm_bindgen::from_value(uri_all(Res::MapExtent).get().await?)?;
-    let div = doc.elem::<HtmlElement>("map-extents")?;
-    let default = doc.0.create_element("button")?;
-    default.set_id("default-extent");
-    default.set_text_content(Some("Default"));
-    div.append_child(&default)?;
+    let extents_container = doc.elem::<HtmlElement>("map-extents-dynamic")?;
+    let mut tree = Tree::new();
     for extent in &extents {
-        let b = doc.0.create_element("button")?;
-        b.set_id(&extent.name);
-        b.set_text_content(Some(&extent.name));
-        div.append_child(&b)?;
+        let mut b = tree.root::<html::Button>();
+        b.id(&extent.name).cdata(&extent.name).close();
     }
+    extents_container.set_inner_html(&String::from(tree));
     Ok(())
 }
 

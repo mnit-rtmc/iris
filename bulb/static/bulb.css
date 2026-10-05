@@ -270,16 +270,22 @@ menu li {
 #map-controls {
   display: flex;
   position: fixed;
-  left: 0;
   bottom: 0;
   margin: 0;
   padding: 0;
   background-color: #899;
   border-top: 1px solid white;
-  border-right: 1px solid white;
   user-select: none;
   max-width: 60%;
   text-wrap: nowrap;
+}
+#map-controls.left {
+  border-right: 1px solid white;
+  border-left: unset;
+}
+#map-controls.right {
+  border-left: 1px solid white;
+  border-right: unset;
 }
 #map-controls button {
   border: none;
@@ -294,13 +300,31 @@ menu li {
 }
 #map-extents {
   border-left: 4px double #677;
-  overflow-x: scroll;
+  anchor-name: --extents-anchor;
 }
 #map-extents button {
-  border-left: 2px solid #677;
+  text-align: start;
 }
-#map-extents button:first-child {
-  border-left: none;
+#map-extents-dynamic {
+  display: none;
+  flex-direction: column-reverse;
+
+  position: fixed;
+  position-anchor: --extents-anchor;
+  bottom: anchor(top);
+  left: anchor(left);
+  min-width: anchor-size(width);
+  max-height: 90%;
+  overflow-y: auto;
+
+  background-color: #899;
+  border: 1px solid white;
+}
+#map-extents-dynamic button {
+  padding-left: calc(0.3rem + 3px);
+}
+#map-extents:hover #map-extents-dynamic {
+  display: flex;
 }
 
 #map-menu {
@@ -316,6 +340,8 @@ menu li {
   position-area: top;
   border: none;
   padding: 0;
+  overflow-y: auto;
+  max-height: 90%;
 }
 #layer-menu li:first-child {
   font-weight: bold;
@@ -345,6 +371,15 @@ menu li {
   flex-direction: row-reverse;
   flex-wrap: nowrap;
 }
+#side-pane.right {
+  flex-direction: row-reverse;
+}
+#side-pane.left {
+  flex-direction: row;
+}
+#side-pane:has(#sidebar.hidden) {
+  width: fit-content;
+}
 #divider {
   display: none;
   max-width: min-content;
@@ -357,6 +392,13 @@ menu li {
   margin: 0;
   margin-top: 0.5rem;
   padding: 0;
+}
+#sidebar.show ~ #divider > #show_sidebar,
+#sidebar.hidden ~ #divider > #hide_sidebar,
+#side-pane.left #left_sidebar,
+#side-pane.right #right_sidebar
+{
+  display: none;
 }
 #sidebar {
   flex: 1 1;
@@ -420,6 +462,7 @@ label:has(+ #sb-resource) {
   flex: 1 0;
   margin-top: 0.1rem;
   overflow-y: auto;
+  anchor-name: --sb-cards-anchor;
 }
 
 @media screen and (min-width: 36rem) {
@@ -621,8 +664,8 @@ label:has(+ #sb-resource) {
   position: fixed;
   max-height: 95%;
   max-width: 95%;
-  overflow-x: clip;
-  overflow-y: scroll;
+  overflow-x: auto;
+  overflow-y: auto;
   resize: both;
 
   padding: 0.1rem 0.2rem;
@@ -646,11 +689,12 @@ label:has(+ #sb-resource) {
   box-shadow: rgba(0, 0, 0, 0.6) 0px 0px 0px 10000px;
 }
 .card-expanded.docked {
-  left: 62%;
-  width: 37%;
-  top: 8%;
+  left: anchor(left);
+  width: calc(anchor-size(width) - 0.7rem);
+  top: anchor(top);
   height: fit-content;
-  max-height: 90%;
+  max-height: calc(anchor-size(height) - 0.5rem);
+  position-anchor: --sb-cards-anchor;
 }
 .card-expanded[style*="width"] {
   max-width: unset;
@@ -666,8 +710,8 @@ label:has(+ #sb-resource) {
 
   background-color: #eee;
   box-shadow: 0rem -1rem 0.2rem 1.2rem #bbb;
-  margin-bottom: .5rem;
-  padding-top: .2rem;
+  margin-bottom: 0.5rem;
+  padding-top: 0.2rem;
 }
 
 .card-expanded > .row:has(#ob-delete),
@@ -680,23 +724,23 @@ label:has(+ #sb-resource) {
   background-color: #eee;
   box-shadow: 0rem 1rem 0.2rem 1.2rem #bbb;
   margin-top: auto;
-  padding-bottom: .2rem;
+  padding-bottom: 0.2rem;
 }
 
 .card-expanded > .title.row,
 .card-expanded > .row:has(#ob-delete),
 .card-expanded > .row:has(#ob_save),
 .card-expanded > .row:has(#ob_geoloc) {
-  margin-left: -.2rem;
-  margin-right: -.2rem;
-  padding-left: .2rem;
-  padding-right: .2rem;
+  margin-left: -0.2rem;
+  margin-right: -0.2rem;
+  padding-left: 0.2rem;
+  padding-right: 0.2rem;
 }
 
 .grab-handle {
   width: 100%;
   min-width: 1rem;
-  padding: .1rem;
+  padding: 0.1rem;
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='50%'>░</text></svg>");
   background-size: .9em;
   cursor: grab;
@@ -756,6 +800,10 @@ label:has(+ #sb-resource) {
 .right {
   left: unset;
   right: 0;
+}
+.left {
+  right: unset;
+  left: 0;
 }
 .fill {
   /* Setting width: 0 and min-width: 100% ignores element size */

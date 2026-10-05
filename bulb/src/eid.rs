@@ -37,6 +37,8 @@ pub const SAVE: &str = "ob_save";
 /* Divider buttons */
 pub const SHOW_SIDEBAR: &str = "show_sidebar";
 pub const HIDE_SIDEBAR: &str = "hide_sidebar";
+pub const LEFT_SIDEBAR: &str =  "left_sidebar";
+pub const RIGHT_SIDEBAR: &str = "right_sidebar";
 
 /* Map menu */
 pub const MAP_MENU: &str = "map-menu";
