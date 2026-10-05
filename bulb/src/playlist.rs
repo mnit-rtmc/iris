@@ -161,22 +161,23 @@ impl PlayList {
     fn entries_html<'p>(&self, anc: &PlayListAnc, div: &'p mut html::Div<'p>) {
         if let Some(entries) = &self.entries {
             let mut ul = div.ul();
-            ul.class("drag-item");
-            for ent in entries {
+            ul.class("draggable-item");
+            for (i, ent) in entries.iter().enumerate() {
                 let mut li = ul.li();
+                li.id(format!("entry-{i}"));
                 li.draggable(true);
                 match anc.camera(ent) {
                     Some(c) => {
+                        let query = QueryParam::new()
+                            .with_res(Res::Camera)
+                            .with_sel(&c.name);
+                        li.a().href(query.to_string()).cdata(&c.name).close();
                         if let Some(num) = c.cam_num {
                             li.span()
                                 .class("info")
                                 .cdata(format!("#{num} "))
                                 .close();
                         }
-                        let query = QueryParam::new()
-                            .with_res(Res::Camera)
-                            .with_sel(&c.name);
-                        li.a().href(query.to_string()).cdata(&c.name).close();
                         li.cdata(" ").cdata_len(opt_ref(&c.location), 64);
                     }
                     None => {

@@ -28,8 +28,8 @@ use resources::Res;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
-    Element, Event, HtmlButtonElement, HtmlElement, HtmlInputElement,
-    HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
+    DragEvent, Element, Event, HtmlButtonElement, HtmlElement,
+    HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
     ScrollLogicalPosition, TransitionEvent,
 };
 
@@ -42,6 +42,7 @@ pub fn add_listeners() -> Result<()> {
     add_click_listener(&sidebar)?;
     add_change_listener(&sidebar)?;
     add_input_listener(&sidebar)?;
+    add_drag_listener(&sidebar)?;
     add_focus_listener(&sidebar)?;
     add_transition_listener(&doc.elem(eid::CARDS)?)?;
     if let Some(doc_elem) = doc.doc_elem() {
@@ -387,6 +388,50 @@ async fn handle_input_other(id: String) -> Result<()> {
         cv.handle_input(&id).await?;
     }
     Ok(())
+}
+
+/// Add "drag" event listeners to an element
+fn add_drag_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Ok(de) = e.dyn_into::<DragEvent>()
+            && let Some(Ok(target)) =
+                de.target().map(|t| t.dyn_into::<HtmlElement>())
+            && let Err(e) = handle_drag_ev(de, target)
+        {
+            log::warn!("handle_drag_ev: {e:?}");
+        }
+    });
+    el.add_event_listener_with_callback(
+        "dragstart",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
+        "dragend",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Handle drag event
+fn handle_drag_ev(ev: DragEvent, target: HtmlElement) -> Result<()> {
+    match ev.type_().as_str() {
+        "dragstart" => {
+            if let Some(dt) = ev.data_transfer() {
+                let id = target.id();
+                dt.set_data("text", &id)?;
+                dt.set_effect_allowed("move");
+            }
+            target.set_class_name("dragging");
+            Ok(())
+        }
+        "dragend" => {
+            target.set_class_name("");
+            Ok(())
+        }
+        _ => Ok(()),
+    }
 }
 
 /// Add "focusin" / "focusout" event listeners to an element

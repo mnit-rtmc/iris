@@ -131,11 +131,16 @@ menu li {
   padding-left: 0;
   white-space: nowrap;
 }
-.drag-item {
+.draggable-item {
   list-style-type: disc;
   padding-left: 1rem;
   white-space: nowrap;
   cursor: grab;
+}
+.dragging {
+  cursor: grabbed;
+  background: #8888;
+  border: 1px dashed black;
 }
 .current {
   background-color: #db6;

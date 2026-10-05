@@ -46,8 +46,10 @@ version = "0.3.104"
 features = [
   'Blob',
   'CssStyleDeclaration',
+  'DataTransfer',
   'Document',
   'DomTokenList',
+  'DragEvent',
   'ErrorEvent',
   'Event',
   'EventSource',
