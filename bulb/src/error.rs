@@ -28,6 +28,9 @@ pub enum Error {
     #[error("No body")]
     NoBody(),
 
+    #[error("No map")]
+    NoMap(),
+
     /// Failed to cast element
     #[error("Cast failed {0}")]
     CastFail(String),

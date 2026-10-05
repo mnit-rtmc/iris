@@ -267,8 +267,8 @@ menu li {
   --locked-display: none;
 }
 
-#layer-zoom {
-  display: none;
+#map-controls {
+  display: flex;
   position: fixed;
   left: 0;
   bottom: 0;
@@ -278,15 +278,29 @@ menu li {
   border-top: 1px solid white;
   border-right: 1px solid white;
   user-select: none;
+  max-width: 60%;
+  text-wrap: nowrap;
 }
-#layer-zoom button {
+#map-controls button {
   border: none;
-  padding: 0;
+  border-radius: 0;
+  padding: 0 0.3rem;
+  margin: 0;
   background-color: #899;
   color: black;
 }
-#layer-zoom button:hover {
+#map-controls button:hover {
   background-color: #677;
+}
+#map-extents {
+  border-left: 4px double #677;
+  overflow-x: scroll;
+}
+#map-extents button {
+  border-left: 2px solid #677;
+}
+#map-extents button:first-child {
+  border-left: none;
 }
 
 #map-menu {
