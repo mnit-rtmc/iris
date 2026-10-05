@@ -12,15 +12,17 @@
 //
 use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
-use crate::card::{self, CardList, CardState};
+use crate::card::{self, CardList, CardState, uri_all, uri_one};
 use crate::eid;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
+use crate::mapextent::MapExtent;
 use crate::permission::Permission;
 use crate::purpose::DedicatedPurpose;
 use crate::query::QueryParam;
 use crate::sidebar;
+use crate::systemattr::SystemAttr;
 use crate::util::Doc;
 use chrono::{DateTime, Local};
 use earthwyrm::{MapEvent, MapPane};
@@ -63,6 +65,8 @@ pub fn add_listeners() -> Result<()> {
     let doc = Doc::new()?;
     let layer_menu: HtmlElement = doc.elem("layer-menu")?;
     add_change_listener(&layer_menu)?;
+    let map_extents: HtmlElement = doc.elem("map-extents")?;
+    add_click_listener(&map_extents)?;
     MapPane::new(MAP_PANE)
         .with_anchor(ANCHOR_X, ANCHOR_Y)
         .with_groups(GROUPS)
@@ -70,13 +74,33 @@ pub fn add_listeners() -> Result<()> {
         .with_contextmenu_handler(handle_contextmenu)
         .with_zoom_handler(handle_zoom)
         .register();
-    if let Some(map_pane) = MapPane::get(MAP_PANE) {
-        // FIXME: use default map extent
-        map_pane.set_position(10, -93.2, 44.95);
-        set_zoom_level(10);
-        spawn_future(update_layers_all(10));
-    }
+    spawn_future(zoom_to_default());
+    spawn_future(update_layers_all(10));
+    spawn_future(add_extent_buttons());
     fetch_station_data();
+    Ok(())
+}
+
+/// Zoom to default map extent
+async fn zoom_to_default() -> Result<()> {
+    let name_js = uri_one(Res::SystemAttribute, "map_extent_name_initial")
+        .get()
+        .await?;
+    let extent_name =
+        serde_wasm_bindgen::from_value::<SystemAttr>(name_js)?.value;
+    recall_extent(extent_name).await
+}
+
+/// Set the map to the specified map extent
+async fn recall_extent(name: String) -> Result<()> {
+    let Some(map_pane) = MapPane::get(MAP_PANE) else {
+        Err(Error::NoMap())?
+    };
+    let extent_js = uri_one(Res::MapExtent, &name).get().await?;
+    let extent = serde_wasm_bindgen::from_value::<MapExtent>(extent_js)?;
+    let (zoom, lon, lat) = (extent.zoom, extent.lon, extent.lat);
+    map_pane.set_position(zoom.into(), lon, lat);
+    set_zoom_level(zoom.into());
     Ok(())
 }
 
@@ -213,6 +237,46 @@ fn add_change_listener(el: &Element) -> Result<()> {
     });
     el.add_event_listener_with_callback(
         "change",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Add buttons for each map extent
+async fn add_extent_buttons() -> Result<()> {
+    let doc = Doc::get();
+    let extents: Vec<MapExtent> =
+        serde_wasm_bindgen::from_value(uri_all(Res::MapExtent).get().await?)?;
+    let div = doc.elem::<HtmlElement>("map-extents")?;
+    let default = doc.0.create_element("button")?;
+    default.set_id("default-extent");
+    default.set_text_content(Some("Default"));
+    div.append_child(&default)?;
+    for extent in &extents {
+        let b = doc.0.create_element("button")?;
+        b.set_id(&extent.name);
+        b.set_text_content(Some(&extent.name));
+        div.append_child(&b)?;
+    }
+    Ok(())
+}
+
+/// Add a "click" event listener to an element
+fn add_click_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
+            let id = target.id();
+            if id == "default-extent" {
+                spawn_future(zoom_to_default());
+            } else {
+                spawn_future(recall_extent(id));
+            }
+        }
+    });
+    el.add_event_listener_with_callback(
+        "click",
         closure.as_ref().unchecked_ref(),
     )?;
     // can't drop closure, just forget it to make JS happy
