@@ -1,5 +1,16 @@
 # IRIS 5.x Release Notes
 
+5.91.0 (5 Oct 2026)
+ - Web UI: add play list cards (incomplete)
+ - Web UI: expanded cards are now movable and resizable
+ - Web UI: "markers" on DMS icons (#Tolling, #Parking, #Wayfinding)
+ - Web UI: improvements to action plan cards
+ - Web UI: fixed for ramp meters, message lines
+ - Web UI: add map extent buttons to bottom of map pane
+ - Update NDOT gate control protocol to support NDOTv6
+ - Log events for Max-Pressure metering algorithm
+ - Fix issues for Alaska DOT
+
 5.90.0 (21 Sep 2026)
  - Web UI: implemented ActionPlan Setup card (w/ device + phase actions)
  - Move `sticky` from `action_plan` to `device_action`
