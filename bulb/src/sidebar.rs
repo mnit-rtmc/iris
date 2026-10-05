@@ -185,6 +185,8 @@ fn handle_click_button(id: String, long_press: bool) {
         eid::LOGOUT => spawn_future(start::handle_logout()),
         eid::SHOW_SIDEBAR => spawn_future(show_sidebar(true)),
         eid::HIDE_SIDEBAR => spawn_future(show_sidebar(false)),
+        eid::LEFT_SIDEBAR => spawn_future(change_sidebar_side(true)),
+        eid::RIGHT_SIDEBAR => spawn_future(change_sidebar_side(false)),
         eid::ADD => spawn_future(show_create_card()),
         // handled by mouse event listener, prevent click:
         "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up" | "ptz-tilt-down"
@@ -207,18 +209,37 @@ fn handle_click_button(id: String, long_press: bool) {
 
 /// Show/hide sidebar
 async fn show_sidebar(show: bool) -> Result<()> {
-    let doc = Doc::new()?;
-    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>(eid::SHOW_SIDEBAR) {
-        btn.set_disabled(show);
-    }
-    if let Some(btn) = doc.opt_elem::<HtmlButtonElement>(eid::HIDE_SIDEBAR) {
-        btn.set_disabled(!show);
-    }
     if show {
         util::show_elem("sidebar");
     } else {
         util::hide_elem("sidebar");
     }
+    Ok(())
+}
+
+/// Sets the sidebar to display on the left or right
+async fn change_sidebar_side(left: bool) -> Result<()> {
+    let doc = Doc::new()?;
+    let side_pane = doc.elem::<HtmlElement>("side-pane")?;
+    let map_controls = doc.elem::<HtmlElement>("map-controls")?;
+    let show_btn = doc.elem::<HtmlButtonElement>(eid::SHOW_SIDEBAR)?;
+    let hide_btn = doc.elem::<HtmlButtonElement>(eid::HIDE_SIDEBAR)?;
+
+    // Change buttons for correct side, then change the sidebar/controls
+    if left {
+        show_btn.set_inner_text("🞂");
+        hide_btn.set_inner_text("🞀");
+
+        side_pane.class_list().replace("right", "left")?;
+        map_controls.class_list().replace("left", "right")?;
+    } else {
+        show_btn.set_inner_text("🞀");
+        hide_btn.set_inner_text("🞂");
+
+        side_pane.class_list().replace("left", "right")?;
+        map_controls.class_list().replace("right", "left")?;
+    }
+
     Ok(())
 }
 
@@ -547,12 +568,16 @@ fn add_fullscreenchange_listener(el: &Element) -> Result<()> {
 
 /// Update controls to reflect query parameters (resource, selection)
 pub async fn update_query(query: QueryParam) -> Result<()> {
+    let sel = query.sel().to_owned();
     let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
-    sidebar.set_class_name("wait");
+    let _ = sidebar.class_list().add_1("wait");
     let rslt = do_update_query(doc, query).await;
     // Turn off "wait" style
-    sidebar.set_class_name("");
+    let _ = sidebar.class_list().remove_1("wait");
+    if !sel.is_empty() {
+        util::show_elem("sidebar");
+    }
     rslt
 }
 

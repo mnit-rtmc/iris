@@ -519,14 +519,16 @@ impl Select<Option<i32>> for Fields {
 /// Show an element
 pub fn show_elem(id: &str) {
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(id) {
-        el.set_class_name("show");
+        let _ = el.class_list().remove_1("hidden");
+        let _ = el.class_list().add_1("show");
     }
 }
 
 /// Hide an element
 pub fn hide_elem(id: &str) {
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(id) {
-        el.set_class_name("hidden");
+        let _ = el.class_list().remove_1("show");
+        let _ = el.class_list().add_1("hidden");
     }
 }
 
