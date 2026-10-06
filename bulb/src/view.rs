@@ -25,6 +25,7 @@ use crate::dayplan::DayPlan;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
+use crate::domevent::MouseTp;
 use crate::eid;
 use crate::encodertype::EncoderType;
 use crate::error::Result;
@@ -46,7 +47,6 @@ use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;
 use crate::signconfig::SignConfig;
-use crate::start::MouseEventTp;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::tollzone::TollZone;
@@ -300,7 +300,7 @@ impl CardView {
     }
 
     /// Handle mouse event for a card
-    pub async fn handle_mouse(&self, id: &str, tp: MouseEventTp) -> Result<()> {
+    pub async fn handle_mouse(&self, id: &str, tp: MouseTp) -> Result<()> {
         #[allow(clippy::single_match)]
         match (self.res, self.view) {
             (Res::Camera, View::Control) => {

@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction};
+use crate::domevent::MouseTp;
 use crate::eid;
 use crate::error::Result;
 use crate::fetch::Uri;
@@ -28,27 +29,6 @@ use web_sys::{
     Element, Event, GamepadEvent, HtmlElement, HtmlInputElement, KeyboardEvent,
     MouseEvent, NavigateEvent, ToggleEvent,
 };
-
-/// Mouse event type
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum MouseEventTp {
-    Down,
-    Move,
-    Up,
-}
-
-impl TryFrom<&MouseEvent> for MouseEventTp {
-    type Error = ();
-
-    fn try_from(me: &MouseEvent) -> std::result::Result<Self, Self::Error> {
-        match me.type_().as_str() {
-            "mousedown" => Ok(Self::Down),
-            "mousemove" => Ok(Self::Move),
-            "mouseup" => Ok(Self::Up),
-            _ => Err(()),
-        }
-    }
-}
 
 /// Application starting function
 #[wasm_bindgen(start)]
@@ -186,15 +166,15 @@ fn add_mouse_listener(doc: &Doc) -> Result<()> {
 
 /// Handle a mouse event
 fn handle_mouse_ev(me: MouseEvent, target: &Element) {
-    let Ok(tp) = MouseEventTp::try_from(&me) else {
+    let Ok(tp) = MouseTp::try_from(&me) else {
         log::error!("handle_mouse_ev, unknown event: {me:?}");
         return;
     };
-    if MouseEventTp::Down == tp {
+    if MouseTp::Down == tp {
         map::dismiss_context_menu();
     }
     // check for "grab" events
-    if (me.buttons() & 1 == 1 || tp == MouseEventTp::Up)
+    if (me.buttons() & 1 == 1 || tp == MouseTp::Up)
         && handle_grab(&me, tp, target)
     {
         return;
@@ -204,9 +184,9 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
         spawn_future(handle_mouse_card(target.id(), tp));
     }
     // check for "joystick" events
-    if me.buttons() & 1 == 1 || tp == MouseEventTp::Up {
+    if me.buttons() & 1 == 1 || tp == MouseTp::Up {
         match tp {
-            MouseEventTp::Up | MouseEventTp::Move => {
+            MouseTp::Up | MouseTp::Move => {
                 let sticks =
                     Doc::get().0.get_elements_by_class_name("joystick");
                 for i in 0..sticks.length() {
@@ -221,7 +201,7 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
                     }
                 }
             }
-            MouseEventTp::Down => {
+            MouseTp::Down => {
                 if Some("joystick") == target.get_attribute("class").as_deref()
                 {
                     spawn_future(joystick::handle_mouse_event(
@@ -237,7 +217,7 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
 }
 
 /// Handle "grab" events
-fn handle_grab(me: &MouseEvent, tp: MouseEventTp, target: &Element) -> bool {
+fn handle_grab(me: &MouseEvent, tp: MouseTp, target: &Element) -> bool {
     // check for "grandparent" element of grab-handle
     if let Some("grab-handle") = target.get_attribute("class").as_deref()
         && let Some(Ok(parent)) =
@@ -250,9 +230,9 @@ fn handle_grab(me: &MouseEvent, tp: MouseEventTp, target: &Element) -> bool {
     } else if let Ok(Some(el)) = Doc::get().0.query_selector("li[data-grabbed]")
         && let Ok(el) = el.dyn_into::<HtmlElement>()
     {
-        if tp == MouseEventTp::Down {
+        if tp == MouseTp::Down {
             // Down on different element, so release current
-            do_handle_grab(me, MouseEventTp::Up, el);
+            do_handle_grab(me, MouseTp::Up, el);
         } else {
             do_handle_grab(me, tp, el);
         }
@@ -263,15 +243,15 @@ fn handle_grab(me: &MouseEvent, tp: MouseEventTp, target: &Element) -> bool {
 }
 
 /// Handle a "grab" event to reposition an element
-fn do_handle_grab(me: &MouseEvent, tp: MouseEventTp, target: HtmlElement) {
+fn do_handle_grab(me: &MouseEvent, tp: MouseTp, target: HtmlElement) {
     me.prevent_default();
     match tp {
-        MouseEventTp::Down => {
+        MouseTp::Down => {
             let (x, y) = util::relative_coords(&target, me);
             let _ =
                 target.set_attribute("data-grabbed", &format!("{},{}", x, y));
         }
-        MouseEventTp::Move => {
+        MouseTp::Move => {
             // Move the element
             if let Some(d) = target.get_attribute("data-grabbed")
                 && let Some((x, y)) = d.split_once(",")
@@ -289,15 +269,15 @@ fn do_handle_grab(me: &MouseEvent, tp: MouseEventTp, target: HtmlElement) {
                     .set_property("left", &format!("{}px", me.client_x() - x));
             }
         }
-        MouseEventTp::Up => {
+        MouseTp::Up => {
             let _ = target.remove_attribute("data-grabbed");
         }
     };
 }
 
 /// Handle a mouse event on an expanded card
-async fn handle_mouse_card(id: String, tp: MouseEventTp) -> Result<()> {
-    if MouseEventTp::Move != tp
+async fn handle_mouse_card(id: String, tp: MouseTp) -> Result<()> {
+    if MouseTp::Move != tp
         && let Some(cv) = app::expanded_view()
     {
         cv.handle_mouse(id.as_str(), tp).await?;

@@ -15,6 +15,7 @@ use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_one, uri_one_direct};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
+use crate::domevent::MouseTp;
 use crate::encodertype::EncoderType;
 use crate::error::Result;
 use crate::fetch::Action;
@@ -24,7 +25,6 @@ use crate::item::{ItemState, ItemStates};
 use crate::joystick;
 use crate::map;
 use crate::permission::{AccessLevel, Permission};
-use crate::start::MouseEventTp;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -878,7 +878,7 @@ impl Card for Camera {
         &self,
         _anc: CameraAnc,
         id: &str,
-        tp: MouseEventTp,
+        tp: MouseTp,
     ) -> Vec<Action> {
         let mut parts = id.split("-");
         let id = match (parts.next(), parts.next()) {
@@ -893,7 +893,7 @@ impl Card for Camera {
         let mouse_down = match id {
             // mouse on invalid target, so always release mouse
             "" => false,
-            _ => tp == MouseEventTp::Down,
+            _ => tp == MouseTp::Down,
         };
         if mouse_down {
             self.mouse_down(id)

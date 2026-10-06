@@ -34,6 +34,7 @@ mod devaction;
 mod device;
 mod dms;
 mod domain;
+mod domevent;
 mod eid;
 mod encodertype;
 mod error;
