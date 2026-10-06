@@ -13,6 +13,7 @@
 use crate::app;
 use crate::asset::Asset;
 use crate::card::{self, CardList};
+use crate::domevent::DragTp;
 use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
@@ -406,6 +407,10 @@ fn add_drag_listener(el: &Element) -> Result<()> {
         closure.as_ref().unchecked_ref(),
     )?;
     el.add_event_listener_with_callback(
+        "dragover",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
         "dragend",
         closure.as_ref().unchecked_ref(),
     )?;
@@ -415,10 +420,11 @@ fn add_drag_listener(el: &Element) -> Result<()> {
 }
 
 /// Handle drag event
-fn handle_drag_ev(ev: DragEvent, target: HtmlElement) -> Result<()> {
-    match ev.type_().as_str() {
-        "dragstart" => {
-            if let Some(dt) = ev.data_transfer() {
+fn handle_drag_ev(de: DragEvent, target: HtmlElement) -> Result<()> {
+    let tp = DragTp::try_from(&de)?;
+    match tp {
+        DragTp::Start => {
+            if let Some(dt) = de.data_transfer() {
                 let id = target.id();
                 dt.set_data("text", &id)?;
                 dt.set_effect_allowed("move");
@@ -426,12 +432,21 @@ fn handle_drag_ev(ev: DragEvent, target: HtmlElement) -> Result<()> {
             target.set_class_name("dragging");
             Ok(())
         }
-        "dragend" => {
+        DragTp::Over => handle_drag_over(de, target),
+        DragTp::End => {
             target.set_class_name("");
             Ok(())
         }
         _ => Ok(()),
     }
+}
+
+/// Handle a `dragover` event
+fn handle_drag_over(de: DragEvent, _target: HtmlElement) -> Result<()> {
+    // FIXME: check datatransfer types
+    de.prevent_default();
+    // FIXME: check for existing placeholder
+    Ok(())
 }
 
 /// Add "focusin" / "focusout" event listeners to an element

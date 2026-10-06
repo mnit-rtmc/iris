@@ -28,8 +28,13 @@ pub enum Error {
     #[error("No body")]
     NoBody(),
 
+    /// Unable to get map element
     #[error("No map")]
     NoMap(),
+
+    /// Unknown DOM event
+    #[error("Unknown DOM event {0}")]
+    UnknownEvent(String),
 
     /// Failed to cast element
     #[error("Cast failed {0}")]

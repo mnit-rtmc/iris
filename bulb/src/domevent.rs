@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::error::Error;
 use web_sys::{DragEvent, MouseEvent};
 
 /// Mouse event type
@@ -24,14 +25,14 @@ pub enum MouseTp {
 }
 
 impl TryFrom<&MouseEvent> for MouseTp {
-    type Error = ();
+    type Error = Error;
 
     fn try_from(me: &MouseEvent) -> std::result::Result<Self, Self::Error> {
         match me.type_().as_str() {
             "mousedown" => Ok(Self::Down),
             "mousemove" => Ok(Self::Move),
             "mouseup" => Ok(Self::Up),
-            _ => Err(()),
+            tp => Err(Error::UnknownEvent(tp.to_string())),
         }
     }
 }
@@ -56,7 +57,7 @@ pub enum DragTp {
 }
 
 impl TryFrom<&DragEvent> for DragTp {
-    type Error = ();
+    type Error = Error;
 
     fn try_from(de: &DragEvent) -> std::result::Result<Self, Self::Error> {
         match de.type_().as_str() {
@@ -67,7 +68,7 @@ impl TryFrom<&DragEvent> for DragTp {
             "dragenter" => Ok(Self::Enter),
             "dragleave" => Ok(Self::Leave),
             "dragover" => Ok(Self::Over),
-            _ => Err(()),
+            tp => Err(Error::UnknownEvent(tp.to_string())),
         }
     }
 }
