@@ -48,8 +48,8 @@ Notes             | Administrator notes, possibly including [hashtag]s
 |--------------|----------------|--------------------------------------------|
 | 👁️  View      | name, location | geo\_loc, video\_loss                      |
 | 👉 Operate   |                | ptz †, recall\_preset †, device\_request † |
-| 💡 Manage    | publish        | store\_preset †                            |
-| 🔧 Configure | controller, cam\_num, notes | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel |
+| 💡 Manage    | publish        |                                            |
+| 🔧 Configure | controller, cam\_num, notes | pin, cam\_template, encoder\_type, enc\_address, enc\_port, enc\_mcast, enc\_channel, store\_preset † |
 
 † _Write only_
 
