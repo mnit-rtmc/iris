@@ -75,7 +75,6 @@ pub fn add_listeners() -> Result<()> {
         .with_zoom_handler(handle_zoom)
         .register();
     spawn_future(zoom_to_default());
-    spawn_future(update_layers_all(10));
     spawn_future(add_extent_buttons());
     fetch_station_data();
     Ok(())
