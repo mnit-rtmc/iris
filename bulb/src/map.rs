@@ -93,14 +93,10 @@ async fn zoom_to_default() -> Result<()> {
 
 /// Set the map to the specified map extent
 async fn recall_extent(name: String) -> Result<()> {
-    let Some(map_pane) = MapPane::get(MAP_PANE) else {
-        Err(Error::NoMap())?
-    };
     let extent_js = uri_one(Res::MapExtent, &name).get().await?;
     let extent = serde_wasm_bindgen::from_value::<MapExtent>(extent_js)?;
     let (zoom, lon, lat) = (extent.zoom, extent.lon, extent.lat);
-    map_pane.set_position(zoom.into(), lon, lat);
-    set_zoom_level(zoom.into());
+    set_extent(zoom.into(), lon, lat).await?;
     Ok(())
 }
 
@@ -141,19 +137,17 @@ fn selected_zoom(res: Res) -> u32 {
 pub fn present_item(res: Res, name: &str, lon: f64, lat: f64) {
     if !app::is_presented_item(res, name) {
         let zoom = selected_zoom(res).max(12);
-        spawn_future(do_present_item(zoom, lon, lat));
+        spawn_future(set_extent(zoom, lon, lat));
         app::present_item(Some((res, name)));
     }
 }
 
-/// Present item on map
-async fn do_present_item(zoom: u32, lon: f64, lat: f64) -> Result<()> {
-    if let Some(map_pane) = MapPane::get(MAP_PANE) {
-        map_pane.set_position(zoom, lon, lat);
-        set_zoom_level(zoom);
-        update_layers_all(zoom).await?;
-    }
-    Ok(())
+/// Set map extent
+async fn set_extent(zoom: u32, lon: f64, lat: f64) -> Result<()> {
+    let map_pane = MapPane::get(MAP_PANE).ok_or(Error::NoMap())?;
+    map_pane.set_position(zoom, lon, lat);
+    set_zoom_level(zoom);
+    update_layers_all(zoom).await
 }
 
 /// Set selected style (CSS)
