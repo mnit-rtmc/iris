@@ -25,7 +25,7 @@ use crate::dayplan::DayPlan;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
-use crate::domevent::{EventTp, MouseTp};
+use crate::domevent::EventTp;
 use crate::eid;
 use crate::encodertype::EncoderType;
 use crate::error::Result;
@@ -325,24 +325,6 @@ impl CardView {
             el.set_class_name(self.view.class_name(false));
         }
         Ok(None)
-    }
-
-    /// Handle mouse event for a card
-    pub async fn handle_mouse(&self, id: String, tp: MouseTp) -> Result<()> {
-        cards_meth!(self, handle_mouse_x, (id, tp))
-    }
-
-    /// Handle mouse event for a card
-    async fn handle_mouse_x<C: Card>(
-        &self,
-        params: (String, MouseTp),
-    ) -> Result<()> {
-        let pri = self.fetch_primary::<C>().await?;
-        let anc = fetch_ancillary(&pri, self.view).await?;
-        for action in pri.handle_mouse(anc, params.0, params.1) {
-            action.perform().await?;
-        }
-        Ok(())
     }
 
     /// Handle input event for an element owned by the resource

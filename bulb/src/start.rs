@@ -277,10 +277,11 @@ fn do_handle_grab(me: &MouseEvent, tp: MouseTp, target: HtmlElement) {
 
 /// Handle a mouse event on an expanded card
 fn handle_mouse_card(id: String, tp: MouseTp) {
+    let tp = EventTp::Mouse(tp);
     if let Some(cv) = app::expanded_view()
-        && cv.is_event_handled(id.as_str(), EventTp::Mouse(tp))
+        && cv.is_event_handled(id.as_str(), tp)
     {
-        spawn_future(async move { cv.handle_mouse(id, tp).await });
+        spawn_future(async move { cv.handle_event(&id, tp).await });
     }
 }
 

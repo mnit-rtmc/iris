@@ -872,6 +872,39 @@ impl Card for Camera {
         }
     }
 
+    /// Handle event for a card
+    fn handle_event(
+        &self,
+        _anc: CameraAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        if let EventTp::Mouse(tp) = tp {
+            let mut parts = id.split("-");
+            let id = match (parts.next(), parts.next()) {
+                // focus/iris auto buttons are on click, not mousedown/up
+                (_, Some("auto")) => "",
+                (Some("focus"), _)
+                | (Some("iris"), _)
+                | (Some("ptz"), _)
+                | (Some("publish"), _) => id,
+                _ => "",
+            };
+            let mouse_down = match id {
+                // mouse on invalid target, so always release mouse
+                "" => false,
+                _ => tp == MouseTp::Down,
+            };
+            if mouse_down {
+                self.mouse_down(id)
+            } else {
+                self.mouse_up(id)
+            }
+        } else {
+            Vec::new()
+        }
+    }
+
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: CameraAnc, id: &str) -> Vec<Action> {
         if let Some(preset_str) = id.strip_prefix("preset-") {
@@ -890,35 +923,6 @@ impl Card for Camera {
             "camera-wiper" => self.device_req(DeviceReq::CameraWiperOneShot),
             "rq_reset" => self.device_req(DeviceReq::ResetDevice),
             _ => self.handle_click_common(anc, id),
-        }
-    }
-
-    /// Handle mouse event for an element on the card
-    fn handle_mouse(
-        &self,
-        _anc: CameraAnc,
-        id: String,
-        tp: MouseTp,
-    ) -> Vec<Action> {
-        let mut parts = id.split("-");
-        let id = match (parts.next(), parts.next()) {
-            // focus/iris auto buttons are on click, not mousedown/up
-            (_, Some("auto")) => "",
-            (Some("focus"), _)
-            | (Some("iris"), _)
-            | (Some("ptz"), _)
-            | (Some("publish"), _) => &id,
-            _ => "",
-        };
-        let mouse_down = match id {
-            // mouse on invalid target, so always release mouse
-            "" => false,
-            _ => tp == MouseTp::Down,
-        };
-        if mouse_down {
-            self.mouse_down(id)
-        } else {
-            self.mouse_up(id)
         }
     }
 

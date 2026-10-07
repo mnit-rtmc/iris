@@ -24,7 +24,7 @@ use crate::dayplan::DayPlan;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
-use crate::domevent::{EventTp, MouseTp};
+use crate::domevent::EventTp;
 use crate::eid;
 use crate::encodertype::EncoderType;
 use crate::error::{Error, Result};
@@ -289,16 +289,6 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Handle input event for an element on the card
     fn handle_input(&self, _anc: Self::Ancillary, _id: &str) -> Vec<Action> {
-        Vec::new()
-    }
-
-    /// Handle mouse event for a card
-    fn handle_mouse(
-        &self,
-        _anc: Self::Ancillary,
-        _id: String,
-        _tp: MouseTp,
-    ) -> Vec<Action> {
         Vec::new()
     }
 
