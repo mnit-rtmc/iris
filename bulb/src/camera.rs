@@ -15,7 +15,7 @@ use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_one, uri_one_direct};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
-use crate::domevent::MouseTp;
+use crate::domevent::{EventTp, MouseTp};
 use crate::encodertype::EncoderType;
 use crate::error::Result;
 use crate::fetch::Action;
@@ -819,6 +819,23 @@ impl Card for Camera {
     /// Get geo location name
     fn geoloc(&self) -> Option<&str> {
         self.geo_loc.as_deref()
+    }
+
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(_view: View, tp: EventTp, id: &str) -> bool {
+        if tp == EventTp::Click {
+            match id {
+                // handled by mouse event listener, prevent click:
+                "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up"
+                | "ptz-tilt-down" | "ptz-zoom-in" | "ptz-zoom-out"
+                | "focus-near" | "focus-far" | "iris-open" | "iris-close" => {
+                    false
+                }
+                _ => true,
+            }
+        } else {
+            true
+        }
     }
 
     /// Convert to HTML view

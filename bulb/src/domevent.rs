@@ -72,3 +72,11 @@ impl TryFrom<&DragEvent> for DragTp {
         }
     }
 }
+
+/// Event type
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EventTp {
+    Click,
+    Mouse(MouseTp),
+    Drag(DragTp),
+}

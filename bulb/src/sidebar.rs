@@ -13,7 +13,7 @@
 use crate::app;
 use crate::asset::Asset;
 use crate::card::{self, CardList};
-use crate::domevent::DragTp;
+use crate::domevent::{DragTp, EventTp};
 use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
@@ -131,6 +131,7 @@ pub fn add_click_listener(el: &Element) -> Result<()> {
     Ok(())
 }
 
+/// Clear card layout class
 fn clear_card_layout(el: &HtmlElement) -> Result<()> {
     el.class_list().remove(
         &["max", "fit", "docked"]
@@ -141,6 +142,7 @@ fn clear_card_layout(el: &HtmlElement) -> Result<()> {
     Ok(())
 }
 
+/// Set card layout
 fn set_card_layout(id: &str) -> Result<()> {
     if let Some((mode, id)) = id.split_once("_")
         && let Some(card) = Doc::get().opt_elem::<HtmlElement>(id)
@@ -188,10 +190,6 @@ fn handle_click_button(id: String, long_press: bool) {
         eid::LEFT_SIDEBAR => spawn_future(change_sidebar_side(true)),
         eid::RIGHT_SIDEBAR => spawn_future(change_sidebar_side(false)),
         eid::ADD => spawn_future(show_create_card()),
-        // handled by mouse event listener, prevent click:
-        "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up" | "ptz-tilt-down"
-        | "ptz-zoom-in" | "ptz-zoom-out" | "focus-near" | "focus-far"
-        | "iris-open" | "iris-close" => (),
         id if matches!(
             id.split_once("_"),
             Some(("maximize", _)) | Some(("fit", _)) | Some(("dock", _))
@@ -200,7 +198,9 @@ fn handle_click_button(id: String, long_press: bool) {
             let _ = set_card_layout(id);
         }
         _ => {
-            if let Some(cv) = app::expanded_view() {
+            if let Some(cv) = app::expanded_view()
+                && cv.is_event_handled(EventTp::Click, id.as_str())
+            {
                 spawn_future(handle_button_card(cv, id, long_press));
             }
         }

@@ -24,7 +24,7 @@ use crate::dayplan::DayPlan;
 use crate::detector::Detector;
 use crate::dms::Dms;
 use crate::domain::Domain;
-use crate::domevent::MouseTp;
+use crate::domevent::{EventTp, MouseTp};
 use crate::eid;
 use crate::encodertype::EncoderType;
 use crate::error::{Error, Result};
@@ -198,6 +198,11 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Get geo location name
     fn geoloc(&self) -> Option<&str> {
         None
+    }
+
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(_view: View, _tp: EventTp, _id: &str) -> bool {
+        true
     }
 
     /// Convert to Create HTML
@@ -619,11 +624,11 @@ impl CardList {
 
     /// Get next suggested name
     pub fn next_name(&self) -> Result<String> {
-        cards_sync!(self, next_name_x)
+        cards_sync!(self, next_name_x, ())
     }
 
     /// Get next suggested name
-    fn next_name_x<C: Card>(&self) -> Result<String> {
+    fn next_name_x<C: Card>(&self, _: ()) -> Result<String> {
         let cards = self.cards::<C>(false)?;
         let prefix = C::PREFIX;
         if prefix.is_empty() {
