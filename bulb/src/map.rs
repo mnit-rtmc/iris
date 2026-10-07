@@ -34,7 +34,7 @@ use std::collections::HashMap;
 use std::time::Duration;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
-use web_sys::{Element, Event, HtmlElement};
+use web_sys::{Element, Event, HtmlButtonElement, HtmlElement};
 
 /// Map pane ID
 const MAP_PANE: &str = "map-pane";
@@ -80,14 +80,17 @@ pub fn add_listeners() -> Result<()> {
     Ok(())
 }
 
-/// Zoom to default map extent
-async fn zoom_to_default() -> Result<()> {
+/// Gets the default map extent name
+async fn get_default_extent() -> Result<String> {
     let name_js = uri_one(Res::SystemAttribute, "map_extent_name_initial")
         .get()
         .await?;
-    let extent_name =
-        serde_wasm_bindgen::from_value::<SystemAttr>(name_js)?.value;
-    recall_extent(extent_name).await
+    Ok(serde_wasm_bindgen::from_value::<SystemAttr>(name_js)?.value)
+}
+
+/// Zoom to default map extent
+async fn zoom_to_default() -> Result<()> {
+    recall_extent(get_default_extent().await?).await
 }
 
 /// Set the map to the specified map extent
@@ -161,7 +164,6 @@ async fn set_extent(zoom: u32, lon: f64, lat: f64) -> Result<()> {
     let map_pane = MapPane::get(MAP_PANE).ok_or(Error::NoMap())?;
     let (ax, ay) = get_anchor();
     map_pane.with_anchor(ax, ay).set_position(zoom, lon, lat);
-    //do_handle_zoom(zoom.into()).await
     set_zoom_level(zoom);
     update_layers_all(zoom).await
 }
@@ -257,8 +259,14 @@ fn add_change_listener(el: &Element) -> Result<()> {
 /// Add buttons for each map extent
 async fn add_extent_buttons() -> Result<()> {
     let doc = Doc::get();
-    let extents: Vec<MapExtent> =
+    let default_extent = get_default_extent().await?;
+    let default_button = doc.elem::<HtmlButtonElement>("default-extent")?;
+    default_button.set_text_content(Some(&default_extent));
+
+    let mut extents: Vec<MapExtent> =
         serde_wasm_bindgen::from_value(uri_all(Res::MapExtent).get().await?)?;
+    extents.retain(|e| e.name != default_extent);
+
     let extents_container = doc.elem::<HtmlElement>("map-extents-dynamic")?;
     let mut tree = Tree::new();
     for extent in &extents {
@@ -266,6 +274,7 @@ async fn add_extent_buttons() -> Result<()> {
         b.id(&extent.name).cdata(&extent.name).close();
     }
     extents_container.set_inner_html(&String::from(tree));
+
     Ok(())
 }
 
