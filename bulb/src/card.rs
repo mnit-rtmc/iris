@@ -201,8 +201,11 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     }
 
     /// Check if an event type is handled for a card view
-    fn is_event_handled(_view: View, _tp: EventTp, _id: &str) -> bool {
-        true
+    fn is_event_handled(_view: View, tp: EventTp, _id: &str) -> bool {
+        match tp {
+            EventTp::Click => true,
+            _ => false,
+        }
     }
 
     /// Convert to Create HTML
@@ -231,7 +234,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     fn handle_mouse(
         &self,
         _anc: Self::Ancillary,
-        _id: &str,
+        _id: String,
         _tp: MouseTp,
     ) -> Vec<Action> {
         Vec::new()

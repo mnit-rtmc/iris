@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::app::{self, DeferredAction};
-use crate::domevent::MouseTp;
+use crate::domevent::{EventTp, MouseTp};
 use crate::eid;
 use crate::error::Result;
 use crate::fetch::Uri;
@@ -181,7 +181,7 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
     }
     // check for card events
     if me.buttons() & 1 == 1 {
-        spawn_future(handle_mouse_card(target.id(), tp));
+        handle_mouse_card(target.id(), tp);
     }
     // check for "joystick" events
     if me.buttons() & 1 == 1 || tp == MouseTp::Up {
@@ -276,13 +276,12 @@ fn do_handle_grab(me: &MouseEvent, tp: MouseTp, target: HtmlElement) {
 }
 
 /// Handle a mouse event on an expanded card
-async fn handle_mouse_card(id: String, tp: MouseTp) -> Result<()> {
-    if MouseTp::Move != tp
-        && let Some(cv) = app::expanded_view()
+fn handle_mouse_card(id: String, tp: MouseTp) {
+    if let Some(cv) = app::expanded_view()
+        && cv.is_event_handled(EventTp::Mouse(tp), id.as_str())
     {
-        cv.handle_mouse(id.as_str(), tp).await?;
+        spawn_future(async move { cv.handle_mouse(id, tp).await });
     }
-    Ok(())
 }
 
 /// Add the event listener for joystick/gamepad connections

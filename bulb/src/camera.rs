@@ -822,19 +822,21 @@ impl Card for Camera {
     }
 
     /// Check if an event type is handled for a card view
-    fn is_event_handled(_view: View, tp: EventTp, id: &str) -> bool {
-        if tp == EventTp::Click {
-            match id {
-                // handled by mouse event listener, prevent click:
-                "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up"
-                | "ptz-tilt-down" | "ptz-zoom-in" | "ptz-zoom-out"
-                | "focus-near" | "focus-far" | "iris-open" | "iris-close" => {
-                    false
+    fn is_event_handled(view: View, tp: EventTp, id: &str) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click) => {
+                match id {
+                    // handled by mouse event listener, prevent click:
+                    "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up"
+                    | "ptz-tilt-down" | "ptz-zoom-in" | "ptz-zoom-out"
+                    | "focus-near" | "focus-far" | "iris-open"
+                    | "iris-close" => false,
+                    _ => true,
                 }
-                _ => true,
             }
-        } else {
-            true
+            (View::Control, EventTp::Mouse(MouseTp::Move)) => false,
+            (View::Control, EventTp::Mouse(_)) => true,
+            _ => false,
         }
     }
 
@@ -894,7 +896,7 @@ impl Card for Camera {
     fn handle_mouse(
         &self,
         _anc: CameraAnc,
-        id: &str,
+        id: String,
         tp: MouseTp,
     ) -> Vec<Action> {
         let mut parts = id.split("-");
@@ -904,7 +906,7 @@ impl Card for Camera {
             (Some("focus"), _)
             | (Some("iris"), _)
             | (Some("ptz"), _)
-            | (Some("publish"), _) => id,
+            | (Some("publish"), _) => &id,
             _ => "",
         };
         let mouse_down = match id {
