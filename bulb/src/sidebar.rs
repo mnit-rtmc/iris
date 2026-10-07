@@ -199,7 +199,7 @@ fn handle_click_button(id: String, long_press: bool) {
         }
         _ => {
             if let Some(cv) = app::expanded_view()
-                && cv.is_event_handled(EventTp::Click, id.as_str())
+                && cv.is_event_handled(id.as_str(), EventTp::Click)
             {
                 spawn_future(handle_button_card(cv, id, long_press));
             }

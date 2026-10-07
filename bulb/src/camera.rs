@@ -822,7 +822,7 @@ impl Card for Camera {
     }
 
     /// Check if an event type is handled for a card view
-    fn is_event_handled(view: View, tp: EventTp, id: &str) -> bool {
+    fn is_event_handled(view: View, id: &str, tp: EventTp) -> bool {
         match (view, tp) {
             (_, EventTp::Click) => {
                 match id {

@@ -265,13 +265,13 @@ impl CardView {
     }
 
     /// Check if an event type is handled for a card view
-    pub fn is_event_handled(&self, tp: EventTp, id: &str) -> bool {
-        cards_sync!(self, is_event_handled_x, (tp, id))
+    pub fn is_event_handled(&self, id: &str, tp: EventTp) -> bool {
+        cards_sync!(self, is_event_handled_x, (id, tp))
     }
 
     /// Check if an event type is handled for a card view
-    fn is_event_handled_x<C: Card>(&self, tp_id: (EventTp, &str)) -> bool {
-        C::is_event_handled(self.view, tp_id.0, tp_id.1)
+    fn is_event_handled_x<C: Card>(&self, params: (&str, EventTp)) -> bool {
+        C::is_event_handled(self.view, params.0, params.1)
     }
 
     /// Handle click event for a button owned by the resource
