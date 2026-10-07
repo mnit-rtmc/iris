@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::error::Error;
-use web_sys::{DragEvent, MouseEvent};
+use web_sys::{DragEvent, FocusEvent, MouseEvent};
 
 /// Mouse event type
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -73,6 +73,33 @@ impl TryFrom<&DragEvent> for DragTp {
     }
 }
 
+/// Focus event type
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FocusTp {
+    /// `blur` event type
+    Blur,
+    /// `focus` event type
+    Focus,
+    /// `focusin` event type
+    In,
+    /// `focusout` event type
+    Out,
+}
+
+impl TryFrom<&FocusEvent> for FocusTp {
+    type Error = Error;
+
+    fn try_from(fe: &FocusEvent) -> std::result::Result<Self, Self::Error> {
+        match fe.type_().as_str() {
+            "blur" => Ok(Self::Blur),
+            "focus" => Ok(Self::Focus),
+            "focusin" => Ok(Self::In),
+            "focusout" => Ok(Self::Out),
+            tp => Err(Error::UnknownEvent(tp.to_string())),
+        }
+    }
+}
+
 /// Event type
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EventTp {
@@ -86,4 +113,6 @@ pub enum EventTp {
     Mouse(MouseTp),
     /// Drag events
     Drag(DragTp),
+    /// Focus events
+    Focus(FocusTp),
 }

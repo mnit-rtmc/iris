@@ -274,6 +274,24 @@ impl CardView {
         C::is_event_handled(self.view, params.0, params.1)
     }
 
+    /// Handle event for a card
+    pub async fn handle_event(&self, id: &str, tp: EventTp) -> Result<()> {
+        cards_meth!(self, handle_event_x, (id, tp))
+    }
+
+    /// Handle event for a card
+    async fn handle_event_x<C: Card>(
+        &self,
+        params: (&str, EventTp),
+    ) -> Result<()> {
+        let pri = self.fetch_primary::<C>().await?;
+        let anc = fetch_ancillary(&pri, self.view).await?;
+        for action in pri.handle_event(anc, params.0, params.1) {
+            action.perform().await?;
+        }
+        Ok(())
+    }
+
     /// Handle click event for a button owned by the resource
     pub async fn handle_click(&self, id: &str) -> Result<Option<View>> {
         cards_meth!(self, handle_click_x, id)

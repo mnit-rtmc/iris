@@ -13,7 +13,7 @@
 use crate::app;
 use crate::asset::Asset;
 use crate::card::{self, CardList};
-use crate::domevent::{DragTp, EventTp};
+use crate::domevent::{DragTp, EventTp, FocusTp};
 use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
@@ -29,7 +29,7 @@ use resources::Res;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
-    DragEvent, Element, Event, HtmlButtonElement, HtmlElement,
+    DragEvent, Element, Event, FocusEvent, HtmlButtonElement, HtmlElement,
     HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
     ScrollLogicalPosition, TransitionEvent,
 };
@@ -478,11 +478,13 @@ fn handle_drag_over(de: DragEvent, _target: HtmlElement) -> Result<()> {
 
 /// Add "focusin" / "focusout" event listeners to an element
 fn add_focus_listener(el: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let Some(Ok(input)) =
-            e.target().map(|e| e.dyn_into::<HtmlInputElement>())
+    let closure: Closure<dyn Fn(_)> = Closure::new(|ev: Event| {
+        if let Ok(fe) = ev.dyn_into::<FocusEvent>()
+            && let Some(Ok(target)) =
+                fe.target().map(|el| el.dyn_into::<HtmlElement>())
+            && let Err(e) = handle_focus_ev(fe, target)
         {
-            handle_focus_events(input, e.type_());
+            log::warn!("handle_focus_ev: {e:?}");
         }
     });
     el.add_event_listener_with_callback(
@@ -498,24 +500,16 @@ fn add_focus_listener(el: &Element) -> Result<()> {
     Ok(())
 }
 
-/// Handle focusin / focusout events
-fn handle_focus_events(input: HtmlInputElement, tp: String) {
-    let id = input.id();
-    // DMS message composer line input
-    if id.as_str().starts_with("mc_line") {
-        match tp.as_str() {
-            "focusin" => input.set_value(""),
-            "focusout" => {
-                if input.value().is_empty()
-                    && let Some(ms) = input.get_attribute("data-cur")
-                {
-                    input.set_value(&ms);
-                    handle_input_card(id);
-                }
-            }
-            _ => (),
-        }
+/// Handle focus events
+fn handle_focus_ev(fe: FocusEvent, target: HtmlElement) -> Result<()> {
+    let tp = EventTp::Focus(FocusTp::try_from(&fe)?);
+    let id = target.id();
+    if let Some(cv) = app::expanded_view()
+        && cv.is_event_handled(id.as_str(), tp)
+    {
+        spawn_future(async move { cv.handle_event(&id, tp).await });
     }
+    Ok(())
 }
 
 /// Add transition event listener to an element

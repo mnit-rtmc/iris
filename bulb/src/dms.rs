@@ -16,7 +16,7 @@ use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::devaction::DeviceAction;
 use crate::device::DeviceReq;
-use crate::domevent::EventTp;
+use crate::domevent::{EventTp, FocusTp};
 use crate::error::Result;
 use crate::fetch::{Action, Uri};
 use crate::geoloc::LocAnc;
@@ -1325,12 +1325,38 @@ impl Card for Dms {
     }
 
     /// Check if an event type is handled for a card view
-    fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
+    fn is_event_handled(view: View, id: &str, tp: EventTp) -> bool {
         match (view, tp) {
             (_, EventTp::Click | EventTp::LongPressClick) => true,
             (View::Control, EventTp::Input) => true,
+            (View::Control, EventTp::Focus(_)) => id.starts_with("mc_line"),
             _ => false,
         }
+    }
+
+    /// Handle event for the card
+    fn handle_event(
+        &self,
+        anc: Self::Ancillary,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        // message composer line input
+        if let Some(input) = Doc::get().opt_elem::<HtmlInputElement>(id) {
+            match tp {
+                EventTp::Focus(FocusTp::In) => input.set_value(""),
+                EventTp::Focus(FocusTp::Out) => {
+                    if input.value().is_empty()
+                        && let Some(ms) = input.get_attribute("data-cur")
+                    {
+                        input.set_value(&ms);
+                        return self.handle_input(anc, id);
+                    }
+                }
+                _ => (),
+            }
+        }
+        Vec::new()
     }
 
     /// Handle click event for a button on the card

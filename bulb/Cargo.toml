@@ -53,6 +53,7 @@ features = [
   'ErrorEvent',
   'Event',
   'EventSource',
+  'FocusEvent',
   'Gamepad',
   'GamepadEvent',
   'Headers',
