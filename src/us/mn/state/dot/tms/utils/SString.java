@@ -3,6 +3,7 @@
  * Copyright (C) 2008-2011  AHMCT, University of California
  * Copyright (C) 2013-2020  Minnesota Department of Transportation
  * Copyright (C) 2017 Iteris Inc.
+ * Copyright (C) 2026 Alaska DOT&PF
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@ import java.util.Arrays;
  *
  * @author Michael Darter
  * @author Douglas Lau
+ * @author Darren Jaeckel, Wostmann & Associates
  */
 public class SString {
 
@@ -331,5 +333,12 @@ public class SString {
 			return sb.toString().trim();
 		}
 		return null;
+	}
+
+	/** Removes the last character from a StringBuilder if it's a comma */
+	static public void removeTrailingComma(StringBuilder sb) {
+		if (sb.charAt(sb.length() - 1) == ',') {
+			sb.setLength(sb.length() - 1);
+		}
 	}
 }
