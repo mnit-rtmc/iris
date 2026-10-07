@@ -203,7 +203,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Check if an event type is handled for a card view
     fn is_event_handled(_view: View, _id: &str, tp: EventTp) -> bool {
         match tp {
-            EventTp::Click => true,
+            EventTp::Click | EventTp::LongPressClick => true,
             _ => false,
         }
     }

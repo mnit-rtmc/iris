@@ -834,6 +834,7 @@ impl Card for Camera {
                     _ => true,
                 }
             }
+            (_, EventTp::LongPressClick) => true,
             (View::Control, EventTp::Mouse(MouseTp::Move)) => false,
             (View::Control, EventTp::Mouse(_)) => true,
             _ => false,

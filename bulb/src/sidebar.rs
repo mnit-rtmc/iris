@@ -112,11 +112,16 @@ pub fn add_click_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             if target.is_instance_of::<HtmlButtonElement>() {
-                let long_press = match target.get_attribute("class") {
-                    Some(cls) => cls.contains("long-press"),
-                    None => false,
+                let long_press = target
+                    .get_attribute("class")
+                    .filter(|cls| cls.contains("long-press"))
+                    .is_some();
+                let tp = if long_press {
+                    EventTp::LongPressClick
+                } else {
+                    EventTp::Click
                 };
-                handle_click_button(target.id(), long_press);
+                handle_click_button(target.id(), tp);
             } else if let Ok(Some(cc)) = target.closest(".card-compact") {
                 handle_click_card(&cc);
             }
@@ -181,7 +186,7 @@ fn set_card_layout(id: &str) -> Result<()> {
 }
 
 /// Handle a `click` event with a button target
-fn handle_click_button(id: String, long_press: bool) {
+fn handle_click_button(id: String, tp: EventTp) {
     match id.as_str() {
         eid::LOGIN => spawn_future(start::handle_login()),
         eid::LOGOUT => spawn_future(start::handle_logout()),
@@ -199,9 +204,9 @@ fn handle_click_button(id: String, long_press: bool) {
         }
         _ => {
             if let Some(cv) = app::expanded_view()
-                && cv.is_event_handled(id.as_str(), EventTp::Click)
+                && cv.is_event_handled(id.as_str(), tp)
             {
-                spawn_future(handle_button_card(cv, id, long_press));
+                spawn_future(handle_button_card(cv, id, tp));
             }
         }
     }
@@ -256,14 +261,14 @@ async fn show_create_card() -> Result<()> {
 async fn handle_button_card(
     cv: CardView,
     id: String,
-    long_press: bool,
+    tp: EventTp,
 ) -> Result<()> {
     let finished = app::long_press_finished();
     if finished && eid::DELETE == id {
         cv.handle_delete().await?;
         let query = QueryParam::current_entry().with_sel("");
         set_query(query).await?;
-    } else if (finished || !long_press)
+    } else if (finished || EventTp::LongPressClick != tp)
         && let Some(v) = cv.handle_click(&id).await?
         && !v.is_expanded()
     {

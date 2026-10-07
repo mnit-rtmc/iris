@@ -76,7 +76,12 @@ impl TryFrom<&DragEvent> for DragTp {
 /// Event type
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EventTp {
+    /// Button click
     Click,
+    /// "Long-Press" button click
+    LongPressClick,
+    /// Mouse events
     Mouse(MouseTp),
+    /// Drag events
     Drag(DragTp),
 }
