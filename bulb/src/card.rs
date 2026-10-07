@@ -200,14 +200,6 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         None
     }
 
-    /// Check if an event type is handled for a card view
-    fn is_event_handled(_view: View, _id: &str, tp: EventTp) -> bool {
-        match tp {
-            EventTp::Click | EventTp::LongPressClick => true,
-            _ => false,
-        }
-    }
-
     /// Convert to Create HTML
     fn to_html_create(&self, len: u32) -> String {
         let mut tree = Tree::new();
@@ -225,19 +217,17 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Convert to HTML view
     fn to_html(&self, view: View, _anc: &Self::Ancillary) -> String;
 
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(_view: View, _id: &str, tp: EventTp) -> bool {
+        match tp {
+            EventTp::Click | EventTp::LongPressClick => true,
+            _ => false,
+        }
+    }
+
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: Self::Ancillary, id: &str) -> Vec<Action> {
         self.handle_click_common(anc, id)
-    }
-
-    /// Handle mouse event for a card
-    fn handle_mouse(
-        &self,
-        _anc: Self::Ancillary,
-        _id: String,
-        _tp: MouseTp,
-    ) -> Vec<Action> {
-        Vec::new()
     }
 
     /// Handle click event for common buttons on the card
@@ -289,6 +279,16 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Handle input event for an element on the card
     fn handle_input(&self, _anc: Self::Ancillary, _id: &str) -> Vec<Action> {
+        Vec::new()
+    }
+
+    /// Handle mouse event for a card
+    fn handle_mouse(
+        &self,
+        _anc: Self::Ancillary,
+        _id: String,
+        _tp: MouseTp,
+    ) -> Vec<Action> {
         Vec::new()
     }
 

@@ -821,26 +821,6 @@ impl Card for Camera {
         self.geo_loc.as_deref()
     }
 
-    /// Check if an event type is handled for a card view
-    fn is_event_handled(view: View, id: &str, tp: EventTp) -> bool {
-        match (view, tp) {
-            (_, EventTp::Click) => {
-                match id {
-                    // handled by mouse event listener, prevent click:
-                    "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up"
-                    | "ptz-tilt-down" | "ptz-zoom-in" | "ptz-zoom-out"
-                    | "focus-near" | "focus-far" | "iris-open"
-                    | "iris-close" => false,
-                    _ => true,
-                }
-            }
-            (_, EventTp::LongPressClick) => true,
-            (View::Control, EventTp::Mouse(MouseTp::Move)) => false,
-            (View::Control, EventTp::Mouse(_)) => true,
-            _ => false,
-        }
-    }
-
     /// Convert to HTML view
     fn to_html(&self, view: View, anc: &CameraAnc) -> String {
         match view {
@@ -870,6 +850,26 @@ impl Card for Camera {
     /// Get changed fields on Location view
     fn changed_location(&self, anc: CameraAnc) -> String {
         anc.loc.changed_location()
+    }
+
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(view: View, id: &str, tp: EventTp) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click) => {
+                match id {
+                    // handled by mouse event listener, prevent click:
+                    "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up"
+                    | "ptz-tilt-down" | "ptz-zoom-in" | "ptz-zoom-out"
+                    | "focus-near" | "focus-far" | "iris-open"
+                    | "iris-close" => false,
+                    _ => true,
+                }
+            }
+            (_, EventTp::LongPressClick) => true,
+            (View::Control, EventTp::Mouse(MouseTp::Move)) => false,
+            (View::Control, EventTp::Mouse(_)) => true,
+            _ => false,
+        }
     }
 
     /// Handle click event for a button on the card

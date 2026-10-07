@@ -15,6 +15,7 @@ use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::dayplan::{DayMatcher, DayPlan};
 use crate::devaction::DeviceAction;
+use crate::domevent::EventTp;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
@@ -606,6 +607,15 @@ impl Card for ActionPlan {
         }
     }
 
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click | EventTp::LongPressClick) => true,
+            (View::Control | View::Setup(true), EventTp::Input) => true,
+            _ => false,
+        }
+    }
+
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
         if let Some((name, "hashtag-clear")) = id.split_once('-') {
@@ -619,25 +629,6 @@ impl Card for ActionPlan {
         } else {
             self.handle_click_common(anc, id)
         }
-    }
-
-    /// Handle input event for an element on the card
-    #[allow(clippy::field_reassign_with_default)]
-    fn handle_input(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
-        // FIXME: Control card only
-        if "phase" == id
-            && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
-        {
-            let phase = el.value();
-            let mut attr = Attr::new();
-            attr.str("phase", &phase.to_string());
-            let uri = uri_one(Res::ActionPlan, &self.name);
-            return vec![Action::Patch(uri, attr.into())];
-        }
-        // FIXME: Setup card only
-        self.update_device_actions(&anc, id);
-        self.update_phase_actions(&anc, id);
-        Vec::new()
     }
 
     /// Handle click event for the save button
@@ -686,5 +677,24 @@ impl Card for ActionPlan {
             actions.push(Action::Patch(uri, changed.into()));
         }
         actions
+    }
+
+    /// Handle input event for an element on the card
+    #[allow(clippy::field_reassign_with_default)]
+    fn handle_input(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
+        // FIXME: Control card only
+        if "phase" == id
+            && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
+        {
+            let phase = el.value();
+            let mut attr = Attr::new();
+            attr.str("phase", &phase.to_string());
+            let uri = uri_one(Res::ActionPlan, &self.name);
+            return vec![Action::Patch(uri, attr.into())];
+        }
+        // FIXME: Setup card only
+        self.update_device_actions(&anc, id);
+        self.update_phase_actions(&anc, id);
+        Vec::new()
     }
 }

@@ -12,6 +12,7 @@
 //
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_all};
+use crate::domevent::EventTp;
 use crate::eid;
 use crate::error::Result;
 use crate::fetch::Action;
@@ -401,6 +402,15 @@ impl Card for MsgLine {
         fields.changed_input("rank", self.rank);
         fields.changed_input("multi", &self.multi);
         fields.into()
+    }
+
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click | EventTp::LongPressClick) => true,
+            (View::Setup(true), EventTp::Input) => true,
+            _ => false,
+        }
     }
 
     /// Handle input event for an element on the card

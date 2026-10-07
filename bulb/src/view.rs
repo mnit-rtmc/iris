@@ -329,29 +329,7 @@ impl CardView {
 
     /// Handle input event for an element owned by the resource
     pub async fn handle_input(&self, id: &str) -> Result<()> {
-        match (self.res, self.view) {
-            (Res::ActionPlan, View::Control | View::Setup(true)) => {
-                self.handle_input_x::<ActionPlan>(id).await
-            }
-            (Res::DayPlan, View::Setup(true)) => {
-                self.handle_input_x::<DayPlan>(id).await
-            }
-            (Res::Dms, View::Control) => self.handle_input_x::<Dms>(id).await,
-            (Res::Domain, View::Control) => {
-                self.handle_input_x::<Domain>(id).await
-            }
-            (Res::Lcs, View::Control) => self.handle_input_x::<Lcs>(id).await,
-            (Res::MsgLine, View::Setup(true)) => {
-                self.handle_input_x::<MsgLine>(id).await
-            }
-            (Res::MsgPattern, View::Setup(true)) => {
-                self.handle_input_x::<MsgPattern>(id).await
-            }
-            (Res::RampMeter, View::Control) => {
-                self.handle_input_x::<RampMeter>(id).await
-            }
-            _ => Ok(()),
-        }
+        cards_meth!(self, handle_input_x, id)
     }
 
     /// Handle input event for an element on a card

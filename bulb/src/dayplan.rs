@@ -13,6 +13,7 @@
 use crate::asset::Asset;
 use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_all, uri_one};
+use crate::domevent::EventTp;
 use crate::eid;
 use crate::error::Result;
 use crate::fetch::Action;
@@ -492,21 +493,13 @@ impl Card for DayPlan {
         }
     }
 
-    /// Handle input event for an element on the card
-    #[allow(clippy::field_reassign_with_default)]
-    fn handle_input(&self, anc: DayPlanAnc, id: &str) -> Vec<Action> {
-        for dm in &anc.day_matchers {
-            let mut ndm = dm.clone();
-            ndm.update_from_dom();
-            if ndm.update_class(*dm != ndm, id) {
-                break;
-            }
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click | EventTp::LongPressClick) => true,
+            (View::Setup(true), EventTp::Input) => true,
+            _ => false,
         }
-        let dm = DayMatcher::new(&anc.next_name, &self.name);
-        let mut ndm = dm.clone();
-        ndm.update_from_dom();
-        ndm.update_class(dm != ndm, id);
-        Vec::new()
     }
 
     /// Handle click event for the save button
@@ -531,5 +524,22 @@ impl Card for DayPlan {
             actions.push(dm.action_post());
         }
         actions
+    }
+
+    /// Handle input event for an element on the card
+    #[allow(clippy::field_reassign_with_default)]
+    fn handle_input(&self, anc: DayPlanAnc, id: &str) -> Vec<Action> {
+        for dm in &anc.day_matchers {
+            let mut ndm = dm.clone();
+            ndm.update_from_dom();
+            if ndm.update_class(*dm != ndm, id) {
+                break;
+            }
+        }
+        let dm = DayMatcher::new(&anc.next_name, &self.name);
+        let mut ndm = dm.clone();
+        ndm.update_from_dom();
+        ndm.update_class(dm != ndm, id);
+        Vec::new()
     }
 }

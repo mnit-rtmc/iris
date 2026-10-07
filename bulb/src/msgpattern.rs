@@ -12,6 +12,7 @@
 //
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html};
+use crate::domevent::EventTp;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
@@ -507,6 +508,15 @@ impl Card for MsgPattern {
         fields.changed_input("flash_beacon", self.flash_beacon);
         fields.changed_input("pixel_service", self.pixel_service);
         fields.into()
+    }
+
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click | EventTp::LongPressClick) => true,
+            (View::Setup(true), EventTp::Input) => true,
+            _ => false,
+        }
     }
 
     /// Handle input event for an element on the card

@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{AncillaryData, Card, footer_html};
+use crate::domevent::EventTp;
 use crate::eid;
 use crate::fetch::Action;
 use crate::item::ItemState;
@@ -138,6 +139,15 @@ impl Card for Domain {
         fields.changed_input("block", &self.block);
         fields.changed_input("enabled", self.enabled);
         fields.into()
+    }
+
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click | EventTp::LongPressClick) => true,
+            (View::Control, EventTp::Input) => true,
+            _ => false,
+        }
     }
 
     /// Handle input event for an element on the card

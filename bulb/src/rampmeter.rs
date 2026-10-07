@@ -14,6 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
+use crate::domevent::EventTp;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::LocAnc;
@@ -1000,6 +1001,15 @@ impl Card for RampMeter {
     /// Get changed fields on Location view
     fn changed_location(&self, anc: RampMeterAnc) -> String {
         anc.loc.changed_location()
+    }
+
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click | EventTp::LongPressClick) => true,
+            (View::Control, EventTp::Input) => true,
+            _ => false,
+        }
     }
 
     /// Handle click event for a button on the card

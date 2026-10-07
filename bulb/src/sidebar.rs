@@ -108,7 +108,7 @@ fn show_hide_res_opt(doc: &Doc, res: Res, access: &[Permission]) {
 }
 
 /// Add a `click` event listener to an element
-pub fn add_click_listener(el: &Element) -> Result<()> {
+fn add_click_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
             if target.is_instance_of::<HtmlButtonElement>() {
@@ -341,7 +341,7 @@ fn handle_input(id: String) {
         {
             handle_res_change()
         }
-        _ => spawn_future(handle_input_other(id)),
+        _ => handle_input_card(id),
     }
 }
 
@@ -410,11 +410,12 @@ fn selected_resource() -> Option<Res> {
 }
 
 /// Handle an input event on an expanded card
-async fn handle_input_other(id: String) -> Result<()> {
-    if let Some(cv) = app::expanded_view() {
-        cv.handle_input(&id).await?;
+fn handle_input_card(id: String) {
+    if let Some(cv) = app::expanded_view()
+        && cv.is_event_handled(id.as_str(), EventTp::Input)
+    {
+        spawn_future(async move { cv.handle_input(&id).await });
     }
-    Ok(())
 }
 
 /// Add "drag" event listeners to an element
@@ -481,7 +482,7 @@ fn add_focus_listener(el: &Element) -> Result<()> {
         if let Some(Ok(input)) =
             e.target().map(|e| e.dyn_into::<HtmlInputElement>())
         {
-            spawn_future(handle_focus_events(input, e.type_()));
+            handle_focus_events(input, e.type_());
         }
     });
     el.add_event_listener_with_callback(
@@ -498,10 +499,7 @@ fn add_focus_listener(el: &Element) -> Result<()> {
 }
 
 /// Handle focusin / focusout events
-async fn handle_focus_events(
-    input: HtmlInputElement,
-    tp: String,
-) -> Result<()> {
+fn handle_focus_events(input: HtmlInputElement, tp: String) {
     let id = input.id();
     // DMS message composer line input
     if id.as_str().starts_with("mc_line") {
@@ -512,13 +510,12 @@ async fn handle_focus_events(
                     && let Some(ms) = input.get_attribute("data-cur")
                 {
                     input.set_value(&ms);
-                    handle_input_other(id).await?;
+                    handle_input_card(id);
                 }
             }
             _ => (),
         }
     }
-    Ok(())
 }
 
 /// Add transition event listener to an element

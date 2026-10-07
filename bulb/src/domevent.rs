@@ -80,6 +80,8 @@ pub enum EventTp {
     Click,
     /// "Long-Press" button click
     LongPressClick,
+    /// Input events
+    Input,
     /// Mouse events
     Mouse(MouseTp),
     /// Drag events
