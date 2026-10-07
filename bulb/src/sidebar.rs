@@ -576,10 +576,10 @@ pub async fn update_query(query: QueryParam) -> Result<()> {
     let sel = query.sel().to_owned();
     let doc = Doc::new()?;
     let sidebar = doc.elem::<HtmlElement>("sidebar")?;
-    let _ = sidebar.class_list().add_1("wait");
+    sidebar.class_list().add_1("wait")?;
     let rslt = do_update_query(doc, query).await;
     // Turn off "wait" style
-    let _ = sidebar.class_list().remove_1("wait");
+    sidebar.class_list().remove_1("wait")?;
     if !sel.is_empty() {
         util::show_elem("sidebar");
     }
@@ -803,51 +803,50 @@ fn card_view_value() -> Option<View> {
 /// Replace a card view element with another view
 async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
     let html = cv.fetch_one(search).await?;
-    replace_card_html(&cv, &html);
+    replace_card_html(&cv, &html)?;
     app::set_expanded_view(Some(cv));
     Ok(())
 }
 
 /// Insert a card placeholder before an element
-fn prepend_placeholder(el: &HtmlElement, id: &str) {
+fn prepend_placeholder(el: &HtmlElement, id: &str) -> Result<()> {
     if Doc::get()
         .opt_elem::<Element>(&format!("{}_placeholder", id))
         .is_some()
     {
-        return;
+        return Ok(());
     }
     if let Ok(placeholder) = Doc::get().0.create_element("li")
         && let Ok(placeholder) = placeholder.dyn_into::<HtmlElement>()
     {
         placeholder.set_id(&format!("{}_placeholder", id));
         placeholder.set_class_name("placeholder card-compact");
-        let _ = el.before_with_node_1(&placeholder);
+        el.before_with_node_1(&placeholder)?;
     }
+    Ok(())
 }
 
 /// Replace a card with provided HTML
-fn replace_card_html(cv: &CardView, html: &str) {
-    let Some(el) = Doc::get().opt_elem::<HtmlElement>(cv.id()) else {
-        log::warn!("element {} not found", cv.id());
-        return;
-    };
+fn replace_card_html(cv: &CardView, html: &str) -> Result<()> {
+    let el = Doc::get().elem::<HtmlElement>(cv.id())?;
     el.set_inner_html(html);
     el.set_class_name(cv.view.class_name(false));
     if cv.view.is_expanded() {
-        prepend_placeholder(&el, cv.id());
-        let _ = el.set_popover(Some("auto"));
-        let _ = el.show_popover();
+        prepend_placeholder(&el, cv.id())?;
+        el.set_popover(Some("auto"))?;
+        el.show_popover()?;
         // Docked layout by default
-        let _ = set_card_layout(&format!("dock_{}", cv.id()));
+        set_card_layout(&format!("dock_{}", cv.id()))?;
     } else {
         // Must remove attribute to position compact card again
-        let _ = el.remove_attribute("popover");
+        el.remove_attribute("popover")?;
         if let Some(el) = Doc::get()
             .opt_elem::<HtmlElement>(&format!("{}_placeholder", cv.id()))
         {
             el.remove();
         }
     }
+    Ok(())
 }
 
 /// Handle SSE notification
@@ -896,7 +895,7 @@ async fn update_card_list(res: Res) -> Result<bool> {
             // update expanded card (Control cards only)
             ev.handle_update().await?;
         } else {
-            replace_card_html(&cv, &html);
+            replace_card_html(&cv, &html)?;
         }
     }
     app::card_list(Some(cards));
