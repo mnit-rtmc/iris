@@ -513,7 +513,7 @@ impl Card for DayPlan {
     /// Check if an event type is handled for a card view
     fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
         match (view, tp) {
-            (_, EventTp::Click | EventTp::LongPressClick) => true,
+            (_, EventTp::Click(_)) => true,
             (View::Setup(true), EventTp::Input) => true,
             _ => false,
         }

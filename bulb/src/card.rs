@@ -220,7 +220,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Check if an event type is handled for a card view
     fn is_event_handled(_view: View, _id: &str, tp: EventTp) -> bool {
         match tp {
-            EventTp::Click | EventTp::LongPressClick => true,
+            EventTp::Click(_) => true,
             _ => false,
         }
     }
@@ -243,8 +243,8 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         tp: EventTp,
     ) -> Vec<Action> {
         match (id, tp) {
-            (eid::SAVE, EventTp::Click) => self.handle_save(anc),
-            (eid::GEOLOC, EventTp::Click) => self.handle_geoloc(anc),
+            (eid::SAVE, EventTp::Click(_)) => self.handle_save(anc),
+            (eid::GEOLOC, EventTp::Click(_)) => self.handle_geoloc(anc),
             _ => Vec::new(),
         }
     }

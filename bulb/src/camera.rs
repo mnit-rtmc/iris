@@ -905,7 +905,8 @@ impl Card for Camera {
     /// Check if an event type is handled for a card view
     fn is_event_handled(view: View, id: &str, tp: EventTp) -> bool {
         match (view, tp) {
-            (_, EventTp::Click) => {
+            (_, EventTp::Click(true)) => true,
+            (_, EventTp::Click(false)) => {
                 match id {
                     // handled by mouse event listener, prevent click:
                     "ptz-pan-left" | "ptz-pan-right" | "ptz-tilt-up"
@@ -915,7 +916,6 @@ impl Card for Camera {
                     _ => true,
                 }
             }
-            (_, EventTp::LongPressClick) => true,
             (View::Control, EventTp::Mouse(MouseTp::Move)) => false,
             (View::Control, EventTp::Mouse(_)) => true,
             _ => false,
@@ -930,9 +930,7 @@ impl Card for Camera {
         tp: EventTp,
     ) -> Vec<Action> {
         match tp {
-            EventTp::Click | EventTp::LongPressClick => {
-                self.handle_click(anc, id, tp)
-            }
+            EventTp::Click(_) => self.handle_click(anc, id, tp),
             EventTp::Mouse(tp) => self.handle_mouse(id, tp),
             _ => self.handle_event_fallback(anc, id, tp),
         }

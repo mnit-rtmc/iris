@@ -1408,7 +1408,7 @@ impl Card for Dms {
     /// Check if an event type is handled for a card view
     fn is_event_handled(view: View, id: &str, tp: EventTp) -> bool {
         match (view, tp) {
-            (_, EventTp::Click | EventTp::LongPressClick) => true,
+            (_, EventTp::Click(_)) => true,
             (View::Control, EventTp::Input) => true,
             (View::Control, EventTp::Focus(_)) => id.starts_with("mc_line"),
             _ => false,
@@ -1423,9 +1423,7 @@ impl Card for Dms {
         tp: EventTp,
     ) -> Vec<Action> {
         match tp {
-            EventTp::Click | EventTp::LongPressClick => {
-                self.handle_click(anc, id, tp)
-            }
+            EventTp::Click(_) => self.handle_click(anc, id, tp),
             EventTp::Input => self.handle_input(anc, id),
             EventTp::Focus(tp) => self.handle_focus(anc, id, tp),
             _ => self.handle_event_fallback(anc, id, tp),

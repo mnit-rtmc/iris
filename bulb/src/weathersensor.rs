@@ -1043,7 +1043,7 @@ impl Card for WeatherSensor {
         tp: EventTp,
     ) -> Vec<Action> {
         match (id, tp) {
-            ("rq_settings", EventTp::Click | EventTp::LongPressClick) => {
+            ("rq_settings", EventTp::Click(_)) => {
                 self.device_req(DeviceReq::SendSettings)
             }
             _ => self.handle_event_fallback(anc, id, tp),

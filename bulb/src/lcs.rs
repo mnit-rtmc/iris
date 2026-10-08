@@ -685,7 +685,7 @@ impl Card for Lcs {
     /// Check if an event type is handled for a card view
     fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
         match (view, tp) {
-            (_, EventTp::Click | EventTp::LongPressClick) => true,
+            (_, EventTp::Click(_)) => true,
             (View::Control, EventTp::Input) => true,
             _ => false,
         }
@@ -694,9 +694,7 @@ impl Card for Lcs {
     /// Handle event for an element on the card
     fn handle_event(&self, anc: LcsAnc, id: &str, tp: EventTp) -> Vec<Action> {
         match tp {
-            EventTp::Click | EventTp::LongPressClick => {
-                self.handle_click(anc, id, tp)
-            }
+            EventTp::Click(_) => self.handle_click(anc, id, tp),
             EventTp::Input => self.handle_input(id),
             _ => self.handle_event_fallback(anc, id, tp),
         }

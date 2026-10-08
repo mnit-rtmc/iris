@@ -295,9 +295,7 @@ impl CardView {
         params: (&str, EventTp),
     ) -> Result<()> {
         let (id, tp) = params;
-        if let (eid::CREATE, EventTp::Click | EventTp::LongPressClick) =
-            (id, tp)
-        {
+        if let (eid::CREATE, EventTp::Click(_)) = (id, tp) {
             for action in C::handle_create() {
                 action.perform().await?;
             }

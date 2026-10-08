@@ -103,10 +103,8 @@ impl TryFrom<&FocusEvent> for FocusTp {
 /// Event type
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EventTp {
-    /// Button click
-    Click,
-    /// "Long-Press" button click
-    LongPressClick,
+    /// Button click (w/ "Long-Press" flag)
+    Click(bool),
     /// Input events
     Input,
     /// Mouse events

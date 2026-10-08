@@ -436,9 +436,7 @@ impl Card for Beacon {
         tp: EventTp,
     ) -> Vec<Action> {
         match tp {
-            EventTp::Click | EventTp::LongPressClick => {
-                self.handle_click(anc, id, tp)
-            }
+            EventTp::Click(_) => self.handle_click(anc, id, tp),
             _ => self.handle_event_fallback(anc, id, tp),
         }
     }

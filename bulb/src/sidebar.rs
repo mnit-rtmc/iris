@@ -116,11 +116,7 @@ fn add_click_listener(el: &Element) -> Result<()> {
                     .get_attribute("class")
                     .filter(|cls| cls.contains("long-press"))
                     .is_some();
-                let tp = if long_press {
-                    EventTp::LongPressClick
-                } else {
-                    EventTp::Click
-                };
+                let tp = EventTp::Click(long_press);
                 handle_click_button(target.id(), tp);
             } else if let Ok(Some(cc)) = target.closest(".card-compact") {
                 handle_click_card(&cc);
@@ -268,7 +264,7 @@ async fn handle_button_card(
         cv.handle_delete().await?;
         let query = QueryParam::current_entry().with_sel("");
         set_query(query).await?;
-    } else if finished || EventTp::LongPressClick != tp {
+    } else if EventTp::Click(false) == tp || finished {
         cv.handle_event(&id, tp).await?;
     }
     app::set_long_press_finished(false);

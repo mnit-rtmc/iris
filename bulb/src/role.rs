@@ -534,9 +534,7 @@ impl Card for Role {
     /// Handle event on the card
     fn handle_event(&self, anc: RoleAnc, id: &str, tp: EventTp) -> Vec<Action> {
         match tp {
-            EventTp::Click | EventTp::LongPressClick => {
-                self.handle_click(anc, id, tp)
-            }
+            EventTp::Click(_) => self.handle_click(anc, id, tp),
             _ => self.handle_event_fallback(anc, id, tp),
         }
     }
