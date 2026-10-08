@@ -237,18 +237,19 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: Self::Ancillary, id: &str) -> Vec<Action> {
-        self.handle_click_common(anc, id)
+        self.handle_event_fallback(anc, id, EventTp::Click)
     }
 
-    /// Handle click event for common buttons on the card
-    fn handle_click_common(
+    /// Handle event fallback (default) on the card
+    fn handle_event_fallback(
         &self,
         anc: Self::Ancillary,
         id: &str,
+        tp: EventTp,
     ) -> Vec<Action> {
-        match id {
-            eid::SAVE => self.handle_save(anc),
-            eid::GEOLOC => self.handle_geoloc(anc),
+        match (id, tp) {
+            (eid::SAVE, EventTp::Click) => self.handle_save(anc),
+            (eid::GEOLOC, EventTp::Click) => self.handle_geoloc(anc),
             _ => Vec::new(),
         }
     }

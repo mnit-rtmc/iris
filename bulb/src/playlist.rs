@@ -316,6 +316,7 @@ impl Card for PlayList {
 
     /// Handle click event for the save button
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
+        // FIXME: can we use Card::handle_save?
         let mut actions = Vec::new();
         if let Some(changed) = self.changed_attr(&anc) {
             let uri = uri_one(Self::res(), &self.name());

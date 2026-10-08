@@ -743,6 +743,30 @@ impl Camera {
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
+
+    /// Handle mouse event for a card
+    fn handle_mouse(&self, id: &str, tp: MouseTp) -> Vec<Action> {
+        let mut parts = id.split("-");
+        let id = match (parts.next(), parts.next()) {
+            // focus/iris auto buttons are on click, not mousedown/up
+            (_, Some("auto")) => "",
+            (Some("focus"), _)
+            | (Some("iris"), _)
+            | (Some("ptz"), _)
+            | (Some("publish"), _) => id,
+            _ => "",
+        };
+        let mouse_down = match id {
+            // mouse on invalid target, so always release mouse
+            "" => false,
+            _ => tp == MouseTp::Down,
+        };
+        if mouse_down {
+            self.mouse_down(id)
+        } else {
+            self.mouse_up(id)
+        }
+    }
 }
 
 /// Dispatch a click event from `init-control` button
@@ -875,33 +899,13 @@ impl Card for Camera {
     /// Handle event for a card
     fn handle_event(
         &self,
-        _anc: CameraAnc,
+        anc: CameraAnc,
         id: &str,
         tp: EventTp,
     ) -> Vec<Action> {
-        if let EventTp::Mouse(tp) = tp {
-            let mut parts = id.split("-");
-            let id = match (parts.next(), parts.next()) {
-                // focus/iris auto buttons are on click, not mousedown/up
-                (_, Some("auto")) => "",
-                (Some("focus"), _)
-                | (Some("iris"), _)
-                | (Some("ptz"), _)
-                | (Some("publish"), _) => id,
-                _ => "",
-            };
-            let mouse_down = match id {
-                // mouse on invalid target, so always release mouse
-                "" => false,
-                _ => tp == MouseTp::Down,
-            };
-            if mouse_down {
-                self.mouse_down(id)
-            } else {
-                self.mouse_up(id)
-            }
-        } else {
-            Vec::new()
+        match tp {
+            EventTp::Mouse(tp) => self.handle_mouse(id, tp),
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 
@@ -922,7 +926,7 @@ impl Card for Camera {
             "iris-auto" => self.device_req(DeviceReq::CameraIrisAuto),
             "camera-wiper" => self.device_req(DeviceReq::CameraWiperOneShot),
             "rq_reset" => self.device_req(DeviceReq::ResetDevice),
-            _ => self.handle_click_common(anc, id),
+            _ => self.handle_event_fallback(anc, id, EventTp::Click),
         }
     }
 

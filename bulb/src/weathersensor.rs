@@ -14,6 +14,7 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::DeviceReq;
+use crate::domevent::EventTp;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::geoloc::LocAnc;
@@ -1038,7 +1039,7 @@ impl Card for WeatherSensor {
     fn handle_click(&self, anc: WeatherSensorAnc, id: &str) -> Vec<Action> {
         match id {
             "rq_settings" => self.device_req(DeviceReq::SendSettings),
-            _ => self.handle_click_common(anc, id),
+            _ => self.handle_event_fallback(anc, id, EventTp::Click),
         }
     }
 }

@@ -1032,13 +1032,13 @@ impl Card for RampMeter {
     /// Handle event for an element on the card
     fn handle_event(
         &self,
-        _anc: RampMeterAnc,
+        anc: RampMeterAnc,
         id: &str,
         tp: EventTp,
     ) -> Vec<Action> {
         match tp {
             EventTp::Input => self.handle_input(id),
-            _ => Vec::new(),
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 
@@ -1046,7 +1046,7 @@ impl Card for RampMeter {
     fn handle_click(&self, anc: RampMeterAnc, id: &str) -> Vec<Action> {
         match id {
             "rq_settings" => self.device_req(DeviceReq::SendSettings),
-            _ => self.handle_click_common(anc, id),
+            _ => self.handle_event_fallback(anc, id, EventTp::Click),
         }
     }
 

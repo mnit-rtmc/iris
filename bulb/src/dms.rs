@@ -1407,7 +1407,7 @@ impl Card for Dms {
         match tp {
             EventTp::Input => self.handle_input(anc, id),
             EventTp::Focus(tp) => self.handle_focus(anc, id, tp),
-            _ => Vec::new(),
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 
@@ -1425,7 +1425,7 @@ impl Card for Dms {
             "rq_settings_query" => self.device_req(DeviceReq::QuerySettings),
             "rq_config_reset" => self.device_req(DeviceReq::ResetDevice),
             "rq_config_query" => self.device_req(DeviceReq::QueryConfiguration),
-            _ => self.handle_click_common(anc, id),
+            _ => self.handle_event_fallback(anc, id, EventTp::Click),
         }
     }
 

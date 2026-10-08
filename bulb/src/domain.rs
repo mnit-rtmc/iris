@@ -179,13 +179,13 @@ impl Card for Domain {
     /// Handle event for an element on the card
     fn handle_event(
         &self,
-        _anc: DomainAnc,
+        anc: DomainAnc,
         id: &str,
         tp: EventTp,
     ) -> Vec<Action> {
         match tp {
             EventTp::Input => self.handle_input(id),
-            _ => Vec::new(),
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 }

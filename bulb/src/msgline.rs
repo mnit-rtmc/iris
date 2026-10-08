@@ -425,6 +425,6 @@ impl Card for MsgLine {
         {
             self.replace_preview(&anc);
         }
-        Vec::new()
+        self.handle_event_fallback(anc, id, tp)
     }
 }

@@ -14,6 +14,7 @@ use crate::asset::Asset;
 use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::domain::Domain;
+use crate::domevent::EventTp;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::ItemState;
@@ -539,7 +540,7 @@ impl Card for Role {
             }
             Vec::new()
         } else {
-            self.handle_click_common(anc, id)
+            self.handle_event_fallback(anc, id, EventTp::Click)
         }
     }
 }

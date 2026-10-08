@@ -644,7 +644,7 @@ impl Card for ActionPlan {
     ) -> Vec<Action> {
         match tp {
             EventTp::Input => self.handle_input(anc, id),
-            _ => Vec::new(),
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 
@@ -659,7 +659,7 @@ impl Card for ActionPlan {
             }
             Vec::new()
         } else {
-            self.handle_click_common(anc, id)
+            self.handle_event_fallback(anc, id, EventTp::Click)
         }
     }
 

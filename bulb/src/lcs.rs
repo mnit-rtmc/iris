@@ -683,10 +683,10 @@ impl Card for Lcs {
     }
 
     /// Handle event for an element on the card
-    fn handle_event(&self, _anc: LcsAnc, id: &str, tp: EventTp) -> Vec<Action> {
+    fn handle_event(&self, anc: LcsAnc, id: &str, tp: EventTp) -> Vec<Action> {
         match tp {
             EventTp::Input => self.handle_input(id),
-            _ => Vec::new(),
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 
@@ -695,7 +695,7 @@ impl Card for Lcs {
         match id {
             "lk_send" => self.lock_send(),
             "lk_blank" => self.lock_blank(),
-            _ => self.handle_click_common(anc, id),
+            _ => self.handle_event_fallback(anc, id, EventTp::Click),
         }
     }
 

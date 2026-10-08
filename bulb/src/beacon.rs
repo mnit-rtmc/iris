@@ -14,6 +14,7 @@ use crate::asset::Asset;
 use crate::attr::Attr;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::domevent::EventTp;
 use crate::eid;
 use crate::error::Result;
 use crate::fetch::Action;
@@ -418,7 +419,7 @@ impl Card for Beacon {
             let uri = uri_one(Res::Beacon, &self.name);
             vec![Action::Patch(uri, attr.into())]
         } else {
-            self.handle_click_common(anc, id)
+            self.handle_event_fallback(anc, id, EventTp::Click)
         }
     }
 

@@ -528,7 +528,7 @@ impl Card for DayPlan {
     ) -> Vec<Action> {
         match tp {
             EventTp::Input => self.handle_input(anc, id),
-            _ => Vec::new(),
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 
