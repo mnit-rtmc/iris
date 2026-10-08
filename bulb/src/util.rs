@@ -517,19 +517,21 @@ impl Select<Option<i32>> for Fields {
 }
 
 /// Show an element
-pub fn show_elem(id: &str) {
+pub fn show_elem(id: &str) -> Result<()> {
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(id) {
-        let _ = el.class_list().remove_1("hidden");
-        let _ = el.class_list().add_1("show");
+        el.class_list().remove_1("hidden")?;
+        el.class_list().add_1("show")?;
     }
+    Ok(())
 }
 
 /// Hide an element
-pub fn hide_elem(id: &str) {
+pub fn hide_elem(id: &str) -> Result<()> {
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(id) {
-        let _ = el.class_list().remove_1("show");
-        let _ = el.class_list().add_1("hidden");
+        el.class_list().remove_1("show")?;
+        el.class_list().add_1("hidden")?;
     }
+    Ok(())
 }
 
 /// Get mouse event coordinates relative to element, not event target

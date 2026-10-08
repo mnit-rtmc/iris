@@ -211,9 +211,9 @@ fn handle_click_button(id: String, tp: EventTp) {
 /// Show/hide sidebar
 async fn show_sidebar(show: bool) -> Result<()> {
     if show {
-        util::show_elem("sidebar");
+        util::show_elem("sidebar")?;
     } else {
-        util::hide_elem("sidebar");
+        util::hide_elem("sidebar")?;
     }
     Ok(())
 }
@@ -560,7 +560,7 @@ pub async fn update_query(query: QueryParam) -> Result<()> {
     // Turn off "wait" style
     sidebar.class_list().remove_1("wait")?;
     if !sel.is_empty() {
-        util::show_elem("sidebar");
+        util::show_elem("sidebar")?;
     }
     rslt
 }
@@ -741,7 +741,7 @@ async fn handle_search() -> Result<()> {
             for cv in cards.search_views(&search).await? {
                 let id = cv.id();
                 if let Some(el) = doc.opt_elem::<Element>(id) {
-                    el.set_class_name(cv.view.class_name(false));
+                    el.set_class_name(cv.view.class_name());
                 }
             }
             app::card_list(Some(cards));
@@ -809,7 +809,7 @@ fn prepend_placeholder(el: &HtmlElement, id: &str) -> Result<()> {
 fn replace_card_html(cv: &CardView, html: &str) -> Result<()> {
     let el = Doc::get().elem::<HtmlElement>(cv.id())?;
     el.set_inner_html(html);
-    el.set_class_name(cv.view.class_name(false));
+    el.set_class_name(cv.view.class_name());
     if cv.view.is_expanded() {
         prepend_placeholder(&el, cv.id())?;
         el.set_popover(Some("auto"))?;

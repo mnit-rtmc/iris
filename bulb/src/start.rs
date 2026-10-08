@@ -104,7 +104,11 @@ fn handle_tick_interval() {
     while let Some(action) = app::next_action() {
         match action {
             DeferredAction::FetchStationData => map::fetch_station_data(),
-            DeferredAction::HideToast => util::hide_elem(eid::TOAST),
+            DeferredAction::HideToast => {
+                if let Err(e) = util::hide_elem(eid::TOAST) {
+                    log::warn!("hide_toast: {e:?}");
+                }
+            }
             DeferredAction::RefreshList => sidebar::handle_res_change(),
             DeferredAction::MakeEventSource => sse::add_listener(),
             DeferredAction::SetNotifyState(ns) => sse::set_notify_state(ns),
@@ -384,7 +388,7 @@ pub async fn handle_login() -> Result<()> {
         let js = format!("{{\"username\":\"{user}\",\"password\":\"{pass}\"}}");
         let el = doc.elem::<HtmlInputElement>("login_pass")?;
         el.set_value("");
-        util::hide_elem(eid::AUTH);
+        util::hide_elem(eid::AUTH)?;
         uri.post(&js.into()).await?;
         // hide/deactivate loading bar
         if let Some(l) = &loading_bar {

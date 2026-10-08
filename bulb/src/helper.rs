@@ -55,7 +55,9 @@ fn show_auth() {
     if let Err(e) = sidebar::logout() {
         log::warn!("show_auth logout: {e:?}");
     }
-    util::show_elem(eid::AUTH);
+    if let Err(e) = util::show_elem(eid::AUTH) {
+        log::warn!("show_auth: {e:?}");
+    }
 }
 
 /// Show a toast message

@@ -88,17 +88,11 @@ pub enum View {
 
 impl View {
     /// Get view class name
-    pub const fn class_name(self, wait: bool) -> &'static str {
+    pub const fn class_name(self) -> &'static str {
         match self {
             View::Hidden | View::SearchEv | View::SaveEv => "no-display",
             View::Compact => "card-compact",
-            _ => {
-                if wait {
-                    "card-expanded wait"
-                } else {
-                    "card-expanded"
-                }
-            }
+            _ => "card-expanded",
         }
     }
 
@@ -279,12 +273,16 @@ impl CardView {
     /// Handle event for a card
     pub async fn handle_event(&self, id: &str, tp: EventTp) -> Result<()> {
         let el = Doc::get().opt_elem::<HtmlElement>(&self.id);
-        if let Some(el) = &el {
-            el.set_class_name(self.view.class_name(true));
+        if let EventTp::Click(_) = tp
+            && let Some(el) = &el
+        {
+            el.class_list().add_1("wait")?;
         }
         let res = cards_meth!(self, handle_event_x, (id, tp));
-        if let Some(el) = &el {
-            el.set_class_name(self.view.class_name(false));
+        if let EventTp::Click(_) = tp
+            && let Some(el) = &el
+        {
+            el.class_list().remove_1("wait")?;
         }
         res
     }
