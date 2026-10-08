@@ -744,6 +744,32 @@ impl Camera {
         String::from(tree)
     }
 
+    /// Handle click event for a button on the card
+    fn handle_click(
+        &self,
+        anc: CameraAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        if let Some(preset_str) = id.strip_prefix("preset-") {
+            if let Ok(preset_num) = preset_str.parse::<u32>() {
+                return self.recall_or_store_preset(preset_num);
+            }
+            if preset_str == "mode-toggle" {
+                // no Action
+                self.toggle_preset_mode();
+            }
+        }
+        match id {
+            "init-control" => self.init_control(),
+            "focus-auto" => self.device_req(DeviceReq::CameraFocusAuto),
+            "iris-auto" => self.device_req(DeviceReq::CameraIrisAuto),
+            "camera-wiper" => self.device_req(DeviceReq::CameraWiperOneShot),
+            "rq_reset" => self.device_req(DeviceReq::ResetDevice),
+            _ => self.handle_event_fallback(anc, id, tp),
+        }
+    }
+
     /// Handle mouse event for a card
     fn handle_mouse(&self, id: &str, tp: MouseTp) -> Vec<Action> {
         let mut parts = id.split("-");
@@ -904,29 +930,11 @@ impl Card for Camera {
         tp: EventTp,
     ) -> Vec<Action> {
         match tp {
+            EventTp::Click | EventTp::LongPressClick => {
+                self.handle_click(anc, id, tp)
+            }
             EventTp::Mouse(tp) => self.handle_mouse(id, tp),
             _ => self.handle_event_fallback(anc, id, tp),
-        }
-    }
-
-    /// Handle click event for a button on the card
-    fn handle_click(&self, anc: CameraAnc, id: &str) -> Vec<Action> {
-        if let Some(preset_str) = id.strip_prefix("preset-") {
-            if let Ok(preset_num) = preset_str.parse::<u32>() {
-                return self.recall_or_store_preset(preset_num);
-            }
-            if preset_str == "mode-toggle" {
-                // no Action
-                self.toggle_preset_mode();
-            }
-        }
-        match id {
-            "init-control" => self.init_control(),
-            "focus-auto" => self.device_req(DeviceReq::CameraFocusAuto),
-            "iris-auto" => self.device_req(DeviceReq::CameraIrisAuto),
-            "camera-wiper" => self.device_req(DeviceReq::CameraWiperOneShot),
-            "rq_reset" => self.device_req(DeviceReq::ResetDevice),
-            _ => self.handle_event_fallback(anc, id, EventTp::Click),
         }
     }
 

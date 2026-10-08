@@ -529,6 +529,26 @@ impl ActionPlan {
         npa.update_class(&anc.action_conditions, &pa, id);
     }
 
+    /// Handle click event for a button on the card
+    fn handle_click(
+        &self,
+        anc: ActionPlanAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        if let Some((name, "hashtag-clear")) = id.split_once('-') {
+            for da in &anc.device_actions {
+                let mut da = da.clone();
+                if da.clear_hashtag(name) {
+                    break;
+                }
+            }
+            Vec::new()
+        } else {
+            self.handle_event_fallback(anc, id, tp)
+        }
+    }
+
     /// Handle input event for an element on the card
     #[allow(clippy::field_reassign_with_default)]
     fn handle_input(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
@@ -643,23 +663,11 @@ impl Card for ActionPlan {
         tp: EventTp,
     ) -> Vec<Action> {
         match tp {
+            EventTp::Click | EventTp::LongPressClick => {
+                self.handle_click(anc, id, tp)
+            }
             EventTp::Input => self.handle_input(anc, id),
             _ => self.handle_event_fallback(anc, id, tp),
-        }
-    }
-
-    /// Handle click event for a button on the card
-    fn handle_click(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
-        if let Some((name, "hashtag-clear")) = id.split_once('-') {
-            for da in &anc.device_actions {
-                let mut da = da.clone();
-                if da.clear_hashtag(name) {
-                    break;
-                }
-            }
-            Vec::new()
-        } else {
-            self.handle_event_fallback(anc, id, EventTp::Click)
         }
     }
 

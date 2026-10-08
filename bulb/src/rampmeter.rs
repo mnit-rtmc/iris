@@ -890,6 +890,19 @@ impl RampMeter {
         String::from(tree)
     }
 
+    /// Handle click event for a button on the card
+    fn handle_click(
+        &self,
+        anc: RampMeterAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match id {
+            "rq_settings" => self.device_req(DeviceReq::SendSettings),
+            _ => self.handle_event_fallback(anc, id, tp),
+        }
+    }
+
     /// Handle input event for an element on the card
     fn handle_input(&self, id: &str) -> Vec<Action> {
         match id {
@@ -1037,16 +1050,11 @@ impl Card for RampMeter {
         tp: EventTp,
     ) -> Vec<Action> {
         match tp {
+            EventTp::Click | EventTp::LongPressClick => {
+                self.handle_click(anc, id, tp)
+            }
             EventTp::Input => self.handle_input(id),
             _ => self.handle_event_fallback(anc, id, tp),
-        }
-    }
-
-    /// Handle click event for a button on the card
-    fn handle_click(&self, anc: RampMeterAnc, id: &str) -> Vec<Action> {
-        match id {
-            "rq_settings" => self.device_req(DeviceReq::SendSettings),
-            _ => self.handle_event_fallback(anc, id, EventTp::Click),
         }
     }
 

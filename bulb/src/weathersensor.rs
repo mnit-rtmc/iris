@@ -1035,11 +1035,18 @@ impl Card for WeatherSensor {
         anc.loc.changed_location()
     }
 
-    /// Handle click event for a button on the card
-    fn handle_click(&self, anc: WeatherSensorAnc, id: &str) -> Vec<Action> {
-        match id {
-            "rq_settings" => self.device_req(DeviceReq::SendSettings),
-            _ => self.handle_event_fallback(anc, id, EventTp::Click),
+    /// Handle event on the card
+    fn handle_event(
+        &self,
+        anc: WeatherSensorAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match (id, tp) {
+            ("rq_settings", EventTp::Click | EventTp::LongPressClick) => {
+                self.device_req(DeviceReq::SendSettings)
+            }
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 }

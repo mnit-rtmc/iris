@@ -1161,6 +1161,24 @@ impl Dms {
         div.close();
     }
 
+    /// Handle click event for a button on the card
+    fn handle_click(&self, anc: DmsAnc, id: &str, tp: EventTp) -> Vec<Action> {
+        match id {
+            "mc_send" => self.send_actions(anc),
+            "mc_blank" => self.blank_actions(anc),
+            "rq_msg_query" => self.device_req(DeviceReq::QueryMessage),
+            "rq_status_query" => self.device_req(DeviceReq::QueryStatus),
+            "rq_pixel_test" => self.device_req(DeviceReq::TestPixels),
+            "rq_pixel_clear" => self.device_req(DeviceReq::ResetStatus),
+            "rq_pixel_query" => self.device_req(DeviceReq::QueryPixelFailures),
+            "rq_settings_send" => self.device_req(DeviceReq::SendSettings),
+            "rq_settings_query" => self.device_req(DeviceReq::QuerySettings),
+            "rq_config_reset" => self.device_req(DeviceReq::ResetDevice),
+            "rq_config_query" => self.device_req(DeviceReq::QueryConfiguration),
+            _ => self.handle_event_fallback(anc, id, tp),
+        }
+    }
+
     /// Handle input event for an element on the card
     fn handle_input(&self, anc: DmsAnc, id: &str) -> Vec<Action> {
         let Some(pat) = self.selected_pattern(&anc) else {
@@ -1405,27 +1423,12 @@ impl Card for Dms {
         tp: EventTp,
     ) -> Vec<Action> {
         match tp {
+            EventTp::Click | EventTp::LongPressClick => {
+                self.handle_click(anc, id, tp)
+            }
             EventTp::Input => self.handle_input(anc, id),
             EventTp::Focus(tp) => self.handle_focus(anc, id, tp),
             _ => self.handle_event_fallback(anc, id, tp),
-        }
-    }
-
-    /// Handle click event for a button on the card
-    fn handle_click(&self, anc: DmsAnc, id: &str) -> Vec<Action> {
-        match id {
-            "mc_send" => self.send_actions(anc),
-            "mc_blank" => self.blank_actions(anc),
-            "rq_msg_query" => self.device_req(DeviceReq::QueryMessage),
-            "rq_status_query" => self.device_req(DeviceReq::QueryStatus),
-            "rq_pixel_test" => self.device_req(DeviceReq::TestPixels),
-            "rq_pixel_clear" => self.device_req(DeviceReq::ResetStatus),
-            "rq_pixel_query" => self.device_req(DeviceReq::QueryPixelFailures),
-            "rq_settings_send" => self.device_req(DeviceReq::SendSettings),
-            "rq_settings_query" => self.device_req(DeviceReq::QuerySettings),
-            "rq_config_reset" => self.device_req(DeviceReq::ResetDevice),
-            "rq_config_query" => self.device_req(DeviceReq::QueryConfiguration),
-            _ => self.handle_event_fallback(anc, id, EventTp::Click),
         }
     }
 

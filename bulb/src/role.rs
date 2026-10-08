@@ -473,6 +473,24 @@ impl Role {
         }
         if !attr.is_empty() { Some(attr) } else { None }
     }
+
+    /// Handle click event for a button on the card
+    fn handle_click(&self, anc: RoleAnc, id: &str, tp: EventTp) -> Vec<Action> {
+        if id.starts_with("ht_") && id.ends_with("_btn") {
+            if let Some(ht) = id.strip_suffix("_btn") {
+                if let Some(ht) = Doc::get().opt_elem::<HtmlElement>(ht) {
+                    ht.set_class_name("");
+                }
+                if let Some(btn) = Doc::get().opt_elem::<HtmlButtonElement>(id)
+                {
+                    btn.set_disabled(true);
+                }
+            }
+            Vec::new()
+        } else {
+            self.handle_event_fallback(anc, id, tp)
+        }
+    }
 }
 
 impl Card for Role {
@@ -513,6 +531,16 @@ impl Card for Role {
         }
     }
 
+    /// Handle event on the card
+    fn handle_event(&self, anc: RoleAnc, id: &str, tp: EventTp) -> Vec<Action> {
+        match tp {
+            EventTp::Click | EventTp::LongPressClick => {
+                self.handle_click(anc, id, tp)
+            }
+            _ => self.handle_event_fallback(anc, id, tp),
+        }
+    }
+
     /// Handle click event for the save button
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
         let mut actions = Vec::new();
@@ -524,23 +552,5 @@ impl Card for Role {
             actions.push(act);
         }
         actions
-    }
-
-    /// Handle click event for a button on the card
-    fn handle_click(&self, anc: RoleAnc, id: &str) -> Vec<Action> {
-        if id.starts_with("ht_") && id.ends_with("_btn") {
-            if let Some(ht) = id.strip_suffix("_btn") {
-                if let Some(ht) = Doc::get().opt_elem::<HtmlElement>(ht) {
-                    ht.set_class_name("");
-                }
-                if let Some(btn) = Doc::get().opt_elem::<HtmlButtonElement>(id)
-                {
-                    btn.set_disabled(true);
-                }
-            }
-            Vec::new()
-        } else {
-            self.handle_event_fallback(anc, id, EventTp::Click)
-        }
     }
 }

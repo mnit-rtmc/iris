@@ -43,9 +43,11 @@ use crate::msgline::MsgLine;
 use crate::msgpattern::MsgPattern;
 use crate::planphase::PlanPhase;
 use crate::playlist::PlayList;
+use crate::query::QueryParam;
 use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;
+use crate::sidebar;
 use crate::signconfig::SignConfig;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
@@ -276,7 +278,15 @@ impl CardView {
 
     /// Handle event for a card
     pub async fn handle_event(&self, id: &str, tp: EventTp) -> Result<()> {
-        cards_meth!(self, handle_event_x, (id, tp))
+        let el = Doc::get().opt_elem::<HtmlElement>(&self.id);
+        if let Some(el) = &el {
+            el.set_class_name(self.view.class_name(true));
+        }
+        let res = cards_meth!(self, handle_event_x, (id, tp));
+        if let Some(el) = &el {
+            el.set_class_name(self.view.class_name(false));
+        }
+        res
     }
 
     /// Handle event for a card
@@ -284,47 +294,27 @@ impl CardView {
         &self,
         params: (&str, EventTp),
     ) -> Result<()> {
-        let pri = self.fetch_primary::<C>().await?;
-        let anc = fetch_ancillary(&pri, self.view).await?;
-        for action in pri.handle_event(anc, params.0, params.1) {
-            action.perform().await?;
-        }
-        Ok(())
-    }
-
-    /// Handle click event for a button owned by the resource
-    pub async fn handle_click(&self, id: &str) -> Result<Option<View>> {
-        cards_meth!(self, handle_click_x, id)
-    }
-
-    /// Handle click event for a button on a card
-    async fn handle_click_x<C: Card>(&self, id: &str) -> Result<Option<View>> {
-        if eid::CREATE == id {
+        let (id, tp) = params;
+        if let (eid::CREATE, EventTp::Click | EventTp::LongPressClick) =
+            (id, tp)
+        {
             for action in C::handle_create() {
                 action.perform().await?;
             }
-            return Ok(Some(self.view.compact()));
+            let query = QueryParam::current_entry().with_sel("");
+            sidebar::set_query(query).await?;
+            return Ok(());
         }
         let view = match id {
-            eid::SAVE => {
-                if let Ok(el) = Doc::get().elem::<HtmlElement>(&self.id) {
-                    el.set_class_name(self.view.class_name(true));
-                }
-                View::SaveEv
-            }
+            eid::SAVE => View::SaveEv,
             _ => self.view,
         };
         let pri = self.fetch_primary::<C>().await?;
         let anc = fetch_ancillary(&pri, view).await?;
-        for action in pri.handle_click(anc, id) {
+        for action in pri.handle_event(anc, id, tp) {
             action.perform().await?;
         }
-        if eid::SAVE == id
-            && let Ok(el) = Doc::get().elem::<HtmlElement>(&self.id)
-        {
-            el.set_class_name(self.view.class_name(false));
-        }
-        Ok(None)
+        Ok(())
     }
 
     /// Handle updating a card in response to an SSE notification

@@ -228,16 +228,11 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Handle event for the card
     fn handle_event(
         &self,
-        _anc: Self::Ancillary,
-        _id: &str,
-        _tp: EventTp,
+        anc: Self::Ancillary,
+        id: &str,
+        tp: EventTp,
     ) -> Vec<Action> {
-        Vec::new()
-    }
-
-    /// Handle click event for a button on the card
-    fn handle_click(&self, anc: Self::Ancillary, id: &str) -> Vec<Action> {
-        self.handle_event_fallback(anc, id, EventTp::Click)
+        self.handle_event_fallback(anc, id, tp)
     }
 
     /// Handle event fallback (default) on the card

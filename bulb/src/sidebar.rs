@@ -268,12 +268,8 @@ async fn handle_button_card(
         cv.handle_delete().await?;
         let query = QueryParam::current_entry().with_sel("");
         set_query(query).await?;
-    } else if (finished || EventTp::LongPressClick != tp)
-        && let Some(v) = cv.handle_click(&id).await?
-        && !v.is_expanded()
-    {
-        let query = QueryParam::current_entry().with_sel("");
-        set_query(query).await?;
+    } else if finished || EventTp::LongPressClick != tp {
+        cv.handle_event(&id, tp).await?;
     }
     app::set_long_press_finished(false);
     Ok(())

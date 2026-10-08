@@ -305,6 +305,29 @@ impl Beacon {
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
+
+    /// Handle click event for a button on the card
+    fn handle_click(
+        &self,
+        anc: BeaconAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        if eid::BCN_FLASHING == id {
+            let mut attr = Attr::new();
+            match self.state {
+                // DARK (2) => FLASHING_REQ (3)
+                2 => attr.num("state", 3),
+                // FLASHING (4) or FAULT_NO_VERIFY (5) => DARK_REQ (1)
+                4 | 5 => attr.num("state", 1),
+                _ => (),
+            }
+            let uri = uri_one(Res::Beacon, &self.name);
+            vec![Action::Patch(uri, attr.into())]
+        } else {
+            self.handle_event_fallback(anc, id, tp)
+        }
+    }
 }
 
 impl ControllerIo for Beacon {
@@ -405,21 +428,18 @@ impl Card for Beacon {
         anc.loc.changed_location()
     }
 
-    /// Handle click event for a button on the card
-    fn handle_click(&self, anc: BeaconAnc, id: &str) -> Vec<Action> {
-        if eid::BCN_FLASHING == id {
-            let mut attr = Attr::new();
-            match self.state {
-                // DARK (2) => FLASHING_REQ (3)
-                2 => attr.num("state", 3),
-                // FLASHING (4) or FAULT_NO_VERIFY (5) => DARK_REQ (1)
-                4 | 5 => attr.num("state", 1),
-                _ => (),
+    /// Handle event for the card
+    fn handle_event(
+        &self,
+        anc: BeaconAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match tp {
+            EventTp::Click | EventTp::LongPressClick => {
+                self.handle_click(anc, id, tp)
             }
-            let uri = uri_one(Res::Beacon, &self.name);
-            vec![Action::Patch(uri, attr.into())]
-        } else {
-            self.handle_event_fallback(anc, id, EventTp::Click)
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 

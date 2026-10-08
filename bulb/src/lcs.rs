@@ -563,6 +563,15 @@ impl Lcs {
         String::from(tree)
     }
 
+    /// Handle click event for a button on the card
+    fn handle_click(&self, anc: LcsAnc, id: &str, tp: EventTp) -> Vec<Action> {
+        match id {
+            "lk_send" => self.lock_send(),
+            "lk_blank" => self.lock_blank(),
+            _ => self.handle_event_fallback(anc, id, tp),
+        }
+    }
+
     /// Handle input event for an element on the card
     fn handle_input(&self, id: &str) -> Vec<Action> {
         if "lk_reason" == id {
@@ -685,17 +694,11 @@ impl Card for Lcs {
     /// Handle event for an element on the card
     fn handle_event(&self, anc: LcsAnc, id: &str, tp: EventTp) -> Vec<Action> {
         match tp {
+            EventTp::Click | EventTp::LongPressClick => {
+                self.handle_click(anc, id, tp)
+            }
             EventTp::Input => self.handle_input(id),
             _ => self.handle_event_fallback(anc, id, tp),
-        }
-    }
-
-    /// Handle click event for a button on the card
-    fn handle_click(&self, anc: LcsAnc, id: &str) -> Vec<Action> {
-        match id {
-            "lk_send" => self.lock_send(),
-            "lk_blank" => self.lock_blank(),
-            _ => self.handle_event_fallback(anc, id, EventTp::Click),
         }
     }
 
