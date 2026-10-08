@@ -413,9 +413,16 @@ impl Card for MsgLine {
         }
     }
 
-    /// Handle input event for an element on the card
-    fn handle_input(&self, anc: MsgLineAnc, id: &str) -> Vec<Action> {
-        if ["line", "multi", "ml_config"].contains(&id) {
+    /// Handle event for an element on the card
+    fn handle_event(
+        &self,
+        anc: MsgLineAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        if let EventTp::Input = tp
+            && ["line", "multi", "ml_config"].contains(&id)
+        {
             self.replace_preview(&anc);
         }
         Vec::new()

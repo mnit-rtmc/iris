@@ -889,6 +889,23 @@ impl RampMeter {
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, id: &str) -> Vec<Action> {
+        match id {
+            "lk-cycle" => self.lock_cycle(),
+            "lk_reason" => {
+                let reason = self.selected_lock_reason();
+                let rate = if reason.duration().is_some() {
+                    self.lock_rate().or(self.status_rate()).or(Some(1714))
+                } else {
+                    None
+                };
+                self.make_lock_action(reason, rate)
+            }
+            _ => Vec::new(),
+        }
+    }
 }
 
 impl ControllerIo for RampMeter {
@@ -1012,28 +1029,24 @@ impl Card for RampMeter {
         }
     }
 
+    /// Handle event for an element on the card
+    fn handle_event(
+        &self,
+        _anc: RampMeterAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match tp {
+            EventTp::Input => self.handle_input(id),
+            _ => Vec::new(),
+        }
+    }
+
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: RampMeterAnc, id: &str) -> Vec<Action> {
         match id {
             "rq_settings" => self.device_req(DeviceReq::SendSettings),
             _ => self.handle_click_common(anc, id),
-        }
-    }
-
-    /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: RampMeterAnc, id: &str) -> Vec<Action> {
-        match id {
-            "lk-cycle" => self.lock_cycle(),
-            "lk_reason" => {
-                let reason = self.selected_lock_reason();
-                let rate = if reason.duration().is_some() {
-                    self.lock_rate().or(self.status_rate()).or(Some(1714))
-                } else {
-                    None
-                };
-                self.make_lock_action(reason, rate)
-            }
-            _ => Vec::new(),
         }
     }
 

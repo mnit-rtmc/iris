@@ -528,6 +528,25 @@ impl ActionPlan {
         npa.update_from_dom();
         npa.update_class(&anc.action_conditions, &pa, id);
     }
+
+    /// Handle input event for an element on the card
+    #[allow(clippy::field_reassign_with_default)]
+    fn handle_input(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
+        // NOTE: Control card only
+        if "phase" == id
+            && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
+        {
+            let phase = el.value();
+            let mut attr = Attr::new();
+            attr.str("phase", &phase.to_string());
+            let uri = uri_one(Res::ActionPlan, &self.name);
+            return vec![Action::Patch(uri, attr.into())];
+        }
+        // NOTE: Setup card only
+        self.update_device_actions(&anc, id);
+        self.update_phase_actions(&anc, id);
+        Vec::new()
+    }
 }
 
 impl Card for ActionPlan {
@@ -616,6 +635,19 @@ impl Card for ActionPlan {
         }
     }
 
+    /// Handle event for an element on the card
+    fn handle_event(
+        &self,
+        anc: ActionPlanAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match tp {
+            EventTp::Input => self.handle_input(anc, id),
+            _ => Vec::new(),
+        }
+    }
+
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
         if let Some((name, "hashtag-clear")) = id.split_once('-') {
@@ -677,24 +709,5 @@ impl Card for ActionPlan {
             actions.push(Action::Patch(uri, changed.into()));
         }
         actions
-    }
-
-    /// Handle input event for an element on the card
-    #[allow(clippy::field_reassign_with_default)]
-    fn handle_input(&self, anc: ActionPlanAnc, id: &str) -> Vec<Action> {
-        // FIXME: Control card only
-        if "phase" == id
-            && let Some(el) = Doc::get().opt_elem::<HtmlSelectElement>("phase")
-        {
-            let phase = el.value();
-            let mut attr = Attr::new();
-            attr.str("phase", &phase.to_string());
-            let uri = uri_one(Res::ActionPlan, &self.name);
-            return vec![Action::Patch(uri, attr.into())];
-        }
-        // FIXME: Setup card only
-        self.update_device_actions(&anc, id);
-        self.update_phase_actions(&anc, id);
-        Vec::new()
     }
 }

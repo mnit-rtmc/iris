@@ -562,6 +562,28 @@ impl Lcs {
         );
         String::from(tree)
     }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, id: &str) -> Vec<Action> {
+        if "lk_reason" == id {
+            let reason = self.selected_lock_reason();
+            if reason.duration().is_some() {
+                if self.is_deployed() {
+                    let indications = self.selected_indications();
+                    if indications.iter().all(|i| *i > 1) {
+                        let ind = Some(&indications[..]);
+                        return self.make_lock_action(reason, ind);
+                    }
+                }
+            } else {
+                return self.make_lock_action(reason, None);
+            };
+        }
+        if id.starts_with("ind_") {
+            self.update_indications();
+        }
+        Vec::new()
+    }
 }
 
 impl Card for Lcs {
@@ -660,6 +682,14 @@ impl Card for Lcs {
         }
     }
 
+    /// Handle event for an element on the card
+    fn handle_event(&self, _anc: LcsAnc, id: &str, tp: EventTp) -> Vec<Action> {
+        match tp {
+            EventTp::Input => self.handle_input(id),
+            _ => Vec::new(),
+        }
+    }
+
     /// Handle click event for a button on the card
     fn handle_click(&self, anc: LcsAnc, id: &str) -> Vec<Action> {
         match id {
@@ -667,28 +697,6 @@ impl Card for Lcs {
             "lk_blank" => self.lock_blank(),
             _ => self.handle_click_common(anc, id),
         }
-    }
-
-    /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: LcsAnc, id: &str) -> Vec<Action> {
-        if "lk_reason" == id {
-            let reason = self.selected_lock_reason();
-            if reason.duration().is_some() {
-                if self.is_deployed() {
-                    let indications = self.selected_indications();
-                    if indications.iter().all(|i| *i > 1) {
-                        let ind = Some(&indications[..]);
-                        return self.make_lock_action(reason, ind);
-                    }
-                }
-            } else {
-                return self.make_lock_action(reason, None);
-            };
-        }
-        if id.starts_with("ind_") {
-            self.update_indications();
-        }
-        Vec::new()
     }
 
     /// Handle updating a card in response to an SSE notification

@@ -341,7 +341,16 @@ fn handle_input(id: String) {
         {
             handle_res_change()
         }
-        _ => handle_input_card(id),
+        _ => handle_event(id, EventTp::Input),
+    }
+}
+
+/// Handle event
+fn handle_event(id: String, tp: EventTp) {
+    if let Some(cv) = app::expanded_view()
+        && cv.is_event_handled(&id, tp)
+    {
+        spawn_future(async move { cv.handle_event(&id, tp).await });
     }
 }
 
@@ -409,15 +418,6 @@ fn selected_resource() -> Option<Res> {
     }
 }
 
-/// Handle an input event on an expanded card
-fn handle_input_card(id: String) {
-    if let Some(cv) = app::expanded_view()
-        && cv.is_event_handled(id.as_str(), EventTp::Input)
-    {
-        spawn_future(async move { cv.handle_input(&id).await });
-    }
-}
-
 /// Add "drag" event listeners to an element
 fn add_drag_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
@@ -482,9 +482,8 @@ fn add_focus_listener(el: &Element) -> Result<()> {
         if let Ok(fe) = ev.dyn_into::<FocusEvent>()
             && let Some(Ok(target)) =
                 fe.target().map(|el| el.dyn_into::<HtmlElement>())
-            && let Err(e) = handle_focus_ev(fe, target)
         {
-            log::warn!("handle_focus_ev: {e:?}");
+            handle_focus_ev(fe, target);
         }
     });
     el.add_event_listener_with_callback(
@@ -500,16 +499,13 @@ fn add_focus_listener(el: &Element) -> Result<()> {
     Ok(())
 }
 
-/// Handle focus events
-fn handle_focus_ev(fe: FocusEvent, target: HtmlElement) -> Result<()> {
-    let tp = EventTp::Focus(FocusTp::try_from(&fe)?);
-    let id = target.id();
-    if let Some(cv) = app::expanded_view()
-        && cv.is_event_handled(id.as_str(), tp)
-    {
-        spawn_future(async move { cv.handle_event(&id, tp).await });
-    }
-    Ok(())
+/// Handle focus event
+fn handle_focus_ev(fe: FocusEvent, target: HtmlElement) {
+    let Ok(tp) = FocusTp::try_from(&fe) else {
+        log::warn!("handle_focus_ev: {fe:?}");
+        return;
+    };
+    handle_event(target.id(), EventTp::Focus(tp));
 }
 
 /// Add transition event listener to an element

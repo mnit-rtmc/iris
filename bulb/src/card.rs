@@ -287,11 +287,6 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         String::new()
     }
 
-    /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: Self::Ancillary, _id: &str) -> Vec<Action> {
-        Vec::new()
-    }
-
     /// Handle updating a card in response to an SSE notification
     fn handle_update(&self, _anc: Self::Ancillary) {
         // NOTE: only Control cards handle updates

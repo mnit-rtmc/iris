@@ -93,6 +93,32 @@ impl Domain {
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, id: &str) -> Vec<Action> {
+        if "block" == id {
+            let doc = Doc::get();
+            if let (Some(block), Some(save)) = (
+                doc.opt_elem::<HtmlInputElement>("block"),
+                doc.opt_elem::<HtmlButtonElement>(eid::SAVE),
+            ) {
+                match IpCidr::from_str(&block.value()) {
+                    Ok(_) => {
+                        block.set_custom_validity("");
+                        block.set_class_name("");
+                        save.set_disabled(false);
+                    }
+                    Err(e) => {
+                        block.set_custom_validity(&e.to_string());
+                        block.set_class_name("invalid");
+                        save.set_disabled(true);
+                    }
+                }
+                block.report_validity();
+            }
+        }
+        Vec::new()
+    }
 }
 
 impl Card for Domain {
@@ -150,29 +176,16 @@ impl Card for Domain {
         }
     }
 
-    /// Handle input event for an element on the card
-    fn handle_input(&self, _anc: DomainAnc, id: &str) -> Vec<Action> {
-        if "block" == id {
-            let doc = Doc::get();
-            if let (Some(block), Some(save)) = (
-                doc.opt_elem::<HtmlInputElement>("block"),
-                doc.opt_elem::<HtmlButtonElement>(eid::SAVE),
-            ) {
-                match IpCidr::from_str(&block.value()) {
-                    Ok(_) => {
-                        block.set_custom_validity("");
-                        block.set_class_name("");
-                        save.set_disabled(false);
-                    }
-                    Err(e) => {
-                        block.set_custom_validity(&e.to_string());
-                        block.set_class_name("invalid");
-                        save.set_disabled(true);
-                    }
-                }
-                block.report_validity();
-            }
+    /// Handle event for an element on the card
+    fn handle_event(
+        &self,
+        _anc: DomainAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match tp {
+            EventTp::Input => self.handle_input(id),
+            _ => Vec::new(),
         }
-        Vec::new()
     }
 }

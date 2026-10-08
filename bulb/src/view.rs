@@ -327,21 +327,6 @@ impl CardView {
         Ok(None)
     }
 
-    /// Handle input event for an element owned by the resource
-    pub async fn handle_input(&self, id: &str) -> Result<()> {
-        cards_meth!(self, handle_input_x, id)
-    }
-
-    /// Handle input event for an element on a card
-    async fn handle_input_x<C: Card>(&self, id: &str) -> Result<()> {
-        let pri = self.fetch_primary::<C>().await?;
-        let anc = fetch_ancillary(&pri, self.view).await?;
-        for action in pri.handle_input(anc, id) {
-            action.perform().await?;
-        }
-        Ok(())
-    }
-
     /// Handle updating a card in response to an SSE notification
     pub async fn handle_update(&self) -> Result<()> {
         if self.view != View::Control {

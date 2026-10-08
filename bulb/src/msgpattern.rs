@@ -452,6 +452,25 @@ impl MsgPattern {
             el.set_outer_html(&String::from(tree));
         }
     }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, anc: MsgPatternAnc, id: &str) -> Vec<Action> {
+        let doc = Doc::get();
+        if "mp_config" == id {
+            self.replace_preview(&anc);
+        } else if let Ok(tab) = Tab::try_from(id) {
+            if let Tab::Preview = tab {
+                self.replace_preview(&anc);
+            }
+            if let Some(el) = doc.opt_elem::<HtmlElement>("mp_preview_div") {
+                el.set_class_name(tab.row_class(Tab::Preview));
+            }
+            if let Some(el) = doc.opt_elem::<HtmlElement>("mp_multi_div") {
+                el.set_class_name(tab.row_class(Tab::Multi));
+            }
+        }
+        Vec::new()
+    }
 }
 
 impl Card for MsgPattern {
@@ -519,23 +538,17 @@ impl Card for MsgPattern {
         }
     }
 
-    /// Handle input event for an element on the card
-    fn handle_input(&self, anc: MsgPatternAnc, id: &str) -> Vec<Action> {
-        let doc = Doc::get();
-        if "mp_config" == id {
-            self.replace_preview(&anc);
-        } else if let Ok(tab) = Tab::try_from(id) {
-            if let Tab::Preview = tab {
-                self.replace_preview(&anc);
-            }
-            if let Some(el) = doc.opt_elem::<HtmlElement>("mp_preview_div") {
-                el.set_class_name(tab.row_class(Tab::Preview));
-            }
-            if let Some(el) = doc.opt_elem::<HtmlElement>("mp_multi_div") {
-                el.set_class_name(tab.row_class(Tab::Multi));
-            }
+    /// Handle event for an element on the card
+    fn handle_event(
+        &self,
+        anc: MsgPatternAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match tp {
+            EventTp::Input => self.handle_input(anc, id),
+            _ => Vec::new(),
         }
-        Vec::new()
     }
 }
 

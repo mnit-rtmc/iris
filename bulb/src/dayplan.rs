@@ -423,6 +423,23 @@ impl DayPlan {
         );
         String::from(tree)
     }
+
+    /// Handle input event for an element on the card
+    #[allow(clippy::field_reassign_with_default)]
+    fn handle_input(&self, anc: DayPlanAnc, id: &str) -> Vec<Action> {
+        for dm in &anc.day_matchers {
+            let mut ndm = dm.clone();
+            ndm.update_from_dom();
+            if ndm.update_class(*dm != ndm, id) {
+                break;
+            }
+        }
+        let dm = DayMatcher::new(&anc.next_name, &self.name);
+        let mut ndm = dm.clone();
+        ndm.update_from_dom();
+        ndm.update_class(dm != ndm, id);
+        Vec::new()
+    }
 }
 
 impl Card for DayPlan {
@@ -502,6 +519,19 @@ impl Card for DayPlan {
         }
     }
 
+    /// Handle event for an element on the card
+    fn handle_event(
+        &self,
+        anc: DayPlanAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match tp {
+            EventTp::Input => self.handle_input(anc, id),
+            _ => Vec::new(),
+        }
+    }
+
     /// Handle click event for the save button
     #[allow(clippy::field_reassign_with_default)]
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
@@ -524,22 +554,5 @@ impl Card for DayPlan {
             actions.push(dm.action_post());
         }
         actions
-    }
-
-    /// Handle input event for an element on the card
-    #[allow(clippy::field_reassign_with_default)]
-    fn handle_input(&self, anc: DayPlanAnc, id: &str) -> Vec<Action> {
-        for dm in &anc.day_matchers {
-            let mut ndm = dm.clone();
-            ndm.update_from_dom();
-            if ndm.update_class(*dm != ndm, id) {
-                break;
-            }
-        }
-        let dm = DayMatcher::new(&anc.next_name, &self.name);
-        let mut ndm = dm.clone();
-        ndm.update_from_dom();
-        ndm.update_class(dm != ndm, id);
-        Vec::new()
     }
 }

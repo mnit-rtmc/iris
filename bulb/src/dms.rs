@@ -1160,6 +1160,69 @@ impl Dms {
         }
         div.close();
     }
+
+    /// Handle input event for an element on the card
+    fn handle_input(&self, anc: DmsAnc, id: &str) -> Vec<Action> {
+        let Some(pat) = self.selected_pattern(&anc) else {
+            return Vec::new();
+        };
+        let Some(dms) = self.make_dms(&anc) else {
+            return Vec::new();
+        };
+        let lines = if "mc_pattern" == id {
+            // update mc_lines element
+            if let Some(mc_lines) =
+                Doc::get().opt_elem::<HtmlElement>("mc_lines")
+            {
+                let mut tree = Tree::new();
+                anc.make_lines_html(
+                    &dms,
+                    pat,
+                    "",
+                    &mut tree.root::<html::Div>(),
+                );
+                mc_lines.set_outer_html(&String::from(tree));
+            }
+            Vec::new()
+        } else {
+            self.selected_lines()
+        };
+        // update mc_preview image element
+        if let Some(el) = Doc::get().opt_elem::<HtmlElement>("mc_preview") {
+            let multi = MessagePattern::new(&dms, &pat.multi)
+                .fill(lines.iter().map(|l| &l[..]));
+            let multi = multi_normalize(&multi);
+            let mut tree = Tree::new();
+            let mut rend = Renderer::new()
+                .with_dms(&dms)
+                .with_id("mc_preview")
+                .with_class("preview");
+            let mut img = tree.root::<html::Img>();
+            rend.render_multi(&multi, &mut img);
+            el.set_outer_html(&String::from(tree));
+        }
+        Vec::new()
+    }
+
+    /// Handle focus event for an element on the card
+    fn handle_focus(&self, anc: DmsAnc, id: &str, tp: FocusTp) -> Vec<Action> {
+        // message composer line input
+        if let Some(input) = Doc::get().opt_elem::<HtmlInputElement>(id) {
+            match tp {
+                FocusTp::In => input.set_value(""),
+                FocusTp::Out => {
+                    if input.value().is_empty()
+                        && let Some(ms) = input.get_attribute("data-cur")
+                    {
+                        input.set_value(&ms);
+                        return self.handle_input(anc, id);
+                    }
+                }
+                _ => (),
+            }
+        }
+        Vec::new()
+    }
 }
 
 /// Make expire select element
@@ -1341,22 +1404,11 @@ impl Card for Dms {
         id: &str,
         tp: EventTp,
     ) -> Vec<Action> {
-        // message composer line input
-        if let Some(input) = Doc::get().opt_elem::<HtmlInputElement>(id) {
-            match tp {
-                EventTp::Focus(FocusTp::In) => input.set_value(""),
-                EventTp::Focus(FocusTp::Out) => {
-                    if input.value().is_empty()
-                        && let Some(ms) = input.get_attribute("data-cur")
-                    {
-                        input.set_value(&ms);
-                        return self.handle_input(anc, id);
-                    }
-                }
-                _ => (),
-            }
+        match tp {
+            EventTp::Input => self.handle_input(anc, id),
+            EventTp::Focus(tp) => self.handle_focus(anc, id, tp),
+            _ => Vec::new(),
         }
-        Vec::new()
     }
 
     /// Handle click event for a button on the card
@@ -1375,49 +1427,6 @@ impl Card for Dms {
             "rq_config_query" => self.device_req(DeviceReq::QueryConfiguration),
             _ => self.handle_click_common(anc, id),
         }
-    }
-
-    /// Handle input event for an element on the card
-    fn handle_input(&self, anc: DmsAnc, id: &str) -> Vec<Action> {
-        let Some(pat) = self.selected_pattern(&anc) else {
-            return Vec::new();
-        };
-        let Some(dms) = self.make_dms(&anc) else {
-            return Vec::new();
-        };
-        let lines = if "mc_pattern" == id {
-            // update mc_lines element
-            if let Some(mc_lines) =
-                Doc::get().opt_elem::<HtmlElement>("mc_lines")
-            {
-                let mut tree = Tree::new();
-                anc.make_lines_html(
-                    &dms,
-                    pat,
-                    "",
-                    &mut tree.root::<html::Div>(),
-                );
-                mc_lines.set_outer_html(&String::from(tree));
-            }
-            Vec::new()
-        } else {
-            self.selected_lines()
-        };
-        // update mc_preview image element
-        if let Some(el) = Doc::get().opt_elem::<HtmlElement>("mc_preview") {
-            let multi = MessagePattern::new(&dms, &pat.multi)
-                .fill(lines.iter().map(|l| &l[..]));
-            let multi = multi_normalize(&multi);
-            let mut tree = Tree::new();
-            let mut rend = Renderer::new()
-                .with_dms(&dms)
-                .with_id("mc_preview")
-                .with_class("preview");
-            let mut img = tree.root::<html::Img>();
-            rend.render_multi(&multi, &mut img);
-            el.set_outer_html(&String::from(tree));
-        }
-        Vec::new()
     }
 
     /// Handle updating a card in response to an SSE notification
