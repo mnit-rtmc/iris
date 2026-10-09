@@ -132,10 +132,13 @@ menu li {
   white-space: nowrap;
 }
 .draggable-item {
-  list-style-type: disc;
-  padding-left: 1rem;
+  list-style: none;
+  padding-left: 0;
   white-space: nowrap;
   cursor: grab;
+}
+.draggable-item > li:has(input:not(:checked)) {
+  background-color: #fdd;
 }
 .dragging {
   cursor: grabbed;

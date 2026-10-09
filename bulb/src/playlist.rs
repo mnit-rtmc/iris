@@ -27,8 +27,8 @@ use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
-use wasm_bindgen::JsValue;
-use web_sys::HtmlElement;
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{HtmlElement, HtmlInputElement};
 
 /// Playlist
 #[derive(Debug, Default, Deserialize, PartialEq)]
@@ -124,6 +124,12 @@ impl PlayListAnc {
             let children = ent.children();
             for i in 0..children.length() {
                 if let Some(c) = children.item(i) {
+                    if let Some(keep) = c.first_element_child()
+                        && let Ok(chk) = keep.dyn_into::<HtmlInputElement>()
+                        && !chk.checked()
+                    {
+                        continue;
+                    }
                     entries.push(c.id());
                 }
             }
@@ -178,6 +184,7 @@ impl PlayList {
                     match anc.playlist(ent) {
                         Some(pl) => {
                             li.id(&pl.name).draggable(true);
+                            li.input().r#type("checkbox").checked();
                             let query = QueryParam::new()
                                 .with_res(Res::PlayList)
                                 .with_sel(&pl.name);
@@ -201,6 +208,7 @@ impl PlayList {
                     match anc.camera(ent) {
                         Some(c) => {
                             li.id(&c.name).draggable(true);
+                            li.input().r#type("checkbox").checked();
                             let query = QueryParam::new()
                                 .with_res(Res::Camera)
                                 .with_sel(&c.name);
