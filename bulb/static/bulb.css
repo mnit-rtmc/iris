@@ -139,7 +139,7 @@ menu li {
 }
 .dragging {
   cursor: grabbed;
-  background: #8888;
+  opacity: 50%;
   border: 1px dashed black;
 }
 .current {

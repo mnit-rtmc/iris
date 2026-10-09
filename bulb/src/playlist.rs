@@ -185,6 +185,7 @@ impl PlayList {
                     }
                 }
             }
+            ul.close();
         }
     }
 
