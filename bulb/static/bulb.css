@@ -142,6 +142,9 @@ menu li {
   opacity: 50%;
   border: 1px dashed black;
 }
+#drop-placeholder {
+  border: 1px dashed black;
+}
 .current {
   background-color: #db6;
 }
@@ -221,6 +224,9 @@ menu li {
   fill: #a44;
   stroke: white;
   stroke-width: 0.5;
+}
+li.changed {
+  background-color: #ffd;
 }
 
 /* Checkbox toggle buttons:

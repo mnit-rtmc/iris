@@ -19,13 +19,16 @@ use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::permission::{AccessLevel, Permission};
 use crate::query::QueryParam;
-use crate::util::{ContainsLower, Fields, Input, opt_ref, opt_str};
+use crate::util::{
+    ContainsLower, Doc, Fields, Input, TextArea, opt_ref, opt_str,
+};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlElement;
 
 /// Playlist
 #[derive(Debug, Default, Deserialize, PartialEq)]
@@ -44,6 +47,7 @@ pub struct PlayListAnc {
     assets: Vec<Asset>,
     access: Vec<Permission>,
     cameras: Vec<Camera>,
+    playlists: Vec<PlayList>,
 }
 
 impl AncillaryData for PlayListAnc {
@@ -52,13 +56,16 @@ impl AncillaryData for PlayListAnc {
     /// Construct ancillary role data
     fn new(_pri: &PlayList, view: View) -> Self {
         let assets = match view {
-            View::Setup(_) => vec![Asset::Access, Asset::Cameras],
+            View::Setup(_) => {
+                vec![Asset::Access, Asset::Cameras, Asset::PlayLists]
+            }
             _ => vec![Asset::Access],
         };
         PlayListAnc {
             assets,
             access: Vec::new(),
             cameras: Vec::new(),
+            playlists: Vec::new(),
         }
     }
 
@@ -81,6 +88,9 @@ impl AncillaryData for PlayListAnc {
             Asset::Cameras => {
                 self.cameras = serde_wasm_bindgen::from_value(value)?;
             }
+            Asset::PlayLists => {
+                self.playlists = serde_wasm_bindgen::from_value(value)?;
+            }
             _ => unreachable!(),
         }
         Ok(())
@@ -102,30 +112,30 @@ impl PlayListAnc {
         self.cameras.iter().find(|c| c.name == *nm)
     }
 
-    /// Check if entries are different
-    fn compare_entries(&self, entries: &[String], sel: &[String]) -> bool {
-        if entries.len() != sel.len() {
-            return true;
-        }
-        for ent in sel {
-            if !entries.contains(ent) {
-                return true;
-            }
-        }
-        false
+    /// Find a playlist
+    fn playlist(&self, nm: &str) -> Option<&PlayList> {
+        self.playlists.iter().find(|p| p.name == *nm)
     }
 
     /// Get selected entries
     fn entries_selected(&self) -> Vec<String> {
-        // FIXME
-        Vec::new()
+        let mut entries = Vec::new();
+        if let Some(ent) = Doc::get().opt_elem::<HtmlElement>("pl-entries") {
+            let children = ent.children();
+            for i in 0..children.length() {
+                if let Some(c) = children.item(i) {
+                    entries.push(c.id());
+                }
+            }
+        }
+        entries
     }
 
     /// Get actions to update entries
     fn entries_changed(&self, pri: &PlayList) -> Option<Vec<String>> {
         let entries = pri.entries.as_ref()?;
         let sel = self.entries_selected();
-        self.compare_entries(&entries[..], &sel[..]).then_some(sel)
+        (entries.as_slice() != sel.as_slice()).then_some(sel)
     }
 }
 
@@ -161,27 +171,54 @@ impl PlayList {
     fn entries_html<'p>(&self, anc: &PlayListAnc, div: &'p mut html::Div<'p>) {
         if let Some(entries) = &self.entries {
             let mut ul = div.ul();
-            ul.class("draggable-item");
-            for (i, ent) in entries.iter().enumerate() {
+            ul.id("pl-entries").class("draggable-item");
+            for ent in entries {
                 let mut li = ul.li();
-                li.id(format!("entry-{i}"));
-                li.draggable(true);
-                match anc.camera(ent) {
-                    Some(c) => {
-                        let query = QueryParam::new()
-                            .with_res(Res::Camera)
-                            .with_sel(&c.name);
-                        li.a().href(query.to_string()).cdata(&c.name).close();
-                        if let Some(num) = c.cam_num {
-                            li.span()
-                                .class("info")
-                                .cdata(format!("#{num} "))
+                if self.meta {
+                    match anc.playlist(ent) {
+                        Some(pl) => {
+                            li.id(&pl.name).draggable(true);
+                            let query = QueryParam::new()
+                                .with_res(Res::PlayList)
+                                .with_sel(&pl.name);
+                            li.a()
+                                .href(query.to_string())
+                                .cdata(&pl.name)
                                 .close();
+                            if let Some(num) = pl.seq_num {
+                                li.span()
+                                    .class("info")
+                                    .cdata(format!("#{num} "))
+                                    .close();
+                            }
+                            li.cdata(" ").cdata_len(&pl.notes, 64);
                         }
-                        li.cdata(" ").cdata_len(opt_ref(&c.location), 64);
+                        None => {
+                            li.cdata(ent);
+                        }
                     }
-                    None => {
-                        li.cdata(ent);
+                } else {
+                    match anc.camera(ent) {
+                        Some(c) => {
+                            li.id(&c.name).draggable(true);
+                            let query = QueryParam::new()
+                                .with_res(Res::Camera)
+                                .with_sel(&c.name);
+                            li.a()
+                                .href(query.to_string())
+                                .cdata(&c.name)
+                                .close();
+                            if let Some(num) = c.cam_num {
+                                li.span()
+                                    .class("info")
+                                    .cdata(format!("#{num} "))
+                                    .close();
+                            }
+                            li.cdata(" ").cdata_len(opt_ref(&c.location), 64);
+                        }
+                        None => {
+                            li.cdata(ent);
+                        }
                     }
                 }
             }
@@ -254,7 +291,7 @@ impl PlayList {
     fn changed_attr(&self, anc: &PlayListAnc) -> Option<Attr> {
         let mut fields = Fields::new();
         fields.changed_input("seq_num", self.seq_num);
-        fields.changed_input("notes", &self.notes);
+        fields.changed_text_area("notes", &self.notes);
         let mut attr = Attr::from(fields);
         if let Some(entries) = anc.entries_changed(self) {
             attr.array("entries", entries);
@@ -317,7 +354,6 @@ impl Card for PlayList {
 
     /// Handle click event for the save button
     fn handle_save(&self, anc: Self::Ancillary) -> Vec<Action> {
-        // FIXME: can we use Card::handle_save?
         let mut actions = Vec::new();
         if let Some(changed) = self.changed_attr(&anc) {
             let uri = uri_one(Self::res(), &self.name());

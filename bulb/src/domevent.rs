@@ -202,8 +202,10 @@ impl DragTp {
                 let id = dt.get_data("entry")?;
                 if let Some(dragging) = Doc::get().opt_elem::<HtmlElement>(&id)
                 {
-                    dragging.class_list().remove_1("dragging")?;
                     dragging.remove();
+                    let cl = dragging.class_list();
+                    cl.remove_1("dragging")?;
+                    cl.add_1("changed")?;
                     ph.insert_adjacent_element("beforebegin", &dragging)?;
                 }
             }
