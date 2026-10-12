@@ -35,6 +35,7 @@ mod device;
 mod dms;
 mod domain;
 mod domevent;
+mod draglist;
 mod eid;
 mod encodertype;
 mod error;

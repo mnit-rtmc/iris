@@ -13,7 +13,8 @@
 use crate::app;
 use crate::asset::Asset;
 use crate::card::{self, CardList};
-use crate::domevent::{DragTp, EventTp, FocusTp};
+use crate::domevent::{EventTp, FocusTp};
+use crate::draglist::DragTp;
 use crate::eid;
 use crate::error::Result;
 use crate::helper::spawn_future;
