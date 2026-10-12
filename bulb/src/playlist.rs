@@ -14,6 +14,7 @@ use crate::asset::Asset;
 use crate::attr::Attr;
 use crate::camera::Camera;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
+use crate::domevent::EventTp;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
@@ -232,6 +233,53 @@ impl PlayList {
             }
             ul.close();
         }
+        div.close();
+    }
+
+    /// Build HTML "add entry" select
+    fn add_entry_html<'p>(
+        &self,
+        anc: &PlayListAnc,
+        span: &'p mut html::Span<'p>,
+    ) {
+        span.class("single-line");
+        span.button()
+            .id("add-entry-btn")
+            .r#type("button")
+            .cdata("➕")
+            .close();
+        // FIXME: use customizable select
+        let mut select = span.select();
+        select.id("add-entry-sel");
+        if self.meta {
+            for pl in &anc.playlists {
+                if !pl.meta {
+                    let mut option = select.option();
+                    option.cdata(&pl.name);
+                    if let Some(num) = pl.seq_num {
+                        option.cdata(format!(" #{num}"));
+                    }
+                    option.cdata(" ").cdata_len(&pl.notes, 32);
+                }
+            }
+        } else {
+            for c in &anc.cameras {
+                let mut option = select.option();
+                option.cdata(&c.name);
+                if let Some(num) = c.cam_num {
+                    option.cdata(format!(" #{num}"));
+                }
+                option.cdata(" ").cdata_len(opt_ref(&c.location), 32);
+            }
+        }
+        select.close();
+        span.close();
+    }
+
+    /// Add the currently selected entry to the play list
+    fn add_entry(&self, anc: &PlayListAnc) -> Vec<Action> {
+        // FIXME
+        Vec::new()
     }
 
     /// Convert to Compact HTML
@@ -283,6 +331,7 @@ impl PlayList {
             .close();
         div.close();
         self.entries_html(anc, &mut tree.root::<html::Div>());
+        self.add_entry_html(anc, &mut tree.root::<html::Span>());
         let can_delete = match &self.entries {
             Some(entries) => entries.is_empty(),
             None => false,
@@ -357,6 +406,19 @@ impl Card for PlayList {
             View::Create => self.to_html_create(15),
             View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
+        }
+    }
+
+    /// Handle event for the card
+    fn handle_event(
+        &self,
+        anc: Self::Ancillary,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match (id, tp) {
+            ("add-entry-btn", EventTp::Click(_)) => self.add_entry(&anc),
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 

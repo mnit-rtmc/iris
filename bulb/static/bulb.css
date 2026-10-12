@@ -822,6 +822,14 @@ label:has(+ #sb-resource) {
 .tiny {
   font-size: xx-small;
 }
+.single-line {
+  white-space: nowrap;
+  margin: 0.1rem;
+  padding-bottom: 0.1rem;
+}
+.single-line > * {
+  margin-left: 0;
+}
 
 /* Sign messages */
 #message-row {
