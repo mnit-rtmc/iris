@@ -792,7 +792,13 @@ fn prepend_placeholder(el: &HtmlElement, id: &str) -> Result<()> {
 
 /// Replace a card with provided HTML
 fn replace_card_html(cv: &CardView, html: &str) -> Result<()> {
-    let el = Doc::get().elem::<HtmlElement>(cv.id())?;
+    let el = match Doc::get().elem::<HtmlElement>(cv.id()) {
+        Ok(el) => el,
+        Err(e) => {
+            log::warn!("replace_card_html: {e:?}");
+            return Ok(());
+        }
+    };
     el.set_inner_html(html);
     el.set_class_name(cv.view.class_name());
     if cv.view.is_expanded() {
