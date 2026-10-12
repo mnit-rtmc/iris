@@ -113,6 +113,26 @@ impl PlayListAnc {
         self.cameras.iter().find(|c| c.name == *nm)
     }
 
+    /// Make a camera entry
+    fn make_camera<'p>(&self, li: &mut html::Li<'p>, id: &str, i: usize) {
+        match self.camera(id) {
+            Some(c) => {
+                li.id(format!("entry-{i}")).draggable(true);
+                li.input().r#type("checkbox").checked();
+                let query =
+                    QueryParam::new().with_res(Res::Camera).with_sel(&c.name);
+                li.a().href(query.to_string()).cdata(&c.name).close();
+                if let Some(num) = c.cam_num {
+                    li.span().class("info").cdata(format!("#{num} ")).close();
+                }
+                li.cdata(" ").cdata_len(opt_ref(&c.location), 64);
+            }
+            None => {
+                log::warn!("camera not found: {id}");
+            }
+        }
+    }
+
     /// Find a playlist
     fn playlist(&self, nm: &str) -> Option<&PlayList> {
         self.playlists.iter().find(|p| p.name == *nm)
@@ -174,61 +194,46 @@ impl PlayList {
         }
     }
 
+    /// Get unused entry number
+    fn get_unused_entry(&self) -> usize {
+        if let Some(entries) = Doc::get().opt_elem::<HtmlElement>("pl-entries")
+            && let Ok(i) = usize::try_from(entries.children().length())
+        {
+            return i;
+        }
+        0
+    }
+
+    /// Make entry for a meta play list
+    fn make_meta_entry<'p>(&self, li: &'p mut html::Li<'p>, i: usize) {
+        li.id(format!("entry-{i}")).draggable(true);
+        li.input().r#type("checkbox").checked();
+        let query = QueryParam::new()
+            .with_res(Res::PlayList)
+            .with_sel(&self.name);
+        li.a().href(query.to_string()).cdata(&self.name).close();
+        if let Some(num) = self.seq_num {
+            li.span().class("info").cdata(format!("#{num} ")).close();
+        }
+        li.cdata(" ").cdata_len(&self.notes, 64);
+    }
+
     /// Build HTML entries list
     fn entries_html<'p>(&self, anc: &PlayListAnc, div: &'p mut html::Div<'p>) {
         if let Some(entries) = &self.entries {
             let mut ul = div.ul();
             ul.id("pl-entries").class("draggable-item");
-            for ent in entries {
+            for (i, ent) in entries.iter().enumerate() {
                 let mut li = ul.li();
                 if self.meta {
                     match anc.playlist(ent) {
-                        Some(pl) => {
-                            li.id(&pl.name).draggable(true);
-                            li.input().r#type("checkbox").checked();
-                            let query = QueryParam::new()
-                                .with_res(Res::PlayList)
-                                .with_sel(&pl.name);
-                            li.a()
-                                .href(query.to_string())
-                                .cdata(&pl.name)
-                                .close();
-                            if let Some(num) = pl.seq_num {
-                                li.span()
-                                    .class("info")
-                                    .cdata(format!("#{num} "))
-                                    .close();
-                            }
-                            li.cdata(" ").cdata_len(&pl.notes, 64);
-                        }
+                        Some(pl) => pl.make_meta_entry(&mut li, i),
                         None => {
-                            li.cdata(ent);
+                            log::warn!("playlist not found: {ent}");
                         }
                     }
                 } else {
-                    match anc.camera(ent) {
-                        Some(c) => {
-                            li.id(&c.name).draggable(true);
-                            li.input().r#type("checkbox").checked();
-                            let query = QueryParam::new()
-                                .with_res(Res::Camera)
-                                .with_sel(&c.name);
-                            li.a()
-                                .href(query.to_string())
-                                .cdata(&c.name)
-                                .close();
-                            if let Some(num) = c.cam_num {
-                                li.span()
-                                    .class("info")
-                                    .cdata(format!("#{num} "))
-                                    .close();
-                            }
-                            li.cdata(" ").cdata_len(opt_ref(&c.location), 64);
-                        }
-                        None => {
-                            li.cdata(ent);
-                        }
-                    }
+                    anc.make_camera(&mut li, ent, i);
                 }
             }
             ul.close();
@@ -255,6 +260,7 @@ impl PlayList {
             for pl in &anc.playlists {
                 if !pl.meta {
                     let mut option = select.option();
+                    option.value(&pl.name);
                     option.cdata(&pl.name);
                     if let Some(num) = pl.seq_num {
                         option.cdata(format!(" #{num}"));
@@ -265,6 +271,7 @@ impl PlayList {
         } else {
             for c in &anc.cameras {
                 let mut option = select.option();
+                option.value(&c.name);
                 option.cdata(&c.name);
                 if let Some(num) = c.cam_num {
                     option.cdata(format!(" #{num}"));
@@ -278,7 +285,29 @@ impl PlayList {
 
     /// Add the currently selected entry to the play list
     fn add_entry(&self, anc: &PlayListAnc) -> Vec<Action> {
-        // FIXME
+        let doc = Doc::get();
+        let Some(sel) = doc.select_parse::<String>("add-entry-sel") else {
+            return Vec::new();
+        };
+        if self.meta {
+            // FIXME
+        } else {
+            if let Some(entries) = doc.opt_elem::<HtmlElement>("pl-entries") {
+                let i = self.get_unused_entry();
+                let mut tree = Tree::new();
+                let mut li = tree.root::<html::Li>();
+                anc.make_camera(&mut li, &sel, i);
+                match doc.0.create_element("li") {
+                    Ok(el) => {
+                        if let Err(e) = entries.append_with_node_1(&el) {
+                            log::warn!("add_entry failed: {e:?}");
+                        }
+                        el.set_outer_html(&String::from(tree));
+                    }
+                    Err(e) => log::warn!("create_element failed: {e:?}"),
+                }
+            }
+        }
         Vec::new()
     }
 
