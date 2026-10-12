@@ -622,7 +622,7 @@ fn show_hide_res_row(
         let cls = if base == Some(res)
             && Permission::access_level_max(access, res) >= AccessLevel::Operate
         {
-            "sb_row_left"
+            "single-line"
         } else {
             "no-display"
         };
