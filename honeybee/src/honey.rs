@@ -680,7 +680,8 @@ fn permission_resource(honey: Honey) -> Router {
             permission::post_role_res(&honey.db, &role, &base_resource).await?;
             return Ok(StatusCode::CREATED);
         }
-        Err(Error::InvalidValue)?
+        log::warn!("POST {nm}: forbidden");
+        Err(Error::Forbidden)?
     }
 
     Router::new()
@@ -865,7 +866,7 @@ fn other_object(honey: Honey) -> Router {
         params: Query<QueryParams>,
         Json(attrs): Json<Map<String, Value>>,
     ) -> Resp0 {
-        log::info!("PATCH {type_n}/{obj_n} {params:?}");
+        log::info!("PATCH {type_n}/{obj_n} {attrs:?}");
         let nm = Name::new(&type_n)?.obj(&obj_n)?;
         let ck_nm = check_name(&type_n, &obj_n, &params.0)?;
         let cred = Credentials::load(&session).await?;

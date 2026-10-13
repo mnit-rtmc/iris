@@ -35,7 +35,7 @@ const RECORD_SEP: u8 = b'\x1E';
 
 /// Parse a SHOW message received from server
 fn parse_show(msg: &str) -> Error {
-    log::trace!("SONAR parse_show {msg}");
+    log::info!("SONAR parse_show {msg}");
     // gross, but no point in changing SHOW messages now!
     let msg = msg.to_lowercase();
     if msg.starts_with("permission") {
