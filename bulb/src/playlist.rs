@@ -194,16 +194,6 @@ impl PlayList {
         }
     }
 
-    /// Get unused entry number
-    fn get_unused_entry(&self) -> usize {
-        if let Some(entries) = Doc::get().opt_elem::<HtmlElement>("pl-entries")
-            && let Ok(i) = usize::try_from(entries.children().length())
-        {
-            return i;
-        }
-        0
-    }
-
     /// Make entry for a meta play list
     fn make_meta_entry<'p>(&self, li: &'p mut html::Li<'p>, i: usize) {
         li.id(format!("entry-{i}")).draggable(true);
@@ -289,24 +279,37 @@ impl PlayList {
         let Some(sel) = doc.select_parse::<String>("add-entry-sel") else {
             return Vec::new();
         };
-        if self.meta {
-            // FIXME
-        } else {
-            if let Some(entries) = doc.opt_elem::<HtmlElement>("pl-entries") {
-                let i = self.get_unused_entry();
-                let mut tree = Tree::new();
-                let mut li = tree.root::<html::Li>();
-                anc.make_camera(&mut li, &sel, i);
-                match doc.0.create_element("li") {
-                    Ok(el) => {
-                        if let Err(e) = entries.append_with_node_1(&el) {
-                            log::warn!("add_entry failed: {e:?}");
-                        }
-                        el.set_outer_html(&String::from(tree));
-                    }
-                    Err(e) => log::warn!("create_element failed: {e:?}"),
+        let Some(entries) = doc.opt_elem::<HtmlElement>("pl-entries") else {
+            return Vec::new();
+        };
+        let Ok(i) = usize::try_from(entries.children().length()) else {
+            return Vec::new();
+        };
+        let li = if self.meta {
+            let mut tree = Tree::new();
+            let mut li = tree.root::<html::Li>();
+            match anc.playlist(&sel) {
+                Some(pl) => pl.make_meta_entry(&mut li, i),
+                None => {
+                    log::warn!("playlist not found: {sel}");
+                    return Vec::new();
                 }
             }
+            String::from(tree)
+        } else {
+            let mut tree = Tree::new();
+            let mut li = tree.root::<html::Li>();
+            anc.make_camera(&mut li, &sel, i);
+            String::from(tree)
+        };
+        match doc.0.create_element("li") {
+            Ok(el) => {
+                if let Err(e) = entries.append_with_node_1(&el) {
+                    log::warn!("add_entry failed: {e:?}");
+                }
+                el.set_outer_html(&li);
+            }
+            Err(e) => log::warn!("create_element failed: {e:?}"),
         }
         Vec::new()
     }
