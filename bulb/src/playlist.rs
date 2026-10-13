@@ -114,14 +114,20 @@ impl PlayListAnc {
     }
 
     /// Make a camera entry
-    fn make_camera<'p>(&self, li: &mut html::Li<'p>, id: &str, i: usize) {
+    fn make_camera<'p>(
+        &self,
+        li: &mut html::Li<'p>,
+        id: &str,
+        cls: &str,
+        i: usize,
+    ) {
         match self.camera(id) {
             Some(c) => {
-                li.id(format!("entry-{i}")).draggable(true);
+                li.id(format!("entry-{i}")).class(cls).draggable(true);
                 li.input().r#type("checkbox").checked();
                 let query =
-                    QueryParam::new().with_res(Res::Camera).with_sel(&c.name);
-                li.a().href(query.to_string()).cdata(&c.name).close();
+                    QueryParam::new().with_res(Res::Camera).with_sel(id);
+                li.a().href(query.to_string()).cdata(id).close();
                 if let Some(num) = c.cam_num {
                     li.span().class("info").cdata(format!("#{num} ")).close();
                 }
@@ -138,6 +144,32 @@ impl PlayListAnc {
         self.playlists.iter().find(|p| p.name == *nm)
     }
 
+    /// Make a meta playlist entry
+    fn make_meta_entry<'p>(
+        &self,
+        li: &mut html::Li<'p>,
+        id: &str,
+        cls: &str,
+        i: usize,
+    ) {
+        match self.playlist(id) {
+            Some(pl) => {
+                li.id(format!("entry-{i}")).class(cls).draggable(true);
+                li.input().r#type("checkbox").checked();
+                let query =
+                    QueryParam::new().with_res(Res::PlayList).with_sel(id);
+                li.a().href(query.to_string()).cdata(id).close();
+                if let Some(num) = pl.seq_num {
+                    li.span().class("info").cdata(format!("#{num} ")).close();
+                }
+                li.cdata(" ").cdata_len(&pl.notes, 64);
+            }
+            None => {
+                log::warn!("playlist not found: {id}");
+            }
+        }
+    }
+
     /// Get selected entries
     fn entries_selected(&self) -> Vec<String> {
         let mut entries = Vec::new();
@@ -151,7 +183,12 @@ impl PlayListAnc {
                     {
                         continue;
                     }
-                    entries.push(c.id());
+                    for e in c.class_name().split(' ') {
+                        if e != "changed" && e != "dragging" {
+                            entries.push(e.to_string());
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -194,20 +231,6 @@ impl PlayList {
         }
     }
 
-    /// Make entry for a meta play list
-    fn make_meta_entry<'p>(&self, li: &'p mut html::Li<'p>, i: usize) {
-        li.id(format!("entry-{i}")).draggable(true);
-        li.input().r#type("checkbox").checked();
-        let query = QueryParam::new()
-            .with_res(Res::PlayList)
-            .with_sel(&self.name);
-        li.a().href(query.to_string()).cdata(&self.name).close();
-        if let Some(num) = self.seq_num {
-            li.span().class("info").cdata(format!("#{num} ")).close();
-        }
-        li.cdata(" ").cdata_len(&self.notes, 64);
-    }
-
     /// Build HTML entries list
     fn entries_html<'p>(&self, anc: &PlayListAnc, div: &'p mut html::Div<'p>) {
         if let Some(entries) = &self.entries {
@@ -216,14 +239,9 @@ impl PlayList {
             for (i, ent) in entries.iter().enumerate() {
                 let mut li = ul.li();
                 if self.meta {
-                    match anc.playlist(ent) {
-                        Some(pl) => pl.make_meta_entry(&mut li, i),
-                        None => {
-                            log::warn!("playlist not found: {ent}");
-                        }
-                    }
+                    anc.make_meta_entry(&mut li, ent, ent, i);
                 } else {
-                    anc.make_camera(&mut li, ent, i);
+                    anc.make_camera(&mut li, ent, ent, i);
                 }
             }
             ul.close();
@@ -285,23 +303,15 @@ impl PlayList {
         let Ok(i) = usize::try_from(entries.children().length()) else {
             return Vec::new();
         };
-        let li = if self.meta {
-            let mut tree = Tree::new();
-            let mut li = tree.root::<html::Li>();
-            match anc.playlist(&sel) {
-                Some(pl) => pl.make_meta_entry(&mut li, i),
-                None => {
-                    log::warn!("playlist not found: {sel}");
-                    return Vec::new();
-                }
-            }
-            String::from(tree)
+        let cls = format!("{sel} changed");
+        let mut tree = Tree::new();
+        let mut li = tree.root::<html::Li>();
+        if self.meta {
+            anc.make_meta_entry(&mut li, &sel, &cls, i);
         } else {
-            let mut tree = Tree::new();
-            let mut li = tree.root::<html::Li>();
-            anc.make_camera(&mut li, &sel, i);
-            String::from(tree)
-        };
+            anc.make_camera(&mut li, &sel, &cls, i);
+        }
+        let li = String::from(tree);
         match doc.0.create_element("li") {
             Ok(el) => {
                 if let Err(e) = entries.append_with_node_1(&el) {
