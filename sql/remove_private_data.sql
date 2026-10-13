@@ -54,6 +54,7 @@ UPDATE iris.system_attribute SET value = '' WHERE name = 'email_sender_server';
 UPDATE iris.system_attribute SET value = '' WHERE name = 'work_request_url';
 UPDATE iris.system_attribute SET value = '' WHERE name LIKE 'subnet_target_%';
 UPDATE iris.system_attribute SET value = '' WHERE name LIKE 'camera_%_url';
+UPDATE iris.system_attribute SET value = 'Home' WHERE name = 'map_extent_name_initial';
 
 DELETE FROM iris.user_id;
 DELETE FROM iris.role_domain;
