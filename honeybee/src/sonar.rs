@@ -163,7 +163,7 @@ impl Name {
     }
 }
 
-/// Get attribute from a JSON value
+/// Build attribute from a JSON value
 fn attr_json(value: &Value) -> Result<String> {
     match value {
         Value::String(value) => {
@@ -176,21 +176,6 @@ fn attr_json(value: &Value) -> Result<String> {
         Value::Bool(value) => Ok(value.to_string()),
         Value::Number(value) => Ok(value.to_string()),
         Value::Null => Ok("\0".to_string()),
-        Value::Array(value) => {
-            let mut s = String::new();
-            for val in value {
-                match attr_json(val) {
-                    Ok(v) => {
-                        if !s.is_empty() {
-                            s.push(UNIT_SEP as char);
-                        }
-                        s.push_str(&v);
-                    }
-                    _ => return Err(Error::InvalidValue)?,
-                }
-            }
-            Ok(s)
-        }
         _ => Err(Error::InvalidValue)?,
     }
 }
@@ -262,9 +247,10 @@ impl<'a> Message<'a> {
                 let nm = std::str::from_utf8(msg[1]).unwrap();
                 Some(Message::Object(nm))
             }
-            b"a" if msg.len() == 3 => {
+            b"a" if msg.len() >= 2 => {
                 let nm = std::str::from_utf8(msg[1]).unwrap();
                 let a = std::str::from_utf8(msg[2]).unwrap();
+                // FIXME: handle array cases (empty, more than 1)
                 Some(Message::Attribute(nm, a))
             }
             b"r" if msg.len() == 2 => {
@@ -312,7 +298,6 @@ impl<'a> Message<'a> {
                 buf.push(b'a');
                 buf.push(UNIT_SEP);
                 buf.extend(nm.as_bytes());
-                buf.push(UNIT_SEP);
                 buf.extend(a.as_bytes());
             }
             Message::Remove(nm) => {
@@ -470,8 +455,26 @@ impl Messenger {
     ) -> Result<()> {
         log::trace!("SONAR update_object {nm}");
         let mut buf = Vec::with_capacity(32);
-        let value = attr_json(value)?;
-        Message::Attribute(nm, &value).encode(&mut buf);
+        match value {
+            Value::Array(arr) => {
+                let mut s = String::new();
+                for val in arr {
+                    match attr_json(val) {
+                        Ok(v) => {
+                            s.push(UNIT_SEP as char);
+                            s.push_str(&v);
+                        }
+                        _ => return Err(Error::InvalidValue)?,
+                    }
+                }
+                Message::Attribute(nm, &s).encode(&mut buf);
+            }
+            _ => {
+                let mut value = attr_json(value)?;
+                value.insert(0, UNIT_SEP as char);
+                Message::Attribute(nm, &value).encode(&mut buf);
+            }
+        }
         self.check_error(10).await?;
         self.send(&buf[..]).await?;
         self.check_error(100).await?;
