@@ -13,8 +13,9 @@
 use crate::asset::Asset;
 use crate::attr::Attr;
 use crate::camera::Camera;
-use crate::card::{AncillaryData, Card, footer_html, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_all, uri_one};
 use crate::domevent::EventTp;
+use crate::eid;
 use crate::error::Result;
 use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
@@ -27,6 +28,8 @@ use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
+use serde_json::Value;
+use serde_json::map::Map;
 use std::borrow::Cow;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{HtmlElement, HtmlInputElement};
@@ -412,6 +415,22 @@ impl Card for PlayList {
         &[ItemState::Simple, ItemState::Meta, ItemState::Prohibited]
     }
 
+    /// Handle click event for the create button
+    fn handle_create() -> Vec<Action> {
+        let doc = Doc::get();
+        if let Some(name) = doc.input_option_string(eid::NAME) {
+            let meta = doc.input_bool("meta");
+            let mut obj = Map::new();
+            obj.insert("name".to_string(), Value::String(name));
+            obj.insert("meta".to_string(), Value::Bool(meta));
+            let value = Value::Object(obj).to_string();
+            let uri = uri_all(Self::res());
+            vec![Action::Post(uri, value.into())]
+        } else {
+            Vec::new()
+        }
+    }
+
     /// Get the name
     fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.name)
@@ -440,6 +459,30 @@ impl Card for PlayList {
         self.name.contains_lower(search)
             || self.check_number(search)
             || self.item_states(anc).is_match(search)
+    }
+
+    /// Convert to Create HTML
+    fn to_html_create(&self, len: u32) -> String {
+        let mut tree = Tree::new();
+        let mut div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for(eid::NAME).cdata("Name").close();
+        div.input()
+            .id(eid::NAME)
+            .maxlength(len)
+            .size(len.min(24))
+            .value(self.name());
+        div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label()
+            .r#for("meta")
+            .cdata("Meta (contains other play lists)")
+            .close();
+        let mut input = div.input();
+        input.id("meta").r#type("checkbox");
+        div.close();
+        String::from(tree)
     }
 
     /// Convert to HTML view
