@@ -209,15 +209,11 @@ impl PlayListAnc {
 impl PlayList {
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a PlayListAnc) -> ItemStates<'a> {
-        let mut states = if self.meta {
-            ItemStates::from(ItemState::Meta)
-        } else {
-            ItemStates::from(ItemState::Simple)
-        };
         if anc.access_level(self) <= AccessLevel::View {
-            states = states.with(ItemState::Prohibited, "");
+            ItemStates::from(ItemState::Prohibited)
+        } else {
+            ItemStates::from(ItemState::Available)
         }
-        states
     }
 
     /// Search for sequence number
@@ -412,7 +408,7 @@ impl Card for PlayList {
 
     /// Get all item states
     fn item_states_all() -> &'static [ItemState] {
-        &[ItemState::Simple, ItemState::Meta, ItemState::Prohibited]
+        &[ItemState::Available, ItemState::Prohibited]
     }
 
     /// Handle click event for the create button
@@ -447,10 +443,8 @@ impl Card for PlayList {
         let states = self.item_states(anc);
         if states.contains(ItemState::Prohibited) {
             ItemState::Prohibited
-        } else if states.contains(ItemState::Meta) {
-            ItemState::Meta
         } else {
-            ItemState::Simple
+            ItemState::Available
         }
     }
 
