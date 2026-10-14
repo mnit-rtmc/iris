@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2026  Minnesota Department of Transportation
+ * Copyright (C) 2026       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +47,7 @@ import us.mn.state.dot.tms.server.event.GateArmEvent;
  * A Gate Arm is a device for restricting access to a ramp on a road.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class GateArmImpl extends DeviceImpl implements GateArm {
 
@@ -444,6 +446,41 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 			notifyAttribute("fault");
 		}
 	}
+
+	/** Error flags (GateArmError bits) */
+	private transient int error_flags;
+
+	/** Get the error flags (GateArmError bits) */
+	@Override
+	public int getErrorFlags() {
+		return error_flags;
+	}
+
+	/** Set the error flags (GateArmError bits) */
+	public void setErrorFlagsNotify(int ef) {
+		if (ef != error_flags) {
+			error_flags = ef;
+			notifyAttribute("errorFlags");
+		}
+	}
+
+	/** Status flags (GateArmFlag bits) */
+	private transient int status_flags;
+
+	/** Get the status flags (GateArmFlag bits) */
+	@Override
+	public int getStatusFlags() {
+		return status_flags;
+	}
+
+	/** Set the status flags (GateArmFlag bits) */
+	public void setStatusFlagsNotify(int sf) {
+		if (sf != status_flags) {
+			status_flags = sf;
+			notifyAttribute("statusFlags");
+		}
+	}
+
 
 	/** Test if gate arm has faults */
 	@Override
