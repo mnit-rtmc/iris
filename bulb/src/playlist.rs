@@ -425,6 +425,9 @@ impl PlayList {
                     anc.render_camera_control(&mut li, ent);
                 }
             }
+            if entries.is_empty() {
+                ul.li().span().class("info").cdata("(no entries)").close();
+            }
             ul.close();
         }
         div.close();
