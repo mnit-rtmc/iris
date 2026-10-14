@@ -68,11 +68,28 @@ abstract public class OpNdotGate<T extends ControllerProperty>
 			sGateArm = (pin == 1) ? "" : ("" + pin);
 	}
 
+	/** Create a new "Retrieve Gate Status" property */
+	protected NdotGateProperty createStatusProperty() {
+		// NDORv5/NDOTv6/NDOTv7 "Retrieve Gate Status" command
+		return new NdotGateProperty("*S"+sGateArm+"#\r\n");
+	}
+
 	/** Update gate arm / controller status */
 	protected void updateStatus() {
+		if (prop == null)
+			return;
+		// During a close warning delay, report an open arm as closing,
+		// so IRIS does not send the close again (which would restart
+		// the controller's delay)
+		// (a close sent during a gate override is ignored by the
+		// controller)
+		prop.closeDelay = !prop.isGateOverride() &&
+			OpCheckMoveStatus.isClosePending(gate_arm);
 		GateArmState new_state = prop.getState();
 		String fault = prop.getFault();
 		gate_arm.setFaultNotify(fault);
+		gate_arm.setErrorFlagsNotify(prop.getGateArmErrors());
+		gate_arm.setStatusFlagsNotify(prop.getGateArmFlags());
 		if (fault != null) {
 			putCtrlFaults("other", fault);
 			updateCtrlStatus();
