@@ -107,14 +107,14 @@ fn render_entry<'p>(
     num: Option<u32>,
     desc: Option<&str>,
 ) {
-    let query = QueryParam::new().with_res(Res::Camera).with_sel(id);
-    li.a().href(query.to_string()).cdata(id).close();
     let mut len = 48 - id.len();
     if let Some(num) = num {
         let nm = format!("#{num} ");
         len -= nm.len();
         li.span().class("info").cdata(nm).close();
     }
+    let query = QueryParam::new().with_res(Res::Camera).with_sel(id);
+    li.a().href(query.to_string()).cdata(id).close();
     if let Some(desc) = desc {
         li.cdata(" ").cdata_len(desc, len);
     }
@@ -310,13 +310,13 @@ impl PlayList {
                 if !pl.meta {
                     let mut option = select.option();
                     option.value(&pl.name);
-                    option.cdata(&pl.name);
                     let mut len = 48 - pl.name.len();
                     if let Some(num) = pl.seq_num {
                         let nm = format!("#{num} ");
                         len -= nm.len();
                         option.cdata(nm);
                     }
+                    option.cdata(&pl.name);
                     option.cdata(" ").cdata_len(&pl.notes, len);
                 }
             }
@@ -324,13 +324,13 @@ impl PlayList {
             for c in &anc.cameras {
                 let mut option = select.option();
                 option.value(&c.name);
-                option.cdata(&c.name);
                 let mut len = 48 - c.name.len();
                 if let Some(num) = c.cam_num {
                     let nm = format!("#{num} ");
                     len -= nm.len();
                     option.cdata(nm);
                 }
+                option.cdata(&c.name);
                 if let Some(loc) = &c.location {
                     option.cdata(" ").cdata_len(loc, len);
                 }
