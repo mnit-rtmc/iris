@@ -14,8 +14,10 @@ use crate::app;
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::domevent::EventTp;
 use crate::eid;
 use crate::error::Result;
+use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::monitorstyle::MonitorStyle;
 use crate::permission::{AccessLevel, Permission};
@@ -166,16 +168,6 @@ impl VideoMonitor {
         String::from(tree)
     }
 
-    /// Clear the selected video monitor
-    #[allow(dead_code)]
-    fn clear_selected(&self) {
-        // FIXME: when should this be called?
-        app::set_vid_mon(None);
-        if let Ok(el) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
-            el.set_inner_html("📺");
-        }
-    }
-
     /// Convert to Status HTML
     fn to_html_status(&self, anc: &VideoMonitorAnc) -> String {
         if self.item_states(anc).contains(ItemState::Online) {
@@ -187,6 +179,14 @@ impl VideoMonitor {
         div.class("row");
         self.item_states(anc).spans(&mut div.span());
         div.span().class("info").cdata(format!("#{}", self.mon_num));
+        div.close();
+        let mut div = tree.root::<html::Div>();
+        div.button()
+            .id("mon-clear")
+            .r#type("button")
+            .cdata("Clear Selection")
+            .close();
+        div.close();
         String::from(tree)
     }
 
@@ -202,6 +202,14 @@ impl VideoMonitor {
             a.href(query.to_string())
                 .cdata(format!("📺 #{}", self.mon_num));
             el.set_inner_html(&String::from(tree));
+        }
+    }
+
+    /// Clear the selected video monitor
+    fn clear_selected(&self) {
+        app::set_vid_mon(None);
+        if let Ok(el) = Doc::get().elem::<HtmlElement>(eid::MONITOR) {
+            el.set_inner_html("📺");
         }
     }
 
@@ -340,5 +348,21 @@ impl Card for VideoMonitor {
         fields.changed_input("controller", &self.controller);
         fields.changed_input("pin", self.pin);
         fields.into()
+    }
+
+    /// Handle event for the card
+    fn handle_event(
+        &self,
+        anc: Self::Ancillary,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match (tp, id) {
+            (EventTp::Click(_), "mon-clear") => {
+                self.clear_selected();
+                Vec::new()
+            }
+            _ => self.handle_event_fallback(anc, id, tp),
+        }
     }
 }
