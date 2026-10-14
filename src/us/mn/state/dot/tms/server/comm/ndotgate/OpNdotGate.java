@@ -78,8 +78,9 @@ abstract public class OpNdotGate<T extends ControllerProperty>
 			updateCtrlStatus();
 			controller.incrementControllerErr();
 		}
-		if (gate_arm.getArmStateEnum() != new_state)
-			gate_arm.setArmStateNotify(new_state);
+		// Always set: even with no state change, this recalculates the
+		// interlock (clearing SYSTEM_DISABLE once the system is enabled)
+		gate_arm.setArmStateNotify(new_state);
 	}
 
 	/** Cleanup the operation */

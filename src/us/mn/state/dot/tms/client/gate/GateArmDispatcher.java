@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2025  Minnesota Department of Transportation
+ * Copyright (C) 2026       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +60,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * GateArmDispatcher is a GUI component for deploying gate arms.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class GateArmDispatcher extends IPanel {
 
@@ -203,7 +205,8 @@ public class GateArmDispatcher extends IPanel {
 			boolean ch = false;
 			for (int i = 0; i < MAX_ARMS; i++)
 				ch |= (ga == gate_arm[i]);
-			if (ch && (null == a || "styles".equals(a)))
+			if (ch && (null == a || "styles".equals(a) ||
+			    "armState".equals(a) || "interlock".equals(a)))
 				updateGateArms();
 		}
 	};
