@@ -631,7 +631,7 @@ impl Camera {
     }
 
     /// Switch the selected monitor to this camera
-    fn switch_monitor(&self) -> Vec<Action> {
+    pub fn switch_monitor(&self) -> Vec<Action> {
         let mut actions = Vec::with_capacity(1);
         if let Some((nm, restricted)) = app::vid_mon()
             && (self.publish || !restricted)

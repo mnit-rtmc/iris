@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::app;
 use crate::asset::Asset;
 use crate::attr::Attr;
 use crate::camera::Camera;
@@ -118,9 +119,15 @@ impl PlayListAnc {
 
     /// Render a camera entry (control)
     fn render_camera_control<'p>(&self, li: &mut html::Li<'p>, id: &str) {
+        let enabled = app::vid_mon().is_some();
         match self.camera(id) {
             Some(c) => {
-                li.button().r#type("button").cdata("▶︎ ").close();
+                let mut button = li.button();
+                button.id(format!("play-{id}")).r#type("button");
+                if !enabled {
+                    button.disabled();
+                }
+                button.cdata("▶︎ ").close();
                 let query =
                     QueryParam::new().with_res(Res::Camera).with_sel(id);
                 li.a().href(query.to_string()).cdata(id).close();
@@ -582,8 +589,17 @@ impl Card for PlayList {
         id: &str,
         tp: EventTp,
     ) -> Vec<Action> {
-        match (id, tp) {
-            ("add-entry-btn", EventTp::Click(_)) => self.add_entry(&anc),
+        match (tp, id) {
+            (EventTp::Click(_), "add-entry-btn") => self.add_entry(&anc),
+            (EventTp::Click(_), id) if id.starts_with("play-") => {
+                if let Some(c) = id.strip_prefix("play-")
+                    && let Some(cam) = anc.camera(c)
+                {
+                    cam.switch_monitor()
+                } else {
+                    Vec::new()
+                }
+            }
             _ => self.handle_event_fallback(anc, id, tp),
         }
     }
