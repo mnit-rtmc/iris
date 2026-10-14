@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmFlag;
 import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
@@ -481,6 +482,11 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		}
 	}
 
+	/** Test if a gate arm override is in progress.
+	 * Only set by protocols which report gate overrides (NDOT gate). */
+	private boolean isGateOverride() {
+		return GateArmFlag.GATE_FLAG_OVERRIDE.checkBit(status_flags);
+	}
 
 	/** Test if gate arm has faults */
 	@Override
@@ -676,6 +682,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Request to open the gate arm */
 	private void requestArmOpen() {
+		// An open sent during a gate override makes the arm end up open
+		// when the gate override completes, so always send it
+		if (isGateOverride()) {
+			requestArmState(GateArmState.OPENING);
+			return;
+		}
 		switch (arm_state) {
 			case OPENING:
 			case OPEN:
@@ -687,6 +699,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Request to close the gate arm */
 	private void requestArmClose() {
+		// A close sent during a gate override is ignored by the
+		// controller
+		if (isGateOverride())
+			return;
 		switch (arm_state) {
 			case CLOSING:
 			case CLOSED:
