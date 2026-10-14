@@ -1076,3 +1076,10 @@ li.placeholder {
   font-size: smaller;
   font-style: italic;
 }
+
+/* Play Lists */
+.playlist {
+  list-style: none;
+  padding-left: 0;
+  white-space: nowrap;
+}

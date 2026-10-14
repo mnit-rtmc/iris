@@ -440,6 +440,7 @@ impl Res {
                 | GateArm
                 | Incident
                 | Lcs
+                | PlayList
                 | RampMeter
         )
     }

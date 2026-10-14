@@ -60,7 +60,7 @@ impl AncillaryData for PlayListAnc {
     /// Construct ancillary role data
     fn new(_pri: &PlayList, view: View) -> Self {
         let assets = match view {
-            View::Setup(_) => {
+            View::Control | View::Setup(_) => {
                 vec![Asset::Access, Asset::Cameras, Asset::PlayLists]
             }
             _ => vec![Asset::Access],
@@ -116,8 +116,27 @@ impl PlayListAnc {
         self.cameras.iter().find(|c| c.name == *nm)
     }
 
-    /// Make a camera entry
-    fn make_camera<'p>(
+    /// Render a camera entry (control)
+    fn render_camera_control<'p>(&self, li: &mut html::Li<'p>, id: &str) {
+        match self.camera(id) {
+            Some(c) => {
+                li.button().r#type("button").cdata("▶︎ ").close();
+                let query =
+                    QueryParam::new().with_res(Res::Camera).with_sel(id);
+                li.a().href(query.to_string()).cdata(id).close();
+                if let Some(num) = c.cam_num {
+                    li.span().class("info").cdata(format!("#{num} ")).close();
+                }
+                li.cdata(" ").cdata_len(opt_ref(&c.location), 64);
+            }
+            None => {
+                log::warn!("camera not found: {id}");
+            }
+        }
+    }
+
+    /// Render a camera entry (setup)
+    fn render_camera_setup<'p>(
         &self,
         li: &mut html::Li<'p>,
         id: &str,
@@ -147,8 +166,26 @@ impl PlayListAnc {
         self.playlists.iter().find(|p| p.name == *nm)
     }
 
-    /// Make a meta playlist entry
-    fn make_meta_entry<'p>(
+    /// Render a meta playlist entry as HTML (control)
+    fn render_meta_control<'p>(&self, li: &mut html::Li<'p>, id: &str) {
+        match self.playlist(id) {
+            Some(pl) => {
+                let query =
+                    QueryParam::new().with_res(Res::PlayList).with_sel(id);
+                li.a().href(query.to_string()).cdata(id).close();
+                if let Some(num) = pl.seq_num {
+                    li.span().class("info").cdata(format!("#{num} ")).close();
+                }
+                li.cdata(" ").cdata_len(&pl.notes, 64);
+            }
+            None => {
+                log::warn!("playlist not found: {id}");
+            }
+        }
+    }
+
+    /// Render a meta playlist entry as HTML (setup)
+    fn render_meta_setup<'p>(
         &self,
         li: &mut html::Li<'p>,
         id: &str,
@@ -230,17 +267,21 @@ impl PlayList {
         }
     }
 
-    /// Build HTML entries list
-    fn entries_html<'p>(&self, anc: &PlayListAnc, div: &'p mut html::Div<'p>) {
+    /// Render setup entries list as HTML
+    fn render_entries_setup<'p>(
+        &self,
+        anc: &PlayListAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
         if let Some(entries) = &self.entries {
             let mut ul = div.ul();
             ul.id("pl-entries").class("draggable-item");
             for (i, ent) in entries.iter().enumerate() {
                 let mut li = ul.li();
                 if self.meta {
-                    anc.make_meta_entry(&mut li, ent, ent, i);
+                    anc.render_meta_setup(&mut li, ent, ent, i);
                 } else {
-                    anc.make_camera(&mut li, ent, ent, i);
+                    anc.render_camera_setup(&mut li, ent, ent, i);
                 }
             }
             ul.close();
@@ -306,9 +347,9 @@ impl PlayList {
         let mut tree = Tree::new();
         let mut li = tree.root::<html::Li>();
         if self.meta {
-            anc.make_meta_entry(&mut li, &sel, &cls, i);
+            anc.render_meta_setup(&mut li, &sel, &cls, i);
         } else {
-            anc.make_camera(&mut li, &sel, &cls, i);
+            anc.render_camera_setup(&mut li, &sel, &cls, i);
         }
         let li = String::from(tree);
         match doc.0.create_element("li") {
@@ -335,6 +376,51 @@ impl PlayList {
             div.span().class("info").cdata(format!("#{sn}")).close();
         }
         String::from(tree)
+    }
+
+    /// Convert to Control HTML
+    fn to_html_control(&self, anc: &PlayListAnc) -> String {
+        let mut tree = Tree::new();
+        self.title(View::Control, &mut tree.root::<html::Div>());
+        self.render_state_row(anc, &mut tree.root::<html::Div>());
+        self.render_entries_control(anc, &mut tree.root::<html::Div>());
+        String::from(tree)
+    }
+
+    /// Render item state row as an HTML div element
+    fn render_state_row<'p>(
+        &self,
+        anc: &PlayListAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        div.id("state-row").class("row fill");
+        self.item_states(anc).spans(&mut div.span());
+        if let Some(num) = self.seq_num {
+            div.span().class("info").cdata(format!("#{num}"));
+        }
+        div.close();
+    }
+
+    /// Render control entries list as HTML
+    fn render_entries_control<'p>(
+        &self,
+        anc: &PlayListAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
+        if let Some(entries) = &self.entries {
+            let mut ul = div.ul();
+            ul.class("playlist");
+            for ent in entries {
+                let mut li = ul.li();
+                if self.meta {
+                    anc.render_meta_control(&mut li, ent);
+                } else {
+                    anc.render_camera_control(&mut li, ent);
+                }
+            }
+            ul.close();
+        }
+        div.close();
     }
 
     /// Convert to Setup HTML
@@ -371,7 +457,7 @@ impl PlayList {
             .cdata(&self.notes)
             .close();
         div.close();
-        self.entries_html(anc, &mut tree.root::<html::Div>());
+        self.render_entries_setup(anc, &mut tree.root::<html::Div>());
         self.add_entry_html(anc, &mut tree.root::<html::Span>());
         let can_delete = match &self.entries {
             Some(entries) => entries.is_empty(),
@@ -483,6 +569,7 @@ impl Card for PlayList {
     fn to_html(&self, view: View, anc: &PlayListAnc) -> String {
         match view {
             View::Create => self.to_html_create(15),
+            View::Control => self.to_html_control(anc),
             View::Setup(edit) => self.to_html_setup(anc, edit),
             _ => self.to_html_compact(anc),
         }
