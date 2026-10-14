@@ -298,17 +298,20 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
             .close();
         div.span().class("grab-handle").close();
         div.button()
-            .id(format!("fit_{}_{}", Self::res(), self.name()))
-            .title("Shrink card to fit content")
-            .cdata("»«")
-            .close();
-        div.button()
-            .id(format!("maximize_{}_{}", Self::res(), self.name()))
+            .id(format!(
+                "card_layout_maximized_{}_{}",
+                Self::res(),
+                self.name()
+            ))
             .title("Maximize/center card")
             .cdata("⛶")
             .close();
         div.button()
-            .id(format!("dock_{}_{}", Self::res(), self.name()))
+            .id(format!(
+                "card_layout_docked_{}_{}",
+                Self::res(),
+                self.name()
+            ))
             .title("Dock card to sidebar")
             .cdata("⤴️")
             .close();
