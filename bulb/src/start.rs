@@ -265,6 +265,7 @@ fn do_handle_grab(me: &MouseEvent, tp: MouseTp, target: HtmlElement) {
                 && (0..doc.client_width()).contains(&me.client_x())
                 && (0..doc.client_height()).contains(&me.client_y())
             {
+                sidebar::clear_card_layout(&target);
                 let _ = target
                     .style()
                     .set_property("top", &format!("{}px", me.client_y() - y));

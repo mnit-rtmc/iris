@@ -71,6 +71,7 @@ button {
   border: 1px solid #888;
   border-radius: 0.2rem;
   padding: 0.1rem 0.2rem;
+  min-width: min-content;
   background-color: #eee;
   color: black;
   cursor: pointer;
@@ -321,7 +322,6 @@ li.changed {
   position: fixed;
   position-anchor: --extents-anchor;
   bottom: anchor(top);
-  left: anchor(left);
   min-width: anchor-size(width);
   max-height: 90%;
   overflow-y: auto;
@@ -334,6 +334,12 @@ li.changed {
 }
 #map-extents:hover #map-extents-dynamic {
   display: flex;
+}
+#map-controls.left #map-extents-dynamic {
+  left: anchor(left);
+}
+#map-controls.right #map-extents-dynamic {
+  right: anchor(right);
 }
 
 #map-menu {
@@ -654,11 +660,14 @@ label:has(+ #sb-resource) {
   flex-direction: column;
 
   position: fixed;
-  max-height: 95%;
-  max-width: 95%;
   overflow-x: auto;
   overflow-y: auto;
   resize: both;
+
+  min-width: min-content;
+  width: max-content;
+  max-width: 95%;
+  max-height: 95%;
 
   padding: 0.1rem 0.2rem;
   margin: 0.1rem;
@@ -668,31 +677,33 @@ label:has(+ #sb-resource) {
   border-radius: 0.2rem;
   box-shadow: 0.2rem 0.2rem 0.2rem 0 rgba(0, 0, 0, 0.2);
 }
-.card-expanded.fit {
-  width: fit-content;
-  height: fit-content;
-  max-height: 90%;
-}
-.card-expanded.max {
-  top: 5%;
-  height: 90%;
-  left: 25%;
-  width: 50%;
+.card-expanded.maximized {
+  top: 5% !important;
+  height: 90% !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50% !important;
   box-shadow: rgba(0, 0, 0, 0.6) 0px 0px 0px 10000px;
+  resize: none;
 }
 .card-expanded.docked {
-  left: anchor(left);
-  width: calc(anchor-size(width) - 0.7rem);
-  top: anchor(top);
-  height: fit-content;
+  min-width: fit-content;
+  width: calc(anchor-size(width) - 0.7rem) !important;
+  top: anchor(top) !important;
+  height: fit-content !important;
   max-height: calc(anchor-size(height) - 0.5rem);
   position-anchor: --sb-cards-anchor;
+  resize: none;
 }
-.card-expanded[style*="width"] {
-  max-width: unset;
+#side-pane.left .card-expanded.docked {
+  left: anchor(left) !important;
+  right: unset !important;
 }
-.card-expanded[style*="height"] {
-  max-height: unset;
+#side-pane.right .card-expanded.docked {
+  right: anchor(right) !important;
+  left: unset !important;
 }
 
 .card-expanded > .title.row {
@@ -801,6 +812,10 @@ label:has(+ #sb-resource) {
   /* Setting width: 0 and min-width: 100% ignores element size */
   width: 0;
   min-width: 100%;
+}
+.fill.info {
+  /* Cancel out .info padding to avoid unnecessary scrollbar */
+  min-width: calc(100% - 0.05rem);
 }
 .tiny {
   font-size: xx-small;

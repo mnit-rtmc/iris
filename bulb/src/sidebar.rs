@@ -16,7 +16,7 @@ use crate::card::{self, CardList};
 use crate::domevent::{EventTp, FocusTp};
 use crate::draglist::DragTp;
 use crate::eid;
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::helper::spawn_future;
 use crate::item::ItemState;
 use crate::map;
@@ -27,8 +27,8 @@ use crate::start;
 use crate::util::{self, Doc};
 use crate::view::{CardView, View};
 use resources::Res;
+use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
-use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     DragEvent, Element, Event, FocusEvent, HtmlButtonElement, HtmlElement,
     HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
@@ -133,52 +133,29 @@ fn add_click_listener(el: &Element) -> Result<()> {
     Ok(())
 }
 
-/// Clear card layout class
-fn clear_card_layout(el: &HtmlElement) -> Result<()> {
-    el.class_list().remove(
-        &["max", "fit", "docked"]
-            .iter()
-            .map(|&s| JsValue::from_str(s))
-            .collect(),
-    )?;
-    Ok(())
+/// Clears all layouts from a card
+pub fn clear_card_layout(card: &HtmlElement) {
+    if card.class_list().contains("maximized")
+        || card.class_list().contains("docked")
+    {
+        let _ = card.class_list().remove_1("maximized");
+        let _ = card.class_list().remove_1("docked");
+        let _ = card.remove_attribute("style");
+    }
 }
 
 /// Set card layout
+/// Takes button ID "card_layout_<layout>_<res>_<name>"
 fn set_card_layout(id: &str) -> Result<()> {
-    if let Some((mode, id)) = id.split_once("_")
-        && let Some(card) = Doc::get().opt_elem::<HtmlElement>(id)
-    {
-        clear_card_layout(&card)?;
-        if mode != "fit" {
-            card.remove_attribute("style")?;
-        } else {
-            card.style().remove_property("width")?;
-            card.style().remove_property("height")?;
-            if card
-                .style()
-                .get_property_value("top")
-                .unwrap_or("".to_owned())
-                .is_empty()
-            {
-                card.style().set_property("top", "8%")?;
-            }
-            if card
-                .style()
-                .get_property_value("left")
-                .unwrap_or("".to_owned())
-                .is_empty()
-            {
-                card.style().set_property("left", "62%")?;
-            }
-        }
-        match mode {
-            "maximize" => card.class_list().add_1("max")?,
-            "fit" => card.class_list().add_1("fit")?,
-            "dock" => card.class_list().add_1("docked")?,
-            _ => (),
-        }
-    }
+    let layout_id = id.split("_").skip(2).collect::<Vec<&str>>().join("_");
+    let Some((layout, id)) = layout_id.split_once("_") else {
+        return Err(Error::JsValue(
+            "#{id} not a valid layout button ID".to_owned(),
+        ));
+    };
+    let card = Doc::get().elem::<HtmlElement>(id)?;
+    clear_card_layout(&card);
+    card.class_list().add_1(layout)?;
     Ok(())
 }
 
@@ -192,11 +169,7 @@ fn handle_click_button(id: String, tp: EventTp) {
         eid::LEFT_SIDEBAR => spawn_future(change_sidebar_side(true)),
         eid::RIGHT_SIDEBAR => spawn_future(change_sidebar_side(false)),
         eid::ADD => spawn_future(show_create_card()),
-        id if matches!(
-            id.split_once("_"),
-            Some(("maximize", _)) | Some(("fit", _)) | Some(("dock", _))
-        ) =>
-        {
+        id if id.starts_with("card_layout_") => {
             let _ = set_card_layout(id);
         }
         _ => {
@@ -806,7 +779,7 @@ fn replace_card_html(cv: &CardView, html: &str) -> Result<()> {
         el.set_popover(Some("auto"))?;
         el.show_popover()?;
         // Docked layout by default
-        set_card_layout(&format!("dock_{}", cv.id()))?;
+        set_card_layout(&format!("card_layout_docked_{}", cv.id()))?;
     } else {
         // Must remove attribute to position compact card again
         el.remove_attribute("popover")?;
