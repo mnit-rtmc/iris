@@ -22,9 +22,7 @@ use crate::fetch::Action;
 use crate::item::{ItemState, ItemStates};
 use crate::permission::{AccessLevel, Permission};
 use crate::query::QueryParam;
-use crate::util::{
-    ContainsLower, Doc, Fields, Input, TextArea, opt_ref, opt_str,
-};
+use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
@@ -102,6 +100,26 @@ impl AncillaryData for PlayListAnc {
     }
 }
 
+/// Render one playlist entry
+fn render_entry<'p>(
+    li: &mut html::Li<'p>,
+    id: &str,
+    num: Option<u32>,
+    desc: Option<&str>,
+) {
+    let query = QueryParam::new().with_res(Res::Camera).with_sel(id);
+    li.a().href(query.to_string()).cdata(id).close();
+    let mut len = 48 - id.len();
+    if let Some(num) = num {
+        let nm = format!("#{num} ");
+        len -= nm.len();
+        li.span().class("info").cdata(nm).close();
+    }
+    if let Some(desc) = desc {
+        li.cdata(" ").cdata_len(desc, len);
+    }
+}
+
 impl PlayListAnc {
     /// Get permission access level
     fn access_level(&self, pri: &PlayList) -> AccessLevel {
@@ -128,13 +146,7 @@ impl PlayListAnc {
                     button.disabled();
                 }
                 button.cdata("▶︎ ").close();
-                let query =
-                    QueryParam::new().with_res(Res::Camera).with_sel(id);
-                li.a().href(query.to_string()).cdata(id).close();
-                if let Some(num) = c.cam_num {
-                    li.span().class("info").cdata(format!("#{num} ")).close();
-                }
-                li.cdata(" ").cdata_len(opt_ref(&c.location), 64);
+                render_entry(li, id, c.cam_num, c.location.as_deref());
             }
             None => {
                 log::warn!("camera not found: {id}");
@@ -154,13 +166,7 @@ impl PlayListAnc {
             Some(c) => {
                 li.id(format!("entry-{i}")).class(cls).draggable(true);
                 li.input().r#type("checkbox").checked();
-                let query =
-                    QueryParam::new().with_res(Res::Camera).with_sel(id);
-                li.a().href(query.to_string()).cdata(id).close();
-                if let Some(num) = c.cam_num {
-                    li.span().class("info").cdata(format!("#{num} ")).close();
-                }
-                li.cdata(" ").cdata_len(opt_ref(&c.location), 64);
+                render_entry(li, id, c.cam_num, c.location.as_deref());
             }
             None => {
                 log::warn!("camera not found: {id}");
@@ -177,13 +183,7 @@ impl PlayListAnc {
     fn render_meta_control<'p>(&self, li: &mut html::Li<'p>, id: &str) {
         match self.playlist(id) {
             Some(pl) => {
-                let query =
-                    QueryParam::new().with_res(Res::PlayList).with_sel(id);
-                li.a().href(query.to_string()).cdata(id).close();
-                if let Some(num) = pl.seq_num {
-                    li.span().class("info").cdata(format!("#{num} ")).close();
-                }
-                li.cdata(" ").cdata_len(&pl.notes, 64);
+                render_entry(li, id, pl.seq_num, Some(&pl.notes));
             }
             None => {
                 log::warn!("playlist not found: {id}");
@@ -203,13 +203,7 @@ impl PlayListAnc {
             Some(pl) => {
                 li.id(format!("entry-{i}")).class(cls).draggable(true);
                 li.input().r#type("checkbox").checked();
-                let query =
-                    QueryParam::new().with_res(Res::PlayList).with_sel(id);
-                li.a().href(query.to_string()).cdata(id).close();
-                if let Some(num) = pl.seq_num {
-                    li.span().class("info").cdata(format!("#{num} ")).close();
-                }
-                li.cdata(" ").cdata_len(&pl.notes, 64);
+                render_entry(li, id, pl.seq_num, Some(&pl.notes));
             }
             None => {
                 log::warn!("playlist not found: {id}");
@@ -317,10 +311,13 @@ impl PlayList {
                     let mut option = select.option();
                     option.value(&pl.name);
                     option.cdata(&pl.name);
+                    let mut len = 48 - pl.name.len();
                     if let Some(num) = pl.seq_num {
-                        option.cdata(format!(" #{num}"));
+                        let nm = format!("#{num} ");
+                        len -= nm.len();
+                        option.cdata(nm);
                     }
-                    option.cdata(" ").cdata_len(&pl.notes, 32);
+                    option.cdata(" ").cdata_len(&pl.notes, len);
                 }
             }
         } else {
@@ -328,10 +325,15 @@ impl PlayList {
                 let mut option = select.option();
                 option.value(&c.name);
                 option.cdata(&c.name);
+                let mut len = 48 - c.name.len();
                 if let Some(num) = c.cam_num {
-                    option.cdata(format!(" #{num}"));
+                    let nm = format!("#{num} ");
+                    len -= nm.len();
+                    option.cdata(nm);
                 }
-                option.cdata(" ").cdata_len(opt_ref(&c.location), 32);
+                if let Some(loc) = &c.location {
+                    option.cdata(" ").cdata_len(loc, len);
+                }
             }
         }
         select.close();
