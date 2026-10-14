@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2025  Minnesota Department of Transportation
+ * Copyright (C) 2026       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +19,6 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * The GateArmManager class provides proxies for GateArm objects.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class GateArmManager extends DeviceManager<GateArm> {
 
@@ -68,14 +69,15 @@ public class GateArmManager extends DeviceManager<GateArm> {
 	/** Create a theme for gate arms */
 	@Override
 	protected ProxyTheme<GateArm> createTheme() {
-		ProxyTheme<GateArm> theme = new ProxyTheme<GateArm>(this,
-			new GateArmMarker());
-		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(ItemStyle.CHANGE, ProxyTheme.COLOR_CHANGE);
-		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.FAULT, ProxyTheme.COLOR_FAULT);
-		theme.addStyle(ItemStyle.OFFLINE, ProxyTheme.COLOR_OFFLINE);
-		return theme;
+		return new GateArmTheme(this);
+	}
+
+	/** Check if a given attribute affects a proxy style */
+	@Override
+	public boolean isStyleAttrib(String a) {
+		return super.isStyleAttrib(a)
+		    || "errorFlags".equals(a)
+		    || "statusFlags".equals(a);
 	}
 
 	/** Fill single selection work request popup */
