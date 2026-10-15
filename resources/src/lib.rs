@@ -337,6 +337,7 @@ impl Res {
             RoadAffix => "🛣️ ",
             Role => "💪",
             SignConfig => "📐",
+            SignDetail => "⋮",
             SystemAttribute => "📃",
             TagReader => "🏷️ ",
             TollZone => "💲",

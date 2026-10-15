@@ -32,6 +32,7 @@ use crate::query::QueryParam;
 use crate::rend::Renderer;
 use crate::rle::Table;
 use crate::signconfig::NtcipDms;
+use crate::signdetail::SignDetail;
 use crate::signmessage::SignMessage;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
@@ -203,6 +204,7 @@ pub struct DmsAnc {
     access: Vec<Permission>,
     messages: Vec<SignMessage>,
     configs: Vec<SignConfig>,
+    details: Vec<SignDetail>,
     compose_patterns: Vec<MsgPattern>,
     lines: Vec<MsgLine>,
     words: Vec<Word>,
@@ -234,6 +236,7 @@ impl AncillaryData for DmsAnc {
             }
             View::Setup(_edit) => {
                 cio.assets.push(Asset::SignConfigs);
+                cio.assets.push(Asset::SignDetails);
             }
             _ => (),
         }
@@ -269,6 +272,9 @@ impl AncillaryData for DmsAnc {
             }
             Asset::SignConfigs => {
                 self.configs = serde_wasm_bindgen::from_value(value)?;
+            }
+            Asset::SignDetails => {
+                self.details = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::MsgPatterns => {
                 let mut patterns: Vec<MsgPattern> =
@@ -384,6 +390,11 @@ impl DmsAnc {
     /// Find a sign config
     fn sign_config(&self, cfg: Option<&str>) -> Option<&SignConfig> {
         cfg.and_then(|cfg| self.configs.iter().find(|c| c.name == cfg))
+    }
+
+    /// Find a sign detail
+    fn sign_detail(&self, dtl: Option<&str>) -> Option<&SignDetail> {
+        dtl.and_then(|dtl| self.details.iter().find(|d| d.name() == dtl))
     }
 
     /// Make line input elements
@@ -1036,7 +1047,7 @@ impl Dms {
         anc.cio.controller_html(self, &mut tree.root::<html::Div>());
         anc.cio.pin_html(self.pin, &mut tree.root::<html::Div>());
         self.sign_config_html(anc, &mut tree.root::<html::Div>());
-        // FIXME: add sign_detail button
+        self.sign_detail_html(anc, &mut tree.root::<html::Div>());
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
@@ -1051,6 +1062,24 @@ impl Dms {
                     .with_res(Res::SignConfig)
                     .with_sel(&cfg.name);
                 div.a().href(query.to_string()).cdata(&cfg.name).close();
+            }
+            None => {
+                div.span().close(); /* empty */
+            }
+        }
+        div.close();
+    }
+
+    /// Make sign detail row as HTML
+    fn sign_detail_html<'p>(&self, anc: &DmsAnc, div: &'p mut html::Div<'p>) {
+        div.class("row");
+        div.label().cdata("Sign Detail").close();
+        match anc.sign_detail(self.sign_detail.as_deref()) {
+            Some(dtl) => {
+                let query = QueryParam::new()
+                    .with_res(Res::SignDetail)
+                    .with_sel(&dtl.name());
+                div.a().href(query.to_string()).cdata(dtl.name()).close();
             }
             None => {
                 div.span().close(); /* empty */

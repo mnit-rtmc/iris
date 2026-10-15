@@ -48,6 +48,7 @@ use crate::rampmeter::RampMeter;
 use crate::road::Road;
 use crate::role::Role;
 use crate::signconfig::SignConfig;
+use crate::signdetail::SignDetail;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::tollzone::TollZone;
@@ -395,6 +396,7 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::Road => Road::item_states_all(),
         Res::Role => Role::item_states_all(),
         Res::SignConfig => SignConfig::item_states_all(),
+        Res::SignDetail => SignDetail::item_states_all(),
         Res::SystemAttribute => SystemAttr::item_states_all(),
         Res::TagReader => TagReader::item_states_all(),
         Res::TollZone => TollZone::item_states_all(),

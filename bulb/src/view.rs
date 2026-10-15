@@ -49,6 +49,7 @@ use crate::road::Road;
 use crate::role::Role;
 use crate::sidebar;
 use crate::signconfig::SignConfig;
+use crate::signdetail::SignDetail;
 use crate::systemattr::SystemAttr;
 use crate::tagreader::TagReader;
 use crate::tollzone::TollZone;

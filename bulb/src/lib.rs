@@ -76,6 +76,7 @@ mod road;
 mod role;
 mod sidebar;
 mod signconfig;
+mod signdetail;
 mod signmessage;
 mod sse;
 mod start;
