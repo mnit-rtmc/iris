@@ -56,12 +56,13 @@ impl DragTp {
     /// Handle a drag event
     pub fn handle(self, de: DragEvent, target: HtmlElement) -> Result<()> {
         match self {
-            Self::Start => Self::start(de, target),
-            Self::Over => Self::over(de, target),
-            Self::Leave => Self::leave(de, target),
-            Self::End => Self::end(de, target),
+            Self::Drag => Self::drag(de, target),
             Self::Drop => Self::drop(de, target),
-            _ => Ok(()),
+            Self::Start => Self::start(de, target),
+            Self::End => Self::end(de, target),
+            Self::Enter => Self::enter(de, target),
+            Self::Leave => Self::leave(de, target),
+            Self::Over => Self::over(de, target),
         }
     }
 
@@ -138,6 +139,11 @@ impl DragTp {
         Ok(())
     }
 
+    /// Handle `dragenter`
+    fn enter(_de: DragEvent, _target: HtmlElement) -> Result<()> {
+        Ok(())
+    }
+
     /// Handle `dragleave`
     fn leave(de: DragEvent, target: HtmlElement) -> Result<()> {
         de.prevent_default();
@@ -164,6 +170,11 @@ impl DragTp {
             placeholder.remove();
         }
         target.class_list().remove_1("dragging")?;
+        Ok(())
+    }
+
+    /// Handle `drag`
+    fn drag(_de: DragEvent, _target: HtmlElement) -> Result<()> {
         Ok(())
     }
 
