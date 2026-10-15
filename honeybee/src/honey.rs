@@ -219,6 +219,7 @@ impl Honey {
             .merge(img_dir_get())
             .merge(gif_dir_get())
             .merge(tfon_dir_get())
+            .merge(corridors_dir_get())
             .nest("/api", self.route_api())
     }
 
@@ -438,6 +439,16 @@ fn img_dir_get() -> Router {
     Router::new().route("/img/{fname}", get(handler))
 }
 
+/// `GET` file from gif directory
+fn gif_dir_get() -> Router {
+    async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
+        let fname = format!("gif/{fname}");
+        log::trace!("GET {fname}");
+        file_stream(&fname, "image/gif").await
+    }
+    Router::new().route("/gif/{fname}", get(handler))
+}
+
 /// `GET` file from tfon directory
 fn tfon_dir_get() -> Router {
     async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
@@ -448,14 +459,14 @@ fn tfon_dir_get() -> Router {
     Router::new().route("/tfon/{fname}", get(handler))
 }
 
-/// `GET` file from gif directory
-fn gif_dir_get() -> Router {
+/// `GET` file from corridors directory
+fn corridors_dir_get() -> Router {
     async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
-        let fname = format!("gif/{fname}");
+        let fname = format!("corridors/{fname}");
         log::trace!("GET {fname}");
-        file_stream(&fname, "image/gif").await
+        file_stream(&fname, "application/json").await
     }
-    Router::new().route("/gif/{fname}", get(handler))
+    Router::new().route("/corridors/{fname}", get(handler))
 }
 
 /// Router for login resource
