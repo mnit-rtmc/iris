@@ -938,20 +938,34 @@ pub const SIGN_CONFIG_ONE: &str = "\
 
 /// SQL query for all sign details (primary)
 pub const SIGN_DETAIL_ALL: &str = "\
+  WITH cte AS (\
+    SELECT sign_detail, count(*) AS sign_count \
+    FROM iris._dms \
+    GROUP BY sign_detail\
+  ) \
   SELECT name, dms_type, portable, technology, sign_access, legend, \
          beacon_type, hardware_make, hardware_model, software_make, \
          software_model, supported_tags, max_pages, max_multi_len, \
-         beacon_activation_flag, pixel_service_flag \
+         beacon_activation_flag, pixel_service_flag, \
+         COALESCE(sign_count, 0) AS sign_count \
   FROM sign_detail_view \
+  LEFT JOIN cte ON name = cte.sign_detail \
   ORDER BY name";
 
 /// SQL query for one sign detail (secondary)
 pub const SIGN_DETAIL_ONE: &str = "\
+  WITH cte AS (\
+    SELECT sign_detail, count(*) AS sign_count \
+    FROM iris._dms \
+    GROUP BY sign_detail\
+  ) \
   SELECT name, dms_type, portable, technology, sign_access, legend, \
          beacon_type, hardware_make, hardware_model, software_make, \
          software_model, supported_tags, max_pages, max_multi_len, \
-         beacon_activation_flag, pixel_service_flag \
+         beacon_activation_flag, pixel_service_flag, \
+         COALESCE(sign_count, 0) AS sign_count \
   FROM sign_detail_view \
+  LEFT JOIN cte ON name = cte.sign_detail \
   WHERE name = $1";
 
 /// SQL query for all sign messages (public)
