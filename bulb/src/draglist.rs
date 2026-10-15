@@ -79,13 +79,11 @@ impl DragTp {
 
     /// Handle `dragover`
     fn over(de: DragEvent, target: HtmlElement) -> Result<()> {
+        de.prevent_default();
         if let Some(dt) = de.data_transfer() {
-            if dt.get_data("entry")?.is_empty() {
-                return Ok(());
-            }
+            // NOTE: dt.get_data("...") returns an empty string in Chrome
             dt.set_drop_effect("move");
         }
-        de.prevent_default();
         let y = f64::from(de.client_y());
         let placeholder =
             Doc::get().opt_elem::<HtmlElement>("drop-placeholder");
@@ -142,6 +140,7 @@ impl DragTp {
 
     /// Handle `dragleave`
     fn leave(de: DragEvent, target: HtmlElement) -> Result<()> {
+        de.prevent_default();
         if let Some(parent) = target.parent_element()
             && let Some(rel) = de.related_target()
             && let Ok(nd) = rel.dyn_into::<Node>()
