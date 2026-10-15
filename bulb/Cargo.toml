@@ -80,6 +80,7 @@ features = [
   'ScrollBehavior',
   'ScrollIntoViewOptions',
   'ScrollLogicalPosition',
+  'Storage',
   'ToggleEvent',
   'TransitionEvent',
   'Window',

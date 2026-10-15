@@ -19,7 +19,7 @@ use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::{
     Document, Element, HtmlElement, HtmlInputElement, HtmlSelectElement,
-    HtmlTextAreaElement, MouseEvent, Window,
+    HtmlTextAreaElement, MouseEvent, Storage, Window,
 };
 
 /// Check for items containing a search string (lower case)
@@ -541,4 +541,27 @@ pub fn relative_coords(target: &Element, me: &MouseEvent) -> (i32, i32) {
         me.client_x() - bounds.left() as i32,
         me.client_y() - bounds.top() as i32,
     )
+}
+
+/// Get the localStorage
+fn local_storage() -> Result<Storage> {
+    window()?.local_storage()?.ok_or(Error::NoStorage())
+}
+
+/// Get value for key in localStorage
+pub fn get_local_storage<T: Into<String>>(k: T) -> Result<Option<String>> {
+    Ok(local_storage()?.get_item(&k.into())?)
+}
+
+/// Set a key/value pair in localStorage
+pub fn set_local_storage<T1: Into<String>, T2: Into<String>>(
+    k: T1,
+    v: T2,
+) -> Result<()> {
+    Ok(local_storage()?.set_item(&k.into(), &v.into())?)
+}
+
+/// Unmap a key in localStorage
+pub fn _unmap_local_storage<T: Into<String>>(k: T) -> Result<()> {
+    Ok(local_storage()?.remove_item(&k.into())?)
 }

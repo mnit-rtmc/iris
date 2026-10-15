@@ -156,6 +156,7 @@ fn set_card_layout(id: &str) -> Result<()> {
     let card = Doc::get().elem::<HtmlElement>(id)?;
     clear_card_layout(&card);
     card.class_list().add_1(layout)?;
+    let _ = util::set_local_storage("card_layout", layout);
     Ok(())
 }
 
@@ -193,7 +194,7 @@ async fn show_sidebar(show: bool) -> Result<()> {
 }
 
 /// Sets the sidebar to display on the left or right
-async fn change_sidebar_side(left: bool) -> Result<()> {
+pub async fn change_sidebar_side(left: bool) -> Result<()> {
     let doc = Doc::new()?;
     let side_pane = doc.elem::<HtmlElement>("side-pane")?;
     let map_controls = doc.elem::<HtmlElement>("map-controls")?;
@@ -207,12 +208,16 @@ async fn change_sidebar_side(left: bool) -> Result<()> {
 
         side_pane.class_list().replace("right", "left")?;
         map_controls.class_list().replace("left", "right")?;
+
+        util::set_local_storage("sidebar", "left")?;
     } else {
         show_btn.set_inner_text("🞀");
         hide_btn.set_inner_text("🞂");
 
         side_pane.class_list().replace("left", "right")?;
         map_controls.class_list().replace("right", "left")?;
+
+        util::set_local_storage("sidebar", "right")?;
     }
 
     Ok(())
@@ -779,8 +784,20 @@ fn replace_card_html(cv: &CardView, html: &str) -> Result<()> {
         prepend_placeholder(&el, cv.id())?;
         el.set_popover(Some("auto"))?;
         el.show_popover()?;
-        // Docked layout by default
-        set_card_layout(&format!("card_layout_docked_{}", cv.id()))?;
+        if let Ok(Some(l)) = util::get_local_storage("card_layout")
+            && !l.is_empty()
+        {
+            if l.contains(":") {
+                Doc::get()
+                    .elem::<HtmlElement>(cv.id())?
+                    .set_attribute("style", &l)?;
+            } else {
+                set_card_layout(&format!("card_layout_{l}_{}", cv.id()))?;
+            }
+        } else {
+            // Docked layout by default
+            set_card_layout(&format!("card_layout_docked_{}", cv.id()))?;
+        }
     } else {
         // Must remove attribute to position compact card again
         el.remove_attribute("popover")?;

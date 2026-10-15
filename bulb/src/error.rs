@@ -28,6 +28,10 @@ pub enum Error {
     #[error("No body")]
     NoBody(),
 
+    /// Unable to get web storage
+    #[error("No storage")]
+    NoStorage(),
+
     /// Unable to get map element
     #[error("No map")]
     NoMap(),
