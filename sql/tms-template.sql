@@ -64,7 +64,6 @@ camera_kbd_panasonic_enable	false
 camera_latest_ptz_enable	false
 camera_num_blank	999
 camera_out_of_service_url	
-camera_playlist_dwell_sec	5
 camera_ptz_blind	true
 camera_stream_controls_enable	false
 cap_save_enable	true
@@ -4982,7 +4981,8 @@ CREATE TABLE iris.play_list (
     name VARCHAR(20) PRIMARY KEY,
     meta BOOLEAN NOT NULL, -- immutable
     seq_num INTEGER UNIQUE,
-    notes VARCHAR CHECK (LENGTH(notes) < 64)
+    notes VARCHAR CHECK (LENGTH(notes) < 64),
+    dwell_sec INTEGER NOT NULL
 );
 
 CREATE TRIGGER play_list_hashtag_trig

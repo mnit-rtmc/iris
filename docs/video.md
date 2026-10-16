@@ -122,9 +122,8 @@ Select `View ➔ Video ➔ Play Lists` menu item
 
 Play lists can be created to quickly cycle through [camera] entries.
 Selecting a play list on a monitor will cause the displayed camera to switch
-automatically after a short dwell time, specified by the
-`camera_playlist_dwell_sec` [system attribute].  The optional **sequence num**
-can be used to play the list from a [camera keyboard].
+automatically after a short dwell time, specified by `dwell_sec`.  The optional
+**sequence num** can be used to play the list from a [camera keyboard].
 
 A **meta** list contains other play lists (instead of cameras) as *sub-list*
 entries.  This allows large lists to be broken up and shared with other meta
@@ -136,11 +135,11 @@ lists.  NOTE: Meta lists can only contain regular (non-meta) lists.
 * `iris/api/play_list` (primary)
 * `iris/api/play_list/{name}`
 
-| Access       | Primary         | Secondary |
-|--------------|-----------------|-----------|
-| 👁️  View      | name, meta     |           |
-| 💡 Manage    |                 | entries   |
-| 🔧 Configure | seq\_num, notes |           |
+| Access       | Primary         | Secondary           |
+|--------------|-----------------|---------------------|
+| 👁️  View      | name, meta      |                     |
+| 💡 Manage    |                 | entries, dwell\_sec |
+| 🔧 Configure | seq\_num, notes |                     |
 
 </details>
 
@@ -163,4 +162,3 @@ Each [role] can have one _scratch_ play list:
 [protocol]: protocols.html
 [role]: users.html#roles
 [selector tool]: cameras.html#selector-tool
-[system attribute]: system_attributes.html
