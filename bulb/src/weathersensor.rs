@@ -20,6 +20,7 @@ use crate::fetch::Action;
 use crate::geoloc::LocAnc;
 use crate::item::ItemState;
 use crate::map;
+use crate::systemattr::SystemAttr;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -160,6 +161,7 @@ pub struct WeatherSensor {
 pub struct WeatherSensorAnc {
     cio: ControllerIoAnc<WeatherSensor>,
     loc: LocAnc<WeatherSensor>,
+    sys_attrs: Vec<SystemAttr>,
 }
 
 impl AncillaryData for WeatherSensorAnc {
@@ -174,7 +176,14 @@ impl AncillaryData for WeatherSensorAnc {
             loc.assets
                 .push(Asset::GeoLoc(nm.to_string(), Res::WeatherSensor));
         }
-        WeatherSensorAnc { cio, loc }
+        if let View::Request = view {
+            loc.assets.push(Asset::SystemAttrs);
+        }
+        WeatherSensorAnc {
+            cio,
+            loc,
+            ..Default::default()
+        }
     }
 
     /// Get next asset to fetch
@@ -189,10 +198,13 @@ impl AncillaryData for WeatherSensorAnc {
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
-        if let Asset::Controllers = asset {
-            self.cio.set_asset(pri, asset, value)
-        } else {
-            self.loc.set_asset(pri, asset, value)
+        match asset {
+            Asset::Controllers => self.cio.set_asset(pri, asset, value),
+            Asset::SystemAttrs => {
+                self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
+                Ok(())
+            }
+            _ => self.loc.set_asset(pri, asset, value),
         }
     }
 }
@@ -880,8 +892,7 @@ impl WeatherSensor {
     }
 
     /// Convert to Request HTML
-    fn to_html_request(&self, _anc: &WeatherSensorAnc) -> String {
-        let work = "http://example.com"; // FIXME
+    fn to_html_request(&self, anc: &WeatherSensorAnc) -> String {
         let mut tree = Tree::new();
         self.title(View::Request, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
@@ -896,12 +907,12 @@ impl WeatherSensor {
         div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Work Request").close();
-        div.a()
-            .href(work)
-            .target("_blank")
-            .rel("noopener noreferrer")
-            .cdata("🔗 ")
-            .cdata(self.name());
+        SystemAttr::render_work_req(
+            &anc.sys_attrs,
+            &mut div.a(),
+            &self.name,
+            anc.loc.lonlat(),
+        );
         String::from(tree)
     }
 

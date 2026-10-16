@@ -790,8 +790,7 @@ impl RampMeter {
     }
 
     /// Convert to Request HTML
-    fn to_html_request(&self, _anc: &RampMeterAnc) -> String {
-        let work = "http://example.com"; // FIXME
+    fn to_html_request(&self, anc: &RampMeterAnc) -> String {
         let mut tree = Tree::new();
         self.title(View::Request, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
@@ -806,12 +805,12 @@ impl RampMeter {
         div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Work Request").close();
-        div.a()
-            .href(work)
-            .target("_blank")
-            .rel("noopener noreferrer")
-            .cdata("🔗 ")
-            .cdata(self.name());
+        SystemAttr::render_work_req(
+            &anc.sys_attrs,
+            &mut div.a(),
+            &self.name,
+            anc.loc.lonlat(),
+        );
         String::from(tree)
     }
 

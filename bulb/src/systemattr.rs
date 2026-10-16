@@ -47,6 +47,61 @@ impl SystemAttr {
         Ok(serde_wasm_bindgen::from_value::<SystemAttr>(json)?)
     }
 
+    /// Render a work request URL
+    pub fn render_work_req<'p>(
+        sys_attrs: &[Self],
+        a: &mut html::A<'p>,
+        nm: &str,
+        lonlat: Option<(f64, f64)>,
+    ) {
+        for sa in sys_attrs {
+            if sa.name == "work_request_url" {
+                let url = sa.build_work_req_url(nm, lonlat);
+                return Self::render_work_req_link(a, &url, nm);
+            }
+        }
+        log::warn!("work_request_url not found");
+        Self::render_work_req_link(a, "", nm);
+    }
+
+    /// Render a work request URL
+    fn build_work_req_url(
+        &self,
+        nm: &str,
+        lonlat: Option<(f64, f64)>,
+    ) -> String {
+        let mut url = String::with_capacity(100);
+        let host = &self.value;
+        if !host.is_empty() {
+            url.push_str("https://");
+            url.push_str(host);
+            url.push_str("/3s/forms/tams/");
+            url.push_str("?asset-type=720");
+            url.push_str("&inventory-id-field=its_device_name");
+            url.push_str("&inventory-id=");
+            url.push_str(nm);
+            if let Some((lon, lat)) = lonlat {
+                url.push_str("&longitude=");
+                url.push_str(&lon.to_string());
+                url.push_str("&latitude=");
+                url.push_str(&lat.to_string());
+            }
+        }
+        url
+    }
+
+    /// Render a work request link
+    fn render_work_req_link<'p>(a: &mut html::A<'p>, mut url: &str, nm: &str) {
+        if url.is_empty() {
+            url = "http://example.com";
+        }
+        a.href(url)
+            .target("_blank")
+            .rel("noopener noreferrer")
+            .cdata("🔗 ")
+            .cdata(nm);
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let mut tree = Tree::new();

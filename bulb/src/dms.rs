@@ -34,6 +34,7 @@ use crate::rle::Table;
 use crate::signconfig::NtcipDms;
 use crate::signdetail::SignDetail;
 use crate::signmessage::SignMessage;
+use crate::systemattr::SystemAttr;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use crate::word::Word;
@@ -212,6 +213,7 @@ pub struct DmsAnc {
     graphics: GraphicTable<32>,
     device_actions: Vec<DeviceAction>,
     action_plans: Vec<ActionPlan>,
+    sys_attrs: Vec<SystemAttr>,
 }
 
 impl AncillaryData for DmsAnc {
@@ -237,6 +239,9 @@ impl AncillaryData for DmsAnc {
             View::Setup(_edit) => {
                 cio.assets.push(Asset::SignConfigs);
                 cio.assets.push(Asset::SignDetails);
+            }
+            View::Request => {
+                cio.assets.push(Asset::SystemAttrs);
             }
             _ => (),
         }
@@ -358,6 +363,9 @@ impl AncillaryData for DmsAnc {
                             .any(|da| da.action_plan == p.name)
                 });
                 self.action_plans = plans;
+            }
+            Asset::SystemAttrs => {
+                self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
             }
             _ => self.loc.set_asset(pri, asset, value)?,
         }
@@ -944,8 +952,7 @@ impl Dms {
     }
 
     /// Convert to Request HTML
-    fn to_html_request(&self, _anc: &DmsAnc) -> String {
-        let work = "http://example.com"; // FIXME
+    fn to_html_request(&self, anc: &DmsAnc) -> String {
         let mut tree = Tree::new();
         self.title(View::Request, &mut tree.root::<html::Div>());
         let mut div = tree.root::<html::Div>();
@@ -1020,12 +1027,12 @@ impl Dms {
         div = tree.root::<html::Div>();
         div.class("row");
         div.span().cdata("Work Request").close();
-        div.a()
-            .href(work)
-            .target("_blank")
-            .rel("noopener noreferrer")
-            .cdata("🔗 ")
-            .cdata(self.name());
+        SystemAttr::render_work_req(
+            &anc.sys_attrs,
+            &mut div.a(),
+            &self.name,
+            anc.loc.lonlat(),
+        );
         String::from(tree)
     }
 
