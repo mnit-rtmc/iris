@@ -129,6 +129,8 @@ fn required_patch_manage(res: Res, att: &str) -> bool {
         | (Res::MsgLine, _)
         | (Res::MsgPattern, _)
         | (Res::PhaseAction, _)
+        | (Res::PlayList, "entries")
+        | (Res::PlayList, "dwell_sec")
         | (Res::RampMeter, "storage")
         | (Res::RampMeter, "max_wait")
         | (Res::RampMeter, "algorithm")

@@ -794,7 +794,7 @@ pub const PLAY_LIST_ALL: &str = "\
 
 /// SQL query for one play list (secondary)
 pub const PLAY_LIST_ONE: &str = "\
-  SELECT name, meta, seq_num, notes, ARRAY(\
+  SELECT name, meta, seq_num, notes, dwell_sec, ARRAY(\
       SELECT COALESCE(camera, sub_list) \
       FROM iris.play_list_entry \
       WHERE play_list = name \

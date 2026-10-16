@@ -41,6 +41,7 @@ pub struct PlayList {
     pub seq_num: Option<u32>,
     pub notes: String,
     // secondary attributes
+    pub dwell_sec: Option<u32>,
     pub entries: Option<Vec<String>>,
 }
 
@@ -276,7 +277,10 @@ impl PlayList {
     ) {
         if let Some(entries) = &self.entries {
             let mut ul = div.ul();
-            ul.id("pl-entries").class("draggable-item");
+            ul.id("pl-entries");
+            if anc.access_level(self) >= AccessLevel::Manage {
+                ul.class("draggable-item");
+            }
             for (i, ent) in entries.iter().enumerate() {
                 let mut li = ul.li();
                 if self.meta {
@@ -450,7 +454,11 @@ impl PlayList {
         div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("seq_num").cdata("Sequence Num").close();
-        div.input()
+        let mut input = div.input();
+        if anc.access_level(self) < AccessLevel::Configure {
+            input.disabled();
+        }
+        input
             .id("seq_num")
             .r#type("number")
             .min(0)
@@ -461,7 +469,11 @@ impl PlayList {
         div = tree.root::<html::Div>();
         div.class("row");
         div.label().r#for("notes").cdata("Notes").close();
-        div.textarea()
+        let mut textarea = div.textarea();
+        if anc.access_level(self) < AccessLevel::Configure {
+            textarea.disabled();
+        }
+        textarea
             .id("notes")
             .maxlength(63)
             .rows(2)
@@ -469,17 +481,34 @@ impl PlayList {
             .cdata(&self.notes)
             .close();
         div.close();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.label().r#for("dwell_sec").cdata("Dwell Sec").close();
+        let mut input = div.input();
+        if anc.access_level(self) < AccessLevel::Manage {
+            input.disabled();
+        }
+        input
+            .id("dwell_sec")
+            .r#type("number")
+            .min(1)
+            .max(300)
+            .size(3)
+            .value(opt_str(self.dwell_sec));
+        div.close();
         self.render_entries_setup(anc, &mut tree.root::<html::Div>());
-        self.add_entry_html(anc, &mut tree.root::<html::Span>());
-        let can_delete = match &self.entries {
-            Some(entries) => entries.is_empty(),
-            None => false,
-        };
-        footer_html(
-            View::Setup(edit),
-            can_delete,
-            &mut tree.root::<html::Div>(),
-        );
+        if anc.access_level(self) >= AccessLevel::Manage {
+            self.add_entry_html(anc, &mut tree.root::<html::Span>());
+            let can_delete = match &self.entries {
+                Some(entries) => entries.is_empty(),
+                None => false,
+            };
+            footer_html(
+                View::Setup(edit),
+                can_delete,
+                &mut tree.root::<html::Div>(),
+            );
+        }
         String::from(tree)
     }
 
@@ -488,6 +517,7 @@ impl PlayList {
         let mut fields = Fields::new();
         fields.changed_input("seq_num", self.seq_num);
         fields.changed_text_area("notes", &self.notes);
+        fields.changed_input("dwell_sec", self.dwell_sec);
         let mut attr = Attr::from(fields);
         if let Some(entries) = anc.entries_changed(self) {
             attr.array("entries", entries);

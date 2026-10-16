@@ -172,6 +172,7 @@ public class Name {
 		{ "dms", "preset" },
 		{ "domain", "enabled" },
 		{ "play_list", "entries" },
+		{ "play_list", "dwellSec" },
 		{ "ramp_meter", "storage" },
 		{ "ramp_meter", "maxWait" },
 		{ "ramp_meter", "algorithm" },
