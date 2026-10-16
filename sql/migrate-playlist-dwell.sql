@@ -13,4 +13,7 @@ ALTER TABLE iris.play_list ALTER COLUMN dwell_sec SET NOT NULL;
 DELETE FROM iris.system_attribute
     WHERE name = 'camera_playlist_dwell_sec';
 
+ALTER TABLE iris.play_list ADD CONSTRAINT dwell_sec_ck
+    CHECK ((dwell_sec > 0) AND (dwell_sec <= 300));
+
 COMMIT;

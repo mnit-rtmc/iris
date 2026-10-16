@@ -4982,7 +4982,9 @@ CREATE TABLE iris.play_list (
     meta BOOLEAN NOT NULL, -- immutable
     seq_num INTEGER UNIQUE,
     notes VARCHAR CHECK (LENGTH(notes) < 64),
-    dwell_sec INTEGER NOT NULL
+    dwell_sec INTEGER NOT NULL,
+
+    CONSTRAINT dwell_sec_ck CHECK ((dwell_sec > 0) AND (dwell_sec <= 300))
 );
 
 CREATE TRIGGER play_list_hashtag_trig
