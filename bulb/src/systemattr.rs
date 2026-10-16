@@ -10,7 +10,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, footer_html};
+use crate::card::{AncillaryData, Card, footer_html, uri_one};
+use crate::error::Result;
 use crate::item::ItemState;
 use crate::util::{ContainsLower, Fields, Input};
 use crate::view::View;
@@ -40,6 +41,12 @@ impl AncillaryData for SystemAttrAnc {
 }
 
 impl SystemAttr {
+    /// Fetch one system attribute
+    pub async fn fetch_one(name: &str) -> Result<Self> {
+        let json = uri_one(Res::SystemAttribute, name).get().await?;
+        Ok(serde_wasm_bindgen::from_value::<SystemAttr>(json)?)
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let mut tree = Tree::new();

@@ -12,7 +12,7 @@
 //
 use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
-use crate::card::{self, CardList, CardState, uri_all, uri_one};
+use crate::card::{self, CardList, CardState};
 use crate::eid;
 use crate::error::{Error, Result};
 use crate::fetch::Uri;
@@ -80,12 +80,11 @@ pub fn add_listeners() -> Result<()> {
     Ok(())
 }
 
-/// Gets the default map extent name
+/// Get the default map extent name
 async fn get_default_extent() -> Result<String> {
-    let name_js = uri_one(Res::SystemAttribute, "map_extent_name_initial")
-        .get()
-        .await?;
-    Ok(serde_wasm_bindgen::from_value::<SystemAttr>(name_js)?.value)
+    Ok(SystemAttr::fetch_one("map_extent_name_initial")
+        .await?
+        .value)
 }
 
 /// Zoom to default map extent
@@ -95,8 +94,7 @@ async fn zoom_to_default() -> Result<()> {
 
 /// Set the map to the specified map extent
 async fn recall_extent(name: String) -> Result<()> {
-    let extent_js = uri_one(Res::MapExtent, &name).get().await?;
-    let extent = serde_wasm_bindgen::from_value::<MapExtent>(extent_js)?;
+    let extent = MapExtent::fetch_one(&name).await?;
     let (zoom, lon, lat) = (extent.zoom, extent.lon, extent.lat);
     set_extent(zoom.into(), lon, lat).await?;
     Ok(())
@@ -263,10 +261,8 @@ async fn add_extent_buttons() -> Result<()> {
     let default_button = doc.elem::<HtmlButtonElement>("default-extent")?;
     default_button.set_text_content(Some(&default_extent));
 
-    let mut extents: Vec<MapExtent> =
-        serde_wasm_bindgen::from_value(uri_all(Res::MapExtent).get().await?)?;
+    let mut extents = MapExtent::fetch_all().await?;
     extents.retain(|e| e.name != default_extent);
-
     let extents_container = doc.elem::<HtmlElement>("map-extents-dynamic")?;
     let mut tree = Tree::new();
     for extent in &extents {
