@@ -169,7 +169,6 @@ impl SignDetail {
             input.checked();
         }
         div.close();
-        // FIXME
         let can_delete = 0 == self.sign_count;
         footer_html(
             View::Setup(edit),

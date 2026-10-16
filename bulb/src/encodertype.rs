@@ -11,6 +11,7 @@
 // GNU General Public License for more details.
 //
 use crate::card::{AncillaryData, Card, footer_html};
+use crate::item::{ItemState, ItemStates};
 use crate::util::{ContainsLower, Fields, Input};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -25,6 +26,7 @@ pub struct EncoderType {
     pub make: String,
     pub model: String,
     pub config: String,
+    pub camera_count: u32,
     // NOTE: last to allow deriving PartialOrd / Ord
     pub name: String,
 }
@@ -56,11 +58,23 @@ impl fmt::Display for EncoderType {
 }
 
 impl EncoderType {
+    /// Get item states
+    fn item_states(&self) -> ItemStates<'static> {
+        if self.camera_count > 0 {
+            ItemState::Available.into()
+        } else {
+            ItemState::Inactive.into()
+        }
+    }
+
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();
-        div.class("title row").cdata(self.name());
+        div.class("title row")
+            .cdata(&self.name)
+            .cdata(" ")
+            .cdata(self.item_states().to_string());
         div.span().class("info").cdata(format!("{self}"));
         String::from(tree)
     }
@@ -96,8 +110,12 @@ impl EncoderType {
             .size(8)
             .value(&self.config);
         div.close();
-        // FIXME: disable delete when used
-        footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
+        let can_delete = 0 == self.camera_count;
+        footer_html(
+            View::Setup(edit),
+            can_delete,
+            &mut tree.root::<html::Div>(),
+        );
         String::from(tree)
     }
 }
@@ -121,9 +139,20 @@ impl Card for EncoderType {
         self
     }
 
+    /// Get the main item state
+    fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
+        let states = self.item_states();
+        if states.contains(ItemState::Inactive) {
+            ItemState::Inactive
+        } else {
+            ItemState::Available
+        }
+    }
+
     /// Check if a search string matches
     fn is_match(&self, search: &str, _anc: &EncoderTypeAnc) -> bool {
         self.name.contains_lower(search)
+            || self.item_states().is_match(search)
             || self.make.contains_lower(search)
             || self.model.contains_lower(search)
             || self.config.contains_lower(search)

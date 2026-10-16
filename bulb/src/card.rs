@@ -372,6 +372,7 @@ fn default_state(res: Res) -> Option<ItemState> {
 
 /// Get slice of all item states for a resource
 pub fn item_states_all(res: Res) -> &'static [ItemState] {
+    // FIXME: use macro!
     match res {
         Res::ActionPlan => ActionPlan::item_states_all(),
         Res::Alarm => Alarm::item_states_all(),
@@ -383,6 +384,7 @@ pub fn item_states_all(res: Res) -> &'static [ItemState] {
         Res::Detector => Detector::item_states_all(),
         Res::Dms => Dms::item_states_all(),
         Res::Domain => Domain::item_states_all(),
+        Res::EncoderType => EncoderType::item_states_all(),
         Res::EventConfig => EventConfig::item_states_all(),
         Res::GateArm => GateArm::item_states_all(),
         Res::Gps => Gps::item_states_all(),
