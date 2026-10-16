@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2018-2024  Minnesota Department of Transportation
+ * Copyright (C) 2018-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Douglas Lau
  */
 public class CamSequence {
-
-	/** Get the dwell time (seconds) */
-	static private int getDwellSec() {
-		return SystemAttrEnum.CAMERA_PLAYLIST_DWELL_SEC.getInt();
- 	}
 
 	/** Dwell time paused value */
 	static private final int DWELL_PAUSED = -1;
@@ -103,6 +98,14 @@ public class CamSequence {
 	/** Reset dwell time */
 	private void resetDwell() {
 		dwell = (dwell >= 0) ? getDwellSec() : DWELL_PAUSED;
+	}
+
+	/** Get the dwell seconds for the current list */
+	private int getDwellSec() {
+		PlayList pl = play_list;
+		if (isMeta())
+			pl = getSubList();
+		return (pl != null) ? pl.getDwellSec() : 5;
 	}
 
 	/** Get the current camera */

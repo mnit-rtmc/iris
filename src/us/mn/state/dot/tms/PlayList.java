@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2024  Minnesota Department of Transportation
+ * Copyright (C) 2017-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,12 @@ public interface PlayList extends SonarObject {
 
 	/** Set notes (including hashtags) */
 	void setNotes(String n);
+
+	/** Set dwell seconds */
+	void setDwellSec(int ds);
+
+	/** Get dwell seconds */
+	int getDwellSec();
 
 	/** Set the entries in the play list */
 	void setEntries(String[] ents);

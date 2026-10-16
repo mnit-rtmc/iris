@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2024  Minnesota Department of Transportation
+ * Copyright (C) 2017-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 	/** Load all the play lists */
 	static public void loadAll() throws TMSException {
 		ent_map = new PlayListMapping(store);
-		store.query("SELECT name, meta, seq_num, notes " +
+		store.query("SELECT name, meta, seq_num, notes, dwell_sec " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -69,6 +69,7 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 		map.put("meta", meta);
 		map.put("seq_num", seq_num);
 		map.put("notes", notes);
+		map.put("dwell_sec", dwell_sec);
 		return map;
 	}
 
@@ -83,18 +84,20 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 		this(row.getString(1),           // name
 		     row.getBoolean(2),          // meta
 		     (Integer) row.getObject(3), // seq_num
-		     row.getString(4)            // notes
+		     row.getString(4),           // notes
+		     row.getInt(5)               // dwell_sec
 		);
 	}
 
 	/** Create a play list from database lookup */
-	private PlayListImpl(String n, boolean m, Integer sn, String nt)
+	private PlayListImpl(String n, boolean m, Integer sn, String nt, int ds)
 		throws TMSException
 	{
 		this(n);
 		meta = m;
 		seq_num = sn;
 		notes = nt;
+		dwell_sec = ds;
 	}
 
 	/** Initialize the transient state */
@@ -161,6 +164,29 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 	@Override
 	public String getNotes() {
 		return notes;
+	}
+
+	/** Dwell seconds */
+	private int dwell_sec;
+
+	/** Set dwell seconds */
+	@Override
+	public void setDwellSec(int ds) {
+		dwell_sec = ds;
+	}
+
+	/** Set dwell seconds */
+	public void doSetDwellSec(int ds) throws TMSException {
+		if (ds != dwell_sec) {
+			store.update(this, "dwell_sec", ds);
+			setDwellSec(ds);
+		}
+	}
+
+	/** Get dwell seconds */
+	@Override
+	public int getDwellSec() {
+		return dwell_sec;
 	}
 
 	/** Entries in the play list */
