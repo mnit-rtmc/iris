@@ -180,7 +180,17 @@ impl VideoMonitor {
         self.item_states(anc).spans(&mut div.span());
         div.span().class("info").cdata(format!("#{}", self.mon_num));
         div.close();
-        let mut div = tree.root::<html::Div>();
+        div = tree.root::<html::Div>();
+        div.class("row");
+        div.span().cdata("Displayed Camera").close();
+        if let Some(cam) = &self.camera {
+            let mut span = div.span();
+            span.class("info");
+            let query = QueryParam::new().with_res(Res::Camera).with_sel(cam);
+            span.a().href(query.to_string()).cdata(cam).close();
+        }
+        div.close();
+        div = tree.root::<html::Div>();
         div.button()
             .id("mon-clear")
             .r#type("button")
