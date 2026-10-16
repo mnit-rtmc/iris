@@ -426,7 +426,10 @@ impl Res {
     /// Check if resource has create view
     pub const fn has_create(self) -> bool {
         use Res::*;
-        !matches!(self, EventConfig | SignConfig | SystemAttribute)
+        !matches!(
+            self,
+            EventConfig | SignConfig | SignDetail | SystemAttribute
+        )
     }
 
     /// Check if resource has control view
