@@ -76,7 +76,7 @@ Config | Encoder configuration
 
 | Access       | Primary             |
 |--------------|---------------------|
-| 👁️  View      | name                |
+| 👁️  View      | name, camera\_count |
 | 🔧 Configure | make, model, config |
 
 </details>

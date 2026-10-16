@@ -353,14 +353,28 @@ pub const ENCODER_STREAM_ONE: &str = "\
 
 /// SQL query for all encoder types (primary)
 pub const ENCODER_TYPE_ALL: &str = "\
-  SELECT name, make, model, config \
+  WITH cte AS (\
+    SELECT encoder_type, count(*) AS camera_count \
+    FROM iris._camera \
+    GROUP BY encoder_type\
+  ) \
+  SELECT name, make, model, config, \
+         COALESCE(camera_count, 0) AS camera_count \
   FROM iris.encoder_type \
+  LEFT JOIN cte ON name = cte.encoder_type \
   ORDER BY name";
 
 /// SQL query for one encoder type
 pub const ENCODER_TYPE_ONE: &str = "\
-  SELECT name, make, model, config \
+  WITH cte AS (\
+    SELECT encoder_type, count(*) AS camera_count \
+    FROM iris._camera \
+    GROUP BY encoder_type\
+  ) \
+  SELECT name, make, model, config, \
+         COALESCE(camera_count, 0) AS camera_count \
   FROM iris.encoder_type \
+  LEFT JOIN cte ON name = cte.encoder_type \
   WHERE name = $1";
 
 /// SQL query for video encodings (LUT)
