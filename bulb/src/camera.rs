@@ -525,52 +525,22 @@ impl Camera {
         self.render_init_row(&mut tree.root::<html::Div>());
         self.render_state_row(anc, &mut tree.root::<html::Div>());
         self.render_location_row(&mut tree.root::<html::Div>());
-        if access_level >= AccessLevel::View {
-            let mut div = tree.root::<html::Div>();
-            div.class("row");
-            div.img()
-                .class("video_player")
-                .id(format!("video_player_{}", self.name))
-                .close();
-            div.close();
-
-            div = tree.root::<html::Div>();
-            div.class("row");
-            div.input().id("video_baseurl").r#type("text");
-
-            let mut proto = div.select();
-            proto.id("video_protocol");
-            proto.option().value("none").close();
-            proto
-                .option()
-                .value("mjpeg")
-                .selected()
-                .cdata("MJPEG")
-                .close();
-            proto.option().value("hls").cdata("HLS").close();
-            proto.close();
-
-            div.button().id("video_update").cdata("Update Stream");
-            div.close();
-        }
-        if access_level >= AccessLevel::Operate {
-            let mut div = tree.root::<html::Div>();
-            div.class("row");
-            self.to_html_ptz_controls(anc, &mut div);
-            self.to_html_misc_controls(anc, &mut div);
-            self.to_html_ptz_presets(anc, &mut div);
-            div.close();
+        if self.item_state_main(anc) != ItemState::Inactive {
+            if access_level >= AccessLevel::View {
+                self.render_player_row(&mut tree.root::<html::Div>());
+                self.render_protocol_row(&mut tree.root::<html::Div>());
+            }
+            if access_level >= AccessLevel::Operate {
+                let mut div = tree.root::<html::Div>();
+                div.class("row");
+                self.to_html_ptz_controls(anc, &mut div);
+                self.to_html_misc_controls(anc, &mut div);
+                self.to_html_ptz_presets(anc, &mut div);
+                div.close();
+            }
         }
         if access_level >= AccessLevel::Manage {
-            let mut div = tree.root::<html::Div>();
-            div.class("row");
-            div.label().r#for("publish").cdata("Publish").close();
-            let mut input = div.input();
-            input.id("publish").r#type("checkbox");
-            if self.publish {
-                input.checked();
-            }
-            div.close();
+            self.render_publish_row(&mut tree.root::<html::Div>());
         }
         String::from(tree)
     }
@@ -603,6 +573,47 @@ impl Camera {
             .class("info fill")
             .cdata_len(opt_ref(&self.location), 64)
             .close();
+    }
+
+    /// Render video player as an HTML div element
+    fn render_player_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.class("row");
+        div.img()
+            .class("video_player")
+            .id(format!("video_player_{}", self.name))
+            .close();
+        div.close();
+    }
+
+    /// Render protocol selector as an HTML div element
+    fn render_protocol_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.class("row");
+        div.input().id("video_baseurl").r#type("text");
+        let mut proto = div.select();
+        proto.id("video_protocol");
+        proto.option().value("none").close();
+        proto
+            .option()
+            .value("mjpeg")
+            .selected()
+            .cdata("MJPEG")
+            .close();
+        proto.option().value("hls").cdata("HLS").close();
+        proto.close();
+        div.button().id("video_update").cdata("Update Stream");
+        div.close();
+    }
+
+    /// Render publish as an HTML div element
+    fn render_publish_row<'p>(&self, div: &'p mut html::Div<'p>) {
+        div.class("row");
+        div.label().r#for("publish").cdata("Publish").close();
+        let mut input = div.input();
+        input.id("publish").r#type("checkbox");
+        if self.publish {
+            input.checked();
+        }
+        div.close();
     }
 
     /// Create action to handle click on a device request button
