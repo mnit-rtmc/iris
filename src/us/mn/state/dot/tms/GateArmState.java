@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2025  Minnesota Department of Transportation
+ * Copyright (C) 2013-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,8 @@ public enum GateArmState {
 	FAULT,      /* 1: fault in gate operation */
 	OPENING,    /* 2: open in progress */
 	OPEN,       /* 3: gate open, open msg on DMS */
-	OBSOLETE,   /* 4: -- obsolete -- */
-	CLOSING,    /* 5: close in progress */
-	CLOSED;     /* 6: gate closed */
+	CLOSING,    /* 4: close in progress */
+	CLOSED;     /* 5: gate closed */
 
 	/** Get gate arm state from an ordinal value */
 	static public GateArmState fromOrdinal(int o) {

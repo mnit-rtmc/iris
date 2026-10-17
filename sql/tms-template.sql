@@ -3471,8 +3471,8 @@ VALUES
     (1, 'fault'),
     (2, 'opening'),
     (3, 'open'),
-    (5, 'closing'),
-    (6, 'closed');
+    (4, 'closing'),
+    (5, 'closed');
 
 CREATE TABLE iris.gate_arm_interlock (
     id INTEGER PRIMARY KEY,
