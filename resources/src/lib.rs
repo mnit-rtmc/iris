@@ -47,8 +47,9 @@ pub enum Res {
     FlowStream,
     Font,
     GateArm,
-    GateArmInterlock,
+    GateArmControlMode,
     GateArmState,
+    GateArmInterlock,
     GeoLoc,
     Gps,
     Graphic,
@@ -148,8 +149,9 @@ impl Res {
             FlowStream,
             Font,
             GateArm,
-            GateArmInterlock,
+            GateArmControlMode,
             GateArmState,
+            GateArmInterlock,
             GeoLoc,
             Gps,
             Graphic,
@@ -237,8 +239,9 @@ impl Res {
             FlowStream => "flow_stream",
             Font => "font",
             GateArm => "gate_arm",
-            GateArmInterlock => "gate_arm_interlock",
+            GateArmControlMode => "gate_arm_control_mode",
             GateArmState => "gate_arm_state",
+            GateArmInterlock => "gate_arm_interlock",
             GeoLoc => "geo_loc",
             Gps => "gps",
             Graphic => "graphic",
@@ -356,10 +359,10 @@ impl Res {
         match self {
             ActionCondition | BeaconState | CommProtocol | CommState
             | Condition | Direction | Encoding | EventDescription | Font
-            | GateArmInterlock | GateArmState | Graphic | IncImpact
-            | IncRange | LaneCode | LcsIndication | LcsType
-            | MeterAlgorithm | MeterType | ResourceType | RnodeTransition
-            | RnodeType | RoadClass | RoadModifier => true,
+            | GateArmControlMode | GateArmState | GateArmInterlock
+            | Graphic | IncImpact | IncRange | LaneCode | LcsIndication
+            | LcsType | MeterAlgorithm | MeterType | ResourceType
+            | RnodeTransition | RnodeType | RoadClass | RoadModifier => true,
             _ => false,
         }
     }

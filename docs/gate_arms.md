@@ -30,16 +30,17 @@ before operating gates.
 <details>
 <summary>API Resources 🕵️ </summary>
 
-* `iris/gate_arm_interlock` (lookup table)
+* `iris/gate_arm_control_mode` (lookup table)
 * `iris/gate_arm_state` (lookup table)
+* `iris/gate_arm_interlock` (lookup table)
 * `iris/api/gate_arm` (primary)
 * `iris/api/gate_arm/{name}`
 
-| Access       | Primary                               | Secondary       |
-|--------------|---------------------------------------|-----------------|
-| 👁️  View      | name, location, arm\_state, interlock | geo\_loc, fault |
-| 👉 Operate   |                                       | lock †          |
-| 🔧 Configure | controller, notes                     | pin, preset, opposing, downstream_hashtag |
+| Access       | Primary           | Secondary                                 |
+|--------------|-------------------|-------------------------------------------|
+| 👁️  View      | name, location, control\_mode, arm\_state, interlock | geo\_loc, fault |
+| 👉 Operate   |                   | lock †                                    |
+| 🔧 Configure | controller, notes | pin, preset, opposing, downstream_hashtag |
 
 † _Write only_
 

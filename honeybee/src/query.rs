@@ -428,7 +428,8 @@ pub const FONT_ONE: &str = "\
 
 /// SQL query for all gate arms (primary)
 pub const GATE_ARM_ALL: &str = "\
-  SELECT g.name, location, controller, notes, arm_state, interlock \
+  SELECT g.name, location, controller, notes, control_mode, arm_state, \
+         interlock \
   FROM iris.gate_arm g \
   LEFT JOIN geo_loc_view gl ON g.geo_loc = gl.name \
   ORDER BY name";
@@ -436,21 +437,28 @@ pub const GATE_ARM_ALL: &str = "\
 /// SQL query for one gate arm (secondary)
 pub const GATE_ARM_ONE: &str = "\
   SELECT g.name, location, geo_loc, controller, pin, preset, notes, \
-         opposing, downstream_hashtag, arm_state, interlock, fault \
+         opposing, downstream_hashtag, control_mode, arm_state, interlock, \
+         fault \
   FROM iris.gate_arm g \
   LEFT JOIN geo_loc_view gl ON g.geo_loc = gl.name \
   WHERE g.name = $1";
 
-/// SQL query for gate arm interlocks (LUT)
-pub const GATE_ARM_INTERLOCK_LUT: &str = "\
+/// SQL query for gate arm control mode (LUT)
+pub const GATE_ARM_CONTROL_MODE_LUT: &str = "\
   SELECT id, description \
-  FROM iris.gate_arm_interlock \
+  FROM iris.gate_arm_control_mode \
   ORDER BY id";
 
 /// SQL query for gate arm states (LUT)
 pub const GATE_ARM_STATE_LUT: &str = "\
   SELECT id, description \
   FROM iris.gate_arm_state \
+  ORDER BY id";
+
+/// SQL query for gate arm interlocks (LUT)
+pub const GATE_ARM_INTERLOCK_LUT: &str = "\
+  SELECT id, description \
+  FROM iris.gate_arm_interlock \
   ORDER BY id";
 
 /// SQL query for geo location markers
