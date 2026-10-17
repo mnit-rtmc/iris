@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmControlMode;
 import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
@@ -71,8 +72,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	static protected void loadAll() throws TMSException {
 		store.query("SELECT name, geo_loc, controller, pin, " +
 			"preset, notes, opposing, downstream_hashtag, " +
-			"arm_state, interlock, fault FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"control_mode, arm_state, interlock, fault " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GateArmImpl(row));
@@ -104,6 +105,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		map.put("notes", notes);
 		map.put("opposing", opposing);
 		map.put("downstream_hashtag", downstream_hashtag);
+		map.put("control_mode", getControlMode());
 		map.put("arm_state", getArmState());
 		map.put("interlock", getInterlock());
 		map.put("fault", fault);
@@ -117,6 +119,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		g.notifyCreate();
 		geo_loc = g;
 		opposing = true;
+		control_mode = GateArmControlMode.NORMAL;
 		arm_state = GateArmState.UNKNOWN;
 		interlock = GateArmInterlock.NONE;
 		GateArmSystem.disable(n, "create gate arm");
@@ -132,15 +135,17 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		     row.getString(6),  // notes
 		     row.getBoolean(7), // opposing
 		     row.getString(8),  // downstream_hashtag
-		     row.getInt(9),     // arm_state
-		     row.getInt(10),    // interlock
-		     row.getString(11)  // fault
+		     row.getInt(9),     // control_mode
+		     row.getInt(10),    // arm_state
+		     row.getInt(11),    // interlock
+		     row.getString(12)  // fault
 		);
 	}
 
 	/** Create a gate arm */
 	private GateArmImpl(String n, String loc, String c, int p, String cp,
-		String nt, boolean o, String ds, int as, int lk, String flt)
+		String nt, boolean o, String ds, int cm, int as, int lk,
+		String flt)
 	{
 		super(n, lookupController(c), p, nt);
 		geo_loc = lookupGeoLoc(loc);
@@ -148,6 +153,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		notes = nt;
 		opposing = o;
 		downstream_hashtag = ds;
+		control_mode = GateArmControlMode.fromOrdinal(cm);
 		arm_state = GateArmState.fromOrdinal(as);
 		interlock = GateArmInterlock.fromOrdinal(lk);
 		fault = flt;
@@ -295,6 +301,38 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	public void checkTimeout() {
 		if (getFailMillis() > failTimeoutMS())
 			setArmStateNotify(GateArmState.UNKNOWN);
+	}
+
+	/** Gate arm control mode */
+	private GateArmControlMode control_mode;
+
+	/** Set the gate arm control mode and notify clients */
+	public void setControlModeNotify(GateArmControlMode gcm) {
+		if (gcm == control_mode) {
+			return;
+		}
+		try {
+			store.update(this, "control_mode", gcm.ordinal());
+		}
+		catch (TMSException e) {
+			GateArmSystem.disable(name, "DB control_mode");
+			logError("setControlModeNotify: " + e.getMessage());
+			return;
+		}
+		control_mode = gcm;
+		notifyAttribute("controlMode");
+		updateStyles();
+	}
+
+	/** Get the control mode */
+	public GateArmControlMode getControlModeEnum() {
+		return control_mode;
+	}
+
+	/** Get the control mode */
+	@Override
+	public int getControlMode() {
+		return getControlModeEnum().ordinal();
 	}
 
 	/** Gate arm state */

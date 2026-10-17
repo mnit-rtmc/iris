@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2025  Minnesota Department of Transportation
+ * Copyright (C) 2013-2026  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,9 @@ public interface GateArm extends Device {
 
 	/** Get downstream hashtag */
 	String getDownstreamHashtag();
+
+	/** Get the control mode */
+	int getControlMode();
 
 	/** Get the arm state */
 	int getArmState();
