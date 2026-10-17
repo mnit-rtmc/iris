@@ -3460,6 +3460,17 @@ CREATE TABLE event.brightness_sample (
 --
 -- Gate Arms
 --
+CREATE TABLE iris.gate_arm_control_mode (
+    id INTEGER PRIMARY KEY,
+    description VARCHAR NOT NULL
+);
+
+INSERT INTO iris.gate_arm_control_mode (id, description)
+VALUES
+    (0, 'normal'),
+    (1, 'override'),
+    (2, 'close delay');
+
 CREATE TABLE iris.gate_arm_state (
     id INTEGER PRIMARY KEY,
     description VARCHAR(10) NOT NULL
@@ -3493,6 +3504,7 @@ CREATE TABLE iris._gate_arm (
     notes VARCHAR CHECK (LENGTH(notes) < 256),
     opposing BOOLEAN NOT NULL,
     downstream_hashtag VARCHAR(16),
+    control_mode INTEGER NOT NULL REFERENCES iris.gate_arm_control_mode,
     arm_state INTEGER NOT NULL REFERENCES iris.gate_arm_state,
     interlock INTEGER NOT NULL REFERENCES iris.gate_arm_interlock,
     fault VARCHAR(32),
@@ -3511,6 +3523,7 @@ CREATE FUNCTION iris.gate_arm_notify() RETURNS TRIGGER AS
     $gate_arm_notify$
 BEGIN
     IF (NEW.notes IS DISTINCT FROM OLD.notes) OR
+       (NEW.control_mode IS DISTINCT FROM OLD.control_mode) OR
        (NEW.arm_state IS DISTINCT FROM OLD.arm_state) OR
        (NEW.interlock IS DISTINCT FROM OLD.interlock)
     THEN
@@ -3532,7 +3545,7 @@ CREATE TRIGGER gate_arm_table_notify_trig
 
 CREATE VIEW iris.gate_arm AS
     SELECT g.name, geo_loc, controller, pin, preset, notes, opposing,
-           downstream_hashtag, arm_state, interlock, fault
+           downstream_hashtag, control_mode, arm_state, interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
     JOIN iris.device_preset p ON g.name = p.name;
@@ -3546,10 +3559,11 @@ BEGIN
         VALUES (NEW.name, 'gate_arm', NEW.preset);
     INSERT INTO iris._gate_arm (
         name, geo_loc, notes, opposing, downstream_hashtag,
-        arm_state, interlock, fault
+        control_mode, arm_state, interlock, fault
     ) VALUES (
         NEW.name, NEW.geo_loc, NEW.notes, NEW.opposing,
-        NEW.downstream_hashtag, NEW.arm_state, NEW.interlock, NEW.fault
+        NEW.downstream_hashtag, NEW.control_mode, NEW.arm_state,
+        NEW.interlock, NEW.fault
     );
     RETURN NEW;
 END;
@@ -3573,6 +3587,7 @@ BEGIN
            notes = NEW.notes,
            opposing = NEW.opposing,
            downstream_hashtag = NEW.downstream_hashtag,
+           control_mode = NEW.control_mode,
            arm_state = NEW.arm_state,
            interlock = NEW.interlock,
            fault = NEW.fault
@@ -3595,12 +3610,13 @@ CREATE VIEW gate_arm_view AS
            l.cross_dir, l.landmark, l.lat, l.lon, l.corridor, l.location,
            cio.controller, cio.pin, c.comm_link, c.drop_id,
            cnd.description AS condition, cp.camera, cp.preset_num, g.opposing,
-           g.downstream_hashtag, gas.description AS arm_state,
-           gai.description AS interlock, fault
+           g.downstream_hashtag, gcm.description AS control_mode,
+           gas.description AS arm_state, gai.description AS interlock, fault
     FROM iris._gate_arm g
     JOIN iris.controller_io cio ON g.name = cio.name
     LEFT JOIN iris.device_preset p ON g.name = p.name
     LEFT JOIN iris.camera_preset cp ON cp.name = p.preset
+    JOIN iris.gate_arm_control_mode gcm ON g.control_mode = gcm.id
     JOIN iris.gate_arm_state gas ON g.arm_state = gas.id
     JOIN iris.gate_arm_interlock gai ON g.interlock = gai.id
     LEFT JOIN geo_loc_view l ON g.geo_loc = l.name
