@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2025  Minnesota Department of Transportation
+ * Copyright (C) 2026       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,7 @@ package us.mn.state.dot.tms;
  * Gate Arm device interface.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public interface GateArm extends Device {
 
@@ -59,6 +61,12 @@ public interface GateArm extends Device {
 
 	/** Get fault description (or null) */
 	String getFault();
+
+	/** Get the error flags (GateArmError bits) */
+	int getErrorFlags();
+
+	/** Get the status flags (GateArmFlag bits) */
+	int getStatusFlags();
 
 	/** Set the lock (JSON) */
 	void setLock(String lk);

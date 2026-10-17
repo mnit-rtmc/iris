@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2026  Minnesota Department of Transportation
+ * Copyright (C) 2026       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +29,7 @@ import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmFlag;
 import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
@@ -46,6 +48,7 @@ import us.mn.state.dot.tms.server.event.GateArmEvent;
  * A Gate Arm is a device for restricting access to a ramp on a road.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class GateArmImpl extends DeviceImpl implements GateArm {
 
@@ -445,6 +448,46 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		}
 	}
 
+	/** Error flags (GateArmError bits) */
+	private transient int error_flags;
+
+	/** Get the error flags (GateArmError bits) */
+	@Override
+	public int getErrorFlags() {
+		return error_flags;
+	}
+
+	/** Set the error flags (GateArmError bits) */
+	public void setErrorFlagsNotify(int ef) {
+		if (ef != error_flags) {
+			error_flags = ef;
+			notifyAttribute("errorFlags");
+		}
+	}
+
+	/** Status flags (GateArmFlag bits) */
+	private transient int status_flags;
+
+	/** Get the status flags (GateArmFlag bits) */
+	@Override
+	public int getStatusFlags() {
+		return status_flags;
+	}
+
+	/** Set the status flags (GateArmFlag bits) */
+	public void setStatusFlagsNotify(int sf) {
+		if (sf != status_flags) {
+			status_flags = sf;
+			notifyAttribute("statusFlags");
+		}
+	}
+
+	/** Test if a gate arm override is in progress.
+	 * Only set by protocols which report gate overrides (NDOT gate). */
+	private boolean isGateOverride() {
+		return GateArmFlag.GATE_FLAG_OVERRIDE.checkBit(status_flags);
+	}
+
 	/** Test if gate arm has faults */
 	@Override
 	protected boolean hasFaults() {
@@ -639,6 +682,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Request to open the gate arm */
 	private void requestArmOpen() {
+		// An open sent during a gate override makes the arm end up open
+		// when the gate override completes, so always send it
+		if (isGateOverride()) {
+			requestArmState(GateArmState.OPENING);
+			return;
+		}
 		switch (arm_state) {
 			case OPENING:
 			case OPEN:
@@ -650,6 +699,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Request to close the gate arm */
 	private void requestArmClose() {
+		// A close sent during a gate override is ignored by the
+		// controller
+		if (isGateOverride())
+			return;
 		switch (arm_state) {
 			case CLOSING:
 			case CLOSED:

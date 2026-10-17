@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2025  Minnesota Department of Transportation
+ * Copyright (C) 2026  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@ package us.mn.state.dot.tms.client.gate;
 
 import java.awt.Color;
 import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.GateArmFlag;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.client.widget.IPanel;
 
@@ -23,6 +25,7 @@ import us.mn.state.dot.tms.client.widget.IPanel;
  * Styling for gate arm states
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 public class StateStyle {
 
@@ -32,14 +35,25 @@ public class StateStyle {
 	/** Text description */
 	private final String text;
 
+	/** Gate override in progress */
+	private final boolean gate_override;
+
 	/** Create a gate arm state style */
 	public StateStyle(GateArm ga) {
 		gas = (ga != null)
 		    ? GateArmState.fromOrdinal(ga.getArmState())
 		    : GateArmState.CLOSED;
+		gate_override = GateArmTheme.isGateOverride(ga);
 		String t = "";
 		if (ga != null) {
 			t = gas.toString();
+			// Close warning delay, or gate override waiting
+			// to close
+			if ((GateArmState.CLOSING == gas ||
+			     GateArmState.OPEN == gas) &&
+			    GateArmFlag.GATE_FLAG_CLOSE_DELAY.checkBit(
+			    ga.getStatusFlags()))
+				t = "CLOSE_DELAY";
 			if (GateArmState.FAULT == gas) {
 				String fault = ga.getFault();
 				if (fault != null)
@@ -57,7 +71,7 @@ public class StateStyle {
 		case FAULT:
 			return Color.BLACK;
 		default:
-			return IPanel.DARK_BLUE;
+			return gate_override ? Color.WHITE : IPanel.DARK_BLUE;
 		}
 	}
 
@@ -69,7 +83,9 @@ public class StateStyle {
 		case FAULT:
 			return Color.YELLOW;
 		default:
-			return null;
+			return gate_override
+			      ? GateArmTheme.COLOR_GATE_OVERRIDE
+			      : null;
 		}
 	}
 

@@ -19,8 +19,6 @@ import java.io.IOException;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.FutureOp;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -97,21 +95,20 @@ public class OpMoveGateArm extends OpNdotGate {
 		}
 	}
 
-	/** Queue op to check closing state */
+	/** Start (or retarget) op to check closing state */
 	private void checkClosing() {
-		int delay = prop.delay;
-		OpDevice op = new OpCheckMoveStatus((GateArmImpl) device,
-			target_state, delay);
-		FutureOp.queueOp(device, delay, op);
-		gate_arm.setArmStateNotify(GateArmState.CLOSING);
+		OpCheckMoveStatus.monitor(gate_arm, target_state, prop.delay);
+		// During a gate override, the controller ignores the close
+		if (!prop.isGateOverride())
+			gate_arm.setArmStateNotify(GateArmState.CLOSING);
 	}
 
-	/** Queue op to check opening state */
+	/** Start (or retarget) op to check opening state */
 	private void checkOpening() {
-		OpDevice op = new OpCheckMoveStatus((GateArmImpl) device,
-			target_state, 0);
-		FutureOp.queueOp(device, 2, op);
-		gate_arm.setArmStateNotify(GateArmState.OPENING);
+		OpCheckMoveStatus.monitor(gate_arm, target_state, 0);
+		// During a gate override, the arm opens when it completes
+		if (!prop.isGateOverride())
+			gate_arm.setArmStateNotify(GateArmState.OPENING);
 	}
 
 	/** Cleanup the operation */

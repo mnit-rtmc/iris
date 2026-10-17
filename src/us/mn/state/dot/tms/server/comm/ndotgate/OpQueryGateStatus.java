@@ -39,8 +39,7 @@ public class OpQueryGateStatus extends OpNdotGate {
 			prop = null;
 			return;
 		}
-		// NDORv5/NDOTv6 "Retrieve Gate Status" command
-		prop = new NdotGateProperty("*S"+sGateArm+"#\r\n");
+		prop = createStatusProperty();
 	}
 
 	/** Create the second phase of the operation */
@@ -69,5 +68,9 @@ public class OpQueryGateStatus extends OpNdotGate {
 		super.cleanup();
 		if (!isSuccess())
 			gate_arm.checkTimeout();
+		else if (prop != null && prop.isMoving()) {
+			// Monitor motion or gate override not started by IRIS
+			OpCheckMoveStatus.monitor(gate_arm, null, 0);
+		}
 	}
 }

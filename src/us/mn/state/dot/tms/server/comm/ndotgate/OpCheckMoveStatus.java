@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.ndotgate;
 
 import java.io.IOException;
+import java.util.HashMap;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.GateArmImpl;
@@ -30,6 +31,10 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * Note:  Updated in January 2026 to include the
  *  shorter v6 gate-fault message strings.
+ * Note2:  Updated in October 2026 for NDOTv7.  A monitor
+ *  runs during any arm motion or gate override.  Each command
+ *  starts a new monitor; an older monitor for the same gate
+ *  arm stops quietly at its next check.
  *
  * @author John L. Stanley - SRF Consulting
  * @author Douglas Lau
@@ -37,7 +42,54 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 @SuppressWarnings("rawtypes")
 public class OpCheckMoveStatus extends OpNdotGate {
 
-	/** Requested gate arm state */
+	/** Seconds between status checks */
+	static private final int RECHECK_SECS = 2;
+
+	/** Current (newest) monitor for each gate arm.  An older monitor
+	 * for the same gate arm stops at its next check. */
+	static private final HashMap<GateArmImpl, OpCheckMoveStatus> CURRENT =
+		new HashMap<GateArmImpl, OpCheckMoveStatus>();
+
+	/** Start monitoring a gate arm.
+	 * @param ga Gate arm.
+	 * @param target Requested state (CLOSED, OPEN), or null to monitor
+	 *               motion or a gate override not started by IRIS (only
+	 *               if no monitor is running).
+	 * @param delaySec Delay before the arm starts moving (seconds). */
+	@SuppressWarnings("unchecked")
+	static public void monitor(GateArmImpl ga, GateArmState target,
+		int delaySec)
+	{
+		OpCheckMoveStatus op;
+		synchronized (CURRENT) {
+			if (target == null && CURRENT.containsKey(ga))
+				return;
+			op = new OpCheckMoveStatus(ga, target, delaySec);
+			if (op.prop == null)
+				return;
+			CURRENT.put(ga, op);
+		}
+		int secs = (target == GateArmState.CLOSED)
+		          ? delaySec
+		          : RECHECK_SECS;
+		FutureOp.queueOp(ga, secs, op);
+	}
+
+	/** Extra time (ms) allowed after the warning delay for the
+	 * controller to start moving the arm */
+	static private final long DELAY_MARGIN_MS = 5000;
+
+	/** Check if a close was commanded for a gate arm and its warning
+	 * delay is still running (arm not expected to move yet) */
+	static public boolean isClosePending(GateArmImpl ga) {
+		synchronized (CURRENT) {
+			OpCheckMoveStatus op = CURRENT.get(ga);
+			return (op != null) && op.isCloseDelay(
+				TimeSteward.currentTimeMillis());
+		}
+	}
+
+	/** Requested gate arm state (null if not requested by IRIS) */
 	private final GateArmState target_state;
 
 	/** Opposite gate arm state
@@ -50,24 +102,52 @@ public class OpCheckMoveStatus extends OpNdotGate {
 	 * bit longer than twice the normal motion time. */
 	private long maxEndTime;
 
+	/** Time when the warning delay (plus margin) ends */
+	private long delayEndTime;
+
+	/** Flag indicating a gate override was seen while monitoring.
+	 * A gate override has no time limit, and can end with the arm in
+	 * either position. */
+	private boolean gate_override_seen = false;
+
+	/** Flag indicating this op was requeued for another check */
+	private boolean requeued = false;
+
 	/** Create a new gate-arm motion-monitor operation */
 	@SuppressWarnings("unchecked")
-	public OpCheckMoveStatus(GateArmImpl d, GateArmState gas,
+	private OpCheckMoveStatus(GateArmImpl d, GateArmState gas,
 		int delaySec)
 	{
 		super(PriorityLevel.POLL_LOW, d, false); // non-exclusive
 		target_state = gas;
 		if (gas == GateArmState.CLOSED)
 			antitarget_state = GateArmState.OPEN;
-		else
+		else if (gas == GateArmState.OPEN)
 			antitarget_state = GateArmState.CLOSED;
+		else
+			antitarget_state = null;
 
 		if (sGateArm != null) {
-			// NDORv5/NDOTv6 "Retrieve Gate Status" command
-			prop = new NdotGateProperty("*S"+sGateArm+"#\r\n");
+			prop = createStatusProperty();
 
 			long started = TimeSteward.currentTimeMillis();
 			maxEndTime = started + ((delaySec + 220) * 1000L);
+			delayEndTime = started + (delaySec * 1000L) +
+				DELAY_MARGIN_MS;
+		}
+	}
+
+	/** Check if a close warning delay is running */
+	private boolean isCloseDelay(long now) {
+		return (target_state == GateArmState.CLOSED)
+		    && !gate_override_seen
+		    && (delayEndTime - now) > 0;
+	}
+
+	/** Check if this is the current monitor for the gate arm */
+	private boolean isCurrent() {
+		synchronized (CURRENT) {
+			return CURRENT.get(gate_arm) == this;
 		}
 	}
 
@@ -86,50 +166,70 @@ public class OpCheckMoveStatus extends OpNdotGate {
 		protected Phase poll(CommMessage mess)
 			throws IOException
 		{
+			requeued = false;
+			// Superseded by a newer monitor?  Stop quietly.
+			if (!isCurrent()) {
+				prop = null;  // no status update
+				return null;
+			}
+			// New property for each check, so a failed check
+			// never reuses a previous response
+			prop = createStatusProperty();
 			mess.add(prop);
 			mess.queryProps();
 			if (!prop.gotValidResponse())
 				throw new ParsingException("NO RESPONSE");
 
-			// Has the arm finished the requested motion?
-			GateArmState new_state = prop.getState();
-			if (new_state == target_state) {
-				// motion complete!!
+			// Controller reported a timeout / config error
+			if (prop.isMotionTimeout())
 				return null;
-			}
-			// Detect manual override condition.
-			if (new_state == antitarget_state) {
-				if (target_state == GateArmState.CLOSED)
-					prop.statusOfGate = StatusOfGate.TIMEOUT_CLOSE_FAILED;
+
+			// Arm moving or gate override in progress?
+			if (prop.isMoving()) {
+				if (prop.isGateOverride())
+					gate_override_seen = true;
+				long now = TimeSteward.currentTimeMillis();
+				if (gate_override_seen ||
+				    (maxEndTime - now) > 0)
+					requeueOp();  // keep monitoring...
 				else
-					prop.statusOfGate = StatusOfGate.TIMEOUT_OPEN_FAILED;
-				return null;
-			}
-			// Detect gate-motion error-responses from
-			// the controller. (These are not comm errors.)
-			if (new_state == GateArmState.FAULT) {
+					setTimeoutFailed();
 				return null;
 			}
 
-			// Is the maximum end-time still in the future?
-			long now = TimeSteward.currentTimeMillis();
-			if ((maxEndTime - now) > 0) {
-				requeueOp();  // if so, then keep monitoring...
+			// Arm at rest
+			GateArmState rest = prop.getRestPosition();
+			if (rest == null)
+				return null;  // unknown status, or lights/sign error
+			if (rest == target_state || target_state == null)
+				return null;  // motion complete!!
+			if (gate_override_seen)
+				return null;  // gate override completed
+			// Close warning delay still running?
+			if (isCloseDelay(TimeSteward.currentTimeMillis())) {
+				requeueOp();  // arm not expected to move yet
 				return null;
 			}
-
-			// Operation monitoring timed out without gate motion completing.
-			if (target_state == GateArmState.CLOSED)
-				prop.statusOfGate = StatusOfGate.TIMEOUT_CLOSE_FAILED;
-			else
-				prop.statusOfGate = StatusOfGate.TIMEOUT_OPEN_FAILED;
+			// Detect manual reversal of gate motion.
+			if (rest == antitarget_state)
+				setTimeoutFailed();
 			return null;
 		}
 	}
 
+	/** Report that the arm did not reach the requested state */
+	private void setTimeoutFailed() {
+		if (target_state == GateArmState.CLOSED)
+			prop.statusOfGate = StatusOfGate.TIMEOUT_CLOSE_FAILED;
+		else if (target_state == GateArmState.OPEN)
+			prop.statusOfGate = StatusOfGate.TIMEOUT_OPEN_FAILED;
+	}
+
+	/** Queue this op for another check */
 	private void requeueOp() {
 		updateStatus();
-		FutureOp.queueOp(device, 2, this); // recheck in ~2 seconds
+		requeued = true;
+		FutureOp.queueOp(device, RECHECK_SECS, this);
 	}
 
 	/** Cleanup the operation */
@@ -138,5 +238,10 @@ public class OpCheckMoveStatus extends OpNdotGate {
 		super.cleanup();
 		if (!isSuccess())
 			gate_arm.checkTimeout();
+		if (!requeued) {
+			synchronized (CURRENT) {
+				CURRENT.remove(gate_arm, this);
+			}
+		}
 	}
 }
