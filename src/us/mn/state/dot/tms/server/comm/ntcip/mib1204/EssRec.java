@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2017  Iteris Inc.
  * Copyright (C) 2019-2025  Minnesota Department of Transportation
+ * Copyright (C) 2026  Alaska DOT&PF
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +18,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
+import us.mn.state.dot.tms.server.comm.ntcip.mibssi.SsiTdpTable;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A collection of weather condition values which can be converted to JSON.
@@ -24,6 +27,7 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
  *
  * @author Michael Darter
  * @author Douglas Lau
+ * @author Darren Jaeckel, Wostmann & Associates
  */
 public class EssRec {
 
@@ -51,6 +55,8 @@ public class EssRec {
 
 	/** Solar radiation values */
 	public final RadiationValues rad_values = new RadiationValues();
+
+	public final SsiTdpTable tdp_table = new SsiTdpTable();
 
 	/** Create a new ESS record */
 	public EssRec() { }
@@ -127,6 +133,11 @@ public class EssRec {
 		ws.setSubSurfTempNotify(t);
 	}
 
+	/** SSI Temperature Data Probe related values */
+	private void storeSsiTdp(WeatherSensorImpl ws) {
+		ws.setSsiTdpTable(tdp_table);
+	}
+
 	/** Store all sample values */
 	public void store(WeatherSensorImpl ws) {
 		storeAtmospheric(ws);
@@ -136,6 +147,7 @@ public class EssRec {
 		storePavement(ws);
 		storeSubSurface(ws);
 		storeRadiation(ws);
+		storeSsiTdp(ws);
 		long st = TimeSteward.currentTimeMillis();
 		ws.setStampNotify(st);
 	}
@@ -165,10 +177,8 @@ public class EssRec {
 		sb.append(ps_table.toJson());
 		sb.append(ss_table.toJson());
 		sb.append(rad_values.toJson());
-		// remove trailing comma
-		if (sb.charAt(sb.length() - 1) == ',')
-			sb.setLength(sb.length() - 1);
-		sb.append('}');
+		sb.append(tdp_table.toJson());
+		SString.removeTrailingComma(sb);
 		return sb.toString();
 	}
 }

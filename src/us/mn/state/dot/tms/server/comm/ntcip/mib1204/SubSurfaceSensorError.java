@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Iteris Inc.
+ * Copyright (C) 2017	Iteris Inc.
  * Copyright (C) 2019-2022  Minnesota Department of Transportation
+ * Copyright (C) 2026	Alaska DOT&PF
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
  *
  * @author Michael Darter
  * @author Douglas Lau
+ * @author Darren Jaeckel, Wostmann & Associates
  */
 public enum SubSurfaceSensorError {
 	undefined,    // 0
@@ -40,5 +42,12 @@ public enum SubSurfaceSensorError {
 			default:
 				return false;
 		}
+	}
+
+	/** Get the enum from an ordinal value */
+	static public SubSurfaceSensorError fromOrdinal(int o) {
+		return (o >= 0 && o < values().length)
+				? values()[o] 
+				: undefined;
 	}
 }

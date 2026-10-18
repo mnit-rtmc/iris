@@ -3,6 +3,7 @@
  * Copyright (C) 2010-2026  Minnesota Department of Transportation
  * Copyright (C) 2017-2021  Iteris Inc.
  * Copyright (C) 2023-2024  SRF Consulting Group
+ * Copyright (C) 2026		Alaska DOT&PF
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +34,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.SString;
+import us.mn.state.dot.tms.server.comm.ntcip.mibssi.SsiTdpTable;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
@@ -43,14 +45,17 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  * precipitation rates, visibility, wind speed, etc. Weather sensor
  * drivers support:
  *   Optical Scientific ORG-815 optical rain gauge
- *   Campbell Scientific CR1000 V27.05
+ *   Campbell Scientific CR1000 V27.05+
  *   Vaisala dmc586 2.4.16
- *   QTT LX-RPU Elite Model Version 1.23
+ *   QTT LX-RPU Elite Model Version 1.23+
+ *   Vaisala RWS200
+ *   Vaisala DST111 and DST211
  *
  * @author Douglas Lau
  * @author Michael Darter
  * @author Gordon Parikh
  * @author John L. Stanley
+ * @author Darren Jaeckel, Wostmann & Associates
  */
 public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 	Comparable<WeatherSensorImpl>
@@ -773,6 +778,21 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor,
 		if (!objectEquals(sr, solar_radiation)) {
 			solar_radiation = sr;
 			notifyAttribute("solarRadiation");
+		}
+	}
+
+	/** Temperature Data Probe table, never null */
+	private transient SsiTdpTable tdp_table = new SsiTdpTable();
+
+	/** Get Temperature Data Probe table */
+	public SsiTdpTable getTdpTable() {
+		return tdp_table;
+	}
+
+	/** Set Temperature Data Probe table */
+	public void setSsiTdpTable(SsiTdpTable tdpt) {
+		if(tdpt != null) {
+			tdp_table = tdpt;
 		}
 	}
 
