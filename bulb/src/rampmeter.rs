@@ -21,6 +21,7 @@ use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
 use crate::map;
+use crate::permission::{AccessLevel, Permission};
 use crate::systemattr::SystemAttr;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
@@ -115,6 +116,7 @@ pub struct RampMeterAnc {
     loc: LocAnc<RampMeter>,
     meter_types: Vec<MeterType>,
     algorithms: Vec<MeterAlgorithm>,
+    access: Vec<Permission>,
     sys_attrs: Vec<SystemAttr>,
 }
 
@@ -220,6 +222,7 @@ impl AncillaryData for RampMeterAnc {
         let mut cio = ControllerIoAnc::new(pri, view);
         match view {
             View::Control | View::Request => {
+                cio.assets.push(Asset::Access);
                 cio.assets.push(Asset::SystemAttrs);
             }
             View::Setup(_edit) => {
@@ -232,9 +235,7 @@ impl AncillaryData for RampMeterAnc {
         RampMeterAnc {
             cio,
             loc,
-            meter_types: Vec::new(),
-            algorithms: Vec::new(),
-            sys_attrs: Vec::new(),
+            ..Default::default()
         }
     }
 
@@ -251,6 +252,10 @@ impl AncillaryData for RampMeterAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
+            Asset::Access => {
+                self.access = serde_wasm_bindgen::from_value(value)?;
+                Ok(())
+            }
             Asset::Controllers => self.cio.set_asset(pri, asset, value),
             Asset::MeterAlgorithms => {
                 self.algorithms = serde_wasm_bindgen::from_value(value)?;
@@ -454,6 +459,17 @@ fn centiseconds(s: f32) -> u16 {
     (s * 10.0).round() as u16 * 10
 }
 
+impl RampMeterAnc {
+    /// Get permission access level
+    fn access_level(&self, pri: &RampMeter) -> AccessLevel {
+        Permission::access_level_notes(
+            self.access.as_slice(),
+            Res::RampMeter,
+            pri.notes.as_deref(),
+        )
+    }
+}
+
 impl RampMeter {
     /// Get status rate
     fn status_rate(&self) -> Option<u32> {
@@ -607,7 +623,12 @@ impl RampMeter {
     }
 
     /// Build lock reason HTML
-    fn lock_reason_html<'p>(&self, span: &'p mut html::Span<'p>) {
+    fn lock_reason_html<'p>(
+        &self,
+
+        anc: &RampMeterAnc,
+        span: &'p mut html::Span<'p>,
+    ) {
         let reason = self.lock_reason();
         span.cdata(match reason {
             LockReason::Unlocked => "🔓",
@@ -615,6 +636,9 @@ impl RampMeter {
         });
         let mut select = span.select();
         select.id("lk_reason");
+        if anc.access_level(self) < AccessLevel::Operate {
+            select.disabled();
+        }
         for r in LockReason::all_meter() {
             let mut option = select.option();
             option.value(r.as_str());
@@ -647,7 +671,10 @@ impl RampMeter {
             Some(r) => format!("{:.1}", 3_600.0 / (r as f32)),
             None => format!("{cycle_min:.1}"),
         });
-        if self.lock.is_none() || !self.lock_reason().is_deployable() {
+        if anc.access_level(self) < AccessLevel::Operate
+            || self.lock.is_none()
+            || !self.lock_reason().is_deployable()
+        {
             input.disabled();
         }
         let mut datalist = span.datalist();
@@ -780,7 +807,7 @@ impl RampMeter {
         self.meter_image_html(1, green_cs, yellow_cs, &mut div.img());
         let mut div2 = div.div();
         div2.class("column");
-        self.lock_reason_html(&mut div2.span());
+        self.lock_reason_html(anc, &mut div2.span());
         self.cycle_html(anc, &mut div2.span());
         self.rate_html(&mut div2.span());
         self.queue_html(&mut div2.span());
