@@ -46,6 +46,7 @@ use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use tokio::fs::metadata;
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
+use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 use tokio_util::io::ReaderStream;
@@ -1201,11 +1202,22 @@ async fn get_by_pkey<PK: ToSql + Sync>(
 ) -> Result<String> {
     let client = db.client().await?;
     let query = format!("SELECT row_to_json(r)::text FROM ({sql}) r");
-    let row = client
-        .query_one(&query, &[&pkey])
-        .await
-        .map_err(|_e| Error::NotFound)?;
+    let res = client.query_one(&query, &[&pkey]).await;
+    let row = check_row_res(res)?;
     Ok(row.get::<usize, String>(0))
+}
+
+/// Check a postgres result
+fn check_row_res(
+    res: std::result::Result<Row, tokio_postgres::Error>,
+) -> Result<Row> {
+    match res {
+        Ok(row) => Ok(row),
+        Err(e) => {
+            log::warn!("check_row_res: {e}");
+            Err(Error::NotFound)
+        }
+    }
 }
 
 /// Query one row by primary key, with an additional param
@@ -1217,10 +1229,8 @@ async fn get_by_pkey2<PK: ToSql + Sync, P2: ToSql + Sync>(
 ) -> Result<String> {
     let client = db.client().await?;
     let query = format!("SELECT row_to_json(r)::text FROM ({sql}) r");
-    let row = client
-        .query_one(&query, &[&pkey, &p2])
-        .await
-        .map_err(|_e| Error::NotFound)?;
+    let res = client.query_one(&query, &[&pkey, &p2]).await;
+    let row = check_row_res(res)?;
     Ok(row.get::<usize, String>(0))
 }
 
@@ -1233,9 +1243,7 @@ async fn get_array_by_pkey<PK: ToSql + Sync>(
     let client = db.client().await?;
     let query =
         format!("SELECT COALESCE(json_agg(r), '[]')::text FROM ({sql}) r");
-    let row = client
-        .query_one(&query, &[&pkey])
-        .await
-        .map_err(|_e| Error::NotFound)?;
+    let res = client.query_one(&query, &[&pkey]).await;
+    let row = check_row_res(res)?;
     Ok(row.get::<usize, String>(0))
 }
