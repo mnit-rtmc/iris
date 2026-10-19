@@ -1,5 +1,17 @@
 # IRIS 5.x Release Notes
 
+5.92.0 (19 Oct 2026)
+ - Web UI: complete play list setup and control cards
+ - Web UI: add more links between resources
+ - Web UI: don't display controls for inactive devices
+ - Web UI: add DMS sign detail cards
+ - Web UI: Tweaked card layout buttons
+ - Web UI: Allow changing sidebar edge (left/right)
+ - Add `gate_arm_control_mode` LUT
+ - Add `dwell_sec` to play list (replaces system attribute)
+ - Fix gate arm interlock issue (NDOT)
+ - Revert change to allow storing camera presets with Manage permission
+
 5.91.0 (5 Oct 2026)
  - Web UI: add play list cards (incomplete)
  - Web UI: expanded cards are now movable and resizable
