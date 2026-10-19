@@ -344,9 +344,9 @@ fn selected_resource() -> Option<Res> {
         }
         Res::Dms if doc.input_bool("res-msg_pattern") => Some(Res::MsgPattern),
         Res::Dms if doc.input_bool("res-msg_line") => Some(Res::MsgLine),
+        Res::Dms if doc.input_bool("res-word") => Some(Res::Word),
         Res::Dms if doc.input_bool("res-sign_config") => Some(Res::SignConfig),
         Res::Dms if doc.input_bool("res-sign_detail") => Some(Res::SignDetail),
-        Res::Dms if doc.input_bool("res-word") => Some(Res::Word),
         Res::Lcs if doc.input_bool("res-lcs_state") => Some(Res::LcsState),
         Res::VideoMonitor if doc.input_bool("res-play_list") => {
             Some(Res::PlayList)
