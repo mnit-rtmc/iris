@@ -10,12 +10,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::actionplan::ActionPlan;
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html, uri_one};
 use crate::cio::{ControllerIo, ControllerIoAnc};
-use crate::devaction::DeviceAction;
-use crate::device::DeviceReq;
+use crate::device::{Device, DeviceAnc, DeviceReq};
 use crate::domevent::EventTp;
 use crate::error::Result;
 use crate::fetch::Action;
@@ -25,7 +23,6 @@ use crate::lock::LockReason;
 use crate::map;
 use crate::notes::contains_hashtag;
 use crate::permission::{AccessLevel, Permission};
-use crate::query::QueryParam;
 use crate::systemattr::SystemAttr;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
@@ -44,7 +41,6 @@ use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
 use std::borrow::Cow;
-use std::collections::BTreeSet;
 use std::fmt;
 use std::io::Write;
 use wasm_bindgen::JsValue;
@@ -118,13 +114,12 @@ pub struct MeterType {
 #[derive(Default)]
 pub struct RampMeterAnc {
     cio: ControllerIoAnc<RampMeter>,
+    dev: DeviceAnc<RampMeter>,
     loc: LocAnc<RampMeter>,
     meter_types: Vec<MeterType>,
     algorithms: Vec<MeterAlgorithm>,
     access: Vec<Permission>,
     sys_attrs: Vec<SystemAttr>,
-    device_actions: Vec<DeviceAction>,
-    action_plans: Vec<ActionPlan>,
 }
 
 impl RampMeterAnc {
@@ -135,21 +130,6 @@ impl RampMeterAnc {
             Res::RampMeter,
             pri.notes.as_deref(),
         )
-    }
-
-    /// Get action plan phases
-    fn phases<'a>(
-        &'a self,
-        plan: &'a ActionPlan,
-    ) -> impl Iterator<Item = &'a str> {
-        let mut phases = BTreeSet::new();
-        phases.insert(&plan.default_phase[..]);
-        for da in &self.device_actions {
-            if da.action_plan == plan.name {
-                phases.insert(&da.phase[..]);
-            }
-        }
-        phases.into_iter()
     }
 
     /// Build meter types HTML
@@ -263,9 +243,11 @@ impl AncillaryData for RampMeterAnc {
             }
             _ => (),
         }
+        let dev = DeviceAnc::new(pri, view);
         let loc = LocAnc::new(pri, view);
         RampMeterAnc {
             cio,
+            dev,
             loc,
             ..Default::default()
         }
@@ -273,7 +255,11 @@ impl AncillaryData for RampMeterAnc {
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
+        self.cio
+            .assets
+            .pop()
+            .or_else(|| self.dev.assets.pop())
+            .or_else(|| self.loc.assets.pop())
     }
 
     /// Set asset value
@@ -301,27 +287,8 @@ impl AncillaryData for RampMeterAnc {
                 self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
                 Ok(())
             }
-            Asset::DeviceActions => {
-                let mut act: Vec<DeviceAction> =
-                    serde_wasm_bindgen::from_value(value)?;
-                act.retain(|da| pri.has_hashtag(&da.hashtag));
-                self.device_actions = act;
-                // now that we have device actions, let's fetch the plans
-                self.cio.assets.push(Asset::ActionPlans);
-                Ok(())
-            }
-            Asset::ActionPlans => {
-                let mut plans: Vec<ActionPlan> =
-                    serde_wasm_bindgen::from_value(value)?;
-                plans.retain(|p| {
-                    p.active
-                        && self
-                            .device_actions
-                            .iter()
-                            .any(|da| da.action_plan == p.name)
-                });
-                self.action_plans = plans;
-                Ok(())
+            Asset::DeviceActions | Asset::ActionPlans => {
+                self.dev.set_asset(pri, asset, value)
             }
             _ => self.loc.set_asset(pri, asset, value),
         }
@@ -513,15 +480,17 @@ fn centiseconds(s: f32) -> u16 {
     (s * 10.0).round() as u16 * 10
 }
 
-impl RampMeter {
-    /// Check if ramp meter has a given hashtag
+impl Device for RampMeter {
+    /// Check if device has a given hashtag
     fn has_hashtag(&self, hashtag: &str) -> bool {
         match &self.notes {
             Some(notes) => contains_hashtag(notes, hashtag),
             None => false,
         }
     }
+}
 
+impl RampMeter {
     /// Get status rate
     fn status_rate(&self) -> Option<u32> {
         self.status.as_ref().and_then(|st| st.rate)
@@ -818,7 +787,7 @@ impl RampMeter {
         self.render_location_row(&mut tree.root::<html::Div>());
         if self.item_state_main(anc) != ItemState::Inactive {
             self.render_lock_row(anc, &mut tree.root::<html::Div>());
-            self.render_action_plans(anc, &mut tree.root::<html::Details>());
+            anc.dev.render_action_plans(&mut tree.root::<html::Details>());
         }
         String::from(tree)
     }
@@ -868,45 +837,6 @@ impl RampMeter {
         div2.close();
         self.meter_image_html(2, green_cs, yellow_cs, &mut div.img());
         div.close();
-    }
-
-    /// Render action plans as HTML
-    fn render_action_plans<'p>(
-        &self,
-        anc: &RampMeterAnc,
-        details: &'p mut html::Details<'p>,
-    ) {
-        if anc.action_plans.is_empty() {
-            return;
-        }
-        details.summary().cdata("📋 Action Plans").close();
-        let mut div = details.div();
-        div.class("row fill");
-        div.span().cdata("Name").close();
-        div.span().cdata("Phase").close();
-        div.close();
-        for act in &anc.action_plans {
-            let mut div = details.div();
-            div.class("row fill");
-            let query = QueryParam::new()
-                .with_res(Res::ActionPlan)
-                .with_sel(&act.name);
-            div.a().href(query.to_string()).cdata(&act.name).close();
-            let mut span = div.span();
-            let mut select = span.select();
-            select.id("phase").disabled();
-            for p in anc.phases(act) {
-                let mut option = select.option();
-                if p == act.phase {
-                    option.selected();
-                }
-                option.cdata(p).close();
-            }
-            select.close();
-            span.close();
-            div.close();
-        }
-        details.close();
     }
 
     /// Convert to Request HTML
