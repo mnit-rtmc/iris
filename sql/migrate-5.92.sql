@@ -3,6 +3,35 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
+SELECT iris.update_version('5.91.0', '5.92.0');
+
+-- Limit number of entries in a playlist
+ALTER TABLE iris.play_list_entry
+    DROP CONSTRAINT ordinal_ck;
+ALTER TABLE iris.play_list_entry
+    ADD CONSTRAINT ordinal_ck
+    CHECK (ordinal >= 0 AND ordinal <= 64);
+
+-- Add dwell_sec column to play_list
+ALTER TABLE iris.play_list ADD COLUMN dwell_sec INTEGER;
+UPDATE iris.play_list SET dwell_sec = (
+    SELECT value FROM iris.system_attribute
+    WHERE name = 'camera_playlist_dwell_sec'
+)::INTEGER;
+ALTER TABLE iris.play_list ALTER COLUMN dwell_sec SET NOT NULL;
+DELETE FROM iris.system_attribute
+    WHERE name = 'camera_playlist_dwell_sec';
+
+ALTER TABLE iris.play_list ADD CONSTRAINT dwell_sec_ck
+    CHECK ((dwell_sec > 0) AND (dwell_sec <= 300));
+
+-- Remove unused gate arm state 4
+INSERT INTO iris.gate_arm_state (id, description) VALUES (4, 'closing');
+UPDATE iris._gate_arm SET arm_state = 4 WHERE arm_state = 5;
+UPDATE iris.gate_arm_state SET description = 'closed' WHERE id = 5;
+UPDATE iris._gate_arm SET arm_state = 5 WHERE arm_state = 6;
+DELETE FROM iris.gate_arm_state WHERE id = 6;
+
 -- Add gate arm control mode
 DROP VIEW gate_arm_view;
 DROP VIEW iris.gate_arm;
