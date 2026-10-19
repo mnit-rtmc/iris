@@ -112,7 +112,7 @@ where
             Asset::Roads => {
                 self.roads = serde_wasm_bindgen::from_value(value)?;
             }
-            _ => unreachable!(),
+            _ => (),
         }
         Ok(())
     }
