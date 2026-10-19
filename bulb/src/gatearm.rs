@@ -10,19 +10,24 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::actionplan::ActionPlan;
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html};
 use crate::cio::{ControllerIo, ControllerIoAnc};
+use crate::devaction::DeviceAction;
 use crate::error::Result;
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::map;
+use crate::notes::contains_hashtag;
+use crate::query::QueryParam;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
 use resources::Res;
 use serde::Deserialize;
 use std::borrow::Cow;
+use std::collections::BTreeSet;
 use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
 
@@ -56,7 +61,9 @@ pub struct GateArm {
 pub struct GateArmAnc {
     cio: ControllerIoAnc<GateArm>,
     loc: LocAnc<GateArm>,
-    pub states: Vec<GateArmState>,
+    states: Vec<GateArmState>,
+    device_actions: Vec<DeviceAction>,
+    action_plans: Vec<ActionPlan>,
 }
 
 /// Get gate arm item states
@@ -71,6 +78,23 @@ pub fn item_states(arm_state: u32) -> ItemStates<'static> {
     }
 }
 
+impl GateArmAnc {
+    /// Get action plan phases
+    fn phases<'a>(
+        &'a self,
+        plan: &'a ActionPlan,
+    ) -> impl Iterator<Item = &'a str> {
+        let mut phases = BTreeSet::new();
+        phases.insert(&plan.default_phase[..]);
+        for da in &self.device_actions {
+            if da.action_plan == plan.name {
+                phases.insert(&da.phase[..]);
+            }
+        }
+        phases.into_iter()
+    }
+}
+
 impl AncillaryData for GateArmAnc {
     type Primary = GateArm;
 
@@ -80,11 +104,14 @@ impl AncillaryData for GateArmAnc {
         if let View::SearchEv | View::Control = view {
             cio.assets.push(Asset::GateArmStates);
         }
+        if let View::Control = view {
+            cio.assets.push(Asset::DeviceActions);
+        }
         let loc = LocAnc::new(pri, view);
         GateArmAnc {
             cio,
             loc,
-            states: Vec::new(),
+            ..Default::default()
         }
     }
 
@@ -105,6 +132,26 @@ impl AncillaryData for GateArmAnc {
             Asset::GateArmStates => {
                 self.states = serde_wasm_bindgen::from_value(value)?;
             }
+            Asset::DeviceActions => {
+                let mut act: Vec<DeviceAction> =
+                    serde_wasm_bindgen::from_value(value)?;
+                act.retain(|da| pri.has_hashtag(&da.hashtag));
+                self.device_actions = act;
+                // now that we have device actions, let's fetch the plans
+                self.cio.assets.push(Asset::ActionPlans);
+            }
+            Asset::ActionPlans => {
+                let mut plans: Vec<ActionPlan> =
+                    serde_wasm_bindgen::from_value(value)?;
+                plans.retain(|p| {
+                    p.active
+                        && self
+                            .device_actions
+                            .iter()
+                            .any(|da| da.action_plan == p.name)
+                });
+                self.action_plans = plans;
+            }
             _ => self.loc.set_asset(pri, asset, value)?,
         }
         Ok(())
@@ -119,6 +166,14 @@ impl ControllerIo for GateArm {
 }
 
 impl GateArm {
+    /// Check if gate arm has a given hashtag
+    fn has_hashtag(&self, hashtag: &str) -> bool {
+        match &self.notes {
+            Some(notes) => contains_hashtag(notes, hashtag),
+            None => false,
+        }
+    }
+
     /// Get item states
     fn item_states<'a>(&'a self, anc: &'a GateArmAnc) -> ItemStates<'a> {
         let states = anc.cio.item_states(self);
@@ -151,15 +206,22 @@ impl GateArm {
         }
         let mut tree = Tree::new();
         self.title(View::Control, &mut tree.root::<html::Div>());
-        self.render_state_row(&mut tree.root::<html::Div>());
+        self.render_state_row(anc, &mut tree.root::<html::Div>());
         self.render_location_row(&mut tree.root::<html::Div>());
+        if self.item_state_main(anc) != ItemState::Inactive {
+            self.render_action_plans(anc, &mut tree.root::<html::Details>());
+        }
         String::from(tree)
     }
 
     /// Render item state row as an HTML div element
-    fn render_state_row<'p>(&self, div: &'p mut html::Div<'p>) {
+    fn render_state_row<'p>(
+        &self,
+        anc: &GateArmAnc,
+        div: &'p mut html::Div<'p>,
+    ) {
         div.id("state-row").class("row fill");
-        item_states(self.arm_state).spans(&mut div.span());
+        self.item_states(anc).spans(&mut div.span());
         div.close();
     }
 
@@ -171,17 +233,43 @@ impl GateArm {
             .close();
     }
 
-    /// Convert to Status HTML
-    fn to_html_status(&self, anc: &GateArmAnc) -> String {
-        let mut tree = Tree::new();
-        self.title(View::Status, &mut tree.root::<html::Div>());
-        let mut div = tree.root::<html::Div>();
-        div.class("row");
-        self.item_states(anc).spans(&mut div.span());
+    /// Render action plans as HTML
+    fn render_action_plans<'p>(
+        &self,
+        anc: &GateArmAnc,
+        details: &'p mut html::Details<'p>,
+    ) {
+        if anc.action_plans.is_empty() {
+            return;
+        }
+        details.summary().cdata("📋 Action Plans").close();
+        let mut div = details.div();
+        div.class("row fill");
+        div.span().cdata("Name").close();
+        div.span().cdata("Phase").close();
         div.close();
-        div = tree.root::<html::Div>();
-        div.class("info").cdata_len(opt_ref(&self.location), 64);
-        String::from(tree)
+        for act in &anc.action_plans {
+            let mut div = details.div();
+            div.class("row fill");
+            let query = QueryParam::new()
+                .with_res(Res::ActionPlan)
+                .with_sel(&act.name);
+            div.a().href(query.to_string()).cdata(&act.name).close();
+            let mut span = div.span();
+            let mut select = span.select();
+            select.id("phase").disabled();
+            for p in anc.phases(act) {
+                let mut option = select.option();
+                if p == act.phase {
+                    option.selected();
+                }
+                option.cdata(p).close();
+            }
+            select.close();
+            span.close();
+            div.close();
+        }
+        details.close();
     }
 
     /// Convert to Setup HTML
@@ -259,6 +347,26 @@ impl Card for GateArm {
         self
     }
 
+    /// Get the main item state
+    fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
+        let states = self.item_states(anc);
+        if states.contains(ItemState::Inactive) {
+            ItemState::Inactive
+        } else if states.contains(ItemState::Offline) {
+            ItemState::Offline
+        } else if states.contains(ItemState::Open) {
+            ItemState::Open
+        } else if states.contains(ItemState::Closed) {
+            ItemState::Closed
+        } else if states.contains(ItemState::Opening) {
+            ItemState::Opening
+        } else if states.contains(ItemState::Closing) {
+            ItemState::Closing
+        } else {
+            ItemState::Fault
+        }
+    }
+
     /// Check if a search string matches
     fn is_match(&self, search: &str, anc: &GateArmAnc) -> bool {
         self.name.contains_lower(search)
@@ -277,7 +385,6 @@ impl Card for GateArm {
         match view {
             View::Create => self.to_html_create(20),
             View::Control => self.to_html_control(anc),
-            View::Status => self.to_html_status(anc),
             View::Setup(edit) => self.to_html_setup(anc, edit),
             View::Location(edit) => anc.loc.to_html_loc(self, edit),
             _ => self.to_html_compact(anc),
@@ -301,11 +408,11 @@ impl Card for GateArm {
     }
 
     /// Handle updating a card in response to an SSE notification
-    fn handle_update(&self, _anc: GateArmAnc) {
+    fn handle_update(&self, anc: GateArmAnc) {
         let doc = Doc::get();
         if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
             let mut tree = Tree::new();
-            self.render_state_row(&mut tree.root::<html::Div>());
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
             row.set_outer_html(&String::from(tree));
         }
         if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {

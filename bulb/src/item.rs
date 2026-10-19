@@ -176,9 +176,9 @@ impl ItemState {
     pub fn fill_css(self) -> &'static str {
         match self {
             Self::Online => "#88bbff",
-            Self::Available => "#4488ee",
-            Self::Deployed => "#ff9800",
-            Self::Operator => "#ffff00",
+            Self::Available | Self::Closed => "#4488ee",
+            Self::Deployed | Self::Open => "#ff9800",
+            Self::Operator | Self::Opening | Self::Closing => "#ffff00",
             Self::Planned => "#bb6655",
             Self::Incident => "#55acee",
             Self::Locked => "#864",
