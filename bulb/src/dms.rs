@@ -858,7 +858,10 @@ impl Dms {
         for act in &anc.action_plans {
             let mut div = details.div();
             div.class("row fill");
-            div.span().class("info").cdata(&act.name).close();
+            let query = QueryParam::new()
+                .with_res(Res::ActionPlan)
+                .with_sel(&act.name);
+            div.a().href(query.to_string()).cdata(&act.name).close();
             let mut span = div.span();
             let mut select = span.select();
             select.id("phase").disabled();
