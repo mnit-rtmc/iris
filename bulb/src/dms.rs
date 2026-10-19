@@ -691,12 +691,12 @@ impl Dms {
         self.render_state_row(anc, &mut tree.root::<html::Div>());
         self.render_message_row(anc, &mut tree.root::<html::Div>());
         self.render_location_row(&mut tree.root::<html::Div>());
-        if anc.access_level(self) >= AccessLevel::Operate
-            && self.item_state_main(anc) != ItemState::Inactive
-        {
-            self.message_composer_html(anc, &mut tree.root::<html::Div>());
+        if self.item_state_main(anc) != ItemState::Inactive {
+            if anc.access_level(self) >= AccessLevel::Operate {
+                self.message_composer_html(anc, &mut tree.root::<html::Div>());
+            }
+            self.action_plans_html(anc, &mut tree.root::<html::Details>());
         }
-        self.action_plans_html(anc, &mut tree.root::<html::Details>());
         String::from(tree)
     }
 
