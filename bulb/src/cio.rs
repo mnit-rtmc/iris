@@ -131,11 +131,8 @@ where
         asset: Asset,
         value: JsValue,
     ) -> Result<()> {
-        match asset {
-            Asset::Controllers => {
-                self.controllers = serde_wasm_bindgen::from_value(value)?;
-            }
-            _ => (),
+        if asset == Asset::Controllers {
+            self.controllers = serde_wasm_bindgen::from_value(value)?;
         }
         Ok(())
     }
