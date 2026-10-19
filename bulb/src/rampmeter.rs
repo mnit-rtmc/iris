@@ -787,7 +787,8 @@ impl RampMeter {
         self.render_location_row(&mut tree.root::<html::Div>());
         if self.item_state_main(anc) != ItemState::Inactive {
             self.render_lock_row(anc, &mut tree.root::<html::Div>());
-            anc.dev.render_action_plans(&mut tree.root::<html::Details>());
+            anc.dev
+                .render_action_plans(&mut tree.root::<html::Details>());
         }
         String::from(tree)
     }
