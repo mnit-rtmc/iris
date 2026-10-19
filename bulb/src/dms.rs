@@ -695,7 +695,7 @@ impl Dms {
             if anc.access_level(self) >= AccessLevel::Operate {
                 self.message_composer_html(anc, &mut tree.root::<html::Div>());
             }
-            self.action_plans_html(anc, &mut tree.root::<html::Details>());
+            self.render_action_plans(anc, &mut tree.root::<html::Details>());
         }
         String::from(tree)
     }
@@ -840,8 +840,8 @@ impl Dms {
             .ok()
     }
 
-    /// Build action plans HTML
-    fn action_plans_html<'p>(
+    /// Render action plans as HTML
+    fn render_action_plans<'p>(
         &self,
         anc: &DmsAnc,
         details: &'p mut html::Details<'p>,

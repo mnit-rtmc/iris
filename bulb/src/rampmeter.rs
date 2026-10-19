@@ -818,7 +818,7 @@ impl RampMeter {
         self.render_location_row(&mut tree.root::<html::Div>());
         if self.item_state_main(anc) != ItemState::Inactive {
             self.render_lock_row(anc, &mut tree.root::<html::Div>());
-            self.action_plans_html(anc, &mut tree.root::<html::Details>());
+            self.render_action_plans(anc, &mut tree.root::<html::Details>());
         }
         String::from(tree)
     }
@@ -870,8 +870,8 @@ impl RampMeter {
         div.close();
     }
 
-    /// Build action plans HTML
-    fn action_plans_html<'p>(
+    /// Render action plans as HTML
+    fn render_action_plans<'p>(
         &self,
         anc: &RampMeterAnc,
         details: &'p mut html::Details<'p>,
