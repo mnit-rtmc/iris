@@ -65,8 +65,8 @@ pub fn item_states(arm_state: u32) -> ItemStates<'static> {
         1 => ItemState::Fault.into(),
         2 => ItemState::Opening.into(),
         3 => ItemState::Open.into(),
-        5 => ItemState::Closing.into(),
-        6 => ItemState::Closed.into(),
+        4 => ItemState::Closing.into(),
+        5 => ItemState::Closed.into(),
         _ => ItemState::Unknown.into(),
     }
 }
