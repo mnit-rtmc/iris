@@ -49,7 +49,7 @@ pub struct GeoLoc {
 #[derive(Debug, Default)]
 pub struct LocAnc<C> {
     pri: PhantomData<C>,
-    pub assets: Vec<Asset>,
+    assets: Vec<Asset>,
     geoloc: Option<GeoLoc>,
     roads: Vec<Road>,
     directions: Vec<Direction>,

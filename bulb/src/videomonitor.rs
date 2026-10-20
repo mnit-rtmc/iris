@@ -51,6 +51,7 @@ pub struct VideoMonitor {
 #[derive(Default)]
 pub struct VideoMonitorAnc {
     cio: ControllerIoAnc<VideoMonitor>,
+    assets: Vec<Asset>,
     access: Vec<Permission>,
     monitor_styles: Vec<MonitorStyle>,
 }
@@ -60,21 +61,21 @@ impl AncillaryData for VideoMonitorAnc {
 
     /// Construct ancillary video monitor data
     fn new(pri: &VideoMonitor, view: View) -> Self {
-        let mut cio = ControllerIoAnc::new(pri, view);
-        cio.assets.push(Asset::Access);
-        if let View::Setup(_edit) = view {
-            cio.assets.push(Asset::MonitorStyles);
-        }
+        let cio = ControllerIoAnc::new(pri, view);
+        let assets = match view {
+            View::Setup(_edit) => vec![Asset::Access, Asset::MonitorStyles],
+            _ => vec![Asset::Access],
+        };
         VideoMonitorAnc {
             cio,
-            access: Vec::new(),
-            monitor_styles: Vec::new(),
+            assets,
+            ..Default::default()
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop()
+        self.cio.asset().or_else(|| self.assets.pop())
     }
 
     /// Set asset value
@@ -87,14 +88,13 @@ impl AncillaryData for VideoMonitorAnc {
         match asset {
             Asset::Access => {
                 self.access = serde_wasm_bindgen::from_value(value)?;
-                Ok(())
             }
             Asset::MonitorStyles => {
                 self.monitor_styles = serde_wasm_bindgen::from_value(value)?;
-                Ok(())
             }
-            _ => self.cio.set_asset(pri, asset, value),
+            _ => self.cio.set_asset(pri, asset, value)?,
         }
+        Ok(())
     }
 }
 

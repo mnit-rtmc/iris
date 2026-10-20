@@ -161,6 +161,7 @@ pub struct WeatherSensor {
 pub struct WeatherSensorAnc {
     cio: ControllerIoAnc<WeatherSensor>,
     loc: LocAnc<WeatherSensor>,
+    assets: Vec<Asset>,
     sys_attrs: Vec<SystemAttr>,
 }
 
@@ -170,25 +171,29 @@ impl AncillaryData for WeatherSensorAnc {
     /// Construct ancillary weather sensor data
     fn new(pri: &WeatherSensor, view: View) -> Self {
         let cio = ControllerIoAnc::new(pri, view);
-        let mut loc = LocAnc::new(pri, view);
-        // Need geoloc to fly to location on map
-        if let (View::Status, Some(nm)) = (view, pri.geoloc()) {
-            loc.assets
-                .push(Asset::GeoLoc(nm.to_string(), Res::WeatherSensor));
-        }
-        if let View::Request = view {
-            loc.assets.push(Asset::SystemAttrs);
-        }
+        let loc = LocAnc::new(pri, view);
+        let assets = match (view, pri.geoloc()) {
+            (View::Status, Some(nm)) => {
+                // Need geoloc to fly to location on map
+                vec![Asset::GeoLoc(nm.to_string(), Res::WeatherSensor)]
+            }
+            (View::Request, _) => vec![Asset::SystemAttrs],
+            _ => Vec::new(),
+        };
         WeatherSensorAnc {
             cio,
             loc,
+            assets,
             ..Default::default()
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
+        self.cio
+            .asset()
+            .or_else(|| self.loc.asset())
+            .or_else(|| self.assets.pop())
     }
 
     /// Set asset value
@@ -199,13 +204,13 @@ impl AncillaryData for WeatherSensorAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
-            Asset::Controllers => self.cio.set_asset(pri, asset, value),
             Asset::SystemAttrs => {
                 self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
-                Ok(())
             }
-            _ => self.loc.set_asset(pri, asset, value),
+            Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
+            _ => self.loc.set_asset(pri, asset, value)?,
         }
+        Ok(())
     }
 }
 

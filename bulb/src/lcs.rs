@@ -81,6 +81,7 @@ pub struct Lcs {
 pub struct LcsAnc {
     cio: ControllerIoAnc<Lcs>,
     loc: LocAnc<Lcs>,
+    assets: Vec<Asset>,
     lcs_states: Vec<LcsState>,
     pub lcs_types: Vec<LcsType>,
 }
@@ -176,27 +177,27 @@ impl AncillaryData for LcsAnc {
 
     /// Construct ancillary LCS array data
     fn new(pri: &Lcs, view: View) -> Self {
-        let mut cio = ControllerIoAnc::new(pri, view);
-        match view {
-            View::Control => cio.assets.push(Asset::LcsStates),
-            View::Setup(_edit) => {
-                cio.assets.push(Asset::LcsStates);
-                cio.assets.push(Asset::LcsTypes);
-            }
-            _ => (),
-        }
+        let cio = ControllerIoAnc::new(pri, view);
         let loc = LocAnc::new(pri, view);
+        let assets = match view {
+            View::Control => vec![Asset::LcsStates],
+            View::Setup(_edit) => vec![Asset::LcsStates, Asset::LcsTypes],
+            _ => Vec::new(),
+        };
         LcsAnc {
             cio,
             loc,
-            lcs_states: Vec::new(),
-            lcs_types: Vec::new(),
+            assets,
+            ..Default::default()
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
+        self.cio
+            .asset()
+            .or_else(|| self.loc.asset())
+            .or_else(|| self.assets.pop())
     }
 
     /// Set asset value

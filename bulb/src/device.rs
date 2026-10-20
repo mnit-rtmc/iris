@@ -36,7 +36,7 @@ pub trait Device {
 #[derive(Debug, Default)]
 pub struct DeviceAnc<D> {
     pri: PhantomData<D>,
-    pub assets: Vec<Asset>,
+    assets: Vec<Asset>,
     device_actions: Vec<DeviceAction>,
     action_plans: Vec<ActionPlan>,
 }

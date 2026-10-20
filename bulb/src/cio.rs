@@ -33,7 +33,7 @@ pub trait ControllerIo {
 #[derive(Debug, Default)]
 pub struct ControllerIoAnc<C> {
     pri: PhantomData<C>,
-    pub assets: Vec<Asset>,
+    assets: Vec<Asset>,
     controllers: Vec<Controller>,
 }
 

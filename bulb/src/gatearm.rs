@@ -59,6 +59,7 @@ pub struct GateArmAnc {
     cio: ControllerIoAnc<GateArm>,
     dev: DeviceAnc<GateArm>,
     loc: LocAnc<GateArm>,
+    assets: Vec<Asset>,
     states: Vec<GateArmState>,
 }
 
@@ -79,19 +80,18 @@ impl AncillaryData for GateArmAnc {
 
     /// Construct ancillary gate arm data
     fn new(pri: &GateArm, view: View) -> Self {
-        let mut cio = ControllerIoAnc::new(pri, view);
-        if let View::SearchEv | View::Control = view {
-            cio.assets.push(Asset::GateArmStates);
-        }
-        if let View::Control = view {
-            cio.assets.push(Asset::DeviceActions);
-        }
+        let cio = ControllerIoAnc::new(pri, view);
         let dev = DeviceAnc::new(pri, view);
         let loc = LocAnc::new(pri, view);
+        let assets = match view {
+            View::SearchEv | View::Control => vec![Asset::GateArmStates],
+            _ => Vec::new(),
+        };
         GateArmAnc {
             cio,
             dev,
             loc,
+            assets,
             ..Default::default()
         }
     }
@@ -99,10 +99,10 @@ impl AncillaryData for GateArmAnc {
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
         self.cio
-            .assets
-            .pop()
-            .or_else(|| self.dev.assets.pop())
-            .or_else(|| self.loc.assets.pop())
+            .asset()
+            .or_else(|| self.dev.asset())
+            .or_else(|| self.loc.asset())
+            .or_else(|| self.assets.pop())
     }
 
     /// Set asset value
@@ -113,10 +113,10 @@ impl AncillaryData for GateArmAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
-            Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             Asset::GateArmStates => {
                 self.states = serde_wasm_bindgen::from_value(value)?;
             }
+            Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             Asset::DeviceActions | Asset::ActionPlans => {
                 self.dev.set_asset(pri, asset, value)?;
             }

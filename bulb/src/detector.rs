@@ -54,6 +54,7 @@ pub struct LaneCode {
 #[derive(Default)]
 pub struct DetectorAnc {
     cio: ControllerIoAnc<Detector>,
+    assets: Vec<Asset>,
     lane_codes: Vec<LaneCode>,
 }
 
@@ -82,19 +83,21 @@ impl AncillaryData for DetectorAnc {
 
     /// Construct ancillary detector data
     fn new(pri: &Detector, view: View) -> Self {
-        let mut cio = ControllerIoAnc::new(pri, view);
-        if let View::Setup(_edit) = view {
-            cio.assets.push(Asset::LaneCodes);
-        }
+        let cio = ControllerIoAnc::new(pri, view);
+        let assets = match view {
+            View::Setup(_edit) => vec![Asset::LaneCodes],
+            _ => Vec::new(),
+        };
         DetectorAnc {
             cio,
-            lane_codes: Vec::new(),
+            assets,
+            ..Default::default()
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop()
+        self.cio.asset().or_else(|| self.assets.pop())
     }
 
     /// Set asset value
@@ -107,10 +110,10 @@ impl AncillaryData for DetectorAnc {
         match asset {
             Asset::LaneCodes => {
                 self.lane_codes = serde_wasm_bindgen::from_value(value)?;
-                Ok(())
             }
-            _ => self.cio.set_asset(pri, asset, value),
+            _ => self.cio.set_asset(pri, asset, value)?,
         }
+        Ok(())
     }
 }
 

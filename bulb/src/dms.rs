@@ -200,6 +200,7 @@ pub struct DmsAnc {
     cio: ControllerIoAnc<Dms>,
     dev: DeviceAnc<Dms>,
     loc: LocAnc<Dms>,
+    assets: Vec<Asset>,
     access: Vec<Permission>,
     messages: Vec<SignMessage>,
     configs: Vec<SignConfig>,
@@ -217,35 +218,37 @@ impl AncillaryData for DmsAnc {
 
     /// Construct ancillary DMS data
     fn new(pri: &Dms, view: View) -> Self {
-        let mut cio = ControllerIoAnc::new(pri, view);
-        match view {
-            View::Compact | View::Hidden | View::SearchEv | View::Status => {
-                cio.assets.push(Asset::SignMessages);
-            }
-            View::Control => {
-                cio.assets.push(Asset::Access);
-                cio.assets.push(Asset::SignMessages);
-                cio.assets.push(Asset::SignConfigs);
-                cio.assets.push(Asset::MsgPatterns);
-                cio.assets.push(Asset::Words);
-                cio.assets.push(Asset::Fonts);
-                cio.assets.push(Asset::Graphics);
-            }
-            View::Setup(_edit) => {
-                cio.assets.push(Asset::SignConfigs);
-                cio.assets.push(Asset::SignDetails);
-            }
-            View::Request => {
-                cio.assets.push(Asset::SystemAttrs);
-            }
-            _ => (),
-        }
+        let cio = ControllerIoAnc::new(pri, view);
         let dev = DeviceAnc::new(pri, view);
         let loc = LocAnc::new(pri, view);
+        let assets = match view {
+            View::Compact | View::Hidden | View::SearchEv | View::Status => {
+                vec![Asset::SignMessages]
+            }
+            View::Control => {
+                vec![
+                    Asset::Access,
+                    Asset::SignMessages,
+                    Asset::SignConfigs,
+                    Asset::MsgPatterns,
+                    Asset::Words,
+                    Asset::Fonts,
+                    Asset::Graphics,
+                ]
+            }
+            View::Setup(_edit) => {
+                vec![Asset::SignConfigs, Asset::SignDetails]
+            }
+            View::Request => {
+                vec![Asset::SystemAttrs]
+            }
+            _ => Vec::new(),
+        };
         DmsAnc {
             cio,
             dev,
             loc,
+            assets,
             ..Default::default()
         }
     }
@@ -253,10 +256,10 @@ impl AncillaryData for DmsAnc {
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
         self.cio
-            .assets
-            .pop()
-            .or_else(|| self.dev.assets.pop())
-            .or_else(|| self.loc.assets.pop())
+            .asset()
+            .or_else(|| self.dev.asset())
+            .or_else(|| self.loc.asset())
+            .or_else(|| self.assets.pop())
     }
 
     /// Set asset value
@@ -269,9 +272,6 @@ impl AncillaryData for DmsAnc {
         match asset {
             Asset::Access => {
                 self.access = serde_wasm_bindgen::from_value(value)?;
-            }
-            Asset::Controllers => {
-                self.cio.set_asset(pri, asset, value)?;
             }
             Asset::SignMessages => {
                 self.messages = serde_wasm_bindgen::from_value(value)?;
@@ -293,7 +293,7 @@ impl AncillaryData for DmsAnc {
                 patterns.sort();
                 self.compose_patterns = patterns;
                 // now that we have the patterns, let's fetch the lines
-                self.cio.assets.push(Asset::MsgLines);
+                self.assets.push(Asset::MsgLines);
             }
             Asset::MsgLines => {
                 let mut lines: Vec<MsgLine> =
@@ -308,7 +308,7 @@ impl AncillaryData for DmsAnc {
                 let fnames: Vec<FontName> =
                     serde_wasm_bindgen::from_value(value)?;
                 for fname in fnames {
-                    self.cio.assets.push(Asset::Font(fname.name));
+                    self.assets.push(Asset::Font(fname.name));
                 }
             }
             Asset::Font(_nm) => {
@@ -324,7 +324,7 @@ impl AncillaryData for DmsAnc {
                 let gnames: Vec<GraphicName> =
                     serde_wasm_bindgen::from_value(value)?;
                 for gname in gnames {
-                    self.cio.assets.push(Asset::Graphic(gname.name));
+                    self.assets.push(Asset::Graphic(gname.name));
                 }
             }
             Asset::Graphic(nm) => {
@@ -347,6 +347,9 @@ impl AncillaryData for DmsAnc {
             }
             Asset::SystemAttrs => {
                 self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
+            }
+            Asset::Controllers => {
+                self.cio.set_asset(pri, asset, value)?;
             }
             Asset::DeviceActions | Asset::ActionPlans => {
                 self.dev.set_asset(pri, asset, value)?;

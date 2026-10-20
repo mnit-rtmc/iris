@@ -63,6 +63,7 @@ pub struct Camera {
 pub struct CameraAnc {
     cio: ControllerIoAnc<Camera>,
     loc: LocAnc<Camera>,
+    assets: Vec<Asset>,
     access: Vec<Permission>,
     enc_types: Vec<EncoderType>,
 }
@@ -73,23 +74,26 @@ impl AncillaryData for CameraAnc {
     /// Construct ancillary camera data
     fn new(pri: &Camera, view: View) -> Self {
         let cio = ControllerIoAnc::new(pri, view);
-        let mut loc = LocAnc::new(pri, view);
-        if let View::Control = view {
-            loc.assets.push(Asset::Access);
-        }
-        if let View::Setup(_edit) = view {
-            loc.assets.push(Asset::EncoderTypes);
-        }
+        let loc = LocAnc::new(pri, view);
+        let assets = match view {
+            View::Control => vec![Asset::Access],
+            View::Setup(_edit) => vec![Asset::EncoderTypes],
+            _ => Vec::new(),
+        };
         CameraAnc {
             cio,
             loc,
+            assets,
             ..Default::default()
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
+        self.cio
+            .asset()
+            .or_else(|| self.loc.asset())
+            .or_else(|| self.assets.pop())
     }
 
     /// Set asset value
@@ -102,16 +106,15 @@ impl AncillaryData for CameraAnc {
         match asset {
             Asset::Access => {
                 self.access = serde_wasm_bindgen::from_value(value)?;
-                Ok(())
             }
-            Asset::Controllers => self.cio.set_asset(pri, asset, value),
             Asset::EncoderTypes => {
                 self.enc_types = serde_wasm_bindgen::from_value(value)?;
                 self.enc_types.sort();
-                Ok(())
             }
-            _ => self.loc.set_asset(pri, asset, value),
+            Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
+            _ => self.loc.set_asset(pri, asset, value)?,
         }
+        Ok(())
     }
 }
 

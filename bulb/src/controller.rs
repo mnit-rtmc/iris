@@ -88,6 +88,7 @@ pub struct Controller {
 #[derive(Debug, Default)]
 pub struct ControllerAnc {
     loc: LocAnc<Controller>,
+    assets: Vec<Asset>,
     conditions: Vec<Condition>,
     states: Vec<CommState>,
     pub cabinet_styles: Vec<CabinetStyle>,
@@ -101,39 +102,39 @@ impl AncillaryData for ControllerAnc {
 
     /// Construct ancillary controller data
     fn new(pri: &Controller, view: View) -> Self {
-        let mut loc = LocAnc::new(pri, view);
-        match view {
-            View::SearchEv => {
-                loc.assets.push(Asset::Conditions);
-                loc.assets.push(Asset::CommStates);
-                loc.assets.push(Asset::CommLinks);
-                loc.assets.push(Asset::CommConfigs);
-            }
-            View::Status => {
-                loc.assets.push(Asset::Conditions);
-                loc.assets.push(Asset::CommStates);
-                loc.assets.push(Asset::CommLinks);
-                loc.assets.push(Asset::CommConfigs);
-                loc.assets.push(Asset::ControllerIo(pri.name.to_string()));
-                loc.assets
-                    .push(Asset::GeoLoc(pri.name.to_string(), Res::Controller));
-            }
-            View::Setup(_edit) => {
-                loc.assets.push(Asset::Conditions);
-                loc.assets.push(Asset::CabinetStyles);
-                loc.assets.push(Asset::ControllerIo(pri.name.to_string()));
-            }
-            _ => (),
+        let loc = LocAnc::new(pri, view);
+        let assets = match view {
+            View::SearchEv => vec![
+                Asset::Conditions,
+                Asset::CommStates,
+                Asset::CommLinks,
+                Asset::CommConfigs,
+            ],
+            View::Status => vec![
+                Asset::Conditions,
+                Asset::CommStates,
+                Asset::CommLinks,
+                Asset::CommConfigs,
+                Asset::ControllerIo(pri.name.to_string()),
+                Asset::GeoLoc(pri.name.to_string(), Res::Controller),
+            ],
+            View::Setup(_edit) => vec![
+                Asset::Conditions,
+                Asset::CabinetStyles,
+                Asset::ControllerIo(pri.name.to_string()),
+            ],
+            _ => Vec::new(),
         };
         ControllerAnc {
             loc,
+            assets,
             ..Default::default()
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.loc.asset()
+        self.loc.asset().or_else(|| self.assets.pop())
     }
 
     /// Set asset value

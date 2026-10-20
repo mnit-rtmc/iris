@@ -110,6 +110,7 @@ pub struct TagReader {
 pub struct TagReaderAnc {
     cio: ControllerIoAnc<TagReader>,
     loc: LocAnc<TagReader>,
+    assets: Vec<Asset>,
 }
 
 impl ProtocolSettings {
@@ -272,17 +273,22 @@ impl AncillaryData for TagReaderAnc {
     /// Construct ancillary tag reader data
     fn new(pri: &TagReader, view: View) -> Self {
         let cio = ControllerIoAnc::new(pri, view);
-        let mut loc = LocAnc::new(pri, view);
-        if let View::Status = view {
-            loc.assets
-                .push(Asset::GeoLoc(pri.name.to_string(), Res::TagReader));
-        }
-        TagReaderAnc { cio, loc }
+        let loc = LocAnc::new(pri, view);
+        let assets = match view {
+            View::Status => {
+                vec![Asset::GeoLoc(pri.name.to_string(), Res::TagReader)]
+            }
+            _ => Vec::new(),
+        };
+        TagReaderAnc { cio, loc, assets }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
+        self.cio
+            .asset()
+            .or_else(|| self.loc.asset())
+            .or_else(|| self.assets.pop())
     }
 
     /// Set asset value

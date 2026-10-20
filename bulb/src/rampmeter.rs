@@ -116,6 +116,7 @@ pub struct RampMeterAnc {
     cio: ControllerIoAnc<RampMeter>,
     dev: DeviceAnc<RampMeter>,
     loc: LocAnc<RampMeter>,
+    assets: Vec<Asset>,
     meter_types: Vec<MeterType>,
     algorithms: Vec<MeterAlgorithm>,
     access: Vec<Permission>,
@@ -230,25 +231,23 @@ impl AncillaryData for RampMeterAnc {
 
     /// Construct ancillary ramp meter data
     fn new(pri: &RampMeter, view: View) -> Self {
-        let mut cio = ControllerIoAnc::new(pri, view);
-        match view {
-            View::Control | View::Request => {
-                cio.assets.push(Asset::Access);
-                cio.assets.push(Asset::SystemAttrs);
-                cio.assets.push(Asset::DeviceActions);
-            }
-            View::Setup(_edit) => {
-                cio.assets.push(Asset::MeterAlgorithms);
-                cio.assets.push(Asset::MeterTypes);
-            }
-            _ => (),
-        }
+        let cio = ControllerIoAnc::new(pri, view);
         let dev = DeviceAnc::new(pri, view);
         let loc = LocAnc::new(pri, view);
+        let assets = match view {
+            View::Control | View::Request => {
+                vec![Asset::Access, Asset::SystemAttrs, Asset::DeviceActions]
+            }
+            View::Setup(_edit) => {
+                vec![Asset::MeterAlgorithms, Asset::MeterTypes]
+            }
+            _ => Vec::new(),
+        };
         RampMeterAnc {
             cio,
             dev,
             loc,
+            assets,
             ..Default::default()
         }
     }
@@ -256,10 +255,10 @@ impl AncillaryData for RampMeterAnc {
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
         self.cio
-            .assets
-            .pop()
-            .or_else(|| self.dev.assets.pop())
-            .or_else(|| self.loc.assets.pop())
+            .asset()
+            .or_else(|| self.dev.asset())
+            .or_else(|| self.loc.asset())
+            .or_else(|| self.assets.pop())
     }
 
     /// Set asset value
@@ -272,26 +271,23 @@ impl AncillaryData for RampMeterAnc {
         match asset {
             Asset::Access => {
                 self.access = serde_wasm_bindgen::from_value(value)?;
-                Ok(())
             }
-            Asset::Controllers => self.cio.set_asset(pri, asset, value),
             Asset::MeterAlgorithms => {
                 self.algorithms = serde_wasm_bindgen::from_value(value)?;
-                Ok(())
             }
             Asset::MeterTypes => {
                 self.meter_types = serde_wasm_bindgen::from_value(value)?;
-                Ok(())
             }
             Asset::SystemAttrs => {
                 self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
-                Ok(())
             }
+            Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             Asset::DeviceActions | Asset::ActionPlans => {
-                self.dev.set_asset(pri, asset, value)
+                self.dev.set_asset(pri, asset, value)?;
             }
-            _ => self.loc.set_asset(pri, asset, value),
+            _ => self.loc.set_asset(pri, asset, value)?,
         }
+        Ok(())
     }
 }
 

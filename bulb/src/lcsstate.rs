@@ -49,6 +49,7 @@ pub struct LcsState {
 #[derive(Debug)]
 pub struct LcsStateAnc {
     cio: ControllerIoAnc<LcsState>,
+    assets: Vec<Asset>,
     pub indications: Vec<LcsIndication>,
 }
 
@@ -97,17 +98,18 @@ impl AncillaryData for LcsStateAnc {
 
     /// Construct ancillary LCS state data
     fn new(pri: &LcsState, view: View) -> Self {
-        let mut cio = ControllerIoAnc::new(pri, view);
-        cio.assets.push(Asset::LcsIndications);
+        let cio = ControllerIoAnc::new(pri, view);
+        let assets = vec![Asset::LcsIndications];
         LcsStateAnc {
             cio,
+            assets,
             indications: Vec::new(),
         }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop()
+        self.cio.asset().or_else(|| self.assets.pop())
     }
 
     /// Set asset value

@@ -61,6 +61,7 @@ pub struct Beacon {
 pub struct BeaconAnc {
     cio: ControllerIoAnc<Beacon>,
     loc: LocAnc<Beacon>,
+    assets: Vec<Asset>,
     states: Option<Vec<BeaconState>>,
 }
 
@@ -69,18 +70,26 @@ impl AncillaryData for BeaconAnc {
 
     /// Construct ancillary beacon data
     fn new(pri: &Beacon, view: View) -> Self {
-        let mut cio = ControllerIoAnc::new(pri, view);
-        if view != View::SaveEv {
-            cio.assets.push(Asset::BeaconStates);
-        }
+        let cio = ControllerIoAnc::new(pri, view);
         let loc = LocAnc::new(pri, view);
-        let states = None;
-        BeaconAnc { cio, loc, states }
+        let assets = match view {
+            View::SaveEv => Vec::new(),
+            _ => vec![Asset::BeaconStates],
+        };
+        BeaconAnc {
+            cio,
+            loc,
+            assets,
+            ..Default::default()
+        }
     }
 
     /// Get next asset to fetch
     fn asset(&mut self) -> Option<Asset> {
-        self.cio.assets.pop().or_else(|| self.loc.assets.pop())
+        self.cio
+            .asset()
+            .or_else(|| self.loc.asset())
+            .or_else(|| self.assets.pop())
     }
 
     /// Set asset value
