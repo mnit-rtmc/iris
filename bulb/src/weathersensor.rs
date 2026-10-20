@@ -172,12 +172,8 @@ impl AncillaryData for WeatherSensorAnc {
     fn new(pri: &WeatherSensor, view: View) -> Self {
         let cio = ControllerIoAnc::new(pri, view);
         let loc = LocAnc::new(pri, view);
-        let assets = match (view, pri.geoloc()) {
-            (View::Status, Some(nm)) => {
-                // Need geoloc to fly to location on map
-                vec![Asset::GeoLoc(nm.to_string(), Res::WeatherSensor)]
-            }
-            (View::Request, _) => vec![Asset::SystemAttrs],
+        let assets = match view {
+            View::Request => vec![Asset::SystemAttrs],
             _ => Vec::new(),
         };
         WeatherSensorAnc {

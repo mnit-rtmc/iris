@@ -69,6 +69,10 @@ where
             (View::Control, Some(nm)) => {
                 assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
             }
+            (View::Status, Some(nm)) if !C::res().has_control() => {
+                // Need geoloc to fly to location on map
+                assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
+            }
             (View::Location(_edit), Some(nm)) => {
                 assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
                 assets.push(Asset::Directions);
