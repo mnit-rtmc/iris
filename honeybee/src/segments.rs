@@ -28,7 +28,7 @@ use std::path::{Path, PathBuf};
 use tokio_postgres::Row;
 
 /// Path to store .loam files
-const LOAM_PATH: &str = "/var/local/wyrmcast/loam";
+const LOAM_PATH: &str = "./loam";
 
 /// Base segment scale factor
 const BASE_SCALE: f64 = 1.0 / 6.0;

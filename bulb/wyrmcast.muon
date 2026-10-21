@@ -136,6 +136,7 @@ layer_group: tile
     tags: $osm_id ?name highway=pedestrian|footway|track|bridleway|steps|corridor|cycleway|path
 layer_group: tms
   osm: false
+  base_path: /var/lib/iris/web
   layer: segment_9
     geom_type: polygon
     zoom: 9
