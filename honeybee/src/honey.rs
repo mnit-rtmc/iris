@@ -462,6 +462,7 @@ fn tfon_dir_get() -> Router {
 
 /// `GET` file from corridors directory
 fn corridors_dir_get() -> Router {
+    // FIXME: also get directory listing
     async fn handler(AxumPath(fname): AxumPath<String>) -> impl IntoResponse {
         let fname = format!("corridors/{fname}");
         log::trace!("GET {fname}");
