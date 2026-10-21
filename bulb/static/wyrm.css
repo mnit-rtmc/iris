@@ -20,6 +20,9 @@
 .wyrm-tile * {
   pointer-events: painted;
 }
+.wyrm-tile rect {
+  pointer-events: visible;
+}
 .wyrm-county {
   fill: #677;
   stroke-width: 0.2;
