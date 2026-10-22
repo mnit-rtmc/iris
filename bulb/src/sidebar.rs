@@ -24,7 +24,7 @@ use crate::permission::{AccessLevel, Permission};
 use crate::query::QueryParam;
 use crate::sse;
 use crate::start;
-use crate::util::{self, Doc};
+use crate::util::{self, Doc, LocalStorage};
 use crate::view::{CardView, View};
 use resources::Res;
 use wasm_bindgen::JsCast;
@@ -156,7 +156,7 @@ fn set_card_layout(id: &str) -> Result<()> {
     let card = Doc::get().elem::<HtmlElement>(id)?;
     clear_card_layout(&card);
     card.class_list().add_1(layout)?;
-    let _ = util::set_local_storage("card_layout", layout);
+    let _ = LocalStorage::CardLayout.set(layout);
     Ok(())
 }
 
@@ -167,8 +167,8 @@ fn handle_click_button(id: String, tp: EventTp) {
         eid::LOGOUT => spawn_future(start::handle_logout()),
         eid::SHOW_SIDEBAR => spawn_future(show_sidebar(true)),
         eid::HIDE_SIDEBAR => spawn_future(show_sidebar(false)),
-        eid::LEFT_SIDEBAR => spawn_future(change_sidebar_side(true)),
-        eid::RIGHT_SIDEBAR => spawn_future(change_sidebar_side(false)),
+        eid::LEFT_SIDEBAR => spawn_future(change_sidebar_loc(true)),
+        eid::RIGHT_SIDEBAR => spawn_future(change_sidebar_loc(false)),
         eid::ADD => spawn_future(show_create_card()),
         id if id.starts_with("card_layout_") => {
             let _ = set_card_layout(id);
@@ -193,15 +193,23 @@ async fn show_sidebar(show: bool) -> Result<()> {
     Ok(())
 }
 
+/// Set sidebar location from storage
+pub async fn set_loc_from_storage() -> Result<()> {
+    change_sidebar_loc(
+        LocalStorage::SidebarLoc.get()?.as_deref() == Some("left"),
+    )
+    .await
+}
+
 /// Sets the sidebar to display on the left or right
-pub async fn change_sidebar_side(left: bool) -> Result<()> {
+pub async fn change_sidebar_loc(left: bool) -> Result<()> {
     let doc = Doc::new()?;
     let side_pane = doc.elem::<HtmlElement>("side-pane")?;
     let map_controls = doc.elem::<HtmlElement>("map-controls")?;
     let show_btn = doc.elem::<HtmlButtonElement>(eid::SHOW_SIDEBAR)?;
     let hide_btn = doc.elem::<HtmlButtonElement>(eid::HIDE_SIDEBAR)?;
 
-    // Change buttons for correct side, then change the sidebar/controls
+    // Set button directions and sidebar/controls location
     if left {
         show_btn.set_inner_text("🞂");
         hide_btn.set_inner_text("🞀");
@@ -209,7 +217,7 @@ pub async fn change_sidebar_side(left: bool) -> Result<()> {
         side_pane.class_list().replace("right", "left")?;
         map_controls.class_list().replace("left", "right")?;
 
-        util::set_local_storage("sidebar", "left")?;
+        LocalStorage::SidebarLoc.set("left")?;
     } else {
         show_btn.set_inner_text("🞀");
         hide_btn.set_inner_text("🞂");
@@ -217,7 +225,7 @@ pub async fn change_sidebar_side(left: bool) -> Result<()> {
         side_pane.class_list().replace("left", "right")?;
         map_controls.class_list().replace("right", "left")?;
 
-        util::set_local_storage("sidebar", "right")?;
+        LocalStorage::SidebarLoc.set("right")?;
     }
 
     Ok(())
@@ -327,7 +335,7 @@ fn handle_event(id: String, tp: EventTp) {
 
 /// Handle selected resource change
 pub fn handle_res_change() {
-    let _ = util::unmap_local_storage("card_view");
+    let _ = LocalStorage::CardView.unmap();
     let query = match selected_resource() {
         Some(res) => QueryParam::new().with_res(res),
         None => QueryParam::new(),
@@ -612,7 +620,7 @@ fn show_hide_res_row(
 
 // Returns the CardView, setting the View from localStorage if possible
 fn get_stored_view(cv: &mut CardView) {
-    if let Ok(Some(stored_view)) = util::get_local_storage("card_view")
+    if let Ok(Some(stored_view)) = LocalStorage::CardView.get()
         && let Ok(mut v) = View::try_from(stored_view.as_str())
     {
         match &mut v {
@@ -738,7 +746,7 @@ fn handle_card_view_ev() {
     if let Some(cv) = app::expanded_view()
         && let Some(view) = card_view_value()
     {
-        let _ = util::set_local_storage("card_view", view.as_str());
+        let _ = LocalStorage::CardView.set(view.as_str());
         spawn_future(replace_card(cv.with_view(view), ""));
     }
 }
@@ -803,7 +811,7 @@ fn replace_card_html(cv: &CardView, html: &str) -> Result<()> {
         prepend_placeholder(&el, cv.id())?;
         el.set_popover(Some("auto"))?;
         el.show_popover()?;
-        if let Ok(Some(l)) = util::get_local_storage("card_layout")
+        if let Ok(Some(l)) = LocalStorage::CardLayout.get()
             && !l.is_empty()
         {
             if l.contains(":") {
