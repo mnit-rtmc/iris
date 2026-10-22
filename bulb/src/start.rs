@@ -27,7 +27,8 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
 use web_sys::{
     Element, Event, GamepadEvent, HtmlElement, HtmlInputElement, KeyboardEvent,
-    MouseEvent, NavigateEvent, ToggleEvent,
+    MouseEvent, NavigateEvent, ResizeObserver, ResizeObserverEntry,
+    ToggleEvent,
 };
 
 /// Application starting function
@@ -51,6 +52,7 @@ fn add_listeners() -> Result<()> {
     add_gamepad_listener()?;
     add_input_enter_listener(&doc.elem("login_pass")?)?;
     add_toggle_listener(&body)?;
+    add_resize_observer(&body)?;
     spawn_future(finish_init());
     Ok(())
 }
@@ -333,6 +335,29 @@ fn add_gamepad_listener() -> Result<()> {
         closure.as_ref().unchecked_ref(),
     )?;
     closure.forget();
+    Ok(())
+}
+
+/// Add a `resize` observer for a CSS resize
+pub fn add_resize_observer(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> =
+        Closure::new(move |m: Vec<ResizeObserverEntry>| {
+            for m in &m {
+                if m.target().get_attribute("class").as_deref()
+                    == Some("card-expanded")
+                    && let Some(l) = m.target().get_attribute("style")
+                {
+                    let _ = util::set_local_storage("card_layout", l);
+                }
+            }
+        });
+
+    let obs = ResizeObserver::new(closure.as_ref().unchecked_ref())?;
+    obs.observe(el);
+    closure.forget();
+
+    app::set_card_resize_observer(obs);
+
     Ok(())
 }
 
