@@ -21,7 +21,7 @@ use crate::map;
 use crate::query::QueryParam;
 use crate::sidebar;
 use crate::sse;
-use crate::util::{self, Doc};
+use crate::util::{self, Doc, LocalStorage};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::{JsCast, JsError};
@@ -59,7 +59,7 @@ fn add_listeners() -> Result<()> {
 
 /// Finish initialization
 async fn finish_init() -> Result<()> {
-    let _ = restore_from_storage().await;
+    let _ = sidebar::set_loc_from_storage().await;
     sse::add_listener();
     match Uri::from("/iris/api/login").get().await {
         Ok(user) => {
@@ -78,15 +78,6 @@ async fn finish_init() -> Result<()> {
             Err(err)
         }
     }
-}
-
-/// Restore settings/preferences stored in localStorage
-async fn restore_from_storage() -> Result<()> {
-    let _ = sidebar::change_sidebar_side(
-        util::get_local_storage("sidebar")?.as_deref() == Some("left"),
-    )
-    .await;
-    Ok(())
 }
 
 /// Trigger reload (on Navigation API)
@@ -289,7 +280,7 @@ fn do_handle_grab(me: &MouseEvent, tp: MouseTp, target: HtmlElement) {
         MouseTp::Up => {
             let _ = target.remove_attribute("data-grabbed");
             if let Some(l) = target.get_attribute("style") {
-                let _ = util::set_local_storage("card_layout", l);
+                let _ = LocalStorage::CardLayout.set(l);
             }
         }
     };
@@ -347,7 +338,7 @@ pub fn add_resize_observer(el: &Element) -> Result<()> {
                     == Some("card-expanded")
                     && let Some(l) = m.target().get_attribute("style")
                 {
-                    let _ = util::set_local_storage("card_layout", l);
+                    let _ = LocalStorage::CardLayout.set(l);
                 }
             }
         });

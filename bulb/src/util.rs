@@ -543,25 +543,41 @@ pub fn relative_coords(target: &Element, me: &MouseEvent) -> (i32, i32) {
     )
 }
 
-/// Get the localStorage
-fn local_storage() -> Result<Storage> {
-    window()?.local_storage()?.ok_or(Error::NoStorage())
+/// Enum to interface with web storage API (localStorage)
+#[derive(Debug)]
+pub enum LocalStorage {
+    /// Last selected view tab on expanded card
+    CardView,
+    /// Last expanded card layout, or style attribute if moved/resized
+    CardLayout,
+    /// Last location of sidebar (left/right)
+    SidebarLoc,
 }
 
-/// Get value for key in localStorage
-pub fn get_local_storage<T: Into<String>>(k: T) -> Result<Option<String>> {
-    Ok(local_storage()?.get_item(&k.into())?)
+impl LocalStorage {
+    /// Get the localStorage
+    fn local_storage() -> Result<Storage> {
+        window()?.local_storage()?.ok_or(Error::NoStorage())
+    }
+
+    /// Get value for key in localStorage
+    pub fn get(self) -> Result<Option<String>> {
+        Ok(Self::local_storage()?.get_item(&self.to_string())?)
+    }
+
+    /// Set a key/value pair in localStorage
+    pub fn set<T: Into<String>>(self, v: T) -> Result<()> {
+        Ok(Self::local_storage()?.set_item(&self.to_string(), &v.into())?)
+    }
+
+    /// Unmap a key in localStorage
+    pub fn unmap(self) -> Result<()> {
+        Ok(Self::local_storage()?.remove_item(&self.to_string())?)
+    }
 }
 
-/// Set a key/value pair in localStorage
-pub fn set_local_storage<T1: Into<String>, T2: Into<String>>(
-    k: T1,
-    v: T2,
-) -> Result<()> {
-    Ok(local_storage()?.set_item(&k.into(), &v.into())?)
-}
-
-/// Unmap a key in localStorage
-pub fn unmap_local_storage<T: Into<String>>(k: T) -> Result<()> {
-    Ok(local_storage()?.remove_item(&k.into())?)
+impl fmt::Display for LocalStorage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(self, f)
+    }
 }
