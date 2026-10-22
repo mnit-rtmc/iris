@@ -20,6 +20,7 @@ use crate::view::CardView;
 use resources::Res;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use web_sys::{Element, ResizeObserver};
 
 /// Interval (ms) between ticks for deferred actions
 pub const TICK_INTERVAL: i32 = 500;
@@ -66,6 +67,8 @@ struct AppState {
     joystick_intervals: HashMap<u32, i32>,
     /// Active stream interval IDs
     stream_intervals: HashMap<String, i32>,
+    /// Card resize observer
+    card_resize_observer: Option<ResizeObserver>,
 }
 
 thread_local! {
@@ -243,7 +246,7 @@ pub fn get_stream_intervals() -> HashMap<String, i32> {
     STATE.with(|rc| rc.borrow().stream_intervals.clone())
 }
 
-/// Stops the stream interval for the given source
+/// Stop the stream interval for the given source
 pub fn stop_stream_interval(source: &String) -> crate::error::Result<()> {
     STATE.with(|rc| {
         let mut rc_mut = rc.borrow_mut();
@@ -257,4 +260,19 @@ pub fn stop_stream_interval(source: &String) -> crate::error::Result<()> {
         }
         Ok(())
     })
+}
+
+/// Set the card resize observer instance
+pub fn set_card_resize_observer(observer: ResizeObserver) {
+    STATE.with(|rc| rc.borrow_mut().card_resize_observer = Some(observer));
+}
+
+/// Stops observing previous card and observe new card
+pub fn update_card_resize_observer(card: &Element) {
+    STATE.with(|rc| {
+        if let Some(obs) = &rc.borrow().card_resize_observer {
+            obs.disconnect();
+            obs.observe(card);
+        }
+    });
 }

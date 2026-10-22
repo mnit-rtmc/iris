@@ -327,6 +327,7 @@ fn handle_event(id: String, tp: EventTp) {
 
 /// Handle selected resource change
 pub fn handle_res_change() {
+    let _ = util::unmap_local_storage("card_view");
     let query = match selected_resource() {
         Some(res) => QueryParam::new().with_res(res),
         None => QueryParam::new(),
@@ -609,6 +610,21 @@ fn show_hide_res_row(
     }
 }
 
+// Returns the CardView, setting the View from localStorage if possible
+fn get_stored_view(cv: &mut CardView) {
+    if let Ok(Some(stored_view)) = util::get_local_storage("card_view")
+        && let Ok(mut v) = View::try_from(stored_view.as_str())
+    {
+        match &mut v {
+            View::Location(edit) | View::Setup(edit) => {
+                *edit = app::can_edit_card()
+            }
+            _ => (),
+        }
+        cv.view = v;
+    };
+}
+
 /// Shrink selected card
 async fn shrink_card(search: &str) -> Result<()> {
     if let Some(cv) = app::expanded_view() {
@@ -629,12 +645,14 @@ async fn expand_card(query: QueryParam, res: Res) -> Result<()> {
                 replace_card(cv, "").await?;
             }
         } else {
-            let cv = CardView::new(res, sel).expand(edit);
+            let mut cv = CardView::new(res, sel).expand(edit);
+            get_stored_view(&mut cv);
             if let Some(el) = Doc::get().opt_elem::<HtmlElement>(cv.id()) {
                 let opt = ScrollIntoViewOptions::new();
                 opt.set_behavior(ScrollBehavior::Instant);
                 opt.set_block(ScrollLogicalPosition::Nearest);
                 el.scroll_into_view_with_scroll_into_view_options(&opt);
+                app::update_card_resize_observer(&el);
             }
             replace_card(cv, "").await?;
         }
@@ -720,6 +738,7 @@ fn handle_card_view_ev() {
     if let Some(cv) = app::expanded_view()
         && let Some(view) = card_view_value()
     {
+        let _ = util::set_local_storage("card_view", view.as_str());
         spawn_future(replace_card(cv.with_view(view), ""));
     }
 }

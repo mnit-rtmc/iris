@@ -562,6 +562,6 @@ pub fn set_local_storage<T1: Into<String>, T2: Into<String>>(
 }
 
 /// Unmap a key in localStorage
-pub fn _unmap_local_storage<T: Into<String>>(k: T) -> Result<()> {
+pub fn unmap_local_storage<T: Into<String>>(k: T) -> Result<()> {
     Ok(local_storage()?.remove_item(&k.into())?)
 }
