@@ -332,4 +332,11 @@ public class SString {
 		}
 		return null;
 	}
+
+	/** Removes the last character from a StringBuilder if it's a comma */
+	static public void removeTrailingComma(StringBuilder sb) {
+		if (sb.charAt(sb.length() - 1) == ',') {
+			sb.setLength(sb.length() - 1);
+		}
+	}
 }
