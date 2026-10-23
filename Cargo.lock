@@ -2105,9 +2105,9 @@ dependencies = [
 
 [[package]]
 name = "squarepeg"
-version = "0.5.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba485d90fdba3504894862cedf26bf6b33168e7c8a117d00b12a3c26b3e50b48"
+checksum = "c7bb7f9c806a254fcdd16f3f3f3020c68ac1242723e7a49344b56767d6139dd4"
 dependencies = [
  "pointy",
 ]
