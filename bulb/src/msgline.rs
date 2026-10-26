@@ -167,7 +167,7 @@ impl MsgLine {
 
     /// Get entered line number
     fn line(&self) -> u16 {
-        Doc::get().input_parse("line").unwrap_or(0)
+        Doc::get().input_parse("line").unwrap_or(self.line)
     }
 
     /// Get entered MULTI string
@@ -202,14 +202,18 @@ impl MsgLine {
     }
 
     /// Render the message pattern image preview
-    fn render_preview<'p>(&self, anc: &MsgLineAnc, img: &'p mut html::Img<'p>) {
+    fn render_preview<'p>(
+        &self,
+        anc: &MsgLineAnc,
+        img: &'p mut html::Img<'p>,
+        line: u16,
+    ) {
         img.id("ml_preview");
         let sc = anc.selected_config();
         if let Some(cfg) = anc.sign_config(sc.as_ref())
             && let Some(dms) = &anc.make_dms(cfg)
         {
             let n_lines = MessagePattern::new(dms, "").widths().count();
-            let line = self.line();
             let gaps = if line > 1 && n_lines > 0 {
                 (usize::from(line) - 1) % n_lines
             } else {
@@ -232,7 +236,7 @@ impl MsgLine {
         if let Some(el) = Doc::get().opt_elem::<HtmlElement>("ml_preview") {
             let mut tree = Tree::new();
             let mut img = tree.root::<html::Img>();
-            self.render_preview(anc, &mut img);
+            self.render_preview(anc, &mut img, self.line());
             el.set_outer_html(&String::from(tree));
         }
     }
@@ -294,7 +298,7 @@ impl MsgLine {
         let mut div2 = div.div();
         div2.class("row");
         self.configs_select(anc, &mut div2.select());
-        self.render_preview(anc, &mut div2.img());
+        self.render_preview(anc, &mut div2.img(), self.line);
         div.close();
         fs.close();
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
