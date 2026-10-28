@@ -45,7 +45,7 @@ tokio-stream.workspace = true
 tokio-util = "0.7"
 tower-sessions-moka-store = "0.15"
 whoami.workspace = true
-xml = "1.3.0"
+xml = "1.4.0"
 
 [dependencies.tower-sessions]
 version = "0.14"
