@@ -21,6 +21,7 @@
   pointer-events: painted;
 }
 .wyrm-tile rect {
+  fill: #566;
   pointer-events: visible;
 }
 .wyrm-county {
