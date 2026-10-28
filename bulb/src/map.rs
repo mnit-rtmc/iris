@@ -343,7 +343,7 @@ impl StationData {
         match DateTime::parse_from_rfc3339(&self.time_stamp) {
             Ok(dt) if dt > oldest && dt < now => self.do_make_style(),
             _ => {
-                log::warn!("bad station_sample timestamp: {}", self.time_stamp);
+                log::debug!("bad station_sample timestamp: {}", self.time_stamp);
                 String::new()
             }
         }

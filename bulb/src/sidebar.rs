@@ -700,7 +700,7 @@ async fn fetch_and_populate_cards(
 }
 
 /// Get value to search
-pub fn search_value() -> Result<String> {
+fn search_value() -> Result<String> {
     let doc = Doc::new()?;
     let sb_search = doc.elem::<HtmlInputElement>(eid::SEARCH)?;
     let mut search = sb_search.value();
