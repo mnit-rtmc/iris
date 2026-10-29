@@ -366,7 +366,6 @@ fn handle_zoom(zoom: u32) {
 
 /// Handle map zoom
 async fn do_handle_zoom(zoom: u32) -> Result<()> {
-    crate::menu::dismiss_context_menu();
     set_zoom_level(zoom);
     update_layers_all(zoom).await?;
     Ok(())
@@ -526,7 +525,5 @@ pub async fn update_layer(res: Res, access: &[Permission]) -> Result<()> {
 /// Handle a `contextmenu` event
 fn handle_contextmenu(me: MapEvent, x: i32, y: i32) {
     log::debug!("contextmenu: {me:?} {x} {y}");
-    let query = build_query(&me);
-    spawn_future(set_query_map(query));
     spawn_future(crate::menu::handle_contextmenu(me, x, y));
 }

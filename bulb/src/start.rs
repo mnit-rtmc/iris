@@ -177,9 +177,6 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
         log::error!("handle_mouse_ev, unknown event: {me:?}");
         return;
     };
-    if MouseTp::Down == tp {
-        crate::menu::dismiss_context_menu();
-    }
     // check for "grab" events
     if (me.buttons() & 1 == 1 || tp == MouseTp::Up)
         && handle_grab(&me, tp, target)

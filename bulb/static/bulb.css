@@ -344,11 +344,18 @@ li.changed {
 
 #map-menu {
   position: absolute;
-  width: fit-content;
-  height: fit-content;
+  inset: unset;
+  margin: 0;
+  padding: 0;
+  border: unset;
+  anchor-name: --context-anchor;
 }
 #map-menu menu {
-  position: absolute;
+  position: fixed;
+  position-anchor: --context-anchor;
+  inset: unset;
+  width: fit-content;
+  height: fit-content;
 }
 
 #layer-popover {

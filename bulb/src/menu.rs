@@ -19,6 +19,9 @@ use hatmil::{Tree, html};
 use resources::Res;
 use web_sys::{Element, HtmlElement};
 
+/// OpenStreetMap domain
+const OSM: &str = "https://www.openstreetmap.org/";
+
 /// Handle a `contextmenu` event
 pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
     set_context_style(Some(&me));
@@ -26,15 +29,34 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
         let mut tree = Tree::new();
         let mut div = tree.root::<html::Div>();
         div.id(eid::MAP_MENU);
-        if let Some(title) = menu_title(&me) {
-            div.style(Prop::new().left(format!("{x}px")).top(format!("{y}px")));
+        div.popover("auto");
+        div.style(div_style(x, y));
+        if let Some(title) = make_title(&me) {
             let mut menu = div.menu();
             menu.style(menu_style(x, y));
             menu.li().cdata(&title);
-        } else {
-            div.class("no-display");
+            if is_osm_layer(&me) {
+                let map_pane =
+                    MapPane::get(eid::MAP_PANE).ok_or(Error::NoMap())?;
+                if let Some(lonlat) = map_pane.lonlat(x, y) {
+                    let mut li = menu.li();
+                    li.a()
+                        .href(format!(
+                            "{OSM}?mlat={}&mlon={}",
+                            lonlat.1, lonlat.0
+                        ))
+                        .target("_blank")
+                        .rel("noopener noreferrer")
+                        .cdata("OpenStreetMap");
+                    li.close();
+                }
+            }
         }
         el.set_outer_html(&String::from(tree));
+    }
+    // NOTE: we must retrieve the element again, or show_popover won't work!
+    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
+        el.show_popover()?;
     }
     Ok(())
 }
@@ -60,8 +82,8 @@ fn set_context_style(me: Option<&MapEvent>) {
     }
 }
 
-/// Get title for map context menu
-fn menu_title(me: &MapEvent) -> Option<String> {
+/// Make title for map context menu
+fn make_title(me: &MapEvent) -> Option<String> {
     if let Some(data_name) = &me.data_name {
         let mut title = data_name.to_string();
         if let Some(data_ref) = &me.data_ref {
@@ -81,29 +103,39 @@ fn menu_title(me: &MapEvent) -> Option<String> {
     }
 }
 
-/// Build context menu style
-fn menu_style(x: i32, y: i32) -> Prop {
+/// Make div style
+fn div_style(x: i32, y: i32) -> Prop {
     let mut prop = Prop::new();
-    if x < 200 {
-        prop = prop.left("0px");
+    if x > 200 {
+        prop = prop.left(format!("{}px", x + 2));
     } else {
-        prop = prop.right("0px");
+        prop = prop.left(format!("{}px", x - 2));
     }
-    if y < 200 {
-        prop = prop.top("0px");
+    if y > 200 {
+        prop = prop.top(format!("{}px", y + 2));
     } else {
-        prop = prop.bottom("0px");
+        prop = prop.top(format!("{}px", y - 2));
     }
     prop
 }
 
-/// Dismiss the map context menu
-pub fn dismiss_context_menu() {
-    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
-        let mut tree = Tree::new();
-        let mut div = tree.root::<html::Div>();
-        div.id(eid::MAP_MENU).class("no-display");
-        el.set_outer_html(&String::from(tree));
+/// Make menu style
+fn menu_style(x: i32, y: i32) -> Prop {
+    let mut prop = Prop::new();
+    if x > 200 {
+        prop = prop.right("anchor(left)");
+    } else {
+        prop = prop.left("anchor(left)");
     }
-    set_context_style(None);
+    if y > 200 {
+        prop = prop.bottom("anchor(top)");
+    } else {
+        prop = prop.top("anchor(top)");
+    }
+    prop
+}
+
+/// Check if event is on an OSM layer
+fn is_osm_layer(me: &MapEvent) -> bool {
+    me.data_name.is_some()
 }
