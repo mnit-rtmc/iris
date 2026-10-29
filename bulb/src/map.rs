@@ -36,9 +36,6 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use web_sys::{Element, Event, HtmlButtonElement, HtmlElement};
 
-/// Map pane ID
-const MAP_PANE: &str = "map-pane";
-
 /// Layer groups
 const GROUPS: &[&str] = &["tile", "tms"];
 
@@ -67,7 +64,7 @@ pub fn add_listeners() -> Result<()> {
     add_change_listener(&layer_menu)?;
     let map_extents: HtmlElement = doc.elem("map-extents")?;
     add_click_listener(&map_extents)?;
-    MapPane::new(MAP_PANE)
+    MapPane::new(eid::MAP_PANE)
         .with_anchor(ANCHOR_X, ANCHOR_Y)
         .with_groups(GROUPS)
         .with_click_handler(handle_click)
@@ -159,7 +156,7 @@ pub fn present_item(res: Res, name: &str, lon: f64, lat: f64) {
 
 /// Set map extent
 async fn set_extent(zoom: u32, lon: f64, lat: f64) -> Result<()> {
-    let map_pane = MapPane::get(MAP_PANE).ok_or(Error::NoMap())?;
+    let map_pane = MapPane::get(eid::MAP_PANE).ok_or(Error::NoMap())?;
     let (ax, ay) = get_anchor();
     map_pane.with_anchor(ax, ay).set_position(zoom, lon, lat);
     set_zoom_level(zoom);
@@ -180,27 +177,6 @@ pub fn set_selected_style(query: QueryParam) {
                 app::present_item(None);
                 el.set_inner_html("");
             }
-        }
-    }
-}
-
-/// Set context style for a layer
-fn set_context_style(me: Option<&MapEvent>) {
-    if let Some(el) = Doc::get().opt_elem::<Element>("context-style") {
-        match me {
-            Some(me) => {
-                let prop = match me.layer.as_str() {
-                    "motorway" | "trunk" | "primary" | "secondary"
-                    | "tertiary" | "road" | "railway" | "path" => {
-                        Prop::new().stroke("#96b")
-                    }
-                    _ => Prop::new().fill("#96b"),
-                };
-                let sel = Sel::cls(&me.target);
-                let css = Rule::new(sel, prop).to_string();
-                el.set_inner_html(&css);
-            }
-            None => el.set_inner_html(""),
         }
     }
 }
@@ -260,7 +236,6 @@ async fn add_extent_buttons() -> Result<()> {
     let default_extent = get_default_extent().await?;
     let default_button = doc.elem::<HtmlButtonElement>("default-extent")?;
     default_button.set_text_content(Some(&default_extent));
-
     let mut extents = MapExtent::fetch_all().await?;
     extents.retain(|e| e.name != default_extent);
     let extents_container = doc.elem::<HtmlElement>("map-extents-dynamic")?;
@@ -270,7 +245,6 @@ async fn add_extent_buttons() -> Result<()> {
         b.id(&extent.name).cdata(&extent.name).close();
     }
     extents_container.set_inner_html(&String::from(tree));
-
     Ok(())
 }
 
@@ -309,7 +283,7 @@ async fn handle_layer_zoom(id: String) -> Result<()> {
 
 /// Get current map zoom level
 fn current_zoom() -> u32 {
-    MapPane::get(MAP_PANE).map(|mp| mp.zoom()).unwrap_or(0)
+    MapPane::get(eid::MAP_PANE).map(|mp| mp.zoom()).unwrap_or(0)
 }
 
 /// Fetch binned station data
@@ -343,7 +317,10 @@ impl StationData {
         match DateTime::parse_from_rfc3339(&self.time_stamp) {
             Ok(dt) if dt > oldest && dt < now => self.do_make_style(),
             _ => {
-                log::debug!("bad station_sample timestamp: {}", self.time_stamp);
+                log::debug!(
+                    "bad station_sample timestamp: {}",
+                    self.time_stamp
+                );
                 String::new()
             }
         }
@@ -389,7 +366,7 @@ fn handle_zoom(zoom: u32) {
 
 /// Handle map zoom
 async fn do_handle_zoom(zoom: u32) -> Result<()> {
-    dismiss_context_menu();
+    crate::menu::dismiss_context_menu();
     set_zoom_level(zoom);
     update_layers_all(zoom).await?;
     Ok(())
@@ -546,74 +523,10 @@ pub async fn update_layer(res: Res, access: &[Permission]) -> Result<()> {
     }
 }
 
-/// Get title for map context menu
-fn menu_title(me: &MapEvent) -> Option<String> {
-    if let Some(data_name) = &me.data_name {
-        let mut title = data_name.to_string();
-        if let Some(data_ref) = &me.data_ref {
-            title.push_str(&format!(" ({})", data_ref));
-        }
-        Some(title)
-    } else if let Some((rname, nm)) = me.target.split_once('-')
-        && let Ok(res) = Res::try_from(rname)
-    {
-        let mut title = format!("{} {nm}", res.symbol());
-        if let Some(data_ref) = &me.data_ref {
-            title.push_str(&format!(" ({})", data_ref));
-        }
-        Some(title)
-    } else {
-        None
-    }
-}
-
 /// Handle a `contextmenu` event
 fn handle_contextmenu(me: MapEvent, x: i32, y: i32) {
     log::debug!("contextmenu: {me:?} {x} {y}");
-    spawn_future(do_handle_contextmenu(me, x, y));
-}
-
-/// Handle a `contextmenu` event
-async fn do_handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
     let query = build_query(&me);
-    set_context_style(Some(&me));
-    set_query_map(query).await?;
-    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
-        let title = menu_title(&me);
-        let mut tree = Tree::new();
-        let mut div = tree.root::<html::Div>();
-        div.id(eid::MAP_MENU);
-        if let Some(title) = title {
-            div.style(Prop::new().left(format!("{x}px")).top(format!("{y}px")));
-            let mut menu = div.menu();
-            let mut prop = Prop::new();
-            if x < 200 {
-                prop = prop.left("0px");
-            } else {
-                prop = prop.right("0px");
-            }
-            if y < 200 {
-                prop = prop.top("0px");
-            } else {
-                prop = prop.bottom("0px");
-            }
-            menu.style(prop);
-            menu.li().cdata(&title);
-        } else {
-            div.class("no-display");
-        }
-        el.set_outer_html(&String::from(tree));
-    }
-    Ok(())
-}
-
-/// Dismiss the map context menu
-pub fn dismiss_context_menu() {
-    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
-        let mut tree = Tree::new();
-        let mut div = tree.root::<html::Div>();
-        div.id(eid::MAP_MENU).class("no-display");
-        el.set_outer_html(&String::from(tree));
-    }
-    set_context_style(None);
+    spawn_future(set_query_map(query));
+    spawn_future(crate::menu::handle_contextmenu(me, x, y));
 }

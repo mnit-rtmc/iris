@@ -40,6 +40,9 @@ pub const HIDE_SIDEBAR: &str = "hide_sidebar";
 pub const LEFT_SIDEBAR: &str = "left_sidebar";
 pub const RIGHT_SIDEBAR: &str = "right_sidebar";
 
+/// Map pane ID
+pub const MAP_PANE: &str = "map-pane";
+
 /* Map menu */
 pub const MAP_MENU: &str = "map-menu";
 

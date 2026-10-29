@@ -178,7 +178,7 @@ fn handle_mouse_ev(me: MouseEvent, target: &Element) {
         return;
     };
     if MouseTp::Down == tp {
-        map::dismiss_context_menu();
+        crate::menu::dismiss_context_menu();
     }
     // check for "grab" events
     if (me.buttons() & 1 == 1 || tp == MouseTp::Up)
