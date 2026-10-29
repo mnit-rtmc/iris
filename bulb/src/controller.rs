@@ -369,12 +369,11 @@ impl Controller {
         self.item_states(Self::DEF_STATE).spans(&mut div.span());
         div.span().cdata(anc.condition(self)).close();
         let mut span = div.span();
+        let query = QueryParam::new()
+            .with_res(Res::CommLink)
+            .with_sel(opt_ref(&self.comm_link));
         span.a()
-            .href(format!(
-                "?res={}&sel={}",
-                Res::CommLink,
-                opt_ref(&self.comm_link)
-            ))
+            .href(query.to_string())
             .cdata(opt_ref(&self.comm_link))
             .close();
         span.cdata(":").cdata(self.drop_id);
