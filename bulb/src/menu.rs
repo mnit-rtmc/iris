@@ -19,7 +19,7 @@ use hatmil::{Tree, html};
 use resources::Res;
 use web_sys::{Element, HtmlElement};
 
-/// OpenStreetMap domain
+/// OpenStreetMap domain URL
 const OSM: &str = "https://www.openstreetmap.org/";
 
 /// Handle a `contextmenu` event
@@ -39,16 +39,7 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
                 let map_pane =
                     MapPane::get(eid::MAP_PANE).ok_or(Error::NoMap())?;
                 if let Some(lonlat) = map_pane.lonlat(x, y) {
-                    let mut li = menu.li();
-                    li.a()
-                        .href(format!(
-                            "{OSM}?mlat={}&mlon={}",
-                            lonlat.1, lonlat.0
-                        ))
-                        .target("_blank")
-                        .rel("noopener noreferrer")
-                        .cdata("OpenStreetMap");
-                    li.close();
+                    make_osm_link(&mut menu.li(), lonlat);
                 }
             }
         }
@@ -59,6 +50,16 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
         el.show_popover()?;
     }
     Ok(())
+}
+
+/// Make link to OpenStreetMap
+fn make_osm_link<'p>(li: &'p mut html::Li<'p>, lonlat: (f64, f64)) {
+    li.a()
+        .href(format!("{OSM}?mlat={}&mlon={}", lonlat.1, lonlat.0))
+        .target("_blank")
+        .rel("noopener noreferrer")
+        .cdata("OpenStreetMap");
+    li.close();
 }
 
 /// Set context style for a layer
