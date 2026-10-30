@@ -34,7 +34,7 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
         if let Some(title) = make_title(&me) {
             let mut menu = div.menu();
             menu.style(menu_style(x, y));
-            menu.li().cdata(&title);
+            menu.li().cdata_len(&title, 24);
             if is_osm_layer(&me) {
                 let map_pane =
                     MapPane::get(eid::MAP_PANE).ok_or(Error::NoMap())?;
@@ -62,10 +62,10 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
 }
 
 /// Set context style for a layer
-fn set_context_style(me: Option<&MapEvent>) {
+pub fn set_context_style(me: Option<&MapEvent>) {
     if let Some(el) = Doc::get().opt_elem::<Element>("context-style") {
         match me {
-            Some(me) => {
+            Some(me) if is_osm_layer(me) => {
                 let prop = match me.layer.as_str() {
                     "motorway" | "trunk" | "primary" | "secondary"
                     | "tertiary" | "road" | "railway" | "path" => {
@@ -77,7 +77,13 @@ fn set_context_style(me: Option<&MapEvent>) {
                 let css = Rule::new(sel, prop).to_string();
                 el.set_inner_html(&css);
             }
-            None => el.set_inner_html(""),
+            Some(me) => {
+                let prop = Prop::new().stroke("white").stroke_width(2);
+                let sel = Sel::cls(&me.target);
+                let css = Rule::new(sel, prop).to_string();
+                el.set_inner_html(&css);
+            }
+            _ => el.set_inner_html(""),
         }
     }
 }

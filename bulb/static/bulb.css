@@ -127,6 +127,17 @@ menu li {
   white-space: nowrap;
   padding: 0.1rem;
 }
+menu li:first-child {
+  font-weight: bold;
+  text-decoration: underline dotted;
+}
+menu a {
+  color: #226;
+}
+menu a:visited {
+  color: #448;
+}
+
 .minimal {
   list-style: none;
   padding-left: 0;
@@ -365,19 +376,9 @@ li.changed {
   overflow-y: auto;
   max-height: 90%;
 }
-#layer-menu li:first-child {
-  font-weight: bold;
-  text-decoration: underline dotted;
-}
 #layer-menu button {
   background: white;
   color: black;
-}
-#layer-menu a {
-  color: #004;
-}
-#layer-menu a:visited {
-  color: #448;
 }
 
 #side-pane {

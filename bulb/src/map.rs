@@ -115,6 +115,7 @@ pub fn get_anchor() -> (f64, f64) {
 /// Handle a `click` event on the map
 fn handle_click(me: MapEvent) {
     log::debug!("click: {me:?}");
+    crate::menu::set_context_style(None);
     spawn_future(set_query_map(build_query(&me)));
 }
 
