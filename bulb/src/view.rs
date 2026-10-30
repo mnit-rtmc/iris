@@ -314,32 +314,6 @@ impl CardView {
         Ok(())
     }
 
-    /// Handle updating a card in response to an SSE notification
-    pub async fn handle_update(&self) -> Result<()> {
-        if self.view != View::Control {
-            return Ok(());
-        }
-        match self.res {
-            Res::ActionPlan => self.handle_update_x::<ActionPlan>().await,
-            Res::Beacon => self.handle_update_x::<Beacon>().await,
-            Res::Camera => self.handle_update_x::<Camera>().await,
-            Res::Dms => self.handle_update_x::<Dms>().await,
-            Res::GateArm => self.handle_update_x::<GateArm>().await,
-            Res::Incident => self.handle_update_x::<Incident>().await,
-            Res::Lcs => self.handle_update_x::<Lcs>().await,
-            Res::RampMeter => self.handle_update_x::<RampMeter>().await,
-            _ => Ok(()),
-        }
-    }
-
-    /// Handle updating a card in response to an SSE notification
-    async fn handle_update_x<C: Card>(&self) -> Result<()> {
-        let pri = self.fetch_primary::<C>().await?;
-        let anc = fetch_ancillary(&pri, self.view).await?;
-        pri.handle_update(anc);
-        Ok(())
-    }
-
     /// Delete a resource by name
     pub async fn handle_delete(&self) -> Result<()> {
         // TODO: add Card::handle_delete?

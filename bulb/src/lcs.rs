@@ -594,6 +594,27 @@ impl Lcs {
         }
         Vec::new()
     }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: LcsAnc) -> Vec<Action> {
+        let doc = Doc::get();
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("indication-row") {
+            let mut tree = Tree::new();
+            self.render_indication_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        Vec::new()
+    }
 }
 
 impl Card for Lcs {
@@ -688,6 +709,7 @@ impl Card for Lcs {
         match (view, tp) {
             (_, EventTp::Click(_)) => true,
             (View::Control, EventTp::Input) => true,
+            (View::Control, EventTp::Update) => true,
             _ => false,
         }
     }
@@ -697,27 +719,8 @@ impl Card for Lcs {
         match tp {
             EventTp::Click(_) => self.handle_click(anc, id, tp),
             EventTp::Input => self.handle_input(id),
+            EventTp::Update => self.handle_update(anc),
             _ => self.handle_event_fallback(anc, id, tp),
-        }
-    }
-
-    /// Handle updating a card in response to an SSE notification
-    fn handle_update(&self, anc: LcsAnc) {
-        let doc = Doc::get();
-        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
-            let mut tree = Tree::new();
-            self.render_state_row(&anc, &mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
-        }
-        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
-            let mut tree = Tree::new();
-            self.render_location_row(&mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
-        }
-        if let Some(row) = doc.opt_elem::<HtmlElement>("indication-row") {
-            let mut tree = Tree::new();
-            self.render_indication_row(&anc, &mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
         }
     }
 }

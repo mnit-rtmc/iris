@@ -879,9 +879,9 @@ async fn update_card_list(res: Res) -> Result<bool> {
     for (cv, html) in cards.changed_html(&search).await? {
         if let Some(ev) = &expanded
             && cv.name() == ev.name()
+            && ev.is_event_handled("SSE", EventTp::Update)
         {
-            // update expanded card (Control cards only)
-            ev.handle_update().await?;
+            ev.handle_event("SSE", EventTp::Update).await?;
         } else {
             replace_card_html(&cv, &html)?;
         }

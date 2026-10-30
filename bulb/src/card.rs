@@ -284,11 +284,6 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         String::new()
     }
 
-    /// Handle updating a card in response to an SSE notification
-    fn handle_update(&self, _anc: Self::Ancillary) {
-        // NOTE: only Control cards handle updates
-    }
-
     /// Build card title
     fn title<'p>(&self, view: View, div: &'p mut html::Div<'p>) {
         div.class("title row");

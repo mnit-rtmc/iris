@@ -75,4 +75,6 @@ pub enum EventTp {
     Mouse(MouseTp),
     /// Focus events
     Focus(FocusTp),
+    /// Update (from SSE notification)
+    Update,
 }

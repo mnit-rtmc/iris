@@ -807,6 +807,22 @@ impl Camera {
             self.mouse_up(id)
         }
     }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: CameraAnc) -> Vec<Action> {
+        let doc = Doc::get();
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        Vec::new()
+    }
 }
 
 /// Dispatch a click event from `init-control` button
@@ -932,6 +948,7 @@ impl Card for Camera {
             }
             (View::Control, EventTp::Mouse(MouseTp::Move)) => false,
             (View::Control, EventTp::Mouse(_)) => true,
+            (View::Control, EventTp::Update) => true,
             _ => false,
         }
     }
@@ -946,22 +963,8 @@ impl Card for Camera {
         match tp {
             EventTp::Click(_) => self.handle_click(anc, id, tp),
             EventTp::Mouse(tp) => self.handle_mouse(id, tp),
+            EventTp::Update => self.handle_update(anc),
             _ => self.handle_event_fallback(anc, id, tp),
-        }
-    }
-
-    /// Handle updating a card in response to an SSE notification
-    fn handle_update(&self, anc: CameraAnc) {
-        let doc = Doc::get();
-        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
-            let mut tree = Tree::new();
-            self.render_state_row(&anc, &mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
-        }
-        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
-            let mut tree = Tree::new();
-            self.render_location_row(&mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
         }
     }
 }

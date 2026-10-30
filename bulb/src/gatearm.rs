@@ -14,7 +14,9 @@ use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html};
 use crate::cio::{ControllerIo, ControllerIoAnc};
 use crate::device::{Device, DeviceAnc};
+use crate::domevent::EventTp;
 use crate::error::Result;
+use crate::fetch::Action;
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::map;
@@ -245,6 +247,22 @@ impl GateArm {
         footer_html(View::Setup(edit), true, &mut tree.root::<html::Div>());
         String::from(tree)
     }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: GateArmAnc) -> Vec<Action> {
+        let doc = Doc::get();
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        Vec::new()
+    }
 }
 
 impl Card for GateArm {
@@ -339,18 +357,25 @@ impl Card for GateArm {
         fields.into()
     }
 
-    /// Handle updating a card in response to an SSE notification
-    fn handle_update(&self, anc: GateArmAnc) {
-        let doc = Doc::get();
-        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
-            let mut tree = Tree::new();
-            self.render_state_row(&anc, &mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click(_)) => true,
+            (View::Control, EventTp::Update) => true,
+            _ => false,
         }
-        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
-            let mut tree = Tree::new();
-            self.render_location_row(&mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
+    }
+
+    /// Handle event for the card
+    fn handle_event(
+        &self,
+        anc: GateArmAnc,
+        id: &str,
+        tp: EventTp,
+    ) -> Vec<Action> {
+        match tp {
+            EventTp::Update => self.handle_update(anc),
+            _ => self.handle_event_fallback(anc, id, tp),
         }
     }
 }

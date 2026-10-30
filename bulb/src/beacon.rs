@@ -337,6 +337,32 @@ impl Beacon {
             self.handle_event_fallback(anc, id, tp)
         }
     }
+
+    /// Handle updating a card in response to an SSE notification
+    fn handle_update(&self, anc: BeaconAnc) -> Vec<Action> {
+        let doc = Doc::get();
+        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
+            let mut tree = Tree::new();
+            self.render_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
+            let mut tree = Tree::new();
+            self.render_location_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("signal-row") {
+            let mut tree = Tree::new();
+            self.render_signal_row(&mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        if let Some(row) = doc.opt_elem::<HtmlElement>("beacon-state-row") {
+            let mut tree = Tree::new();
+            self.render_beacon_state_row(&anc, &mut tree.root::<html::Div>());
+            row.set_outer_html(&String::from(tree));
+        }
+        Vec::new()
+    }
 }
 
 impl ControllerIo for Beacon {
@@ -437,6 +463,15 @@ impl Card for Beacon {
         anc.loc.changed_location()
     }
 
+    /// Check if an event type is handled for a card view
+    fn is_event_handled(view: View, _id: &str, tp: EventTp) -> bool {
+        match (view, tp) {
+            (_, EventTp::Click(_)) => true,
+            (View::Control, EventTp::Update) => true,
+            _ => false,
+        }
+    }
+
     /// Handle event for the card
     fn handle_event(
         &self,
@@ -446,32 +481,8 @@ impl Card for Beacon {
     ) -> Vec<Action> {
         match tp {
             EventTp::Click(_) => self.handle_click(anc, id, tp),
+            EventTp::Update => self.handle_update(anc),
             _ => self.handle_event_fallback(anc, id, tp),
-        }
-    }
-
-    /// Handle updating a card in response to an SSE notification
-    fn handle_update(&self, anc: BeaconAnc) {
-        let doc = Doc::get();
-        if let Some(row) = doc.opt_elem::<HtmlElement>("state-row") {
-            let mut tree = Tree::new();
-            self.render_state_row(&anc, &mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
-        }
-        if let Some(row) = doc.opt_elem::<HtmlElement>("location-row") {
-            let mut tree = Tree::new();
-            self.render_location_row(&mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
-        }
-        if let Some(row) = doc.opt_elem::<HtmlElement>("signal-row") {
-            let mut tree = Tree::new();
-            self.render_signal_row(&mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
-        }
-        if let Some(row) = doc.opt_elem::<HtmlElement>("beacon-state-row") {
-            let mut tree = Tree::new();
-            self.render_beacon_state_row(&anc, &mut tree.root::<html::Div>());
-            row.set_outer_html(&String::from(tree));
         }
     }
 }
