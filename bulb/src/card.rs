@@ -367,42 +367,7 @@ fn default_state(res: Res) -> Option<ItemState> {
 
 /// Get slice of all item states for a resource
 pub fn item_states_all(res: Res) -> &'static [ItemState] {
-    // FIXME: use macro!
-    match res {
-        Res::ActionPlan => ActionPlan::item_states_all(),
-        Res::Alarm => Alarm::item_states_all(),
-        Res::Beacon => Beacon::item_states_all(),
-        Res::Camera => Camera::item_states_all(),
-        Res::CommLink => CommLink::item_states_all(),
-        Res::Controller => Controller::item_states_all(),
-        Res::DayPlan => DayPlan::item_states_all(),
-        Res::Detector => Detector::item_states_all(),
-        Res::Dms => Dms::item_states_all(),
-        Res::Domain => Domain::item_states_all(),
-        Res::EncoderType => EncoderType::item_states_all(),
-        Res::EventConfig => EventConfig::item_states_all(),
-        Res::GateArm => GateArm::item_states_all(),
-        Res::Gps => Gps::item_states_all(),
-        Res::Incident => Incident::item_states_all(),
-        Res::Lcs => Lcs::item_states_all(),
-        Res::MsgLine => MsgLine::item_states_all(),
-        Res::MsgPattern => MsgPattern::item_states_all(),
-        Res::PlanPhase => PlanPhase::item_states_all(),
-        Res::PlayList => PlayList::item_states_all(),
-        Res::RampMeter => RampMeter::item_states_all(),
-        Res::Road => Road::item_states_all(),
-        Res::Role => Role::item_states_all(),
-        Res::SignConfig => SignConfig::item_states_all(),
-        Res::SignDetail => SignDetail::item_states_all(),
-        Res::SystemAttribute => SystemAttr::item_states_all(),
-        Res::TagReader => TagReader::item_states_all(),
-        Res::TollZone => TollZone::item_states_all(),
-        Res::User => User::item_states_all(),
-        Res::VideoMonitor => VideoMonitor::item_states_all(),
-        Res::WeatherSensor => WeatherSensor::item_states_all(),
-        Res::Word => Word::item_states_all(),
-        _ => &[],
-    }
+    cards_res!(res, item_states_all)
 }
 
 /// Get available views for a resource type

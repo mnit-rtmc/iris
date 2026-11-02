@@ -11,6 +11,54 @@
 // GNU General Public License for more details.
 //
 
+/// Create a generic static resource method call
+macro_rules! cards_res {
+    ($res:ident, $meth:ident) => {
+        match $res {
+            Res::ActionPlan => ActionPlan::$meth(),
+            Res::Alarm => Alarm::$meth(),
+            Res::Beacon => Beacon::$meth(),
+            Res::CabinetStyle => CabinetStyle::$meth(),
+            Res::Camera => Camera::$meth(),
+            Res::CommConfig => CommConfig::$meth(),
+            Res::CommLink => CommLink::$meth(),
+            Res::Controller => Controller::$meth(),
+            Res::DayPlan => DayPlan::$meth(),
+            Res::Detector => Detector::$meth(),
+            Res::Dms => Dms::$meth(),
+            Res::Domain => Domain::$meth(),
+            Res::EncoderType => EncoderType::$meth(),
+            Res::EventConfig => EventConfig::$meth(),
+            Res::FlowStream => FlowStream::$meth(),
+            Res::GateArm => GateArm::$meth(),
+            Res::Gps => Gps::$meth(),
+            Res::Incident => Incident::$meth(),
+            Res::Lcs => Lcs::$meth(),
+            Res::LcsState => LcsState::$meth(),
+            Res::MapExtent => MapExtent::$meth(),
+            Res::MonitorStyle => MonitorStyle::$meth(),
+            Res::MsgLine => MsgLine::$meth(),
+            Res::MsgPattern => MsgPattern::$meth(),
+            Res::PlanPhase => PlanPhase::$meth(),
+            Res::PlayList => PlayList::$meth(),
+            Res::RampMeter => RampMeter::$meth(),
+            //Res::Rnode => Rnode::$meth(),
+            Res::Road => Road::$meth(),
+            Res::Role => Role::$meth(),
+            Res::SignConfig => SignConfig::$meth(),
+            Res::SignDetail => SignDetail::$meth(),
+            Res::SystemAttribute => SystemAttr::$meth(),
+            Res::TagReader => TagReader::$meth(),
+            Res::TollZone => TollZone::$meth(),
+            Res::User => User::$meth(),
+            Res::VideoMonitor => VideoMonitor::$meth(),
+            Res::WeatherSensor => WeatherSensor::$meth(),
+            Res::Word => Word::$meth(),
+            _ => unreachable!(),
+        }
+    };
+}
+
 /// Create a generic resource method for CardList or CardView
 macro_rules! cards_sync {
     ($cards:ident, $meth:ident, $param:expr) => {
