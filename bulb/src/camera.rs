@@ -873,6 +873,25 @@ impl Card for Camera {
         self
     }
 
+    /// Make a context menu
+    fn make_menu(&self, access: &[Permission]) -> Vec<String> {
+        let mut items = Vec::new();
+        if self.publish {
+            items.push("Unpublish".to_string());
+        } else {
+            items.push("Publish".to_string());
+        }
+        for acc in access {
+            if Res::VideoMonitor.as_str() == acc.base_resource
+                && acc.hashtag.is_some()
+                && AccessLevel::from(acc.access_level) == AccessLevel::Manage
+            {
+                items.push("Add to playlist".to_string());
+            }
+        }
+        items
+    }
+
     /// Get the main item state
     fn item_state_main(&self, anc: &Self::Ancillary) -> ItemState {
         let states = self.item_states(anc);

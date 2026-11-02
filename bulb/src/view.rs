@@ -12,6 +12,7 @@
 //
 use crate::actionplan::ActionPlan;
 use crate::alarm::Alarm;
+use crate::asset::Asset;
 use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
 use crate::camera::Camera;
@@ -41,6 +42,7 @@ use crate::mapextent::MapExtent;
 use crate::monitorstyle::MonitorStyle;
 use crate::msgline::MsgLine;
 use crate::msgpattern::MsgPattern;
+use crate::permission::Permission;
 use crate::planphase::PlanPhase;
 use crate::playlist::PlayList;
 use crate::query::QueryParam;
@@ -317,6 +319,17 @@ impl CardView {
         }
         Ok(())
     }
+
+    /// Make a context menu
+    async fn make_menu(&self, access: &[Permission]) -> Result<Vec<String>> {
+        cards_meth!(self, make_menu_x, access)
+    }
+
+    /// Make a context menu
+    async fn make_menu_x<C: Card>(&self, access: &[Permission]) -> Result<Vec<String>> {
+        let pri = C::fetch_one(&self.name).await?;
+        Ok(pri.make_menu(access))
+    }
 }
 
 /// Build a create card
@@ -343,4 +356,11 @@ fn html_card_create(res: Res, create: &str) -> String {
     div.close();
     footer_html(View::Create, false, &mut tree.root::<html::Div>());
     String::from(tree)
+}
+
+/// Make a context menu
+pub async fn make_menu_res(res: Res, nm: &str) -> Result<Vec<String>> {
+    let access: Vec<_> = Asset::Access.uri().get_val().await?;
+    let cv = CardView::new(res, nm);
+    cv.make_menu(&access).await
 }

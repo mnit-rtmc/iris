@@ -13,6 +13,7 @@
 use crate::eid;
 use crate::error::{Error, Result};
 use crate::util::Doc;
+use crate::view::make_menu_res;
 use earthwyrm::{MapEvent, MapPane};
 use hatmil::css::{Prop, Rule, Sel};
 use hatmil::{Tree, html};
@@ -40,6 +41,11 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
                     MapPane::get(eid::MAP_PANE).ok_or(Error::NoMap())?;
                 if let Some(lonlat) = map_pane.lonlat(x, y) {
                     make_osm_link(&mut menu.li(), lonlat);
+                }
+            } else if let Some((res, nm)) = layer_res(&me) {
+                for item in make_menu_res(res, nm).await? {
+                    let mut li = menu.li();
+                    li.cdata(item);
                 }
             }
         }
@@ -145,4 +151,14 @@ fn menu_style(x: i32, y: i32) -> Prop {
 /// Check if event is on an OSM layer
 fn is_osm_layer(me: &MapEvent) -> bool {
     me.data_name.is_some()
+}
+
+/// Get layer resource type
+fn layer_res(me: &MapEvent) -> Option<(Res, &str)> {
+    me.target.split_once('-').and_then(|(rname, nm)| {
+        match Res::try_from(rname) {
+            Ok(res) => Some((res, nm)),
+            Err(_e) => None,
+        }
+    })
 }

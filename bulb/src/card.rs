@@ -193,6 +193,11 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     /// Set the name
     fn with_name(self, name: &str) -> Self;
 
+    /// Make a context menu
+    fn make_menu(&self, _access: &[Permission]) -> Vec<String> {
+        Vec::new()
+    }
+
     /// Get the main item state
     fn item_state_main(&self, _anc: &Self::Ancillary) -> ItemState {
         ItemState::Unknown
