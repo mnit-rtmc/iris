@@ -10,7 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, footer_html, uri_all, uri_one};
+use crate::card::{AncillaryData, Card, footer_html, uri_all};
 use crate::error::Result;
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use crate::view::View;
@@ -43,12 +43,6 @@ impl AncillaryData for MapExtentAnc {
 }
 
 impl MapExtent {
-    /// Fetch one map extent
-    pub async fn fetch_one(name: &str) -> Result<Self> {
-        let json = uri_one(Res::MapExtent, name).get().await?;
-        Ok(serde_wasm_bindgen::from_value::<MapExtent>(json)?)
-    }
-
     /// Fetch all map extents
     pub async fn fetch_all() -> Result<Vec<Self>> {
         let uri = uri_all(Res::MapExtent);

@@ -12,7 +12,7 @@
 //
 use crate::app::{self, DeferredAction};
 use crate::asset::Asset;
-use crate::card::{self, CardList, CardState};
+use crate::card::{self, Card, CardList, CardState};
 use crate::eid;
 use crate::error::{Error, Result};
 use crate::fetch::Uri;

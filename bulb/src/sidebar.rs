@@ -772,7 +772,7 @@ fn card_view_value() -> Option<View> {
 
 /// Replace a card view element with another view
 async fn replace_card(mut cv: CardView, search: &str) -> Result<()> {
-    let html = cv.fetch_one(search).await?;
+    let html = cv.fetch_card(search).await?;
     replace_card_html(&cv, &html)?;
     app::set_expanded_view(Some(cv));
     Ok(())

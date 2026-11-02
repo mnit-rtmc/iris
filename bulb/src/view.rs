@@ -225,40 +225,33 @@ impl CardView {
     }
 
     /// Fetch a card for a given view
-    pub async fn fetch_one(&mut self, search: &str) -> Result<String> {
+    pub async fn fetch_card(&mut self, search: &str) -> Result<String> {
         let html = if self.is_create() {
-            let html = self.fetch_one_res(search).await?;
+            let html = self.fetch_card_res(search).await?;
             html_card_create(self.res, &html)
         } else {
-            self.fetch_one_res(search).await?
+            self.fetch_card_res(search).await?
         };
         Ok(html)
     }
 
     /// Fetch a card view
-    async fn fetch_one_res(&mut self, search: &str) -> Result<String> {
-        cards_meth!(self, fetch_one_x, search)
+    async fn fetch_card_res(&mut self, search: &str) -> Result<String> {
+        cards_meth!(self, fetch_card_x, search)
     }
 
     /// Fetch a card view
-    async fn fetch_one_x<C: Card>(&mut self, search: &str) -> Result<String> {
+    async fn fetch_card_x<C: Card>(&mut self, search: &str) -> Result<String> {
         let pri = if self.is_create() {
             C::default().with_name(&self.name)
         } else {
-            self.fetch_primary::<C>().await?
+            C::fetch_one(&self.name).await?
         };
         let anc = fetch_ancillary(&pri, self.view).await?;
         if !search.is_empty() && !Search::new(search).is_match(&pri, &anc) {
             self.view = View::Hidden;
         }
         Ok(pri.to_html(self.view, &anc))
-    }
-
-    /// Fetch primary JSON resource
-    async fn fetch_primary<C: Card>(&self) -> Result<C> {
-        let uri = uri_one(C::res(), &self.name);
-        let json = uri.get().await?;
-        C::new(json)
     }
 
     /// Check if an event type is handled for a card view
@@ -306,7 +299,7 @@ impl CardView {
             eid::SAVE => View::SaveEv,
             _ => self.view,
         };
-        let pri = self.fetch_primary::<C>().await?;
+        let pri = C::fetch_one(&self.name).await?;
         let anc = fetch_ancillary(&pri, view).await?;
         for action in pri.handle_event(anc, id, tp) {
             action.perform().await?;

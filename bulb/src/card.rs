@@ -161,6 +161,12 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         Ok(serde_wasm_bindgen::from_value(json)?)
     }
 
+    /// Fetch one named card
+    async fn fetch_one(name: &str) -> Result<Self> {
+        let json = uri_one(Self::res(), name).get().await?;
+        Self::new(json)
+    }
+
     /// Handle click event for the create button
     fn handle_create() -> Vec<Action> {
         let doc = Doc::get();
