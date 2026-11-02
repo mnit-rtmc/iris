@@ -225,22 +225,22 @@ impl CardView {
     }
 
     /// Fetch a card for a given view
-    pub async fn fetch_card(&mut self, search: &str) -> Result<String> {
+    pub async fn fetch_card_html(&mut self, search: &str) -> Result<String> {
         let html = if self.is_create() {
-            let html = self.fetch_card_res(search).await?;
+            let html = self.fetch_card(search).await?;
             html_card_create(self.res, &html)
         } else {
-            self.fetch_card_res(search).await?
+            self.fetch_card(search).await?
         };
         Ok(html)
     }
 
-    /// Fetch a card view
-    async fn fetch_card_res(&mut self, search: &str) -> Result<String> {
+    /// Fetch a card view as HTML
+    async fn fetch_card(&mut self, search: &str) -> Result<String> {
         cards_meth!(self, fetch_card_x, search)
     }
 
-    /// Fetch a card view
+    /// Fetch a card view as HTML
     async fn fetch_card_x<C: Card>(&mut self, search: &str) -> Result<String> {
         let pri = if self.is_create() {
             C::default().with_name(&self.name)
