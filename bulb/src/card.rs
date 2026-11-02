@@ -169,8 +169,8 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
 
     /// Fetch all cards
     async fn fetch_all() -> Result<Vec<Self>> {
-        let uri = uri_all(Self::res());
-        Ok(serde_wasm_bindgen::from_value(uri.get().await?)?)
+        let json = uri_all(Self::res()).get().await?;
+        Ok(serde_wasm_bindgen::from_value(json)?)
     }
 
     /// Handle click event for the create button
