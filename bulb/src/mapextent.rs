@@ -10,8 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::card::{AncillaryData, Card, footer_html, uri_all};
-use crate::error::Result;
+use crate::card::{AncillaryData, Card, footer_html};
 use crate::util::{ContainsLower, Fields, Input, opt_ref};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -43,12 +42,6 @@ impl AncillaryData for MapExtentAnc {
 }
 
 impl MapExtent {
-    /// Fetch all map extents
-    pub async fn fetch_all() -> Result<Vec<Self>> {
-        let uri = uri_all(Res::MapExtent);
-        Ok(serde_wasm_bindgen::from_value(uri.get().await?)?)
-    }
-
     /// Convert to Compact HTML
     fn to_html_compact(&self) -> String {
         let mut tree = Tree::new();

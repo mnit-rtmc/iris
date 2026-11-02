@@ -425,7 +425,7 @@ async fn layer_style_css(
         app::query().res() == Some(res) || zoom >= selected_zoom(res);
     if permitted && displayed {
         let mut cards = CardList::new(res, access);
-        cards.fetch_all().await?;
+        cards.fetch_all_json().await?;
         let states = cards.states_main().await?;
         Ok(res_states_css(res, &states))
     } else {

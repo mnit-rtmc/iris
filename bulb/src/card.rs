@@ -167,6 +167,12 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
         Self::new(json)
     }
 
+    /// Fetch all cards
+    async fn fetch_all() -> Result<Vec<Self>> {
+        let uri = uri_all(Self::res());
+        Ok(serde_wasm_bindgen::from_value(uri.get().await?)?)
+    }
+
     /// Handle click event for the create button
     fn handle_create() -> Vec<Action> {
         let doc = Doc::get();
@@ -490,7 +496,7 @@ impl CardList {
     }
 
     /// Fetch card list
-    pub async fn fetch_all(&mut self) -> Result<()> {
+    pub async fn fetch_all_json(&mut self) -> Result<()> {
         let json = uri_all(self.res).get().await?;
         let json: Value = serde_wasm_bindgen::from_value(json)?;
         self.json = json.to_string();

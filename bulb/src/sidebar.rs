@@ -677,7 +677,7 @@ async fn fetch_and_populate_cards(
     match query.res() {
         Some(res) => {
             let mut cards = CardList::new(res, access);
-            cards.fetch_all().await?;
+            cards.fetch_all_json().await?;
             can_create = res.has_create()
                 && cards.access_level() == AccessLevel::Configure;
             let search = search_value()?;
@@ -874,7 +874,7 @@ async fn update_card_list(res: Res) -> Result<bool> {
     app::card_list(Some(old_cards));
     let access: Vec<_> = Asset::Access.uri().get_val().await?;
     let mut cards = CardList::new(res, &access).with_json(old_json);
-    cards.fetch_all().await?;
+    cards.fetch_all_json().await?;
     let search = search_value()?;
     for (cv, html) in cards.changed_html(&search).await? {
         if let Some(ev) = &expanded
