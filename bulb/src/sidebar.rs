@@ -205,7 +205,7 @@ pub async fn set_loc_from_storage() -> Result<()> {
 pub async fn change_sidebar_loc(left: bool) -> Result<()> {
     let doc = Doc::new()?;
     let side_pane = doc.elem::<HtmlElement>("side-pane")?;
-    let map_controls = doc.elem::<HtmlElement>("map-controls")?;
+    let map_controls = doc.elem::<HtmlElement>(eid::MAP_CONTROLS)?;
     let show_btn = doc.elem::<HtmlButtonElement>(eid::SHOW_SIDEBAR)?;
     let hide_btn = doc.elem::<HtmlButtonElement>(eid::HIDE_SIDEBAR)?;
 

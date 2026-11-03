@@ -40,11 +40,10 @@ pub const HIDE_SIDEBAR: &str = "hide_sidebar";
 pub const LEFT_SIDEBAR: &str = "left_sidebar";
 pub const RIGHT_SIDEBAR: &str = "right_sidebar";
 
-/// Map pane ID
+/// Map elements
 pub const MAP_PANE: &str = "map-pane";
-
-/* Map menu */
-pub const MAP_MENU: &str = "map-menu";
+pub const MAP_MENU: &str = "map-contextmenu";
+pub const MAP_CONTROLS: &str = "map-controls";
 
 /* Beacon element IDs */
 pub const BCN_FLASHING: &str = "ob_flashing";
