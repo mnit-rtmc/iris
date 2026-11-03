@@ -24,17 +24,17 @@ pub enum Error {
     #[error("No document")]
     NoDocument(),
 
-    /// Unable to get body
-    #[error("No body")]
-    NoBody(),
+    /// Missing element
+    #[error("Missing element")]
+    MissingElement(),
+
+    /// Missing attribute
+    #[error("Missing attribute")]
+    MissingAttribute(),
 
     /// Unable to get web storage
     #[error("No storage")]
     NoStorage(),
-
-    /// Unable to get map element
-    #[error("No map")]
-    NoMap(),
 
     /// Unknown DOM event
     #[error("Unknown DOM event {0}")]

@@ -17,7 +17,6 @@ use crate::error::Result;
 use crate::fetch::Uri;
 use crate::helper::spawn_future;
 use crate::joystick;
-use crate::map;
 use crate::query::QueryParam;
 use crate::sidebar;
 use crate::sse;
@@ -44,10 +43,11 @@ pub async fn start() -> core::result::Result<(), JsError> {
 fn add_listeners() -> Result<()> {
     add_interval_callback()?;
     add_navigate_callback()?;
-    map::add_listeners()?;
+    crate::map::add_listeners()?;
     sidebar::add_listeners()?;
     let doc = Doc::new()?;
     add_contextmenu_listener(&doc)?;
+    crate::menu::add_listeners(&doc)?;
     add_mouse_listener(&doc)?;
     let body = doc.body()?;
     add_gamepad_listener()?;
@@ -107,7 +107,9 @@ fn handle_tick_interval() {
     app::tick_tock();
     while let Some(action) = app::next_action() {
         match action {
-            DeferredAction::FetchStationData => map::fetch_station_data(),
+            DeferredAction::FetchStationData => {
+                crate::map::fetch_station_data()
+            }
             DeferredAction::HideToast => {
                 if let Err(e) = util::hide_elem(eid::TOAST) {
                     log::warn!("hide_toast: {e:?}");

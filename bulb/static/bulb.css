@@ -313,6 +313,7 @@ li.changed {
       background-color: #899;
     }
     & a {
+      display: inline-block;
       text-decoration: none;
     }
     & a:hover, button:hover {

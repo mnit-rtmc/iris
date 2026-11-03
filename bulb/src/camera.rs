@@ -24,6 +24,7 @@ use crate::helper::spawn_future;
 use crate::item::{ItemState, ItemStates};
 use crate::joystick;
 use crate::map;
+use crate::menu::MenuAction;
 use crate::permission::{AccessLevel, Permission};
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
@@ -76,7 +77,7 @@ impl AncillaryData for CameraAnc {
         let cio = ControllerIoAnc::new(pri, view);
         let loc = LocAnc::new(pri, view);
         let assets = match view {
-            View::Control => vec![Asset::Access],
+            View::Control | View::Menu => vec![Asset::Access],
             View::Setup(_edit) => vec![Asset::EncoderTypes],
             _ => Vec::new(),
         };
@@ -126,6 +127,15 @@ impl CameraAnc {
             Res::Camera,
             pri.notes.as_deref(),
         )
+    }
+
+    /// Check if role has access to scratch playlist
+    fn has_scratch_playlist_access(&self) -> bool {
+        self.access.iter().any(|acc| {
+            Res::VideoMonitor.as_str() == acc.base_resource
+                && acc.hashtag.is_some()
+                && AccessLevel::from(acc.access_level) == AccessLevel::Manage
+        })
     }
 
     /// Build encoder types HTML
@@ -874,20 +884,15 @@ impl Card for Camera {
     }
 
     /// Make a context menu
-    fn make_menu(&self, access: &[Permission]) -> Vec<String> {
+    fn make_menu(&self, anc: &CameraAnc) -> Vec<MenuAction> {
         let mut items = Vec::new();
         if self.publish {
-            items.push("Unpublish".to_string());
+            items.push(MenuAction::Unpublish);
         } else {
-            items.push("Publish".to_string());
+            items.push(MenuAction::Publish);
         }
-        for acc in access {
-            if Res::VideoMonitor.as_str() == acc.base_resource
-                && acc.hashtag.is_some()
-                && AccessLevel::from(acc.access_level) == AccessLevel::Manage
-            {
-                items.push("Add to playlist".to_string());
-            }
+        if anc.has_scratch_playlist_access() {
+            items.push(MenuAction::PlaylistAdd);
         }
         items
     }

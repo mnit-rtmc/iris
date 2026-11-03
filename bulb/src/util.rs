@@ -194,7 +194,7 @@ impl Doc {
     pub fn body(&self) -> Result<HtmlElement> {
         self.0
             .body()
-            .ok_or(Error::NoBody())
+            .ok_or(Error::MissingElement())
             .inspect_err(|e| log::error!("body: {e:?}"))
     }
 

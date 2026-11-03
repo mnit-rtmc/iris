@@ -12,7 +12,6 @@
 //
 use crate::actionplan::ActionPlan;
 use crate::alarm::Alarm;
-use crate::asset::Asset;
 use crate::beacon::Beacon;
 use crate::cabinetstyle::CabinetStyle;
 use crate::camera::Camera;
@@ -39,10 +38,10 @@ use crate::incident::Incident;
 use crate::lcs::Lcs;
 use crate::lcsstate::LcsState;
 use crate::mapextent::MapExtent;
+use crate::menu::MenuAction;
 use crate::monitorstyle::MonitorStyle;
 use crate::msgline::MsgLine;
 use crate::msgpattern::MsgPattern;
-use crate::permission::Permission;
 use crate::planphase::PlanPhase;
 use crate::playlist::PlayList;
 use crate::query::QueryParam;
@@ -73,6 +72,8 @@ pub enum View {
     SearchEv,
     /// Save event "view"
     SaveEv,
+    /// Menu action "view"
+    Menu,
     /// Create view
     Create,
     /// Compact view
@@ -127,6 +128,7 @@ impl View {
             Hidden => "Hidden",
             SearchEv => "Search",
             SaveEv => "🖍️ Save",
+            Menu => "Menu",
             Create => "🆕 Create",
             Compact => "⌄ Compact",
             Control => "🕹️ Control",
@@ -321,17 +323,15 @@ impl CardView {
     }
 
     /// Make a context menu
-    async fn make_menu(&self, access: &[Permission]) -> Result<Vec<String>> {
-        cards_meth!(self, make_menu_x, access)
+    async fn make_menu(&self) -> Result<Vec<MenuAction>> {
+        cards_meth!(self, make_menu_x)
     }
 
     /// Make a context menu
-    async fn make_menu_x<C: Card>(
-        &self,
-        access: &[Permission],
-    ) -> Result<Vec<String>> {
+    async fn make_menu_x<C: Card>(&self) -> Result<Vec<MenuAction>> {
         let pri = C::fetch_one(&self.name).await?;
-        Ok(pri.make_menu(access))
+        let anc = fetch_ancillary(&pri, self.view).await?;
+        Ok(pri.make_menu(&anc))
     }
 }
 
@@ -362,8 +362,7 @@ fn html_card_create(res: Res, create: &str) -> String {
 }
 
 /// Make a context menu
-pub async fn make_menu_res(res: Res, nm: &str) -> Result<Vec<String>> {
-    let access: Vec<_> = Asset::Access.uri().get_val().await?;
-    let cv = CardView::new(res, nm);
-    cv.make_menu(&access).await
+pub async fn make_menu_res(res: Res, nm: &str) -> Result<Vec<MenuAction>> {
+    let cv = CardView::new(res, nm).with_view(View::Menu);
+    cv.make_menu().await
 }

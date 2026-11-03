@@ -44,6 +44,7 @@ pub const RIGHT_SIDEBAR: &str = "right_sidebar";
 pub const MAP_PANE: &str = "map-pane";
 pub const MAP_MENU: &str = "map-contextmenu";
 pub const MAP_CONTROLS: &str = "map-controls";
+pub const MAP_EXTENTS: &str = "map-extents";
 
 /* Beacon element IDs */
 pub const BCN_FLASHING: &str = "ob_flashing";

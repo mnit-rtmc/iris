@@ -12,16 +12,76 @@
 //
 use crate::eid;
 use crate::error::{Error, Result};
+use crate::helper::spawn_future;
 use crate::util::Doc;
 use crate::view::make_menu_res;
 use earthwyrm::{MapEvent, MapPane};
 use hatmil::css::{Prop, Rule, Sel};
 use hatmil::{Tree, html};
 use resources::Res;
-use web_sys::{Element, HtmlElement};
+use wasm_bindgen::JsCast;
+use wasm_bindgen::closure::Closure;
+use web_sys::{Element, Event, HtmlElement};
 
 /// OpenStreetMap domain URL
 const OSM: &str = "https://www.openstreetmap.org/";
+
+/// Menu action
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MenuAction {
+    /// Blank a sign
+    Blank,
+    /// Publish a camera
+    Publish,
+    /// Unpublish a camera
+    Unpublish,
+    /// Add a camera to scratch playlist
+    PlaylistAdd,
+    /// Remove a camera from scratch playlist
+    PlaylistRemove,
+}
+
+impl MenuAction {
+    /// Get string slice
+    fn as_str(self) -> &'static str {
+        match self {
+            MenuAction::Blank => "Blank",
+            MenuAction::Publish => "Publish",
+            MenuAction::Unpublish => "Unpublish",
+            MenuAction::PlaylistAdd => "Add to playlist",
+            MenuAction::PlaylistRemove => "Remove from playlist",
+        }
+    }
+}
+
+impl TryFrom<&Element> for MenuAction {
+    type Error = Error;
+
+    fn try_from(el: &Element) -> Result<Self> {
+        let action = el
+            .get_attribute("data-action")
+            .ok_or(Error::MissingAttribute())?;
+        use MenuAction::*;
+        if action == Blank.as_str() {
+            Ok(Blank)
+        } else if action == Publish.as_str() {
+            Ok(Publish)
+        } else if action == Unpublish.as_str() {
+            Ok(Unpublish)
+        } else if action == PlaylistAdd.as_str() {
+            Ok(PlaylistAdd)
+        } else if action == PlaylistRemove.as_str() {
+            Ok(PlaylistRemove)
+        } else {
+            Err(Error::MissingAttribute())
+        }
+    }
+}
+
+/// Add menu event listeners
+pub fn add_listeners(doc: &Doc) -> Result<()> {
+    add_click_listener(doc)
+}
 
 /// Handle a `contextmenu` event
 pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
@@ -37,15 +97,21 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
             menu.style(menu_style(x, y));
             menu.li().cdata_len(&title, 24);
             if is_osm_layer(&me) {
-                let map_pane =
-                    MapPane::get(eid::MAP_PANE).ok_or(Error::NoMap())?;
+                let map_pane = MapPane::get(eid::MAP_PANE)
+                    .ok_or(Error::MissingElement())?;
                 if let Some(lonlat) = map_pane.lonlat(x, y) {
                     make_osm_link(&mut menu.li(), lonlat);
                 }
             } else if let Some((res, nm)) = layer_res(&me) {
                 for item in make_menu_res(res, nm).await? {
                     let mut li = menu.li();
-                    li.button().r#type("button").cdata(item);
+                    let mut button = li.button();
+                    button
+                        .class("menu-action")
+                        .data_("action", item.as_str())
+                        .data_("res", res.as_str())
+                        .data_("name", nm)
+                        .cdata(item.as_str());
                     li.close();
                 }
             }
@@ -162,4 +228,40 @@ fn layer_res(me: &MapEvent) -> Option<(Res, &str)> {
             Err(_e) => None,
         }
     })
+}
+
+/// Add a "click" event listener to document
+fn add_click_listener(doc: &Doc) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        // NOTE: target.class_name() will throw an error in some cases
+        if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>())
+            && target.class_list().contains("menu-action")
+        {
+            spawn_future(handle_menu_action(target));
+        }
+    });
+    doc.0.add_event_listener_with_callback(
+        "click",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    // can't drop closure, just forget it to make JS happy
+    closure.forget();
+    Ok(())
+}
+
+/// Handle menu action click
+async fn handle_menu_action(el: Element) -> Result<()> {
+    let action = MenuAction::try_from(&el)?;
+    let res = el
+        .get_attribute("data-res")
+        .ok_or(Error::MissingAttribute())?;
+    let nm = el
+        .get_attribute("data-name")
+        .ok_or(Error::MissingAttribute())?;
+    log::info!("action: {action:?}, res: {res}, name: {nm}");
+    // FIXME: perform action
+    if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
+        el.hide_popover()?;
+    }
+    Ok(())
 }

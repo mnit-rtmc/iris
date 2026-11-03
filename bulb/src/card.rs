@@ -38,6 +38,7 @@ use crate::item::ItemState;
 use crate::lcs::Lcs;
 use crate::lcsstate::LcsState;
 use crate::mapextent::MapExtent;
+use crate::menu::MenuAction;
 use crate::monitorstyle::MonitorStyle;
 use crate::msgline::MsgLine;
 use crate::msgpattern::MsgPattern;
@@ -194,7 +195,7 @@ pub trait Card: Default + DeserializeOwned + PartialEq {
     fn with_name(self, name: &str) -> Self;
 
     /// Make a context menu
-    fn make_menu(&self, _access: &[Permission]) -> Vec<String> {
+    fn make_menu(&self, _anc: &Self::Ancillary) -> Vec<MenuAction> {
         Vec::new()
     }
 

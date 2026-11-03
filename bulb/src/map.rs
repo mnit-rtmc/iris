@@ -62,7 +62,7 @@ pub fn add_listeners() -> Result<()> {
     let doc = Doc::new()?;
     let layer_menu: HtmlElement = doc.elem("layer-menu")?;
     add_change_listener(&layer_menu)?;
-    let map_extents: HtmlElement = doc.elem("map-extents")?;
+    let map_extents: HtmlElement = doc.elem(eid::MAP_EXTENTS)?;
     add_click_listener(&map_extents)?;
     MapPane::new(eid::MAP_PANE)
         .with_anchor(ANCHOR_X, ANCHOR_Y)
@@ -157,7 +157,7 @@ pub fn present_item(res: Res, name: &str, lon: f64, lat: f64) {
 
 /// Set map extent
 async fn set_extent(zoom: u32, lon: f64, lat: f64) -> Result<()> {
-    let map_pane = MapPane::get(eid::MAP_PANE).ok_or(Error::NoMap())?;
+    let map_pane = MapPane::get(eid::MAP_PANE).ok_or(Error::MissingElement())?;
     let (ax, ay) = get_anchor();
     map_pane.with_anchor(ax, ay).set_position(zoom, lon, lat);
     set_zoom_level(zoom);
