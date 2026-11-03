@@ -11,6 +11,9 @@
 // GNU General Public License for more details.
 //
 #![allow(clippy::match_like_matches_macro)]
+#![warn(missing_docs)]
+
+//! Web UI for IRIS
 
 #[macro_use]
 mod macros;

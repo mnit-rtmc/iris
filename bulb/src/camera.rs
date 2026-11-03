@@ -346,12 +346,12 @@ impl Camera {
         actions
     }
 
+    /// Add PTZ controls to tree
     fn to_html_ptz_controls(
         &self,
         _anc: &CameraAnc,
         parent_row: &mut html::Div,
     ) {
-        // Add PTZ controls
         let mut div = parent_row.div();
         div.id("ptz-controls");
         let mut row = div.div();
