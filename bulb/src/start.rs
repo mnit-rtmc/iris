@@ -47,6 +47,7 @@ fn add_listeners() -> Result<()> {
     map::add_listeners()?;
     sidebar::add_listeners()?;
     let doc = Doc::new()?;
+    add_contextmenu_listener(&doc)?;
     add_mouse_listener(&doc)?;
     let body = doc.body()?;
     add_gamepad_listener()?;
@@ -143,6 +144,19 @@ fn handle_navigate(ev: NavigateEvent) {
             spawn_future(sidebar::update_query(query));
         }
     }
+}
+
+/// Add a contextmenu event listener to an element
+fn add_contextmenu_listener(doc: &Doc) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        e.prevent_default();
+    });
+    doc.0.add_event_listener_with_callback(
+        "contextmenu",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
 }
 
 /// Add a mouse event listener to an element
