@@ -296,7 +296,6 @@ li.changed {
   padding: 0;
   anchor-name: --context-anchor;
   display: flex;
-
   & menu {
     flex-direction: column;
     position: fixed;
@@ -316,10 +315,10 @@ li.changed {
     & a {
       text-decoration: none;
     }
-    & a:hover {
-      background-color: #677;
+    & a:hover, button:hover {
+      background-color: #abb;
     }
-    & button:hover {
+    & a:active, button:active {
       background-color: #677;
     }
   }
@@ -336,6 +335,20 @@ li.changed {
   user-select: none;
   max-width: 60%;
   text-wrap: nowrap;
+  & button {
+    border: none;
+    border-radius: 0;
+    padding: 0 0.3rem;
+    margin: 0;
+    background-color: #899;
+    color: black;
+  }
+  & button:hover {
+    background-color: #abb;
+  }
+  & button:active {
+    background-color: #677;
+  }
 }
 #map-controls.left {
   border-right: 1px solid white;
@@ -345,40 +358,27 @@ li.changed {
   border-left: 1px solid white;
   border-right: unset;
 }
-#map-controls button {
-  border: none;
-  border-radius: 0;
-  padding: 0 0.3rem;
-  margin: 0;
-  background-color: #899;
-  color: black;
-}
-#map-controls button:hover {
-  background-color: #677;
-}
 #map-extents {
   border-left: 4px double #677;
   anchor-name: --extents-anchor;
-}
-#map-extents button {
-  text-align: start;
+  & button {
+    text-align: start;
+  }
 }
 #map-extents-dynamic {
   display: none;
   flex-direction: column-reverse;
-
   position: fixed;
   position-anchor: --extents-anchor;
   bottom: anchor(top);
   min-width: anchor-size(width);
   max-height: 90%;
   overflow-y: auto;
-
   background-color: #899;
   border: 1px solid white;
-}
-#map-extents-dynamic button {
-  padding-left: calc(0.3rem + 3px);
+  & button {
+    padding-left: calc(0.3rem + 3px);
+  }
 }
 #map-extents:hover #map-extents-dynamic {
   display: flex;
