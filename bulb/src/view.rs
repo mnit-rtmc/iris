@@ -326,7 +326,10 @@ impl CardView {
     }
 
     /// Make a context menu
-    async fn make_menu_x<C: Card>(&self, access: &[Permission]) -> Result<Vec<String>> {
+    async fn make_menu_x<C: Card>(
+        &self,
+        access: &[Permission],
+    ) -> Result<Vec<String>> {
         let pri = C::fetch_one(&self.name).await?;
         Ok(pri.make_menu(access))
     }

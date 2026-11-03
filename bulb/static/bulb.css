@@ -290,18 +290,39 @@ li.changed {
 
 #map-contextmenu {
   position: absolute;
+  border: unset;
   inset: unset;
   margin: 0;
   padding: 0;
-  border: unset;
   anchor-name: --context-anchor;
-}
-#map-contextmenu menu {
-  position: fixed;
-  position-anchor: --context-anchor;
-  inset: unset;
-  width: fit-content;
-  height: fit-content;
+  display: flex;
+
+  & menu {
+    flex-direction: column;
+    position: fixed;
+    position-anchor: --context-anchor;
+    inset: unset;
+    width: fit-content;
+    height: fit-content;
+    & li, a, button {
+      border: none;
+      inset: unset;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      color: black;
+      background-color: #899;
+    }
+    & a {
+      text-decoration: none;
+    }
+    & a:hover {
+      background-color: #677;
+    }
+    & button:hover {
+      background-color: #677;
+    }
+  }
 }
 
 #map-controls {

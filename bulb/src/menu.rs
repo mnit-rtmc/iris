@@ -45,7 +45,8 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
             } else if let Some((res, nm)) = layer_res(&me) {
                 for item in make_menu_res(res, nm).await? {
                     let mut li = menu.li();
-                    li.cdata(item);
+                    li.button().r#type("button").cdata(item);
+                    li.close();
                 }
             }
         }
