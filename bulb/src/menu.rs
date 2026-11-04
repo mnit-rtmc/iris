@@ -19,6 +19,7 @@ use earthwyrm::{MapEvent, MapPane};
 use hatmil::css::{Prop, Rule, Sel};
 use hatmil::{Tree, html};
 use resources::Res;
+use std::fmt;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use web_sys::{Element, Event, HtmlElement};
@@ -27,29 +28,82 @@ use web_sys::{Element, Event, HtmlElement};
 const OSM: &str = "https://www.openstreetmap.org/";
 
 /// Menu action
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum MenuAction {
     /// Blank a sign
-    Blank,
+    Blank(String),
     /// Publish a camera
-    Publish,
+    Publish(String),
     /// Unpublish a camera
-    Unpublish,
-    /// Add a camera to scratch playlist
-    PlaylistAdd,
-    /// Remove a camera from scratch playlist
-    PlaylistRemove,
+    Unpublish(String),
+    /// Add to a scratch list (camera, playlist)
+    ScratchAdd(String, String),
+    /// Remove from a scratch list (camera, playlist)
+    ScratchRemove(String, String),
 }
 
 impl MenuAction {
-    /// Get string slice
-    fn as_str(self) -> &'static str {
+    /// Get as string slice
+    fn as_str(&self) -> &'static str {
+        use MenuAction::*;
         match self {
-            MenuAction::Blank => "Blank",
-            MenuAction::Publish => "Publish",
-            MenuAction::Unpublish => "Unpublish",
-            MenuAction::PlaylistAdd => "Add to playlist",
-            MenuAction::PlaylistRemove => "Remove from playlist",
+            Blank(_) => "Blank",
+            Publish(_) => "Publish",
+            Unpublish(_) => "Unpublish",
+            ScratchAdd(_, _) => "ScratchAdd",
+            ScratchRemove(_, _) => "ScratchRemove",
+        }
+    }
+
+    /// Get resource name
+    fn name(&self) -> &str {
+        use MenuAction::*;
+        match self {
+            Blank(nm)
+            | Publish(nm)
+            | Unpublish(nm)
+            | ScratchAdd(nm, _)
+            | ScratchRemove(nm, _) => nm,
+        }
+    }
+
+    /// Get extra parameter (if any)
+    fn extra(&self) -> Option<&str> {
+        use MenuAction::*;
+        match self {
+            ScratchAdd(_, ex) | ScratchRemove(_, ex) => Some(ex),
+            _ => None,
+        }
+    }
+
+    /// Make a button for the action
+    fn button<'p>(&self, button: &'p mut html::Button<'p>) {
+        button
+            .class("menu-action")
+            .data_("action", format!("{self:?}"))
+            .cdata(self.to_string());
+    }
+}
+
+impl fmt::Debug for MenuAction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}+{}", self.as_str(), self.name())?;
+        if let Some(extra) = self.extra() {
+            write!(f, "+{extra}")?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for MenuAction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use MenuAction::*;
+        match self {
+            Blank(_) => write!(f, "Blank"),
+            Publish(_) => write!(f, "Publish"),
+            Unpublish(_) => write!(f, "Unpublish"),
+            ScratchAdd(_, pl) => write!(f, "Add to {pl}"),
+            ScratchRemove(_, pl) => write!(f, "Remove from {pl}"),
         }
     }
 }
@@ -58,20 +112,25 @@ impl TryFrom<&Element> for MenuAction {
     type Error = Error;
 
     fn try_from(el: &Element) -> Result<Self> {
+        use MenuAction::*;
         let action = el
             .get_attribute("data-action")
             .ok_or(Error::MissingAttribute())?;
-        use MenuAction::*;
-        if action == Blank.as_str() {
-            Ok(Blank)
-        } else if action == Publish.as_str() {
-            Ok(Publish)
-        } else if action == Unpublish.as_str() {
-            Ok(Unpublish)
-        } else if action == PlaylistAdd.as_str() {
-            Ok(PlaylistAdd)
-        } else if action == PlaylistRemove.as_str() {
-            Ok(PlaylistRemove)
+        let mut params = action.split('+');
+        let var = params.next().ok_or(Error::MissingAttribute())?;
+        let nm = params.next().ok_or(Error::MissingAttribute())?.to_string();
+        if "Blank" == var {
+            Ok(Blank(nm))
+        } else if "Publish" == var {
+            Ok(Publish(nm))
+        } else if "Unpublish" == var {
+            Ok(Unpublish(nm))
+        } else if "ScratchAdd" == var {
+            let pl = params.next().ok_or(Error::MissingAttribute())?;
+            Ok(ScratchAdd(nm, pl.to_string()))
+        } else if "ScratchRemove" == var {
+            let pl = params.next().ok_or(Error::MissingAttribute())?;
+            Ok(ScratchRemove(nm, pl.to_string()))
         } else {
             Err(Error::MissingAttribute())
         }
@@ -105,13 +164,7 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
             } else if let Some((res, nm)) = layer_res(&me) {
                 for item in make_menu_res(res, nm).await? {
                     let mut li = menu.li();
-                    let mut button = li.button();
-                    button
-                        .class("menu-action")
-                        .data_("action", item.as_str())
-                        .data_("res", res.as_str())
-                        .data_("name", nm)
-                        .cdata(item.as_str());
+                    item.button(&mut li.button());
                     li.close();
                 }
             }
@@ -252,13 +305,7 @@ fn add_click_listener(doc: &Doc) -> Result<()> {
 /// Handle menu action click
 async fn handle_menu_action(el: Element) -> Result<()> {
     let action = MenuAction::try_from(&el)?;
-    let res = el
-        .get_attribute("data-res")
-        .ok_or(Error::MissingAttribute())?;
-    let nm = el
-        .get_attribute("data-name")
-        .ok_or(Error::MissingAttribute())?;
-    log::info!("action: {action:?}, res: {res}, name: {nm}");
+    log::info!("action: {action:?}");
     // FIXME: perform action
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
         el.hide_popover()?;

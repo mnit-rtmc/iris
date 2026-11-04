@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::card::uri_one;
 use crate::error::{Error, Result};
 use crate::fetch::{ContentType, Uri};
 use resources::Res;
@@ -59,6 +60,7 @@ pub enum Asset {
     Permissions,
     PhaseActions,
     PlanPhases,
+    PlayList(String),
     PlayLists,
     ResourceTypes,
     RoadClasses,
@@ -138,6 +140,7 @@ impl Asset {
             Permissions => "/iris/api/permission".into(),
             PhaseActions => "/iris/api/phase_action".into(),
             PlanPhases => "/iris/api/plan_phase".into(),
+            PlayList(nm) => uri_one(Res::PlayList, nm),
             PlayLists => "/iris/api/play_list".into(),
             ResourceTypes => "/iris/lut/resource_type".into(),
             RoadClasses => "/iris/lut/road_class".into(),

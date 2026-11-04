@@ -25,7 +25,9 @@ use crate::item::{ItemState, ItemStates};
 use crate::joystick;
 use crate::map;
 use crate::menu::MenuAction;
+use crate::notes::contains_hashtag;
 use crate::permission::{AccessLevel, Permission};
+use crate::playlist::PlayList;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -67,6 +69,8 @@ pub struct CameraAnc {
     assets: Vec<Asset>,
     access: Vec<Permission>,
     enc_types: Vec<EncoderType>,
+    playlists: Vec<PlayList>,
+    scratch: Vec<PlayList>,
 }
 
 impl AncillaryData for CameraAnc {
@@ -77,7 +81,8 @@ impl AncillaryData for CameraAnc {
         let cio = ControllerIoAnc::new(pri, view);
         let loc = LocAnc::new(pri, view);
         let assets = match view {
-            View::Control | View::Menu => vec![Asset::Access],
+            View::Control => vec![Asset::Access],
+            View::Menu => vec![Asset::PlayLists, Asset::Access],
             View::Setup(_edit) => vec![Asset::EncoderTypes],
             _ => Vec::new(),
         };
@@ -112,6 +117,23 @@ impl AncillaryData for CameraAnc {
                 self.enc_types = serde_wasm_bindgen::from_value(value)?;
                 self.enc_types.sort();
             }
+            Asset::PlayLists => {
+                self.playlists = serde_wasm_bindgen::from_value(value)?;
+                let mut assets = Vec::new();
+                let tags = self.scratch_playlist_hashtags();
+                for tag in tags {
+                    for pl in &self.playlists {
+                        if contains_hashtag(&pl.notes, tag) {
+                            assets.push(Asset::PlayList(pl.name.to_string()));
+                        }
+                    }
+                }
+                self.assets.extend(assets);
+            }
+            Asset::PlayList(_nm) => {
+                let scratch = serde_wasm_bindgen::from_value(value)?;
+                self.scratch.push(scratch);
+            }
             Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             _ => self.loc.set_asset(pri, asset, value)?,
         }
@@ -129,13 +151,18 @@ impl CameraAnc {
         )
     }
 
-    /// Check if role has access to scratch playlist
-    fn has_scratch_playlist_access(&self) -> bool {
-        self.access.iter().any(|acc| {
-            Res::VideoMonitor.as_str() == acc.base_resource
-                && acc.hashtag.is_some()
+    /// Get hashtags for scratch playlist
+    fn scratch_playlist_hashtags(&self) -> Vec<&str> {
+        let mut tags = Vec::new();
+        for acc in &self.access {
+            if Res::VideoMonitor.as_str() == acc.base_resource
                 && AccessLevel::from(acc.access_level) == AccessLevel::Manage
-        })
+                && let Some(tag) = acc.hashtag.as_deref()
+            {
+                tags.push(tag);
+            }
+        }
+        tags
     }
 
     /// Build encoder types HTML
@@ -886,13 +913,27 @@ impl Card for Camera {
     /// Make a context menu
     fn make_menu(&self, anc: &CameraAnc) -> Vec<MenuAction> {
         let mut items = Vec::new();
-        if self.publish {
-            items.push(MenuAction::Unpublish);
-        } else {
-            items.push(MenuAction::Publish);
+        if anc.access_level(self) >= AccessLevel::Manage {
+            if self.publish {
+                items.push(MenuAction::Unpublish(self.name.to_string()));
+            } else {
+                items.push(MenuAction::Publish(self.name.to_string()));
+            }
         }
-        if anc.has_scratch_playlist_access() {
-            items.push(MenuAction::PlaylistAdd);
+        for scratch in &anc.scratch {
+            if let Some(entries) = &scratch.entries {
+                if entries.contains(&self.name) {
+                    items.push(MenuAction::ScratchRemove(
+                        self.name.clone(),
+                        scratch.name().to_string(),
+                    ));
+                } else {
+                    items.push(MenuAction::ScratchAdd(
+                        self.name.clone(),
+                        scratch.name().to_string(),
+                    ));
+                }
+            }
         }
         items
     }

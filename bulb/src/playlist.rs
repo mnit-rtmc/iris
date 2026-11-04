@@ -67,9 +67,7 @@ impl AncillaryData for PlayListAnc {
         };
         PlayListAnc {
             assets,
-            access: Vec::new(),
-            cameras: Vec::new(),
-            playlists: Vec::new(),
+            ..Default::default()
         }
     }
 
@@ -580,6 +578,7 @@ impl Card for PlayList {
     fn is_match(&self, search: &str, anc: &PlayListAnc) -> bool {
         self.name.contains_lower(search)
             || self.check_number(search)
+            || self.notes.contains_lower(search)
             || self.item_states(anc).is_match(search)
     }
 
