@@ -10,9 +10,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
+use crate::attr::Attr;
+use crate::card::{Card, uri_one};
 use crate::eid;
 use crate::error::{Error, Result};
+use crate::fetch::Action;
 use crate::helper::spawn_future;
+use crate::playlist::PlayList;
 use crate::util::Doc;
 use crate::view::make_menu_res;
 use earthwyrm::{MapEvent, MapPane};
@@ -20,8 +24,8 @@ use hatmil::css::{Prop, Rule, Sel};
 use hatmil::{Tree, html};
 use resources::Res;
 use std::fmt;
-use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Event, HtmlElement};
 
 /// OpenStreetMap domain URL
@@ -83,6 +87,58 @@ impl MenuAction {
             .data_("action", format!("{self:?}"))
             .cdata(self.to_string());
     }
+
+    /// Perform the menu action
+    async fn perform(self) -> Result<()> {
+        log::debug!("action: {self:?}");
+        use MenuAction::*;
+        match self {
+            Publish(nm) => {
+                let uri = uri_one(Res::Camera, &nm);
+                let mut attr = Attr::new();
+                attr.bool("publish", true);
+                let value = JsValue::from(attr);
+                Action::Patch(uri, value).perform().await
+            }
+            Unpublish(nm) => {
+                let uri = uri_one(Res::Camera, &nm);
+                let mut attr = Attr::new();
+                attr.bool("publish", false);
+                let value = JsValue::from(attr);
+                Action::Patch(uri, value).perform().await
+            }
+            ScratchAdd(nm, pl) => {
+                let plist = PlayList::fetch_one(&pl).await?;
+                if let Some(mut entries) = plist.entries {
+                    entries.push(nm);
+                    set_playlist_entries(&pl, entries).await
+                } else {
+                    log::debug!("no entries: {pl}");
+                    Ok(())
+                }
+            }
+            ScratchRemove(nm, pl) => {
+                let plist = PlayList::fetch_one(&pl).await?;
+                if let Some(mut entries) = plist.entries {
+                    entries.retain(|e| *e != nm);
+                    set_playlist_entries(&pl, entries).await
+                } else {
+                    log::debug!("no entries: {pl}");
+                    Ok(())
+                }
+            }
+            _ => unimplemented!(),
+        }
+    }
+}
+
+/// Set entries on a playlist
+async fn set_playlist_entries(pl: &str, entries: Vec<String>) -> Result<()> {
+    let uri = uri_one(Res::PlayList, pl);
+    let mut attr = Attr::new();
+    attr.array("entries", entries);
+    let value = JsValue::from(attr);
+    Action::Patch(uri, value).perform().await
 }
 
 impl fmt::Debug for MenuAction {
@@ -305,8 +361,7 @@ fn add_click_listener(doc: &Doc) -> Result<()> {
 /// Handle menu action click
 async fn handle_menu_action(el: Element) -> Result<()> {
     let action = MenuAction::try_from(&el)?;
-    log::info!("action: {action:?}");
-    // FIXME: perform action
+    action.perform().await?;
     if let Some(el) = Doc::get().opt_elem::<HtmlElement>(eid::MAP_MENU) {
         el.hide_popover()?;
     }

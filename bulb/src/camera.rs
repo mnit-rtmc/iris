@@ -914,24 +914,21 @@ impl Card for Camera {
     fn make_menu(&self, anc: &CameraAnc) -> Vec<MenuAction> {
         let mut items = Vec::new();
         if anc.access_level(self) >= AccessLevel::Manage {
+            let nm = self.name.to_string();
             if self.publish {
-                items.push(MenuAction::Unpublish(self.name.to_string()));
+                items.push(MenuAction::Unpublish(nm));
             } else {
-                items.push(MenuAction::Publish(self.name.to_string()));
+                items.push(MenuAction::Publish(nm));
             }
         }
         for scratch in &anc.scratch {
             if let Some(entries) = &scratch.entries {
+                let nm = self.name.to_string();
+                let snm = scratch.name().to_string();
                 if entries.contains(&self.name) {
-                    items.push(MenuAction::ScratchRemove(
-                        self.name.clone(),
-                        scratch.name().to_string(),
-                    ));
+                    items.push(MenuAction::ScratchRemove(nm, snm));
                 } else {
-                    items.push(MenuAction::ScratchAdd(
-                        self.name.clone(),
-                        scratch.name().to_string(),
-                    ));
+                    items.push(MenuAction::ScratchAdd(nm, snm));
                 }
             }
         }
