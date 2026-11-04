@@ -295,9 +295,7 @@ li.changed {
   margin: 0;
   padding: 0;
   anchor-name: --context-anchor;
-  display: flex;
   & menu {
-    flex-direction: column;
     position: fixed;
     position-anchor: --context-anchor;
     inset: unset;
