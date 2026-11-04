@@ -28,6 +28,7 @@ use crate::menu::MenuAction;
 use crate::notes::contains_hashtag;
 use crate::permission::{AccessLevel, Permission};
 use crate::playlist::PlayList;
+use crate::systemattr::SystemAttr;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -71,6 +72,7 @@ pub struct CameraAnc {
     enc_types: Vec<EncoderType>,
     playlists: Vec<PlayList>,
     scratch: Vec<PlayList>,
+    sys_attrs: Vec<SystemAttr>,
 }
 
 impl AncillaryData for CameraAnc {
@@ -82,7 +84,9 @@ impl AncillaryData for CameraAnc {
         let loc = LocAnc::new(pri, view);
         let assets = match view {
             View::Control => vec![Asset::Access],
-            View::Menu => vec![Asset::PlayLists, Asset::Access],
+            View::Menu => {
+                vec![Asset::PlayLists, Asset::Access, Asset::SystemAttrs]
+            }
             View::Setup(_edit) => vec![Asset::EncoderTypes],
             _ => Vec::new(),
         };
@@ -133,6 +137,9 @@ impl AncillaryData for CameraAnc {
             Asset::PlayList(_nm) => {
                 let scratch = serde_wasm_bindgen::from_value(value)?;
                 self.scratch.push(scratch);
+            }
+            Asset::SystemAttrs => {
+                self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             _ => self.loc.set_asset(pri, asset, value)?,
@@ -931,6 +938,13 @@ impl Card for Camera {
                     items.push(MenuAction::ScratchAdd(nm, snm));
                 }
             }
+        }
+        if let Some(url) = SystemAttr::work_req_url(
+            &anc.sys_attrs,
+            &self.name,
+            anc.loc.lonlat(),
+        ) {
+            items.push(MenuAction::Link(url, String::from("Work Request")));
         }
         items
     }

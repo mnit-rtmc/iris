@@ -40,6 +40,20 @@ impl AncillaryData for SystemAttrAnc {
 }
 
 impl SystemAttr {
+    /// Get a work request URL
+    pub fn work_req_url(
+        sys_attrs: &[Self],
+        nm: &str,
+        lonlat: Option<(f64, f64)>,
+    ) -> Option<String> {
+        for sa in sys_attrs {
+            if sa.name == "work_request_url" {
+                return sa.build_work_req_url(nm, lonlat);
+            }
+        }
+        None
+    }
+
     /// Render a work request URL
     pub fn render_work_req<'p>(
         sys_attrs: &[Self],
@@ -47,14 +61,13 @@ impl SystemAttr {
         nm: &str,
         lonlat: Option<(f64, f64)>,
     ) {
-        for sa in sys_attrs {
-            if sa.name == "work_request_url" {
-                let url = sa.build_work_req_url(nm, lonlat);
-                return Self::render_work_req_link(a, &url, nm);
+        match Self::work_req_url(sys_attrs, nm, lonlat) {
+            Some(url) => Self::render_work_req_link(a, &url, nm),
+            None => {
+                log::warn!("work_request_url not found");
+                Self::render_work_req_link(a, "", nm);
             }
         }
-        log::warn!("work_request_url not found");
-        Self::render_work_req_link(a, "", nm);
     }
 
     /// Render a work request URL
@@ -62,10 +75,10 @@ impl SystemAttr {
         &self,
         nm: &str,
         lonlat: Option<(f64, f64)>,
-    ) -> String {
-        let mut url = String::with_capacity(100);
+    ) -> Option<String> {
         let host = &self.value;
         if !host.is_empty() {
+            let mut url = String::with_capacity(100);
             url.push_str("https://");
             url.push_str(host);
             url.push_str("/3s/forms/tams/");
@@ -75,12 +88,14 @@ impl SystemAttr {
             url.push_str(nm);
             if let Some((lon, lat)) = lonlat {
                 url.push_str("&longitude=");
-                url.push_str(&lon.to_string());
+                url.push_str(&format!("{lon:.5}"));
                 url.push_str("&latitude=");
-                url.push_str(&lat.to_string());
+                url.push_str(&format!("{lat:.5}"));
             }
+            Some(url)
+        } else {
+            None
         }
-        url
     }
 
     /// Render a work request link

@@ -66,7 +66,7 @@ where
     fn new(pri: &C, view: View) -> Self {
         let mut assets = Vec::new();
         match (view, pri.geoloc()) {
-            (View::Control, Some(nm)) => {
+            (View::Control | View::Menu, Some(nm)) => {
                 assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
             }
             (View::Status, Some(nm)) if !C::res().has_control() => {

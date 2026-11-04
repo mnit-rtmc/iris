@@ -34,6 +34,8 @@ const OSM: &str = "https://www.openstreetmap.org/";
 /// Menu action
 #[derive(Clone, PartialEq, Eq)]
 pub enum MenuAction {
+    /// Link to URL
+    Link(String, String),
     /// Blank a sign
     Blank(String),
     /// Publish a camera
@@ -51,6 +53,7 @@ impl MenuAction {
     fn as_str(&self) -> &'static str {
         use MenuAction::*;
         match self {
+            Link(_, _) => "Link",
             Blank(_) => "Blank",
             Publish(_) => "Publish",
             Unpublish(_) => "Unpublish",
@@ -63,7 +66,8 @@ impl MenuAction {
     fn name(&self) -> &str {
         use MenuAction::*;
         match self {
-            Blank(nm)
+            Link(nm, _)
+            | Blank(nm)
             | Publish(nm)
             | Unpublish(nm)
             | ScratchAdd(nm, _)
@@ -75,9 +79,17 @@ impl MenuAction {
     fn extra(&self) -> Option<&str> {
         use MenuAction::*;
         match self {
-            ScratchAdd(_, ex) | ScratchRemove(_, ex) => Some(ex),
+            Link(_, ex) | ScratchAdd(_, ex) | ScratchRemove(_, ex) => Some(ex),
             _ => None,
         }
+    }
+
+    /// Make a link for the action
+    fn link<'p>(&self, a: &'p mut html::A<'p>) {
+        a.href(self.name())
+            .target("_blank")
+            .rel("noopener noreferrer")
+            .cdata(self.extra().unwrap_or("Link"));
     }
 
     /// Make a button for the action
@@ -155,6 +167,7 @@ impl fmt::Display for MenuAction {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use MenuAction::*;
         match self {
+            Link(_, ex) => write!(f, "{ex}"),
             Blank(_) => write!(f, "Blank"),
             Publish(_) => write!(f, "Publish"),
             Unpublish(_) => write!(f, "Unpublish"),
@@ -175,7 +188,10 @@ impl TryFrom<&Element> for MenuAction {
         let mut params = action.split('+');
         let var = params.next().ok_or(Error::MissingAttribute())?;
         let nm = params.next().ok_or(Error::MissingAttribute())?.to_string();
-        if "Blank" == var {
+        if "Link" == var {
+            let ex = params.next().ok_or(Error::MissingAttribute())?;
+            Ok(Link(nm, ex.to_string()))
+        } else if "Blank" == var {
             Ok(Blank(nm))
         } else if "Publish" == var {
             Ok(Publish(nm))
@@ -215,12 +231,19 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
                 let map_pane = MapPane::get(eid::MAP_PANE)
                     .ok_or(Error::MissingElement())?;
                 if let Some(lonlat) = map_pane.lonlat(x, y) {
-                    make_osm_link(&mut menu.li(), lonlat);
+                    let item = make_osm_link(lonlat);
+                    let mut li = menu.li();
+                    item.link(&mut li.a());
+                    li.close();
                 }
             } else if let Some((res, nm)) = layer_res(&me) {
                 for item in make_menu_res(res, nm).await? {
                     let mut li = menu.li();
-                    item.button(&mut li.button());
+                    if let MenuAction::Link(_, _) = item {
+                        item.link(&mut li.a());
+                    } else {
+                        item.button(&mut li.button());
+                    }
                     li.close();
                 }
             }
@@ -235,13 +258,10 @@ pub async fn handle_contextmenu(me: MapEvent, x: i32, y: i32) -> Result<()> {
 }
 
 /// Make link to OpenStreetMap
-fn make_osm_link<'p>(li: &'p mut html::Li<'p>, lonlat: (f64, f64)) {
-    li.a()
-        .href(format!("{OSM}?mlat={}&mlon={}", lonlat.1, lonlat.0))
-        .target("_blank")
-        .rel("noopener noreferrer")
-        .cdata("OpenStreetMap");
-    li.close();
+fn make_osm_link(lonlat: (f64, f64)) -> MenuAction {
+    let href = format!("{OSM}?mlat={:.5}&mlon={:.5}", lonlat.1, lonlat.0);
+    let ex = String::from("OpenStreetMap");
+    MenuAction::Link(href, ex)
 }
 
 /// Set context style for a layer
