@@ -226,6 +226,7 @@ impl AncillaryData for DmsAnc {
             View::Compact | View::Hidden | View::SearchEv | View::Status => {
                 vec![Asset::SignMessages]
             }
+            View::Menu => vec![Asset::Access],
             View::Control => {
                 vec![
                     Asset::Access,
@@ -1339,7 +1340,13 @@ impl Card for Dms {
 
     /// Make a context menu
     fn make_menu(&self, anc: &DmsAnc) -> Vec<MenuAction> {
-        anc.loc.make_menu(&self.name)
+        let mut items = anc.loc.make_menu(&self.name);
+        if anc.access_level(self) >= AccessLevel::Operate && self.lock.is_some()
+        {
+            let nm = self.name.to_string();
+            items.push(MenuAction::Blank(nm));
+        }
+        items
     }
 
     /// Get the main item state

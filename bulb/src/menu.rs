@@ -105,6 +105,13 @@ impl MenuAction {
         log::debug!("action: {self:?}");
         use MenuAction::*;
         match self {
+            Blank(nm) => {
+                let uri = uri_one(Res::Dms, &nm);
+                let mut attr = Attr::new();
+                attr.opt_str("lock", None);
+                let value = JsValue::from(attr);
+                Action::Patch(uri, value).perform().await
+            }
             Publish(nm) => {
                 let uri = uri_one(Res::Camera, &nm);
                 let mut attr = Attr::new();
