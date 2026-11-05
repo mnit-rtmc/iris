@@ -20,6 +20,7 @@ use crate::fetch::Action;
 use crate::geoloc::LocAnc;
 use crate::item::ItemState;
 use crate::map;
+use crate::menu::MenuAction;
 use crate::systemattr::SystemAttr;
 use crate::util::{ContainsLower, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
@@ -201,7 +202,8 @@ impl AncillaryData for WeatherSensorAnc {
     ) -> Result<()> {
         match asset {
             Asset::SystemAttrs => {
-                self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
+                self.sys_attrs = serde_wasm_bindgen::from_value(value.clone())?;
+                self.loc.set_asset(pri, asset, value)?;
             }
             Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             _ => self.loc.set_asset(pri, asset, value)?,
@@ -990,6 +992,11 @@ impl Card for WeatherSensor {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Make a context menu
+    fn make_menu(&self, anc: &WeatherSensorAnc) -> Vec<MenuAction> {
+        anc.loc.make_menu(&self.name)
     }
 
     /// Get the main item state

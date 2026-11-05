@@ -20,6 +20,7 @@ use crate::fetch::Action;
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::map;
+use crate::menu::MenuAction;
 use crate::notes::contains_hashtag;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
@@ -295,6 +296,11 @@ impl Card for GateArm {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Make a context menu
+    fn make_menu(&self, anc: &GateArmAnc) -> Vec<MenuAction> {
+        anc.loc.make_menu(&self.name)
     }
 
     /// Get the main item state

@@ -21,6 +21,7 @@ use crate::item::{ItemState, ItemStates};
 use crate::lcsstate::LcsState;
 use crate::lock::LockReason;
 use crate::map;
+use crate::menu::MenuAction;
 use crate::util::{
     ContainsLower, Doc, Fields, Input, Select, TextArea, opt_ref, opt_str,
 };
@@ -208,13 +209,13 @@ impl AncillaryData for LcsAnc {
         value: JsValue,
     ) -> Result<()> {
         match asset {
-            Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             Asset::LcsStates => {
                 self.lcs_states = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::LcsTypes => {
                 self.lcs_types = serde_wasm_bindgen::from_value(value)?;
             }
+            Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             _ => self.loc.set_asset(pri, asset, value)?,
         }
         Ok(())
@@ -646,6 +647,11 @@ impl Card for Lcs {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Make a context menu
+    fn make_menu(&self, anc: &LcsAnc) -> Vec<MenuAction> {
+        anc.loc.make_menu(&self.name)
     }
 
     /// Get the main item state

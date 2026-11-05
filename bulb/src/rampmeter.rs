@@ -21,6 +21,7 @@ use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
 use crate::map;
+use crate::menu::MenuAction;
 use crate::notes::contains_hashtag;
 use crate::permission::{AccessLevel, Permission};
 use crate::systemattr::SystemAttr;
@@ -279,7 +280,8 @@ impl AncillaryData for RampMeterAnc {
                 self.meter_types = serde_wasm_bindgen::from_value(value)?;
             }
             Asset::SystemAttrs => {
-                self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
+                self.sys_attrs = serde_wasm_bindgen::from_value(value.clone())?;
+                self.loc.set_asset(pri, asset, value)?;
             }
             Asset::Controllers => self.cio.set_asset(pri, asset, value)?,
             Asset::DeviceActions | Asset::ActionPlans => {
@@ -1035,6 +1037,11 @@ impl Card for RampMeter {
     fn with_name(mut self, name: &str) -> Self {
         self.name = name.to_string();
         self
+    }
+
+    /// Make a context menu
+    fn make_menu(&self, anc: &RampMeterAnc) -> Vec<MenuAction> {
+        anc.loc.make_menu(&self.name)
     }
 
     /// Get the main item state

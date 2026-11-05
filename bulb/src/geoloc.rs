@@ -13,7 +13,9 @@
 use crate::asset::Asset;
 use crate::card::{AncillaryData, Card, footer_html};
 use crate::error::Result;
+use crate::menu::MenuAction;
 use crate::road::{Direction, Road};
+use crate::systemattr::SystemAttr;
 use crate::util::{Fields, Input, Select, opt_ref, opt_str};
 use crate::view::View;
 use hatmil::{Tree, html};
@@ -54,6 +56,7 @@ pub struct LocAnc<C> {
     roads: Vec<Road>,
     directions: Vec<Direction>,
     modifiers: Vec<RoadModifier>,
+    sys_attrs: Vec<SystemAttr>,
 }
 
 impl<C> AncillaryData for LocAnc<C>
@@ -66,7 +69,11 @@ where
     fn new(pri: &C, view: View) -> Self {
         let mut assets = Vec::new();
         match (view, pri.geoloc()) {
-            (View::Control | View::Menu, Some(nm)) => {
+            (View::Menu, Some(nm)) => {
+                assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
+                assets.push(Asset::SystemAttrs);
+            }
+            (View::Control, Some(nm)) => {
                 assets.push(Asset::GeoLoc(nm.to_string(), C::res()));
             }
             (View::Status, Some(nm)) if !C::res().has_control() => {
@@ -84,10 +91,7 @@ where
         LocAnc {
             pri: PhantomData,
             assets,
-            geoloc: None,
-            roads: Vec::new(),
-            directions: Vec::new(),
-            modifiers: Vec::new(),
+            ..Default::default()
         }
     }
 
@@ -116,6 +120,9 @@ where
             Asset::Roads => {
                 self.roads = serde_wasm_bindgen::from_value(value)?;
             }
+            Asset::SystemAttrs => {
+                self.sys_attrs = serde_wasm_bindgen::from_value(value)?;
+            }
             _ => (),
         }
         Ok(())
@@ -135,6 +142,17 @@ where
             },
             None => None,
         }
+    }
+
+    /// Make a context menu
+    pub fn make_menu(&self, name: &str) -> Vec<MenuAction> {
+        let mut items = Vec::new();
+        if let Some(url) =
+            SystemAttr::work_req_url(&self.sys_attrs, name, self.lonlat())
+        {
+            items.push(MenuAction::Link(url, String::from("Work Request")));
+        }
+        items
     }
 
     /// Build roads HTML
