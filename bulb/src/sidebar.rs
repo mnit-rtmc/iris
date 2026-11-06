@@ -541,17 +541,13 @@ pub async fn update_query(query: QueryParam) -> Result<()> {
 /// Update controls to reflect query parameters (resource, selection)
 async fn do_update_query(doc: Doc, query: QueryParam) -> Result<()> {
     map::set_selected_style(query.clone());
+    let aquery = app::query();
     let res = query.res();
-    let res_change = res != app::query().res();
-    let sel_change = query.sel() != app::query().sel();
+    let res_change = res != aquery.res();
+    let sel_change = query.sel() != aquery.sel();
     app::set_query(query.clone());
     if res_change {
-        let access: Vec<_> = Asset::Access.uri().get_val().await?;
-        update_resources(&doc, res, &access)?;
-        let sb_cards = doc.elem::<Element>(eid::CARDS)?;
-        sb_cards.set_inner_html("");
-        fetch_and_populate_cards(query.clone(), &access).await?;
-        sse::post_req(res, &access).await?;
+        update_resources(&doc, res, query.clone()).await?;
     }
     if let Some(res) = res
         && sel_change
@@ -564,24 +560,25 @@ async fn do_update_query(doc: Doc, query: QueryParam) -> Result<()> {
 }
 
 /// Update resource elements for a query
-fn update_resources(
+async fn update_resources(
     doc: &Doc,
     res: Option<Res>,
-    access: &[Permission],
+    query: QueryParam,
 ) -> Result<()> {
+    let access: Vec<_> = Asset::Access.uri().get_val().await?;
     let base = res.map(|r| r.base());
     let resource = doc.elem::<HtmlSelectElement>(eid::RESOURCE)?;
     resource.set_value(base.map(|r| r.as_str()).unwrap_or(""));
-    show_hide_res_row(doc, base, Res::ActionPlan, access);
-    show_hide_res_row(doc, base, Res::Camera, access);
-    show_hide_res_row(doc, base, Res::Dms, access);
-    show_hide_res_row(doc, base, Res::Lcs, access);
-    show_hide_res_row(doc, base, Res::VideoMonitor, access);
-    show_hide_res_row(doc, base, Res::CommConfig, access);
-    show_hide_res_row(doc, base, Res::Road, access);
-    show_hide_res_row(doc, base, Res::Permission, access);
-    show_hide_res_row(doc, base, Res::SystemAttribute, access);
-    show_hide_res_row(doc, base, Res::TollZone, access);
+    show_hide_res_row(doc, base, Res::ActionPlan, &access);
+    show_hide_res_row(doc, base, Res::Camera, &access);
+    show_hide_res_row(doc, base, Res::Dms, &access);
+    show_hide_res_row(doc, base, Res::Lcs, &access);
+    show_hide_res_row(doc, base, Res::VideoMonitor, &access);
+    show_hide_res_row(doc, base, Res::CommConfig, &access);
+    show_hide_res_row(doc, base, Res::Road, &access);
+    show_hide_res_row(doc, base, Res::Permission, &access);
+    show_hide_res_row(doc, base, Res::SystemAttribute, &access);
+    show_hide_res_row(doc, base, Res::TollZone, &access);
     if let Some(res) = res {
         let id = format!("res-{res}");
         if let Some(el) = doc.opt_elem::<HtmlInputElement>(&id) {
@@ -596,6 +593,10 @@ fn update_resources(
         None => String::new(),
     };
     sb_state.set_inner_html(&html);
+    let sb_cards = doc.elem::<Element>(eid::CARDS)?;
+    sb_cards.set_inner_html("");
+    fetch_and_populate_cards(query, &access).await?;
+    sse::post_req(res, &access).await?;
     Ok(())
 }
 
