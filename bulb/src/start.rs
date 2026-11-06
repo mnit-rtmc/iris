@@ -376,7 +376,7 @@ fn add_toggle_listener(el: &Element) -> Result<()> {
             // Remove style so compact card isn't a different size
             let _ = target.remove_attribute("style");
             let query = QueryParam::current_entry().with_sel("");
-            spawn_future(sidebar::set_query(query));
+            spawn_future(sidebar::change_query(query));
         }
     });
 

@@ -296,7 +296,7 @@ impl CardView {
                 action.perform().await?;
             }
             let query = QueryParam::current_entry().with_sel("");
-            sidebar::set_query(query).await?;
+            sidebar::change_query(query).await?;
             return Ok(());
         }
         let view = match id {

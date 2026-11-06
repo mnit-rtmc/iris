@@ -137,7 +137,7 @@ async fn set_query_map(query: QueryParam) -> Result<()> {
     {
         app::present_item(Some((res, name)));
     }
-    sidebar::set_query(query).await
+    sidebar::change_query(query).await
 }
 
 /// Get zoom level for selected resource

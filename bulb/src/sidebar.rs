@@ -235,7 +235,7 @@ pub async fn change_sidebar_loc(left: bool) -> Result<()> {
 async fn show_create_card() -> Result<()> {
     let query = QueryParam::current_entry();
     if query.res().is_some() && app::can_edit_card() {
-        set_query(query.with_sel("_")).await?;
+        change_query(query.with_sel("_")).await?;
     }
     Ok(())
 }
@@ -250,7 +250,7 @@ async fn handle_button_card(
     if finished && eid::DELETE == id {
         cv.handle_delete().await?;
         let query = QueryParam::current_entry().with_sel("");
-        set_query(query).await?;
+        change_query(query).await?;
     } else if EventTp::Click(false) == tp || finished {
         cv.handle_event(&id, tp).await?;
     }
@@ -263,7 +263,7 @@ fn handle_click_card(el: &Element) {
     if let Some(name) = el.get_attribute("data-name") {
         let query = QueryParam::current_entry().with_sel(&name);
         if query.res().is_some() {
-            spawn_future(set_query(query));
+            spawn_future(change_query(query));
         }
     }
 }
@@ -340,7 +340,7 @@ pub fn handle_res_change() {
         Some(res) => QueryParam::new().with_res(res),
         None => QueryParam::new(),
     };
-    spawn_future(set_query(query));
+    spawn_future(change_query(query));
 }
 
 /// Get the selected resource value
@@ -714,8 +714,8 @@ fn search_value() -> Result<String> {
     Ok(search)
 }
 
-/// Set query parameters
-pub async fn set_query(query: QueryParam) -> Result<()> {
+/// Change query parameters
+pub async fn change_query(query: QueryParam) -> Result<()> {
     let window = util::window()?;
     let navigation = window.navigation();
     navigation.navigate(&format!("/iris/{query}"));
