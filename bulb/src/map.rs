@@ -121,7 +121,7 @@ fn handle_click(me: MapEvent) {
 
 /// Build query parameters from a map event
 fn build_query(me: &MapEvent) -> QueryParam {
-    if let Some((rname, nm)) = me.target.split_once('-')
+    if let Some((rname, nm)) = me.class.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
         QueryParam::current_entry().with_res(res).with_sel(nm)

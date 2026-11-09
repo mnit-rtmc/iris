@@ -283,13 +283,13 @@ pub fn set_context_style(me: Option<&MapEvent>) {
                     }
                     _ => Prop::new().fill("#96b"),
                 };
-                let sel = Sel::cls(&me.target);
+                let sel = Sel::cls(&me.class);
                 let css = Rule::new(sel, prop).to_string();
                 el.set_inner_html(&css);
             }
             Some(me) => {
                 let prop = Prop::new().stroke("white").stroke_width(2);
-                let sel = Sel::cls(&me.target);
+                let sel = Sel::cls(&me.class);
                 let css = Rule::new(sel, prop).to_string();
                 el.set_inner_html(&css);
             }
@@ -306,7 +306,7 @@ fn make_title(me: &MapEvent) -> Option<String> {
             title.push_str(&format!(" ({})", data_ref));
         }
         Some(title)
-    } else if let Some((rname, nm)) = me.target.split_once('-')
+    } else if let Some((rname, nm)) = me.class.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
         let mut title = format!("{} {nm}", res.symbol());
@@ -358,7 +358,7 @@ fn is_osm_layer(me: &MapEvent) -> bool {
 
 /// Get layer resource type
 fn layer_res(me: &MapEvent) -> Option<(Res, &str)> {
-    me.target.split_once('-').and_then(|(rname, nm)| {
+    me.class.split_once('-').and_then(|(rname, nm)| {
         match Res::try_from(rname) {
             Ok(res) => Some((res, nm)),
             Err(_e) => None,
