@@ -301,22 +301,35 @@ pub fn set_context_style(me: Option<&MapEvent>) {
 /// Make title for map context menu
 fn make_title(me: &MapEvent) -> Option<String> {
     if let Some(data_name) = &me.data_name {
-        let mut title = data_name.to_string();
-        if let Some(data_ref) = &me.data_ref {
-            title.push_str(&format!(" ({})", data_ref));
-        }
-        Some(title)
+        Some(make_title_ref(data_name, me.data_ref.as_deref()))
     } else if let Some((rname, nm)) = me.class.split_once('-')
         && let Ok(res) = Res::try_from(rname)
     {
-        let mut title = format!("{} {nm}", res.symbol());
-        if let Some(data_ref) = &me.data_ref {
-            title.push_str(&format!(" ({})", data_ref));
-        }
+        let mut title = make_title_ref(nm, me.data_ref.as_deref());
+        title.insert(0, ' ');
+        title.insert_str(0, res.symbol());
         Some(title)
     } else {
         None
     }
+}
+
+/// Make title with `data_ref`
+///
+/// `data_ref` is used for camera numbers; it should only be added if it's
+/// different than the number in `name`
+fn make_title_ref(name: &str, data_ref: Option<&str>) -> String {
+    let mut title = name.to_string();
+    if let Some(data_ref) = &data_ref
+        && let Some(rf) = data_ref.strip_prefix('#')
+        && let Some(nm) = name.strip_prefix('C')
+        && rf != nm.trim_start_matches('0')
+    {
+        title.push_str(" (");
+        title.push_str(data_ref);
+        title.push(')');
+    }
+    title
 }
 
 /// Make div style
