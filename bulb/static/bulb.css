@@ -340,6 +340,8 @@ li.changed {
     border-radius: 0;
     padding: 0 0.3rem;
     margin: 0;
+    alignment-baseline: central;
+    height: 100%;
     background-color: #899;
     color: black;
   }
