@@ -281,7 +281,7 @@ pub async fn handle_gamepad(id: String, axes: js_sys::Array) -> Result<()> {
 
         // Whether physical input was stopped already
         let stopped = stick
-            .get_attribute("stopped")
+            .get_attribute("data-stopped")
             .unwrap_or(String::from("true"))
             == "true";
 
@@ -301,7 +301,7 @@ pub async fn handle_gamepad(id: String, axes: js_sys::Array) -> Result<()> {
             }
             // Update attribute and handle animation
             let sending_stop = &format!("{}", sending_stop);
-            stick.set_attribute("stopped", sending_stop).ok();
+            stick.set_attribute("data-stopped", sending_stop).ok();
             handle_mouse_move(&stick, x, y, true);
 
             // Now actually send PTZ action

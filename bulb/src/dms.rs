@@ -426,16 +426,24 @@ impl DmsAnc {
                 rect_num = rn;
             }
             input
-                .id(mc_line)
+                .id(&mc_line)
+                .class("dropdown-field")
+                .style(format!("anchor-name:--{mc_line}"))
                 .value(cur_line)
-                .list(&mc_choice)
+                .list("") // Disable browser dropdown
+                .data_("dropdown-list", &mc_choice)
                 .data_("cur", cur_line);
             if let Some(font) = dms.font_definition().font(font_num) {
                 if ('a'..='z').any(|c| font.character(c).is_none()) {
                     input.autocapitalize("characters");
                 }
                 let mut datalist = div.datalist();
-                datalist.id(mc_choice);
+                datalist
+                    .id(mc_choice)
+                    .class("dropdown")
+                    .style(format!("position-anchor:--{mc_line}"))
+                    .tabindex(-1)
+                    .data_("dropdown-field", &mc_line);
                 for ml in &self.lines {
                     if ml.line == ln
                         && let Some(ms) =
@@ -1207,8 +1215,28 @@ impl Dms {
         // message composer line input
         if let Some(input) = Doc::get().opt_elem::<HtmlInputElement>(id) {
             match tp {
-                FocusTp::In => input.set_value(""),
+                FocusTp::In => {
+                    input.set_value("");
+                    if input.class_list().contains("dropdown-field")
+                        && let Some(mc_choice) =
+                            input.get_attribute("data-dropdown-list")
+                        && let Some(dropdown) =
+                            Doc::get().opt_elem::<HtmlElement>(&mc_choice)
+                    {
+                        let _ =
+                            dropdown.style().set_property("display", "flex");
+                    }
+                }
                 FocusTp::Out => {
+                    if input.class_list().contains("dropdown-field")
+                        && let Some(mc_choice) =
+                            input.get_attribute("data-dropdown-list")
+                        && let Some(dropdown) =
+                            Doc::get().opt_elem::<HtmlElement>(&mc_choice)
+                    {
+                        let _ =
+                            dropdown.style().set_property("display", "none");
+                    }
                     if input.value().is_empty()
                         && let Some(ms) = input.get_attribute("data-cur")
                     {

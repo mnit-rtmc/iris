@@ -360,6 +360,10 @@ li.changed {
   border-left: 1px solid white;
   border-right: unset;
 }
+.dropdown-field {
+  border-radius: 0;
+  border-width: 1px;
+}
 #map-extents {
   border-left: 4px double #677;
   anchor-name: --extents-anchor;
@@ -367,28 +371,45 @@ li.changed {
     text-align: start;
   }
 }
-#map-extents-dynamic {
+.dropdown {
+  flex-direction: column;
   display: none;
+  position: fixed;
+
+  background-color: #899;
+  border: 1px solid white;
+
+  top: anchor(bottom);
+  bottom: 0;
+  min-width: anchor-size(width);
+  overflow-y: auto;
+
+  button {
+    padding-left: calc(0.3rem + 3px);
+  }
+  button:hover,
+  option:hover,
+  .active {
+    background-color: #677;
+  }
+}
+#map-extents-container {
   flex-direction: column-reverse;
   position: fixed;
   position-anchor: --extents-anchor;
+  top: revert;
   bottom: anchor(top);
-  min-width: anchor-size(width);
   max-height: 90%;
-  overflow-y: auto;
-  background-color: #899;
-  border: 1px solid white;
-  & button {
-    padding-left: calc(0.3rem + 3px);
-  }
 }
-#map-extents:hover #map-extents-dynamic {
+div:hover > .dropdown.hoverable {
   display: flex;
 }
-#map-controls.left #map-extents-dynamic {
+#map-controls.left .dropdown {
   left: anchor(left);
+  right: unset;
 }
-#map-controls.right #map-extents-dynamic {
+#map-controls.right .dropdown {
+  left: unset;
   right: anchor(right);
 }
 

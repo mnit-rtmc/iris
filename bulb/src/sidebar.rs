@@ -31,8 +31,9 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use web_sys::{
     DragEvent, Element, Event, FocusEvent, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
-    ScrollLogicalPosition, TransitionEvent,
+    HtmlInputElement, HtmlOptionElement, HtmlSelectElement, KeyboardEvent,
+    ScrollBehavior, ScrollIntoViewOptions, ScrollLogicalPosition,
+    TransitionEvent,
 };
 
 /// Add event listeners
@@ -46,6 +47,7 @@ pub fn add_listeners() -> Result<()> {
     add_input_listener(&sidebar)?;
     add_drag_listener(&sidebar)?;
     add_focus_listener(&sidebar)?;
+    add_dropdown_key_listener(&sidebar)?;
     add_transition_listener(&doc.elem(eid::CARDS)?)?;
     if let Some(doc_elem) = doc.doc_elem() {
         add_fullscreenchange_listener(&doc_elem)?;
@@ -119,6 +121,13 @@ fn add_click_listener(el: &Element) -> Result<()> {
                     .is_some();
                 let tp = EventTp::Click(long_press);
                 handle_click_button(target.id(), tp);
+            } else if let Some(Ok(p)) =
+                target.parent_element().map(|e| e.dyn_into::<HtmlElement>())
+                && let Some(id) = p.get_attribute("data-dropdown-field")
+            {
+                if let Ok(target) = target.dyn_into::<HtmlOptionElement>() {
+                    handle_click_dropdown_option(&id, target.value());
+                }
             } else if let Ok(Some(cc)) = target.closest(".card-compact") {
                 handle_click_card(&cc);
             }
@@ -180,6 +189,15 @@ fn handle_click_button(id: String, tp: EventTp) {
                 spawn_future(handle_button_card(cv, id, tp));
             }
         }
+    }
+}
+
+/// Handle a `click` event with an input dropdown target
+fn handle_click_dropdown_option(field_id: &str, value: String) {
+    if let Some(input) = Doc::get().opt_elem::<HtmlInputElement>(field_id) {
+        input.set_value(&value);
+        // Now handle the input as if it was typed
+        handle_input(input.id());
     }
 }
 
@@ -333,6 +351,13 @@ fn handle_event(id: String, tp: EventTp) {
     }
 }
 
+/// Handle custom dropdown
+fn handle_dropdown(list_id: String) {
+    if let Some(dropdown) = Doc::get().opt_elem::<HtmlElement>(&list_id) {
+        let _ = dropdown.style().set_property("display", "flex");
+    }
+}
+
 /// Handle selected resource change
 pub fn handle_res_change() {
     let _ = LocalStorage::CardView.unmap();
@@ -470,7 +495,110 @@ fn handle_focus_ev(fe: FocusEvent, target: HtmlElement) {
         log::warn!("handle_focus_ev: {fe:?}");
         return;
     };
+    if target.class_list().contains("dropdown-field")
+        && let Some(list) = target.get_attribute("data-dropdown-list")
+    {
+        handle_dropdown(list);
+    }
     handle_event(target.id(), EventTp::Focus(tp));
+}
+
+/// Add a dropdown keyboard listener to an element
+fn add_dropdown_key_listener(el: &Element) -> Result<()> {
+    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
+        if let (Some(Ok(target)), Ok(ev)) = (
+            e.target().map(|e| e.dyn_into::<HtmlInputElement>()),
+            e.dyn_into::<KeyboardEvent>(),
+        ) {
+            let _ = handle_dropdown_key(&target, ev);
+        }
+    });
+    el.add_event_listener_with_callback(
+        "keydown",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    el.add_event_listener_with_callback(
+        "keypress",
+        closure.as_ref().unchecked_ref(),
+    )?;
+    closure.forget();
+    Ok(())
+}
+
+/// Highlights an option in a dropdown
+fn handle_dropdown_key(
+    target: &HtmlInputElement,
+    ev: KeyboardEvent,
+) -> Result<()> {
+    if let Some(list) = target.get_attribute("data-dropdown-list")
+        && let Some(list) = Doc::get().opt_elem::<HtmlElement>(&list)
+        && let Some(first) = list.first_element_child()
+        && let Some(last) = list.last_element_child()
+    {
+        let active: Element = if let Some(a) = list.query_selector(".active")? {
+            a
+        } else {
+            first.clone()
+        };
+        match ev.key().as_ref() {
+            "ArrowDown" => {
+                let _ = active.class_list().remove_1("active");
+                if let Some(Ok(elem)) = active
+                    .next_sibling()
+                    .map(|e| e.dyn_into::<HtmlOptionElement>())
+                {
+                    let _ = elem.class_list().add_1("active");
+                    target.set_value(&elem.value());
+                } else {
+                    let _ = first.class_list().add_1("active");
+                    target.set_value(
+                        &first
+                            .dyn_into::<HtmlOptionElement>()
+                            .map_err(|_| {
+                                Error::CastFail(
+                                    "Failed to cast option".to_owned(),
+                                )
+                            })?
+                            .value(),
+                    );
+                };
+            }
+            "ArrowUp" => {
+                let _ = active.class_list().remove_1("active");
+                if let Some(Ok(elem)) = active
+                    .previous_sibling()
+                    .map(|e| e.dyn_into::<HtmlOptionElement>())
+                {
+                    let _ = elem.class_list().add_1("active");
+                    target.set_value(&elem.value());
+                } else {
+                    let _ = last.class_list().add_1("active");
+                    target.set_value(
+                        &last
+                            .dyn_into::<HtmlOptionElement>()
+                            .map_err(|_| {
+                                Error::CastFail(
+                                    "Failed to cast option".to_owned(),
+                                )
+                            })?
+                            .value(),
+                    );
+                }
+            }
+            "Enter" => {
+                if let Some(elem) = list.query_selector(".active")? {
+                    elem.dyn_into::<HtmlOptionElement>()
+                        .map_err(|_| {
+                            Error::CastFail("Failed to cast option".to_owned())
+                        })?
+                        .click();
+                    let _ = list.style().set_property("display", "none");
+                }
+            }
+            _ => (),
+        }
+    }
+    Ok(())
 }
 
 /// Add transition event listener to an element

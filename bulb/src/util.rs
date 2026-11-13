@@ -221,6 +221,17 @@ impl Doc {
         self.opt_elem(id).ok_or(Error::CastFail(id.to_string()))
     }
 
+    /// Get a single element with query_selector and cast it
+    pub fn query<E: JsCast>(&self, query: &str) -> Option<E> {
+        self.0
+            .query_selector(query)
+            .inspect_err(|e| log::error!("query: {query} {e:?}"))
+            .ok()??
+            .dyn_into::<E>()
+            .inspect_err(|e| log::error!("query: {query} {e:?}"))
+            .ok()
+    }
+
     /// Get and parse a `select` element value
     pub fn select_parse<T: FromStr>(&self, id: &str) -> Option<T> {
         self.opt_elem::<HtmlSelectElement>(id)

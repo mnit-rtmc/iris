@@ -61,6 +61,7 @@ features = [
   'HtmlElement',
   'HtmlImageElement',
   'HtmlInputElement',
+  'HtmlOptionElement',
   'HtmlSelectElement',
   'HtmlTextAreaElement',
   'HtmlVideoElement',
