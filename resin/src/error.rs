@@ -14,7 +14,7 @@ use hyper::StatusCode;
 use hyper::header::InvalidHeaderValue;
 use std::string::FromUtf8Error;
 
-/// Pollinator errors
+/// Resin errors
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     /// Hyper error
@@ -33,6 +33,7 @@ pub enum Error {
     #[error("HTTP status {0}")]
     HttpStatus(StatusCode),
 
+    /// HTTP client error
     #[error("HTTPS {0}")]
     Https(#[from] hyper_util::client::legacy::Error),
 
@@ -95,5 +96,5 @@ impl<E: std::fmt::Debug> From<bb8::RunError<E>> for Error {
     }
 }
 
-/// Pollinator result
+/// Resin result
 pub type Result<T> = std::result::Result<T, Error>;
