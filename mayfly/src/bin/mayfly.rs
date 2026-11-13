@@ -24,7 +24,7 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 /// Main function
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let app = route_root().into_make_service_with_connect_info::<SocketAddr>();

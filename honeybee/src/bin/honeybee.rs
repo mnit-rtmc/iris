@@ -32,7 +32,7 @@ struct Args {
 }
 
 /// Main entry point
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
     let args: Args = argh::from_env();
