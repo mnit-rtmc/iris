@@ -69,17 +69,12 @@ fn parse_addr(addr: &str) -> Result<IpAddr, StatusCode> {
 
 /// Get forwarded addresses from header map
 ///
-/// Checks both `X-Forwarded-For` and `Forwarded` headers
+/// Checks `X-Forwarded-For`, then `Forwarded` headers
 pub fn forwarded_addrs(headers: &HeaderMap) -> Result<Vec<IpAddr>, StatusCode> {
     let xff = parse_xff(headers)?;
-    let fwd = parse_forwarded(headers)?;
     if xff.is_empty() {
-        Ok(fwd)
-    } else if fwd.is_empty() {
-        Ok(xff)
+        parse_forwarded(headers)
     } else {
-        let mut fwd = fwd;
-        fwd.extend(xff);
-        Ok(fwd)
+        Ok(xff)
     }
 }

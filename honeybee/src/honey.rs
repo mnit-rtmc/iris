@@ -189,13 +189,13 @@ impl Honey {
     async fn log_domain_fail(
         &self,
         addr: IpAddr,
-        xff: bool,
+        first: bool,
         user: &str,
     ) -> Result<()> {
-        let ev = if xff {
-            EventTp::FailDomainXff
-        } else {
+        let ev = if first {
             EventTp::FailDomain
+        } else {
+            EventTp::FailDomainXff
         };
         insert_client_ev(&self.db, ev, &addr.to_string(), user).await;
         Err(Error::Forbidden)
@@ -509,7 +509,9 @@ fn login_resource(honey: Honey) -> Router {
         Json(cred): Json<Credentials>,
     ) -> impl IntoResponse {
         log::info!("POST login from {addr}");
-        let xff = forwarded_addrs(&headers)?;
+        let mut addrs = forwarded_addrs(&headers)?;
+        addrs.push(addr.ip());
+        addrs.reverse();
         session
             .cycle_id()
             .await
@@ -517,13 +519,12 @@ fn login_resource(honey: Honey) -> Router {
         honey.authenticate(cred.clone()).await?;
         let user = cred.user();
         let domains = domain::query_by_user(&honey.db, user).await?;
-        if !domain::contains_any_enabled(&domains, addr.ip()) {
-            honey.log_domain_fail(addr.ip(), false, user).await?;
-        }
-        for addr in xff {
+        let mut first = true;
+        for addr in addrs {
             if !domain::contains_any_enabled(&domains, addr) {
-                honey.log_domain_fail(addr, true, user).await?;
+                honey.log_domain_fail(addr, first, user).await?;
             }
+            first = false;
         }
         cred.store(&session)
             .await
