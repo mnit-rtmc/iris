@@ -21,7 +21,6 @@ use crate::onvif::OnvifMessenger;
 use crate::permission;
 use crate::query;
 use crate::sonar::{Messenger, Name};
-use crate::xff::XForwardedFor;
 use axum::Router;
 use axum::body::Body;
 use axum::extract::{ConnectInfo, Json, Path as AxumPath, Query, State};
@@ -31,7 +30,7 @@ use axum::response::{IntoResponse, Sse};
 use axum::routing::{get, patch};
 use axum_extra::TypedHeader;
 use headers::{ETag, IfNoneMatch};
-use http::header::HeaderName;
+use http::header::{HeaderMap, HeaderName};
 use hyper_util::client::legacy::Client as HttpClient;
 use hyper_util::rt::TokioExecutor;
 use resin::Database;
@@ -39,6 +38,7 @@ use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
 use serde_json::map::Map;
+use shelter::xff::XForwardedFor;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::SocketAddr;
@@ -488,11 +488,12 @@ fn login_resource(honey: Honey) -> Router {
     async fn handle_post(
         session: Session,
         ConnectInfo(addr): ConnectInfo<SocketAddr>,
-        XForwardedFor(xff): XForwardedFor,
+        headers: HeaderMap,
         State(honey): State<Honey>,
         Json(cred): Json<Credentials>,
     ) -> impl IntoResponse {
         log::info!("POST login from {addr}");
+        let xff = XForwardedFor::parse_addrs(&headers)?;
         session
             .cycle_id()
             .await
@@ -513,8 +514,8 @@ fn login_resource(honey: Honey) -> Router {
                 Err(Error::Forbidden)?;
             }
         }
-        for addr in xff {
-            match domain::any_contains(&domains, addr) {
+        for addr in xff.iter() {
+            match domain::any_contains(&domains, *addr) {
                 Ok(true) => (),
                 _ => {
                     insert_client_ev(

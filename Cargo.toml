@@ -1,5 +1,5 @@
 [workspace]
-members = ["honeybee", "mayfly", "bulb", "rendzina", "resin", "resources", "pollinator"]
+members = ["honeybee", "mayfly", "bulb", "rendzina", "resin", "resources", "pollinator", "shelter"]
 default-members = ["honeybee", "mayfly"]
 resolver = "2"
 

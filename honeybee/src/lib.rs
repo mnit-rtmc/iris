@@ -1,6 +1,6 @@
 // lib.rs
 //
-// Copyright (C) 2018-2025  Minnesota Department of Transportation
+// Copyright (C) 2018-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ mod signmsg;
 mod soap;
 pub mod sonar;
 mod tls;
-mod xff;
 mod xml;
 
 pub use error::{Error, Result};

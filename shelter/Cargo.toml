@@ -1,0 +1,10 @@
+[package]
+name = "shelter"
+description = "Utility crate for rate-limiting"
+license = "GPL-2.0-or-later"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+http.workspace = true
+log.workspace = true
