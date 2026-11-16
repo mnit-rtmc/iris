@@ -932,7 +932,6 @@ dependencies = [
  "base64 0.23.1",
  "bb8",
  "bb8-postgres",
- "cidr",
  "env_logger",
  "futures",
  "headers",
