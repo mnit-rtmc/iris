@@ -41,7 +41,7 @@ use serde_json::map::Map;
 use shelter::xff::XForwardedFor;
 use std::collections::HashMap;
 use std::convert::Infallible;
-use std::net::SocketAddr;
+use std::net::{IpAddr, SocketAddr};
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use tokio::fs::metadata;
@@ -183,6 +183,22 @@ impl Honey {
             db,
             notifiers,
         }
+    }
+
+    /// Log domain failure error
+    async fn log_domain_fail(
+        &self,
+        addr: IpAddr,
+        xff: bool,
+        user: &str,
+    ) -> Result<()> {
+        let ev = if xff {
+            EventTp::FailDomainXff
+        } else {
+            EventTp::FailDomain
+        };
+        insert_client_ev(&self.db, ev, &addr.to_string(), user).await;
+        Err(Error::Forbidden)
     }
 
     /// Authenticate with IRIS server
@@ -501,32 +517,12 @@ fn login_resource(honey: Honey) -> Router {
         honey.authenticate(cred.clone()).await?;
         let user = cred.user();
         let domains = domain::query_by_user(&honey.db, user).await?;
-        match domain::any_contains(&domains, addr.ip()) {
-            Ok(true) => (),
-            _ => {
-                insert_client_ev(
-                    &honey.db,
-                    EventTp::FailDomain,
-                    &addr.to_string(),
-                    user,
-                )
-                .await;
-                Err(Error::Forbidden)?;
-            }
+        if !domain::contains_any_enabled(&domains, addr.ip()) {
+            honey.log_domain_fail(addr.ip(), false, user).await?;
         }
         for addr in xff.iter() {
-            match domain::any_contains(&domains, *addr) {
-                Ok(true) => (),
-                _ => {
-                    insert_client_ev(
-                        &honey.db,
-                        EventTp::FailDomainXff,
-                        &addr.to_string(),
-                        user,
-                    )
-                    .await;
-                    Err(Error::Forbidden)?;
-                }
+            if !domain::contains_any_enabled(&domains, *addr) {
+                honey.log_domain_fail(*addr, true, user).await?;
             }
         }
         cred.store(&session)

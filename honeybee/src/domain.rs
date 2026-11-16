@@ -48,9 +48,9 @@ impl Domain {
         }
     }
 
-    /// Check if domain contains an address
-    pub fn contains(&self, addr: IpAddr) -> Result<bool> {
-        Ok(self.block.contains(&addr))
+    /// Check if domain contains a given address
+    pub fn contains(&self, addr: IpAddr) -> bool {
+        self.block.contains(&addr)
     }
 }
 
@@ -64,14 +64,12 @@ pub async fn query_by_user(db: &Database, user: &str) -> Result<Vec<Domain>> {
     Ok(domains)
 }
 
-/// Check if any domain contains an address
-pub fn any_contains(domains: &[Domain], addr: IpAddr) -> Result<bool> {
-    let mut res = false;
+/// Check if any enabled domain contains a given address
+pub fn contains_any_enabled(domains: &[Domain], addr: IpAddr) -> bool {
     for d in domains {
-        // NOTE: check all domains in case one is not valid
-        if d.contains(addr)? {
-            res = true;
+        if d.enabled && d.contains(addr) {
+            return true;
         }
     }
-    Ok(res)
+    false
 }
