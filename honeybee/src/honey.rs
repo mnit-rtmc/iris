@@ -38,7 +38,7 @@ use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
 use serde_json::map::Map;
-use shelter::xff::XForwardedFor;
+use shelter::forwarded_addrs;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::{IpAddr, SocketAddr};
@@ -509,7 +509,7 @@ fn login_resource(honey: Honey) -> Router {
         Json(cred): Json<Credentials>,
     ) -> impl IntoResponse {
         log::info!("POST login from {addr}");
-        let xff = XForwardedFor::parse_addrs(&headers)?;
+        let xff = forwarded_addrs(&headers)?;
         session
             .cycle_id()
             .await
@@ -520,9 +520,9 @@ fn login_resource(honey: Honey) -> Router {
         if !domain::contains_any_enabled(&domains, addr.ip()) {
             honey.log_domain_fail(addr.ip(), false, user).await?;
         }
-        for addr in xff.iter() {
-            if !domain::contains_any_enabled(&domains, *addr) {
-                honey.log_domain_fail(*addr, true, user).await?;
+        for addr in xff {
+            if !domain::contains_any_enabled(&domains, addr) {
+                honey.log_domain_fail(addr, true, user).await?;
             }
         }
         cred.store(&session)

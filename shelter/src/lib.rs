@@ -12,4 +12,6 @@
 //
 #![forbid(unsafe_code)]
 
-pub mod xff;
+mod xff;
+
+pub use xff::forwarded_addrs;
