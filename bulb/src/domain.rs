@@ -15,7 +15,7 @@ use crate::domevent::EventTp;
 use crate::eid;
 use crate::fetch::Action;
 use crate::item::ItemState;
-use crate::util::{ContainsLower, Doc, Fields, Input, opt_ref};
+use crate::util::{ContainsLower, Doc, Fields, Input};
 use crate::view::View;
 use cidr::IpCidr;
 use hatmil::{Tree, html};
@@ -30,8 +30,7 @@ use web_sys::{HtmlButtonElement, HtmlInputElement};
 pub struct Domain {
     pub name: String,
     pub enabled: bool,
-    // secondary
-    pub block: Option<String>,
+    pub block: String,
 }
 
 /// Ancillary domain data
@@ -79,7 +78,7 @@ impl Domain {
             .id("block")
             .maxlength(42)
             .size(24)
-            .value(opt_ref(&self.block));
+            .value(&self.block);
         div.close();
         div = tree.root::<html::Div>();
         div.class("row");

@@ -328,7 +328,7 @@ pub const HASHTAG_SIGN_CFG: &str = "\
 
 /// SQL query for all domains (primary)
 pub const DOMAIN_ALL: &str = "\
-  SELECT name, enabled \
+  SELECT name, enabled, block \
   FROM iris.domain \
   ORDER BY name";
 
@@ -337,6 +337,17 @@ pub const DOMAIN_ONE: &str = "\
   SELECT name, enabled, block \
   FROM iris.domain \
   WHERE name = $1";
+
+/// SQL query for enabled domains by user
+pub const DOMAIN_BY_USER: &str = "\
+  SELECT d.name, d.enabled, block \
+  FROM iris.domain d \
+  JOIN iris.role_domain rd ON rd.domain = d.name \
+  JOIN iris.user_id u ON u.role = rd.role \
+  JOIN iris.role r ON r.name = u.role \
+  WHERE d.enabled = true \
+    AND r.enabled = true \
+    AND u.name = $1";
 
 /// SQL query for all encoder streams (primary)
 pub const ENCODER_STREAM_ALL: &str = "\

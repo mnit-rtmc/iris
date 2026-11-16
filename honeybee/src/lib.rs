@@ -17,7 +17,6 @@
 
 mod access;
 mod cred;
-mod domain;
 mod error;
 mod event;
 mod files;

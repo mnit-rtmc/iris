@@ -12,6 +12,8 @@
 //
 #![forbid(unsafe_code)]
 
+mod domain;
 mod xff;
 
+pub use domain::Domain;
 pub use xff::forwarded_addrs;

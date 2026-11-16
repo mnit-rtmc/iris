@@ -14,7 +14,6 @@
 //
 use crate::access::Access;
 use crate::cred::Credentials;
-use crate::domain;
 use crate::error::{Error, Result};
 use crate::event::{self, EventTp};
 use crate::onvif::OnvifMessenger;
@@ -38,7 +37,7 @@ use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
 use serde_json::map::Map;
-use shelter::forwarded_addrs;
+use shelter::{Domain, forwarded_addrs};
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::{IpAddr, SocketAddr};
@@ -518,10 +517,10 @@ fn login_resource(honey: Honey) -> Router {
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         honey.authenticate(cred.clone()).await?;
         let user = cred.user();
-        let domains = domain::query_by_user(&honey.db, user).await?;
+        let domains = domains_by_user(&honey.db, user).await?;
         let mut first = true;
         for addr in addrs {
-            if !domain::contains_any_enabled(&domains, addr) {
+            if !Domain::contains_any_enabled(&domains, addr) {
                 honey.log_domain_fail(addr, first, user).await?;
             }
             first = false;
@@ -557,6 +556,20 @@ fn login_resource(honey: Honey) -> Router {
             get(handle_get).post(handle_post).delete(handle_delete),
         )
         .with_state(honey)
+}
+
+/// Query valid domains by user
+async fn domains_by_user(db: &Database, user: &str) -> Result<Vec<Domain>> {
+    let mut domains = Vec::new();
+    let client = db.client().await?;
+    for row in client.query(query::DOMAIN_BY_USER, &[&user]).await? {
+        domains.push(Domain {
+            name: row.get(0),
+            enabled: row.get(1),
+            block: row.get(2),
+        });
+    }
+    Ok(domains)
 }
 
 /// Insert a client event to DB

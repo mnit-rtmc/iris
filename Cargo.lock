@@ -2020,8 +2020,10 @@ dependencies = [
 name = "shelter"
 version = "5.92.1"
 dependencies = [
+ "cidr",
  "http",
  "log",
+ "serde",
 ]
 
 [[package]]

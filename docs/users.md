@@ -79,11 +79,11 @@ can connect to IRIS.
 * `iris/api/domain`
 * `iris/api/domain/{name}`
 
-| Access       | Primary | Secondary |
-|--------------|---------|-----------|
-| 👁️  View      | name    |           |
-| 💡 Manage    | enabled |           |
-| 🔧 Configure |         | block     |
+| Access       | Primary |
+|--------------|---------|
+| 👁️  View      | name    |
+| 💡 Manage    | enabled |
+| 🔧 Configure | block   |
 
 </details>
 
