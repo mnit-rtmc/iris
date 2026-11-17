@@ -154,9 +154,9 @@ public class MaxPressureEvent extends BaseEvent {
 		if (d_node != null)
 			map.put("d_node", d_node);
 		map.put("us_density_detected", upstream_density_detected);
-		map.put("us_density_detected", upstream_density_estimated);
+		map.put("us_density_estimated", upstream_density_estimated);
 		map.put("ds_density_detected", downstream_density_detected);
-		map.put("ds_density_detected", downstream_density_estimated);
+		map.put("ds_density_estimated", downstream_density_estimated);
 		map.put("us_weight", upstream_weight);
 		map.put("ds_weight", downstream_weight);
 		map.put("rmp_weight", ramp_weight);
