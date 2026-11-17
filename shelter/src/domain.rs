@@ -12,7 +12,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use cidr::IpCidr;
+use cidr::{Family, IpCidr};
 use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
 
@@ -35,8 +35,42 @@ impl Domain {
         false
     }
 
+    /// Find domain that best matches a given address
+    pub fn best_match(domains: &[Self], addr: IpAddr) -> Option<&Domain> {
+        let mut dom = None;
+        let mut score = 0;
+        for d in domains {
+            if d.enabled
+                && d.contains(addr)
+                && (dom.is_none() || d.score() > score)
+            {
+                dom = Some(d);
+                score = d.score();
+            }
+        }
+        dom
+    }
+
+    /// Get domain "score", based on specificity
+    fn score(&self) -> u8 {
+        let len = self.block.network_length();
+        match self.block.family() {
+            Family::Ipv4 => len << 2,
+            Family::Ipv6 => len,
+        }
+    }
+
     /// Check if domain contains a given address
     pub fn contains(&self, addr: IpAddr) -> bool {
         self.block.contains(&addr)
+    }
+
+    /// Check if domain is restricted
+    pub fn is_restricted(&self) -> bool {
+        let len = self.block.network_length();
+        match self.block.family() {
+            Family::Ipv4 => len < 16,
+            Family::Ipv6 => len < 64,
+        }
     }
 }
