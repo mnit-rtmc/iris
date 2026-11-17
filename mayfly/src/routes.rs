@@ -17,6 +17,7 @@ use crate::binned::{
     TrafficData, VehicleFilter,
 };
 use crate::error::{Error, Result};
+use crate::state::MayRouter;
 use crate::traffic::Traffic;
 use crate::{vlg, vlog};
 use axum::Router;
@@ -309,7 +310,7 @@ fn parse_date(date: &str) -> Result<Stamp> {
 }
 
 /// Build route for districts
-pub fn districts_get() -> Router {
+pub fn districts_get() -> MayRouter {
     async fn handler() -> impl IntoResponse {
         log::info!("GET /districts");
         let path = Path::new(BASE_PATH);
@@ -319,7 +320,7 @@ pub fn districts_get() -> Router {
 }
 
 /// Build route for years
-pub fn years_get() -> Router {
+pub fn years_get() -> MayRouter {
     async fn handler(years: Query<Years>) -> impl IntoResponse {
         log::info!("GET /years");
         let path = district_path(&years.0.district);
@@ -342,7 +343,7 @@ impl Dates {
 }
 
 /// Build route for dates
-pub fn dates_get() -> Router {
+pub fn dates_get() -> MayRouter {
     async fn handler(dates: Query<Dates>) -> impl IntoResponse {
         log::info!("GET /dates");
         let path = dates.0.path()?;
@@ -378,7 +379,7 @@ impl Corridors {
 }
 
 /// Build route for corridors
-pub fn corridors_get() -> Router {
+pub fn corridors_get() -> MayRouter {
     async fn handler(corridors: Query<Corridors>) -> impl IntoResponse {
         log::info!("GET /corridors");
         let path = corridors.0.zip_path()?;
@@ -411,7 +412,7 @@ impl Detectors {
 }
 
 /// Lookup detectors with archived data
-pub fn detectors_get() -> Router {
+pub fn detectors_get() -> MayRouter {
     async fn handler(detectors: Query<Detectors>) -> impl IntoResponse {
         log::info!("GET /detectors");
         let path = detectors.0.zip_path()?;
@@ -702,7 +703,7 @@ fn make_body<T: TrafficData>(data: &[T]) -> Result<String> {
 }
 
 /// Lookup archived count data.
-pub fn counts_get() -> Router {
+pub fn counts_get() -> MayRouter {
     async fn handler(traf: Query<Traf<CountData>>) -> impl IntoResponse {
         log::info!("GET /counts for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
@@ -711,7 +712,7 @@ pub fn counts_get() -> Router {
 }
 
 /// Lookup archived headway data.
-pub fn headway_get() -> Router {
+pub fn headway_get() -> MayRouter {
     async fn handler(traf: Query<Traf<HeadwayData>>) -> impl IntoResponse {
         log::info!("GET /headway for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
@@ -720,7 +721,7 @@ pub fn headway_get() -> Router {
 }
 
 /// Lookup archived occupancy data.
-pub fn occupancy_get() -> Router {
+pub fn occupancy_get() -> MayRouter {
     async fn handler(traf: Query<Traf<OccupancyData>>) -> impl IntoResponse {
         log::info!("GET /occupancy for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
@@ -729,7 +730,7 @@ pub fn occupancy_get() -> Router {
 }
 
 /// Lookup archived length data.
-pub fn length_get() -> Router {
+pub fn length_get() -> MayRouter {
     async fn handler(traf: Query<Traf<LengthData>>) -> impl IntoResponse {
         log::info!("GET /length for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
@@ -738,7 +739,7 @@ pub fn length_get() -> Router {
 }
 
 /// Lookup archived speed data.
-pub fn speed_get() -> Router {
+pub fn speed_get() -> MayRouter {
     async fn handler(traf: Query<Traf<SpeedData>>) -> impl IntoResponse {
         log::info!("GET /speed for {} on {}", traf.detector, traf.date);
         traf_handler(traf.0).await
@@ -747,7 +748,7 @@ pub fn speed_get() -> Router {
 }
 
 /// Lookup estimated speed data.
-pub fn espeed_get() -> Router {
+pub fn espeed_get() -> MayRouter {
     async fn handler(traf: Query<Traf<SpeedData>>) -> impl IntoResponse {
         log::info!("GET /espeed for {} on {}", traf.detector, traf.date);
         let is_recent = traf.is_recent()?;

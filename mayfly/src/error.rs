@@ -1,6 +1,6 @@
 // error.rs
 //
-// Copyright (c) 2019-2025  Minnesota Department of Transportation
+// Copyright (c) 2019-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,6 +43,10 @@ pub enum Error {
     /// Zip error
     #[error("Zip {0}")]
     Zip(#[from] ZipError),
+
+    /// OnceLock already initialized error
+    #[error("Already initialized")]
+    AlreadyInitialized(),
 }
 
 /// Result type

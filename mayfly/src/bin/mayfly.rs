@@ -1,6 +1,6 @@
 // mayfly.rs
 //
-// Copyright (c) 2019-2025  Minnesota Department of Transportation
+// Copyright (c) 2019-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,11 +15,13 @@
 #![forbid(unsafe_code)]
 
 use axum::Router;
+use axum::middleware;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use http::header;
 use mayfly::error::Result;
 use mayfly::routes;
+use mayfly::state::{MayRouter, MayState, limiter_middleware};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
@@ -27,7 +29,15 @@ use tokio::net::TcpListener;
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
     env_logger::builder().format_timestamp(None).init();
-    let app = route_root().into_make_service_with_connect_info::<SocketAddr>();
+    let state = MayState::new();
+    state.load_domains().await?;
+    let app = route_root()
+        .route_layer(middleware::from_fn_with_state(
+            state.clone(),
+            limiter_middleware,
+        ))
+        .with_state(state)
+        .into_make_service_with_connect_info::<SocketAddr>();
     let listener = TcpListener::bind("127.0.0.1:3131").await?;
     axum::serve(listener, app).await?;
     log::warn!("Axum serve ended");
@@ -35,14 +45,14 @@ async fn main() -> Result<()> {
 }
 
 /// Build root route
-fn route_root() -> Router {
+fn route_root() -> MayRouter {
     Router::new()
         .merge(root_get())
         .nest("/mayfly", route_mayfly())
 }
 
 /// Build route for index html
-fn root_get() -> Router {
+fn root_get() -> MayRouter {
     Router::new().route("/mayfly/", get(index_handler))
 }
 
@@ -55,12 +65,12 @@ async fn index_handler() -> impl IntoResponse {
 }
 
 /// Build route for index html
-fn index_get() -> Router {
+fn index_get() -> MayRouter {
     Router::new().route("/index.html", get(index_handler))
 }
 
 /// Build route for CSS
-fn css_get() -> Router {
+fn css_get() -> MayRouter {
     async fn handler() -> impl IntoResponse {
         (
             [(header::CONTENT_TYPE, "text/css")],
@@ -74,7 +84,7 @@ fn css_get() -> Router {
 }
 
 /// Build mayfly route
-fn route_mayfly() -> Router {
+fn route_mayfly() -> MayRouter {
     Router::new()
         .merge(index_get())
         .merge(css_get())

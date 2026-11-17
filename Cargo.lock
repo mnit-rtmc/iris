@@ -1276,6 +1276,7 @@ dependencies = [
  "resin",
  "serde",
  "serde_json",
+ "shelter",
  "thiserror",
  "tokio",
  "ureq",
