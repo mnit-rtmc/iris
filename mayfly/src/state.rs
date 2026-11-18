@@ -105,7 +105,7 @@ impl MayState {
                 Ok(p) => p.get(),
                 _ => 1,
             };
-            (para * 64).min(IN_PROGRESS_LIMIT)
+            (para * 32).min(IN_PROGRESS_LIMIT)
         })
     }
 
