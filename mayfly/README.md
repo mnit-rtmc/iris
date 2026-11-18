@@ -27,6 +27,15 @@ systemctl start mayfly.service
 On a server with IRIS installed, `nginx` will be set up to proxy requests to
 the `/mayfly` route.
 
+## Additional Setup
+
+The `mayfly` service requires a couple of additional files which are generated
+by `honeybee`.  If it's running on a different server, those files must be
+copied manually:
+
+- `/var/lib/iris/web/detector_pub`: For `espeed` calculation
+- `/var/lib/iris/web/api/domain`: For client network checks and rate-limiting
+
 ## Cocoon
 
 Cocoon is a command-line program to add 30-second binned data to .traffic
