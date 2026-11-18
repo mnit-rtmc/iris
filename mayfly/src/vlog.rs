@@ -1,6 +1,6 @@
 // vlog.rs
 //
-// Copyright (c) 2021-2025  Minnesota Department of Transportation
+// Copyright (c) 2021-2026  Minnesota Department of Transportation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -216,8 +216,7 @@ impl VehLogReader {
                 && let Some(elapsed) = self.elapsed(b, i)
             {
                 let avg_headway = elapsed / ((i - b) as u32);
-                for j in b + 1..=i {
-                    let ev = &mut self.events[j];
+                for ev in self.events.iter_mut().take(i + 1).skip(b + 1) {
                     *ev = ev.clone().with_headway_ms(avg_headway);
                 }
             }
