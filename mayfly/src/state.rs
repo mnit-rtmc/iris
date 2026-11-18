@@ -13,13 +13,13 @@
 use crate::error::{Error, Result};
 use axum::Router;
 use axum::body::Body;
-use axum::extract::{Request, State};
+use axum::extract::{ConnectInfo, Request, State};
 use axum::middleware::Next;
 use axum::response::Response;
 use http::StatusCode;
 use http::header::HeaderMap;
 use shelter::{Domain, forwarded_addrs};
-use std::net::IpAddr;
+use std::net::{IpAddr, SocketAddr};
 use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, OnceLock};
@@ -137,14 +137,21 @@ impl MayState {
 
 /// Middleware to limit requests
 pub async fn limiter_middleware(
+    ConnectInfo(sock): ConnectInfo<SocketAddr>,
     headers: HeaderMap,
     State(state): State<MayState>,
     request: Request,
     next: Next,
 ) -> Response {
-    // NOTE: only forwarded addresses, ConnectInfo is the proxy server
     let addrs = match forwarded_addrs(&headers) {
-        Ok(addrs) => addrs,
+        Ok(addrs) => {
+            if addrs.is_empty() {
+                // use ConnectInfo only if there's no proxy server
+                vec![sock.ip()]
+            } else {
+                addrs
+            }
+        }
         Err(sc) => return err_response(sc),
     };
     if let Some(sc) = state.precheck(&addrs) {
