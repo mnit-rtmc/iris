@@ -23,9 +23,10 @@ use std::net::IpAddr;
 use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, OnceLock};
+use std::thread::available_parallelism;
 
 /// Limit of in-progress requests (restricted domains)
-const IN_PROGRESS_LIMIT: u32 = 128;
+const IN_PROGRESS_LIMIT: usize = 128;
 
 /// Mayfly application state
 #[derive(Clone, Default)]
@@ -33,7 +34,9 @@ pub struct MayState {
     /// Network domains
     domains: OnceLock<Vec<Domain>>,
     /// Count of in-progress requests (restricted)
-    in_progress: Arc<Mutex<u32>>,
+    in_progress: Arc<Mutex<usize>>,
+    /// Limit of in-progress requests
+    in_progress_limit: OnceLock<usize>,
 }
 
 /// Mayfly router
@@ -78,22 +81,43 @@ impl MayState {
             None => true,
         };
         if restricted {
-            match self.in_progress.lock() {
-                Ok(in_progress) => {
-                    if *in_progress.deref() > IN_PROGRESS_LIMIT {
+            match self.get_in_progress() {
+                Some(in_progress) => {
+                    if in_progress > self.get_in_progress_limit() {
                         if let Some(addr) = addrs.last() {
-                            log::warn!("Too many requests: {addr}");
+                            log::warn!(
+                                "Too many requests: {addr} ({in_progress})"
+                            );
                         }
                         return Some(StatusCode::TOO_MANY_REQUESTS);
                     }
                 }
-                Err(_e) => {
-                    log::error!("Poisoned in_progress");
-                    return Some(StatusCode::INTERNAL_SERVER_ERROR);
-                }
+                None => return Some(StatusCode::INTERNAL_SERVER_ERROR),
             }
         }
         None
+    }
+
+    /// Get in-progress limit based on available CPUs
+    fn get_in_progress_limit(&self) -> usize {
+        *self.in_progress_limit.get_or_init(|| {
+            let para = match available_parallelism() {
+                Ok(p) => p.get(),
+                _ => 1,
+            };
+            (para * 64).min(IN_PROGRESS_LIMIT)
+        })
+    }
+
+    /// Get in-progress count
+    fn get_in_progress(&self) -> Option<usize> {
+        match self.in_progress.lock() {
+            Ok(in_progress) => Some(*in_progress.deref()),
+            Err(_e) => {
+                log::error!("Poisoned in_progress");
+                None
+            }
+        }
     }
 
     /// Increment in-progress count
