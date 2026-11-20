@@ -26,7 +26,6 @@ tokio-stream.workspace = true
 tokio-tungstenite.workspace = true
 tungstenite.workspace = true
 whoami.workspace = true
-openssl = { version = "0.10", features = ["vendored"] }
 
 [dependencies.futures-util]
 version = "0.3.28"
