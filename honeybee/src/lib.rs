@@ -30,6 +30,7 @@ mod segments;
 mod signmsg;
 mod soap;
 pub mod sonar;
+mod sse;
 mod tls;
 mod xml;
 

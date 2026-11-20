@@ -20,6 +20,7 @@ use crate::onvif::OnvifMessenger;
 use crate::permission;
 use crate::query;
 use crate::sonar::{Messenger, Name};
+use crate::sse::Notifier;
 use axum::Router;
 use axum::body::Body;
 use axum::extract::{ConnectInfo, Json, Path as AxumPath, Query, State};
@@ -44,7 +45,6 @@ use std::net::{IpAddr, SocketAddr};
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 use tokio::fs::metadata;
-use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 use tokio_postgres::Row;
 use tokio_postgres::types::ToSql;
 use tokio_stream::wrappers::UnboundedReceiverStream;
@@ -56,22 +56,8 @@ use tower_sessions_moka_store::MokaStore;
 /// Sonar host name for IRIS
 const SONAR_HOST: &str = "localhost.localdomain";
 
-/// Expiration for notifier activity
-const EXPIRATION: std::time::Duration =
-    std::time::Duration::from_secs(4 * 3600);
-
 /// SSE event result
 type EventResult = std::result::Result<Event, Infallible>;
-
-/// Client SSE notifier
-struct SseNotifier {
-    /// Listening channel names
-    channels: Vec<Name>,
-    /// Sse stream sender
-    tx: Option<UnboundedSender<EventResult>>,
-    /// Previous activity time
-    activity: SystemTime,
-}
 
 /// Honeybee server state
 #[derive(Clone)]
@@ -81,7 +67,7 @@ pub struct Honey {
     /// Database connection pool
     db: Database,
     /// SSE notifiers for each session
-    notifiers: Arc<Mutex<HashMap<Id, SseNotifier>>>,
+    notifiers: Arc<Mutex<HashMap<Id, Notifier>>>,
 }
 
 /// No-header response result
@@ -114,62 +100,6 @@ fn json_resp(json: String) -> Resp2 {
         ],
         Body::from(json),
     ))
-}
-
-impl SseNotifier {
-    /// Make a new SSE notifier
-    fn new() -> Self {
-        SseNotifier {
-            channels: Vec::new(),
-            tx: None,
-            activity: SystemTime::now(),
-        }
-    }
-
-    /// Check if notifier is listening to a channel
-    fn is_listening(&self, nm: &Name) -> bool {
-        for chan in &self.channels {
-            if nm.res_type == chan.res_type {
-                match (nm.object_n(), chan.object_n()) {
-                    (Some(nn), Some(cn)) if nn == cn => {
-                        return true;
-                    }
-                    (None, _) => return true,
-                    _ => (),
-                }
-            }
-        }
-        false
-    }
-
-    /// Send an SSE event
-    fn send_event_checked(&mut self, id: &Id, nm: &Name) {
-        log::trace!("checking {nm} for {id}");
-        if self.is_listening(nm) {
-            self.send_event(id, nm);
-        }
-    }
-
-    /// Send an SSE event
-    fn send_event(&mut self, id: &Id, nm: &Name) {
-        log::trace!("send_event SSE: {nm} to {id}");
-        if let Some(tx) = &self.tx {
-            self.activity = SystemTime::now();
-            let ev = Event::default().data(nm.to_string());
-            if let Err(e) = tx.send(Ok(ev)) {
-                log::warn!("send_event SSE: {e}");
-                self.tx = None;
-            }
-        }
-    }
-
-    /// Send an SSE event for all listening channels
-    fn send_channels(&mut self, id: &Id) {
-        log::debug!("send_channels SSE {id} {}", self.channels.len());
-        for nm in &self.channels.clone() {
-            self.send_event(id, nm);
-        }
-    }
 }
 
 impl Honey {
@@ -285,40 +215,37 @@ impl Honey {
     }
 
     /// Store channel names for a session Id
-    fn store_channels(&self, id: Id, names: Vec<Name>) {
+    fn store_channel_names(&self, id: Id, names: Vec<Name>) {
         let mut map = self.notifiers.lock().unwrap();
         match map.get_mut(&id) {
             Some(notifier) => {
-                notifier.channels = names;
-                notifier.send_channels(&id);
+                *notifier.channels_mut() = names;
+                notifier.send_channels();
             }
             None => {
-                log::warn!("store_channels: SSE sender {id} unknown");
-                let mut notifier = SseNotifier::new();
-                notifier.channels = names;
+                log::warn!("store_channel_names: SSE sender {id} unknown");
+                let mut notifier = Notifier::new(id);
+                *notifier.channels_mut() = names;
                 map.insert(id, notifier);
             }
         }
     }
 
-    /// Store SSE sender for a session Id
-    fn store_sender(&self, id: Id, tx: UnboundedSender<EventResult>) {
+    /// Make SSE stream for a session Id
+    fn make_stream(&self, id: Id) -> UnboundedReceiverStream<EventResult> {
         let mut map = self.notifiers.lock().unwrap();
         log::trace!("Adding SSE sender for {id}");
         match map.get_mut(&id) {
             Some(notifier) => {
-                if notifier.tx.is_some() {
-                    // NOTE: this happens when multiple tabs
-                    //       are open on the same browser
-                    log::warn!("store_sender: SSE sender {id} exists");
-                }
-                notifier.tx = Some(tx);
-                notifier.send_channels(&id);
+                let rx = notifier.make_channel();
+                notifier.send_channels();
+                UnboundedReceiverStream::new(rx)
             }
             None => {
-                let mut notifier = SseNotifier::new();
-                notifier.tx = Some(tx);
+                let mut notifier = Notifier::new(id);
+                let rx = notifier.make_channel();
                 map.insert(id, notifier);
+                UnboundedReceiverStream::new(rx)
             }
         }
     }
@@ -335,8 +262,8 @@ impl Honey {
     pub async fn notify_sse(&self, nm: Name) {
         log::trace!("notify_sse {nm}");
         let mut map = self.notifiers.lock().unwrap();
-        for (id, notifier) in map.iter_mut() {
-            notifier.send_event_checked(id, &nm);
+        for notifier in map.values_mut() {
+            notifier.send_event_checked(&nm);
         }
     }
 
@@ -345,12 +272,7 @@ impl Honey {
         log::trace!("purge_expired");
         let now = SystemTime::now();
         let mut map = self.notifiers.lock().unwrap();
-        map.retain(|_id, notifier| {
-            match now.duration_since(notifier.activity) {
-                Ok(dur) => dur < EXPIRATION,
-                Err(_e) => false,
-            }
-        });
+        map.retain(|_id, notifier| !notifier.is_expired(now));
     }
 }
 
@@ -636,9 +558,7 @@ fn notify_resource(honey: Honey) -> Router {
             return Err(StatusCode::UNAUTHORIZED);
         };
         let id = session.id().unwrap_or_default();
-        let (tx, rx) = unbounded_channel();
-        honey.store_sender(id, tx);
-        let stream = UnboundedReceiverStream::new(rx);
+        let stream = honey.make_stream(id);
         Ok(Sse::new(stream).keep_alive(
             KeepAlive::new()
                 .interval(std::time::Duration::from_secs(60))
@@ -656,7 +576,7 @@ fn notify_resource(honey: Honey) -> Router {
         let names = try_names_from_channels(&channels)?;
         honey.check_view_channels(&session, &names).await?;
         let id = session.id().unwrap_or_default();
-        honey.store_channels(id, names);
+        honey.store_channel_names(id, names);
         html_resp("<html>Ok</html>")
     }
 
