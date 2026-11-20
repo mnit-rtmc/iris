@@ -19,4 +19,4 @@ pub mod rtms_echo;
 pub mod rwis_api;
 
 pub use binner::IntervalBinner;
-pub use comm_link::{CommLink, CommLinkCfg};
+pub use comm_link::{CommLink, CommLinkCfg, CommProtocol};

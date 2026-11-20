@@ -59,12 +59,20 @@ SELECT row_to_json(row)::text FROM (
 
 /// Comm protocol
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-enum CommProtocol {
+pub enum CommProtocol {
     RtmsEcho,
     CampbellCloud,
 }
 
 impl CommProtocol {
+    /// Get ID
+    pub fn id(self) -> u32 {
+        match self {
+            Self::CampbellCloud => 26,
+            Self::RtmsEcho => 31,
+        }
+    }
+
     /// Get protocol from ID
     fn from_id(id: u32) -> Option<Self> {
         match id {

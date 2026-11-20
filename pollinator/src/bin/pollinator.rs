@@ -11,7 +11,7 @@
 // GNU General Public License for more details.
 //
 use argh::FromArgs;
-use pollinator::{CommLink, CommLinkCfg, IntervalBinner};
+use pollinator::{CommLink, CommLinkCfg, CommProtocol, IntervalBinner};
 use resin::{Database, Error, Result};
 use std::collections::HashMap;
 use tokio::task::{AbortHandle, JoinSet};
@@ -42,7 +42,7 @@ impl Args {
             (self.uri, self.user, self.password)
         {
             let cfg = CommLinkCfg::default()
-                .with_protocol(31)
+                .with_protocol(CommProtocol::RtmsEcho.id())
                 .with_uri(&uri)
                 .with_user(&user)
                 .with_password(&password);

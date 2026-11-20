@@ -1,5 +1,6 @@
 mod api_utility;
 
+use crate::comm_link::CommProtocol;
 use resin::{Database, Error, Result};
 use serde_json::{Map, Value, json};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -7,6 +8,22 @@ use tokio::join;
 use tokio_postgres::Client;
 
 pub use api_utility::ApiUtility;
+
+/// SQL to query comm links by protocol
+const QUERY_LINKS: &str = "\
+    SELECT name, uri FROM iris.comm_link WHERE comm_config IN (\
+        SELECT name FROM iris.comm_config WHERE protocol = $1\
+    )";
+
+/// SQL to query controller passwords
+const QUERY_PASSWORDS: &str = "\
+    SELECT password \
+    FROM iris.controller \
+    WHERE comm_link = $1 \
+    ORDER BY drop_id";
+
+/// SQL to query alternate IDs for weather sensors
+const QUERY_ALT_IDS: &str = "SELECT alt_id FROM iris._weather_sensor";
 
 /// Runs the CampbellCloud API process ("RWIS API").
 /// Retrieves API credentials from database, fetches data from API,
@@ -56,19 +73,7 @@ async fn get_creds_from_db(
     client: &Client,
 ) -> Result<(String, String, String, String)> {
     let links = client
-        .query(
-            "
-            SELECT name, uri
-            FROM iris.comm_link
-            WHERE comm_config IN
-            (
-                SELECT name
-                FROM iris.comm_config
-                WHERE description='CampbellCloud'
-            );
-            ",
-            &[],
-        )
+        .query(QUERY_LINKS, &[&CommProtocol::CampbellCloud.id()])
         .await?;
     // All CampbellCloud controllers should be on one link
     let cl_name: &str = links[0].try_get("name")?;
@@ -77,17 +82,7 @@ async fn get_creds_from_db(
     if let Some((org_id, uri)) =
         links[0].try_get::<_, &str>("uri")?.split_once("@")
     {
-        let passwords = client
-            .query(
-                "
-                SELECT password
-                FROM iris.controller
-                WHERE comm_link=$1
-                ORDER BY drop_id
-                ",
-                &[&cl_name],
-            )
-            .await?;
+        let passwords = client.query(QUERY_PASSWORDS, &[&cl_name]).await?;
         for password in &passwords {
             if let Some((user, pass)) =
                 password.try_get::<_, &str>(0)?.split_once(":")
@@ -107,16 +102,12 @@ async fn get_creds_from_db(
     ))
 }
 
-/// Gets the serial numbers stored in the alt_id column of the database.
+/// Get the serial numbers stored in the alt_id column of the database
 async fn get_serial_numbers(client: &Client) -> Result<Vec<String>> {
     let mut serials = vec![];
 
-    for row in client
-        .query("SELECT alt_id FROM iris._weather_sensor", &[])
-        .await?
-    {
+    for row in client.query(QUERY_ALT_IDS, &[]).await? {
         let alt_id: Option<String> = row.try_get(0)?;
-
         if let Some(id) = alt_id
             && !id.is_empty()
         {
