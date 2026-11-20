@@ -20,7 +20,6 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
-use crate::map;
 use crate::menu::MenuAction;
 use crate::msgline::MsgLine;
 use crate::msgpattern::{FontName, GraphicName, MsgPattern};
@@ -37,6 +36,7 @@ use crate::systemattr::SystemAttr;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use crate::word::Word;
+use crate::{map, util};
 use chrono::{DateTime, Local, format::SecondsFormat};
 use hatmil::{Tree, html};
 use js_sys::{ArrayBuffer, Uint8Array};
@@ -52,7 +52,9 @@ use std::fmt;
 use std::iter::repeat;
 use std::time::Duration;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement};
+use web_sys::{
+    HtmlElement, HtmlInputElement, HtmlOptionElement, HtmlSelectElement,
+};
 
 /// Display Units
 type TempUnit = mag::temp::DegF;
@@ -1191,6 +1193,28 @@ impl Dms {
             }
             Vec::new()
         } else {
+            if let Some(line) = Doc::get().opt_elem::<HtmlInputElement>(id)
+                && let Some(list_id) = line.get_attribute("data-dropdown-list")
+                && let Some(list) = Doc::get().opt_elem::<HtmlElement>(&list_id)
+            {
+                let options = list.children();
+                for i in 0..options.length() {
+                    if let Some(Ok(option)) = options
+                        .item(i)
+                        .map(|e| e.dyn_into::<HtmlOptionElement>())
+                    {
+                        if !option
+                            .value()
+                            .to_uppercase()
+                            .starts_with(&line.value().to_uppercase())
+                        {
+                            let _ = option.class_list().add_1("no-display");
+                        } else {
+                            let _ = option.class_list().remove_1("no-display");
+                        }
+                    }
+                }
+            }
             self.selected_lines()
         };
         // update mc_preview image element
@@ -1217,25 +1241,23 @@ impl Dms {
             match tp {
                 FocusTp::In => {
                     input.set_value("");
-                    if input.class_list().contains("dropdown-field")
-                        && let Some(mc_choice) =
-                            input.get_attribute("data-dropdown-list")
-                        && let Some(dropdown) =
+                    if let Some(mc_choice) =
+                        input.get_attribute("data-dropdown-list")
+                        && let Some(list) =
                             Doc::get().opt_elem::<HtmlElement>(&mc_choice)
                     {
-                        let _ =
-                            dropdown.style().set_property("display", "flex");
+                        // Always start with no filter on dropdown
+                        util::reset_dropdown_filter(&input);
+                        let _ = list.style().set_property("display", "flex");
                     }
                 }
                 FocusTp::Out => {
-                    if input.class_list().contains("dropdown-field")
-                        && let Some(mc_choice) =
-                            input.get_attribute("data-dropdown-list")
-                        && let Some(dropdown) =
+                    if let Some(mc_choice) =
+                        input.get_attribute("data-dropdown-list")
+                        && let Some(list) =
                             Doc::get().opt_elem::<HtmlElement>(&mc_choice)
                     {
-                        let _ =
-                            dropdown.style().set_property("display", "none");
+                        let _ = list.style().set_property("display", "none");
                     }
                     if input.value().is_empty()
                         && let Some(ms) = input.get_attribute("data-cur")
