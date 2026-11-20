@@ -61,15 +61,15 @@ impl MayState {
     }
 
     /// Check domains before processing request
-    fn precheck(&self, addrs: &[IpAddr]) -> Option<StatusCode> {
+    fn precheck(&self, addrs: &[IpAddr]) -> StatusCode {
         let Some(domains) = self.domains.get() else {
             log::error!("Domains not initialized");
-            return Some(StatusCode::INTERNAL_SERVER_ERROR);
+            return StatusCode::INTERNAL_SERVER_ERROR;
         };
         for addr in addrs {
             if !Domain::contains_any_enabled(domains, *addr) {
                 log::warn!("Invalid domain for IP: {addr}");
-                return Some(StatusCode::FORBIDDEN);
+                return StatusCode::FORBIDDEN;
             }
         }
         // NOTE: we can only trust the last XFF address (from our proxy)
@@ -89,13 +89,13 @@ impl MayState {
                                 "Too many requests: {addr} ({in_progress})"
                             );
                         }
-                        return Some(StatusCode::TOO_MANY_REQUESTS);
+                        return StatusCode::TOO_MANY_REQUESTS;
                     }
                 }
-                None => return Some(StatusCode::INTERNAL_SERVER_ERROR),
+                None => return StatusCode::INTERNAL_SERVER_ERROR,
             }
         }
-        None
+        StatusCode::OK
     }
 
     /// Get in-progress limit based on available CPUs
@@ -154,7 +154,8 @@ pub async fn limiter_middleware(
         }
         Err(sc) => return err_response(sc),
     };
-    if let Some(sc) = state.precheck(&addrs) {
+    let sc = state.precheck(&addrs);
+    if StatusCode::OK != sc {
         return err_response(sc);
     }
     state.increment_in_progress();
