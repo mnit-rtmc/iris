@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017 Iteris Inc.
+ * Copyright (C) 2017	Iteris Inc.
  * Copyright (C) 2019-2025  Minnesota Department of Transportation
+ * Copyright (C) 2026  Alaska DOT&PF
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +21,15 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.EssRec;
+
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1204.MIB1204.essMobileFriction;
+
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PavementSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.PercentObject;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.SubSurfaceSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.TemperatureSensorsTable;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1204.WindSensorsTable;
+import us.mn.state.dot.tms.server.comm.ntcip.mibssi.SsiTdpTable;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 
 /**
@@ -33,6 +37,7 @@ import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
  *
  * @author Michael Darter
  * @author Douglas Lau
+ * @author Darren Jaeckel, Wostmann & Associates
  */
 public class OpQueryEssStatus extends OpEss {
 
@@ -51,6 +56,8 @@ public class OpQueryEssStatus extends OpEss {
 	/** Sub-surface sensors table */
 	private final SubSurfaceSensorsTable ss_table;
 
+	private final SsiTdpTable tdp_table;
+
 	/** Create new query ESS status operation */
 	public OpQueryEssStatus(WeatherSensorImpl ws) {
 		super(PriorityLevel.POLL_LOW, ws);
@@ -58,6 +65,7 @@ public class OpQueryEssStatus extends OpEss {
 		ts_table = ess_rec.ts_table;
 		ps_table = ess_rec.ps_table;
 		ss_table = ess_rec.ss_table;
+		tdp_table = ess_rec.tdp_table;
 	}
 
 	/** Create the second phase of the operation */
@@ -598,7 +606,7 @@ public class OpQueryEssStatus extends OpEss {
 			logQuery(ess_rec.rad_values.instantaneous_solar.node);
 			logQuery(ess_rec.rad_values.total_radiation.node);
 			logQuery(ess_rec.rad_values.total_radiation_period);
-			return null;
+			return new QuerySsiTdpSensor();
 		}
 	}
 
@@ -611,13 +619,29 @@ public class OpQueryEssStatus extends OpEss {
 			mess.add(ess_rec.rad_values.solar_radiation);
 			try {
 				mess.queryProps();
+				logQuery(ess_rec.rad_values.solar_radiation);
 			}
 			catch (NoSuchName e) {
 				// Note: this object was deprecated in V2
-				return null;
 			}
-			logQuery(ess_rec.rad_values.solar_radiation);
-			return null;
+			return new QuerySsiTdpSensor();
+		}
+	}
+
+	/** Phase to query SSI TDP table */
+	protected class QuerySsiTdpSensor extends Phase {
+
+		/** Query */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(tdp_table.tdp_bytes);
+			try {
+				mess.queryProps();
+				logQuery(tdp_table.tdp_bytes);
+			} catch(NoSuchName ex) {
+				log("SSI TDP Table: ignored ex=" + ex);
+			}
+			return null; // Stop Polling Phase
 		}
 	}
 
