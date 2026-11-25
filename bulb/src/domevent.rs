@@ -71,6 +71,8 @@ pub enum EventTp {
     Click(bool),
     /// Input events
     Input,
+    /// Keypress events (arrows, enter)
+    KeyPress(&'static str),
     /// Mouse events
     Mouse(MouseTp),
     /// Focus events

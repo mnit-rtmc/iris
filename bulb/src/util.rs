@@ -545,20 +545,6 @@ pub fn hide_elem(id: &str) -> Result<()> {
     Ok(())
 }
 
-/// Resets the dropdown filter for input
-pub fn reset_dropdown_filter(input: &HtmlInputElement) {
-    if let Some(list) = input.get_attribute("data-dropdown-list")
-        && let Some(list) = Doc::get().opt_elem::<HtmlElement>(&list)
-    {
-        let options = list.children();
-        (0..options.length()).for_each(|i| {
-            options
-                .item(i)
-                .map(|el| el.class_list().remove_1("no-display"));
-        });
-    }
-}
-
 /// Get mouse event coordinates relative to element, not event target
 pub fn relative_coords(target: &Element, me: &MouseEvent) -> (i32, i32) {
     let bounds = target.get_bounding_client_rect();

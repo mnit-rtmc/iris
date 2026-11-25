@@ -20,6 +20,7 @@ use crate::fetch::{Action, Uri};
 use crate::geoloc::LocAnc;
 use crate::item::{ItemState, ItemStates};
 use crate::lock::LockReason;
+use crate::map;
 use crate::menu::MenuAction;
 use crate::msgline::MsgLine;
 use crate::msgpattern::{FontName, GraphicName, MsgPattern};
@@ -36,7 +37,6 @@ use crate::systemattr::SystemAttr;
 use crate::util::{ContainsLower, Doc, Fields, Input, TextArea, opt_ref};
 use crate::view::View;
 use crate::word::Word;
-use crate::{map, util};
 use chrono::{DateTime, Local, format::SecondsFormat};
 use hatmil::{Tree, html};
 use js_sys::{ArrayBuffer, Uint8Array};
@@ -48,13 +48,12 @@ use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
 use std::borrow::Cow;
+use std::collections::HashSet;
 use std::fmt;
 use std::iter::repeat;
 use std::time::Duration;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{
-    HtmlElement, HtmlInputElement, HtmlOptionElement, HtmlSelectElement,
-};
+use web_sys::{HtmlElement, HtmlInputElement, HtmlSelectElement};
 
 /// Display Units
 type TempUnit = mag::temp::DegF;
@@ -446,10 +445,13 @@ impl DmsAnc {
                     .style(format!("position-anchor:--{mc_line}"))
                     .tabindex(-1)
                     .data_("dropdown-field", &mc_line);
+                // Prevent duplicate options (simplifies dropdown/arrow keys)
+                let mut seen = HashSet::new();
                 for ml in &self.lines {
                     if ml.line == ln
                         && let Some(ms) =
                             self.line_multi(&ml.multi, width, font)
+                        && seen.insert(ms.clone())
                     {
                         let mut option = datalist.option();
                         option.value(&ms).cdata(join_text(&ms, " ")).close();
@@ -1193,28 +1195,6 @@ impl Dms {
             }
             Vec::new()
         } else {
-            if let Some(line) = Doc::get().opt_elem::<HtmlInputElement>(id)
-                && let Some(list_id) = line.get_attribute("data-dropdown-list")
-                && let Some(list) = Doc::get().opt_elem::<HtmlElement>(&list_id)
-            {
-                let options = list.children();
-                for i in 0..options.length() {
-                    if let Some(Ok(option)) = options
-                        .item(i)
-                        .map(|e| e.dyn_into::<HtmlOptionElement>())
-                    {
-                        if !option
-                            .value()
-                            .to_uppercase()
-                            .starts_with(&line.value().to_uppercase())
-                        {
-                            let _ = option.class_list().add_1("no-display");
-                        } else {
-                            let _ = option.class_list().remove_1("no-display");
-                        }
-                    }
-                }
-            }
             self.selected_lines()
         };
         // update mc_preview image element
@@ -1239,26 +1219,8 @@ impl Dms {
         // message composer line input
         if let Some(input) = Doc::get().opt_elem::<HtmlInputElement>(id) {
             match tp {
-                FocusTp::In => {
-                    input.set_value("");
-                    if let Some(mc_choice) =
-                        input.get_attribute("data-dropdown-list")
-                        && let Some(list) =
-                            Doc::get().opt_elem::<HtmlElement>(&mc_choice)
-                    {
-                        // Always start with no filter on dropdown
-                        util::reset_dropdown_filter(&input);
-                        let _ = list.style().set_property("display", "flex");
-                    }
-                }
+                FocusTp::In => input.set_value(""),
                 FocusTp::Out => {
-                    if let Some(mc_choice) =
-                        input.get_attribute("data-dropdown-list")
-                        && let Some(list) =
-                            Doc::get().opt_elem::<HtmlElement>(&mc_choice)
-                    {
-                        let _ = list.style().set_property("display", "none");
-                    }
                     if input.value().is_empty()
                         && let Some(ms) = input.get_attribute("data-cur")
                     {

@@ -10,7 +10,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::app;
 use crate::asset::Asset;
 use crate::card::{self, CardList};
 use crate::domevent::{EventTp, FocusTp};
@@ -26,14 +25,14 @@ use crate::sse;
 use crate::start;
 use crate::util::{self, Doc, LocalStorage};
 use crate::view::{CardView, View};
+use crate::{app, dropdown};
 use resources::Res;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use web_sys::{
-    DragEvent, Element, Event, FocusEvent, HtmlButtonElement, HtmlCollection,
-    HtmlElement, HtmlInputElement, HtmlOptionElement, HtmlSelectElement,
-    KeyboardEvent, ScrollBehavior, ScrollIntoViewOptions,
-    ScrollLogicalPosition, TransitionEvent,
+    DragEvent, Element, Event, FocusEvent, HtmlButtonElement, HtmlElement,
+    HtmlInputElement, HtmlOptionElement, HtmlSelectElement, ScrollBehavior,
+    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent,
 };
 
 /// Add event listeners
@@ -47,7 +46,7 @@ pub fn add_listeners() -> Result<()> {
     add_input_listener(&sidebar)?;
     add_drag_listener(&sidebar)?;
     add_focus_listener(&sidebar)?;
-    add_dropdown_key_listener(&sidebar)?;
+    dropdown::add_listeners(&sidebar)?;
     add_transition_listener(&doc.elem(eid::CARDS)?)?;
     if let Some(doc_elem) = doc.doc_elem() {
         add_fullscreenchange_listener(&doc_elem)?;
@@ -121,12 +120,17 @@ fn add_click_listener(el: &Element) -> Result<()> {
                     .is_some();
                 let tp = EventTp::Click(long_press);
                 handle_click_button(target.id(), tp);
-            } else if let Some(Ok(p)) = target
-                .parent_element()
-                .map(|e| e.dyn_into::<HtmlInputElement>())
+            } else if let Ok(Some(opt)) = target.closest("option")
+                && let Some(Ok(list)) =
+                    opt.parent_element().map(|e| e.dyn_into::<Element>())
+                && list.has_attribute("data-dropdown-field")
             {
                 if let Ok(target) = target.dyn_into::<HtmlOptionElement>() {
-                    handle_choose_dropdown_option(&p, target.value());
+                    dropdown::handle_event(
+                        list.id(),
+                        EventTp::Click(false),
+                        Some(target),
+                    )
                 }
             } else if let Ok(Some(cc)) = target.closest(".card-compact") {
                 handle_click_card(&cc);
@@ -190,14 +194,6 @@ fn handle_click_button(id: String, tp: EventTp) {
             }
         }
     }
-}
-
-/// Handle a `click` event with an input dropdown target
-pub fn handle_choose_dropdown_option(input: &HtmlInputElement, value: String) {
-    input.set_value(&value);
-    // Now handle the input as if it was typed
-    handle_input(input.id());
-    //util::reset_dropdown_filter(input);
 }
 
 /// Show/hide sidebar
@@ -314,7 +310,11 @@ fn handle_change(id: String) {
 fn add_input_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
-            handle_input(target.id());
+            if let Some(list_id) = target.get_attribute("data-dropdown-list") {
+                dropdown::handle_event(list_id, EventTp::Input, None);
+            } else {
+                handle_input(target.id());
+            }
         }
     });
     el.add_event_listener_with_callback(
@@ -327,7 +327,7 @@ fn add_input_listener(el: &Element) -> Result<()> {
 }
 
 /// Handle an input event
-fn handle_input(id: String) {
+pub fn handle_input(id: String) {
     match id.as_str() {
         eid::SEARCH | eid::STATE => spawn_future(handle_search()),
         eid::VIEW => handle_card_view_ev(),
@@ -347,13 +347,6 @@ fn handle_event(id: String, tp: EventTp) {
         && cv.is_event_handled(&id, tp)
     {
         spawn_future(async move { cv.handle_event(&id, tp).await });
-    }
-}
-
-/// Handle custom dropdown
-fn handle_dropdown(list_id: String) {
-    if let Some(dropdown) = Doc::get().opt_elem::<HtmlElement>(&list_id) {
-        let _ = dropdown.style().set_property("display", "flex");
     }
 }
 
@@ -497,115 +490,9 @@ fn handle_focus_ev(fe: FocusEvent, target: HtmlElement) {
     if target.class_list().contains("dropdown-field")
         && let Some(list) = target.get_attribute("data-dropdown-list")
     {
-        handle_dropdown(list);
+        dropdown::handle_event(list, EventTp::Focus(tp), None);
     }
     handle_event(target.id(), EventTp::Focus(tp));
-}
-
-/// Add a dropdown keyboard listener to an element
-fn add_dropdown_key_listener(el: &Element) -> Result<()> {
-    let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
-        if let (Some(Ok(target)), Ok(ev)) = (
-            e.target().map(|e| e.dyn_into::<HtmlInputElement>()),
-            e.dyn_into::<KeyboardEvent>(),
-        ) {
-            let _ = handle_dropdown_key(&target, ev);
-        }
-    });
-    el.add_event_listener_with_callback(
-        "keydown",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    el.add_event_listener_with_callback(
-        "keypress",
-        closure.as_ref().unchecked_ref(),
-    )?;
-    closure.forget();
-    Ok(())
-}
-
-/// Get the next visible sibling element
-fn get_next_option(
-    options: &HtmlCollection,
-    i: usize,
-    backwards: bool,
-) -> Result<HtmlOptionElement> {
-    let options: Vec<HtmlOptionElement> = (0..options.length())
-        .filter_map(|i| {
-            options
-                .item(i)
-                .map(|e| e.dyn_into::<HtmlOptionElement>().ok())
-                .unwrap_or(None)
-        })
-        .collect();
-
-    let n = options.len();
-    let val = options[i].value();
-
-    let mut new_i = i;
-    while options[new_i].value() == val
-        || options[new_i].class_list().contains("no-display")
-    {
-        new_i = if backwards {
-            new_i.checked_sub(1).unwrap_or(n - 1)
-        } else {
-            (new_i + 1) % n
-        };
-        if new_i == i {
-            break;
-        }
-    }
-    // new_i points at first new value, or original option
-    Ok(options[new_i].clone())
-}
-
-/// Highlights an option in a dropdown
-fn handle_dropdown_key(
-    target: &HtmlInputElement,
-    ev: KeyboardEvent,
-) -> Result<()> {
-    if let Some(list) = target.get_attribute("data-dropdown-list")
-        && let Some(list) = Doc::get().opt_elem::<HtmlElement>(&list)
-    {
-        let options = list.children();
-        if options.length() == 0 {
-            Err(Error::MissingElement())?
-        }
-        let i = (0..options.length())
-            .find(|&i| {
-                options
-                    .item(i)
-                    .map(|el| el.class_list().contains("active"))
-                    .unwrap_or(false)
-            })
-            .unwrap_or(0);
-        match ev.key().as_ref() {
-            "ArrowUp" | "ArrowDown" => {
-                let _ =
-                    options.item(i).unwrap().class_list().remove_1("active");
-                let elem = get_next_option(
-                    &options,
-                    i as usize,
-                    ev.key() == "ArrowUp",
-                )?;
-                let _ = elem.class_list().add_1("active");
-                target.set_value(&elem.value());
-            }
-            "Enter" => {
-                if let Some(elem) = list.query_selector(".active")? {
-                    let elem =
-                        elem.dyn_into::<HtmlOptionElement>().map_err(|_| {
-                            Error::CastFail("Failed to cast option".to_owned())
-                        })?;
-                    handle_choose_dropdown_option(target, elem.value());
-                    let _ = elem.class_list().remove_1("active");
-                    let _ = list.style().set_property("display", "none");
-                }
-            }
-            _ => (),
-        }
-    }
-    Ok(())
 }
 
 /// Add transition event listener to an element
