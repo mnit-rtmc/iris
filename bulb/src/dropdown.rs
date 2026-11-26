@@ -18,7 +18,8 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use web_sys::{
     Element, Event, HtmlElement, HtmlInputElement, HtmlOptionElement,
-    KeyboardEvent,
+    KeyboardEvent, ScrollBehavior, ScrollIntoViewContainer,
+    ScrollIntoViewOptions, ScrollLogicalPosition,
 };
 
 pub fn add_listeners(el: &Element) -> Result<()> {
@@ -196,6 +197,12 @@ pub fn handle_event(
 
             let _ = el.class_list().add_1("active");
             let _ = active.map(|a| a.class_list().remove_1("active"));
+
+            let opt = ScrollIntoViewOptions::new();
+            opt.set_behavior(ScrollBehavior::Smooth);
+            opt.set_block(ScrollLogicalPosition::Center);
+            opt.set_container(ScrollIntoViewContainer::Nearest);
+            el.scroll_into_view_with_scroll_into_view_options(&opt);
         }
         EventTp::Input => {
             // Show if typing again after selection

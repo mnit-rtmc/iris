@@ -82,6 +82,7 @@ features = [
   'Response',
   'ScrollBehavior',
   'ScrollIntoViewOptions',
+  'ScrollIntoViewContainer',
   'ScrollLogicalPosition',
   'Storage',
   'ToggleEvent',
