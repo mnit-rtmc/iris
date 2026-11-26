@@ -48,6 +48,7 @@ use resources::Res;
 use serde::Deserialize;
 use serde_json::Value;
 use std::borrow::Cow;
+use std::collections::HashSet;
 use std::fmt;
 use std::iter::repeat;
 use std::time::Duration;
@@ -426,20 +427,31 @@ impl DmsAnc {
                 rect_num = rn;
             }
             input
-                .id(mc_line)
+                .id(&mc_line)
+                .class("dropdown-field")
+                .style(format!("anchor-name:--{mc_line}"))
                 .value(cur_line)
-                .list(&mc_choice)
+                .list("") // Disable browser dropdown
+                .data_("dropdown-list", &mc_choice)
                 .data_("cur", cur_line);
             if let Some(font) = dms.font_definition().font(font_num) {
                 if ('a'..='z').any(|c| font.character(c).is_none()) {
                     input.autocapitalize("characters");
                 }
                 let mut datalist = div.datalist();
-                datalist.id(mc_choice);
+                datalist
+                    .id(mc_choice)
+                    .class("dropdown")
+                    .style(format!("position-anchor:--{mc_line}"))
+                    .tabindex(-1)
+                    .data_("dropdown-field", &mc_line);
+                // Prevent duplicate options (simplifies dropdown/arrow keys)
+                let mut seen = HashSet::new();
                 for ml in &self.lines {
                     if ml.line == ln
                         && let Some(ms) =
                             self.line_multi(&ml.multi, width, font)
+                        && seen.insert(ms.clone())
                     {
                         let mut option = datalist.option();
                         option.value(&ms).cdata(join_text(&ms, " ")).close();

@@ -247,8 +247,7 @@ fn handle_grab(me: &MouseEvent, tp: MouseTp, target: &Element) -> bool {
     {
         do_handle_grab(me, tp, card);
         true
-    } else if let Ok(Some(el)) = Doc::get().0.query_selector("li[data-grabbed]")
-        && let Ok(el) = el.dyn_into::<HtmlElement>()
+    } else if let Some(el) = Doc::get().query::<HtmlElement>("li[data-grabbed]")
     {
         if tp == MouseTp::Down {
             // Down on different element, so release current

@@ -239,7 +239,7 @@ async fn add_extent_buttons() -> Result<()> {
     default_button.set_text_content(Some(&default_extent));
     let mut extents = MapExtent::fetch_all().await?;
     extents.retain(|e| e.name != default_extent);
-    let extents_container = doc.elem::<HtmlElement>("map-extents-dynamic")?;
+    let extents_container = doc.elem::<HtmlElement>("map-extents-container")?;
     let mut tree = Tree::new();
     for extent in &extents {
         let mut b = tree.root::<html::Button>();

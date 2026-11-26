@@ -39,6 +39,7 @@ mod dms;
 mod domain;
 mod domevent;
 mod draglist;
+mod dropdown;
 mod eid;
 mod encodertype;
 mod error;

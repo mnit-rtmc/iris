@@ -10,7 +10,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-use crate::app;
 use crate::asset::Asset;
 use crate::card::{self, CardList};
 use crate::domevent::{EventTp, FocusTp};
@@ -26,13 +25,14 @@ use crate::sse;
 use crate::start;
 use crate::util::{self, Doc, LocalStorage};
 use crate::view::{CardView, View};
+use crate::{app, dropdown};
 use resources::Res;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use web_sys::{
     DragEvent, Element, Event, FocusEvent, HtmlButtonElement, HtmlElement,
-    HtmlInputElement, HtmlSelectElement, ScrollBehavior, ScrollIntoViewOptions,
-    ScrollLogicalPosition, TransitionEvent,
+    HtmlInputElement, HtmlOptionElement, HtmlSelectElement, ScrollBehavior,
+    ScrollIntoViewOptions, ScrollLogicalPosition, TransitionEvent,
 };
 
 /// Add event listeners
@@ -46,6 +46,7 @@ pub fn add_listeners() -> Result<()> {
     add_input_listener(&sidebar)?;
     add_drag_listener(&sidebar)?;
     add_focus_listener(&sidebar)?;
+    dropdown::add_listeners(&sidebar)?;
     add_transition_listener(&doc.elem(eid::CARDS)?)?;
     if let Some(doc_elem) = doc.doc_elem() {
         add_fullscreenchange_listener(&doc_elem)?;
@@ -119,6 +120,18 @@ fn add_click_listener(el: &Element) -> Result<()> {
                     .is_some();
                 let tp = EventTp::Click(long_press);
                 handle_click_button(target.id(), tp);
+            } else if let Ok(Some(opt)) = target.closest("option")
+                && let Some(Ok(list)) =
+                    opt.parent_element().map(|e| e.dyn_into::<Element>())
+                && list.has_attribute("data-dropdown-field")
+            {
+                if let Ok(target) = target.dyn_into::<HtmlOptionElement>() {
+                    dropdown::handle_event(
+                        list.id(),
+                        EventTp::Click(false),
+                        Some(target),
+                    )
+                }
             } else if let Ok(Some(cc)) = target.closest(".card-compact") {
                 handle_click_card(&cc);
             }
@@ -297,7 +310,11 @@ fn handle_change(id: String) {
 fn add_input_listener(el: &Element) -> Result<()> {
     let closure: Closure<dyn Fn(_)> = Closure::new(|e: Event| {
         if let Some(Ok(target)) = e.target().map(|e| e.dyn_into::<Element>()) {
-            handle_input(target.id());
+            if let Some(list_id) = target.get_attribute("data-dropdown-list") {
+                dropdown::handle_event(list_id, EventTp::Input, None);
+            } else {
+                handle_input(target.id());
+            }
         }
     });
     el.add_event_listener_with_callback(
@@ -310,7 +327,7 @@ fn add_input_listener(el: &Element) -> Result<()> {
 }
 
 /// Handle an input event
-fn handle_input(id: String) {
+pub fn handle_input(id: String) {
     match id.as_str() {
         eid::SEARCH | eid::STATE => spawn_future(handle_search()),
         eid::VIEW => handle_card_view_ev(),
@@ -470,6 +487,11 @@ fn handle_focus_ev(fe: FocusEvent, target: HtmlElement) {
         log::warn!("handle_focus_ev: {fe:?}");
         return;
     };
+    if target.class_list().contains("dropdown-field")
+        && let Some(list) = target.get_attribute("data-dropdown-list")
+    {
+        dropdown::handle_event(list, EventTp::Focus(tp), None);
+    }
     handle_event(target.id(), EventTp::Focus(tp));
 }
 
